@@ -1,0 +1,92 @@
+0.12.0 - 2011-03-21
+{ Ko vd Sloot ]
+* decapped progs and man 
+
+0.11.1 - 2011-03-20
+
+[ Joost van Baal ]
+* NEWS: record changes and releases
+* docs/Frog.1, docs/Makefile.am: add Frog.1 .so link: consistent with name of
+  binary
+
+
+0.11.0 - 2011-03-17
+
+[ Ko van der Sloot ]
+* Reworked mblem and mbma: less dependant on tagger results
+* minor fixes
+* more stuff is handled in parallel (work in progress)
+* docs/frog.1: added a man page
+
+[ Antal van den Bosch ]
+* config/mblem.tree: "weesten" issue
+* config/mblem.tree: let's hope this tree file reverts to the correct encoding
+  situation
+* config/mblem.tree, config/mblem.tree.wgt: fixed "emmen" and "vrienden" errors
+
+
+0.10.4 - 2011-03-01
+
+[ Ko van der Sloot ]
+* configure.ac: We need the most recent ucto!
+* Makefile.am: now bootstrap works
+
+[ Maarten van Gompel ]
+* src/Frog-util.cxx: when using testdir, ignore hidden files (dotfiles)
+* src/Frog.cxx: sentence per line on input side
+* src/Frog.cxx: prettier help output
+
+
+0.10.3 - 2011-02-27
+
+[ Joost van Baal ]
+* scripts/Makefile.am, scripts/pylet/{data,util}/Makefile.am: Minor changes
+  to make life easier for software packagers.  Install python code and
+  compiled python in sane locations.
+
+[ Ko van der Sloot ]
+* src/Frog.cxx: added a '-n' option to do 'one sentence per line' tokenizing.
+
+
+0.10.2 - 2011-02-13
+
+[ Joost van Baal ]
+* Minor changes to make life easier for software packagers.
+
+
+0.10.1 - 2011-02-12
+
+[ Joost van Baal ]
+* configure.ac: merge frog-ng patch to deal with unavailable icu 4.6
+
+[ Ko van der Sloot ]
+* configure.ac: we need ucto >= 0.3.6
+* src/Frog.cxx: added -e option to set the encoding
+* configure.ac: bumped version, now uses ucto-icu.pc
+
+[ Antal van den Bosch ]
+* config/Frog.mwu.1.0, config/Makefile.am, config/frog.cfg,
+  config/mwu.suspects5: moved to a more comprehensive MWU file
+  based on the Lassy + Alpino treebanks
+
+
+0.9.3 - 2010-01-26
+
+[ Ko van der Sloot ]
+* New release
+
+[ Maarten van Gompel ]
+* 2010-08-30 Added paragraph detection, added beginofsentence role, restyled
+  view of usage options, implemented '--stok' mode for tokenisation (one
+  sentence per line), roles are now shown explicitly in verbose tokeniser
+  output.  (0.6)
+* 2010-08-17 Improved server mode, without intermediate files (new tokeniser
+  only) (0.5)
+* 2010-05-11 Integrated new tokeniser (from ucto) (0.3?)
+
+
+2008-06-01 Ko vd Sloot
+	   Source is moved to SVN
+2007-12-03 Ko vd Sloot
+	   Finished packaging.
+2007-10-09 Started packaging

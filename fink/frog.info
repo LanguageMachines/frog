@@ -1,0 +1,43 @@
+# $Id$
+# $URL$
+Package: frog
+Version: 0.11.1
+Revision: 1
+BuildDepends: ucto-dev (>= 0.4.1), timbl-dev (>= 6.3.1), mbt-dev (>= 3.2.0), libxml2, libicu36-dev, python26
+DescPackaging: <<
+This package was built on i386 running Darwin / Mac OS X v. 10.6.0,
+using fink 0.29.19-51.
+<<
+Description: Tagger and parser for Dutch language
+Source: http://ilk.uvt.nl/downloads/pub/software/frog-%v.tar.gz
+Source-Checksum: SHA1(7c3e24fa81957b8349b1f82a21fe28d48183600b)
+InstallScript: <<
+ make install DESTDIR=%d
+<<
+DocFiles: AUTHORS ChangeLog NEWS README TODO
+DescDetail: <<
+Memory-Based Learning (MBL) is a machine-learning method applicable to a wide
+range of tasks in Natural Language Processing (NLP).
+
+Frog is a modular system integrating a morphosyntactic tagger, lemmatizer,
+morphological analyzer, and dependency parser for the Dutch language.  It is
+based upon it's predecessor TADPOLE (TAgger, Dependency Parser, and
+mOrphoLogical analyzEr).  Using Memory-Based Learning techniques, Tadpole
+tokenizes, tags, lemmatizes, and morphologically segments word tokens in
+incoming Dutch UTF-8 text files, and assigns a dependency graph to each
+sentence.  Tadpole is particularly targeted at the increasing need for fast,
+automatic NLP systems applicable to very large (multi-million to billion word)
+document collections that are becoming available due to the progressive
+digitization of both new and old textual data.
+
+NB: Frog can be considered alpha software, and is in a fair state of flux.
+
+Frog is a product of the ILK Research Group (Tilburg University,
+The Netherlands) and the CLiPS Research Centre (University of Antwerp,
+Belgium).
+
+If you do scientific research in NLP, Frog will likely be of use to you.
+<<
+License: GPL
+Maintainer: Joost van Baal <joostvb-ilk@ad1810.com>
+Homepage: http://ilk.uvt.nl/frog/

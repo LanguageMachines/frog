@@ -1,0 +1,84 @@
+.TH frog 1 "2011 march 21"
+
+.SH NAME
+frog - Dutch morpho-syntactic analyzer and dependency parser
+.SH SYNOPSYS
+frog [options]
+
+frog -t test-file
+
+.SH DESCRIPTION
+frog is an integration of memory-based natural language processing (NLP) modules developed for Dutch.
+frog's current version will tokenize, tag, lemmatize, and morphologically segment word tokens in Dutch text files, and will assign a dependency graph to each sentence.
+
+.SH OPTIONS
+
+.BR -c " <configfile>"
+.RS
+set the configuration using 'file'
+.RE
+
+.BR -d " <level>"
+.RS
+set debug level.
+.RE
+
+.BR -e " <encoding>"
+.RS
+set input encoding. (default UTF8)
+.RE
+
+.BR --keep-parser-files =[yes|no]
+.RS
+keep the intermediate files from the parser. Last sentence only!
+.RE
+
+.BR -n
+.RS
+assume inputfile to hold one sentence per line
+.RE
+
+.BR -o " <file>"
+.RS
+send output to 'file'. Default is stdout.
+.RE
+
+.BR --outputdir " <dir>"
+.RS
+send al output to 'dir'. Default is stdout. Useful in combination with 
+.B --testdir
+.RE
+
+.BR --skip =[mpt]
+.RS
+skip parts of the proces: Tokenizer (t), Multi-Word unit (m) or Parser (p)
+.RE
+
+.BR -S " <port>"
+.RS
+Run a server on 'port'
+.RE
+
+.BR -t " <file>"
+.RS
+process 'file'
+.RE
+
+.BR --tmpdir =<dir>
+.RS
+process all files in 'dir'. see also 
+.B --outputdir
+.RE
+
+.SH BUGS
+likely
+
+.SH AUTHORS
+Maarten van Gompel proycon@anaproy.nl
+
+Ko van der Sloot Timbl@uvt.nl
+
+Antal van den Bosch Timbl@uvt.nl
+
+.SH SEE ALSO
+.BR ucto (1)
