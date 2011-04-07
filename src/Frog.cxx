@@ -107,8 +107,8 @@ bool keepIntermediateFiles = false;
 Configuration configuration;
 static string configFileName = string(SYSCONF_PATH) + '/' + PACKAGE + '/' + "frog.cfg";
 
-void usage( const string& progname ) {
-  cout << progname << " v." << VERSION << endl << "Options:\n";
+void usage( ) {
+  cout << PACKAGE_STRING << endl << "Options:\n";
   cout << "\t============= INPUT MODE (mandatory, choose one) ========================\n"
        << "\t -e <encoding>          specify encoding of the input (default UTF-8)\n"
        << "\t -t <testfile>          Run frog on this file\n"
@@ -251,7 +251,7 @@ bool parse_args( TimblOpts& Opts ) {
     Opts.Delete('o');
   };
   if ( Opts.Find ('h', value, mood)) {
-    usage(ProgName);
+    usage();
     return false;
   };
   if ( Opts.Find ('S', value, mood)) {
@@ -402,7 +402,7 @@ int splitWT( const string& tagged, const vector<string>& words,
       *Log(theErrLog) << "tagger out of sync: word[" << i << "] ≠ tagword["
 		      << i << "] " << word << " vs. " 
 		      << words[i] << endl;
-      exit(1);
+      exit( EXIT_FAILURE );
     }
     tags.push_back( tag );
     known.push_back( isKnown );
@@ -612,7 +612,7 @@ void TestFile( const string& infilename, const string& outFileName) {
   if ( !outFileName.empty() ){
     if ( outStream.open( outFileName.c_str() ), outStream.bad() ){
       *Log(theErrLog) << "unable to open outputfile: " << outFileName << endl;
-      exit(1);
+      exit( EXIT_FAILURE );
     }
   }
   TestFileName = infilename; //untokenised!
@@ -670,18 +670,21 @@ int main(int argc, char *argv[]) {
   std::ios_base::sync_with_stdio(false);
   cerr << "frog " << VERSION << "(c) ILK 1998 - 2011" << endl;
   cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
-  if (argc < 2) {
-    usage(argv[0]);
-    exit(0);
-  }
   ProgName = argv[0];
-  
+  if (argc < 2) {
+    usage();
+    exit( EXIT_SUCCESS );
+  }
+  cerr << "based on [" << Tokenizer::VersionName() << ", "
+       << Timbl::VersionName() << ", "
+       << Sockets::VersionName() << ", "
+       << Tagger::VersionName() << "]" << endl;
   try {
     TimblOpts Opts(argc, argv);
     bool dummy;
     string val;
     if ( Opts.Find('v', val, dummy ) ){
-      exit(0);
+      exit( EXIT_SUCCESS );
     }
     if ( parse_args(Opts) ){
       //gets a settingsfile for each component, 
@@ -750,8 +753,9 @@ int main(int argc, char *argv[]) {
   }
   catch ( const exception& e ){
     *Log(theErrLog) << "fatal error: " << e.what() << endl;
+    return EXIT_FAILURE;
   }
   delete tagger;
   
-  return 0;
+  return EXIT_SUCCESS;
 }
