@@ -41,10 +41,10 @@
 #include <vector>
 #include <omp.h>
 
-
-
 #include "timbl/TimblAPI.h"
 #include "mbt/MbtAPI.h"
+#include "timblserver/TimblServerAPI.h"
+
 // individual module headers
 
 #include "config.h"
@@ -56,8 +56,6 @@
 #include "frog/FrogData.h"
 #include "frog/Parser.h"
 #include "ucto/tokenize.h"
-#include "timblserver/SocketBasics.h"
-
 
 using namespace std;
 
@@ -637,8 +635,6 @@ void TestServer( Sockets::ServerSocket &conn) {
   Common::Timer frogTimer;
   frogTimer.start();
 
-
-
   try {
     while (true) {
       string data;
@@ -677,7 +673,7 @@ int main(int argc, char *argv[]) {
   }
   cerr << "based on [" << Tokenizer::VersionName() << ", "
        << Timbl::VersionName() << ", "
-       << Sockets::VersionName() << ", "
+       << TimblServer::VersionName() << ", "
        << Tagger::VersionName() << "]" << endl;
   try {
     TimblOpts Opts(argc, argv);
