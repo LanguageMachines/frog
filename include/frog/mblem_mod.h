@@ -48,7 +48,7 @@ class Mblem {
  public:
   Mblem();
   ~Mblem();
-  void init( const Configuration& );
+  bool init( const Configuration& );
   void Classify( const UnicodeString& );
   std::string postprocess( const std::string& tag );
  private:

@@ -295,26 +295,38 @@ bool parse_args( TimblOpts& Opts ) {
     // see: http://bisqwit.iki.fi/story/howto/openmp/#OpenmpAndFork
     string init = "-s " + configuration.configDir() + tagset;
     tagger = new MbtAPI( init, *theErrLog );
-    myMblem.init( configuration );
-    myMbma.init( configuration );
-    if ( doMwu ){
-      myMwu.init( configuration );
-      if ( doParse )
-	myParser.init( configuration );
+    bool stat = myMblem.init( configuration );
+    if ( stat ){
+      stat = myMbma.init( configuration );
+      if ( stat ) {
+	if ( doMwu ){
+	  stat = myMwu.init( configuration );
+	  if ( stat && doParse )
+	    stat = myParser.init( configuration );
+	}
+	else {
+	  if ( doParse )
+	    *Log(theErrLog) << " Parser disabled, because MWU is deselected" << endl;
+	  doParse = false;;
+	}
+      }
     }
-    else {
-      if ( doParse )
-	*Log(theErrLog) << " Parser disabled, because MWU is deselected" << endl;
-      doParse = false;;
+    if ( !stat ){
+      *Log(theErrLog) << "Initialization failed." << endl;
+      return false;
     }
   }
-  else if ( true ) {
+  else {
+    bool lemStat = true;
+    bool mwuStat = true;
+    bool mbaStat = true;
+    bool parStat = true;
 #pragma omp parallel sections
     {
 #pragma omp section
-      myMblem.init( configuration );
+      lemStat = myMblem.init( configuration );
 #pragma omp section
-      myMbma.init( configuration );
+      mbaStat = myMbma.init( configuration );
 #pragma omp section 
       {
 	string init = "-s " + configuration.configDir() + tagset;
@@ -323,11 +335,11 @@ bool parse_args( TimblOpts& Opts ) {
 #pragma omp section
       {
 	if ( doMwu ){
-	  myMwu.init( configuration );
-	  if ( doParse ){
+	  mwuStat = myMwu.init( configuration );
+	  if ( mwuStat && doParse ){
 	    Common::Timer initTimer;
 	    initTimer.start();
-	    myParser.init( configuration );
+	    parStat = myParser.init( configuration );
 	    initTimer.stop();
 	    *Log(theErrLog) << "init Parse took: " << initTimer << endl;
 	  }
@@ -338,8 +350,24 @@ bool parse_args( TimblOpts& Opts ) {
 	  doParse = false;;
 	}
       }
+    }   // end omp parallel sections
+    if ( ! ( lemStat && mbaStat && mwuStat && parStat ) ){
+      *Log(theErrLog) << "Initialization failed: ";
+      if ( ! ( lemStat ) ){
+	*Log(theErrLog) << "[lemmatizer] ";
+      }	
+      if ( ! ( mbaStat ) ){
+	*Log(theErrLog) << "[morphology] ";
+      }	
+      if ( ! ( mwuStat ) ){
+	*Log(theErrLog) << "[multiword unit] ";
+      }	
+      if ( ! ( parStat ) ){
+	*Log(theErrLog) << "[parser] ";
+      }
+      *Log(theErrLog) << endl;
+      return false;
     }
-    // end omp parallel sections
   }
   *Log(theErrLog) << "Initialization done." << endl;
   return true;

@@ -65,7 +65,7 @@ void Mblem::read_transtable( const string& tableName ) {
   return;
 }
 
-void Mblem::init( const Configuration& config ) {
+bool Mblem::init( const Configuration& config ) {
   *Log(theErrLog) << "Initiating lemmatizer...\n";
   string db = config.lookUp( "debug", "mblem" );
   if ( !db.empty() )
@@ -87,8 +87,7 @@ void Mblem::init( const Configuration& config ) {
   opts += " +vs -vf";	    
   //Read in (igtree) data
   myLex = new TimblAPI(opts);
-  myLex->GetInstanceBase(treeName);
-  return;
+  return myLex->GetInstanceBase(treeName);
 }
 
 Mblem::~Mblem(){

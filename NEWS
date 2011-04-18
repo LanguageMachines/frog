@@ -1,3 +1,8 @@
+0.12.1 - 2011-04-18
+[ Ko vd Sloot ]
+* added a fixed mbma.igtree file
+* better reaction when startup fails. Try to bail out asap.
+
 0.12.0 - 2011-03-21
 { Ko vd Sloot ]
 * decapped progs and man 

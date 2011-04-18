@@ -175,7 +175,7 @@ bool Mwu::read_mwus( const string& fname) {
   return true;
 }
   
-void Mwu::init( const Configuration& config ) {
+bool Mwu::init( const Configuration& config ) {
   myCFS = "_";
   *Log(theErrLog) << "initiating mwuChunker ... \n";
   debug = tpDebug;
@@ -185,7 +185,7 @@ void Mwu::init( const Configuration& config ) {
   string att = config.lookUp( "t", "mwu" );  
   if ( att.empty() ){
     *Log(theErrLog) << "cannot find attribute 't' in configfile" << endl;
-    exit(1);
+    return false;
   }
   mwuFileName = prefix( config.configDir(), att );
   att = config.lookUp( "c", "mwu" );  
@@ -193,9 +193,9 @@ void Mwu::init( const Configuration& config ) {
     myCFS = att;
   if (!read_mwus(mwuFileName)) {
     *Log(theErrLog) << "Cannot read mwu file " << mwuFileName << endl;
-    exit(1);
+    return false;
   }
-  return;
+  return true;
 }
 
 ostream &operator <<( ostream& os,

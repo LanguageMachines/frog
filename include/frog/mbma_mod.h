@@ -46,7 +46,7 @@ class Mbma {
  public:
   Mbma();
   ~Mbma() { cleanUp(); };
-  void init( const Configuration& );
+  bool init( const Configuration& );
   void Classify( const UnicodeString& );
   std::string postprocess( const UnicodeString& word,
 			   const std::string& inputTag );

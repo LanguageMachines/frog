@@ -90,7 +90,7 @@ class Mwu {
  public:
   ~Mwu();
   void reset();
-  void init( const Configuration& );
+  bool init( const Configuration& );
   void Classify( );
   void add( const std::string&, const std::string&,
 	    const std::string&, const std::string& );

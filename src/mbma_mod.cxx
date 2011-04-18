@@ -122,7 +122,7 @@ void Mbma::init_cgn( const string& dir ) {
     throw ( runtime_error( "unable to open:" + fn ) );
 }
   
-void Mbma::init( const Configuration& config ) {
+bool Mbma::init( const Configuration& config ) {
   *Log(theErrLog) << "Initiating morphological analyzer...\n";
   debugFlag = tpDebug;
   string db = config.lookUp( "debug", "mbma" );
@@ -140,8 +140,7 @@ void Mbma::init( const Configuration& config ) {
     opts = "-a1";
   opts += " +vs -vf"; // make Timbl run quietly
   MTree = new TimblAPI(opts);
-  MTree->GetInstanceBase(MTreeFilename);
-  return;
+  return MTree->GetInstanceBase(MTreeFilename);
 }
   
 void Mbma::cleanUp(){
