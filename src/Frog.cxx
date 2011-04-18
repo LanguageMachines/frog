@@ -699,10 +699,14 @@ int main(int argc, char *argv[]) {
     usage();
     exit( EXIT_SUCCESS );
   }
-  cerr << "based on [" << Tokenizer::VersionName() << ", "
-       << Timbl::VersionName() << ", "
-       << TimblServer::VersionName() << ", "
-       << Tagger::VersionName() << "]" << endl;
+  //
+  // The code below works for very new versions.  (Timbl 6.4.2, Mbt 3.2.6)
+  // I just disable this until these are common.
+  //
+  // cerr << "based on [" << Tokenizer::VersionName() << ", "
+  //      << Timbl::VersionName() << ", "
+  //      << TimblServer::VersionName() << ", "
+  //      << Tagger::VersionName() << "]" << endl;
   try {
     TimblOpts Opts(argc, argv);
     bool dummy;
