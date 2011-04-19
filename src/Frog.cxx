@@ -665,9 +665,18 @@ void TestServer( Sockets::ServerSocket &conn) {
 
   try {
     while (true) {
-      string data;
-      if ( !conn.read( data ) )	 //read data from client
-	throw( runtime_error( "read failed" ) );
+      string data = "";      
+      while (true) {
+	string tmpdata;
+	if ( !conn.read( tmpdata ) )	 //read data from client
+	    throw( runtime_error( "read failed" ) );
+	
+	if (data.length() < 2048) { /* Todo: get TCP_BUFFER_SIZE dynamically from TimblServer and OS */
+	    data = data + tmpdata;
+	    break;
+	}
+      }
+          	
       if (tpDebug)
 	std::cerr << "Received: [" << data << "]" << "\n";
       
