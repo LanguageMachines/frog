@@ -105,7 +105,7 @@ AC_ARG_WITH(ucto,
        [  --with-ucto=DIR       use ucto installed in <DIR>],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
-PKG_CHECK_MODULES([ucto], [ucto >= 0.4.4] )
+PKG_CHECK_MODULES([ucto], [ucto >= 0.4.5] )
 CXXFLAGS="$CXXFLAGS $ucto_CFLAGS"
 LIBS="$LIBS $ucto_LIBS"
 

@@ -1,3 +1,7 @@
+0.12.3 - 2011-04-27
+[ Maarten van Gompel ]
+* moved nasty sentence per line patch away, support now in ucto itself
+
 0.12.2 - 2011-04-19
 [ Maarten van Gompel ]
 * fixed max read buffer (2048 byte) problem in server mode

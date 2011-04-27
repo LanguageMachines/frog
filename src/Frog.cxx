@@ -567,9 +567,6 @@ void Test( istream& IN,
       bool done = false;
       do {
 	    done = !getline( IN, line );	
-	    if ( doSentencePerLine ){
-	      line += string( " " ) + "<utt>";
-	    }
 	    int numS;
 	    if ((done) || (line.empty())) {
 		tokenizer.signalParagraph();
