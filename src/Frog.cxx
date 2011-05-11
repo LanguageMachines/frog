@@ -271,18 +271,21 @@ bool parse_args( TimblOpts& Opts ) {
     return false;
   }
 
-  if ( doTok ) {
-    string rulesName = configuration.lookUp( "rulesFile", "tokenizer" );
-    if ( rulesName.empty() ){
-      *Log(theErrLog) << "no rulesFile found in configuration" << endl;
-      return false;
-    }
-    else {
-      tokenizer.setErrorLog( theErrLog );
-      if ( !tokenizer.init( configuration.configDir(), rulesName ) )
-	return false;
-    }
+  string rulesName = configuration.lookUp( "rulesFile", "tokenizer" );
+  if ( rulesName.empty() ){
+    *Log(theErrLog) << "no rulesFile found in configuration" << endl;
+    return false;
   }
+  else {
+    tokenizer.setErrorLog( theErrLog );
+    if ( !tokenizer.init( configuration.configDir(), rulesName ) )
+      return false;
+  }
+  string debug = configuration.lookUp( "debug", "tokenizer" );
+  if ( debug.empty() )
+    tokenizer.setDebug( tpDebug );
+  else
+    tokenizer.setDebug( stringTo<int>(debug) );
 
   if ( !doServer && TestFileName.empty() && fileNames.empty() ){
     *Log(theErrLog) << "no frogging without input!" << endl;
