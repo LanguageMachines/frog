@@ -138,7 +138,8 @@ string complexAna::displayTag( ){
 }
 
 ostream& operator<< ( ostream& os, const mwuAna& a ){
-  os << a.word << a.OFS << a.lemma << a.OFS << a.morphemes << a.OFS << a.tag << a.OFS << a.conf;
+  os << a.word << a.OFS << a.lemma << a.OFS << a.morphemes << a.OFS << a.tag << a.OFS
+     << std::fixed << a.conf;
   return os;
 }
 
