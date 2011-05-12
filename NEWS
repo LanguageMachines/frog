@@ -1,4 +1,7 @@
-0.12.3 - 2011-04-27
+0.12.3 - 2011-xx-xx
+[Ko vd Sloot]
+* added a column for confidence. Needs the most recent Timbl and Mbt!
+
 [ Maarten van Gompel ]
 * moved nasty sentence per line patch away, support now in ucto itself
 
