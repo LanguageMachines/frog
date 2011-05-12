@@ -42,10 +42,11 @@
 using namespace Timbl;
 using namespace std;
 
-mwuAna::mwuAna( const std::string& wrd, const std::string& tg,
+mwuAna::mwuAna( const std::string& wrd, const std::string& tg, double con,
 		const std::string& mblemL, const std::string& mbmaL,
 		const std::string& cfs, const std::string& ofs ) {
   word = wrd;
+  conf = con;
   CFS = cfs;
   OFS = ofs;
   std::vector<std::string> parts;
@@ -94,6 +95,7 @@ complexAna *mwuAna::append( const mwuAna *add ){
   ana->CFS = CFS;
   ana->OFS = OFS;
   ana->word = word + CFS + add->word;
+  ana->conf = conf * add->conf;
   ana->tagHead = tagHead + CFS + add->tagHead;
   ana->tagMods = tagMods + CFS + add->tagMods;
   ana->lemma = lemma + CFS + add->lemma;
@@ -108,6 +110,7 @@ complexAna *complexAna::append( const mwuAna *add ){
   ana->OFS = OFS;
   ana->word = word + CFS + add->getWord();
   ana->tag = tag + CFS + add->getTag();
+  ana->conf = conf * add->getConf();
   ana->tagHead = tagHead + CFS + add->getTagHead();
   ana->tagMods = tagMods + CFS + add->getTagMods();
   ana->lemma = lemma + CFS + add->getLemma();
@@ -135,7 +138,7 @@ string complexAna::displayTag( ){
 }
 
 ostream& operator<< ( ostream& os, const mwuAna& a ){
-  os << a.word << a.OFS << a.lemma << a.OFS << a.morphemes << a.OFS << a.tag;
+  os << a.word << a.OFS << a.lemma << a.OFS << a.morphemes << a.OFS << a.tag << a.OFS << a.conf;
   return os;
 }
 
@@ -145,9 +148,9 @@ void Mwu::reset(){
   mWords.clear();
 }
 
-void Mwu::add( const std::string& word, const std::string& tag,
+void Mwu::add( const std::string& word, const std::string& tag, double con,
 	       const std::string& mblem, const std::string& mbma){
-  mWords.push_back( new mwuAna( word, tag, mblem, mbma, myCFS, 
+  mWords.push_back( new mwuAna( word, tag, con, mblem, mbma, myCFS, 
 				configuration.lookUp( "outputSeparator" ) ) );
 }
 

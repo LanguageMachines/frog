@@ -35,7 +35,7 @@ class complexAna;
 class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );
  public:
-  mwuAna( const std::string&, const std::string&,
+  mwuAna( const std::string&, const std::string&, double,
 	  const std::string&, const std::string&,
 	  const std::string&, const std::string& );
   virtual ~mwuAna() {};
@@ -59,6 +59,10 @@ class mwuAna {
   std::string getTag() const {
     return tag;
   }
+
+  double getConf() const {
+    return conf;
+  }
   
   virtual std::string displayTag( );
   
@@ -66,6 +70,7 @@ class mwuAna {
     mwuAna(){};
     std::string word;
     std::string tag;
+    double conf;
     std::string tagHead;
     std::string tagMods;
     std::string lemma;
@@ -92,7 +97,7 @@ class Mwu {
   void reset();
   bool init( const Configuration& );
   void Classify( );
-  void add( const std::string&, const std::string&,
+  void add( const std::string&, const std::string&, double d,
 	    const std::string&, const std::string& );
   std::vector<mwuAna*>& getAna(){ return mWords; };
   std::string myCFS;

@@ -332,7 +332,7 @@ bool parse_args( TimblOpts& Opts ) {
       mbaStat = myMbma.init( configuration );
 #pragma omp section 
       {
-	string init = "-s " + configuration.configDir() + tagset;
+	string init = "-s " + configuration.configDir() + tagset + " -vc";
 	tagger = new MbtAPI( init, *theErrLog );
       }
 #pragma omp section
@@ -350,12 +350,15 @@ bool parse_args( TimblOpts& Opts ) {
 	else {
 	  if ( doParse )
 	    *Log(theErrLog) << " Parser disabled, because MWU is deselected" << endl;
-	  doParse = false;;
+	  doParse = false;
 	}
       }
     }   // end omp parallel sections
-    if ( ! ( lemStat && mbaStat && mwuStat && parStat ) ){
+    if ( ! ( tagger->isInit() && lemStat && mbaStat && mwuStat && parStat ) ){
       *Log(theErrLog) << "Initialization failed: ";
+      if ( ! ( tagger->isInit() ) ){
+	*Log(theErrLog) << "[tagger] ";
+      }	
       if ( ! ( lemStat ) ){
 	*Log(theErrLog) << "[lemmatizer] ";
       }	
@@ -376,12 +379,22 @@ bool parse_args( TimblOpts& Opts ) {
   return true;
 }
 
-bool splitOneWT( const string& in, string& word, string& tag ){
+bool splitOneWT( const string& inp, string& word, string& tag, string& confidence ){
   bool isKnown = true;
+  string in = inp;
   //     split word and tag, and store num of slashes
   if (tpDebug)
     cout << "split Classify starting with " << in << endl;
-  size_t pos = in.rfind("//");
+  string::size_type pos = in.rfind("/");
+  if ( pos == string::npos ) {
+    *Log(theErrLog) << "no word/tag/confidence triple in this line: " << in << endl;
+    exit( EXIT_FAILURE );
+  }
+  else {
+    confidence = in.substr( pos+1 );
+    in.erase( pos );
+  }
+  pos = in.rfind("//");
   if ( pos != string::npos ) {
     // double slash: lets's hope is is an unknown word
     if ( pos == 0 ){
@@ -402,9 +415,8 @@ bool splitOneWT( const string& in, string& word, string& tag ){
       tag = in.substr( pos+1 );
     }
     else {
-      *Log(theErrLog) << "no word/tag pair in this line: " << in << endl;
-      word = "oops";
-      tag = "ai";
+      *Log(theErrLog) << "no word/tag/confidence triple in this line: " << in << endl;
+      exit( EXIT_FAILURE );
     }
   }
   if ( tpDebug){
@@ -412,29 +424,36 @@ bool splitOneWT( const string& in, string& word, string& tag ){
       cout << "known";
     else
       cout << "unknown";
-    cout << " word: " << word << "\ttag: " << tag << endl;
+    cout << " word: " << word << "\ttag: " << tag << "\tconfidence: " << confidence << endl;
   }
   return isKnown;
 }
 
 int splitWT( const string& tagged, const vector<string>& words,
-	     vector<string>& tags, vector<bool>& known ){
+	     vector<string>& tags, vector<bool>& known, vector<double>& conf ){
   vector<string> tagwords;
   tags.clear();
   known.clear();
+  conf.clear();
   size_t num_words = split_at( tagged, tagwords, sep );
   num_words--; // the last "word" is <utt> which gets added by the tagger
   for( size_t i = 0; i < num_words; ++i ) {
-    string word, tag;
-    bool isKnown = splitOneWT( tagwords[i], word, tag );
+    string word, tag, confs;
+    bool isKnown = splitOneWT( tagwords[i], word, tag, confs );
     if ( word != words[i] ){
       *Log(theErrLog) << "tagger out of sync: word[" << i << "] ≠ tagword["
 		      << i << "] " << word << " vs. " 
 		      << words[i] << endl;
       exit( EXIT_FAILURE );
     }
+    double confidence;
+    if ( !stringTo<double>( confs, confidence ) ){
+      *Log(theErrLog) << "tagger confused. Excpeced a double, got '" << confs << "'" << endl;
+      exit( EXIT_FAILURE );
+    }
     tags.push_back( tag );
     known.push_back( isKnown );
+    conf.push_back( confidence );
   }
   return num_words;
 }
@@ -478,13 +497,14 @@ vector<FrogData *> TestSentence( const string& sentence,
 	   << endl;
     }
     vector<string> tags;
+    vector<double> confidences;
     vector<bool> known;
-    int num_words = splitWT( tagged, words, tags, known );
+    int num_words = splitWT( tagged, words, tags, known, confidences );
     if (tpDebug) {
       cout << "#tagged_words: " << num_words << endl;
       for( int i = 0; i < num_words; i++) 
 	cout   << "\ttagged word[" << i <<"]: " << words[i] << (known[i]?"/":"//")
-	       << tags[i] << endl;
+	       << tags[i] << " <" << confidences[i] << ">" << endl;
     }
     myMwu.reset();
     for ( int i = 0; i < num_words; ++i ) {
@@ -523,7 +543,7 @@ vector<FrogData *> TestSentence( const string& sentence,
 	       << tags[i] << endl;
 	cout << "analysis: " << mblemLemma << " " << mbmaLemma << endl;
       }
-      myMwu.add( words[i], tags[i], mblemLemma, mbmaLemma );  
+      myMwu.add( words[i], tags[i], confidences[i], mblemLemma, mbmaLemma );  
     } //for int i = 0 to num_words
 
     if ( doMwu ){
@@ -708,14 +728,10 @@ int main(int argc, char *argv[]) {
     usage();
     exit( EXIT_SUCCESS );
   }
-  //
-  // The code below works for very new versions.  (Timbl 6.4.2, Mbt 3.2.6)
-  // I just disable this until these are common.
-  //
-  // cerr << "based on [" << Tokenizer::VersionName() << ", "
-  //      << Timbl::VersionName() << ", "
-  //      << TimblServer::VersionName() << ", "
-  //      << Tagger::VersionName() << "]" << endl;
+  cerr << "based on [" << Tokenizer::VersionName() << ", "
+       << Timbl::VersionName() << ", "
+       << TimblServer::VersionName() << ", "
+       << Tagger::VersionName() << "]" << endl;
   try {
     TimblOpts Opts(argc, argv);
     bool dummy;
