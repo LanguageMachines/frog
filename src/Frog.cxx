@@ -803,6 +803,9 @@ int main(int argc, char *argv[]) {
 	TestFile( TestFileName, outputFileName );
       }
     }
+    else {
+      return EXIT_FAILURE;
+    }
   }
   catch ( const exception& e ){
     *Log(theErrLog) << "fatal error: " << e.what() << endl;
