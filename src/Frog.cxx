@@ -71,7 +71,7 @@ string outputFileName;
 string outputDirName;
 set<string> fileNames;
 string ProgName;
-int tpDebug = 5; //0 for none, more for more output
+int tpDebug = 0; //0 for none, more for more output
 string sep = " "; // "&= " for cgi 
 bool doTok = true;
 bool doMwu = true;
