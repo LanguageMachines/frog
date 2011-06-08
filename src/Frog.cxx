@@ -71,7 +71,7 @@ string outputFileName;
 string outputDirName;
 set<string> fileNames;
 string ProgName;
-int tpDebug = 0; //0 for none, more for more output
+int tpDebug = 5; //0 for none, more for more output
 string sep = " "; // "&= " for cgi 
 bool doTok = true;
 bool doMwu = true;
@@ -301,7 +301,7 @@ bool parse_args( TimblOpts& Opts ) {
     // we use fork(). omp (GCC version) doesn't do well when omp is used
     // before the fork!
     // see: http://bisqwit.iki.fi/story/howto/openmp/#OpenmpAndFork
-    string init = "-s " + configuration.configDir() + tagset;
+    string init = "-s " + configuration.configDir() + tagset + " -vc";
     tagger = new MbtAPI( init, *theErrLog );
     bool stat = myMblem.init( configuration );
     if ( stat ){
