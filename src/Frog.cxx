@@ -123,7 +123,8 @@ void usage( ) {
        << "\t --outputdir=<outputfile> Output to directory, instead of default stdout\n"
        << "\t --keep-parser-files=[yes|no] keep intermediate parser files, (last sentence only)\n"
        << "\t============= OTHER OPTIONS ============================================\n"
-       << "\t -d <debug level> (for more verbosity)\n";
+       << "\t -d <debug level> (for more verbosity)\n"
+       << "\t -Q               Disable quote detection in tokeniser\n";
 
 }
 
@@ -286,6 +287,10 @@ bool parse_args( TimblOpts& Opts ) {
     tokenizer.setDebug( tpDebug );
   else
     tokenizer.setDebug( stringTo<int>(debug) );
+
+  if ( Opts.Find ('Q', value, mood)) {
+      tokenizer.setQuoteDetection(false);
+  };
 
   if ( !doServer && TestFileName.empty() && fileNames.empty() ){
     *Log(theErrLog) << "no frogging without input!" << endl;
