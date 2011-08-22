@@ -279,7 +279,7 @@ bool parse_args( TimblOpts& Opts ) {
   }
   else {
     tokenizer.setErrorLog( theErrLog );
-    if ( !tokenizer.init( configuration.configDir(), rulesName ) )
+    if ( !tokenizer.init( rulesName ) )
       return false;
   }
   string debug = configuration.lookUp( "debug", "tokenizer" );
