@@ -124,7 +124,7 @@ void usage( ) {
        << "\t --keep-parser-files=[yes|no] keep intermediate parser files, (last sentence only)\n"
        << "\t============= OTHER OPTIONS ============================================\n"
        << "\t -d <debug level> (for more verbosity)\n"
-       << "\t -Q               Disable quote detection in tokeniser\n";
+       << "\t -Q               Enable quote detection in tokeniser\n";
 
 }
 
@@ -289,7 +289,7 @@ bool parse_args( TimblOpts& Opts ) {
     tokenizer.setDebug( stringTo<int>(debug) );
 
   if ( Opts.Find ('Q', value, mood)) {
-      tokenizer.setQuoteDetection(false);
+      tokenizer.setQuoteDetection(true);
   };
 
   if ( !doServer && TestFileName.empty() && fileNames.empty() ){
