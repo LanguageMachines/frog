@@ -50,12 +50,12 @@
 #include "config.h"
 #include "frog/Frog.h"
 #include "frog/Configuration.h"
+#include "ucto/tokenize.h"
 #include "frog/mbma_mod.h"
 #include "frog/mblem_mod.h"
 #include "frog/mwu_chunker_mod.h"
 #include "frog/FrogData.h"
 #include "frog/Parser.h"
-#include "ucto/tokenize.h"
 
 using namespace std;
 
