@@ -308,7 +308,7 @@ bool parse_args( TimblOpts& Opts ) {
     // we use fork(). omp (GCC version) doesn't do well when omp is used
     // before the fork!
     // see: http://bisqwit.iki.fi/story/howto/openmp/#OpenmpAndFork
-    string init = "-s " + configuration.configDir() + tagset + " -vc";
+    string init = "-s " + configuration.configDir() + tagset + " -vcf";
     tagger = new MbtAPI( init, *theErrLog );
     bool stat = myMblem.init( configuration );
     if ( stat ){
@@ -344,7 +344,7 @@ bool parse_args( TimblOpts& Opts ) {
       mbaStat = myMbma.init( configuration );
 #pragma omp section 
       {
-	string init = "-s " + configuration.configDir() + tagset + " -vc";
+	string init = "-s " + configuration.configDir() + tagset + " -vcf";
 	tagger = new MbtAPI( init, *theErrLog );
       }
 #pragma omp section
@@ -460,7 +460,7 @@ int splitWT( const string& tagged, const vector<string>& words,
     }
     double confidence;
     if ( !stringTo<double>( confs, confidence ) ){
-      *Log(theErrLog) << "tagger confused. Excpeced a double, got '" << confs << "'" << endl;
+      *Log(theErrLog) << "tagger confused. Expected a double, got '" << confs << "'" << endl;
       exit( EXIT_FAILURE );
     }
     tags.push_back( tag );

@@ -97,7 +97,7 @@ AC_ARG_WITH(mbt,
        [  --with-mbt=DIR       use mbt installed in <DIR>],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
-PKG_CHECK_MODULES([mbt], [mbt >= 3.2.6] )
+PKG_CHECK_MODULES([mbt], [mbt >= 3.2.7] )
 CXXFLAGS="$CXXFLAGS $mbt_CFLAGS"
 LIBS="$LIBS $mbt_LIBS"
 
