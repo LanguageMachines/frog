@@ -106,7 +106,7 @@ Configuration configuration;
 static string configFileName = string(SYSCONF_PATH) + '/' + PACKAGE + '/' + "frog.cfg";
 
 void usage( ) {
-  cout << PACKAGE_STRING << endl << "Options:\n";
+  cout << endl << "Options:\n";
   cout << "\t============= INPUT MODE (mandatory, choose one) ========================\n"
        << "\t -e <encoding>          specify encoding of the input (default UTF-8)\n"
        << "\t -t <testfile>          Run frog on this file\n"
@@ -123,6 +123,8 @@ void usage( ) {
        << "\t --outputdir=<outputfile> Output to directory, instead of default stdout\n"
        << "\t --keep-parser-files=[yes|no] keep intermediate parser files, (last sentence only)\n"
        << "\t============= OTHER OPTIONS ============================================\n"
+       << "\t -h. give some help.\n"
+       << "\t -V or --version . Show version info.\n"
        << "\t -d <debug level> (for more verbosity)\n"
        << "\t -Q               Enable quote detection in tokeniser\n";
 
@@ -140,7 +142,16 @@ static Parser myParser;
 bool parse_args( TimblOpts& Opts ) {
   string value;
   bool mood;
-   // is a config file specified?
+  if ( Opts.Find('V', value, mood ) ||
+       Opts.Find("version", value, mood ) ){
+    // we alreade did that
+    exit( EXIT_SUCCESS );
+  }
+  if ( Opts.Find ('h', value, mood)) {
+    usage();
+    exit( EXIT_SUCCESS );
+  };
+  // is a config file specified?
   if ( Opts.Find( 'c',  value, mood ) ) {
     configFileName = value;
     Opts.Delete( 'c' );
@@ -248,10 +259,6 @@ bool parse_args( TimblOpts& Opts ) {
   else if ( Opts.Find ('o', value, mood)) {
     outputFileName = value;
     Opts.Delete('o');
-  };
-  if ( Opts.Find ('h', value, mood)) {
-    usage();
-    return false;
   };
   if ( Opts.Find ('S', value, mood)) {
     doServer = true;
@@ -726,24 +733,15 @@ void TestServer( Sockets::ServerSocket &conn) {
 
 int main(int argc, char *argv[]) {
   std::ios_base::sync_with_stdio(false);
-  cerr << "frog " << VERSION << "(c) ILK 1998 - 2011" << endl;
+  cerr << "frog " << VERSION << " (c) ILK 1998 - 2011" << endl;
   cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
   ProgName = argv[0];
-  if (argc < 2) {
-    usage();
-    exit( EXIT_SUCCESS );
-  }
   cerr << "based on [" << Tokenizer::VersionName() << ", "
        << Timbl::VersionName() << ", "
        << TimblServer::VersionName() << ", "
        << Tagger::VersionName() << "]" << endl;
   try {
     TimblOpts Opts(argc, argv);
-    bool dummy;
-    string val;
-    if ( Opts.Find('v', val, dummy ) ){
-      exit( EXIT_SUCCESS );
-    }
     if ( parse_args(Opts) ){
       //gets a settingsfile for each component, 
       //and starts init for that mod
