@@ -56,8 +56,11 @@
 #include "frog/mwu_chunker_mod.h"
 #include "frog/FrogData.h"
 #include "frog/Parser.h"
+#include "libfolia/document.h"
+#include "libfolia/folia.h"
 
 using namespace std;
+using namespace folia;
 
 Tokenizer::TokenizerClass tokenizer;
 
@@ -293,7 +296,7 @@ bool parse_args( TimblOpts& Opts ) {
   if ( debug.empty() )
     tokenizer.setDebug( tpDebug );
   else
-    tokenizer.setDebug( stringTo<int>(debug) );
+    tokenizer.setDebug( Timbl::stringTo<int>(debug) );
 
   if ( Opts.Find ('Q', value, mood)) {
       tokenizer.setQuoteDetection(true);
@@ -447,7 +450,7 @@ int splitWT( const string& tagged, const vector<string>& words,
   tags.clear();
   known.clear();
   conf.clear();
-  size_t num_words = split_at( tagged, tagwords, sep );
+  size_t num_words = Timbl::split_at( tagged, tagwords, sep );
   num_words--; // the last "word" is <utt> which gets added by the tagger
   for( size_t i = 0; i < num_words; ++i ) {
     string word, tag, confs;
@@ -495,7 +498,7 @@ vector<FrogData *> TestSentence( const string& sentence,
     if (tpDebug) 
       cout << "in: " << sentence << endl;
     vector<string> words;
-    int num = split_at( sentence, words, sep );
+    int num = Timbl::split_at( sentence, words, sep );
     if ( num < 1 ){
       *theErrLog << "unable to get words from the sentence " << endl;
       return solutions;
@@ -588,58 +591,44 @@ void Test( istream& IN,
 	   Common::Timer &frogTimer,
 	   const string& tmpDir ) {
 
-      bool bos = true; //for pre-tokenised text only
-      string eosmarker = "";
-      tokenizer.setEosMarker( eosmarker );
-      tokenizer.setVerbose( false );
-      tokenizer.setSentenceDetection( true ); //detection of sentences
-      tokenizer.setParagraphDetection( false ); //detection of paragraphs
-      tokenizer.setSentencePerLineInput( doSentencePerLine );
-      if ( !encoding.empty() )
-	tokenizer.setInputEncoding( encoding );
-
-      string line;  
-      bool done = false;
-      do {
-	    done = !getline( IN, line );	
-	    int numS;
-	    if ((done) || (line.empty())) {
-		tokenizer.signalParagraph();
-		numS = tokenizer.countSentences(true); //count full sentences in token buffer, force buffer to empty!
-	    } else {
-		timers.tokTimer.start();
-		if (doTok) {
-		    tokenizer.tokenizeLine( line ); //tokenize the line, appending to tokens
-		} else {
-		    tokenizer.passthruLine( line, bos ); //add pre-tokenized data without further tokenisation
-		}
-		numS = tokenizer.countSentences(); //count full sentences in token buffer	    
-		timers.tokTimer.stop();
-	    }	
-	    if ( numS > 0 ) { //process sentences 
-	      if  (tpDebug > 0) *Log(theErrLog) << "[tokenize] " << numS << " sentence(s) in buffer, processing..." << endl;
-	      for (int i = 0; i < numS; i++) {
-		/* ******* Begin process sentence  ********** */
-		string sentence = tokenizer.getSentenceString(i);
-		if (tpDebug > 0 ) *Log(theErrLog) << "[DEBUG] SENTENCE: " << sentence << endl;
-		vector<FrogData*> solutions = TestSentence( sentence,  tmpDir, timers ); 
-		//NOTE- full sentences are passed (which may span multiple lines) (MvG)         
-		const size_t solution_size = solutions.size();
-		for ( size_t j = 0; j < solution_size; ++j ) {
-		  showResults( outStream, *solutions[j] ); 
-		  delete solutions[j];
-		}
-	      }
-	      //clear processed sentences from buffer
-	      if  (tpDebug > 0) *Log(theErrLog) << "[tokenize] flushing " << numS << " sentence(s) from buffer..." << endl;
-	      tokenizer.flushSentences(numS);	    
-	    } else {
-	      if  (tpDebug > 0) *Log(theErrLog) << "[tokenize] No sentences yet, reading on..." << endl;
-	    }
-      } while (!done);
+  string eosmarker = "";
+  tokenizer.setEosMarker( eosmarker );
+  tokenizer.setVerbose( false );
+  tokenizer.setSentenceDetection( true ); //detection of sentences
+  tokenizer.setParagraphDetection( false ); //detection of paragraphs
+  tokenizer.setSentencePerLineInput( doSentencePerLine );
+  if ( !encoding.empty() )
+    tokenizer.setInputEncoding( encoding );
+  
+  tokenizer.setXMLOutput( true, "frog" );
+  string line;  
+  Document doc = tokenizer.tokenize( IN );
+  vector<AbstractElement*> sentences = doc.sentences();
+  size_t numS = sentences.size();
+  if ( numS > 0 ) { //process sentences 
+    if  (tpDebug > 0) *Log(theErrLog) << "[tokenize] " << numS << " sentence(s) in buffer, processing..." << endl;
+    for ( size_t i = 0; i < numS; i++) {
+      /* ******* Begin process sentence  ********** */
+      vector<AbstractElement*> words = sentences[i]->words();
+      string sentence;
+      for ( size_t w = 0; w < words.size(); ++w ) {
+	sentence += words[w]->str() + " ";
+      }
+      if (tpDebug > 0 ) *Log(theErrLog) << "[DEBUG] SENTENCE: " << sentence << endl;
+      vector<FrogData*> solutions = TestSentence( sentence,  tmpDir, timers ); 
+      //NOTE- full sentences are passed (which may span multiple lines) (MvG)         
+      const size_t solution_size = solutions.size();
+      for ( size_t j = 0; j < solution_size; ++j ) {
+	showResults( outStream, *solutions[j] ); 
+	delete solutions[j];
+      }
+    }
+  } else {
+    if  (tpDebug > 0) *Log(theErrLog) << "[tokenize] No sentences yet, reading on..." << endl;
+  }
   
   frogTimer.stop();  
-
+  
   *Log(theErrLog) << "tokenisation took:" << timers.tokTimer << endl;
   *Log(theErrLog) << "tagging took:     " << timers.tagTimer << endl;
   *Log(theErrLog) << "MBA took:         " << timers.mbmaTimer << endl;

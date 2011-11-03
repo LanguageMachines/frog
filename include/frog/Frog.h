@@ -34,6 +34,7 @@
 
 #include <set>
 #include "timbl/LogStream.h"
+#include "libfolia/foliautils.h"
 #include "frog/Configuration.h"
 
 std::string prefix( const std::string&, const std::string& );

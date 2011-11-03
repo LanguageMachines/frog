@@ -34,7 +34,6 @@
 #include <timbl/TimblAPI.h>
 
 #include "frog/Frog.h"
-#include "ucto/unicode.h"
 #include "frog/Configuration.h"
 #include "frog/mbma_mod.h"
 
@@ -176,7 +175,7 @@ vector<string> Mbma::make_instances( const UnicodeString& word ){
     if (debugFlag > 2)
       cout << "inst #" << i << " : " << inst << endl;
     // classify res
-    insts.push_back( UnicodeToUTF8(inst) );
+    insts.push_back( folia::UnicodeToUTF8(inst) );
     // store res
   }
   return insts;
@@ -281,7 +280,7 @@ vector<waStruct> Mbma::Step1( unsigned int step,
       eexcept = true;
     }
     // insert the deletestring :-) 
-    UnicodeString last = UTF8ToUnicode( deletestring );
+    UnicodeString last = folia::UTF8ToUnicode( deletestring );
     waItem.word += last;
     // delete the insertstring :-) 
     if (( tobeignored == 0 ) &&
@@ -452,7 +451,7 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
   vector<waStruct>::const_iterator it = ana.begin();
   while ( it != ana.end() ) { 
     if ( !it->word.isEmpty() ){
-      morphemes += "[" + UnicodeToUTF8(it->word) + "]";
+      morphemes += "[" + folia::UnicodeToUTF8(it->word) + "]";
     }
     string this_class= it->act;
     if (debugFlag)
@@ -621,7 +620,7 @@ string Mbma::postprocess( const UnicodeString& word,
     //should be(come?) a switch
     if ( match == 0 ) {
       // fallback option: put the word in bracket's and pretend it's a lemma ;-)
-      res = "[" + UnicodeToUTF8(word) + "]";
+      res = "[" + folia::UnicodeToUTF8(word) + "]";
     }
     else if (match == 1) {
       res = analysis[matches[0]].getMorph();

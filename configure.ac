@@ -101,11 +101,20 @@ PKG_CHECK_MODULES([mbt], [mbt >= 3.2.6] )
 CXXFLAGS="$CXXFLAGS $mbt_CFLAGS"
 LIBS="$LIBS $mbt_LIBS"
 
+AC_ARG_WITH(folia,
+       [  --with-folia=DIR       use ucto installed in <DIR>],
+       [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
+       [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
+AC_MSG_NOTICE( [pkg-config search path: $PKG_CONFIG_PATH] )
+PKG_CHECK_MODULES([folia],[folia >= 0.3])
+CXXFLAGS="$CXXFLAGS $folia_CFLAGS"
+LIBS="$LIBS $folia_LIBS"
+
 AC_ARG_WITH(ucto,
        [  --with-ucto=DIR       use ucto installed in <DIR>],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
-PKG_CHECK_MODULES([ucto], [ucto >= 0.4.7] )
+PKG_CHECK_MODULES([ucto], [ucto >= 0.4.8] )
 CXXFLAGS="$CXXFLAGS $ucto_CFLAGS"
 LIBS="$LIBS $ucto_LIBS"
 

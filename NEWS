@@ -1,5 +1,7 @@
 0.12.6 - 2011-**-**
-  *
+  * merged with the foliabased branch. So now we use the folia based Tokenizer.
+    This makes it possible to start integrating folia into Frog. 
+    That will be done gradually.
 
 0.12.5 - 2011-10-10
   * is released

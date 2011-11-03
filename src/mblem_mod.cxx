@@ -113,7 +113,7 @@ string Mblem::make_instance( const UnicodeString& in ) {
     }
   }
   instance += "?";
-  string result = UnicodeToUTF8(instance);
+  string result = folia::UnicodeToUTF8(instance);
   if (debug)
     cout << "inst: " << instance << endl;
   
@@ -201,7 +201,7 @@ void Mblem::Classify( const UnicodeString& uWord ){
   }
   int index = 0;
   while ( index < numParts ) {
-    UnicodeString part = UTF8ToUnicode( parts[index++] );
+    UnicodeString part = folia::UTF8ToUnicode( parts[index++] );
     if (debug)
       cout <<"part = " << part << endl;
     UnicodeString insstr;
@@ -210,9 +210,9 @@ void Mblem::Classify( const UnicodeString& uWord ){
     string restag;
     size_t lpos = part.indexOf("+");
     if ( lpos != string::npos )
-      restag = UnicodeToUTF8( UnicodeString( part, 0, lpos ) );
+      restag = folia::UnicodeToUTF8( UnicodeString( part, 0, lpos ) );
     else 
-      restag =  UnicodeToUTF8( part );
+      restag =  folia::UnicodeToUTF8( part );
     if ( classMap.size() > 0 ){
       map<string,string>::const_iterator it = classMap.find(restag);
       if ( it != classMap.end() )
@@ -321,7 +321,7 @@ void Mblem::Classify( const UnicodeString& uWord ){
     }
     if ( debug )
       cout << "appending lemma " << lemma << " and tag " << restag << endl;
-    mblemResult.push_back( mblemData( UnicodeToUTF8(lemma), restag ) );
+    mblemResult.push_back( mblemData( folia::UnicodeToUTF8(lemma), restag ) );
   } // while
   if ( debug ){
     cout << "stored lemma and tag options: " << mblemResult.size() << " lemma's and " << mblemResult.size() << " tags:\n";
