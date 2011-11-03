@@ -161,6 +161,7 @@ AC_OUTPUT([
   config/Makefile
   docs/Makefile
   scripts/Makefile
+  tests/Makefile
   src/Makefile
   include/Makefile
   include/frog/Makefile

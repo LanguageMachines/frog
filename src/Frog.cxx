@@ -311,7 +311,11 @@ bool parse_args( TimblOpts& Opts ) {
     // we use fork(). omp (GCC version) doesn't do well when omp is used
     // before the fork!
     // see: http://bisqwit.iki.fi/story/howto/openmp/#OpenmpAndFork
-    string init = "-s " + configuration.configDir() + tagset + " -vcf";
+    string init = "-s " + configuration.configDir() + tagset;
+    if ( Tagger::Version() == "3.2.6" )
+      init += " -vc";
+    else
+      init += " -vcf";
     tagger = new MbtAPI( init, *theErrLog );
     bool stat = myMblem.init( configuration );
     if ( stat ){
@@ -347,7 +351,11 @@ bool parse_args( TimblOpts& Opts ) {
       mbaStat = myMbma.init( configuration );
 #pragma omp section 
       {
-	string init = "-s " + configuration.configDir() + tagset + " -vcf";
+	string init = "-s " + configuration.configDir() + tagset;
+	if ( Tagger::Version() == "3.2.6" )
+	  init += " -vc";
+	else
+	  init += " -vcf";
 	tagger = new MbtAPI( init, *theErrLog );
       }
 #pragma omp section
