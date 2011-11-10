@@ -35,6 +35,7 @@
 
 #include "frog/Frog.h"
 #include "frog/Configuration.h"
+#include "libfolia/folia.h"
 #include "frog/mbma_mod.h"
 
 using namespace std;
@@ -405,7 +406,7 @@ void Mbma::resolve_inflections( vector<waStruct>& ana,
 
 MBMAana Mbma::addInflect( const vector<waStruct>& ana,
 			  const string& inflect, 
-			  const string& morph ){
+			  const vector<string>& morph ){
   bool found = false;
   string thisclass;
   vector<waStruct>::const_reverse_iterator it = ana.rbegin();
@@ -447,11 +448,11 @@ MBMAana Mbma::addInflect( const vector<waStruct>& ana,
 
 MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
   string inflect;
-  string morphemes;
+  vector<string> morphemes;
   vector<waStruct>::const_iterator it = ana.begin();
   while ( it != ana.end() ) { 
     if ( !it->word.isEmpty() ){
-      morphemes += "[" + folia::UnicodeToUTF8(it->word) + "]";
+      morphemes.push_back( folia::UnicodeToUTF8(it->word) );
     }
     string this_class= it->act;
     if (debugFlag)
@@ -560,9 +561,41 @@ void Mbma::execute( const UnicodeString& word,
     analysis.push_back( tmp );
   }
 }
+
+void addMorph( folia::AbstractElement *word, 
+	       const vector<string>& lemmas ){
+  folia::AbstractElement *ml = 0;
+  try {
+    ml = word->annotation( folia::Morphology_t );
+  }
+  catch(...){
+    ml = new folia::MorphologyLayer("");
+#pragma omp critical(foliaupdate)
+    {
+      word->append( ml );
+    }
+  }
+  int offset = 0;
+  for ( size_t p=0; p < lemmas.size(); ++p ){
+    folia::AbstractElement *m = new folia::Morpheme("");
+#pragma omp critical(foliaupdate)
+    {
+      ml->append( m );
+    }
+    folia::AbstractElement *t = 
+      new folia::TextContent( "value='" + escape( lemmas[p]) + 
+			      "', offset='" + toString(offset) + "'" );
+    offset += lemmas[p].length();
+#pragma omp critical(foliaupdate)
+    {
+      m->append( t );
+    }
+  }
+}	  
       
 string Mbma::postprocess( const UnicodeString& word,
-			  const string& inputTag ){
+			  const string& inputTag,
+			  folia::AbstractElement *fword ){
   if (debugFlag){
     for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
       cout << it->getTag() << it->getInflection()<< " ";
@@ -621,9 +654,15 @@ string Mbma::postprocess( const UnicodeString& word,
     if ( match == 0 ) {
       // fallback option: put the word in bracket's and pretend it's a lemma ;-)
       res = "[" + folia::UnicodeToUTF8(word) + "]";
+      vector<string> tmp;
+      tmp.push_back( folia::UnicodeToUTF8(word) );
+      addMorph( fword, tmp );
     }
     else if (match == 1) {
-      res = analysis[matches[0]].getMorph();
+      const vector<string> ma = analysis[matches[0]].getMorph();
+      for ( size_t p=0; p < ma.size(); ++p )
+	res += "[" + ma[p] + "]";
+      addMorph( fword, ma );
     } 
     else {
       // find the best match
@@ -642,12 +681,17 @@ string Mbma::postprocess( const UnicodeString& word,
       map<string, int> possible_lemmas;
       // find unique lemma's
       for ( size_t q = 0; q < match; ++q ) {
-	map<string, int>::iterator lemmaIt
-	  = possible_lemmas.find( analysis[matches[q]].getMorph());
-	if (lemmaIt == possible_lemmas.end())
-	  possible_lemmas.insert( make_pair( analysis[matches[q]].getMorph(),1 ) );
-	else
+	const vector<string> ma = analysis[matches[q]].getMorph();
+	string key;
+	for ( size_t p=0; p < ma.size(); ++p )
+	  key += ma[p];
+	map<string, int>::iterator lemmaIt = possible_lemmas.find( key );
+	if (lemmaIt == possible_lemmas.end()){
+	  possible_lemmas.insert( make_pair( key,1 ) );
+	}
+	else {
 	  lemmaIt->second++;
+	}
       }
       if (debugFlag)
 	cout << "#unique lemma's: " << possible_lemmas.size() << endl;
@@ -660,7 +704,7 @@ string Mbma::postprocess( const UnicodeString& word,
       // find best match
       // loop through all subParts of the tag
       // and match with inflections from each m
-      set<string> bestMatches;
+      map <string, const vector<string>* > bestMatches;
       int max_count = 0;
       for ( size_t q=0; q < match; ++q ) {
 	int match_count = 0;
@@ -676,21 +720,27 @@ string Mbma::postprocess( const UnicodeString& word,
 	  }
 	}
 	if (debugFlag)
-	  cout << "score: " << match_count << endl;
+	  cout << "score: " << match_count << " max was " << max_count << endl;
 	if (match_count >= max_count) {
+	  string key;
+	  const vector<string> *ma = &analysis[matches[q]].getMorph();
+	  for ( size_t p=0; p < ma->size(); ++p )
+	    key += (*ma)[p] + "+"; // create uniqe keys
+	  
 	  if (match_count > max_count) {
 	    max_count = match_count;
 	    bestMatches.clear();
-	    bestMatches.insert( analysis[matches[q]].getMorph() );
 	  }
-	  else {
-	    bestMatches.insert( analysis[matches[q]].getMorph() );
-	  }
+	  bestMatches.insert( make_pair(key, ma ) );
 	}
       }
-      set<string>::const_iterator it = bestMatches.begin();
+      map< string, const vector<string> *>::const_iterator it = bestMatches.begin();
       while ( it != bestMatches.end() ){
-	res += *it;
+	string tmp;
+	for ( size_t p=0; p < it->second->size(); ++p )
+	  tmp += "[" + (*it->second)[p] + "]";
+	res += tmp;
+	addMorph( fword, *it->second );
 	++it;
 	if ( it != bestMatches.end() )
 	  res += "/";
@@ -701,9 +751,17 @@ string Mbma::postprocess( const UnicodeString& word,
     cout << "final MBMA lemma: " << res << endl;
   return res;  
 }  // postprocess
-  
-void Mbma::Classify( const UnicodeString& word ) {
-  UnicodeString uWord = word;
+
+string Mbma::Classify( folia::AbstractElement* sword,
+		       const string& word, const string& tag ){
+  UnicodeString uWord = folia::UTF8ToUnicode( word );
+  uWord.toLower();
+  if ( tag.find( "SPEC(" ) == 0 ){
+    vector<string> tmp;
+    tmp.push_back( word );
+    addMorph( sword, tmp );
+    return "[" + word + "]";
+  }
   if (debugFlag)
     cout << "Classify word: " << uWord << endl;
   
@@ -724,6 +782,7 @@ void Mbma::Classify( const UnicodeString& word ) {
     classes[0] = "X";
   
   execute( uWord, classes );
+  return postprocess( uWord, tag, sword );
 }
 
 ostream& operator<< ( ostream& os, const MBMAana& a ){

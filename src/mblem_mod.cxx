@@ -33,6 +33,7 @@
 #include "timbl/TimblAPI.h"
 
 #include "ucto/unicode.h"
+#include "libfolia/folia.h"
 #include "frog/Frog.h"
 #include "frog/Configuration.h"
 #include "frog/mblem_mod.h"
@@ -186,7 +187,14 @@ string Mblem::postprocess( const string& tag ){
   return res;
 } 
 
-void Mblem::Classify( const UnicodeString& uWord ){
+string Mblem::Classify( folia::AbstractElement *sword,
+			const string& word, 
+			const string& tag ){
+  if ( tag.find( "SPEC(" ) == 0 ){
+    return word;
+  }
+  UnicodeString uWord = folia::UTF8ToUnicode(word);
+  uWord.toLower();
   mblemResult.clear();
   string inst = make_instance(uWord);  
   string classString;
@@ -331,4 +339,12 @@ void Mblem::Classify( const UnicodeString& uWord ){
     }
     cout << "\n\n";
   }
+  string res = postprocess( tag ); 
+  folia::KWargs args = folia::getArgs( "set='mbt-lemma', cls='" 
+				       + escape(res) + "', annotator='MBT'" );
+#pragma omp critical(foliaupdate)
+  {
+    sword->addLemmaAnnotation( args );
+  }
+  return res;
 }

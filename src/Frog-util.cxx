@@ -100,3 +100,13 @@ string& trim(string &str)  //3rd party function. TODO: test if utf-8 safe? (MvG)
     return str;
 }
 
+string escape( const string& in ){
+  string out;
+  for ( size_t i=0; i < in.length(); ++i ){
+    if ( in[i] == '\'' )
+      out += "\\";
+    out += in[i];
+  }
+  return out;
+}
+

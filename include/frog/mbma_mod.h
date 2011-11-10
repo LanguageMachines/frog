@@ -47,9 +47,11 @@ class Mbma {
   Mbma();
   ~Mbma() { cleanUp(); };
   bool init( const Configuration& );
-  void Classify( const UnicodeString& );
-  std::string postprocess( const UnicodeString& word,
-			   const std::string& inputTag );
+  std::string Classify( folia::AbstractElement *,
+			const std::string&, const std::string& );
+  std::string postprocess( const UnicodeString&,
+			   const std::string&,
+			   folia::AbstractElement * );
  private:
   void cleanUp();
   bool readsettings( const std::string&, const std::string& );
@@ -65,7 +67,8 @@ class Mbma {
 			       const std::string& basictags );
   void resolve_inflections( std::vector<waStruct>& , const std::string& );
   MBMAana addInflect( const std::vector<waStruct>& ana,
-		      const std::string&, const std::string&  );
+		      const std::string&, 
+		      const std::vector<std::string>&  );
   MBMAana inflectAndAffix( const std::vector<waStruct>& ana );
   void execute( const UnicodeString& word, 
 		const std::vector<std::string>& classes );
@@ -84,12 +87,11 @@ class MBMAana {
   MBMAana() {
     tag = "";
     infl = "";
-    morphemes = "";
     description = "";    
   };
  MBMAana( const std::string& _tag,
 	  const std::string& _infl,
-	  const std::string& _mo, 
+	  const std::vector<std::string>& _mo, 
 	  const std::string& _des ): 
   tag(_tag),infl(_infl),morphemes(_mo), description(_des) {};
   
@@ -103,14 +105,14 @@ class MBMAana {
     return infl;
   };
   
-  std::string getMorph() const {
+  const std::vector<std::string>& getMorph() const {
     return morphemes;
   };
   
  private:
   std::string tag;
   std::string infl;
-  std::string morphemes;
+  std::vector<std::string> morphemes;
   std::string description;  
 };
 

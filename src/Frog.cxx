@@ -493,24 +493,28 @@ UnicodeString decap( const UnicodeString &W ) {
   return w;
 }
 
-vector<FrogData *> TestSentence( const string& sentence,
+vector<FrogData *> TestSentence( const AbstractElement* sent,
 				 const string& tmpDir,
 				 TimerBlock& timers ){
+  vector<AbstractElement*> swords = sent->words();
   vector<FrogData *> solutions;
-
-  if ( !sentence.empty() ) {
+  if ( !swords.empty() ) {
     if (tpDebug) {
-      // don't mangle debug output, so run 1 thread
+      // don't mangle debug output, so run 1 thread then
       omp_set_num_threads( 1 );
     }
+    vector<string> words;
+    string sentence; // the tagger needs the whole sentence
+    for ( size_t w = 0; w < swords.size(); ++w ) {
+      sentence += swords[w]->str();
+      words.push_back( swords[w]->str() );
+      if ( w < swords.size()-1 )
+	sentence += " ";
+    }
+    if (tpDebug > 0 ) *Log(theErrLog) << "[DEBUG] SENTENCE: " << sentence << endl;
+    
     if (tpDebug) 
       cout << "in: " << sentence << endl;
-    vector<string> words;
-    int num = Timbl::split_at( sentence, words, sep );
-    if ( num < 1 ){
-      *theErrLog << "unable to get words from the sentence " << endl;
-      return solutions;
-    }
     timers.tagTimer.start();
     string tagged = tagger->Tag(sentence);
     timers.tagTimer.stop();
@@ -531,33 +535,27 @@ vector<FrogData *> TestSentence( const string& sentence,
     }
     myMwu.reset();
     for ( int i = 0; i < num_words; ++i ) {
+      KWargs args = getArgs( "set='mbt-pos', cls='" + escape( tags[i] )
+			     + "', annotator='MBT', confidence='" 
+			     + toString(confidences[i]) + "'" );
+      swords[i]->addPosAnnotation( args );
       //process each word and dump every ana for now
-      UnicodeString uWord = UTF8ToUnicode(words[i] );
-      uWord.toLower();
       string mbmaLemma;
       string mblemLemma;
-#pragma omp parallel sections firstprivate( uWord )
+#pragma omp parallel sections
       {
 #pragma omp section
 	{
 	  timers.mbmaTimer.start();
 	  if (tpDebug) cout << "Calling mbma..." << endl;
-	  myMbma.Classify( uWord );
-	  if ( tags[i].find( "SPEC(" ) == 0 )
-	    mbmaLemma = "[" + words[i] + "]";
-	  else
-	    mbmaLemma = myMbma.postprocess( uWord, tags[i] );
+	  mbmaLemma = myMbma.Classify( swords[i], words[i], tags[i] );
 	  timers.mbmaTimer.stop();
 	}
 #pragma omp section
 	{
 	  timers.mblemTimer.start();
 	  if (tpDebug) cout << "Calling mblem..." << endl;
-	  myMblem.Classify( uWord );
-	  if ( tags[i].find( "SPEC(" ) == 0 )
-	    mblemLemma = words[i];
-	  else
-	    mblemLemma = myMblem.postprocess( tags[i] ); 
+	  mblemLemma = myMblem.Classify( swords[i], words[i], tags[i] );
 	  timers.mblemTimer.stop();
 	}
       }
@@ -591,6 +589,38 @@ vector<FrogData *> TestSentence( const string& sentence,
   return solutions;
 }
 
+ostream &showResults( ostream& os, const AbstractElement* sentence ){
+  vector<AbstractElement *> words = sentence->words();
+  for( size_t i=0; i < words.size(); ++i ){
+    string pos;
+    string lemma;
+    string morph;
+    double conf;
+    try { 
+      AbstractElement *postag = words[i]->annotation(Pos_t);
+      pos = postag->cls();
+      conf = postag->confidence();
+    }
+    catch (... ){
+    }
+    try { 
+      lemma = words[i]->lemma();
+    }
+    catch (... ){
+    }
+    try { 
+      vector<AbstractElement*> m = words[i]->annotations(Morpheme_t);
+      for ( size_t p=0; p < m.size(); ++p ){
+	morph += "[" + UnicodeToUTF8( m[p]->text() ) + "]";
+      }
+    }
+    catch (... ){
+    }
+    os << i << "\t" << words[i]->str() << "\t" << lemma << "\t" << morph << "\t" << pos << "\t" << conf << endl;
+  }
+  return os;
+}
+
 
 
 void Test( istream& IN,
@@ -610,24 +640,25 @@ void Test( istream& IN,
   
   tokenizer.setXMLOutput( true, "frog" );
   string line;  
-  Document doc = tokenizer.tokenize( IN );
+  Document doc = tokenizer.tokenize( IN ); 
+  doc.declare( AnnotationType::POS, "mbt-pos");
+  doc.declare( AnnotationType::LEMMA, "mbt-lemma");
+
+  // Tokenize the whole input into one FoLiA document.
+  // This is nog a good idea on the long term, I think
+
   vector<AbstractElement*> sentences = doc.sentences();
   size_t numS = sentences.size();
   if ( numS > 0 ) { //process sentences 
     if  (tpDebug > 0) *Log(theErrLog) << "[tokenize] " << numS << " sentence(s) in buffer, processing..." << endl;
     for ( size_t i = 0; i < numS; i++) {
       /* ******* Begin process sentence  ********** */
-      vector<AbstractElement*> words = sentences[i]->words();
-      string sentence;
-      for ( size_t w = 0; w < words.size(); ++w ) {
-	sentence += words[w]->str() + " ";
-      }
-      if (tpDebug > 0 ) *Log(theErrLog) << "[DEBUG] SENTENCE: " << sentence << endl;
-      vector<FrogData*> solutions = TestSentence( sentence,  tmpDir, timers ); 
+      vector<FrogData*> solutions = TestSentence( sentences[i],  tmpDir, timers ); 
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)         
       const size_t solution_size = solutions.size();
       for ( size_t j = 0; j < solution_size; ++j ) {
 	showResults( outStream, *solutions[j] ); 
+	//	showResults( outStream, sentences[j] ); 
 	delete solutions[j];
       }
     }
@@ -652,6 +683,8 @@ void Test( istream& IN,
     *Log(theErrLog) << "Parsing (total)   took: " << timers.parseTimer << endl;
   }
   *Log(theErrLog) << "Frogging took:      " << frogTimer << endl;
+  doc.save( "frog-folia.xml" );
+  *Log(theErrLog) << "debug:: resulting FoLiA doc saved in frog-folia.xml" << endl;
   return;
 }
 
