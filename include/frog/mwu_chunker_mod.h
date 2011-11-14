@@ -29,13 +29,15 @@
 #ifndef __MWU_CHUNKER__
 #define __MWU_CHUNKER__
 
+#include "libfolia/folia.h"
 
 class complexAna;
 
 class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );
  public:
-  mwuAna( const std::string&, const std::string&, double,
+  mwuAna( folia::AbstractElement *,
+	  const std::string&, const std::string&, double,
 	  const std::string&, const std::string&,
 	  const std::string&, const std::string& );
   virtual ~mwuAna() {};
@@ -44,7 +46,9 @@ class mwuAna {
   std::string getTagHead() const {
     return tagHead;
   }
-  
+
+  virtual void addEntity( folia::AbstractElement * ){};
+
   std::string getTagMods() const;
   
   std::string getWord() const {
@@ -58,6 +62,10 @@ class mwuAna {
   }
   std::string getTag() const {
     return tag;
+  }
+
+  folia::AbstractElement *getFword() const {
+    return fword;
   }
 
   double getConf() const {
@@ -77,6 +85,7 @@ class mwuAna {
     std::string morphemes;
     std::string CFS;
     std::string OFS;
+    folia::AbstractElement *fword;
 };
 
 class complexAna: public mwuAna {
@@ -84,6 +93,8 @@ class complexAna: public mwuAna {
   complexAna( );
   complexAna *append( const mwuAna * );
   std::string displayTag( );
+  void addEntity( folia::AbstractElement * );
+  std::vector<folia::AbstractElement *> fwords;
 };
 
 #define mymap2 std::multimap<std::string, std::vector<std::string> >
@@ -96,14 +107,16 @@ class Mwu {
   ~Mwu();
   void reset();
   bool init( const Configuration& );
-  void Classify( );
-  void add( const std::string&, const std::string&, double d,
+  void Classify( folia::AbstractElement* );
+  void add( folia::AbstractElement *,
+	    const std::string&, const std::string&, double d,
 	    const std::string&, const std::string& );
   std::vector<mwuAna*>& getAna(){ return mWords; };
   std::string myCFS;
  private:
   bool readsettings( const std::string&, const std::string&);
   bool read_mwus( const std::string& );
+  void Classify();
   int debug;
   std::string mwuFileName;
   std::vector<mwuAna*> mWords;

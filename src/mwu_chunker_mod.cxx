@@ -37,14 +37,17 @@
 #include "timbl/TimblAPI.h"
 
 #include "frog/Frog.h" // defines etc.
+#include "libfolia/folia.h" // defines etc.
 #include "frog/mwu_chunker_mod.h"
 
 using namespace Timbl;
 using namespace std;
 
-mwuAna::mwuAna( const std::string& wrd, const std::string& tg, double con,
+mwuAna::mwuAna( folia::AbstractElement *fwrd,
+		const std::string& wrd, const std::string& tg, double con,
 		const std::string& mblemL, const std::string& mbmaL,
 		const std::string& cfs, const std::string& ofs ) {
+  fword = fwrd;
   word = wrd;
   conf = con;
   CFS = cfs;
@@ -101,6 +104,8 @@ complexAna *mwuAna::append( const mwuAna *add ){
   ana->lemma = lemma + CFS + add->lemma;
   ana->morphemes = morphemes + CFS + add->morphemes;
   ana->tag = tag + CFS + add->tag;
+  ana->fwords.push_back( fword );
+  ana->fwords.push_back( add->fword );
   return ana;
 }
 
@@ -115,6 +120,8 @@ complexAna *complexAna::append( const mwuAna *add ){
   ana->tagMods = tagMods + CFS + add->getTagMods();
   ana->lemma = lemma + CFS + add->getLemma();
   ana->morphemes = morphemes + CFS + add->getMorphemes();
+  ana->fwords = fwords;
+  ana->fwords.push_back( add->getFword() );
   return ana;
 }
 
@@ -137,6 +144,31 @@ string complexAna::displayTag( ){
     OFS + CFS;
 }
 
+void complexAna::addEntity( folia::AbstractElement *sent ){
+  folia::AbstractElement *el = 0;
+  try {
+    el = sent->annotation( folia::Entities_t );
+  }
+  catch(...){
+    el = new folia::EntitiesLayer("");
+#pragma omp critical(foliaupdate)
+    {
+      sent->append( el );
+    }
+  }
+  folia::AbstractElement *e = new folia::Entity("");
+#pragma omp critical(foliaupdate)
+  {
+    el->append( e );
+  }
+  for ( size_t p=0; p < fwords.size(); ++p ){
+#pragma omp critical(foliaupdate)
+    {
+      e->append( fwords[p] );
+    }
+  }
+}
+
 ostream& operator<< ( ostream& os, const mwuAna& a ){
   os << a.word << a.OFS << a.lemma << a.OFS << a.morphemes << a.OFS << a.tag << a.OFS
      << std::fixed << a.conf;
@@ -149,9 +181,10 @@ void Mwu::reset(){
   mWords.clear();
 }
 
-void Mwu::add( const std::string& word, const std::string& tag, double con,
+void Mwu::add( folia::AbstractElement *fw, 
+	       const std::string& word, const std::string& tag, double con,
 	       const std::string& mblem, const std::string& mbma){
-  mWords.push_back( new mwuAna( word, tag, con, mblem, mbma, myCFS, 
+  mWords.push_back( new mwuAna( fw, word, tag, con, mblem, mbma, myCFS, 
 				configuration.lookUp( "outputSeparator" ) ) );
 }
 
@@ -209,7 +242,14 @@ ostream &operator <<( ostream& os,
   return os;
 }
 
-void Mwu::Classify( ){
+void Mwu::Classify( folia::AbstractElement *sent ){
+  Classify();
+  for( size_t i = 0; i < mWords.size(); ++i ){
+    mWords[i]->addEntity( sent );
+  }
+}
+
+void Mwu::Classify(){
   if ( debug )
     cout << "\nStarting mwu Classify\n";
   mymap2::iterator best_match;
@@ -316,9 +356,9 @@ void Mwu::Classify( ){
     mWords.erase(anatmp1, anatmp2);
     if ( debug ){
       cout << "tussenstand:" << endl;
-      cout << this << endl;
+      cout << *this << endl;
     }      
-    Classify();
+    Classify( );
   } //if (matchLength)
   return;
 } // //Classify

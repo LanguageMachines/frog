@@ -564,18 +564,14 @@ void Mbma::execute( const UnicodeString& word,
 
 void addMorph( folia::AbstractElement *word, 
 	       const vector<string>& lemmas ){
-  folia::AbstractElement *ml = 0;
-  try {
-    ml = word->annotation( folia::Morphology_t );
-  }
-  catch(...){
-    ml = new folia::MorphologyLayer("");
+  folia::AbstractElement *ml = new folia::MorphologyLayer("");
 #pragma omp critical(foliaupdate)
-    {
-      word->append( ml );
-    }
+  {
+    word->append( ml );
   }
+
   int offset = 0;
+  string args = "annotator='mbma'";
   for ( size_t p=0; p < lemmas.size(); ++p ){
     folia::AbstractElement *m = new folia::Morpheme("");
 #pragma omp critical(foliaupdate)

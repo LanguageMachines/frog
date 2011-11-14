@@ -191,6 +191,12 @@ string Mblem::Classify( folia::AbstractElement *sword,
 			const string& word, 
 			const string& tag ){
   if ( tag.find( "SPEC(" ) == 0 ){
+    folia::KWargs args = folia::getArgs( "set='mbt-lemma', cls='" 
+					 + escape(word) + "', annotator='MBT'" );
+#pragma omp critical(foliaupdate)
+    {
+      sword->addLemmaAnnotation( args );
+    }
     return word;
   }
   UnicodeString uWord = folia::UTF8ToUnicode(word);

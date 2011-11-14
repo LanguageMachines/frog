@@ -493,7 +493,7 @@ UnicodeString decap( const UnicodeString &W ) {
   return w;
 }
 
-vector<FrogData *> TestSentence( const AbstractElement* sent,
+vector<FrogData *> TestSentence( AbstractElement* sent,
 				 const string& tmpDir,
 				 TimerBlock& timers ){
   vector<AbstractElement*> swords = sent->words();
@@ -564,7 +564,7 @@ vector<FrogData *> TestSentence( const AbstractElement* sent,
 	       << tags[i] << endl;
 	cout << "analysis: " << mblemLemma << " " << mbmaLemma << endl;
       }
-      myMwu.add( words[i], tags[i], confidences[i], mblemLemma, mbmaLemma );  
+      myMwu.add( swords[i], words[i], tags[i], confidences[i], mblemLemma, mbmaLemma );  
     } //for int i = 0 to num_words
 
     if ( doMwu ){
@@ -572,7 +572,7 @@ vector<FrogData *> TestSentence( const AbstractElement* sent,
 	if (tpDebug)
 	  cout << "starting mwu Chunking ... \n";
 	timers.mwuTimer.start();
-	myMwu.Classify( );
+	myMwu.Classify( sent );
 	timers.mwuTimer.stop();
       }
       if (tpDebug) {
@@ -589,35 +589,124 @@ vector<FrogData *> TestSentence( const AbstractElement* sent,
   return solutions;
 }
 
-ostream &showResults( ostream& os, const AbstractElement* sentence ){
-  vector<AbstractElement *> words = sentence->words();
-  for( size_t i=0; i < words.size(); ++i ){
-    string pos;
-    string lemma;
-    string morph;
-    double conf;
+vector<AbstractElement *> lookup( AbstractElement *word, 
+				  const vector<AbstractElement*>& entities ){
+  vector<AbstractElement*> vec;
+  for ( size_t p=0; p < entities.size(); ++p ){
+    vec = entities[p]->select(Word_t);
+    if ( !vec.empty() ){
+      if ( vec[0]->id() == word->id() ) {
+	// using folia::operator<<;
+	// cerr << "found " << vec << endl;
+	return vec;
+      }
+    }
+  }
+  vec.clear();
+  return vec;
+}
+
+void displayWord( ostream& os, size_t index, const AbstractElement *word ){
+  string pos;
+  string lemma;
+  string morph;
+  double conf;
+  try { 
+    AbstractElement *postag = word->annotation(Pos_t);
+    pos = postag->cls();
+    conf = postag->confidence();
+  }
+  catch (... ){
+  }
+  try { 
+    lemma = word->lemma();
+  }
+  catch (... ){
+  }
+  try { 
+    vector<AbstractElement*> ml = word->annotations(Morphology_t);
+    for ( size_t p=0; p < ml.size(); ++p ){
+      vector<AbstractElement*> m = ml[p]->annotations(Morpheme_t);
+      for ( size_t q=0; q < m.size(); ++q ){
+	morph += "[" + UnicodeToUTF8( m[q]->text() ) + "]";
+      }
+      if ( p < ml.size()-1 )
+	morph += "/";
+    }
+  }
+  catch (... ){
+  }
+  os << index << "\t" << word->str() << "\t" << lemma << "\t" << morph << "\t" << pos << "\t" << std::fixed << conf << "\t\t" << endl;
+}  
+
+void displayMWU( ostream& os, size_t index, 
+		 const vector<AbstractElement *> mwu ){
+  string wrd;
+  string pos;
+  string lemma;
+  string morph;
+  double conf = 1;
+  for ( size_t p=0; p < mwu.size(); ++p ){
+    AbstractElement *word = mwu[p];
     try { 
-      AbstractElement *postag = words[i]->annotation(Pos_t);
-      pos = postag->cls();
-      conf = postag->confidence();
+      wrd += word->str();
+      AbstractElement *postag = word->annotation(Pos_t);
+      pos += postag->cls();
+      if ( p < mwu.size() -1 ){
+	wrd += "_";
+	pos += "_";
+      }
+      conf *= postag->confidence();
     }
     catch (... ){
     }
     try { 
-      lemma = words[i]->lemma();
-    }
-    catch (... ){
-    }
-    try { 
-      vector<AbstractElement*> m = words[i]->annotations(Morpheme_t);
-      for ( size_t p=0; p < m.size(); ++p ){
-	morph += "[" + UnicodeToUTF8( m[p]->text() ) + "]";
+      lemma += word->lemma();
+      if ( p < mwu.size() -1 ){
+	lemma += "_";
       }
     }
     catch (... ){
     }
-    os << i << "\t" << words[i]->str() << "\t" << lemma << "\t" << morph << "\t" << pos << "\t" << conf << endl;
+    try { 
+      vector<AbstractElement*> m = word->annotations(Morpheme_t);
+      for ( size_t t=0; t < m.size(); ++t ){
+	morph += "[" + UnicodeToUTF8( m[t]->text() ) + "]";
+      }
+      if ( p < mwu.size() -1 ){
+	morph += "_";
+      }
+    }
+    catch (... ){
+    }
   }
+  os << index << "\t" << wrd << "\t" << lemma << "\t" << morph << "\t" << pos << "\t" << std::fixed << conf <<"\t\t" << endl;
+}  
+
+ostream &showResults( ostream& os, const AbstractElement* sentence ){
+  static set<ElementType> excludeSet;
+  if ( excludeSet.empty() ){
+    excludeSet.insert( Chunk_t );
+    excludeSet.insert( SyntacticUnit_t );
+    excludeSet.insert( Entity_t );
+  }
+  vector<AbstractElement *> words = sentence->select( Word_t, excludeSet );
+  vector<AbstractElement *> entities = sentence->select( Entity_t );
+  size_t index = 1;
+  for( size_t i=0; i < words.size(); ++i ){
+    AbstractElement *word = words[i];
+    vector<AbstractElement *> mwu = lookup( word, entities );
+    if ( !mwu.empty() ){
+      displayMWU( os, index, mwu );
+      i += mwu.size()-1;
+    }
+    else {
+      displayWord( os, index, word );
+    }
+    ++index;
+  }
+  if ( words.size() )
+    os << endl;
   return os;
 }
 
@@ -657,10 +746,10 @@ void Test( istream& IN,
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)         
       const size_t solution_size = solutions.size();
       for ( size_t j = 0; j < solution_size; ++j ) {
-	showResults( outStream, *solutions[j] ); 
-	//	showResults( outStream, sentences[j] ); 
+	//	showResults( outStream, *solutions[j] ); 
 	delete solutions[j];
       }
+      showResults( outStream, sentences[i] ); 
     }
   } else {
     if  (tpDebug > 0) *Log(theErrLog) << "[tokenize] No sentences yet, reading on..." << endl;
