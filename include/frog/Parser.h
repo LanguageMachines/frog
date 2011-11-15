@@ -82,12 +82,18 @@ class Parser {
  Parser():pairs(0),dir(0),rels(0),PI(0),isInit(false){};
   ~Parser();
   bool init( const Configuration& );
-  void Parse( FrogData *, const std::string&, TimerBlock& );
-  void prepareParse();
-  void createParserFile( std::ostream& );
+  void Parse( FrogData *, folia::AbstractElement *, const std::string&, TimerBlock& );
+  void prepareParse( folia::AbstractElement * );
+  void createParserFile( const std::vector<std::string>&,
+			 const std::vector<std::string>&, 
+			 const std::vector<std::string>& );
  private:
-  void createRelDir();
-  void createPairs();
+  void createRelDir( const std::vector<std::string>&,
+		     const std::vector<std::string>&, 
+		     const std::vector<std::string>& );
+  void createPairs( const std::vector<std::string>&,
+		    const std::vector<std::string>&, 
+		    const std::vector<std::string>& );
   Timbl::TimblAPI *pairs;
   Timbl::TimblAPI *dir;
   Timbl::TimblAPI *rels;

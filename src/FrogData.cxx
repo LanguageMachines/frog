@@ -64,7 +64,7 @@ void FrogData::appendParseResult( std::istream& is ){
 	*Log(theErrLog) << "confused! " << endl;
 	*Log(theErrLog) << "got line '" << line << "'" << endl;
 	*Log(theErrLog) << "expected something like '" << cnt+1 << " " << 
-	  mwu_data[cnt] << endl;
+	  *mwu_data[cnt] << endl;
       }
       parseNum[cnt] = parts[6];
       parseTag[cnt] = parts[7];

@@ -582,7 +582,7 @@ vector<FrogData *> TestSentence( AbstractElement* sent,
     }
     FrogData *pd = new FrogData( myMwu );
     if ( doParse ){  
-      myParser.Parse( pd, tmpDir, timers );
+      myParser.Parse( pd, sent, tmpDir, timers );
     }
     solutions.push_back( pd );
   }
@@ -684,13 +684,7 @@ void displayMWU( ostream& os, size_t index,
 }  
 
 ostream &showResults( ostream& os, const AbstractElement* sentence ){
-  static set<ElementType> excludeSet;
-  if ( excludeSet.empty() ){
-    excludeSet.insert( Chunk_t );
-    excludeSet.insert( SyntacticUnit_t );
-    excludeSet.insert( Entity_t );
-  }
-  vector<AbstractElement *> words = sentence->select( Word_t, excludeSet );
+  vector<AbstractElement *> words = sentence->words();
   vector<AbstractElement *> entities = sentence->select( Entity_t );
   size_t index = 1;
   for( size_t i=0; i < words.size(); ++i ){
@@ -746,10 +740,10 @@ void Test( istream& IN,
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)         
       const size_t solution_size = solutions.size();
       for ( size_t j = 0; j < solution_size; ++j ) {
-	//	showResults( outStream, *solutions[j] ); 
+	showResults( outStream, *solutions[j] ); 
 	delete solutions[j];
       }
-      showResults( outStream, sentences[i] ); 
+      //      showResults( outStream, sentences[i] ); 
     }
   } else {
     if  (tpDebug > 0) *Log(theErrLog) << "[tokenize] No sentences yet, reading on..." << endl;

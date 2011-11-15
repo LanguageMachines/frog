@@ -37,6 +37,7 @@
 
 #include "config.h"
 #include "timbl/TimblAPI.h"
+#include "libfolia/folia.h"
 #include "frog/Frog.h"
 #include "frog/Configuration.h"
 #include "frog/mwu_chunker_mod.h"
@@ -45,6 +46,7 @@
 
 using namespace std;
 using namespace Timbl;
+using namespace folia;
 
 PythonInterface::PythonInterface( ) {
   Py_OptimizeFlag = 1; // enable optimisation (-O) mode
@@ -102,9 +104,21 @@ Common::Timer pairsTimer;
 Common::Timer dirTimer;
 Common::Timer csiTimer;
 
-void Parser::createParserFile( ostream& os ){
-  for( size_t i = 0; i < mwu_data->size(); ++i )
-    os << i+1 << (*mwu_data)[i]->displayTag( ) << endl;
+void Parser::createParserFile( const vector<string>& words,
+			       const vector<string>& heads,
+			       const vector<string>& mods ){
+  ofstream anaFile( fileName.c_str() );
+  if ( anaFile ){
+    for( size_t i = 0; i < words.size(); ++i ){
+      anaFile << i+1 << "\t" << words[i] << "\t" << "*" << "\t" << heads[i] 
+	      << "\t" << heads[i] << "\t" << mods[i] << "\t"<< "0" 
+	      << "\t" << "_" << "\t" << "_" << "\t" << "_" << endl;
+    }
+  }
+  else {
+    cerr << "unable to create a parser file " << fileName << endl;
+    exit( EXIT_FAILURE );
+  }
 }
 
 bool Parser::init( const Configuration& configuration ){
@@ -219,21 +233,40 @@ Parser::~Parser(){
   delete PI;
 }
 
-void Parser::createPairs(){
+static vector<AbstractElement *> lookup( AbstractElement *word, 
+				  const vector<AbstractElement*>& entities ){
+  vector<AbstractElement*> vec;
+  for ( size_t p=0; p < entities.size(); ++p ){
+    vec = entities[p]->select(Word_t);
+    if ( !vec.empty() ){
+      if ( vec[0]->id() == word->id() ) {
+	// using folia::operator<<;
+	// cerr << "found " << vec << endl;
+	return vec;
+      }
+    }
+  }
+  vec.clear();
+  return vec;
+}
+
+void Parser::createPairs( const vector<string>& words,
+			  const vector<string>& heads,
+			  const vector<string>& mods ){
   string pFile = fileName + ".pairs.inst";
   remove( pFile.c_str() );
   ofstream ps( pFile.c_str() );
   if ( ps ){
-    if ( mwu_data->size() == 1 ){
-      ps << "__ " << (*mwu_data)[0]->getWord() << " __"
-	 << " ROOT ROOT ROOT __ " << (*mwu_data)[0]->getTagHead() 
+    if ( words.size() == 1 ){
+      ps << "__ " << words[0] << " __"
+	 << " ROOT ROOT ROOT __ " << heads[0]
 	 << " __ ROOT ROOT ROOT "
-	 << (*mwu_data)[0]->getTagHead() << "^ROOT ROOT ROOT ROOT^" 
-	 << (*mwu_data)[0]->getTagMods() 
+	 << words[0] << "^ROOT ROOT ROOT ROOT^" 
+	 << heads[0]
 	 << " _" << endl;
     }
     else {
-      for ( size_t i=0 ; i < mwu_data->size(); ++i ){
+      for ( size_t i=0 ; i < words.size(); ++i ){
 	string word_1, word0, word1;
 	string tag_1, tag0, tag1;
 	string mods0;
@@ -242,19 +275,19 @@ void Parser::createPairs(){
 	  tag_1 = "__";
 	}
 	else {
-	  word_1 = (*mwu_data)[i-1]->getWord();
-	  tag_1 = (*mwu_data)[i-1]->getTagHead();
+	  word_1 = words[i-1];
+	  tag_1 = heads[i-1];
 	}
-	word0 = (*mwu_data)[i]->getWord();
-	tag0 = (*mwu_data)[i]->getTagHead();
-	mods0 = (*mwu_data)[i]->getTagMods();
-	if ( i == mwu_data->size() - 1 ){
+	word0 = words[i];
+	tag0 = heads[i];
+	mods0 = mods[i];
+	if ( i == words.size() - 1 ){
 	  word1 = "__";
 	  tag1 = "__";
 	}
 	else {
-	  word1 = (*mwu_data)[i+1]->getWord();
-	  tag1 = (*mwu_data)[i+1]->getTagHead();
+	  word1 = words[i+1];
+	  tag1 = heads[i+1];
 	}
 	ps << word_1 << " " << word0 << " " << word1
 	   << " ROOT ROOT ROOT "
@@ -264,7 +297,7 @@ void Parser::createPairs(){
 	   << " _" << endl;
       }
       // 
-      for ( size_t wPos=0; wPos < mwu_data->size(); ++wPos ){
+      for ( size_t wPos=0; wPos < words.size(); ++wPos ){
 	string w_word_1, w_word0, w_word1;
 	string w_tag_1, w_tag0, w_tag1;
 	string w_mods0;
@@ -273,21 +306,21 @@ void Parser::createPairs(){
 	  w_tag_1 = "__";
 	}
 	else {
-	  w_word_1 = (*mwu_data)[wPos-1]->getWord();
-	  w_tag_1 = (*mwu_data)[wPos-1]->getTagHead();
+	  w_word_1 = words[wPos-1];
+	  w_tag_1 = heads[wPos-1];
 	}
-	w_word0 = (*mwu_data)[wPos]->getWord();
-	w_tag0 = (*mwu_data)[wPos]->getTagHead();
-	w_mods0 = (*mwu_data)[wPos]->getTagMods();
-	if ( wPos == mwu_data->size()-1 ){
+	w_word0 = words[wPos];
+	w_tag0 = heads[wPos];
+	w_mods0 = mods[wPos];
+	if ( wPos == words.size()-1 ){
 	  w_word1 = "__";
 	  w_tag1 = "__";
 	}
 	else {
-	  w_word1 = (*mwu_data)[wPos+1]->getWord();
-	  w_tag1 = (*mwu_data)[wPos+1]->getTagHead();
+	  w_word1 = words[wPos+1];
+	  w_tag1 = heads[wPos+1];
 	}
-	for ( size_t pos=0; pos < mwu_data->size(); ++pos ){
+	for ( size_t pos=0; pos < words.size(); ++pos ){
 	  //	  os << wPos << "-" << pos << " ";
 	  if ( pos > wPos + maxDepSpan )
 	    break;
@@ -303,13 +336,13 @@ void Parser::createPairs(){
 	  if ( pos == 0 )
 	    ps << " __";
 	  else
-	    ps << " " << (*mwu_data)[pos-1]->getWord();
-	  if ( pos < mwu_data->size() )
-	    ps << " " << (*mwu_data)[pos]->getWord();
+	    ps << " " << words[pos-1];
+	  if ( pos < words.size() )
+	    ps << " " << words[pos];
 	  else
 	    ps << " __";
-	  if ( pos < mwu_data->size()-1 )
-	    ps << " " << (*mwu_data)[pos+1]->getWord();
+	  if ( pos < words.size()-1 )
+	    ps << " " << words[pos+1];
 	  else
 	    ps << " __";
 	  ps << " " << w_tag_1;
@@ -318,19 +351,19 @@ void Parser::createPairs(){
 	  if ( pos == 0 )
 	    ps << " __";
 	  else
-	    ps << " " << (*mwu_data)[pos-1]->getTagHead();
-	  if ( pos < mwu_data->size() )
-	    ps << " " << (*mwu_data)[pos]->getTagHead();
+	    ps << " " << heads[pos-1];
+	  if ( pos < words.size() )
+	    ps << " " << heads[pos];
 	  else
 	    ps << " __";
-	  if ( pos < mwu_data->size()-1 )
-	    ps << " " << (*mwu_data)[pos+1]->getTagHead();
+	  if ( pos < words.size()-1 )
+	    ps << " " << heads[pos+1];
 	  else
 	    ps << " __";
 	  
 	  ps << " " << w_tag0 << "^";
-	  if ( pos < mwu_data->size() )
-	    ps << (*mwu_data)[pos]->getTagHead();
+	  if ( pos < words.size() )
+	    ps << heads[pos];
 	  else
 	    ps << "__";
 	  
@@ -338,10 +371,10 @@ void Parser::createPairs(){
 	    ps << " LEFT " << wPos - pos;
 	  else
 	    ps << " RIGHT " << pos - wPos;
-	  if ( pos >= mwu_data->size() )
+	  if ( pos >= words.size() )
 	    ps << " __";
 	  else
-	    ps << " " << (*mwu_data)[pos]->getTagMods();
+	    ps << " " << mods[pos];
 	  ps << "^" << w_mods0;
 	  ps << " __" << endl;
 	}
@@ -350,7 +383,9 @@ void Parser::createPairs(){
   }
 }
 
-void Parser::createRelDir(){
+void Parser::createRelDir( const vector<string>& words,
+			   const vector<string>& heads,
+			   const vector<string>& mods ){
   string word_2, word_1, word0, word1, word2;
   string tag_2, tag_1, tag0, tag1, tag2;
   string mod_2, mod_1, mod0, mod1, mod2;
@@ -361,10 +396,10 @@ void Parser::createRelDir(){
   remove( rFile.c_str() );
   ofstream rs( rFile.c_str() );
   if ( ds && rs ){
-    if ( mwu_data->size() == 1 ){
-      word0 = (*mwu_data)[0]->getWord();
-      tag0 = (*mwu_data)[0]->getTagHead();
-      mod0 = (*mwu_data)[0]->getTagMods();
+    if ( words.size() == 1 ){
+      word0 = words[0];
+      tag0 = heads[0];
+      mod0 = mods[0];
       ds << "__ __";
       ds << " " << word0;
       ds << " __ __ __ __";
@@ -390,13 +425,13 @@ void Parser::createRelDir(){
       rs << " " << tag0 << "^__^__";
       rs << " __" << endl;
     }
-    else if ( mwu_data->size() == 2 ){
-      word0 = (*mwu_data)[0]->getWord();
-      tag0 = (*mwu_data)[0]->getTagHead();
-      mod0 = (*mwu_data)[0]->getTagMods();
-      word1 = (*mwu_data)[1]->getWord();
-      tag1 = (*mwu_data)[1]->getTagHead();
-      mod1 = (*mwu_data)[1]->getTagMods();
+    else if ( words.size() == 2 ){
+      word0 = words[0];
+      tag0 = heads[0];
+      mod0 = mods[0];
+      word1 = words[1];
+      tag1 = heads[1];
+      mod1 = mods[1];
       ds << "__ __";
       ds << " " << word0;
       ds << " " << word1;
@@ -458,16 +493,16 @@ void Parser::createRelDir(){
       rs << " " << tag1 << "^__^__";
       rs << " __" << endl;
     }
-    else if ( mwu_data->size() == 3 ) {
-      word0 = (*mwu_data)[0]->getWord();
-      tag0 = (*mwu_data)[0]->getTagHead();
-      mod0 = (*mwu_data)[0]->getTagMods();
-      word1 = (*mwu_data)[1]->getWord();
-      tag1 = (*mwu_data)[1]->getTagHead();
-      mod1 = (*mwu_data)[1]->getTagMods();
-      word2 = (*mwu_data)[2]->getWord();
-      tag2 = (*mwu_data)[2]->getTagHead();
-      mod2 = (*mwu_data)[2]->getTagMods();
+    else if ( words.size() == 3 ) {
+      word0 = words[0];
+      tag0 = heads[0];
+      mod0 = mods[0];
+      word1 = words[1];
+      tag1 = heads[1];
+      mod1 = mods[1];
+      word2 = words[2];
+      tag2 = heads[2];
+      mod2 = mods[2];
       ds << "__ __";
       ds << " " << word0;
       ds << " " << word1;
@@ -532,7 +567,7 @@ void Parser::createRelDir(){
       rs << " __ __";
       rs << " " << tag0;
       rs << " " << tag1;
-      rs << " " << (*mwu_data)[2]->getTagHead();
+      rs << " " << tag2;
       rs << " __^" << tag0;
       rs << " " << tag0 << "^" << tag1;
       rs << " __^__^" << tag0;
@@ -570,7 +605,7 @@ void Parser::createRelDir(){
       rs << " __" << endl;
     }
     else {
-      for ( size_t i=0 ; i < mwu_data->size(); ++i ){
+      for ( size_t i=0 ; i < words.size(); ++i ){
 	if ( i == 0 ){
 	  word_2 = "__";
 	  tag_2 = "__";
@@ -583,33 +618,33 @@ void Parser::createRelDir(){
 	  word_2 = "__";
 	  tag_2 = "__";
 	  mod_2 = "__";
-	  word_1 = (*mwu_data)[i-1]->getWord();
-	  tag_1 = (*mwu_data)[i-1]->getTagHead();
-	  mod_1 = (*mwu_data)[i-1]->getTagMods();
+	  word_1 = words[i-1];
+	  tag_1 = heads[i-1];
+	  mod_1 = mods[i-1];
 	}
 	else {
-	  word_2 = (*mwu_data)[i-2]->getWord();
-	  tag_2 = (*mwu_data)[i-2]->getTagHead();
-	  mod_2 = (*mwu_data)[i-2]->getTagMods();
-	  word_1 = (*mwu_data)[i-1]->getWord();
-	  tag_1 = (*mwu_data)[i-1]->getTagHead();
-	  mod_1 = (*mwu_data)[i-1]->getTagMods();
+	  word_2 = words[i-2];
+	  tag_2 = heads[i-2];
+	  mod_2 = mods[i-2];
+	  word_1 = words[i-1];
+	  tag_1 = heads[i-1];
+	  mod_1 = mods[i-1];
 	}
-	word0 = (*mwu_data)[i]->getWord();
-	tag0 = (*mwu_data)[i]->getTagHead();
-	mod0 = (*mwu_data)[i]->getTagMods();
-	if ( i < mwu_data->size() - 2 ){
-	  word1 = (*mwu_data)[i+1]->getWord();
-	  tag1 = (*mwu_data)[i+1]->getTagHead();
-	  mod1 = (*mwu_data)[i+1]->getTagMods();
-	  word2 = (*mwu_data)[i+2]->getWord();
-	  tag2 = (*mwu_data)[i+2]->getTagHead();
-	  mod2 = (*mwu_data)[i+2]->getTagMods();
+	word0 = words[i];
+	tag0 = heads[i];
+	mod0 = mods[i];
+	if ( i < words.size() - 2 ){
+	  word1 = words[i+1];
+	  tag1 = heads[i+1];
+	  mod1 = mods[i+1];
+	  word2 = words[i+2];
+	  tag2 = heads[i+2];
+	  mod2 = mods[i+2];
 	}
-	else if ( i == mwu_data->size() - 2 ){
-	  word1 = (*mwu_data)[i+1]->getWord();
-	  tag1 = (*mwu_data)[i+1]->getTagHead();
-	  mod1 = (*mwu_data)[i+1]->getTagMods();
+	else if ( i == words.size() - 2 ){
+	  word1 = words[i+1];
+	  tag1 = heads[i+1];
+	  mod1 = mods[i+1];
 	  word2 = "__";
 	  tag2 = "__";
 	  mod2 = "__";
@@ -665,29 +700,93 @@ void Parser::createRelDir(){
   }
 }
 
-void Parser::prepareParse( ) {
+void Parser::prepareParse( AbstractElement *sent ) {
+  vector<string> words;
+  vector<string> heads;
+  vector<string> mods;
+
+  vector<AbstractElement *> fwords = sent->words();
+  vector<AbstractElement *> entities = sent->select( Entity_t );
+  
+  for( size_t i=0; i < fwords.size(); ++i ){
+    AbstractElement *word = fwords[i];
+    vector<AbstractElement *> mwu = lookup( word, entities );
+    if ( !mwu.empty() ){
+      string word;
+      string head;
+      string mod;
+      for ( size_t p=0; p < mwu.size(); ++p ){
+	word += mwu[p]->str();
+	AbstractElement *postag = mwu[p]->annotation(Pos_t);
+	string pt = postag->cls();
+	string cls = pt.substr(0,pt.find_first_of("("));
+	head += cls;
+	string tmp = pt.substr(pt.find_first_of("(")+1, 
+			       pt.size() - pt.find_first_of("(") - 2 );
+	for ( size_t i=0; i < tmp.size(); ++i ){
+	  if ( tmp[i] == ',' )
+	    tmp[i] = '|';
+	}
+	mod += tmp;
+	if ( p < mwu.size() -1 ){
+	  word += "_";
+	  head += "_";
+	  mod += "_";
+	}
+      }
+      words.push_back( word );
+      heads.push_back( head );
+      mods.push_back( mod );
+      i += mwu.size()-1;
+    }
+    else {
+      words.push_back( word->str() );
+      AbstractElement *postag = word->annotation(Pos_t);
+      string pt = postag->cls();
+      string cls = pt.substr(0,pt.find_first_of("("));
+      heads.push_back( cls );
+      string tmp = pt.substr(pt.find_first_of("(")+1, 
+			     pt.size() - pt.find_first_of("(") - 2 );
+      if ( tmp.empty() )
+	tmp = "__";
+      for ( size_t i=0; i < tmp.size(); ++i ){
+	if ( tmp[i] == ',' )
+	  tmp[i] = '|';
+      }
+      mods.push_back( tmp );
+    }
+  }
+  
+  // using Timbl::operator<<;
+  // cerr << "folia words " << words << endl;
+  // cerr << "folia heads " << heads << endl;
+  // cerr << "folia mods " << mods << endl;
+
+  createParserFile( words, heads, mods );
+
 #pragma omp parallel sections
   {
 #pragma omp section
     {
-      createPairs( );
+      createPairs( words, heads, mods );
     }
 #pragma omp section
     {
-      createRelDir();
+      createRelDir( words, heads, mods );
     }
   }
 }
   
-void Parser::Parse( FrogData *pd, const string& tmpDirName, TimerBlock& timers ){
-  mwu_data = &pd->mwu_data;
+void Parser::Parse( FrogData *pd, 
+		    AbstractElement *sent,
+		    const string& tmpDirName, TimerBlock& timers ){
   fileName = tmpDirName+"csiparser";
   timers.parseTimer.start();
   if ( !isInit ){
     *Log(parseLog) << "Parser is not initialized!" << endl;
     exit(1);
   }
-  if ( mwu_data->empty() ){
+  if ( !sent ){
     *Log(parseLog) << "unable to parse an analisis without words" << endl;
     return;
   }
@@ -698,68 +797,64 @@ void Parser::Parse( FrogData *pd, const string& tmpDirName, TimerBlock& timers )
   string dirOutName = fileName + ".dir.out";
   string relsInName = fileName + ".rels.inst";
   string relsOutName = fileName + ".rels.out";
-  ofstream anaFile( fileName.c_str() );
-  if ( anaFile ){
-    createParserFile( anaFile );
-    remove( resFileName.c_str() );
-    timers.prepareTimer.start();
-    prepareParse( );
-    timers.prepareTimer.stop();
+  remove( resFileName.c_str() );
+  timers.prepareTimer.start();
+  prepareParse( sent );
+  timers.prepareTimer.stop();
 #pragma omp parallel sections
+  {
+#pragma omp section
     {
-#pragma omp section
-      {
-	remove( pairsOutName.c_str() );
-	timers.pairsTimer.start();
-	pairs->Test( pairsInName, pairsOutName );
-	timers.pairsTimer.stop();
-      }
-#pragma omp section
-      {
-	remove( dirOutName.c_str() );
-	timers.dirTimer.start();
-	dir->Test( dirInName, dirOutName );
-	timers.dirTimer.stop();
-      }
-#pragma omp section
-      {
-	remove( relsOutName.c_str() );
-	timers.relsTimer.start();
-	rels->Test( relsInName, relsOutName );
-	timers.relsTimer.stop();
-      }
-    }
-    timers.csiTimer.start();
-    try {
-      PI->parse( pairsOutName,
-		 relsOutName,
-		 dirOutName,
-		 maxDepSpanS,
-		 fileName,
-		 resFileName );
-      if ( PyErr_Occurred() )
-	PyErr_Print();
-    }
-    catch( exception const & ){
-      PyErr_Print();
-    }
-    timers.csiTimer.stop();
-    ifstream resFile( resFileName.c_str() );
-    if ( resFile ){
-      pd->appendParseResult( resFile );
-    }
-    else
-      *Log(parseLog) << "couldn't open results file: " << resFileName << endl;
-    if ( !keepIntermediateFiles ){
-      remove( fileName.c_str() );
-      remove( resFileName.c_str() );
       remove( pairsOutName.c_str() );
-      remove( dirOutName.c_str() );
-      remove( relsOutName.c_str() );
-      remove( pairsInName.c_str() );
-      remove( dirInName.c_str() );
-      remove( relsInName.c_str() );
+      timers.pairsTimer.start();
+      pairs->Test( pairsInName, pairsOutName );
+      timers.pairsTimer.stop();
     }
+#pragma omp section
+    {
+      remove( dirOutName.c_str() );
+      timers.dirTimer.start();
+      dir->Test( dirInName, dirOutName );
+      timers.dirTimer.stop();
+    }
+#pragma omp section
+    {
+      remove( relsOutName.c_str() );
+      timers.relsTimer.start();
+      rels->Test( relsInName, relsOutName );
+      timers.relsTimer.stop();
+    }
+  }
+  timers.csiTimer.start();
+  try {
+    PI->parse( pairsOutName,
+	       relsOutName,
+	       dirOutName,
+	       maxDepSpanS,
+	       fileName,
+	       resFileName );
+    if ( PyErr_Occurred() )
+      PyErr_Print();
+  }
+  catch( exception const & ){
+    PyErr_Print();
+  }
+  timers.csiTimer.stop();
+  ifstream resFile( resFileName.c_str() );
+  if ( resFile ){
+    pd->appendParseResult( resFile );
+  }
+  else
+    *Log(parseLog) << "couldn't open results file: " << resFileName << endl;
+  if ( !keepIntermediateFiles ){
+    remove( fileName.c_str() );
+    remove( resFileName.c_str() );
+    remove( pairsOutName.c_str() );
+    remove( dirOutName.c_str() );
+    remove( relsOutName.c_str() );
+    remove( pairsInName.c_str() );
+    remove( dirInName.c_str() );
+    remove( relsInName.c_str() );
   }
   timers.parseTimer.stop();
 }
