@@ -776,7 +776,47 @@ void Parser::prepareParse( AbstractElement *sent ) {
     }
   }
 }
-  
+
+ void appendParseResult( AbstractElement *sent, istream& is ){
+   string line;
+   int cnt=0;
+   vector<int> nums;
+   vector<string> roles;
+   while ( getline( is, line ) ){
+     vector<string> parts;
+     int num = Timbl::split_at( line, parts, " " );
+     if ( num > 7 ){
+       if ( Timbl::stringTo<int>( parts[0] ) != cnt+1 ){
+	 *Log(theErrLog) << "confused! " << endl;
+	 *Log(theErrLog) << "got line '" << line << "'" << endl;
+       }
+       nums.push_back( Timbl::stringTo<int>(parts[6]) );
+       roles.push_back( parts[7] );
+     }
+     ++cnt;
+   }
+   AbstractElement *dl = new DependenciesLayer("");
+   sent->append( dl );
+   // for ( size_t i=0; i < nums.size(); ++i ){
+   //   cerr << sent->words( i )->str() << "\t"
+   // 	  << nums[i] << "\t" << roles[i] << endl;
+   // }
+   for ( size_t i=0; i < nums.size(); ++i ){
+     if ( nums[i] != 0 ){
+       AbstractElement *d = new Dependency( "generate-id='" + sent->id() + 
+					    "', class='"+ roles[i] +"'" );
+       dl->append( d );
+       AbstractElement *h = new DependencyHead("");
+       h->append( sent->words( nums[i] - 1 ) );
+       d->append( h );
+       h = new DependencyDependent("");
+       h->append( sent->words( i ) );
+       d->append( h );
+     }
+   }
+ }
+ 
+ 
 void Parser::Parse( FrogData *pd, 
 		    AbstractElement *sent,
 		    const string& tmpDirName, TimerBlock& timers ){
@@ -846,6 +886,14 @@ void Parser::Parse( FrogData *pd,
   }
   else
     *Log(parseLog) << "couldn't open results file: " << resFileName << endl;
+  resFile.close();
+  resFile.open( resFileName.c_str() );
+  if ( resFile ){
+    appendParseResult( sent, resFile );
+  }
+  else
+    *Log(parseLog) << "couldn't reopen open results file: " << resFileName << endl;
+
   if ( !keepIntermediateFiles ){
     remove( fileName.c_str() );
     remove( resFileName.c_str() );
