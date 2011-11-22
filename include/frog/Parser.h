@@ -76,6 +76,7 @@ class PythonInterface {
 	      const std::string& outputFile);
 };  
 
+struct parseData;
 
 class Parser {
  public:
@@ -83,17 +84,11 @@ class Parser {
   ~Parser();
   bool init( const Configuration& );
   void Parse( FrogData *, folia::AbstractElement *, const std::string&, TimerBlock& );
-  void prepareParse( folia::AbstractElement * );
-  void createParserFile( const std::vector<std::string>&,
-			 const std::vector<std::string>&, 
-			 const std::vector<std::string>& );
+  void prepareParse( folia::AbstractElement *, parseData& );
+  void createParserFile( const parseData& );
  private:
-  void createRelDir( const std::vector<std::string>&,
-		     const std::vector<std::string>&, 
-		     const std::vector<std::string>& );
-  void createPairs( const std::vector<std::string>&,
-		    const std::vector<std::string>&, 
-		    const std::vector<std::string>& );
+  void createRelDir( const parseData& );
+  void createPairs( const parseData& );
   Timbl::TimblAPI *pairs;
   Timbl::TimblAPI *dir;
   Timbl::TimblAPI *rels;

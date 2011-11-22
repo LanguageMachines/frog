@@ -104,9 +104,33 @@ Common::Timer pairsTimer;
 Common::Timer dirTimer;
 Common::Timer csiTimer;
 
-void Parser::createParserFile( const vector<string>& words,
-			       const vector<string>& heads,
-			       const vector<string>& mods ){
+struct parseData {
+  void clear() { words.clear(); heads.clear(); mods.clear(); mwus.clear(); }
+  vector<string> words;
+  vector<string> heads;
+  vector<string> mods;
+  vector<vector<AbstractElement *> > mwus;
+};
+
+ostream& operator<<( ostream& os, const parseData& pd ){
+  using folia::operator<<;
+  os << "pd words " << pd.words << endl;
+  os << "pd heads " << pd.heads << endl;
+  os << "pd mods " << pd.mods << endl;
+  os << "pd mwus ";
+  for ( size_t i=0; i < pd.mwus.size(); ++i ){
+    for ( size_t j=0; j < pd.mwus[i].size(); ++j )
+      os << pd.mwus[i][j]->id();
+    os << endl;
+  }
+  return os;
+}
+  
+void Parser::createParserFile( const parseData& pd ){
+  const vector<string>& words = pd.words;
+  const vector<string>& heads = pd.heads;
+  const vector<string>& mods = pd.mods;
+
   ofstream anaFile( fileName.c_str() );
   if ( anaFile ){
     for( size_t i = 0; i < words.size(); ++i ){
@@ -250,9 +274,10 @@ static vector<AbstractElement *> lookup( AbstractElement *word,
   return vec;
 }
 
-void Parser::createPairs( const vector<string>& words,
-			  const vector<string>& heads,
-			  const vector<string>& mods ){
+void Parser::createPairs( const parseData& pd ){
+  const vector<string>& words = pd.words;
+  const vector<string>& heads = pd.heads;
+  const vector<string>& mods = pd.mods;
   string pFile = fileName + ".pairs.inst";
   remove( pFile.c_str() );
   ofstream ps( pFile.c_str() );
@@ -383,9 +408,11 @@ void Parser::createPairs( const vector<string>& words,
   }
 }
 
-void Parser::createRelDir( const vector<string>& words,
-			   const vector<string>& heads,
-			   const vector<string>& mods ){
+void Parser::createRelDir( const parseData& pd ){
+  const vector<string>& words = pd.words;
+  const vector<string>& heads = pd.heads;
+  const vector<string>& mods = pd.mods;
+
   string word_2, word_1, word0, word1, word2;
   string tag_2, tag_1, tag0, tag1, tag2;
   string mod_2, mod_1, mod0, mod1, mod2;
@@ -700,11 +727,9 @@ void Parser::createRelDir( const vector<string>& words,
   }
 }
 
-void Parser::prepareParse( AbstractElement *sent ) {
-  vector<string> words;
-  vector<string> heads;
-  vector<string> mods;
+void Parser::prepareParse( AbstractElement *sent, parseData& pd ) {
 
+  pd.clear();
   vector<AbstractElement *> fwords = sent->words();
   vector<AbstractElement *> entities = sent->select( Entity_t );
   
@@ -734,17 +759,18 @@ void Parser::prepareParse( AbstractElement *sent ) {
 	  mod += "_";
 	}
       }
-      words.push_back( word );
-      heads.push_back( head );
-      mods.push_back( mod );
+      pd.words.push_back( word );
+      pd.heads.push_back( head );
+      pd.mods.push_back( mod );
+      pd.mwus.push_back( mwu );
       i += mwu.size()-1;
     }
     else {
-      words.push_back( word->str() );
+      pd.words.push_back( word->str() );
       AbstractElement *postag = word->annotation(Pos_t);
       string pt = postag->cls();
       string cls = pt.substr(0,pt.find_first_of("("));
-      heads.push_back( cls );
+      pd.heads.push_back( cls );
       string tmp = pt.substr(pt.find_first_of("(")+1, 
 			     pt.size() - pt.find_first_of("(") - 2 );
       if ( tmp.empty() )
@@ -753,31 +779,31 @@ void Parser::prepareParse( AbstractElement *sent ) {
 	if ( tmp[i] == ',' )
 	  tmp[i] = '|';
       }
-      mods.push_back( tmp );
+      pd.mods.push_back( tmp );
+      vector<AbstractElement*> vec;
+      vec.push_back(word);
+      pd.mwus.push_back( vec );
     }
   }
   
-  // using Timbl::operator<<;
-  // cerr << "folia words " << words << endl;
-  // cerr << "folia heads " << heads << endl;
-  // cerr << "folia mods " << mods << endl;
-
-  createParserFile( words, heads, mods );
+  createParserFile( pd );
 
 #pragma omp parallel sections
   {
 #pragma omp section
     {
-      createPairs( words, heads, mods );
+      createPairs( pd );
     }
 #pragma omp section
     {
-      createRelDir( words, heads, mods );
+      createRelDir( pd );
     }
   }
 }
 
- void appendParseResult( AbstractElement *sent, istream& is ){
+ void appendParseResult( AbstractElement *sent, 
+			 parseData& pd,
+			 istream& is ){
    string line;
    int cnt=0;
    vector<int> nums;
@@ -797,27 +823,28 @@ void Parser::prepareParse( AbstractElement *sent ) {
    }
    AbstractElement *dl = new DependenciesLayer("");
    sent->append( dl );
-   // for ( size_t i=0; i < nums.size(); ++i ){
-   //   cerr << sent->words( i )->str() << "\t"
-   // 	  << nums[i] << "\t" << roles[i] << endl;
-   // }
+   
    for ( size_t i=0; i < nums.size(); ++i ){
      if ( nums[i] != 0 ){
        AbstractElement *d = new Dependency( "generate-id='" + sent->id() + 
 					    "', class='"+ roles[i] +"'" );
        dl->append( d );
        AbstractElement *h = new DependencyHead("");
-       h->append( sent->words( nums[i] - 1 ) );
+       for ( size_t j=0; j < pd.mwus[nums[i]-1].size(); ++ j ){
+	 h->append( pd.mwus[nums[i]-1][j] );
+       }
        d->append( h );
        h = new DependencyDependent("");
-       h->append( sent->words( i ) );
+       for ( size_t j=0; j < pd.mwus[i].size(); ++ j ){
+	 h->append( pd.mwus[i][j] );
+       }
        d->append( h );
      }
    }
  }
  
  
-void Parser::Parse( FrogData *pd, 
+void Parser::Parse( FrogData *fd, 
 		    AbstractElement *sent,
 		    const string& tmpDirName, TimerBlock& timers ){
   fileName = tmpDirName+"csiparser";
@@ -839,7 +866,8 @@ void Parser::Parse( FrogData *pd,
   string relsOutName = fileName + ".rels.out";
   remove( resFileName.c_str() );
   timers.prepareTimer.start();
-  prepareParse( sent );
+  parseData pd;  
+  prepareParse( sent, pd );
   timers.prepareTimer.stop();
 #pragma omp parallel sections
   {
@@ -882,14 +910,14 @@ void Parser::Parse( FrogData *pd,
   timers.csiTimer.stop();
   ifstream resFile( resFileName.c_str() );
   if ( resFile ){
-    pd->appendParseResult( resFile );
+    fd->appendParseResult( resFile );
   }
   else
     *Log(parseLog) << "couldn't open results file: " << resFileName << endl;
   resFile.close();
   resFile.open( resFileName.c_str() );
   if ( resFile ){
-    appendParseResult( sent, resFile );
+    appendParseResult( sent, pd, resFile );
   }
   else
     *Log(parseLog) << "couldn't reopen open results file: " << resFileName << endl;

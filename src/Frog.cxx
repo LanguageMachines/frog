@@ -603,41 +603,32 @@ vector<AbstractElement *> lookup( AbstractElement *word,
     }
   }
   vec.clear();
+  vec.push_back( word ); // single unit
   return vec;
 }
 
-void displayWord( ostream& os, size_t index, const AbstractElement *word ){
-  string pos;
-  string lemma;
-  string morph;
-  double conf;
-  try { 
-    AbstractElement *postag = word->annotation(Pos_t);
-    pos = postag->cls();
-    conf = postag->confidence();
-  }
-  catch (... ){
-  }
-  try { 
-    lemma = word->lemma();
-  }
-  catch (... ){
-  }
-  try { 
-    vector<AbstractElement*> ml = word->annotations(Morphology_t);
-    for ( size_t p=0; p < ml.size(); ++p ){
-      vector<AbstractElement*> m = ml[p]->annotations(Morpheme_t);
-      for ( size_t q=0; q < m.size(); ++q ){
-	morph += "[" + UnicodeToUTF8( m[q]->text() ) + "]";
+AbstractElement *lookupDep( const AbstractElement *word, 
+			    const vector<AbstractElement *>&dependencies ){
+  //  cerr << "\nlookup "<< word << " in " << dependencies << endl;
+  for ( size_t i=0; i < dependencies.size(); ++i ){
+    //    cerr << "\nprobeer " << dependencies[i] << endl;
+    try {
+      vector<AbstractElement *> dv = dependencies[i]->select( DependencyDependent_t );
+      if ( !dv.empty() ){
+	vector<AbstractElement *> v = dv[0]->select( Word_t );
+	for ( size_t j=0; j < v.size(); ++j ){
+	  if ( v[j] == word ){
+	    //	    cerr << "\nfound word " << v[j] << endl;
+	    return dependencies[i];
+	  }
+	}
       }
-      if ( p < ml.size()-1 )
-	morph += "/";
+    }
+    catch(...){
     }
   }
-  catch (... ){
-  }
-  os << index << "\t" << word->str() << "\t" << lemma << "\t" << morph << "\t" << pos << "\t" << std::fixed << conf << "\t\t" << endl;
-}  
+  return 0;
+}
 
 void displayMWU( ostream& os, size_t index, 
 		 const vector<AbstractElement *> mwu ){
@@ -669,9 +660,14 @@ void displayMWU( ostream& os, size_t index,
     catch (... ){
     }
     try { 
-      vector<AbstractElement*> m = word->annotations(Morpheme_t);
-      for ( size_t t=0; t < m.size(); ++t ){
-	morph += "[" + UnicodeToUTF8( m[t]->text() ) + "]";
+      vector<AbstractElement*> ml = word->annotations(Morphology_t);
+      for ( size_t q=0; q < ml.size(); ++q ){
+	vector<AbstractElement*> m = ml[q]->annotations(Morpheme_t);
+	for ( size_t t=0; t < m.size(); ++t ){
+	  morph += "[" + UnicodeToUTF8( m[t]->text() ) + "]";
+	}
+	if ( q < ml.size()-1 )
+	  morph += "/";
       }
       if ( p < mwu.size() -1 ){
 	morph += "_";
@@ -680,23 +676,43 @@ void displayMWU( ostream& os, size_t index,
     catch (... ){
     }
   }
-  os << index << "\t" << wrd << "\t" << lemma << "\t" << morph << "\t" << pos << "\t" << std::fixed << conf <<"\t\t" << endl;
+  os << index << "\t" << wrd << "\t" << lemma << "\t" << morph << "\t" << pos << "\t" << std::fixed << conf;
 }  
 
 ostream &showResults( ostream& os, const AbstractElement* sentence ){
   vector<AbstractElement *> words = sentence->words();
   vector<AbstractElement *> entities = sentence->select( Entity_t );
+  vector<AbstractElement *> dependencies = sentence->select( Dependency_t );
   size_t index = 1;
+  map<AbstractElement*, int> enumeration;
+  vector<vector<AbstractElement *> > mwus;
   for( size_t i=0; i < words.size(); ++i ){
     AbstractElement *word = words[i];
     vector<AbstractElement *> mwu = lookup( word, entities );
-    if ( !mwu.empty() ){
-      displayMWU( os, index, mwu );
-      i += mwu.size()-1;
+    for ( size_t j=0; j < mwu.size(); ++j ){
+      enumeration[mwu[j]] = index;
+    }
+    mwus.push_back( mwu );
+    i += mwu.size()-1;
+    ++index;
+  }
+  for( size_t i=0; i < mwus.size(); ++i ){
+    displayMWU( os, i+1, mwus[i] );
+    if ( doParse ){
+      string cls;
+      AbstractElement *dep = lookupDep( mwus[i][0], dependencies );
+      if ( dep ){
+	vector<AbstractElement *> w = dep->select( DependencyHead_t );
+	os << "\t" << enumeration.find(w[0]->index(0))->second << "\t" << dep->cls();
+      }
+      else {
+	os << "\t"<< 0 << "\tROOT";
+      }
     }
     else {
-      displayWord( os, index, word );
+      os << "\t\t";
     }
+    os << endl;
     ++index;
   }
   if ( words.size() )
@@ -740,10 +756,10 @@ void Test( istream& IN,
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)         
       const size_t solution_size = solutions.size();
       for ( size_t j = 0; j < solution_size; ++j ) {
-	showResults( outStream, *solutions[j] ); 
+	//	showResults( outStream, *solutions[j] ); 
 	delete solutions[j];
       }
-      //      showResults( outStream, sentences[i] ); 
+      showResults( outStream, sentences[i] ); 
     }
   } else {
     if  (tpDebug > 0) *Log(theErrLog) << "[tokenize] No sentences yet, reading on..." << endl;
