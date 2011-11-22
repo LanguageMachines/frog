@@ -54,7 +54,6 @@
 #include "frog/mbma_mod.h"
 #include "frog/mblem_mod.h"
 #include "frog/mwu_chunker_mod.h"
-#include "frog/FrogData.h"
 #include "frog/Parser.h"
 #include "libfolia/document.h"
 #include "libfolia/folia.h"
@@ -493,11 +492,10 @@ UnicodeString decap( const UnicodeString &W ) {
   return w;
 }
 
-vector<FrogData *> TestSentence( AbstractElement* sent,
-				 const string& tmpDir,
-				 TimerBlock& timers ){
+void TestSentence( AbstractElement* sent,
+		   const string& tmpDir,
+		   TimerBlock& timers ){
   vector<AbstractElement*> swords = sent->words();
-  vector<FrogData *> solutions;
   if ( !swords.empty() ) {
     if (tpDebug) {
       // don't mangle debug output, so run 1 thread then
@@ -580,13 +578,10 @@ vector<FrogData *> TestSentence( AbstractElement* sent,
 	cout << myMwu << endl;
       }
     }
-    FrogData *pd = new FrogData( myMwu );
     if ( doParse ){  
-      myParser.Parse( pd, sent, tmpDir, timers );
+      myParser.Parse( sent, tmpDir, timers );
     }
-    solutions.push_back( pd );
   }
-  return solutions;
 }
 
 vector<AbstractElement *> lookup( AbstractElement *word, 
@@ -752,13 +747,8 @@ void Test( istream& IN,
     if  (tpDebug > 0) *Log(theErrLog) << "[tokenize] " << numS << " sentence(s) in buffer, processing..." << endl;
     for ( size_t i = 0; i < numS; i++) {
       /* ******* Begin process sentence  ********** */
-      vector<FrogData*> solutions = TestSentence( sentences[i],  tmpDir, timers ); 
+      TestSentence( sentences[i],  tmpDir, timers ); 
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)         
-      const size_t solution_size = solutions.size();
-      for ( size_t j = 0; j < solution_size; ++j ) {
-	//	showResults( outStream, *solutions[j] ); 
-	delete solutions[j];
-      }
       showResults( outStream, sentences[i] ); 
     }
   } else {

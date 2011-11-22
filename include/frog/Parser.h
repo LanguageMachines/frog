@@ -83,7 +83,7 @@ class Parser {
  Parser():pairs(0),dir(0),rels(0),PI(0),isInit(false){};
   ~Parser();
   bool init( const Configuration& );
-  void Parse( FrogData *, folia::AbstractElement *, const std::string&, TimerBlock& );
+  void Parse( folia::AbstractElement *, const std::string&, TimerBlock& );
   void prepareParse( folia::AbstractElement *, parseData& );
   void createParserFile( const parseData& );
  private:

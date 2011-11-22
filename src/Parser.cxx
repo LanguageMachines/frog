@@ -41,7 +41,6 @@
 #include "frog/Frog.h"
 #include "frog/Configuration.h"
 #include "frog/mwu_chunker_mod.h"
-#include "frog/FrogData.h"
 #include "frog/Parser.h"
 
 using namespace std;
@@ -844,8 +843,7 @@ void Parser::prepareParse( AbstractElement *sent, parseData& pd ) {
  }
  
  
-void Parser::Parse( FrogData *fd, 
-		    AbstractElement *sent,
+void Parser::Parse( AbstractElement *sent,
 		    const string& tmpDirName, TimerBlock& timers ){
   fileName = tmpDirName+"csiparser";
   timers.parseTimer.start();
@@ -910,17 +908,10 @@ void Parser::Parse( FrogData *fd,
   timers.csiTimer.stop();
   ifstream resFile( resFileName.c_str() );
   if ( resFile ){
-    fd->appendParseResult( resFile );
-  }
-  else
-    *Log(parseLog) << "couldn't open results file: " << resFileName << endl;
-  resFile.close();
-  resFile.open( resFileName.c_str() );
-  if ( resFile ){
     appendParseResult( sent, pd, resFile );
   }
   else
-    *Log(parseLog) << "couldn't reopen open results file: " << resFileName << endl;
+    *Log(parseLog) << "couldn't open results file: " << resFileName << endl;
 
   if ( !keepIntermediateFiles ){
     remove( fileName.c_str() );
