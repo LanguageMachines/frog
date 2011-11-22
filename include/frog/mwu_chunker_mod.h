@@ -37,8 +37,6 @@ class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );
  public:
   mwuAna( folia::AbstractElement *,
-	  const std::string&, const std::string&, double,
-	  const std::string&, const std::string&,
 	  const std::string&, const std::string& );
   virtual ~mwuAna() {};
   
@@ -54,12 +52,7 @@ class mwuAna {
   std::string getWord() const {
     return word;
   }
-  std::string getLemma() const {
-    return lemma;
-  }
-  std::string getMorphemes() const {
-    return morphemes;
-  }
+
   std::string getTag() const {
     return tag;
   }
@@ -68,23 +61,12 @@ class mwuAna {
     return fword;
   }
 
-  double getConf() const {
-    return conf;
-  }
-  
-  virtual std::string displayTag( );
-  
  protected:
     mwuAna(){};
     std::string word;
     std::string tag;
-    double conf;
     std::string tagHead;
     std::string tagMods;
-    std::string lemma;
-    std::string morphemes;
-    std::string CFS;
-    std::string OFS;
     folia::AbstractElement *fword;
 };
 
@@ -92,7 +74,6 @@ class complexAna: public mwuAna {
  public:
   complexAna( );
   complexAna *append( const mwuAna * );
-  std::string displayTag( );
   void addEntity( folia::AbstractElement * );
   std::vector<folia::AbstractElement *> fwords;
 };
@@ -109,7 +90,6 @@ class Mwu {
   bool init( const Configuration& );
   void Classify( folia::AbstractElement* );
   void add( folia::AbstractElement *,
-	    const std::string&, const std::string&, double d,
 	    const std::string&, const std::string& );
   std::vector<mwuAna*>& getAna(){ return mWords; };
   std::string myCFS;

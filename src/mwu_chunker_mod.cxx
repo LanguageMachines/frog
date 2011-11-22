@@ -44,18 +44,13 @@ using namespace Timbl;
 using namespace std;
 
 mwuAna::mwuAna( folia::AbstractElement *fwrd,
-		const std::string& wrd, const std::string& tg, double con,
-		const std::string& mblemL, const std::string& mbmaL,
-		const std::string& cfs, const std::string& ofs ) {
+		const std::string& wrd, const std::string& tg ){
   fword = fwrd;
   word = wrd;
-  conf = con;
-  CFS = cfs;
-  OFS = ofs;
   std::vector<std::string> parts;
   int num = Timbl::split_at_first_of( tg, parts, "()" );
   if ( num < 1 ){
-    throw runtime_error("tag should look like 'Main_Tag(Subtags)' but it is: '" + tag + "'" );
+    throw runtime_error("tag should look like 'Main_Tag(Subtags)' but it is: '" + tg + "'" );
   }
   else {
     if ( num > 2 ){
@@ -78,51 +73,20 @@ mwuAna::mwuAna( folia::AbstractElement *fwrd,
     }
     tag = tg;
   }
-  if ( mblemL.empty() ){
-    std::cerr << "NO mblem : " << wrd << " : " << tg << std::endl;
-    lemma = word;
-  }
-  else
-    lemma = mblemL;
-  if ( mbmaL.empty() ){
-    std::cerr << "NO mbma: " << wrd << " : " << tg << std::endl;
-  }
-  else
-    morphemes = mbmaL;
 }  
 
 complexAna::complexAna( ){ }
 
 complexAna *mwuAna::append( const mwuAna *add ){
   complexAna *ana = new complexAna();
-  ana->CFS = CFS;
-  ana->OFS = OFS;
-  ana->word = word + CFS + add->word;
-  ana->conf = conf * add->conf;
-  ana->tagHead = tagHead + CFS + add->tagHead;
-  ana->tagMods = tagMods + CFS + add->tagMods;
-  ana->lemma = lemma + CFS + add->lemma;
-  ana->morphemes = morphemes + CFS + add->morphemes;
-  ana->tag = tag + CFS + add->tag;
   ana->fwords.push_back( fword );
   ana->fwords.push_back( add->fword );
   return ana;
 }
 
 complexAna *complexAna::append( const mwuAna *add ){
-  complexAna *ana = new complexAna();
-  ana->CFS = CFS;
-  ana->OFS = OFS;
-  ana->word = word + CFS + add->getWord();
-  ana->tag = tag + CFS + add->getTag();
-  ana->conf = conf * add->getConf();
-  ana->tagHead = tagHead + CFS + add->getTagHead();
-  ana->tagMods = tagMods + CFS + add->getTagMods();
-  ana->lemma = lemma + CFS + add->getLemma();
-  ana->morphemes = morphemes + CFS + add->getMorphemes();
-  ana->fwords = fwords;
-  ana->fwords.push_back( add->getFword() );
-  return ana;
+  fwords.push_back( add->getFword() );
+  return this;
 }
 
 string mwuAna::getTagMods() const {
@@ -130,18 +94,6 @@ string mwuAna::getTagMods() const {
     return "__";
   else
     return tagMods;
-}
-
-string mwuAna::displayTag( ){
-  return OFS + word + OFS + lemma + OFS + tagHead + OFS + tagHead +
-    OFS + getTagMods() + OFS + "0" + OFS + CFS + OFS + CFS + 
-    OFS + CFS;
-}
-
-string complexAna::displayTag( ){
-  return OFS + word + OFS + lemma + OFS + "MWU" + OFS + tagHead +
-    OFS + getTagMods() + OFS + "0" + OFS + CFS + OFS + CFS +
-    OFS + CFS;
 }
 
 void complexAna::addEntity( folia::AbstractElement *sent ){
@@ -169,12 +121,6 @@ void complexAna::addEntity( folia::AbstractElement *sent ){
   }
 }
 
-ostream& operator<< ( ostream& os, const mwuAna& a ){
-  os << a.word << a.OFS << a.lemma << a.OFS << a.morphemes << a.OFS << a.tag << a.OFS
-     << std::fixed << a.conf;
-  return os;
-}
-
 Mwu::~Mwu(){}
 
 void Mwu::reset(){
@@ -182,10 +128,8 @@ void Mwu::reset(){
 }
 
 void Mwu::add( folia::AbstractElement *fw, 
-	       const std::string& word, const std::string& tag, double con,
-	       const std::string& mblem, const std::string& mbma){
-  mWords.push_back( new mwuAna( fw, word, tag, con, mblem, mbma, myCFS, 
-				configuration.lookUp( "outputSeparator" ) ) );
+	       const std::string& word, const std::string& tag ){
+  mWords.push_back( new mwuAna( fw, word, tag ) );
 }
 
 
@@ -238,7 +182,7 @@ bool Mwu::init( const Configuration& config ) {
 ostream &operator <<( ostream& os,
 		      const Mwu& mwu ){
   for( size_t i = 0; i < mwu.mWords.size(); ++i )
-    os << i+1 << "\t" << *mwu.mWords[i] << endl;
+    os << i+1 << "\t" << mwu.mWords[i]->getWord() << endl;
   return os;
 }
 
@@ -339,7 +283,8 @@ void Mwu::Classify(){
       // and do the same for mWords elems (Word, Tag, Lemma, Morph)
       mwuAna *tmp1 = mWords[i];
       mWords[i] = mWords[i]->append( mWords[i+j] );
-      delete tmp1;
+      if ( tmp1 != mWords[i] )
+	delete tmp1;
       if ( debug ){
 	cout << "concat tag " << mWords[i+j]->getTagHead()
 	     << "(" << mWords[i+j]->getTagMods() << ")" << endl;

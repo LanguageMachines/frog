@@ -562,7 +562,7 @@ void TestSentence( AbstractElement* sent,
 	       << tags[i] << endl;
 	cout << "analysis: " << mblemLemma << " " << mbmaLemma << endl;
       }
-      myMwu.add( swords[i], words[i], tags[i], confidences[i], mblemLemma, mbmaLemma );  
+      myMwu.add( swords[i], words[i], tags[i] );  
     } //for int i = 0 to num_words
 
     if ( doMwu ){
