@@ -40,7 +40,6 @@
 #include "libfolia/folia.h"
 #include "frog/Frog.h"
 #include "frog/Configuration.h"
-#include "frog/mwu_chunker_mod.h"
 #include "frog/Parser.h"
 
 using namespace std;

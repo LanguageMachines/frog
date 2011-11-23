@@ -45,7 +45,7 @@ using namespace std;
 
 mwuAna::mwuAna( folia::AbstractElement *fwrd,
 		const std::string& wrd, const std::string& tg ){
-  fword = fwrd;
+  fwords.push_back( fwrd );
   word = wrd;
   std::vector<std::string> parts;
   int num = Timbl::split_at_first_of( tg, parts, "()" );
@@ -75,18 +75,20 @@ mwuAna::mwuAna( folia::AbstractElement *fwrd,
   }
 }  
 
-complexAna::complexAna( ){ }
-
-complexAna *mwuAna::append( const mwuAna *add ){
-  complexAna *ana = new complexAna();
-  ana->fwords.push_back( fword );
-  ana->fwords.push_back( add->fword );
-  return ana;
+ostream &operator <<( ostream& os,
+		      const mwuAna& mwa ){
+  using folia::operator<<;
+  os << "MWU: [";
+  for ( size_t i=0; i < mwa.fwords.size(); ++i )
+    os << mwa.fwords[i]->id() << ",";
+  os << "]";
+  return os;
 }
 
-complexAna *complexAna::append( const mwuAna *add ){
+void mwuAna::append( const mwuAna *add ){
+  //  cerr << " APPEND: " << *add << endl << " to " << *this << endl;
   fwords.push_back( add->getFword() );
-  return this;
+  //  cerr << "result " << *this << endl;
 }
 
 string mwuAna::getTagMods() const {
@@ -96,7 +98,9 @@ string mwuAna::getTagMods() const {
     return tagMods;
 }
 
-void complexAna::addEntity( folia::AbstractElement *sent ){
+void mwuAna::addEntity( folia::AbstractElement *sent ){
+  if ( fwords.size() <= 1 )
+    return;
   folia::AbstractElement *el = 0;
   try {
     el = sent->annotation( folia::Entities_t );
@@ -186,6 +190,11 @@ ostream &operator <<( ostream& os,
   return os;
 }
 
+ostream &operator <<( ostream& os,
+		      const mwuAna* mwu ){
+  return os << *mwu;
+}
+
 void Mwu::Classify( folia::AbstractElement *sent ){
   Classify();
   for( size_t i = 0; i < mWords.size(); ++i ){
@@ -218,6 +227,8 @@ void Mwu::Classify(){
       MWUs.insert( make_pair(key, newmwu) );
     }
   }
+
+  //  cerr << "hier Mwords " << mWords << endl; 
   size_t i; 
   for( i = 0; i < max; i++) {
     string word = mWords[i]->getWord();
@@ -281,10 +292,7 @@ void Mwu::Classify(){
       if ( debug )
 	cout << "concat " << mWords[i+j]->getWord() << endl;
       // and do the same for mWords elems (Word, Tag, Lemma, Morph)
-      mwuAna *tmp1 = mWords[i];
-      mWords[i] = mWords[i]->append( mWords[i+j] );
-      if ( tmp1 != mWords[i] )
-	delete tmp1;
+      mWords[i]->append( mWords[i+j] );
       if ( debug ){
 	cout << "concat tag " << mWords[i+j]->getTagHead()
 	     << "(" << mWords[i+j]->getTagMods() << ")" << endl;
@@ -305,5 +313,6 @@ void Mwu::Classify(){
     }      
     Classify( );
   } //if (matchLength)
+  //  cerr << endl << "done Mwords " << mWords << endl; 
   return;
 } // //Classify

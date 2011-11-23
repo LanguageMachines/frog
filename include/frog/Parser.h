@@ -95,7 +95,6 @@ class Parser {
   std::string maxDepSpanS;
   size_t maxDepSpan;
   PythonInterface *PI;
-  std::vector<mwuAna*> *mwu_data;
   bool isInit;
   std::string fileName;
   LogStream *parseLog;
