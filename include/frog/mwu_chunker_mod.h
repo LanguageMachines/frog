@@ -39,20 +39,12 @@ class mwuAna {
   
   void append( const mwuAna * );
 
-  std::string getTagHead() const {
-    return tagHead;
-  }
+  bool isSpec();
 
   void addEntity( folia::AbstractElement * );
 
-  std::string getTagMods() const;
-  
   std::string getWord() const {
     return word;
-  }
-
-  std::string getTag() const {
-    return tag;
   }
 
   folia::AbstractElement *getFword() const {
@@ -62,7 +54,6 @@ class mwuAna {
  protected:
     mwuAna(){};
     std::string word;
-    std::string tag;
     std::string tagHead;
     std::string tagMods;
     std::vector<folia::AbstractElement *> fwords;

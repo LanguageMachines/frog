@@ -44,17 +44,17 @@ using namespace Timbl;
 using namespace std;
 
 mwuAna::mwuAna( folia::AbstractElement *fwrd,
-		const std::string& wrd, const std::string& tg ){
+		const std::string& wrd, const std::string& tag ){
   fwords.push_back( fwrd );
   word = wrd;
   std::vector<std::string> parts;
-  int num = Timbl::split_at_first_of( tg, parts, "()" );
+  int num = Timbl::split_at_first_of( tag, parts, "()" );
   if ( num < 1 ){
-    throw runtime_error("tag should look like 'Main_Tag(Subtags)' but it is: '" + tg + "'" );
+    throw runtime_error("tag should look like 'Main_Tag(Subtags)' but it is: '" + tag + "'" );
   }
   else {
     if ( num > 2 ){
-      *Log(theErrLog) << "WARNING: found a suspicious tag: '" << tg << "'. Tags should look like 'Main_Tag(Subtags)' " << endl;
+      *Log(theErrLog) << "WARNING: found a suspicious tag: '" << tag << "'. Tags should look like 'Main_Tag(Subtags)' " << endl;
     }
     tagHead = parts[0];
     if ( num > 1 ){
@@ -71,7 +71,6 @@ mwuAna::mwuAna( folia::AbstractElement *fwrd,
       }
       tagMods = result;
     }
-    tag = tg;
   }
 }  
 
@@ -91,11 +90,8 @@ void mwuAna::append( const mwuAna *add ){
   //  cerr << "result " << *this << endl;
 }
 
-string mwuAna::getTagMods() const {
-  if ( tagMods.empty() )
-    return "__";
-  else
-    return tagMods;
+bool mwuAna::isSpec(){
+  return (tagHead == "SPEC") && (tagMods == "deeleigen");
 }
 
 void mwuAna::addEntity( folia::AbstractElement *sent ){
@@ -211,14 +207,11 @@ void Mwu::Classify(){
   
   // add all current sequences of SPEC(deeleigen) words to MWUs
   for( size_t i=0; i < max-1; ++i ) {
-    if ( mWords[i]->getTagHead() == "SPEC" &&
-	 mWords[i]->getTagMods() == "deeleigen" &&
-	 mWords[i+1]->getTagHead() == "SPEC" &&
-	 mWords[i+1]->getTagMods() == "deeleigen" ) {
+    if ( mWords[i]->isSpec() &&
+	 mWords[i+1]->isSpec() ){
       vector<string> newmwu;
       while ( i < max &&
-	      mWords[i]->getTagHead() == "SPEC" &&
-	      mWords[i]->getTagMods() == "deeleigen" ) {
+	      mWords[i]->isSpec() ){
 	newmwu.push_back(mWords[i]->getWord());
 	i++;
       }
@@ -294,10 +287,8 @@ void Mwu::Classify(){
       // and do the same for mWords elems (Word, Tag, Lemma, Morph)
       mWords[i]->append( mWords[i+j] );
       if ( debug ){
-	cout << "concat tag " << mWords[i+j]->getTagHead()
-	     << "(" << mWords[i+j]->getTagMods() << ")" << endl;
-	cout << "gives : " << mWords[i]->getTagHead() 
-	     << "(" << mWords[i]->getTagMods() << ")" << endl;
+	cout << "concat tag " << mWords[i+j] << endl;
+	cout << "gives : " << mWords[i] << endl;
       }
       
     }
