@@ -54,6 +54,7 @@
 #include "frog/mbma_mod.h"
 #include "frog/mblem_mod.h"
 #include "frog/mwu_chunker_mod.h"
+#include "frog/tagger_mod.h"
 #include "frog/Parser.h"
 #include "libfolia/document.h"
 #include "libfolia/folia.h"
@@ -134,12 +135,11 @@ void usage( ) {
 
 //**** stuff to process commandline options *********************************
 
-static MbtAPI *tagger;
-
 static Mbma myMbma;
 static Mblem myMblem;
 static Mwu myMwu;
 static Parser myParser;
+static MBTagger myTagger;
 
 bool parse_args( TimblOpts& Opts ) {
   string value;
@@ -310,25 +310,22 @@ bool parse_args( TimblOpts& Opts ) {
     // we use fork(). omp (GCC version) doesn't do well when omp is used
     // before the fork!
     // see: http://bisqwit.iki.fi/story/howto/openmp/#OpenmpAndFork
-    string init = "-s " + configuration.configDir() + tagset;
-    if ( Tagger::Version() == "3.2.6" )
-      init += " -vc";
-    else
-      init += " -vcf";
-    tagger = new MbtAPI( init, *theErrLog );
-    bool stat = myMblem.init( configuration );
+    bool stat = myTagger.init( configuration );
     if ( stat ){
-      stat = myMbma.init( configuration );
-      if ( stat ) {
-	if ( doMwu ){
-	  stat = myMwu.init( configuration );
-	  if ( stat && doParse )
-	    stat = myParser.init( configuration );
-	}
-	else {
-	  if ( doParse )
-	    *Log(theErrLog) << " Parser disabled, because MWU is deselected" << endl;
-	  doParse = false;;
+      bool stat = myMblem.init( configuration );
+      if ( stat ){
+	stat = myMbma.init( configuration );
+	if ( stat ) {
+	  if ( doMwu ){
+	    stat = myMwu.init( configuration );
+	    if ( stat && doParse )
+	      stat = myParser.init( configuration );
+	  }
+	  else {
+	    if ( doParse )
+	      *Log(theErrLog) << " Parser disabled, because MWU is deselected" << endl;
+	    doParse = false;;
+	  }
 	}
       }
     }
@@ -342,6 +339,7 @@ bool parse_args( TimblOpts& Opts ) {
     bool mwuStat = true;
     bool mbaStat = true;
     bool parStat = true;
+    bool tagStat = true;
 #pragma omp parallel sections
     {
 #pragma omp section
@@ -349,14 +347,7 @@ bool parse_args( TimblOpts& Opts ) {
 #pragma omp section
       mbaStat = myMbma.init( configuration );
 #pragma omp section 
-      {
-	string init = "-s " + configuration.configDir() + tagset;
-	if ( Tagger::Version() == "3.2.6" )
-	  init += " -vc";
-	else
-	  init += " -vcf";
-	tagger = new MbtAPI( init, *theErrLog );
-      }
+      tagStat = myTagger.init( configuration );
 #pragma omp section
       {
 	if ( doMwu ){
@@ -376,9 +367,9 @@ bool parse_args( TimblOpts& Opts ) {
 	}
       }
     }   // end omp parallel sections
-    if ( ! ( tagger->isInit() && lemStat && mbaStat && mwuStat && parStat ) ){
+    if ( ! ( tagStat && lemStat && mbaStat && mwuStat && parStat ) ){
       *Log(theErrLog) << "Initialization failed: ";
-      if ( ! ( tagger->isInit() ) ){
+      if ( ! ( tagStat ) ){
 	*Log(theErrLog) << "[tagger] ";
       }	
       if ( ! ( lemStat ) ){
@@ -451,7 +442,7 @@ bool splitOneWT( const string& inp, string& word, string& tag, string& confidenc
   return isKnown;
 }
 
-int splitWT( const string& tagged, const vector<string>& words,
+int splitWT( const string& tagged, vector<string>& words,
 	     vector<string>& tags, vector<bool>& known, vector<double>& conf ){
   vector<string> tagwords;
   tags.clear();
@@ -462,34 +453,17 @@ int splitWT( const string& tagged, const vector<string>& words,
   for( size_t i = 0; i < num_words; ++i ) {
     string word, tag, confs;
     bool isKnown = splitOneWT( tagwords[i], word, tag, confs );
-    if ( word != words[i] ){
-      *Log(theErrLog) << "tagger out of sync: word[" << i << "] ≠ tagword["
-		      << i << "] " << word << " vs. " 
-		      << words[i] << endl;
-      exit( EXIT_FAILURE );
-    }
     double confidence;
     if ( !stringTo<double>( confs, confidence ) ){
       *Log(theErrLog) << "tagger confused. Expected a double, got '" << confs << "'" << endl;
       exit( EXIT_FAILURE );
     }
+    words.push_back( word );
     tags.push_back( tag );
     known.push_back( isKnown );
     conf.push_back( confidence );
   }
   return num_words;
-}
-
-UnicodeString decap( const UnicodeString &W ) {
-  // decapitalize the whole word 
-  UnicodeString w = W;
-  if (tpDebug)
-    cout << "Decapping " << w;
-  for ( int i = 0; i < w.length(); ++i )
-    w.replace( i, 1, u_tolower( w[i] ) );
-  if (tpDebug)
-    cout << " to : " << w << endl;
-  return w;
 }
 
 void TestSentence( AbstractElement* sent,
@@ -502,25 +476,9 @@ void TestSentence( AbstractElement* sent,
       omp_set_num_threads( 1 );
     }
     vector<string> words;
-    string sentence; // the tagger needs the whole sentence
-    for ( size_t w = 0; w < swords.size(); ++w ) {
-      sentence += swords[w]->str();
-      words.push_back( swords[w]->str() );
-      if ( w < swords.size()-1 )
-	sentence += " ";
-    }
-    if (tpDebug > 0 ) *Log(theErrLog) << "[DEBUG] SENTENCE: " << sentence << endl;
-    
-    if (tpDebug) 
-      cout << "in: " << sentence << endl;
     timers.tagTimer.start();
-    string tagged = tagger->Tag(sentence);
+    string tagged = myTagger.Classify( sent );
     timers.tagTimer.stop();
-    if (tpDebug) {
-      cout << "sentence: " << sentence
-	   <<"\ntagged: "<< tagged
-	   << endl;
-    }
     vector<string> tags;
     vector<double> confidences;
     vector<bool> known;
@@ -933,7 +891,7 @@ int main(int argc, char *argv[]) {
     *Log(theErrLog) << "fatal error: " << e.what() << endl;
     return EXIT_FAILURE;
   }
-  delete tagger;
+  //  delete tagger;
   
   return EXIT_SUCCESS;
 }
