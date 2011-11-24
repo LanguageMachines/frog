@@ -39,7 +39,7 @@ class mwuAna {
   
   void append( const mwuAna * );
 
-  bool isSpec();
+  bool isSpec() { return spec;} ;
 
   void addEntity( folia::AbstractElement * );
 
@@ -54,8 +54,7 @@ class mwuAna {
  protected:
     mwuAna(){};
     std::string word;
-    std::string tagHead;
-    std::string tagMods;
+    bool spec;
     std::vector<folia::AbstractElement *> fwords;
 };
 

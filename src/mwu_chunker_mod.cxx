@@ -47,32 +47,8 @@ mwuAna::mwuAna( folia::AbstractElement *fwrd,
 		const std::string& wrd, const std::string& tag ){
   fwords.push_back( fwrd );
   word = wrd;
-  std::vector<std::string> parts;
-  int num = Timbl::split_at_first_of( tag, parts, "()" );
-  if ( num < 1 ){
-    throw runtime_error("tag should look like 'Main_Tag(Subtags)' but it is: '" + tag + "'" );
-  }
-  else {
-    if ( num > 2 ){
-      *Log(theErrLog) << "WARNING: found a suspicious tag: '" << tag << "'. Tags should look like 'Main_Tag(Subtags)' " << endl;
-    }
-    tagHead = parts[0];
-    if ( num > 1 ){
-      //
-      // the MBT tagger returns things like N(soort,ev,basis,zijd,stan)
-      // the Parser is trained with N(soort|ev|basis|zijd|stan)
-      // so convert
-      //
-      string result = parts[1];
-      string::size_type pos = result.find( "," );
-      while ( pos != string::npos ){
-	result.replace(pos,1,"|");
-	pos = result.find( "," );
-      }
-      tagMods = result;
-    }
-  }
-}  
+  spec = ( tag == "SPEC(deeleigen)" );
+}
 
 ostream &operator <<( ostream& os,
 		      const mwuAna& mwa ){
@@ -88,10 +64,6 @@ void mwuAna::append( const mwuAna *add ){
   //  cerr << " APPEND: " << *add << endl << " to " << *this << endl;
   fwords.push_back( add->getFword() );
   //  cerr << "result " << *this << endl;
-}
-
-bool mwuAna::isSpec(){
-  return (tagHead == "SPEC") && (tagMods == "deeleigen");
 }
 
 void mwuAna::addEntity( folia::AbstractElement *sent ){
