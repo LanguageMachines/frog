@@ -41,14 +41,8 @@ class mwuAna {
   
   virtual complexAna *append( const mwuAna * );
 
-  virtual void addEntity( folia::AbstractElement * ){};
-
   std::string getWord() const {
     return word;
-  }
-
-  std::string getTag() const {
-    return tag;
   }
 
   folia::AbstractElement *getFword() const {
@@ -56,21 +50,20 @@ class mwuAna {
   }
   
   bool isSpec(){ return spec; };
+  void addEntity( folia::AbstractElement * );
   
  protected:
     mwuAna(){};
     std::string word;
-    std::string tag;
     bool spec;
     folia::AbstractElement *fword;
+    std::vector<folia::AbstractElement *> fwords;
 };
 
 class complexAna: public mwuAna {
  public:
   complexAna( );
   complexAna *append( const mwuAna * );
-  void addEntity( folia::AbstractElement * );
-  std::vector<folia::AbstractElement *> fwords;
 };
 
 #define mymap2 std::multimap<std::string, std::vector<std::string> >

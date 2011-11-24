@@ -44,11 +44,10 @@ using namespace Timbl;
 using namespace std;
 
 mwuAna::mwuAna( folia::AbstractElement *fwrd,
-		const std::string& tg ){
+		const std::string& tag ){
   spec = false;
   fword = fwrd;
   word = fwrd->str();
-  tag = tg;
   std::vector<std::string> parts;
   int num = Timbl::split_at_first_of( tag, parts, "()" );
   if ( num < 1 ){
@@ -74,27 +73,29 @@ complexAna *complexAna::append( const mwuAna *add ){
   return this;
 }
 
-void complexAna::addEntity( folia::AbstractElement *sent ){
-  folia::AbstractElement *el = 0;
-  try {
-    el = sent->annotation( folia::Entities_t );
-  }
-  catch(...){
-    el = new folia::EntitiesLayer("");
-#pragma omp critical(foliaupdate)
-    {
-      sent->append( el );
+void mwuAna::addEntity( folia::AbstractElement *sent ){
+  if ( fwords.size() > 0 ){
+    folia::AbstractElement *el = 0;
+    try {
+      el = sent->annotation( folia::Entities_t );
     }
-  }
-  folia::AbstractElement *e = new folia::Entity("");
+    catch(...){
+      el = new folia::EntitiesLayer("");
 #pragma omp critical(foliaupdate)
-  {
-    el->append( e );
-  }
-  for ( size_t p=0; p < fwords.size(); ++p ){
+      {
+	sent->append( el );
+      }
+    }
+    folia::AbstractElement *e = new folia::Entity("");
 #pragma omp critical(foliaupdate)
     {
-      e->append( fwords[p] );
+      el->append( e );
+    }
+    for ( size_t p=0; p < fwords.size(); ++p ){
+#pragma omp critical(foliaupdate)
+      {
+	e->append( fwords[p] );
+      }
     }
   }
 }
