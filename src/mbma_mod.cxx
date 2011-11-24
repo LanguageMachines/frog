@@ -749,15 +749,16 @@ string Mbma::postprocess( const UnicodeString& word,
 }  // postprocess
 
 string Mbma::Classify( folia::AbstractElement* sword,
-		       const string& word, const string& tag ){
-  UnicodeString uWord = folia::UTF8ToUnicode( word );
-  uWord.toLower();
+		       const string& tag ){
+  UnicodeString uWord = sword->text();
   if ( tag.find( "SPEC(" ) == 0 ){
+    string word = folia::UnicodeToUTF8( uWord );
     vector<string> tmp;
     tmp.push_back( word );
     addMorph( sword, tmp );
     return "[" + word + "]";
   }
+  uWord.toLower();
   if (debugFlag)
     cout << "Classify word: " << uWord << endl;
   

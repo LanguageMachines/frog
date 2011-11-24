@@ -188,8 +188,8 @@ string Mblem::postprocess( const string& tag ){
 } 
 
 string Mblem::Classify( folia::AbstractElement *sword,
-			const string& word, 
 			const string& tag ){
+  string word = sword->str();
   if ( tag.find( "SPEC(" ) == 0 ){
     folia::KWargs args = folia::getArgs( "set='mbt-lemma', cls='" 
 					 + escape(word) + "', annotator='MBT'" );

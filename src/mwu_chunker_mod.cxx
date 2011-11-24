@@ -44,9 +44,9 @@ using namespace Timbl;
 using namespace std;
 
 mwuAna::mwuAna( folia::AbstractElement *fwrd,
-		const std::string& wrd, const std::string& tg ){
+		const std::string& tg ){
   fword = fwrd;
-  word = wrd;
+  word = fwrd->str();
   std::vector<std::string> parts;
   int num = Timbl::split_at_first_of( tg, parts, "()" );
   if ( num < 1 ){
@@ -127,9 +127,8 @@ void Mwu::reset(){
   mWords.clear();
 }
 
-void Mwu::add( folia::AbstractElement *fw, 
-	       const std::string& word, const std::string& tag ){
-  mWords.push_back( new mwuAna( fw, word, tag ) );
+void Mwu::add( folia::AbstractElement *fw, const std::string& tag ){
+  mWords.push_back( new mwuAna( fw, tag ) );
 }
 
 

@@ -48,7 +48,7 @@ class Mbma {
   ~Mbma() { cleanUp(); };
   bool init( const Configuration& );
   std::string Classify( folia::AbstractElement *,
-			const std::string&, const std::string& );
+			const std::string& );
   std::string postprocess( const UnicodeString&,
 			   const std::string&,
 			   folia::AbstractElement * );

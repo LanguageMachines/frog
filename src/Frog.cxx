@@ -443,10 +443,10 @@ bool splitOneWT( const string& inp, string& word, string& tag, string& confidenc
 }
 
 int splitWT( const string& tagged, vector<string>& words,
-	     vector<string>& tags, vector<bool>& known, vector<double>& conf ){
+	     vector<string>& tags, vector<double>& conf ){
   vector<string> tagwords;
+  vector<bool> known;
   tags.clear();
-  known.clear();
   conf.clear();
   size_t num_words = Timbl::split_at( tagged, tagwords, sep );
   num_words--; // the last "word" is <utt> which gets added by the tagger
@@ -462,6 +462,12 @@ int splitWT( const string& tagged, vector<string>& words,
     tags.push_back( tag );
     known.push_back( isKnown );
     conf.push_back( confidence );
+  }
+  if (tpDebug) {
+    cout << "#tagged_words: " << num_words << endl;
+    for( size_t i = 0; i < num_words; i++) 
+      cout   << "\ttagged word[" << i <<"]: " << words[i] << (known[i]?"/":"//")
+	     << tags[i] << " <" << conf[i] << ">" << endl;
   }
   return num_words;
 }
@@ -481,14 +487,7 @@ void TestSentence( AbstractElement* sent,
     timers.tagTimer.stop();
     vector<string> tags;
     vector<double> confidences;
-    vector<bool> known;
-    int num_words = splitWT( tagged, words, tags, known, confidences );
-    if (tpDebug) {
-      cout << "#tagged_words: " << num_words << endl;
-      for( int i = 0; i < num_words; i++) 
-	cout   << "\ttagged word[" << i <<"]: " << words[i] << (known[i]?"/":"//")
-	       << tags[i] << " <" << confidences[i] << ">" << endl;
-    }
+    int num_words = splitWT( tagged, words, tags, confidences );
     myMwu.reset();
     for ( int i = 0; i < num_words; ++i ) {
       KWargs args = getArgs( "set='mbt-pos', cls='" + escape( tags[i] )
@@ -504,23 +503,23 @@ void TestSentence( AbstractElement* sent,
 	{
 	  timers.mbmaTimer.start();
 	  if (tpDebug) cout << "Calling mbma..." << endl;
-	  mbmaLemma = myMbma.Classify( swords[i], words[i], tags[i] );
+	  mbmaLemma = myMbma.Classify( swords[i], tags[i] );
 	  timers.mbmaTimer.stop();
 	}
 #pragma omp section
 	{
 	  timers.mblemTimer.start();
 	  if (tpDebug) cout << "Calling mblem..." << endl;
-	  mblemLemma = myMblem.Classify( swords[i], words[i], tags[i] );
+	  mblemLemma = myMblem.Classify( swords[i], tags[i] );
 	  timers.mblemTimer.stop();
 	}
       }
       if (tpDebug) {
-	cout   << "tagged word[" << i <<"]: " << words[i] << (known[i]?"/":"//")
+	cout   << "tagged word[" << i <<"]: " << swords[i]->str() << " tag "
 	       << tags[i] << endl;
 	cout << "analysis: " << mblemLemma << " " << mbmaLemma << endl;
       }
-      myMwu.add( swords[i], words[i], tags[i] );  
+      myMwu.add( swords[i], tags[i] );  
     } //for int i = 0 to num_words
 
     if ( doMwu ){

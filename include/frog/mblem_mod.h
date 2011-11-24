@@ -50,7 +50,7 @@ class Mblem {
   ~Mblem();
   bool init( const Configuration& );
   std::string Classify( folia::AbstractElement *, 
-			const std::string&, const std::string& );
+			const std::string& );
  private:
   void read_transtable( const std::string& );
   void create_MBlem_defaults();
