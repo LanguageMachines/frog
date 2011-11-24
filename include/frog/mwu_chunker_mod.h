@@ -31,31 +31,51 @@
 
 #include "libfolia/folia.h"
 
+class complexAna;
+
 class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );
  public:
   mwuAna( folia::AbstractElement *,
 	  const std::string&, const std::string& );
+  virtual ~mwuAna() {};
   
-  void append( const mwuAna * );
+  virtual complexAna *append( const mwuAna * );
+  std::string getTagHead() const {
+    return tagHead;
+  }
 
-  bool isSpec() { return spec;} ;
+  virtual void addEntity( folia::AbstractElement * ){};
 
-  void addEntity( folia::AbstractElement * );
-
+  std::string getTagMods() const;
+  
   std::string getWord() const {
     return word;
   }
 
+  std::string getTag() const {
+    return tag;
+  }
+
   folia::AbstractElement *getFword() const {
-    return fwords[0];
+    return fword;
   }
 
  protected:
     mwuAna(){};
     std::string word;
-    bool spec;
-    std::vector<folia::AbstractElement *> fwords;
+    std::string tag;
+    std::string tagHead;
+    std::string tagMods;
+    folia::AbstractElement *fword;
+};
+
+class complexAna: public mwuAna {
+ public:
+  complexAna( );
+  complexAna *append( const mwuAna * );
+  void addEntity( folia::AbstractElement * );
+  std::vector<folia::AbstractElement *> fwords;
 };
 
 #define mymap2 std::multimap<std::string, std::vector<std::string> >

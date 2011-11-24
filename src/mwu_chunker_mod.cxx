@@ -44,31 +44,59 @@ using namespace Timbl;
 using namespace std;
 
 mwuAna::mwuAna( folia::AbstractElement *fwrd,
-		const std::string& wrd, const std::string& tag ){
-  fwords.push_back( fwrd );
+		const std::string& wrd, const std::string& tg ){
+  fword = fwrd;
   word = wrd;
-  spec = ( tag == "SPEC(deeleigen)" );
+  std::vector<std::string> parts;
+  int num = Timbl::split_at_first_of( tg, parts, "()" );
+  if ( num < 1 ){
+    throw runtime_error("tag should look like 'Main_Tag(Subtags)' but it is: '" + tg + "'" );
+  }
+  else {
+    if ( num > 2 ){
+      *Log(theErrLog) << "WARNING: found a suspicious tag: '" << tg << "'. Tags should look like 'Main_Tag(Subtags)' " << endl;
+    }
+    tagHead = parts[0];
+    if ( num > 1 ){
+      //
+      // the MBT tagger returns things like N(soort,ev,basis,zijd,stan)
+      // the Parser is trained with N(soort|ev|basis|zijd|stan)
+      // so convert
+      //
+      string result = parts[1];
+      string::size_type pos = result.find( "," );
+      while ( pos != string::npos ){
+	result.replace(pos,1,"|");
+	pos = result.find( "," );
+      }
+      tagMods = result;
+    }
+    tag = tg;
+  }
+}  
+
+complexAna::complexAna( ){ }
+
+complexAna *mwuAna::append( const mwuAna *add ){
+  complexAna *ana = new complexAna();
+  ana->fwords.push_back( fword );
+  ana->fwords.push_back( add->fword );
+  return ana;
 }
 
-ostream &operator <<( ostream& os,
-		      const mwuAna& mwa ){
-  using folia::operator<<;
-  os << "MWU: [";
-  for ( size_t i=0; i < mwa.fwords.size(); ++i )
-    os << mwa.fwords[i]->id() << ",";
-  os << "]";
-  return os;
-}
-
-void mwuAna::append( const mwuAna *add ){
-  //  cerr << " APPEND: " << *add << endl << " to " << *this << endl;
+complexAna *complexAna::append( const mwuAna *add ){
   fwords.push_back( add->getFword() );
-  //  cerr << "result " << *this << endl;
+  return this;
 }
 
-void mwuAna::addEntity( folia::AbstractElement *sent ){
-  if ( fwords.size() <= 1 )
-    return;
+string mwuAna::getTagMods() const {
+  if ( tagMods.empty() )
+    return "__";
+  else
+    return tagMods;
+}
+
+void complexAna::addEntity( folia::AbstractElement *sent ){
   folia::AbstractElement *el = 0;
   try {
     el = sent->annotation( folia::Entities_t );
@@ -158,11 +186,6 @@ ostream &operator <<( ostream& os,
   return os;
 }
 
-ostream &operator <<( ostream& os,
-		      const mwuAna* mwu ){
-  return os << *mwu;
-}
-
 void Mwu::Classify( folia::AbstractElement *sent ){
   Classify();
   for( size_t i = 0; i < mWords.size(); ++i ){
@@ -179,11 +202,14 @@ void Mwu::Classify(){
   
   // add all current sequences of SPEC(deeleigen) words to MWUs
   for( size_t i=0; i < max-1; ++i ) {
-    if ( mWords[i]->isSpec() &&
-	 mWords[i+1]->isSpec() ){
+    if ( mWords[i]->getTagHead() == "SPEC" &&
+	 mWords[i]->getTagMods() == "deeleigen" &&
+	 mWords[i+1]->getTagHead() == "SPEC" &&
+	 mWords[i+1]->getTagMods() == "deeleigen" ) {
       vector<string> newmwu;
       while ( i < max &&
-	      mWords[i]->isSpec() ){
+	      mWords[i]->getTagHead() == "SPEC" &&
+	      mWords[i]->getTagMods() == "deeleigen" ) {
 	newmwu.push_back(mWords[i]->getWord());
 	i++;
       }
@@ -192,8 +218,6 @@ void Mwu::Classify(){
       MWUs.insert( make_pair(key, newmwu) );
     }
   }
-
-  //  cerr << "hier Mwords " << mWords << endl; 
   size_t i; 
   for( i = 0; i < max; i++) {
     string word = mWords[i]->getWord();
@@ -257,10 +281,15 @@ void Mwu::Classify(){
       if ( debug )
 	cout << "concat " << mWords[i+j]->getWord() << endl;
       // and do the same for mWords elems (Word, Tag, Lemma, Morph)
-      mWords[i]->append( mWords[i+j] );
+      mwuAna *tmp1 = mWords[i];
+      mWords[i] = mWords[i]->append( mWords[i+j] );
+      if ( tmp1 != mWords[i] )
+	delete tmp1;
       if ( debug ){
-	cout << "concat tag " << mWords[i+j] << endl;
-	cout << "gives : " << mWords[i] << endl;
+	cout << "concat tag " << mWords[i+j]->getTagHead()
+	     << "(" << mWords[i+j]->getTagMods() << ")" << endl;
+	cout << "gives : " << mWords[i]->getTagHead() 
+	     << "(" << mWords[i]->getTagMods() << ")" << endl;
       }
       
     }
@@ -276,6 +305,5 @@ void Mwu::Classify(){
     }      
     Classify( );
   } //if (matchLength)
-  //  cerr << endl << "done Mwords " << mWords << endl; 
   return;
 } // //Classify
