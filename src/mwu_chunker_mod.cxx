@@ -45,33 +45,17 @@ using namespace std;
 
 mwuAna::mwuAna( folia::AbstractElement *fwrd,
 		const std::string& tg ){
+  spec = false;
   fword = fwrd;
   word = fwrd->str();
+  tag = tg;
   std::vector<std::string> parts;
-  int num = Timbl::split_at_first_of( tg, parts, "()" );
+  int num = Timbl::split_at_first_of( tag, parts, "()" );
   if ( num < 1 ){
-    throw runtime_error("tag should look like 'Main_Tag(Subtags)' but it is: '" + tg + "'" );
+    throw runtime_error("tag should look like 'Main_Tag(Subtags)' but it is: '" + tag + "'" );
   }
   else {
-    if ( num > 2 ){
-      *Log(theErrLog) << "WARNING: found a suspicious tag: '" << tg << "'. Tags should look like 'Main_Tag(Subtags)' " << endl;
-    }
-    tagHead = parts[0];
-    if ( num > 1 ){
-      //
-      // the MBT tagger returns things like N(soort,ev,basis,zijd,stan)
-      // the Parser is trained with N(soort|ev|basis|zijd|stan)
-      // so convert
-      //
-      string result = parts[1];
-      string::size_type pos = result.find( "," );
-      while ( pos != string::npos ){
-	result.replace(pos,1,"|");
-	pos = result.find( "," );
-      }
-      tagMods = result;
-    }
-    tag = tg;
+    spec = ( tag == "SPEC(deeleigen)" );
   }
 }  
 
@@ -79,6 +63,7 @@ complexAna::complexAna( ){ }
 
 complexAna *mwuAna::append( const mwuAna *add ){
   complexAna *ana = new complexAna();
+  ana->spec = add->spec;
   ana->fwords.push_back( fword );
   ana->fwords.push_back( add->fword );
   return ana;
@@ -87,13 +72,6 @@ complexAna *mwuAna::append( const mwuAna *add ){
 complexAna *complexAna::append( const mwuAna *add ){
   fwords.push_back( add->getFword() );
   return this;
-}
-
-string mwuAna::getTagMods() const {
-  if ( tagMods.empty() )
-    return "__";
-  else
-    return tagMods;
 }
 
 void complexAna::addEntity( folia::AbstractElement *sent ){
@@ -201,14 +179,9 @@ void Mwu::Classify(){
   
   // add all current sequences of SPEC(deeleigen) words to MWUs
   for( size_t i=0; i < max-1; ++i ) {
-    if ( mWords[i]->getTagHead() == "SPEC" &&
-	 mWords[i]->getTagMods() == "deeleigen" &&
-	 mWords[i+1]->getTagHead() == "SPEC" &&
-	 mWords[i+1]->getTagMods() == "deeleigen" ) {
+    if ( mWords[i]->isSpec() && mWords[i+1]->isSpec() ) {
       vector<string> newmwu;
-      while ( i < max &&
-	      mWords[i]->getTagHead() == "SPEC" &&
-	      mWords[i]->getTagMods() == "deeleigen" ) {
+      while ( i < max && mWords[i]->isSpec() ){
 	newmwu.push_back(mWords[i]->getWord());
 	i++;
       }
@@ -284,13 +257,6 @@ void Mwu::Classify(){
       mWords[i] = mWords[i]->append( mWords[i+j] );
       if ( tmp1 != mWords[i] )
 	delete tmp1;
-      if ( debug ){
-	cout << "concat tag " << mWords[i+j]->getTagHead()
-	     << "(" << mWords[i+j]->getTagMods() << ")" << endl;
-	cout << "gives : " << mWords[i]->getTagHead() 
-	     << "(" << mWords[i]->getTagMods() << ")" << endl;
-      }
-      
     }
     vector<mwuAna*>::iterator anatmp1 = mWords.begin() + i;
     vector<mwuAna*>::iterator anatmp2 = ++anatmp1 + matchLength;

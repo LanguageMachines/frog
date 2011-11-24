@@ -40,14 +40,9 @@ class mwuAna {
   virtual ~mwuAna() {};
   
   virtual complexAna *append( const mwuAna * );
-  std::string getTagHead() const {
-    return tagHead;
-  }
 
   virtual void addEntity( folia::AbstractElement * ){};
 
-  std::string getTagMods() const;
-  
   std::string getWord() const {
     return word;
   }
@@ -59,13 +54,14 @@ class mwuAna {
   folia::AbstractElement *getFword() const {
     return fword;
   }
-
+  
+  bool isSpec(){ return spec; };
+  
  protected:
     mwuAna(){};
     std::string word;
     std::string tag;
-    std::string tagHead;
-    std::string tagMods;
+    bool spec;
     folia::AbstractElement *fword;
 };
 
