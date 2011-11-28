@@ -54,7 +54,7 @@
 #include "frog/mbma_mod.h"
 #include "frog/mblem_mod.h"
 #include "frog/mwu_chunker_mod.h"
-#include "frog/tagger_mod.h"
+#include "frog/cgn_tagger_mod.h"
 #include "frog/Parser.h"
 #include "libfolia/document.h"
 #include "libfolia/folia.h"

@@ -31,7 +31,7 @@
 #include "mbt/MbtAPI.h"
 #include "libfolia/folia.h"
 #include "frog/Frog.h"
-#include "frog/tagger_mod.h"
+#include "frog/cgn_tagger_mod.h"
 
 using namespace std;
 using namespace folia;
