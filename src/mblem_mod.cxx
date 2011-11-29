@@ -145,15 +145,13 @@ bool isSimilar( const string& tag, const string& cgnTag ){
     similar( tag, cgnTag, "ott,3,ev" ) ||
     similar( tag, cgnTag, "ott,2,ev" ) ||
     similar( tag, cgnTag, "ott,1,ev" ) ||
-    similar( tag, cgnTag, "ott,2,ev" ) ||
-    similar( tag, cgnTag, "ott,1,ev" ) ||
     similar( tag, cgnTag, "ott,1of2of3,mv" ) ||
+    similar( tag, cgnTag, "ott,1of2of3,ev" ) ||
     similar( tag, cgnTag, "ovt,1of2of3,mv" ) ||
     similar( tag, cgnTag, "ovt,1of2of3,ev" ) ||
     similar( tag, cgnTag, "ovt,3,ev" ) ||
     similar( tag, cgnTag, "ovt,2,ev" ) ||
-    similar( tag, cgnTag, "ovt,1,ev" ) ||
-    similar( tag, cgnTag, "ovt,1of2of3,mv" );
+    similar( tag, cgnTag, "ovt,1,ev" );
 }
   
 string Mblem::postprocess( const string& tag ){
@@ -187,16 +185,21 @@ string Mblem::postprocess( const string& tag ){
   return res;
 } 
 
+void addAnnotation( folia::AbstractElement *word,
+		    const string& cls ){
+  folia::KWargs args = folia::getArgs( "set='mbt-lemma', cls='" 
+				       + escape(cls) + "', annotator='mblem'" );
+#pragma omp critical(foliaupdate)
+  {
+    word->addLemmaAnnotation( args );
+  }
+}
+
 string Mblem::Classify( folia::AbstractElement *sword,
 			const string& tag ){
   string word = sword->str();
   if ( tag.find( "SPEC(" ) == 0 ){
-    folia::KWargs args = folia::getArgs( "set='mbt-lemma', cls='" 
-					 + escape(word) + "', annotator='MBT'" );
-#pragma omp critical(foliaupdate)
-    {
-      sword->addLemmaAnnotation( args );
-    }
+    addAnnotation( sword, word );
     return word;
   }
   UnicodeString uWord = folia::UTF8ToUnicode(word);
@@ -346,11 +349,6 @@ string Mblem::Classify( folia::AbstractElement *sword,
     cout << "\n\n";
   }
   string res = postprocess( tag ); 
-  folia::KWargs args = folia::getArgs( "set='mbt-lemma', cls='" 
-				       + escape(res) + "', annotator='MBT'" );
-#pragma omp critical(foliaupdate)
-  {
-    sword->addLemmaAnnotation( args );
-  }
+  addAnnotation( sword, res );
   return res;
 }
