@@ -89,7 +89,16 @@ void Mbma::fillMaps() {
   iNames['g'] = "imperative";
   iNames['a'] = "subjunctive";
 }
-  
+
+string Mbma::getIname( char c ) const {
+  map<char,string>::const_iterator it = iNames.find(c);
+  if ( it != iNames.end() ){
+    return it->second;
+  }
+  else
+    return "";
+}
+
 // BJ: dirty hack with fixed everything to read in tag correspondences
 void Mbma::init_cgn( const string& dir ) {
   string line;
@@ -510,7 +519,7 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
 
 void Mbma::execute( const UnicodeString& word, 
 		    const vector<string>& classes ){
-  string basictags = "NAQVDOBPYIXZ";
+  const string basictags = "NAQVDOBPYIXZ";
   analysis.clear();
   /* determine the largest number of alternative analyses 
      and store every part in a vector of string vectors
@@ -562,8 +571,53 @@ void Mbma::execute( const UnicodeString& word,
   }
 }
 
-void addMorph( folia::AbstractElement *word, 
-	       const vector<string>& lemmas ){
+string getSubSet( char c ){
+  switch ( c ){
+  case 'e':
+  case 'm':
+    return "number";
+    break;
+  case 'd':
+    return "todo";
+    break;
+  case 'G':
+  case 'D':
+    return "case";
+    break;
+  case 't':
+  case 'v':
+    return "tense";
+    break;
+  case 'C':
+  case 'S':
+    return "degree";
+    break;
+  case 'a':
+  case 'g':
+    return "mood";
+    break;
+  case '1':
+  case '2':
+  case '3':
+    return "person";
+    break;
+  case 'E':
+    return "suffix-e";
+    break;
+  default:
+    return "todo";
+  }
+}
+
+folia::AbstractElement *Mbma::createFeature( char c ) const {
+  string cls = getIname(c);
+  string ss = getSubSet(c);
+  return new folia::Feature( "subset='" + ss + "', class='" + cls + "'" );
+}
+
+void Mbma::addMorph( folia::AbstractElement *word, 
+		     const vector<string>& lemmas,
+		     const string& infl ){
   folia::AbstractElement *ml = new folia::MorphologyLayer("");
 #pragma omp critical(foliaupdate)
   {
@@ -586,12 +640,20 @@ void addMorph( folia::AbstractElement *word,
     {
       m->append( t );
     }
+//     if ( !infl.empty() && infl[0] != 'X' ){
+//       folia::AbstractElement *t = createFeature( infl[0] );
+// #pragma omp critical(foliaupdate)
+//       {
+// 	m->append( t );
+//       }
+      
+//     }
   }
 }	  
       
-string Mbma::postprocess( const UnicodeString& word,
-			  const string& inputTag,
-			  folia::AbstractElement *fword ){
+void Mbma::postprocess( const UnicodeString& word,
+			const string& mainTag,
+			folia::AbstractElement *fword ){
   if (debugFlag){
     for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
       cout << it->getTag() << it->getInflection()<< " ";
@@ -601,19 +663,8 @@ string Mbma::postprocess( const UnicodeString& word,
     cout << endl <<endl;
   }
   
-  string res;
   if (debugFlag)
-      cout << "before morpho: " << res << endl;
-  
-  // BJ: OK, this was taglemma, now get the morphological analysis in
-  string::size_type openH = inputTag.find( '(' );
-  string::size_type closeH = inputTag.find( ')' );
-  if ( openH == string::npos || closeH == string::npos ){
-    *Log(theErrLog) << "main tag without subparts: impossible" << endl;
-    exit(-1);
-  }
-  string mainTag = inputTag.substr( 0, openH );
-  string tagPartS = inputTag.substr( openH+1, closeH-openH-1 );    
+      cout << "before morpho: " << endl;
   
   map<string,string>::const_iterator tagIt = TAGconv.find( mainTag );
   if ( tagIt == TAGconv.end() ) {
@@ -648,28 +699,21 @@ string Mbma::postprocess( const UnicodeString& word,
     }
     //should be(come?) a switch
     if ( match == 0 ) {
-      // fallback option: put the word in bracket's and pretend it's a lemma ;-)
-      res = "[" + folia::UnicodeToUTF8(word) + "]";
+      // fallback option: use the word and pretend it's a lemma ;-)
       vector<string> tmp;
       tmp.push_back( folia::UnicodeToUTF8(word) );
       addMorph( fword, tmp );
     }
     else if (match == 1) {
       const vector<string> ma = analysis[matches[0]].getMorph();
-      for ( size_t p=0; p < ma.size(); ++p )
-	res += "[" + ma[p] + "]";
-      addMorph( fword, ma );
+      addMorph( fword, ma, analysis[matches[0]].getInflection() );
     } 
     else {
-      // find the best match
-      vector<string> tagParts;
-      // we need the separate tags from the inputTag
-      
-      size_t numParts = split_at( tagPartS, tagParts, "," );
+      vector<folia::AbstractElement *> feats = fword->annotation( folia::Pos_t)->select( folia::Feature_t );
       if (debugFlag){
-	cout << "tag: " << inputTag << ": " << mainTag << endl;
-	for ( size_t q =0 ; q < tagParts.size(); ++q ) {
-	  cout << "\tpart #" << q << ": " << tagParts[q] << endl;
+	cout << "tag: " << mainTag << endl;
+	for ( size_t q =0 ; q < feats.size(); ++q ) {
+	  cout << "\tpart #" << q << ": " << feats[q]->cls() << endl;
 	}
       }
       if (debugFlag)
@@ -694,7 +738,7 @@ string Mbma::postprocess( const UnicodeString& word,
       if ( possible_lemmas.size() < 1) {
 	if (debugFlag)
 	  cout << "Problem!, no possible lemma's" << endl;
-	return res;
+	return;
       }
       // append all unique lemmas
       // find best match
@@ -706,9 +750,9 @@ string Mbma::postprocess( const UnicodeString& word,
 	int match_count = 0;
 	string inflection = analysis[matches[q]].getInflection();
 	if (debugFlag)
-	  cout << "matching " << inflection << " with " << inputTag << endl;
-	for ( size_t u=0; u < numParts; ++u ) {
-	  map<string,string>::const_iterator conv_tag_p = TAGconv.find(tagParts[u]);
+	  cout << "matching " << inflection << " with " << mainTag << endl;
+	for ( size_t u=0; u < feats.size(); ++u ) {
+	  map<string,string>::const_iterator conv_tag_p = TAGconv.find(feats[u]->cls());
 	  if (conv_tag_p != TAGconv.end()) {
 	    string c = conv_tag_p->second;
 	    if ( inflection.find( c ) != string::npos )
@@ -732,31 +776,28 @@ string Mbma::postprocess( const UnicodeString& word,
       }
       map< string, const vector<string> *>::const_iterator it = bestMatches.begin();
       while ( it != bestMatches.end() ){
-	string tmp;
-	for ( size_t p=0; p < it->second->size(); ++p )
-	  tmp += "[" + (*it->second)[p] + "]";
-	res += tmp;
+	if (debugFlag){
+	  string tmp;
+	  for ( size_t p=0; p < it->second->size(); ++p )
+	    tmp += "[" + (*it->second)[p] + "]";
+	  cout << "MBMA add lemma: " << tmp << endl;
+	}
 	addMorph( fword, *it->second );
 	++it;
-	if ( it != bestMatches.end() )
-	  res += "/";
       }
     }
   }
-  if (debugFlag)
-    cout << "final MBMA lemma: " << res << endl;
-  return res;  
 }  // postprocess
 
-string Mbma::Classify( folia::AbstractElement* sword,
-		       const string& tag ){
+bool Mbma::Classify( folia::AbstractElement* sword ){
   UnicodeString uWord = sword->text();
-  if ( tag.find( "SPEC(" ) == 0 ){
+  string tag = sword->pos();
+  if ( tag.find( "SPEC" ) == 0 ){
     string word = folia::UnicodeToUTF8( uWord );
     vector<string> tmp;
     tmp.push_back( word );
     addMorph( sword, tmp );
-    return "[" + word + "]";
+    return true;
   }
   uWord.toLower();
   if (debugFlag)
@@ -779,7 +820,8 @@ string Mbma::Classify( folia::AbstractElement* sword,
     classes[0] = "X";
   
   execute( uWord, classes );
-  return postprocess( uWord, tag, sword );
+  postprocess( uWord, tag, sword );
+  return true;
 }
 
 ostream& operator<< ( ostream& os, const MBMAana& a ){

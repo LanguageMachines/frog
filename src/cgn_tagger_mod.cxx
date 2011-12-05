@@ -144,6 +144,156 @@ static int splitWT( const string& tagged,
   return num_words;
 }
 
+string getSubSet( const string& val, const string& tag ){
+  if ( val == "soort" ||
+       val == "eigen" )
+    return "ntype";
+  else if ( ( tag == "N" || tag == "VNW" ) &&
+	    ( val == "ev" ||
+	      val == "mv" ||
+	      val == "getal" ) )
+    return "getal";
+  else if ( val == "zijd" ||
+	    val == "onz" ||
+	    val == "masc" ||
+	    val == "fem" ||
+	    val == "genus" )
+    return "genus";
+  else if ( val == "stan" ||
+	    val == "gen" ||
+	    val == "dat" ||
+	    val == "nomin" ||
+	    val == "obl" ||
+	    val == "bijz" )
+    return "naamval";
+  else if ( val == "afgebr" ||
+	    val == "afk" ||
+	    val == "deeleigen" ||
+	    val == "symb" ||
+	    val == "vreemd" ||
+	    val == "enof" ||
+	    val == "meta" ||
+	    val == "achter" ||
+	    val == "comment" ||
+	    val == "onverst" )
+    return "spectype";
+  else if ( val == "neven" ||
+	    val == "onder" )
+    return "conjtype";
+  else if ( val == "init" ||
+	    val == "versm" ||
+	    val == "fin" )
+    return "vztype";
+  else if ( val == "agr" ||
+	    val == "evon" ||
+	    val == "rest" ||
+	    val == "evz" ||
+	    val == "agr3" ||
+	    val == "evmo" ||
+	    val == "rest3" ||
+	    val == "evf" )
+    return "npagr";
+  else if ( val == "bep" ||
+	    val == "onbep" )
+    return "lwtype";
+  else if ( val == "pers" ||
+	    val == "pr" ||
+	    val == "refl1" ||
+	    val == "recip" ||
+	    val == "bez" ||
+	    val == "vb" ||
+	    val == "vrag" ||
+	    val == "betr" ||
+	    val == "excl" ||
+	    val == "aanw" ||
+	    val == "onbep" )
+    return "vwtype";
+  else if ( val == "adv-pron" ||
+	    val == "pron" ||
+	    val == "det" ||
+	    val == "grad" )
+    return "pdtype";
+  else if ( val == "vol" ||
+	    val == "red" ||
+	    val == "nadr" )
+    return "status";
+  else if ( val == "1" ||
+	    val == "2" ||
+	    val == "2v" ||
+	    val == "2b" ||
+	    val == "3" ||
+	    val == "3p" ||
+	    val == "3m" ||
+	    val == "3v" ||
+	    val == "3o" ||
+	    val == "persoon" )
+    return "persoon";
+  else if ( val == "prenom" ||
+	    val == "postnom" ||
+	    val == "nom" ||
+	    val == "vrij" )
+    return "positie";
+  else if ( val == "zonder" ||
+	    val == "met-e" ||
+	    val == "met-s" )
+    return "buiging";
+  else if ( val == "zonder-v" ||
+	    val == "mv-n" ||
+	    val == "zonder-n" )
+    return "getal-n";
+  else if ( val == "basis" ||
+	    val == "comp" ||
+	    val == "sup" ||
+	    val == "dim" )
+    return "graad";
+  else if ( val == "pv" ||
+	    val == "inf" ||
+	    val == "vd" ||
+	    val == "od" )
+    return "wvorm";
+  else if ( val == "tgw" ||
+	    val == "verl" ||
+	    val == "conj" )
+    return "pvtijd";
+  else if ( tag == "WW" &&
+	    ( val == "ev" ||
+	      val == "mv" ||
+	      val == "met-t" ) )
+    return "pvagr";
+  else if ( val == "hoofd" ||
+	    val == "rang" )
+    return "numtype";
+  else if ( val == "dial" )
+    return "dial";
+  else
+    throw folia::ValueError( "unknown cgn subset for tag: '" + val + "'" );
+}
+
+void addTag( AbstractElement *word, const string& inputTag, double confidence ){
+  string::size_type openH = inputTag.find( '(' );
+  string::size_type closeH = inputTag.find( ')' );
+  if ( openH == string::npos || closeH == string::npos ){
+    *Log(theErrLog) << "tagger_mod: main tag without subparts: impossible: " << inputTag << endl;
+    exit(-1);
+  }
+  string mainTag = inputTag.substr( 0, openH );
+  if ( mainTag == "SPEC" )
+    confidence = 1.0;
+  string tagPartS = inputTag.substr( openH+1, closeH-openH-1 );
+  KWargs args = getArgs( "set='mbt-pos', cls='" + escape( mainTag )
+			 + "', annotator='MBT', confidence='" 
+			 + toString(confidence) + "'" );
+  AbstractElement *pos = word->addPosAnnotation( args );
+  vector<string> tagParts;
+  size_t numParts = Timbl::split_at( tagPartS, tagParts, "," );
+  for ( size_t i=0; i < numParts; ++i ){
+    string arg = "set='mbt-pos', subset='" + getSubSet( tagParts[i], mainTag ) 
+      + "', cls='" + tagParts[i] + "', annotator='MBT'";
+    AbstractElement *feat = new folia::Feature( arg );
+    pos->append( feat );
+  }
+}
+
 string MBTagger::Classify( AbstractElement *sent, vector<string>& tags ){
   tags.clear();
   string tagged;
@@ -167,14 +317,11 @@ string MBTagger::Classify( AbstractElement *sent, vector<string>& tags ){
 	   <<"\ntagged: "<< tagged
 	   << endl;
     }
-  }
-  vector<double> conf;
-  int num_words = splitWT( tagged, tags, conf );
-  for ( int i = 0; i < num_words; ++i ) {
-    KWargs args = getArgs( "set='mbt-pos', cls='" + escape( tags[i] )
-			   + "', annotator='MBT', confidence='" 
-			   + toString(conf[i]) + "'" );
-    swords[i]->addPosAnnotation( args );
+    vector<double> conf;
+    int num_words = splitWT( tagged, tags, conf );
+    for ( int i = 0; i < num_words; ++i ) {
+      addTag( swords[i], tags[i], conf[i] );
+    }
   }
   return tagged;
 }

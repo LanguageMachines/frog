@@ -741,16 +741,13 @@ void Parser::prepareParse( AbstractElement *sent, parseData& pd ) {
       for ( size_t p=0; p < mwu.size(); ++p ){
 	word += mwu[p]->str();
 	AbstractElement *postag = mwu[p]->annotation(Pos_t);
-	string pt = postag->cls();
-	string cls = pt.substr(0,pt.find_first_of("("));
-	head += cls;
-	string tmp = pt.substr(pt.find_first_of("(")+1, 
-			       pt.size() - pt.find_first_of("(") - 2 );
-	for ( size_t i=0; i < tmp.size(); ++i ){
-	  if ( tmp[i] == ',' )
-	    tmp[i] = '|';
+	head += postag->cls();
+	vector<AbstractElement*> feats = postag->select( Feature_t );
+	for ( size_t j=0; j < feats.size(); ++j ){
+	  mod += feats[j]->cls();
+	  if ( j < feats.size()-1 )
+	    mod += "|";
 	}
-	mod += tmp;
 	if ( p < mwu.size() -1 ){
 	  word += "_";
 	  head += "_";
@@ -766,18 +763,20 @@ void Parser::prepareParse( AbstractElement *sent, parseData& pd ) {
     else {
       pd.words.push_back( word->str() );
       AbstractElement *postag = word->annotation(Pos_t);
-      string pt = postag->cls();
-      string cls = pt.substr(0,pt.find_first_of("("));
-      pd.heads.push_back( cls );
-      string tmp = pt.substr(pt.find_first_of("(")+1, 
-			     pt.size() - pt.find_first_of("(") - 2 );
-      if ( tmp.empty() )
-	tmp = "__";
-      for ( size_t i=0; i < tmp.size(); ++i ){
-	if ( tmp[i] == ',' )
-	  tmp[i] = '|';
+      string head = postag->cls();
+      pd.heads.push_back( head );
+      string mod;
+      vector<AbstractElement*> feats = postag->select( Feature_t );
+      if ( feats.size() == 0 )
+	mod = "__";
+      else {
+	for ( size_t j=0; j < feats.size(); ++j ){
+	  mod += feats[j]->cls();
+	  if ( j < feats.size()-1 )
+	    mod += "|";
+	}
       }
-      pd.mods.push_back( tmp );
+      pd.mods.push_back( mod );
       vector<AbstractElement*> vec;
       vec.push_back(word);
       pd.mwus.push_back( vec );

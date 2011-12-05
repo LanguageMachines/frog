@@ -415,7 +415,7 @@ void TestSentence( AbstractElement* sent,
 	{
 	  timers.mbmaTimer.start();
 	  if (tpDebug) cout << "Calling mbma..." << endl;
-	  mbmaLemma = myMbma.Classify( swords[i], tags[i] );
+	  mbmaLemma = myMbma.Classify( swords[i] );
 	  timers.mbmaTimer.stop();
 	}
 #pragma omp section
@@ -506,7 +506,14 @@ void displayMWU( ostream& os, size_t index,
     try { 
       wrd += word->str();
       AbstractElement *postag = word->annotation(Pos_t);
-      pos += postag->cls();
+      pos += postag->cls() + "(";
+      vector<AbstractElement*> feats = postag->select( Feature_t );
+      for ( size_t i=0; i < feats.size(); ++i ){
+	pos += feats[i]->cls();
+	if ( i < feats.size()-1 )
+	  pos += ",";
+      }
+      pos += ")";
       if ( p < mwu.size() -1 ){
 	wrd += "_";
 	pos += "_";
