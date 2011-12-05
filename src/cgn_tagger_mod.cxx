@@ -270,18 +270,36 @@ string getSubSet( const string& val, const string& tag ){
 }
 
 void addTag( AbstractElement *word, const string& inputTag, double confidence ){
-  string::size_type openH = inputTag.find( '(' );
-  string::size_type closeH = inputTag.find( ')' );
-  if ( openH == string::npos || closeH == string::npos ){
-    *Log(theErrLog) << "tagger_mod: main tag without subparts: impossible: " << inputTag << endl;
-    exit(-1);
-  }
-  string mainTag = inputTag.substr( 0, openH );
-  if ( mainTag == "SPEC" )
+  string mainTag;
+  string tagPartS;
+  string annotator = "MBT";
+  string ucto_class = word->cls();
+  if ( ucto_class == "ABBREVIATION-KNOWN" ){
+    annotator = "ucto";
+    mainTag = "SPEC";
+    tagPartS = "afk";
     confidence = 1.0;
-  string tagPartS = inputTag.substr( openH+1, closeH-openH-1 );
-  KWargs args = getArgs( "set='mbt-pos', cls='" + escape( mainTag )
-			 + "', annotator='MBT', confidence='" 
+  }
+  else if ( ucto_class == "SMILEY" ){
+    annotator = "ucto";
+    mainTag = "SPEC";
+    tagPartS = "symb";
+    confidence = 1.0;
+  }
+  else {
+    string::size_type openH = inputTag.find( '(' );
+    string::size_type closeH = inputTag.find( ')' );
+    if ( openH == string::npos || closeH == string::npos ){
+      *Log(theErrLog) << "tagger_mod: main tag without subparts: impossible: " << inputTag << endl;
+      exit(-1);
+    }
+    mainTag = inputTag.substr( 0, openH );
+    if ( mainTag == "SPEC" )
+      confidence = 1.0;
+    tagPartS = inputTag.substr( openH+1, closeH-openH-1 );
+  }
+  KWargs args = getArgs( "set='mbt-pos', cls='" + mainTag
+			 + "', annotator='" + annotator + "', confidence='" 
 			 + toString(confidence) + "'" );
   AbstractElement *pos = word->addPosAnnotation( args );
   vector<string> tagParts;

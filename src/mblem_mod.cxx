@@ -196,9 +196,10 @@ void addAnnotation( folia::AbstractElement *word,
 }
 
 string Mblem::Classify( folia::AbstractElement *sword,
-			const string& tag ){
+			const string& intag ){
   string word = sword->str();
-  if ( tag.find( "SPEC(" ) == 0 ){
+  string tag = sword->pos();
+  if ( tag == "SPEC" ) {
     addAnnotation( sword, word );
     return word;
   }
@@ -348,7 +349,7 @@ string Mblem::Classify( folia::AbstractElement *sword,
     }
     cout << "\n\n";
   }
-  string res = postprocess( tag ); 
+  string res = postprocess( intag ); 
   addAnnotation( sword, res );
   return res;
 }
