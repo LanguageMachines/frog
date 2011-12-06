@@ -36,7 +36,7 @@ class complexAna;
 class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );
  public:
-  mwuAna( folia::AbstractElement * );
+  mwuAna( folia::FoliaElement * );
   virtual ~mwuAna() {};
   
   virtual complexAna *append( const mwuAna * );
@@ -45,19 +45,19 @@ class mwuAna {
     return word;
   }
 
-  folia::AbstractElement *getFword() const {
+  folia::FoliaElement *getFword() const {
     return fword;
   }
   
   bool isSpec(){ return spec; };
-  void addEntity( folia::AbstractElement * );
+  void addEntity( folia::FoliaElement * );
   
  protected:
     mwuAna(){};
     std::string word;
     bool spec;
-    folia::AbstractElement *fword;
-    std::vector<folia::AbstractElement *> fwords;
+    folia::FoliaElement *fword;
+    std::vector<folia::FoliaElement *> fwords;
 };
 
 class complexAna: public mwuAna {
@@ -76,8 +76,8 @@ class Mwu {
   ~Mwu();
   void reset();
   bool init( const Configuration& );
-  void Classify( folia::AbstractElement* );
-  void add( folia::AbstractElement * );
+  void Classify( folia::FoliaElement* );
+  void add( folia::FoliaElement * );
   std::vector<mwuAna*>& getAna(){ return mWords; };
   std::string myCFS;
  private:

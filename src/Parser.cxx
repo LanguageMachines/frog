@@ -107,7 +107,7 @@ struct parseData {
   vector<string> words;
   vector<string> heads;
   vector<string> mods;
-  vector<vector<AbstractElement *> > mwus;
+  vector<vector<FoliaElement *> > mwus;
 };
 
 ostream& operator<<( ostream& os, const parseData& pd ){
@@ -255,9 +255,9 @@ Parser::~Parser(){
   delete PI;
 }
 
-static vector<AbstractElement *> lookup( AbstractElement *word, 
-				  const vector<AbstractElement*>& entities ){
-  vector<AbstractElement*> vec;
+static vector<FoliaElement *> lookup( FoliaElement *word, 
+				  const vector<FoliaElement*>& entities ){
+  vector<FoliaElement*> vec;
   for ( size_t p=0; p < entities.size(); ++p ){
     vec = entities[p]->select(Word_t);
     if ( !vec.empty() ){
@@ -725,24 +725,24 @@ void Parser::createRelDir( const parseData& pd ){
   }
 }
 
-void Parser::prepareParse( AbstractElement *sent, parseData& pd ) {
+void Parser::prepareParse( FoliaElement *sent, parseData& pd ) {
 
   pd.clear();
-  vector<AbstractElement *> fwords = sent->words();
-  vector<AbstractElement *> entities = sent->select( Entity_t );
+  vector<FoliaElement *> fwords = sent->words();
+  vector<FoliaElement *> entities = sent->select( Entity_t );
   
   for( size_t i=0; i < fwords.size(); ++i ){
-    AbstractElement *word = fwords[i];
-    vector<AbstractElement *> mwu = lookup( word, entities );
+    FoliaElement *word = fwords[i];
+    vector<FoliaElement *> mwu = lookup( word, entities );
     if ( !mwu.empty() ){
       string word;
       string head;
       string mod;
       for ( size_t p=0; p < mwu.size(); ++p ){
 	word += mwu[p]->str();
-	AbstractElement *postag = mwu[p]->annotation(Pos_t);
+	FoliaElement *postag = mwu[p]->annotation(Pos_t);
 	head += postag->cls();
-	vector<AbstractElement*> feats = postag->select( Feature_t );
+	vector<FoliaElement*> feats = postag->select( Feature_t );
 	for ( size_t j=0; j < feats.size(); ++j ){
 	  mod += feats[j]->cls();
 	  if ( j < feats.size()-1 )
@@ -762,11 +762,11 @@ void Parser::prepareParse( AbstractElement *sent, parseData& pd ) {
     }
     else {
       pd.words.push_back( word->str() );
-      AbstractElement *postag = word->annotation(Pos_t);
+      FoliaElement *postag = word->annotation(Pos_t);
       string head = postag->cls();
       pd.heads.push_back( head );
       string mod;
-      vector<AbstractElement*> feats = postag->select( Feature_t );
+      vector<FoliaElement*> feats = postag->select( Feature_t );
       if ( feats.size() == 0 )
 	mod = "__";
       else {
@@ -777,7 +777,7 @@ void Parser::prepareParse( AbstractElement *sent, parseData& pd ) {
 	}
       }
       pd.mods.push_back( mod );
-      vector<AbstractElement*> vec;
+      vector<FoliaElement*> vec;
       vec.push_back(word);
       pd.mwus.push_back( vec );
     }
@@ -798,7 +798,7 @@ void Parser::prepareParse( AbstractElement *sent, parseData& pd ) {
   }
 }
 
- void appendParseResult( AbstractElement *sent, 
+ void appendParseResult( FoliaElement *sent, 
 			 parseData& pd,
 			 istream& is ){
    string line;
@@ -818,15 +818,15 @@ void Parser::prepareParse( AbstractElement *sent, parseData& pd ) {
      }
      ++cnt;
    }
-   AbstractElement *dl = new DependenciesLayer("");
+   FoliaElement *dl = new DependenciesLayer("");
    sent->append( dl );
    
    for ( size_t i=0; i < nums.size(); ++i ){
      if ( nums[i] != 0 ){
-       AbstractElement *d = new Dependency( "generate-id='" + sent->id() + 
+       FoliaElement *d = new Dependency( "generate-id='" + sent->id() + 
 					    "', class='"+ roles[i] +"'" );
        dl->append( d );
-       AbstractElement *h = new DependencyHead("");
+       FoliaElement *h = new DependencyHead("");
        for ( size_t j=0; j < pd.mwus[nums[i]-1].size(); ++ j ){
 	 h->append( pd.mwus[nums[i]-1][j] );
        }
@@ -841,7 +841,7 @@ void Parser::prepareParse( AbstractElement *sent, parseData& pd ) {
  }
  
  
-void Parser::Parse( AbstractElement *sent,
+void Parser::Parse( FoliaElement *sent,
 		    const string& tmpDirName, TimerBlock& timers ){
   fileName = tmpDirName+"csiparser";
   timers.parseTimer.start();

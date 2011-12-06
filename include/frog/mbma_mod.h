@@ -47,7 +47,7 @@ class Mbma {
   Mbma();
   ~Mbma() { cleanUp(); };
   bool init( const Configuration& );
-  bool Classify( folia::AbstractElement * );
+  bool Classify( folia::FoliaElement * );
   std::string getIname( char ) const;
  private:
   void cleanUp();
@@ -69,10 +69,10 @@ class Mbma {
   MBMAana inflectAndAffix( const std::vector<waStruct>& ana );
   void execute( const UnicodeString& word, 
 		const std::vector<std::string>& classes );
-  void postprocess( folia::AbstractElement * );
+  void postprocess( folia::FoliaElement * );
   int debugFlag;
-  folia::AbstractElement *createFeature( char c ) const;
-  void addMorph( folia::AbstractElement *, 
+  folia::FoliaElement *createFeature( char c ) const;
+  void addMorph( folia::FoliaElement *, 
 		 const std::vector<std::string>& );
   std::string MTreeFilename;
   Timbl::TimblAPI *MTree;

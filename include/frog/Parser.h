@@ -83,8 +83,8 @@ class Parser {
  Parser():pairs(0),dir(0),rels(0),PI(0),isInit(false){};
   ~Parser();
   bool init( const Configuration& );
-  void Parse( folia::AbstractElement *, const std::string&, TimerBlock& );
-  void prepareParse( folia::AbstractElement *, parseData& );
+  void Parse( folia::FoliaElement *, const std::string&, TimerBlock& );
+  void prepareParse( folia::FoliaElement *, parseData& );
   void createParserFile( const parseData& );
  private:
   void createRelDir( const parseData& );

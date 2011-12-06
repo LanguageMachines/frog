@@ -397,10 +397,10 @@ bool parse_args( TimblOpts& Opts ) {
   return true;
 }
 
-void TestSentence( AbstractElement* sent,
+void TestSentence( FoliaElement* sent,
 		   const string& tmpDir,
 		   TimerBlock& timers ){
-  vector<AbstractElement*> swords = sent->words();
+  vector<FoliaElement*> swords = sent->words();
   if ( !swords.empty() ) {
     if (tpDebug) {
       // don't mangle debug output, so run 1 thread then
@@ -455,9 +455,9 @@ void TestSentence( AbstractElement* sent,
   }
 }
 
-vector<AbstractElement *> lookup( AbstractElement *word, 
-				  const vector<AbstractElement*>& entities ){
-  vector<AbstractElement*> vec;
+vector<FoliaElement *> lookup( FoliaElement *word, 
+				  const vector<FoliaElement*>& entities ){
+  vector<FoliaElement*> vec;
   for ( size_t p=0; p < entities.size(); ++p ){
     vec = entities[p]->select(Word_t);
     if ( !vec.empty() ){
@@ -473,15 +473,15 @@ vector<AbstractElement *> lookup( AbstractElement *word,
   return vec;
 }
 
-AbstractElement *lookupDep( const AbstractElement *word, 
-			    const vector<AbstractElement *>&dependencies ){
+FoliaElement *lookupDep( const FoliaElement *word, 
+			    const vector<FoliaElement *>&dependencies ){
   //  cerr << "\nlookup "<< word << " in " << dependencies << endl;
   for ( size_t i=0; i < dependencies.size(); ++i ){
     //    cerr << "\nprobeer " << dependencies[i] << endl;
     try {
-      vector<AbstractElement *> dv = dependencies[i]->select( DependencyDependent_t );
+      vector<FoliaElement *> dv = dependencies[i]->select( DependencyDependent_t );
       if ( !dv.empty() ){
-	vector<AbstractElement *> v = dv[0]->select( Word_t );
+	vector<FoliaElement *> v = dv[0]->select( Word_t );
 	for ( size_t j=0; j < v.size(); ++j ){
 	  if ( v[j] == word ){
 	    //	    cerr << "\nfound word " << v[j] << endl;
@@ -497,19 +497,19 @@ AbstractElement *lookupDep( const AbstractElement *word,
 }
 
 void displayMWU( ostream& os, size_t index, 
-		 const vector<AbstractElement *> mwu ){
+		 const vector<FoliaElement *> mwu ){
   string wrd;
   string pos;
   string lemma;
   string morph;
   double conf = 1;
   for ( size_t p=0; p < mwu.size(); ++p ){
-    AbstractElement *word = mwu[p];
+    FoliaElement *word = mwu[p];
     try { 
       wrd += word->str();
-      AbstractElement *postag = word->annotation(Pos_t);
+      FoliaElement *postag = word->annotation(Pos_t);
       pos += postag->cls() + "(";
-      vector<AbstractElement*> feats = postag->select( Feature_t );
+      vector<FoliaElement*> feats = postag->select( Feature_t );
       for ( size_t i=0; i < feats.size(); ++i ){
 	pos += feats[i]->cls();
 	if ( i < feats.size()-1 )
@@ -533,9 +533,9 @@ void displayMWU( ostream& os, size_t index,
     catch (... ){
     }
     try { 
-      vector<AbstractElement*> ml = word->annotations(Morphology_t);
+      vector<FoliaElement*> ml = word->annotations(Morphology_t);
       for ( size_t q=0; q < ml.size(); ++q ){
-	vector<AbstractElement*> m = ml[q]->annotations(Morpheme_t);
+	vector<FoliaElement*> m = ml[q]->annotations(Morpheme_t);
 	for ( size_t t=0; t < m.size(); ++t ){
 	  morph += "[" + UnicodeToUTF8( m[t]->text() ) + "]";
 	}
@@ -552,16 +552,16 @@ void displayMWU( ostream& os, size_t index,
   os << index << "\t" << wrd << "\t" << lemma << "\t" << morph << "\t" << pos << "\t" << std::fixed << conf;
 }  
 
-ostream &showResults( ostream& os, const AbstractElement* sentence ){
-  vector<AbstractElement *> words = sentence->words();
-  vector<AbstractElement *> entities = sentence->select( Entity_t );
-  vector<AbstractElement *> dependencies = sentence->select( Dependency_t );
+ostream &showResults( ostream& os, const FoliaElement* sentence ){
+  vector<FoliaElement *> words = sentence->words();
+  vector<FoliaElement *> entities = sentence->select( Entity_t );
+  vector<FoliaElement *> dependencies = sentence->select( Dependency_t );
   size_t index = 1;
-  map<AbstractElement*, int> enumeration;
-  vector<vector<AbstractElement *> > mwus;
+  map<FoliaElement*, int> enumeration;
+  vector<vector<FoliaElement *> > mwus;
   for( size_t i=0; i < words.size(); ++i ){
-    AbstractElement *word = words[i];
-    vector<AbstractElement *> mwu = lookup( word, entities );
+    FoliaElement *word = words[i];
+    vector<FoliaElement *> mwu = lookup( word, entities );
     for ( size_t j=0; j < mwu.size(); ++j ){
       enumeration[mwu[j]] = index;
     }
@@ -573,9 +573,9 @@ ostream &showResults( ostream& os, const AbstractElement* sentence ){
     displayMWU( os, i+1, mwus[i] );
     if ( doParse ){
       string cls;
-      AbstractElement *dep = lookupDep( mwus[i][0], dependencies );
+      FoliaElement *dep = lookupDep( mwus[i][0], dependencies );
       if ( dep ){
-	vector<AbstractElement *> w = dep->select( DependencyHead_t );
+	vector<FoliaElement *> w = dep->select( DependencyHead_t );
 	os << "\t" << enumeration.find(w[0]->index(0))->second << "\t" << dep->cls();
       }
       else {
@@ -619,7 +619,7 @@ void Test( istream& IN,
   // Tokenize the whole input into one FoLiA document.
   // This is nog a good idea on the long term, I think
 
-  vector<AbstractElement*> sentences = doc.sentences();
+  vector<FoliaElement*> sentences = doc.sentences();
   size_t numS = sentences.size();
   if ( numS > 0 ) { //process sentences 
     if  (tpDebug > 0) *Log(theErrLog) << "[tokenize] " << numS << " sentence(s) in buffer, processing..." << endl;

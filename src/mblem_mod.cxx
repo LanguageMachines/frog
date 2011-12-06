@@ -154,7 +154,7 @@ bool isSimilar( const string& tag, const string& cgnTag ){
     similar( tag, cgnTag, "ovt,1,ev" );
 }
 
-void addAnnotation( folia::AbstractElement *word,
+void addAnnotation( folia::FoliaElement *word,
 		    const string& cls ){
   folia::KWargs args = folia::getArgs( "set='mbt-lemma', cls='" 
 				       + escape(cls) + "', annotator='mblem'" );
@@ -164,9 +164,9 @@ void addAnnotation( folia::AbstractElement *word,
   }
 }
   
-string Mblem::postprocess( folia::AbstractElement *word ){
+string Mblem::postprocess( folia::FoliaElement *word ){
   string tag = word->pos() + "(";
-  vector<folia::AbstractElement *> feats = word->select( folia::Feature_t );
+  vector<folia::FoliaElement *> feats = word->select( folia::Feature_t );
   for( size_t i=0; i < feats.size(); ++i ){
     tag += feats[i]->cls();
     if ( i < feats.size()-1 )
@@ -204,7 +204,7 @@ string Mblem::postprocess( folia::AbstractElement *word ){
   return res;
 } 
 
-string Mblem::Classify( folia::AbstractElement *sword ){
+string Mblem::Classify( folia::FoliaElement *sword ){
   string word = sword->str();
   string tag = sword->pos();
   if ( tag == "SPEC" ) {

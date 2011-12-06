@@ -302,7 +302,7 @@ string getSubSet( const string& val, const string& head ){
 			   "' whithin the constraints for '" + head + "'" );
 }
 
-void addTag( AbstractElement *word, const string& inputTag, double confidence ){
+void addTag( FoliaElement *word, const string& inputTag, double confidence ){
   string mainTag;
   string tagPartS;
   string annotator = "MBT";
@@ -336,20 +336,20 @@ void addTag( AbstractElement *word, const string& inputTag, double confidence ){
   KWargs args = getArgs( "set='mbt-pos', cls='" + mainTag
 			 + "', annotator='" + annotator + "', confidence='" 
 			 + toString(confidence) + "'" );
-  AbstractElement *pos = word->addPosAnnotation( args );
+  FoliaElement *pos = word->addPosAnnotation( args );
   vector<string> tagParts;
   size_t numParts = Timbl::split_at( tagPartS, tagParts, "," );
   for ( size_t i=0; i < numParts; ++i ){
     string arg = "set='mbt-pos', subset='" + getSubSet( tagParts[i], mainTag ) 
       + "', cls='" + tagParts[i] + "', annotator='MBT'";
-    AbstractElement *feat = new folia::Feature( arg );
+    FoliaElement *feat = new folia::Feature( arg );
     pos->append( feat );
   }
 }
 
-string MBTagger::Classify( AbstractElement *sent ){
+string MBTagger::Classify( FoliaElement *sent ){
   string tagged;
-  vector<AbstractElement*> swords = sent->words();
+  vector<FoliaElement*> swords = sent->words();
   if ( !swords.empty() ) {
     vector<string> words;
     string sentence; // the tagger needs the whole sentence

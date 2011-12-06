@@ -43,13 +43,13 @@
 using namespace Timbl;
 using namespace std;
 
-mwuAna::mwuAna( folia::AbstractElement *fwrd ){
+mwuAna::mwuAna( folia::FoliaElement *fwrd ){
   spec = false;
   fword = fwrd;
   word = fwrd->str();
   string tag = fwrd->pos();
   if ( tag == "SPEC" ){
-    vector<folia::AbstractElement *> feats = fwrd->select( folia::Feature_t );
+    vector<folia::FoliaElement *> feats = fwrd->select( folia::Feature_t );
     spec = ( feats.size() == 1 && feats[0]->cls() == "deeleigen" );
   }
 }  
@@ -69,9 +69,9 @@ complexAna *complexAna::append( const mwuAna *add ){
   return this;
 }
 
-void mwuAna::addEntity( folia::AbstractElement *sent ){
+void mwuAna::addEntity( folia::FoliaElement *sent ){
   if ( fwords.size() > 0 ){
-    folia::AbstractElement *el = 0;
+    folia::FoliaElement *el = 0;
     try {
       el = sent->annotation( folia::Entities_t );
     }
@@ -82,7 +82,7 @@ void mwuAna::addEntity( folia::AbstractElement *sent ){
 	sent->append( el );
       }
     }
-    folia::AbstractElement *e = new folia::Entity("");
+    folia::FoliaElement *e = new folia::Entity("");
 #pragma omp critical(foliaupdate)
     {
       el->append( e );
@@ -102,7 +102,7 @@ void Mwu::reset(){
   mWords.clear();
 }
 
-void Mwu::add( folia::AbstractElement *word ){
+void Mwu::add( folia::FoliaElement *word ){
   mWords.push_back( new mwuAna( word ) );
 }
 
@@ -160,9 +160,9 @@ ostream &operator <<( ostream& os,
   return os;
 }
 
-void Mwu::Classify( folia::AbstractElement *sent ){
+void Mwu::Classify( folia::FoliaElement *sent ){
   reset();
-  vector<folia::AbstractElement*> words = sent->words();
+  vector<folia::FoliaElement*> words = sent->words();
   for ( size_t i=0; i < words.size(); ++i )
     add( words[i] );  
   Classify();

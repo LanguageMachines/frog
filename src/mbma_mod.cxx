@@ -562,9 +562,9 @@ void Mbma::execute( const UnicodeString& word,
   }
 }
 
-void Mbma::addMorph( folia::AbstractElement *word, 
+void Mbma::addMorph( folia::FoliaElement *word, 
 		     const vector<string>& lemmas ){
-  folia::AbstractElement *ml = new folia::MorphologyLayer("");
+  folia::FoliaElement *ml = new folia::MorphologyLayer("");
 #pragma omp critical(foliaupdate)
   {
     word->append( ml );
@@ -573,12 +573,12 @@ void Mbma::addMorph( folia::AbstractElement *word,
   int offset = 0;
   string args = "annotator='mbma'";
   for ( size_t p=0; p < lemmas.size(); ++p ){
-    folia::AbstractElement *m = new folia::Morpheme("");
+    folia::FoliaElement *m = new folia::Morpheme("");
 #pragma omp critical(foliaupdate)
     {
       ml->append( m );
     }
-    folia::AbstractElement *t = 
+    folia::FoliaElement *t = 
       new folia::TextContent( "value='" + escape( lemmas[p]) + 
 			      "', offset='" + toString(offset) + "'" );
     offset += lemmas[p].length();
@@ -589,7 +589,7 @@ void Mbma::addMorph( folia::AbstractElement *word,
   }
 }	  
       
-void Mbma::postprocess( folia::AbstractElement *fword ){
+void Mbma::postprocess( folia::FoliaElement *fword ){
   if (debugFlag){
     for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
       cout << it->getTag() << it->getInflection()<< " ";
@@ -648,7 +648,7 @@ void Mbma::postprocess( folia::AbstractElement *fword ){
       addMorph( fword, ma );
     } 
     else {
-      vector<folia::AbstractElement *> feats = fword->annotation( folia::Pos_t)->select( folia::Feature_t );
+      vector<folia::FoliaElement *> feats = fword->annotation( folia::Pos_t)->select( folia::Feature_t );
       if (debugFlag){
 	cout << "tag: " << tag << endl;
 	for ( size_t q =0 ; q < feats.size(); ++q ) {
@@ -728,7 +728,7 @@ void Mbma::postprocess( folia::AbstractElement *fword ){
   }
 }  // postprocess
 
-bool Mbma::Classify( folia::AbstractElement* sword ){
+bool Mbma::Classify( folia::FoliaElement* sword ){
   UnicodeString uWord = sword->text();
   string tag = sword->pos();
   if ( tag.find( "SPEC" ) == 0 ){

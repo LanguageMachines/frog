@@ -49,13 +49,13 @@ class Mblem {
   Mblem();
   ~Mblem();
   bool init( const Configuration& );
-  std::string Classify( folia::AbstractElement * );
+  std::string Classify( folia::FoliaElement * );
  private:
   void read_transtable( const std::string& );
   void create_MBlem_defaults();
   bool readsettings( const std::string& dir, const std::string& fname );
   std::string make_instance( const UnicodeString& in );
-  std::string postprocess( folia::AbstractElement * );
+  std::string postprocess( folia::FoliaElement * );
   Timbl::TimblAPI *myLex;
   std::string punctuation;
   size_t history;
