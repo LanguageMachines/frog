@@ -71,6 +71,7 @@ string TestFileName;
 string testDirName;
 string tmpDirName;
 string outputFileName;
+string XMLoutFileName;
 string outputDirName;
 set<string> fileNames;
 string ProgName;
@@ -261,6 +262,10 @@ bool parse_args( TimblOpts& Opts ) {
   else if ( Opts.Find ('o', value, mood)) {
     outputFileName = value;
     Opts.Delete('o');
+  };
+  if ( Opts.Find ('X', value, mood)) {
+    XMLoutFileName = value;
+    Opts.Delete('X');
   };
   if ( Opts.Find ('S', value, mood)) {
     doServer = true;
@@ -648,8 +653,10 @@ void Test( istream& IN,
     *Log(theErrLog) << "Parsing (total)   took: " << timers.parseTimer << endl;
   }
   *Log(theErrLog) << "Frogging took:      " << frogTimer << endl;
-  doc.save( "frog-folia.xml" );
-  *Log(theErrLog) << "debug:: resulting FoLiA doc saved in frog-folia.xml" << endl;
+  if ( !XMLoutFileName.empty() ){
+    doc.save( XMLoutFileName );
+    *Log(theErrLog) << "resulting FoLiA doc saved in " << XMLoutFileName << endl;
+  }
   return;
 }
 
