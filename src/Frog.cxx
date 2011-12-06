@@ -427,7 +427,7 @@ void TestSentence( AbstractElement* sent,
 	{
 	  timers.mblemTimer.start();
 	  if (tpDebug) cout << "Calling mblem..." << endl;
-	  mblemLemma = myMblem.Classify( swords[i], tags[i] );
+	  mblemLemma = myMblem.Classify( swords[i] );
 	  timers.mblemTimer.stop();
 	}
       }

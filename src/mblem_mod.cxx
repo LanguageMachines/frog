@@ -153,8 +153,26 @@ bool isSimilar( const string& tag, const string& cgnTag ){
     similar( tag, cgnTag, "ovt,2,ev" ) ||
     similar( tag, cgnTag, "ovt,1,ev" );
 }
+
+void addAnnotation( folia::AbstractElement *word,
+		    const string& cls ){
+  folia::KWargs args = folia::getArgs( "set='mbt-lemma', cls='" 
+				       + escape(cls) + "', annotator='mblem'" );
+#pragma omp critical(foliaupdate)
+  {
+    word->addLemmaAnnotation( args );
+  }
+}
   
-string Mblem::postprocess( const string& tag ){
+string Mblem::postprocess( folia::AbstractElement *word ){
+  string tag = word->pos() + "(";
+  vector<folia::AbstractElement *> feats = word->select( folia::Feature_t );
+  for( size_t i=0; i < feats.size(); ++i ){
+    tag += feats[i]->cls();
+    if ( i < feats.size()-1 )
+      tag += ",";
+  }
+  tag += ")";
   if ( debug ){
     cout << "\n\tlemmas: ";
     for( vector<mblemData>::const_iterator it=mblemResult.begin(); 
@@ -182,21 +200,11 @@ string Mblem::postprocess( const string& tag ){
   }
   if (debug)
     cout << "final MBLEM lemma: " << res << endl;
+  addAnnotation( word, res );
   return res;
 } 
 
-void addAnnotation( folia::AbstractElement *word,
-		    const string& cls ){
-  folia::KWargs args = folia::getArgs( "set='mbt-lemma', cls='" 
-				       + escape(cls) + "', annotator='mblem'" );
-#pragma omp critical(foliaupdate)
-  {
-    word->addLemmaAnnotation( args );
-  }
-}
-
-string Mblem::Classify( folia::AbstractElement *sword,
-			const string& intag ){
+string Mblem::Classify( folia::AbstractElement *sword ){
   string word = sword->str();
   string tag = sword->pos();
   if ( tag == "SPEC" ) {
@@ -349,7 +357,6 @@ string Mblem::Classify( folia::AbstractElement *sword,
     }
     cout << "\n\n";
   }
-  string res = postprocess( intag ); 
-  addAnnotation( sword, res );
+  string res = postprocess( sword ); 
   return res;
 }
