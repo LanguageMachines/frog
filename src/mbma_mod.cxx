@@ -616,8 +616,7 @@ folia::AbstractElement *Mbma::createFeature( char c ) const {
 }
 
 void Mbma::addMorph( folia::AbstractElement *word, 
-		     const vector<string>& lemmas,
-		     const string& infl ){
+		     const vector<string>& lemmas ){
   folia::AbstractElement *ml = new folia::MorphologyLayer("");
 #pragma omp critical(foliaupdate)
   {
@@ -640,20 +639,10 @@ void Mbma::addMorph( folia::AbstractElement *word,
     {
       m->append( t );
     }
-//     if ( !infl.empty() && infl[0] != 'X' ){
-//       folia::AbstractElement *t = createFeature( infl[0] );
-// #pragma omp critical(foliaupdate)
-//       {
-// 	m->append( t );
-//       }
-      
-//     }
   }
 }	  
       
-void Mbma::postprocess( const UnicodeString& word,
-			const string& mainTag,
-			folia::AbstractElement *fword ){
+void Mbma::postprocess( folia::AbstractElement *fword ){
   if (debugFlag){
     for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
       cout << it->getTag() << it->getInflection()<< " ";
@@ -665,8 +654,8 @@ void Mbma::postprocess( const UnicodeString& word,
   
   if (debugFlag)
       cout << "before morpho: " << endl;
-  
-  map<string,string>::const_iterator tagIt = TAGconv.find( mainTag );
+  const string tag = fword->pos();
+  map<string,string>::const_iterator tagIt = TAGconv.find( tag );
   if ( tagIt == TAGconv.end() ) {
     //
     // this should never happen
@@ -674,6 +663,7 @@ void Mbma::postprocess( const UnicodeString& word,
     if (debugFlag){
       cout << "no match!\n";
     } 
+    throw folia::ValueError( "unknown pos tag value '" + tag + "'" );
   }
   else {
     if (debugFlag){
@@ -701,17 +691,19 @@ void Mbma::postprocess( const UnicodeString& word,
     if ( match == 0 ) {
       // fallback option: use the word and pretend it's a lemma ;-)
       vector<string> tmp;
+      UnicodeString word = fword->text();
+      word.toLower();
       tmp.push_back( folia::UnicodeToUTF8(word) );
       addMorph( fword, tmp );
     }
     else if (match == 1) {
       const vector<string> ma = analysis[matches[0]].getMorph();
-      addMorph( fword, ma, analysis[matches[0]].getInflection() );
+      addMorph( fword, ma );
     } 
     else {
       vector<folia::AbstractElement *> feats = fword->annotation( folia::Pos_t)->select( folia::Feature_t );
       if (debugFlag){
-	cout << "tag: " << mainTag << endl;
+	cout << "tag: " << tag << endl;
 	for ( size_t q =0 ; q < feats.size(); ++q ) {
 	  cout << "\tpart #" << q << ": " << feats[q]->cls() << endl;
 	}
@@ -750,7 +742,7 @@ void Mbma::postprocess( const UnicodeString& word,
 	int match_count = 0;
 	string inflection = analysis[matches[q]].getInflection();
 	if (debugFlag)
-	  cout << "matching " << inflection << " with " << mainTag << endl;
+	  cout << "matching " << inflection << " with " << tag << endl;
 	for ( size_t u=0; u < feats.size(); ++u ) {
 	  map<string,string>::const_iterator conv_tag_p = TAGconv.find(feats[u]->cls());
 	  if (conv_tag_p != TAGconv.end()) {
@@ -820,7 +812,7 @@ bool Mbma::Classify( folia::AbstractElement* sword ){
     classes[0] = "X";
   
   execute( uWord, classes );
-  postprocess( uWord, tag, sword );
+  postprocess( sword );
   return true;
 }
 

@@ -69,14 +69,11 @@ class Mbma {
   MBMAana inflectAndAffix( const std::vector<waStruct>& ana );
   void execute( const UnicodeString& word, 
 		const std::vector<std::string>& classes );
-  void postprocess( const UnicodeString&,
-		    const std::string&,
-		    folia::AbstractElement * );
+  void postprocess( folia::AbstractElement * );
   int debugFlag;
   folia::AbstractElement *createFeature( char c ) const;
   void addMorph( folia::AbstractElement *, 
-		 const std::vector<std::string>&,
-		 const std::string& = "" );
+		 const std::vector<std::string>& );
   std::string MTreeFilename;
   Timbl::TimblAPI *MTree;
   std::map<char,std::string> iNames;  
