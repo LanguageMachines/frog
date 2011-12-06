@@ -407,10 +407,8 @@ void TestSentence( AbstractElement* sent,
       omp_set_num_threads( 1 );
     }
     timers.tagTimer.start();
-    vector<string> tags;
-    string tagged = myTagger.Classify( sent, tags );
+    string tagged = myTagger.Classify( sent );
     timers.tagTimer.stop();
-    myMwu.reset();
     for ( size_t i = 0; i < swords.size(); ++i ) {
       string mbmaLemma;
       string mblemLemma;
@@ -433,10 +431,9 @@ void TestSentence( AbstractElement* sent,
       }
       if (tpDebug) {
 	cout   << "tagged word[" << i <<"]: " << swords[i]->str() << " tag "
-	       << tags[i] << endl;
+	       << swords[i]->pos() << endl;
 	cout << "analysis: " << mblemLemma << " " << mbmaLemma << endl;
       }
-      myMwu.add( swords[i], tags[i] );  
     } //for int i = 0 to num_words
 
     if ( doMwu ){

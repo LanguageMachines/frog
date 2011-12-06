@@ -36,7 +36,7 @@ class MBTagger {
   MBTagger();
   ~MBTagger();
   bool init( const Configuration& );
-  std::string Classify( folia::AbstractElement*, std::vector<std::string>& );
+  std::string Classify( folia::AbstractElement * );
  private:
   MbtAPI *tagger;  
 };

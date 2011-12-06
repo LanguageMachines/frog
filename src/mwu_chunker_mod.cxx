@@ -43,18 +43,14 @@
 using namespace Timbl;
 using namespace std;
 
-mwuAna::mwuAna( folia::AbstractElement *fwrd,
-		const std::string& tag ){
+mwuAna::mwuAna( folia::AbstractElement *fwrd ){
   spec = false;
   fword = fwrd;
   word = fwrd->str();
-  std::vector<std::string> parts;
-  int num = Timbl::split_at_first_of( tag, parts, "()" );
-  if ( num < 1 ){
-    throw runtime_error("tag should look like 'Main_Tag(Subtags)' but it is: '" + tag + "'" );
-  }
-  else {
-    spec = ( tag == "SPEC(deeleigen)" );
+  string tag = fwrd->pos();
+  if ( tag == "SPEC" ){
+    vector<folia::AbstractElement *> feats = fwrd->select( folia::Feature_t );
+    spec = ( feats.size() == 1 && feats[0]->cls() == "deeleigen" );
   }
 }  
 
@@ -106,8 +102,8 @@ void Mwu::reset(){
   mWords.clear();
 }
 
-void Mwu::add( folia::AbstractElement *fw, const std::string& tag ){
-  mWords.push_back( new mwuAna( fw, tag ) );
+void Mwu::add( folia::AbstractElement *word ){
+  mWords.push_back( new mwuAna( word ) );
 }
 
 
@@ -165,6 +161,10 @@ ostream &operator <<( ostream& os,
 }
 
 void Mwu::Classify( folia::AbstractElement *sent ){
+  reset();
+  vector<folia::AbstractElement*> words = sent->words();
+  for ( size_t i=0; i < words.size(); ++i )
+    add( words[i] );  
   Classify();
   for( size_t i = 0; i < mWords.size(); ++i ){
     mWords[i]->addEntity( sent );

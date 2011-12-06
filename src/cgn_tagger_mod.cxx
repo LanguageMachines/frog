@@ -280,7 +280,9 @@ void addTag( AbstractElement *word, const string& inputTag, double confidence ){
     tagPartS = "afk";
     confidence = 1.0;
   }
-  else if ( ucto_class == "SMILEY" ){
+  else if ( ucto_class == "SMILEY" ||
+	    ucto_class == "URL-WWW" ||
+	    ucto_class == "E-MAIL" ){
     annotator = "ucto";
     mainTag = "SPEC";
     tagPartS = "symb";
@@ -312,8 +314,7 @@ void addTag( AbstractElement *word, const string& inputTag, double confidence ){
   }
 }
 
-string MBTagger::Classify( AbstractElement *sent, vector<string>& tags ){
-  tags.clear();
+string MBTagger::Classify( AbstractElement *sent ){
   string tagged;
   vector<AbstractElement*> swords = sent->words();
   if ( !swords.empty() ) {
@@ -336,6 +337,7 @@ string MBTagger::Classify( AbstractElement *sent, vector<string>& tags ){
 	   << endl;
     }
     vector<double> conf;
+    vector<string> tags;
     int num_words = splitWT( tagged, tags, conf );
     for ( int i = 0; i < num_words; ++i ) {
       addTag( swords[i], tags[i], conf[i] );
