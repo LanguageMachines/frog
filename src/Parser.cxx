@@ -728,7 +728,7 @@ void Parser::createRelDir( const parseData& pd ){
 void Parser::prepareParse( FoliaElement *sent, parseData& pd ) {
 
   pd.clear();
-  vector<FoliaElement *> fwords = sent->words();
+  vector<Word*> fwords = sent->words();
   vector<FoliaElement *> entities = sent->select( Entity_t );
   
   for( size_t i=0; i < fwords.size(); ++i ){

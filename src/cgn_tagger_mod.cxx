@@ -349,7 +349,7 @@ void addTag( FoliaElement *word, const string& inputTag, double confidence ){
 
 string MBTagger::Classify( FoliaElement *sent ){
   string tagged;
-  vector<FoliaElement*> swords = sent->words();
+  vector<Word*> swords = sent->words();
   if ( !swords.empty() ) {
     vector<string> words;
     string sentence; // the tagger needs the whole sentence

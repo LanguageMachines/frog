@@ -400,7 +400,7 @@ bool parse_args( TimblOpts& Opts ) {
 void TestSentence( FoliaElement* sent,
 		   const string& tmpDir,
 		   TimerBlock& timers ){
-  vector<FoliaElement*> swords = sent->words();
+  vector<Word*> swords = sent->words();
   if ( !swords.empty() ) {
     if (tpDebug) {
       // don't mangle debug output, so run 1 thread then
@@ -553,7 +553,7 @@ void displayMWU( ostream& os, size_t index,
 }  
 
 ostream &showResults( ostream& os, const FoliaElement* sentence ){
-  vector<FoliaElement *> words = sentence->words();
+  vector<Word*> words = sentence->words();
   vector<FoliaElement *> entities = sentence->select( Entity_t );
   vector<FoliaElement *> dependencies = sentence->select( Dependency_t );
   size_t index = 1;
@@ -619,7 +619,7 @@ void Test( istream& IN,
   // Tokenize the whole input into one FoLiA document.
   // This is nog a good idea on the long term, I think
 
-  vector<FoliaElement*> sentences = doc.sentences();
+  vector<Sentence*> sentences = doc.sentences();
   size_t numS = sentences.size();
   if ( numS > 0 ) { //process sentences 
     if  (tpDebug > 0) *Log(theErrLog) << "[tokenize] " << numS << " sentence(s) in buffer, processing..." << endl;

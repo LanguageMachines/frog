@@ -162,7 +162,7 @@ ostream &operator <<( ostream& os,
 
 void Mwu::Classify( folia::FoliaElement *sent ){
   reset();
-  vector<folia::FoliaElement*> words = sent->words();
+  vector<folia::Word*> words = sent->words();
   for ( size_t i=0; i < words.size(); ++i )
     add( words[i] );  
   Classify();
