@@ -44,6 +44,135 @@ MBTagger::~MBTagger(){
   delete tagger;
 }
 
+static multimap<string,string> cgnSubSets;
+static multimap<string,string> cgnConstraints;
+
+void fillSubSetTable(){
+  // should become a config file!
+  cgnSubSets.insert( make_pair("soort", "ntype" ));
+  cgnSubSets.insert( make_pair("eigen", "ntype" ));
+  
+  cgnSubSets.insert( make_pair("ev", "getal" ));
+  cgnSubSets.insert( make_pair("mv", "getal" ));
+  cgnSubSets.insert( make_pair("getal", "getal" ));
+  
+  cgnSubSets.insert( make_pair("zijd", "genus" ));
+  cgnSubSets.insert( make_pair("onz", "genus" ));
+  cgnSubSets.insert( make_pair("masc", "genus" ));
+  cgnSubSets.insert( make_pair("fem", "genus" ));
+  cgnSubSets.insert( make_pair("genus", "genus" ) );
+  
+  cgnSubSets.insert( make_pair("stan", "naamval" ));
+  cgnSubSets.insert( make_pair("gen", "naamval" ));
+  cgnSubSets.insert( make_pair("dat", "naamval" ));
+  cgnSubSets.insert( make_pair("nomin", "naamval" ));
+  cgnSubSets.insert( make_pair("obl", "naamval" ));
+  cgnSubSets.insert( make_pair("bijz", "naamval" ));
+    
+  cgnSubSets.insert( make_pair("afgebr", "spectype" ));
+  cgnSubSets.insert( make_pair("afk", "spectype" ));
+  cgnSubSets.insert( make_pair("deeleigen", "spectype" ));
+  cgnSubSets.insert( make_pair("symb", "spectype" ));
+  cgnSubSets.insert( make_pair("vreemd", "spectype" ));
+  cgnSubSets.insert( make_pair("enof", "spectype" ));
+  cgnSubSets.insert( make_pair("meta", "spectype" ));
+  cgnSubSets.insert( make_pair("achter", "spectype" ));
+  cgnSubSets.insert( make_pair("comment", "spectype" ));
+  cgnSubSets.insert( make_pair("onverst", "spectype" ));
+  
+  cgnSubSets.insert( make_pair("neven", "conjtype" ));
+  cgnSubSets.insert( make_pair("onder", "conjtype" ));
+    
+  cgnSubSets.insert( make_pair("init", "vztype" ));
+  cgnSubSets.insert( make_pair("versm", "vztype" ));
+  cgnSubSets.insert( make_pair("fin", "vztype" ));
+    
+  cgnSubSets.insert( make_pair("agr", "npagr" ));
+  cgnSubSets.insert( make_pair("evon", "npagr" ));
+  cgnSubSets.insert( make_pair("rest", "npagr" ));
+  cgnSubSets.insert( make_pair("evz", "npagr" ));
+  cgnSubSets.insert( make_pair( "agr3", "npagr" ));
+  cgnSubSets.insert( make_pair( "evmo", "npagr" ));
+  cgnSubSets.insert( make_pair( "rest3", "npagr" ));
+  cgnSubSets.insert( make_pair("evf", "npagr" ));
+  
+  cgnSubSets.insert( make_pair("bep", "lwtype" ));
+  cgnSubSets.insert( make_pair("onbep", "lwtype" ));
+  
+  cgnSubSets.insert( make_pair("pers", "vwtype" ));
+  cgnSubSets.insert( make_pair("pr", "vwtype" ));
+  cgnSubSets.insert( make_pair( "refl1", "vwtype" ));
+  cgnSubSets.insert( make_pair("recip", "vwtype" ));
+  cgnSubSets.insert( make_pair("bez", "vwtype" ));
+  cgnSubSets.insert( make_pair("vb", "vwtype" ));
+  cgnSubSets.insert( make_pair("vrag", "vwtype" ));
+  cgnSubSets.insert( make_pair("betr", "vwtype" ));
+  cgnSubSets.insert( make_pair("excl", "vwtype" ));
+  cgnSubSets.insert( make_pair("aanw", "vwtype" ));
+  cgnSubSets.insert( make_pair("onbep", "vwtype" ));
+    
+  cgnSubSets.insert( make_pair("adv-pron", "pdtype" ));
+  cgnSubSets.insert( make_pair("pron", "pdtype" ));
+  cgnSubSets.insert( make_pair("det", "pdtype" ));
+  cgnSubSets.insert( make_pair("grad", "pdtype" ));
+  
+  cgnSubSets.insert( make_pair("vol", "status" ));
+  cgnSubSets.insert( make_pair("red", "status" ));
+  cgnSubSets.insert( make_pair("nadr", "status" ));
+  
+  cgnSubSets.insert( make_pair("1", "persoon" ));
+  cgnSubSets.insert( make_pair("2", "persoon" ));
+  cgnSubSets.insert( make_pair("2v", "persoon" ));
+  cgnSubSets.insert( make_pair("2b", "persoon" ));
+  cgnSubSets.insert( make_pair("3", "persoon" ));
+  cgnSubSets.insert( make_pair("3p", "persoon" ));
+  cgnSubSets.insert( make_pair("3m", "persoon" ));
+  cgnSubSets.insert( make_pair("3v", "persoon" ));
+  cgnSubSets.insert( make_pair("3o", "persoon" ));
+  cgnSubSets.insert( make_pair("persoon", "persoon" ));
+  
+  cgnSubSets.insert( make_pair("prenom", "positie" ));
+  cgnSubSets.insert( make_pair("postnom", "positie" ));
+  cgnSubSets.insert( make_pair("nom", "positie" ));
+  cgnSubSets.insert( make_pair("vrij", "positie" ));
+  
+  cgnSubSets.insert( make_pair("zonder", "buiging" ));
+  cgnSubSets.insert( make_pair("met-e", "buiging" ));
+  cgnSubSets.insert( make_pair("met-s", "buiging" ));
+    
+  cgnSubSets.insert( make_pair("zonder-v", "getal-n" ));
+  cgnSubSets.insert( make_pair("mv-n", "getal-n" ));
+  cgnSubSets.insert( make_pair("zonder-n", "getal-n" ));
+    
+  cgnSubSets.insert( make_pair("basis", "graad" ));
+  cgnSubSets.insert( make_pair("comp", "graad" ));
+  cgnSubSets.insert( make_pair("sup", "graad" ));
+  cgnSubSets.insert( make_pair("dim", "graad" ));
+  
+  cgnSubSets.insert( make_pair("pv", "wvorm" ));
+  cgnSubSets.insert( make_pair("inf", "wvorm" ));
+  cgnSubSets.insert( make_pair("vd", "wvorm" ));
+  cgnSubSets.insert( make_pair("od", "wvorm" ));
+    
+  cgnSubSets.insert( make_pair("tgw", "pvtijd" ));
+  cgnSubSets.insert( make_pair("verl", "pvtijd" ));
+  cgnSubSets.insert( make_pair("conj", "pvtijd" ));
+  
+  cgnSubSets.insert( make_pair("ev", "pvagr" ));
+  cgnSubSets.insert( make_pair("mv", "pvagr" ));
+  cgnSubSets.insert( make_pair( "met-t", "pvagr" ));
+    
+  cgnSubSets.insert( make_pair("hoofd", "numtype" ));
+  cgnSubSets.insert( make_pair("rang", "numtype" ));
+  
+  cgnSubSets.insert( make_pair("dial", "dial" ));
+
+  cgnConstraints.insert( make_pair( "getal", "N" ) );
+  cgnConstraints.insert( make_pair( "getal", "VNW" ) );
+  cgnConstraints.insert( make_pair( "pvagr", "WW" ) );
+}
+
+ 
 bool MBTagger::init( const Configuration& conf ){
   if ( tagger != 0 ){
     *Log(theErrLog) << "MBTagger is already initialized!" << endl;
@@ -54,6 +183,7 @@ bool MBTagger::init( const Configuration& conf ){
     *Log(theErrLog) << "Unable to find settings for Tagger" << endl;
     return false;
   }
+  fillSubSetTable();
   string init = "-s " + configuration.configDir() + tagset;
   if ( Tagger::Version() == "3.2.6" )
     init += " -vc";
@@ -144,129 +274,32 @@ static int splitWT( const string& tagged,
   return num_words;
 }
 
-string getSubSet( const string& val, const string& tag ){
-  if ( val == "soort" ||
-       val == "eigen" )
-    return "ntype";
-  else if ( ( tag == "N" || tag == "VNW" ) &&
-	    ( val == "ev" ||
-	      val == "mv" ||
-	      val == "getal" ) )
-    return "getal";
-  else if ( val == "zijd" ||
-	    val == "onz" ||
-	    val == "masc" ||
-	    val == "fem" ||
-	    val == "genus" )
-    return "genus";
-  else if ( val == "stan" ||
-	    val == "gen" ||
-	    val == "dat" ||
-	    val == "nomin" ||
-	    val == "obl" ||
-	    val == "bijz" )
-    return "naamval";
-  else if ( val == "afgebr" ||
-	    val == "afk" ||
-	    val == "deeleigen" ||
-	    val == "symb" ||
-	    val == "vreemd" ||
-	    val == "enof" ||
-	    val == "meta" ||
-	    val == "achter" ||
-	    val == "comment" ||
-	    val == "onverst" )
-    return "spectype";
-  else if ( val == "neven" ||
-	    val == "onder" )
-    return "conjtype";
-  else if ( val == "init" ||
-	    val == "versm" ||
-	    val == "fin" )
-    return "vztype";
-  else if ( val == "agr" ||
-	    val == "evon" ||
-	    val == "rest" ||
-	    val == "evz" ||
-	    val == "agr3" ||
-	    val == "evmo" ||
-	    val == "rest3" ||
-	    val == "evf" )
-    return "npagr";
-  else if ( val == "bep" ||
-	    val == "onbep" )
-    return "lwtype";
-  else if ( val == "pers" ||
-	    val == "pr" ||
-	    val == "refl1" ||
-	    val == "recip" ||
-	    val == "bez" ||
-	    val == "vb" ||
-	    val == "vrag" ||
-	    val == "betr" ||
-	    val == "excl" ||
-	    val == "aanw" ||
-	    val == "onbep" )
-    return "vwtype";
-  else if ( val == "adv-pron" ||
-	    val == "pron" ||
-	    val == "det" ||
-	    val == "grad" )
-    return "pdtype";
-  else if ( val == "vol" ||
-	    val == "red" ||
-	    val == "nadr" )
-    return "status";
-  else if ( val == "1" ||
-	    val == "2" ||
-	    val == "2v" ||
-	    val == "2b" ||
-	    val == "3" ||
-	    val == "3p" ||
-	    val == "3m" ||
-	    val == "3v" ||
-	    val == "3o" ||
-	    val == "persoon" )
-    return "persoon";
-  else if ( val == "prenom" ||
-	    val == "postnom" ||
-	    val == "nom" ||
-	    val == "vrij" )
-    return "positie";
-  else if ( val == "zonder" ||
-	    val == "met-e" ||
-	    val == "met-s" )
-    return "buiging";
-  else if ( val == "zonder-v" ||
-	    val == "mv-n" ||
-	    val == "zonder-n" )
-    return "getal-n";
-  else if ( val == "basis" ||
-	    val == "comp" ||
-	    val == "sup" ||
-	    val == "dim" )
-    return "graad";
-  else if ( val == "pv" ||
-	    val == "inf" ||
-	    val == "vd" ||
-	    val == "od" )
-    return "wvorm";
-  else if ( val == "tgw" ||
-	    val == "verl" ||
-	    val == "conj" )
-    return "pvtijd";
-  else if ( tag == "WW" &&
-	    ( val == "ev" ||
-	      val == "mv" ||
-	      val == "met-t" ) )
-    return "pvagr";
-  else if ( val == "hoofd" ||
-	    val == "rang" )
-    return "numtype";
-  else if ( val == "dial" )
-    return "dial";
-  else
-    throw folia::ValueError( "unknown cgn subset for tag: '" + val + "'" );
+string getSubSet( const string& val, const string& head ){
+  typedef multimap<string,string>::const_iterator mm_iter;
+  mm_iter it = cgnSubSets.find( val );
+  if ( it == cgnSubSets.end() )
+    throw folia::ValueError( "unknown cgn subset for class: '" + val + "'" );
+  string result;
+  while ( it != cgnSubSets.upper_bound(val) ){
+    result = it->second;
+    mm_iter cit = cgnConstraints.find( result );
+    if ( cit == cgnConstraints.end() ){
+      // no constraints on this value
+      return result;
+    }
+    else {
+      while ( cit != cgnConstraints.upper_bound( result ) ){
+	if ( cit->second == head ) {
+	  // allowed
+	  return result;
+	}
+	++cit;
+      }
+    }
+    ++it;
+  }
+  throw folia::ValueError( "unable to find cgn subset for class: '" + val + 
+			   "' whithin the constraints for '" + head + "'" );
 }
 
 void addTag( AbstractElement *word, const string& inputTag, double confidence ){
