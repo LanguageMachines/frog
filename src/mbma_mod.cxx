@@ -90,15 +90,6 @@ void Mbma::fillMaps() {
   iNames['a'] = "subjunctive";
 }
 
-string Mbma::getIname( char c ) const {
-  map<char,string>::const_iterator it = iNames.find(c);
-  if ( it != iNames.end() ){
-    return it->second;
-  }
-  else
-    return "";
-}
-
 // BJ: dirty hack with fixed everything to read in tag correspondences
 void Mbma::init_cgn( const string& dir ) {
   string line;
@@ -569,50 +560,6 @@ void Mbma::execute( const UnicodeString& word,
     }
     analysis.push_back( tmp );
   }
-}
-
-string getSubSet( char c ){
-  switch ( c ){
-  case 'e':
-  case 'm':
-    return "number";
-    break;
-  case 'd':
-    return "todo";
-    break;
-  case 'G':
-  case 'D':
-    return "case";
-    break;
-  case 't':
-  case 'v':
-    return "tense";
-    break;
-  case 'C':
-  case 'S':
-    return "degree";
-    break;
-  case 'a':
-  case 'g':
-    return "mood";
-    break;
-  case '1':
-  case '2':
-  case '3':
-    return "person";
-    break;
-  case 'E':
-    return "suffix-e";
-    break;
-  default:
-    return "todo";
-  }
-}
-
-folia::AbstractElement *Mbma::createFeature( char c ) const {
-  string cls = getIname(c);
-  string ss = getSubSet(c);
-  return new folia::Feature( "subset='" + ss + "', class='" + cls + "'" );
 }
 
 void Mbma::addMorph( folia::AbstractElement *word, 
