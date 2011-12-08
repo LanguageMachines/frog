@@ -49,7 +49,7 @@ mwuAna::mwuAna( folia::FoliaElement *fwrd ){
   word = fwrd->str();
   string tag = fwrd->pos();
   if ( tag == "SPEC" ){
-    vector<folia::FoliaElement *> feats = fwrd->select( folia::Feature_t );
+    vector<folia::Feature*> feats = fwrd->select<folia::Feature>();
     spec = ( feats.size() == 1 && feats[0]->cls() == "deeleigen" );
   }
 }  
@@ -73,7 +73,7 @@ void mwuAna::addEntity( folia::FoliaElement *sent ){
   if ( fwords.size() > 0 ){
     folia::FoliaElement *el = 0;
     try {
-      el = sent->annotation( folia::Entities_t );
+      el = sent->annotation<folia::EntitiesLayer>( );
     }
     catch(...){
       el = new folia::EntitiesLayer("");

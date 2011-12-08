@@ -648,7 +648,7 @@ void Mbma::postprocess( folia::FoliaElement *fword ){
       addMorph( fword, ma );
     } 
     else {
-      vector<folia::FoliaElement *> feats = fword->annotation( folia::Pos_t)->select( folia::Feature_t );
+      vector<folia::Feature*> feats = fword->annotation<folia::PosAnnotation>()->select<folia::Feature>();
       if (debugFlag){
 	cout << "tag: " << tag << endl;
 	for ( size_t q =0 ; q < feats.size(); ++q ) {

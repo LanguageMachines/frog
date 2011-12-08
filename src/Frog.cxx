@@ -455,11 +455,10 @@ void TestSentence( FoliaElement* sent,
   }
 }
 
-vector<FoliaElement *> lookup( FoliaElement *word, 
-				  const vector<FoliaElement*>& entities ){
-  vector<FoliaElement*> vec;
+vector<Word*> lookup( Word *word, const vector<Entity*>& entities ){
+  vector<Word*> vec;
   for ( size_t p=0; p < entities.size(); ++p ){
-    vec = entities[p]->select(Word_t);
+    vec = entities[p]->select<Word>();
     if ( !vec.empty() ){
       if ( vec[0]->id() == word->id() ) {
 	// using folia::operator<<;
@@ -473,15 +472,15 @@ vector<FoliaElement *> lookup( FoliaElement *word,
   return vec;
 }
 
-FoliaElement *lookupDep( const FoliaElement *word, 
-			    const vector<FoliaElement *>&dependencies ){
+Dependency *lookupDep( const Word *word, 
+		       const vector<Dependency*>&dependencies ){
   //  cerr << "\nlookup "<< word << " in " << dependencies << endl;
   for ( size_t i=0; i < dependencies.size(); ++i ){
     //    cerr << "\nprobeer " << dependencies[i] << endl;
     try {
-      vector<FoliaElement *> dv = dependencies[i]->select( DependencyDependent_t );
+      vector<DependencyDependent*> dv = dependencies[i]->select<DependencyDependent>();
       if ( !dv.empty() ){
-	vector<FoliaElement *> v = dv[0]->select( Word_t );
+	vector<Word*> v = dv[0]->select<Word>();
 	for ( size_t j=0; j < v.size(); ++j ){
 	  if ( v[j] == word ){
 	    //	    cerr << "\nfound word " << v[j] << endl;
@@ -497,19 +496,19 @@ FoliaElement *lookupDep( const FoliaElement *word,
 }
 
 void displayMWU( ostream& os, size_t index, 
-		 const vector<FoliaElement *> mwu ){
+		 const vector<Word*> mwu ){
   string wrd;
   string pos;
   string lemma;
   string morph;
   double conf = 1;
   for ( size_t p=0; p < mwu.size(); ++p ){
-    FoliaElement *word = mwu[p];
+    Word *word = mwu[p];
     try { 
       wrd += word->str();
-      FoliaElement *postag = word->annotation(Pos_t);
+      PosAnnotation *postag = word->annotation<PosAnnotation>();
       pos += postag->cls() + "(";
-      vector<FoliaElement*> feats = postag->select( Feature_t );
+      vector<folia::Feature*> feats = postag->select<folia::Feature>();
       for ( size_t i=0; i < feats.size(); ++i ){
 	pos += feats[i]->cls();
 	if ( i < feats.size()-1 )
@@ -533,9 +532,9 @@ void displayMWU( ostream& os, size_t index,
     catch (... ){
     }
     try { 
-      vector<FoliaElement*> ml = word->annotations(Morphology_t);
+      vector<MorphologyLayer*> ml = word->annotations<MorphologyLayer>();
       for ( size_t q=0; q < ml.size(); ++q ){
-	vector<FoliaElement*> m = ml[q]->annotations(Morpheme_t);
+	vector<Morpheme*> m = ml[q]->annotations<Morpheme>();
 	for ( size_t t=0; t < m.size(); ++t ){
 	  morph += "[" + UnicodeToUTF8( m[t]->text() ) + "]";
 	}
@@ -554,14 +553,14 @@ void displayMWU( ostream& os, size_t index,
 
 ostream &showResults( ostream& os, const FoliaElement* sentence ){
   vector<Word*> words = sentence->words();
-  vector<FoliaElement *> entities = sentence->select( Entity_t );
-  vector<FoliaElement *> dependencies = sentence->select( Dependency_t );
+  vector<Entity*> entities = sentence->select<Entity>();
+  vector<Dependency*> dependencies = sentence->select<Dependency>();
   size_t index = 1;
   map<FoliaElement*, int> enumeration;
-  vector<vector<FoliaElement *> > mwus;
+  vector<vector<Word*> > mwus;
   for( size_t i=0; i < words.size(); ++i ){
-    FoliaElement *word = words[i];
-    vector<FoliaElement *> mwu = lookup( word, entities );
+    Word *word = words[i];
+    vector<Word*> mwu = lookup( word, entities );
     for ( size_t j=0; j < mwu.size(); ++j ){
       enumeration[mwu[j]] = index;
     }
@@ -573,9 +572,9 @@ ostream &showResults( ostream& os, const FoliaElement* sentence ){
     displayMWU( os, i+1, mwus[i] );
     if ( doParse ){
       string cls;
-      FoliaElement *dep = lookupDep( mwus[i][0], dependencies );
+      Dependency *dep = lookupDep( mwus[i][0], dependencies );
       if ( dep ){
-	vector<FoliaElement *> w = dep->select( DependencyHead_t );
+	vector<DependencyHead*> w = dep->select<DependencyHead>();
 	os << "\t" << enumeration.find(w[0]->index(0))->second << "\t" << dep->cls();
       }
       else {

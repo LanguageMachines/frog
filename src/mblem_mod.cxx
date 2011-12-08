@@ -166,7 +166,7 @@ void addAnnotation( folia::FoliaElement *word,
   
 string Mblem::postprocess( folia::FoliaElement *word ){
   string tag = word->pos() + "(";
-  vector<folia::FoliaElement *> feats = word->select( folia::Feature_t );
+  vector<folia::Feature*> feats = word->select<folia::Feature>();
   for( size_t i=0; i < feats.size(); ++i ){
     tag += feats[i]->cls();
     if ( i < feats.size()-1 )

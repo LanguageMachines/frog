@@ -107,7 +107,7 @@ struct parseData {
   vector<string> words;
   vector<string> heads;
   vector<string> mods;
-  vector<vector<FoliaElement *> > mwus;
+  vector<vector<Word*> > mwus;
 };
 
 ostream& operator<<( ostream& os, const parseData& pd ){
@@ -255,11 +255,11 @@ Parser::~Parser(){
   delete PI;
 }
 
-static vector<FoliaElement *> lookup( FoliaElement *word, 
-				  const vector<FoliaElement*>& entities ){
-  vector<FoliaElement*> vec;
+static vector<Word *> lookup( Word *word, 
+			      const vector<Entity*>& entities ){
+  vector<Word*> vec;
   for ( size_t p=0; p < entities.size(); ++p ){
-    vec = entities[p]->select(Word_t);
+    vec = entities[p]->select<Word>();
     if ( !vec.empty() ){
       if ( vec[0]->id() == word->id() ) {
 	// using folia::operator<<;
@@ -729,20 +729,20 @@ void Parser::prepareParse( FoliaElement *sent, parseData& pd ) {
 
   pd.clear();
   vector<Word*> fwords = sent->words();
-  vector<FoliaElement *> entities = sent->select( Entity_t );
+  vector<Entity*> entities = sent->select<Entity>();
   
   for( size_t i=0; i < fwords.size(); ++i ){
-    FoliaElement *word = fwords[i];
-    vector<FoliaElement *> mwu = lookup( word, entities );
+    Word *word = fwords[i];
+    vector<Word*> mwu = lookup( word, entities );
     if ( !mwu.empty() ){
       string word;
       string head;
       string mod;
       for ( size_t p=0; p < mwu.size(); ++p ){
 	word += mwu[p]->str();
-	FoliaElement *postag = mwu[p]->annotation(Pos_t);
+	PosAnnotation *postag = mwu[p]->annotation<PosAnnotation>();
 	head += postag->cls();
-	vector<FoliaElement*> feats = postag->select( Feature_t );
+	vector<folia::Feature*> feats = postag->select<folia::Feature>();
 	for ( size_t j=0; j < feats.size(); ++j ){
 	  mod += feats[j]->cls();
 	  if ( j < feats.size()-1 )
@@ -762,11 +762,11 @@ void Parser::prepareParse( FoliaElement *sent, parseData& pd ) {
     }
     else {
       pd.words.push_back( word->str() );
-      FoliaElement *postag = word->annotation(Pos_t);
+      PosAnnotation *postag = word->annotation<PosAnnotation>();
       string head = postag->cls();
       pd.heads.push_back( head );
       string mod;
-      vector<FoliaElement*> feats = postag->select( Feature_t );
+      vector<folia::Feature*> feats = postag->select<folia::Feature>();
       if ( feats.size() == 0 )
 	mod = "__";
       else {
@@ -777,7 +777,7 @@ void Parser::prepareParse( FoliaElement *sent, parseData& pd ) {
 	}
       }
       pd.mods.push_back( mod );
-      vector<FoliaElement*> vec;
+      vector<Word*> vec;
       vec.push_back(word);
       pd.mwus.push_back( vec );
     }
