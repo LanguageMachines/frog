@@ -489,7 +489,10 @@ Dependency *lookupDep( const Word *word,
 	}
       }
     }
-    catch(...){
+    catch ( exception& e ){
+      if  (tpDebug > 0) 
+	*Log(theErrLog) << "get Dependency results failed: " 
+			<< e.what() << endl;      
     }
   }
   return 0;
@@ -521,7 +524,10 @@ void displayMWU( ostream& os, size_t index,
       }
       conf *= postag->confidence();
     }
-    catch (... ){
+    catch ( exception& e ){
+      if  (tpDebug > 0) 
+	*Log(theErrLog) << "get Postag results failed: " 
+			<< e.what() << endl;            
     }
     try { 
       lemma += word->lemma();
@@ -529,12 +535,15 @@ void displayMWU( ostream& os, size_t index,
 	lemma += "_";
       }
     }
-    catch (... ){
+    catch ( exception& e ){
+      if  (tpDebug > 0) 
+	*Log(theErrLog) << "get Lemma results failed: " 
+			<< e.what() << endl;      
     }
     try { 
       vector<MorphologyLayer*> ml = word->annotations<MorphologyLayer>();
       for ( size_t q=0; q < ml.size(); ++q ){
-	vector<Morpheme*> m = ml[q]->annotations<Morpheme>();
+	vector<Morpheme*> m = ml[q]->select<Morpheme>();
 	for ( size_t t=0; t < m.size(); ++t ){
 	  morph += "[" + UnicodeToUTF8( m[t]->text() ) + "]";
 	}
@@ -545,7 +554,10 @@ void displayMWU( ostream& os, size_t index,
 	morph += "_";
       }
     }
-    catch (... ){
+    catch ( exception& e ){
+      if  (tpDebug > 0) 
+	*Log(theErrLog) << "get Morph results failed: " 
+			<< e.what() << endl;      
     }
   }
   os << index << "\t" << wrd << "\t" << lemma << "\t" << morph << "\t" << pos << "\t" << std::fixed << conf;

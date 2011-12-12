@@ -569,7 +569,6 @@ void Mbma::addMorph( folia::FoliaElement *word,
   {
     word->append( ml );
   }
-
   int offset = 0;
   string args = "annotator='mbma'";
   for ( size_t p=0; p < lemmas.size(); ++p ){
@@ -581,6 +580,7 @@ void Mbma::addMorph( folia::FoliaElement *word,
     folia::FoliaElement *t = 
       new folia::TextContent( "value='" + escape( lemmas[p]) + 
 			      "', offset='" + toString(offset) + "'" );
+
     offset += lemmas[p].length();
 #pragma omp critical(foliaupdate)
     {

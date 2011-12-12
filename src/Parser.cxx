@@ -819,23 +819,35 @@ void Parser::prepareParse( FoliaElement *sent, parseData& pd ) {
      ++cnt;
    }
    FoliaElement *dl = new DependenciesLayer("");
+#pragma omp critical(foliaupdate)
+   {
    sent->append( dl );
-   
+   }
    for ( size_t i=0; i < nums.size(); ++i ){
      if ( nums[i] != 0 ){
        FoliaElement *d = new Dependency( "generate-id='" + sent->id() + 
 					    "', class='"+ roles[i] +"'" );
+#pragma omp critical(foliaupdate)
+       {
        dl->append( d );
+       }
        FoliaElement *h = new DependencyHead("");
-       for ( size_t j=0; j < pd.mwus[nums[i]-1].size(); ++ j ){
-	 h->append( pd.mwus[nums[i]-1][j] );
+#pragma omp critical(foliaupdate)
+       {
+	 for ( size_t j=0; j < pd.mwus[nums[i]-1].size(); ++ j ){
+	   h->append( pd.mwus[nums[i]-1][j] );
+	 }
+	 d->append( h );
        }
-       d->append( h );
-       h = new DependencyDependent("");
-       for ( size_t j=0; j < pd.mwus[i].size(); ++ j ){
-	 h->append( pd.mwus[i][j] );
+
+#pragma omp critical(foliaupdate)
+       {
+	 h = new DependencyDependent("");
+	 for ( size_t j=0; j < pd.mwus[i].size(); ++ j ){
+	   h->append( pd.mwus[i][j] );
+	 }
+	 d->append( h );
        }
-       d->append( h );
      }
    }
  }
