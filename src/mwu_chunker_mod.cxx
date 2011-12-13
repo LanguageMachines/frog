@@ -45,32 +45,22 @@ using namespace std;
 
 mwuAna::mwuAna( folia::FoliaElement *fwrd ){
   spec = false;
-  fword = fwrd;
+  //  fword = fwrd;
   word = fwrd->str();
   string tag = fwrd->annotation<folia::PosAnnotation>()->feat("head");
   if ( tag == "SPEC" ){
     vector<folia::Feature*> feats = fwrd->select<folia::Feature>();
     spec = ( feats.size() == 1 && feats[0]->cls() == "deeleigen" );
   }
+  fwords.push_back( fwrd );
 }  
 
-complexAna::complexAna( ){ }
-
-complexAna *mwuAna::append( const mwuAna *add ){
-  complexAna *ana = new complexAna();
-  ana->spec = add->spec;
-  ana->fwords.push_back( fword );
-  ana->fwords.push_back( add->fword );
-  return ana;
-}
-
-complexAna *complexAna::append( const mwuAna *add ){
-  fwords.push_back( add->getFword() );
-  return this;
+void mwuAna::append( const mwuAna *add ){
+  fwords.push_back( add->fwords[0] );
 }
 
 void mwuAna::addEntity( folia::FoliaElement *sent ){
-  if ( fwords.size() > 0 ){
+  if ( fwords.size() > 1 ){
     folia::FoliaElement *el = 0;
     try {
       el = sent->annotation<folia::EntitiesLayer>( );
@@ -253,11 +243,7 @@ void Mwu::Classify(){
     for ( size_t j = 1; j <= matchLength; ++j) {
       if ( debug )
 	cout << "concat " << mWords[i+j]->getWord() << endl;
-      // and do the same for mWords elems (Word, Tag, Lemma, Morph)
-      mwuAna *tmp1 = mWords[i];
-      mWords[i] = mWords[i]->append( mWords[i+j] );
-      if ( tmp1 != mWords[i] )
-	delete tmp1;
+      mWords[i]->append( mWords[i+j] );
     }
     vector<mwuAna*>::iterator anatmp1 = mWords.begin() + i;
     vector<mwuAna*>::iterator anatmp2 = ++anatmp1 + matchLength;

@@ -140,7 +140,7 @@ static Mbma myMbma;
 static Mblem myMblem;
 static Mwu myMwu;
 static Parser myParser;
-static MBTagger myTagger;
+static MBTagger myCGNTagger;
 
 bool parse_args( TimblOpts& Opts ) {
   string value;
@@ -315,7 +315,7 @@ bool parse_args( TimblOpts& Opts ) {
     // we use fork(). omp (GCC version) doesn't do well when omp is used
     // before the fork!
     // see: http://bisqwit.iki.fi/story/howto/openmp/#OpenmpAndFork
-    bool stat = myTagger.init( configuration );
+    bool stat = myCGNTagger.init( configuration );
     if ( stat ){
       bool stat = myMblem.init( configuration );
       if ( stat ){
@@ -352,7 +352,7 @@ bool parse_args( TimblOpts& Opts ) {
 #pragma omp section
       mbaStat = myMbma.init( configuration );
 #pragma omp section 
-      tagStat = myTagger.init( configuration );
+      tagStat = myCGNTagger.init( configuration );
 #pragma omp section
       {
 	if ( doMwu ){
@@ -407,7 +407,7 @@ void TestSentence( FoliaElement* sent,
       omp_set_num_threads( 1 );
     }
     timers.tagTimer.start();
-    string tagged = myTagger.Classify( sent );
+    string tagged = myCGNTagger.Classify( sent );
     timers.tagTimer.stop();
     for ( size_t i = 0; i < swords.size(); ++i ) {
       string mbmaLemma;
@@ -740,6 +740,7 @@ int main(int argc, char *argv[]) {
   cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
   ProgName = argv[0];
   cerr << "based on [" << Tokenizer::VersionName() << ", "
+       << folia::VersionName() << ", "
        << Timbl::VersionName() << ", "
        << TimblServer::VersionName() << ", "
        << Tagger::VersionName() << "]" << endl;

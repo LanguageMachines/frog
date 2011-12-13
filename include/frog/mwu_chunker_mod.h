@@ -31,24 +31,18 @@
 
 #include "libfolia/folia.h"
 
-class complexAna;
-
 class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );
  public:
   mwuAna( folia::FoliaElement * );
   virtual ~mwuAna() {};
   
-  virtual complexAna *append( const mwuAna * );
+  void append( const mwuAna * );
 
   std::string getWord() const {
     return word;
   }
 
-  folia::FoliaElement *getFword() const {
-    return fword;
-  }
-  
   bool isSpec(){ return spec; };
   void addEntity( folia::FoliaElement * );
   
@@ -56,14 +50,7 @@ class mwuAna {
     mwuAna(){};
     std::string word;
     bool spec;
-    folia::FoliaElement *fword;
     std::vector<folia::FoliaElement *> fwords;
-};
-
-class complexAna: public mwuAna {
- public:
-  complexAna( );
-  complexAna *append( const mwuAna * );
 };
 
 #define mymap2 std::multimap<std::string, std::vector<std::string> >
