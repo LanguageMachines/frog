@@ -55,8 +55,9 @@ mwuAna::mwuAna( folia::FoliaElement *fwrd ){
   fwords.push_back( fwrd );
 }  
 
-void mwuAna::append( const mwuAna *add ){
+void mwuAna::merge( const mwuAna *add ){
   fwords.push_back( add->fwords[0] );
+  delete add;
 }
 
 void mwuAna::addEntity( folia::FoliaElement *sent ){
@@ -86,9 +87,12 @@ void mwuAna::addEntity( folia::FoliaElement *sent ){
   }
 }
 
-Mwu::~Mwu(){}
+Mwu::~Mwu(){ reset(); }
 
 void Mwu::reset(){
+  for( size_t i=0; i< mWords.size(); ++i ){
+    delete mWords[i];
+  }
   mWords.clear();
 }
 
@@ -243,13 +247,10 @@ void Mwu::Classify(){
     for ( size_t j = 1; j <= matchLength; ++j) {
       if ( debug )
 	cout << "concat " << mWords[i+j]->getWord() << endl;
-      mWords[i]->append( mWords[i+j] );
+      mWords[i]->merge( mWords[i+j] );
     }
     vector<mwuAna*>::iterator anatmp1 = mWords.begin() + i;
     vector<mwuAna*>::iterator anatmp2 = ++anatmp1 + matchLength;
-    for ( vector<mwuAna*>::iterator anaTmp = anatmp1;
-	  anaTmp != anatmp2; ++ anaTmp )
-      delete *anaTmp;
     mWords.erase(anatmp1, anatmp2);
     if ( debug ){
       cout << "tussenstand:" << endl;

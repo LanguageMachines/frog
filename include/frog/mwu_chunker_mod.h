@@ -37,7 +37,7 @@ class mwuAna {
   mwuAna( folia::FoliaElement * );
   virtual ~mwuAna() {};
   
-  void append( const mwuAna * );
+  void merge( const mwuAna * );
 
   std::string getWord() const {
     return word;
