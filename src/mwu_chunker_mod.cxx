@@ -47,7 +47,7 @@ mwuAna::mwuAna( folia::FoliaElement *fwrd ){
   spec = false;
   fword = fwrd;
   word = fwrd->str();
-  string tag = fwrd->pos();
+  string tag = fwrd->annotation<folia::PosAnnotation>()->feat("head");
   if ( tag == "SPEC" ){
     vector<folia::Feature*> feats = fwrd->select<folia::Feature>();
     spec = ( feats.size() == 1 && feats[0]->cls() == "deeleigen" );

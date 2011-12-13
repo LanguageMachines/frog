@@ -510,14 +510,7 @@ void displayMWU( ostream& os, size_t index,
     try { 
       wrd += word->str();
       PosAnnotation *postag = word->annotation<PosAnnotation>();
-      pos += postag->cls() + "(";
-      vector<folia::Feature*> feats = postag->select<folia::Feature>();
-      for ( size_t i=0; i < feats.size(); ++i ){
-	pos += feats[i]->cls();
-	if ( i < feats.size()-1 )
-	  pos += ",";
-      }
-      pos += ")";
+      pos += postag->cls();
       if ( p < mwu.size() -1 ){
 	wrd += "_";
 	pos += "_";

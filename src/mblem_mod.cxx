@@ -165,14 +165,7 @@ void addAnnotation( folia::FoliaElement *word,
 }
   
 string Mblem::postprocess( folia::FoliaElement *word ){
-  string tag = word->pos() + "(";
-  vector<folia::Feature*> feats = word->select<folia::Feature>();
-  for( size_t i=0; i < feats.size(); ++i ){
-    tag += feats[i]->cls();
-    if ( i < feats.size()-1 )
-      tag += ",";
-  }
-  tag += ")";
+  string tag = word->pos();
   if ( debug ){
     cout << "\n\tlemmas: ";
     for( vector<mblemData>::const_iterator it=mblemResult.begin(); 
@@ -206,7 +199,7 @@ string Mblem::postprocess( folia::FoliaElement *word ){
 
 string Mblem::Classify( folia::FoliaElement *sword ){
   string word = sword->str();
-  string tag = sword->pos();
+  string tag = sword->annotation<folia::PosAnnotation>()->feat("head");
   if ( tag == "SPEC" ) {
     addAnnotation( sword, word );
     return word;

@@ -741,7 +741,7 @@ void Parser::prepareParse( FoliaElement *sent, parseData& pd ) {
       for ( size_t p=0; p < mwu.size(); ++p ){
 	word += mwu[p]->str();
 	PosAnnotation *postag = mwu[p]->annotation<PosAnnotation>();
-	head += postag->cls();
+	head += postag->feat("head");
 	vector<folia::Feature*> feats = postag->select<folia::Feature>();
 	for ( size_t j=0; j < feats.size(); ++j ){
 	  mod += feats[j]->cls();
@@ -763,7 +763,7 @@ void Parser::prepareParse( FoliaElement *sent, parseData& pd ) {
     else {
       pd.words.push_back( word->str() );
       PosAnnotation *postag = word->annotation<PosAnnotation>();
-      string head = postag->cls();
+      string head = postag->feat("head");
       pd.heads.push_back( head );
       string mod;
       vector<folia::Feature*> feats = postag->select<folia::Feature>();

@@ -303,6 +303,7 @@ string getSubSet( const string& val, const string& head ){
 }
 
 void addTag( FoliaElement *word, const string& inputTag, double confidence ){
+  string cgnTag = inputTag;
   string mainTag;
   string tagPartS;
   string annotator = "MBT";
@@ -311,6 +312,7 @@ void addTag( FoliaElement *word, const string& inputTag, double confidence ){
     annotator = "ucto";
     mainTag = "SPEC";
     tagPartS = "afk";
+    cgnTag = "SPEC(afk)";
     confidence = 1.0;
   }
   else if ( ucto_class == "SMILEY" ||
@@ -319,21 +321,23 @@ void addTag( FoliaElement *word, const string& inputTag, double confidence ){
     annotator = "ucto";
     mainTag = "SPEC";
     tagPartS = "symb";
+    cgnTag = "SPEC(symb)";
     confidence = 1.0;
   }
   else {
-    string::size_type openH = inputTag.find( '(' );
-    string::size_type closeH = inputTag.find( ')' );
+    string::size_type openH = cgnTag.find( '(' );
+    string::size_type closeH = cgnTag.find( ')' );
     if ( openH == string::npos || closeH == string::npos ){
-      *Log(theErrLog) << "tagger_mod: main tag without subparts: impossible: " << inputTag << endl;
+      *Log(theErrLog) << "tagger_mod: main tag without subparts: impossible: " << cgnTag << endl;
       exit(-1);
     }
-    mainTag = inputTag.substr( 0, openH );
+    mainTag = cgnTag.substr( 0, openH );
     if ( mainTag == "SPEC" )
       confidence = 1.0;
-    tagPartS = inputTag.substr( openH+1, closeH-openH-1 );
+    tagPartS = cgnTag.substr( openH+1, closeH-openH-1 );
   }
-  KWargs args = getArgs( "set='mbt-pos', cls='" + mainTag
+  KWargs args = getArgs( "set='mbt-pos', head='" + mainTag
+			 + "', cls='" + cgnTag
 			 + "', annotator='" + annotator + "', confidence='" 
 			 + toString(confidence) + "'" );
   FoliaElement *pos = word->addPosAnnotation( args );

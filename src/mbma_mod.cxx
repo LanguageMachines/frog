@@ -601,7 +601,8 @@ void Mbma::postprocess( folia::FoliaElement *fword ){
   
   if (debugFlag)
       cout << "before morpho: " << endl;
-  const string tag = fword->pos();
+  folia::PosAnnotation * pos = fword->annotation<folia::PosAnnotation>();
+  const string tag = pos->feat("head");
   map<string,string>::const_iterator tagIt = TAGconv.find( tag );
   if ( tagIt == TAGconv.end() ) {
     //
@@ -730,8 +731,9 @@ void Mbma::postprocess( folia::FoliaElement *fword ){
 
 bool Mbma::Classify( folia::FoliaElement* sword ){
   UnicodeString uWord = sword->text();
-  string tag = sword->pos();
-  if ( tag.find( "SPEC" ) == 0 ){
+  folia::PosAnnotation * pos = sword->annotation<folia::PosAnnotation>();
+  string tag = pos->feat("head");
+  if ( tag == "SPEC" ){
     string word = folia::UnicodeToUTF8( uWord );
     vector<string> tmp;
     tmp.push_back( word );
