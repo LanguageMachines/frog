@@ -49,11 +49,18 @@ using namespace folia;
 PythonInterface::PythonInterface( ) {
   Py_OptimizeFlag = 1; // enable optimisation (-O) mode
   Py_Initialize();
-  string newpath = Py_GetPath();
-  newpath += string(":") + PYTHONDIR;
-  PySys_SetPath( (char*)newpath.c_str() );
+
+  PyObject* ourpath = PyString_FromString( PYTHONDIR );
+  if ( ourpath != 0 ){
+    PyObject *sys_path = PySys_GetObject( (char*)("path"));
+    if (sys_path != NULL ){
+      PyList_Append(sys_path, ourpath);
+    }
+    else
+      sys_path = ourpath;
+  }
   try {
-    PyObject *im = PyImport_ImportModule( "csidp" );
+    PyObject *im = PyImport_ImportModule( "frog.csidp" );
     if ( im ){
       module.assign( im );
       PyObject *mf = PyObject_GetAttrString(module, "main");
