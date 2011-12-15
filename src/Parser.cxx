@@ -59,24 +59,35 @@ PythonInterface::PythonInterface( ) {
     else
       sys_path = ourpath;
   }
+  PyObject *im = 0;
   try {
-    PyObject *im = PyImport_ImportModule( "frog.csidp" );
-    if ( im ){
-      module.assign( im );
-      PyObject *mf = PyObject_GetAttrString(module, "main");
-      if ( mf )
-	mainFunction.assign( mf );
-      else {
-	PyErr_Print();
-	exit(1);
-      }
+    im = PyImport_ImportModule( "frog.csidp" );
+  }
+  catch( exception const & ){
+    PyErr_Print();
+    im = 0;
+  }
+  PyErr_Clear();
+  if ( !im ){
+    try {
+      im = PyImport_ImportModule( "csidp" );
     }
+    catch( exception const & ){
+      PyErr_Print();
+      exit(1);
+    }
+  }
+  if ( im ){
+    module.assign( im );
+    PyObject *mf = PyObject_GetAttrString(module, "main");
+    if ( mf )
+      mainFunction.assign( mf );
     else {
       PyErr_Print();
       exit(1);
     }
   }
-  catch( exception const & ){
+  else {
     PyErr_Print();
     exit(1);
   }
