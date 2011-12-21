@@ -1,8 +1,8 @@
-1	This	This	[This]	SPEC(vreemd)	0.900000		
+1	This	This	[This]	SPEC(vreemd)	1.000000		
 2	is	is	[is]	SPEC(vreemd)	1.000000		
-3	a	a	[a]	SPEC(vreemd)	0.836879		
-4	test	test	[test]	SPEC(deeleigen)	0.500000		
-5	on	on	[on]	SPEC(vreemd)	0.882253		
+3	a	a	[a]	SPEC(vreemd)	1.000000		
+4	test	test	[test]	SPEC(deeleigen)	1.000000		
+5	on	on	[on]	SPEC(vreemd)	1.000000		
 6	date	date	[daat][e]	N(soort,ev,basis,zijd,stan)	0.805515		
 7	29-10-2011	29-10-2011	[29-10-2011]	TW(hoofd,vrij)	0.884207		
 8	!	!	[!]	LET()	0.995005		

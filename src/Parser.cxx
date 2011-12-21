@@ -128,7 +128,6 @@ struct parseData {
 };
 
 ostream& operator<<( ostream& os, const parseData& pd ){
-  using folia::operator<<;
   os << "pd words " << pd.words << endl;
   os << "pd heads " << pd.heads << endl;
   os << "pd mods " << pd.mods << endl;
@@ -279,7 +278,6 @@ static vector<Word *> lookup( Word *word,
     vec = entities[p]->select<Word>();
     if ( !vec.empty() ){
       if ( vec[0]->id() == word->id() ) {
-	// using folia::operator<<;
 	// cerr << "found " << vec << endl;
 	return vec;
       }

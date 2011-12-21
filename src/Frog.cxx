@@ -461,7 +461,6 @@ vector<Word*> lookup( Word *word, const vector<Entity*>& entities ){
     vec = entities[p]->select<Word>();
     if ( !vec.empty() ){
       if ( vec[0]->id() == word->id() ) {
-	// using folia::operator<<;
 	// cerr << "found " << vec << endl;
 	return vec;
       }
