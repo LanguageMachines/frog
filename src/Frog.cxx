@@ -803,6 +803,7 @@ int main(int argc, char *argv[]) {
 	  } catch ( std::exception& e )
 	  {
 	    std::cerr << "Server error:" << e.what() << "\nExiting.\n";
+	    exit(EXIT_FAILURE);
 	  }
 	
       } else {
