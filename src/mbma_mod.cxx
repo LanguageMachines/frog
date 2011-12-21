@@ -39,7 +39,7 @@
 #include "frog/mbma_mod.h"
 
 using namespace std;
-using namespace Timbl;
+using namespace folia;
 
 const long int LEFT =  6; // left context
 const long int RIGHT = 6; // right context
@@ -139,7 +139,7 @@ bool Mbma::init( const Configuration& config ) {
   if ( opts.empty() )
     opts = "-a1";
   opts += " +vs -vf"; // make Timbl run quietly
-  MTree = new TimblAPI(opts);
+  MTree = new Timbl::TimblAPI(opts);
   return MTree->GetInstanceBase(MTreeFilename);
 }
   
@@ -176,7 +176,7 @@ vector<string> Mbma::make_instances( const UnicodeString& word ){
     if (debugFlag > 2)
       cout << "inst #" << i << " : " << inst << endl;
     // classify res
-    insts.push_back( folia::UnicodeToUTF8(inst) );
+    insts.push_back( UnicodeToUTF8(inst) );
     // store res
   }
   return insts;
@@ -281,7 +281,7 @@ vector<waStruct> Mbma::Step1( unsigned int step,
       eexcept = true;
     }
     // insert the deletestring :-) 
-    UnicodeString last = folia::UTF8ToUnicode( deletestring );
+    UnicodeString last = UTF8ToUnicode( deletestring );
     waItem.word += last;
     // delete the insertstring :-) 
     if (( tobeignored == 0 ) &&
@@ -452,7 +452,7 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
   vector<waStruct>::const_iterator it = ana.begin();
   while ( it != ana.end() ) { 
     if ( !it->word.isEmpty() ){
-      morphemes.push_back( folia::UnicodeToUTF8(it->word) );
+      morphemes.push_back( UnicodeToUTF8(it->word) );
     }
     string this_class= it->act;
     if (debugFlag)
@@ -562,9 +562,9 @@ void Mbma::execute( const UnicodeString& word,
   }
 }
 
-void Mbma::addMorph( folia::FoliaElement *word, 
+void Mbma::addMorph( FoliaElement *word, 
 		     const vector<string>& lemmas ){
-  folia::FoliaElement *ml = new folia::MorphologyLayer("");
+  FoliaElement *ml = new MorphologyLayer("");
 #pragma omp critical(foliaupdate)
   {
     word->append( ml );
@@ -572,13 +572,13 @@ void Mbma::addMorph( folia::FoliaElement *word,
   int offset = 0;
   string args = "annotator='mbma'";
   for ( size_t p=0; p < lemmas.size(); ++p ){
-    folia::FoliaElement *m = new folia::Morpheme("");
+    FoliaElement *m = new Morpheme("");
 #pragma omp critical(foliaupdate)
     {
       ml->append( m );
     }
-    folia::FoliaElement *t = 
-      new folia::TextContent( "value='" + escape( lemmas[p]) + 
+    FoliaElement *t = 
+      new TextContent( "value='" + escape( lemmas[p]) + 
 			      "', offset='" + toString(offset) + "'" );
 
     offset += lemmas[p].length();
@@ -589,7 +589,7 @@ void Mbma::addMorph( folia::FoliaElement *word,
   }
 }	  
       
-void Mbma::postprocess( folia::FoliaElement *fword ){
+void Mbma::postprocess( FoliaElement *fword ){
   if (debugFlag){
     for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
       cout << it->getTag() << it->getInflection()<< " ";
@@ -601,7 +601,7 @@ void Mbma::postprocess( folia::FoliaElement *fword ){
   
   if (debugFlag)
       cout << "before morpho: " << endl;
-  folia::PosAnnotation * pos = fword->annotation<folia::PosAnnotation>();
+  PosAnnotation * pos = fword->annotation<PosAnnotation>();
   const string tag = pos->feat("head");
   map<string,string>::const_iterator tagIt = TAGconv.find( tag );
   if ( tagIt == TAGconv.end() ) {
@@ -611,7 +611,7 @@ void Mbma::postprocess( folia::FoliaElement *fword ){
     if (debugFlag){
       cout << "no match!\n";
     } 
-    throw folia::ValueError( "unknown pos tag value '" + tag + "'" );
+    throw ValueError( "unknown pos tag value '" + tag + "'" );
   }
   else {
     if (debugFlag){
@@ -641,7 +641,7 @@ void Mbma::postprocess( folia::FoliaElement *fword ){
       vector<string> tmp;
       UnicodeString word = fword->text();
       word.toLower();
-      tmp.push_back( folia::UnicodeToUTF8(word) );
+      tmp.push_back( UnicodeToUTF8(word) );
       addMorph( fword, tmp );
     }
     else if (match == 1) {
@@ -649,7 +649,7 @@ void Mbma::postprocess( folia::FoliaElement *fword ){
       addMorph( fword, ma );
     } 
     else {
-      vector<folia::Feature*> feats = fword->annotation<folia::PosAnnotation>()->select<folia::Feature>();
+      vector<Feature*> feats = fword->annotation<PosAnnotation>()->select<Feature>();
       if (debugFlag){
 	cout << "tag: " << tag << endl;
 	for ( size_t q =0 ; q < feats.size(); ++q ) {
@@ -729,12 +729,12 @@ void Mbma::postprocess( folia::FoliaElement *fword ){
   }
 }  // postprocess
 
-bool Mbma::Classify( folia::FoliaElement* sword ){
+bool Mbma::Classify( FoliaElement* sword ){
   UnicodeString uWord = sword->text();
-  folia::PosAnnotation * pos = sword->annotation<folia::PosAnnotation>();
+  PosAnnotation * pos = sword->annotation<PosAnnotation>();
   string tag = pos->feat("head");
   if ( tag == "SPEC" ){
-    string word = folia::UnicodeToUTF8( uWord );
+    string word = UnicodeToUTF8( uWord );
     vector<string> tmp;
     tmp.push_back( word );
     addMorph( sword, tmp );

@@ -40,16 +40,16 @@
 #include "libfolia/folia.h" // defines etc.
 #include "frog/mwu_chunker_mod.h"
 
-using namespace Timbl;
+using namespace folia;
 using namespace std;
 
-mwuAna::mwuAna( folia::FoliaElement *fwrd ){
+mwuAna::mwuAna( FoliaElement *fwrd ){
   spec = false;
   //  fword = fwrd;
   word = fwrd->str();
-  string tag = fwrd->annotation<folia::PosAnnotation>()->feat("head");
+  string tag = fwrd->annotation<PosAnnotation>()->feat("head");
   if ( tag == "SPEC" ){
-    vector<folia::Feature*> feats = fwrd->select<folia::Feature>();
+    vector<Feature*> feats = fwrd->select<Feature>();
     spec = ( feats.size() == 1 && feats[0]->cls() == "deeleigen" );
   }
   fwords.push_back( fwrd );
@@ -60,20 +60,20 @@ void mwuAna::merge( const mwuAna *add ){
   delete add;
 }
 
-void mwuAna::addEntity( folia::FoliaElement *sent ){
+void mwuAna::addEntity( FoliaElement *sent ){
   if ( fwords.size() > 1 ){
-    folia::FoliaElement *el = 0;
+    FoliaElement *el = 0;
     try {
-      el = sent->annotation<folia::EntitiesLayer>( );
+      el = sent->annotation<EntitiesLayer>( );
     }
     catch(...){
-      el = new folia::EntitiesLayer("");
+      el = new EntitiesLayer("");
 #pragma omp critical(foliaupdate)
       {
 	sent->append( el );
       }
     }
-    folia::FoliaElement *e = new folia::Entity("");
+    FoliaElement *e = new Entity("");
 #pragma omp critical(foliaupdate)
     {
       el->append( e );
@@ -96,7 +96,7 @@ void Mwu::reset(){
   mWords.clear();
 }
 
-void Mwu::add( folia::FoliaElement *word ){
+void Mwu::add( FoliaElement *word ){
   mWords.push_back( new mwuAna( word ) );
 }
 
@@ -154,9 +154,9 @@ ostream &operator <<( ostream& os,
   return os;
 }
 
-void Mwu::Classify( folia::FoliaElement *sent ){
+void Mwu::Classify( FoliaElement *sent ){
   reset();
-  vector<folia::Word*> words = sent->words();
+  vector<Word*> words = sent->words();
   for ( size_t i=0; i < words.size(); ++i )
     add( words[i] );  
   Classify();

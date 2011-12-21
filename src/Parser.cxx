@@ -43,7 +43,6 @@
 #include "frog/Parser.h"
 
 using namespace std;
-using namespace Timbl;
 using namespace folia;
 
 PythonInterface::PythonInterface( ) {
@@ -178,8 +177,8 @@ bool Parser::init( const Configuration& configuration ){
   string cDir = configuration.configDir();
   string att = configuration.lookUp( "maxDepSpan", "parser" );
   if ( !att.empty() ){
-    size_t gs;
-    if ( stringTo<size_t>( att, gs, 0, 50 ) ){
+    size_t gs = stringTo<size_t>( att );
+    if ( gs < 50 ){
       maxDepSpanS = att;
       maxDepSpan = gs;
     }
@@ -237,7 +236,7 @@ bool Parser::init( const Configuration& configuration ){
     return false;
   
   bool happy = true;
-  pairs = new TimblAPI( pairsOptions );
+  pairs = new Timbl::TimblAPI( pairsOptions );
   if ( pairs->Valid() ){
     *Log(parseLog) << "reading " <<  pairsFileName << endl;
     happy = pairs->GetInstanceBase( pairsFileName );
@@ -245,7 +244,7 @@ bool Parser::init( const Configuration& configuration ){
   else
     *Log(parseLog) << "creating Timbl for pairs failed:" << pairsOptions << endl;
   if ( happy ){
-    dir = new TimblAPI( dirOptions );
+    dir = new Timbl::TimblAPI( dirOptions );
     if ( dir->Valid() ){
       *Log(parseLog) << "reading " <<  dirFileName << endl;
       happy = dir->GetInstanceBase( dirFileName );
@@ -253,7 +252,7 @@ bool Parser::init( const Configuration& configuration ){
     else
       *Log(parseLog) << "creating Timbl for dir failed:" << dirOptions << endl;
     if ( happy ){
-      rels = new TimblAPI( relsOptions );
+      rels = new Timbl::TimblAPI( relsOptions );
       if ( rels->Valid() ){
 	*Log(parseLog) << "reading " <<  relsFileName << endl;
 	happy = rels->GetInstanceBase( relsFileName );

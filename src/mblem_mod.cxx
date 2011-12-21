@@ -39,7 +39,7 @@
 #include "frog/mblem_mod.h"
 
 using namespace std;
-using namespace Timbl;
+using namespace folia;
 
 Mblem::Mblem(): myLex(0),punctuation( "?...,:;\\'`(){}[]%#+-_=/!" ), 
 		history(20), debug(0) {}
@@ -87,7 +87,7 @@ bool Mblem::init( const Configuration& config ) {
   //make it silent
   opts += " +vs -vf";	    
   //Read in (igtree) data
-  myLex = new TimblAPI(opts);
+  myLex = new Timbl::TimblAPI(opts);
   return myLex->GetInstanceBase(treeName);
 }
 
@@ -114,7 +114,7 @@ string Mblem::make_instance( const UnicodeString& in ) {
     }
   }
   instance += "?";
-  string result = folia::UnicodeToUTF8(instance);
+  string result = UnicodeToUTF8(instance);
   if (debug)
     cout << "inst: " << instance << endl;
   
@@ -154,9 +154,9 @@ bool isSimilar( const string& tag, const string& cgnTag ){
     similar( tag, cgnTag, "ovt,1,ev" );
 }
 
-void addAnnotation( folia::FoliaElement *word,
+void addAnnotation( FoliaElement *word,
 		    const string& cls ){
-  folia::KWargs args = folia::getArgs( "set='mbt-lemma', cls='" 
+  KWargs args = getArgs( "set='mbt-lemma', cls='" 
 				       + escape(cls) + "', annotator='mblem'" );
 #pragma omp critical(foliaupdate)
   {
@@ -164,7 +164,7 @@ void addAnnotation( folia::FoliaElement *word,
   }
 }
   
-string Mblem::postprocess( folia::FoliaElement *word ){
+string Mblem::postprocess( FoliaElement *word ){
   string tag = word->pos();
   if ( debug ){
     cout << "\n\tlemmas: ";
@@ -197,14 +197,14 @@ string Mblem::postprocess( folia::FoliaElement *word ){
   return res;
 } 
 
-string Mblem::Classify( folia::FoliaElement *sword ){
+string Mblem::Classify( FoliaElement *sword ){
   string word = sword->str();
-  string tag = sword->annotation<folia::PosAnnotation>()->feat("head");
+  string tag = sword->annotation<PosAnnotation>()->feat("head");
   if ( tag == "SPEC" ) {
     addAnnotation( sword, word );
     return word;
   }
-  UnicodeString uWord = folia::UTF8ToUnicode(word);
+  UnicodeString uWord = UTF8ToUnicode(word);
   uWord.toLower();
   mblemResult.clear();
   string inst = make_instance(uWord);  
@@ -220,7 +220,7 @@ string Mblem::Classify( folia::FoliaElement *sword ){
   }
   int index = 0;
   while ( index < numParts ) {
-    UnicodeString part = folia::UTF8ToUnicode( parts[index++] );
+    UnicodeString part = UTF8ToUnicode( parts[index++] );
     if (debug)
       cout <<"part = " << part << endl;
     UnicodeString insstr;
@@ -229,9 +229,9 @@ string Mblem::Classify( folia::FoliaElement *sword ){
     string restag;
     size_t lpos = part.indexOf("+");
     if ( lpos != string::npos )
-      restag = folia::UnicodeToUTF8( UnicodeString( part, 0, lpos ) );
+      restag = UnicodeToUTF8( UnicodeString( part, 0, lpos ) );
     else 
-      restag =  folia::UnicodeToUTF8( part );
+      restag =  UnicodeToUTF8( part );
     if ( classMap.size() > 0 ){
       map<string,string>::const_iterator it = classMap.find(restag);
       if ( it != classMap.end() )
@@ -340,7 +340,7 @@ string Mblem::Classify( folia::FoliaElement *sword ){
     }
     if ( debug )
       cout << "appending lemma " << lemma << " and tag " << restag << endl;
-    mblemResult.push_back( mblemData( folia::UnicodeToUTF8(lemma), restag ) );
+    mblemResult.push_back( mblemData( UnicodeToUTF8(lemma), restag ) );
   } // while
   if ( debug ){
     cout << "stored lemma and tag options: " << mblemResult.size() << " lemma's and " << mblemResult.size() << " tags:\n";
