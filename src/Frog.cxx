@@ -71,8 +71,11 @@ string TestFileName;
 string testDirName;
 string tmpDirName;
 string outputFileName;
+bool wantOUT;
 string XMLoutFileName;
+bool wantXML;
 string outputDirName;
+string xmlDirName;
 set<string> fileNames;
 string ProgName;
 int tpDebug = 0; //0 for none, more for more output
@@ -124,14 +127,15 @@ void usage( ) {
        << "\t============= OUTPUT OPTIONS ============================================\n"
        << "\t --tmpdir=<directory> (location to store intermediate files. Default /tmp )\n"
        << "\t -o <outputfile>	      Output to file, instead of default stdout\n"
-       << "\t --outputdir=<outputfile> Output to directory, instead of default stdout\n"
+       << "\t -X <xmlfile>      Output also to an XML file in folia format\n"
+       << "\t --outputdir=<dir> Output to dir, instead of default stdout\n"
+       << "\t --xmldir=<dir> Use 'dir' to output FoliA XML to.\n"      
        << "\t --keep-parser-files=[yes|no] keep intermediate parser files, (last sentence only)\n"
        << "\t============= OTHER OPTIONS ============================================\n"
        << "\t -h. give some help.\n"
        << "\t -V or --version . Show version info.\n"
        << "\t -d <debug level> (for more verbosity)\n"
        << "\t -Q               Enable quote detection in tokeniser\n";
-
 }
 
 //**** stuff to process commandline options *********************************
@@ -249,6 +253,7 @@ bool parse_args( TimblOpts& Opts ) {
     }
     Opts.Delete('t');
   };
+  wantOUT = false;
   if ( Opts.Find( "outputdir", value, mood)) {
     outputDirName = value;
     if ( !outputDirName.empty() ){
@@ -257,26 +262,47 @@ bool parse_args( TimblOpts& Opts ) {
 	return false;
       }
     }
+    wantOUT = true;
     Opts.Delete( "outputdir");
   }
   else if ( Opts.Find ('o', value, mood)) {
+    wantOUT = true;
     outputFileName = value;
     Opts.Delete('o');
   };
-  if ( Opts.Find ('X', value, mood)) {
+  wantXML = false;
+  if ( Opts.Find( "xmldir", value, mood)) {
+    xmlDirName = value;
+    if ( !xmlDirName.empty() ){
+      if ( !existsDir( xmlDirName ) ){
+	*Log(theErrLog) << "XML output dir " << xmlDirName << " not readable" << endl;
+	return false;
+      }
+    }
+    wantXML = true;
+    Opts.Delete( "xmldir");
+  }
+  else if ( Opts.Find ('X', value, mood)) {
+    wantXML = true;
     XMLoutFileName = value;
     Opts.Delete('X');
-  };
+  }
+  
+  if ( !outputFileName.empty() && !testDirName.empty() ){
+    *Log(theErrLog) << "useless -o value" << endl;
+    return false;
+  }
+  if ( !XMLoutFileName.empty() && !testDirName.empty() ){
+    *Log(theErrLog) << "useless -X value" << endl;
+    return false;
+  }
+
   if ( Opts.Find ('S', value, mood)) {
     doServer = true;
     listenport= value;
   }
   if ( !outputDirName.empty() && testDirName.empty() ){
     *Log(theErrLog) << "useless -outputdir option" << endl;
-    return false;
-  }
-  if ( !outputFileName.empty() && !testDirName.empty() ){
-    *Log(theErrLog) << "useless -o option" << endl;
     return false;
   }
 
@@ -602,6 +628,7 @@ void Test( istream& IN,
 	   ostream& outStream,
 	   TimerBlock& timers,
 	   Common::Timer &frogTimer,
+	   const string& xmlOutFile,
 	   const string& tmpDir ) {
 
   string eosmarker = "";
@@ -653,21 +680,23 @@ void Test( istream& IN,
     *Log(theErrLog) << "Parsing (total)   took: " << timers.parseTimer << endl;
   }
   *Log(theErrLog) << "Frogging took:      " << frogTimer << endl;
-  if ( !XMLoutFileName.empty() ){
-    doc.save( XMLoutFileName );
-    *Log(theErrLog) << "resulting FoLiA doc saved in " << XMLoutFileName << endl;
+  if ( !xmlOutFile.empty() ){
+    doc.save( xmlOutFile );
+    *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
   }
   return;
 }
 
-void TestFile( const string& infilename, const string& outFileName) {
+void TestFile( const string& infilename, 
+	       const string& outFileName,
+	       const string& xmlOutFile ) {
   // init's are done
   TimerBlock timers;
   Common::Timer frogTimer;
   frogTimer.start();
 
   string TestFileName = ""; //untokenised!
-
+  
   ofstream outStream;
   if ( !outFileName.empty() ){
     if ( outStream.open( outFileName.c_str() ), outStream.bad() ){
@@ -680,11 +709,11 @@ void TestFile( const string& infilename, const string& outFileName) {
   ifstream IN( TestFileName.c_str() );
 
   if (!outFileName.empty()) {
-	  Test(IN, outStream, timers, frogTimer, tmpDirName );
+    Test(IN, outStream, timers, frogTimer, xmlOutFile, tmpDirName );
   } else {
-	  Test(IN, cout, timers, frogTimer, tmpDirName );
+    Test(IN, cout, timers, frogTimer, xmlOutFile, tmpDirName );
   }
-
+  
   if ( !outFileName.empty() )
     *Log(theErrLog) << "results stored in " << outFileName << endl;
 }
@@ -719,7 +748,7 @@ void TestServer( Sockets::ServerSocket &conn) {
 
       *Log(theErrLog) << "Processing... " << endl;
       
-      Test(inputstream, outputstream, timers, frogTimer, tmpDirName );
+      Test(inputstream, outputstream, timers, frogTimer, "", tmpDirName );
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  )
 	  throw( runtime_error( "write to client failed" ) );
 
@@ -751,11 +780,21 @@ int main(int argc, char *argv[]) {
       
       if ( !fileNames.empty() ) {
 	string outPath;
+	string xmlPath;
 	if ( !outputDirName.empty() )
 	  outPath = outputDirName + "/";
+	if ( !xmlDirName.empty() )
+	  xmlPath = xmlDirName + "/";
 	set<string>::const_iterator it = fileNames.begin();
 	while ( it != fileNames.end() ){
-	  TestFile( testDirName +"/" + *it, outPath + *it + ".out" );
+	  string testName = testDirName +"/" + *it;
+	  string outName = outPath + *it + ".out";
+	  string xmlName;
+	  if ( !xmlDirName.empty() )
+	    xmlName = xmlPath + *it + ".xml";
+	  else if ( wantXML )
+	    xmlName = *it + ".xml"; // do not clobber the inputdir!
+	  TestFile( testName, outName, xmlName );
 	  ++it;
 	}
       }
@@ -807,7 +846,11 @@ int main(int argc, char *argv[]) {
 	  }
 	
       } else {
-	TestFile( TestFileName, outputFileName );
+	if ( wantXML && XMLoutFileName.empty() )
+	  XMLoutFileName = TestFileName + ".xml";
+	if ( wantOUT && outputFileName.empty() )
+	  outputFileName = TestFileName + ".out";
+	TestFile( TestFileName, outputFileName, XMLoutFileName );
       }
     }
     else {
