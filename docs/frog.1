@@ -1,4 +1,4 @@
-.TH frog 1 "2011 August 23"
+.TH frog 1 "2011 December 22"
 
 .SH NAME
 frog - Dutch morpho-syntactic analyzer and dependency parser
@@ -45,13 +45,12 @@ assume inputfile to hold one sentence per line
 
 .BR -o " <file>"
 .RS
-send output to 'file'. Default is stdout.
+send output to 'file' instead of stdout. Defaults to the name of the inputfile with '.out' appended.
 .RE
 
 .BR --outputdir " <dir>"
 .RS
-send al output to 'dir'. Default is stdout. Useful in combination with 
-.B --testdir
+send all output to 'dir' instead of stdout. Creates filenames from the inputfilename(s) with '.out' appended.
 .RE
 
 .BR --skip =[mpt]
@@ -84,6 +83,17 @@ process all files in 'dir'. see also
 .RS
 show version info
 .RE
+
+.BR --xmldir " <dir>"
+.RS
+generate FoLiA XML output and send it to 'dir'. Creates filenames from the inputfilename with '.xml' appended.
+.RE
+
+.BR -X " <file>"
+.RS
+generate FoLiA XML output and send it to 'file'. Defaults to the name of the inputfile(s) with '.xml' appended.
+.RE
+
 
 .SH BUGS
 likely
