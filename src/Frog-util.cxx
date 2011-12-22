@@ -78,6 +78,7 @@ void getFileNames( const string& dirName, set<string>& fileNames ){
        }
        entry = readdir( dir );
     }
+    closedir( dir );
   }
 }
 
