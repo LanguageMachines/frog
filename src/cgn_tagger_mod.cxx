@@ -2,7 +2,7 @@
   $Id: Frog.cxx 13560 2011-11-22 13:51:45Z sloot $
   $URL: https://ilk.uvt.nl/svn/sources/Frog/trunk/src/Frog.cxx $
 
-  Copyright (c) 2006 - 2011
+  Copyright (c) 2006 - 2012
   Tilburg University
 
   A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
