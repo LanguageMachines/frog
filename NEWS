@@ -1,7 +1,9 @@
-0.12.6 - 2011-**-**
+0.12.7 - 2012-01-02
+  * fixed compilation on GNU/Hurd
+
+0.12.6 - 2011-12-22
   * merged with the foliabased branch. So now we use the folia based Tokenizer.
-    This makes it possible to start integrating folia into Frog. 
-    That will be done gradually.
+    folia XML is now the main interface between the modules in Frog. 
 
 0.12.5 - 2011-10-10
   * is released

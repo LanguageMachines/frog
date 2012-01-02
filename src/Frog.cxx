@@ -803,7 +803,9 @@ int main(int argc, char *argv[]) {
 	struct sigaction action;
 	action.sa_handler = SIG_IGN;
 	sigemptyset(&action.sa_mask);
+#ifdef SA_NOCLDWAIT
 	action.sa_flags = SA_NOCLDWAIT;
+#endif	
 	sigaction(SIGCHLD, &action, NULL); 
 	
 	srand((unsigned)time(0));
