@@ -30,6 +30,8 @@
 */
 
 #include "Python.h"
+#include <sys/types.h>
+#include <unistd.h>
 #include <cstdlib>
 #include <string>
 #include <iostream>
@@ -870,7 +872,9 @@ void Parser::prepareParse( FoliaElement *sent, parseData& pd ) {
  
 void Parser::Parse( FoliaElement *sent,
 		    const string& tmpDirName, TimerBlock& timers ){
-  fileName = tmpDirName+"csiparser";
+  pid_t pid = getpid();
+  string pids = toString( pid );
+  fileName = tmpDirName+"csi."+pids;
   timers.parseTimer.start();
   if ( !isInit ){
     *Log(parseLog) << "Parser is not initialized!" << endl;

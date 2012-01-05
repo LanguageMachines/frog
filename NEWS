@@ -1,5 +1,6 @@
-0.12.7 - 2012-01-02
+0.12.7 - 2012-01-05
   * fixed compilation on GNU/Hurd
+  * temporary parserfiles get a unique name now (using the pid).
 
 0.12.6 - 2011-12-22
   * merged with the foliabased branch. So now we use the folia based Tokenizer.
