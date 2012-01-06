@@ -101,7 +101,7 @@ void fillSubSetTable(){
   
   cgnSubSets.insert( make_pair("pers", "vwtype" ));
   cgnSubSets.insert( make_pair("pr", "vwtype" ));
-  cgnSubSets.insert( make_pair( "refl1", "vwtype" ));
+  cgnSubSets.insert( make_pair("refl", "vwtype" ));
   cgnSubSets.insert( make_pair("recip", "vwtype" ));
   cgnSubSets.insert( make_pair("bez", "vwtype" ));
   cgnSubSets.insert( make_pair("vb", "vwtype" ));
