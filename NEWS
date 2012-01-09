@@ -1,3 +1,9 @@
+0.12.8 - 2012-01
+[Ko vd Sloot]
+  * fixed argument escaping problem when calling libfolia
+[ Maarten van Gompel ]
+  * fixed a typo in cgn_tagger_mod
+
 0.12.7 - 2012-01-05
   * fixed compilation on GNU/Hurd
   * temporary parserfiles get a unique name now (using the pid).

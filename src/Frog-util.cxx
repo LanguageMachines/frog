@@ -106,6 +106,8 @@ string escape( const string& in ){
   for ( size_t i=0; i < in.length(); ++i ){
     if ( in[i] == '\'' )
       out += "\\";
+    else if ( in[i] == '\\' )
+      out += "\\";
     out += in[i];
   }
   return out;
