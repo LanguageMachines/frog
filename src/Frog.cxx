@@ -212,6 +212,7 @@ bool parse_args( TimblOpts& Opts ) {
   else {
     tmpDirName += "/";
   }
+#ifdef HAVE_DIRENT_H
   if ( !tmpDirName.empty() ){
     if ( !existsDir( tmpDirName ) ){
       *Log(theErrLog) << "temporary dir " << tmpDirName << " not readable" << endl;
@@ -219,6 +220,7 @@ bool parse_args( TimblOpts& Opts ) {
     }
     *Log(theErrLog) << "checking tmpdir: " << tmpDirName << " OK" << endl;
   }
+#endif
   if ( Opts.Find ( "testdir", value, mood)) {
 #ifdef HAVE_DIRENT_H
     doDirTest = true;
@@ -256,12 +258,14 @@ bool parse_args( TimblOpts& Opts ) {
   wantOUT = false;
   if ( Opts.Find( "outputdir", value, mood)) {
     outputDirName = value;
+#ifdef HAVE_DIRENT_H
     if ( !outputDirName.empty() ){
       if ( !existsDir( outputDirName ) ){
 	*Log(theErrLog) << "output dir " << outputDirName << " not readable" << endl;
 	return false;
       }
     }
+#endif
     wantOUT = true;
     Opts.Delete( "outputdir");
   }
@@ -273,12 +277,14 @@ bool parse_args( TimblOpts& Opts ) {
   wantXML = false;
   if ( Opts.Find( "xmldir", value, mood)) {
     xmlDirName = value;
+#ifdef HAVE_DIRENT_H
     if ( !xmlDirName.empty() ){
       if ( !existsDir( xmlDirName ) ){
 	*Log(theErrLog) << "XML output dir " << xmlDirName << " not readable" << endl;
 	return false;
       }
     }
+#endif
     wantXML = true;
     Opts.Delete( "xmldir");
   }

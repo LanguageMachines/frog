@@ -35,6 +35,17 @@ AC_SUBST([LIBTOOL_DEPS])
 # when running tests, use CXX
 AC_LANG([C++])
 
+# Checks for libraries.
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
+AC_HEADER_DIRENT
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+
+# Checks for library functions.
+AC_FUNC_FORK
+
 ACX_PTHREAD([],[AC_MSG_ERROR([We need pthread support!])])
 
 if test x"$acx_pthread_ok" = xyes; then
@@ -46,25 +57,10 @@ fi
 OPENMP_CHECK( [CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"],
 	      [AC_MSG_ERROR([We need OpenMP, please use a recent compiler!])])
 
-# Checks for typedefs, structures, and compiler characteristics.
-AC_HEADER_STDBOOL
-AC_HEADER_DIRENT
-AC_HEADER_SYS_WAIT
-AC_C_INLINE
-AC_C_CONST
-AC_TYPE_INT32_T
-AC_TYPE_SIZE_T
-
-# Checks for libraries.
 
 if test $prefix = "NONE"; then
    prefix="$ac_default_prefix"
 fi
-
-# Checks for library functions.
-AC_FUNC_FORK
-AC_FUNC_STAT
-AC_CHECK_FUNCS([memset])
 
 PKG_PROG_PKG_CONFIG
 AC_PATH_PROG(pkgconfigpath, pkg-config, NONE)
