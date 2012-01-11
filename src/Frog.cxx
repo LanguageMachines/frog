@@ -342,7 +342,9 @@ bool parse_args( TimblOpts& Opts ) {
     *Log(theErrLog) << "no frogging without input!" << endl;
     return false;
   }
-  
+}
+
+bool init(){  
   if ( doServer ){
     // we use fork(). omp (GCC version) doesn't do well when omp is used
     // before the fork!
@@ -779,15 +781,12 @@ int main(int argc, char *argv[]) {
   try {
     TimblOpts Opts(argc, argv);
         
-    if ( parse_args(Opts) ){
-    
-       if ((tpDebug) || (doServer)) {
+    if ( parse_args(Opts) &&
+	 init() ){
+      if ((tpDebug) || (doServer)) {
       	//don't mangle debug output, so run 1 thread then.. also run in one thread in server mode, forking is too expensive for lots of small snippets
       	omp_set_num_threads( 1 );
-   	   }
-      //gets a settingsfile for each component, 
-      //and starts init for that mod
-      
+      }
       if ( !fileNames.empty() ) {
 	string outPath;
 	string xmlPath;
