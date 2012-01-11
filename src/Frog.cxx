@@ -434,8 +434,8 @@ void TestSentence( FoliaElement* sent,
 		   TimerBlock& timers ){
   vector<Word*> swords = sent->words();
   if ( !swords.empty() ) {
-    if (tpDebug) {
-      // don't mangle debug output, so run 1 thread then
+    if ((tpDebug) || (doServer)) {
+      // don't mangle debug output, so run 1 thread then.. also run in one thread in server mode, forking is too expensive for lots of small snippets
       omp_set_num_threads( 1 );
     }
     timers.tagTimer.start();
