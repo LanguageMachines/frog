@@ -728,9 +728,8 @@ void TestFile( const string& infilename,
 void TestServer( Sockets::ServerSocket &conn) {
   //by Maarten van Gompel
 
-  TimerBlock timers;
-  Common::Timer frogTimer;
-  frogTimer.start();
+  
+  
 
   try {
     while (true) {
@@ -754,6 +753,9 @@ void TestServer( Sockets::ServerSocket &conn) {
 
       *Log(theErrLog) << "Processing... " << endl;
       
+      TimerBlock timers;
+  	  Common::Timer frogTimer;
+  	  frogTimer.start();
       Test(inputstream, outputstream, timers, frogTimer, "", tmpDirName );
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  )
 	  throw( runtime_error( "write to client failed" ) );
