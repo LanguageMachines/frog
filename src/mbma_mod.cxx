@@ -589,7 +589,7 @@ void Mbma::addMorph( FoliaElement *word,
   }
 }	  
       
-void Mbma::postprocess( FoliaElement *fword ){
+void Mbma::postprocess( FoliaElement *fword, PosAnnotation *pos ){
   if (debugFlag){
     for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
       cout << it->getTag() << it->getInflection()<< " ";
@@ -601,7 +601,6 @@ void Mbma::postprocess( FoliaElement *fword ){
   
   if (debugFlag)
       cout << "before morpho: " << endl;
-  PosAnnotation * pos = fword->annotation<PosAnnotation>();
   const string tag = pos->feat("head");
   map<string,string>::const_iterator tagIt = TAGconv.find( tag );
   if ( tagIt == TAGconv.end() ) {
@@ -638,9 +637,13 @@ void Mbma::postprocess( FoliaElement *fword ){
     //should be(come?) a switch
     if ( match == 0 ) {
       // fallback option: use the word and pretend it's a lemma ;-)
-      vector<string> tmp;
-      UnicodeString word = fword->text();
+      UnicodeString word;
+#pragma omp critical(foliaupdate)
+      {
+	word = fword->text();
+      }
       word.toLower();
+      vector<string> tmp;
       tmp.push_back( UnicodeToUTF8(word) );
       addMorph( fword, tmp );
     }
@@ -649,7 +652,7 @@ void Mbma::postprocess( FoliaElement *fword ){
       addMorph( fword, ma );
     } 
     else {
-      vector<Feature*> feats = fword->annotation<PosAnnotation>()->select<Feature>();
+      vector<Feature*> feats = pos->select<Feature>();
       if (debugFlag){
 	cout << "tag: " << tag << endl;
 	for ( size_t q =0 ; q < feats.size(); ++q ) {
@@ -730,8 +733,13 @@ void Mbma::postprocess( FoliaElement *fword ){
 }  // postprocess
 
 bool Mbma::Classify( FoliaElement* sword ){
-  UnicodeString uWord = sword->text();
-  PosAnnotation * pos = sword->annotation<PosAnnotation>();
+  UnicodeString uWord;
+  PosAnnotation *pos;
+#pragma omp critical(foliaupdate)
+  {
+    uWord = sword->text();
+    pos = sword->annotation<PosAnnotation>();
+  }
   string tag = pos->feat("head");
   if ( tag == "SPEC" ){
     string word = UnicodeToUTF8( uWord );
@@ -761,7 +769,7 @@ bool Mbma::Classify( FoliaElement* sword ){
     classes[0] = "X";
   
   execute( uWord, classes );
-  postprocess( sword );
+  postprocess( sword, pos );
   return true;
 }
 

@@ -69,7 +69,7 @@ class Mbma {
   MBMAana inflectAndAffix( const std::vector<waStruct>& ana );
   void execute( const UnicodeString& word, 
 		const std::vector<std::string>& classes );
-  void postprocess( folia::FoliaElement * );
+  void postprocess( folia::FoliaElement *, folia::PosAnnotation * );
   int debugFlag;
   folia::FoliaElement *createFeature( char c ) const;
   void addMorph( folia::FoliaElement *, 

@@ -50,14 +50,14 @@
 #include "config.h"
 #include "frog/Frog.h"
 #include "frog/Configuration.h"
+#include "libfolia/document.h"
+#include "libfolia/folia.h"
 #include "ucto/tokenize.h"
 #include "frog/mbma_mod.h"
 #include "frog/mblem_mod.h"
 #include "frog/mwu_chunker_mod.h"
 #include "frog/cgn_tagger_mod.h"
 #include "frog/Parser.h"
-#include "libfolia/document.h"
-#include "libfolia/folia.h"
 
 using namespace std;
 using namespace folia;
