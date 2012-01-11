@@ -434,10 +434,6 @@ void TestSentence( FoliaElement* sent,
 		   TimerBlock& timers ){
   vector<Word*> swords = sent->words();
   if ( !swords.empty() ) {
-    if ((tpDebug) || (doServer)) {
-      // don't mangle debug output, so run 1 thread then.. also run in one thread in server mode, forking is too expensive for lots of small snippets
-      omp_set_num_threads( 1 );
-    }
     timers.tagTimer.start();
     string tagged = myCGNTagger.Classify( sent );
     timers.tagTimer.stop();
@@ -782,7 +778,13 @@ int main(int argc, char *argv[]) {
        << Tagger::VersionName() << "]" << endl;
   try {
     TimblOpts Opts(argc, argv);
+        
     if ( parse_args(Opts) ){
+    
+       if ((tpDebug) || (doServer)) {
+      	//don't mangle debug output, so run 1 thread then.. also run in one thread in server mode, forking is too expensive for lots of small snippets
+      	omp_set_num_threads( 1 );
+   	   }
       //gets a settingsfile for each component, 
       //and starts init for that mod
       
