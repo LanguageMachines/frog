@@ -1,7 +1,8 @@
 0.12.9 - 2012-01-12
 [Ko vd Sloot]
   * fixed threading problems.
-  * split very log function into 2 parts
+  * split very long function into 2 parts
+
 [Maarten van Gompel]
   * when in servermode, set_omp_num_threads(1). Otherwise every call
    to the server would start extra threads.
