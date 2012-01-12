@@ -345,7 +345,7 @@ bool parse_args( TimblOpts& Opts ) {
   return true;
 }
 
-bool init(){  
+bool froginit(){  
   if ( doServer ){
     // we use fork(). omp (GCC version) doesn't do well when omp is used
     // before the fork!
@@ -408,7 +408,7 @@ bool init(){
       }
     }   // end omp parallel sections
     if ( ! ( tagStat && lemStat && mbaStat && mwuStat && parStat ) ){
-      *Log(theErrLog) << "Initialization failed: ";
+      *Log(theErrLog) << "Initialization failed for: ";
       if ( ! ( tagStat ) ){
 	*Log(theErrLog) << "[tagger] ";
       }	
@@ -782,8 +782,12 @@ int main(int argc, char *argv[]) {
   try {
     TimblOpts Opts(argc, argv);
         
-    if ( parse_args(Opts) &&
-	 init() ){
+    if ( parse_args(Opts) ){
+      if (  !froginit() ){
+	cerr << "terminated." << endl;
+	return EXIT_FAILURE;
+      }
+      
       if ((tpDebug) || (doServer)) {
       	//don't mangle debug output, so run 1 thread then.. also run in one thread in server mode, forking is too expensive for lots of small snippets
       	omp_set_num_threads( 1 );
