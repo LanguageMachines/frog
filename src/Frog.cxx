@@ -342,6 +342,7 @@ bool parse_args( TimblOpts& Opts ) {
     *Log(theErrLog) << "no frogging without input!" << endl;
     return false;
   }
+  return true;
 }
 
 bool init(){  
