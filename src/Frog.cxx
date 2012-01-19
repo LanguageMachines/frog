@@ -639,6 +639,7 @@ void Test( istream& IN,
   string eosmarker = "";
   tokenizer.setEosMarker( eosmarker );
   tokenizer.setVerbose( false );
+  tokenizer.setPassThru( !doTok );
   tokenizer.setSentenceDetection( true ); //detection of sentences
   tokenizer.setParagraphDetection( false ); //detection of paragraphs
   tokenizer.setSentencePerLineInput( doSentencePerLine );
