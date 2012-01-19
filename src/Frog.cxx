@@ -728,38 +728,26 @@ void TestFile( const string& infilename,
 void TestServer( Sockets::ServerSocket &conn) {
   //by Maarten van Gompel
 
-  
-  
-
   try {
     while (true) {
       string data = "";      
-      while (true) {
-	string tmpdata;
-	if ( !conn.read( tmpdata ) )	 //read data from client
-	    throw( runtime_error( "read failed" ) );
-	
-	if (data.length() < 2048) { /* Todo: get TCP_BUFFER_SIZE dynamically from TimblServer and OS */
-	    data = data + tmpdata;
-	    break;
-	}
-      }
-          	
+      if ( !conn.read( data ) )	 //read data from client
+	throw( runtime_error( "read failed" ) );
       if (tpDebug)
 	std::cerr << "Received: [" << data << "]" << "\n";
       
       istringstream inputstream(data,istringstream::in);
       ostringstream outputstream;
-
+      
       *Log(theErrLog) << "Processing... " << endl;
       
       TimerBlock timers;
-  	  Common::Timer frogTimer;
-  	  frogTimer.start();
+      Common::Timer frogTimer;
+      frogTimer.start();
       Test(inputstream, outputstream, timers, frogTimer, "", tmpDirName );
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  )
-	  throw( runtime_error( "write to client failed" ) );
-
+	throw( runtime_error( "write to client failed" ) );
+      
     }
   }
   catch ( std::exception& e ) {
