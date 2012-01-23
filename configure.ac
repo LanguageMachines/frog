@@ -73,6 +73,27 @@ if test "$pkgconfigpath" != "NONE"; then
 fi
 
 #check for needed dependencies
+useICU=1;
+# inspired by feh-1.3.4/configure.ac.  Tnx Tom Gilbert and feh hackers.
+AC_ARG_WITH(icu,
+       [  --with-icu=DIR       use ICU installed in <DIR>],
+       [if test "$with_icu" = "no"; then
+           useICU=0
+	else
+	   CXXFLAGS="$CXXFLAGS -I$withval/include"
+           LIBS="-L$withval/lib $LIBS"
+	fi] )
+
+if test "$useICU" = "1"; then
+  AX_ICU_CHECK( [3.6],
+		[CXXFLAGS="$CXXFLAGS $ICU_CPPSEARCHPATH"
+		LIBS="$ICU_LIBPATH $ICU_LIBS $ICU_IOLIBS $LIBS"],
+		[AC_MSG_FAILURE( "No ICU development environment found. Please check if libicu-dev or the like is installed" )] )
+  AC_DEFINE(HAVE_ICU, 1, we want to use ICU )
+else
+  AC_MSG_ERROR("ICU support is required")
+fi
+
 AC_ARG_WITH(timbl,
        [  --with-timbl=DIR       use timbl installed in <DIR>],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
@@ -113,11 +134,6 @@ AC_ARG_WITH(ucto,
 PKG_CHECK_MODULES([ucto], [ucto >= 0.4.9] )
 CXXFLAGS="$CXXFLAGS $ucto_CFLAGS"
 LIBS="$LIBS $ucto_LIBS"
-
-# needed till icu 4.6 is widely available
-PKG_CHECK_MODULES( [icu], [ucto-icu >= 3.6] )
-CXXFLAGS="$CXXFLAGS $icu_FLAGS"
-LIBS="$LIBS $icu_LIBS"
 
 #
 # the ac_python_devel.m4 script tramples upon $LIBS, so we save it
