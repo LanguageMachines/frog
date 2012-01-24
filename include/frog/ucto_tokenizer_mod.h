@@ -38,16 +38,12 @@ class Configuration;
 class UctoTokenizer {
  public:
   bool init( const Configuration& );
-  void setPassThru( bool b ) { tokenizer.setPassThru( b ); };
-  void setSentencePerLineInput( bool b ) {
-    tokenizer.setSentencePerLineInput( b ); };
-  void setInputEncoding( const std::string & enc ){
-    if ( !enc.empty() )
-      tokenizer.setInputEncoding( enc );
-  }
+  void setPassThru( bool b );
+  void setSentencePerLineInput( bool b );
+  void setInputEncoding( const std::string & enc );
   folia::Document tokenize( std::istream& );
  private:
-  Tokenizer::TokenizerClass tokenizer;
+  Tokenizer::TokenizerClass *tokenizer;
 };
 
 #endif 

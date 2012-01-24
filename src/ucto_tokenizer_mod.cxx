@@ -38,14 +38,17 @@
 using namespace std;
 
 bool UctoTokenizer::init( const Configuration& conf ){
+  if ( tokenizer )
+    throw runtime_error( "ucto tokenizer is already initalized" );
+  tokenizer = new Tokenizer::TokenizerClass();
   string rulesName = conf.lookUp( "rulesFile", "tokenizer" );
   if ( rulesName.empty() ){
     *Log(theErrLog) << "no rulesFile found in configuration" << endl;
     return false;
   }
   else {
-    tokenizer.setErrorLog( theErrLog );
-    if ( !tokenizer.init( rulesName ) )
+    tokenizer->setErrorLog( theErrLog );
+    if ( !tokenizer->init( rulesName ) )
       return false;
   }
   string debug = conf.lookUp( "debug", "tokenizer" );
@@ -53,20 +56,46 @@ bool UctoTokenizer::init( const Configuration& conf ){
     debug = conf.lookUp( "debug" );
   }
   if ( debug.empty() ){
-    tokenizer.setDebug( tpDebug );
+    tokenizer->setDebug( tpDebug );
   }
   else
-    tokenizer.setDebug( Timbl::stringTo<int>(debug) );
-  tokenizer.setEosMarker( "" );
-  tokenizer.setVerbose( false );
-  tokenizer.setSentenceDetection( true ); //detection of sentences
-  tokenizer.setParagraphDetection( false ); //detection of paragraphs  
-  tokenizer.setXMLOutput( true, "frog" );
+    tokenizer->setDebug( Timbl::stringTo<int>(debug) );
+  tokenizer->setEosMarker( "" );
+  tokenizer->setVerbose( false );
+  tokenizer->setSentenceDetection( true ); //detection of sentences
+  tokenizer->setParagraphDetection( false ); //detection of paragraphs  
+  tokenizer->setXMLOutput( true, "frog" );
   return true;
 }
 
+void UctoTokenizer::setPassThru( bool b ) { 
+  if ( tokenizer )
+    tokenizer->setPassThru( b ); 
+  else
+    throw runtime_error( "ucto tokenizer not initalized" );
+}
+
+void UctoTokenizer::setSentencePerLineInput( bool b ) {
+  if ( tokenizer )
+    tokenizer->setSentencePerLineInput( b ); 
+  else
+    throw runtime_error( "ucto tokenizer not initalized" );
+};
+
+void UctoTokenizer::setInputEncoding( const std::string & enc ){
+  if ( tokenizer ){
+    if ( !enc.empty() )
+      tokenizer->setInputEncoding( enc );
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initalized" );
+}
 
 folia::Document UctoTokenizer::tokenize( istream& is ){
-  return tokenizer.tokenize( is );
+  if ( tokenizer )
+    return tokenizer->tokenize( is );
+  else
+    throw runtime_error( "ucto tokenizer not initalized" );
+
 }
 
