@@ -26,19 +26,19 @@
       timbl@uvt.nl
 */
 
-#ifndef TAGGER_MOD_H
-#define TAGGER_MOD_H
+#ifndef CGN_TAGGER_MOD_H
+#define CGN_TAGGER_MOD_H
 
 class Configuration;
 
-class MBTagger {
+class CGNTagger {
  public:
-  MBTagger();
-  ~MBTagger();
+  CGNTagger();
+  ~CGNTagger();
   bool init( const Configuration& );
   std::string Classify( folia::FoliaElement * );
  private:
   MbtAPI *tagger;  
 };
 
-#endif // TAGGER_MOD_H
+#endif // CGN_TAGGER_MOD_H

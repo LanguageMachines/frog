@@ -26,8 +26,8 @@
       timbl@uvt.nl
 */
                                     
-#ifndef __MDMA_MOD__
-#define __MBMA_MOD__
+#ifndef MBMA_MOD_H
+#define MBMA_MOD_H
 
 class MBMAana;
 

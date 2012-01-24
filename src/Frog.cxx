@@ -52,7 +52,7 @@
 #include "frog/Configuration.h"
 #include "libfolia/document.h"
 #include "libfolia/folia.h"
-#include "ucto/tokenize.h"
+#include "frog/ucto_tokenizer_mod.h"
 #include "frog/mbma_mod.h"
 #include "frog/mblem_mod.h"
 #include "frog/mwu_chunker_mod.h"
@@ -61,8 +61,6 @@
 
 using namespace std;
 using namespace folia;
-
-Tokenizer::TokenizerClass tokenizer;
 
 LogStream my_default_log( cerr, "frog-", StampMessage ); // fall-back
 LogStream *theErrLog = &my_default_log;  // fill the externals
@@ -144,7 +142,9 @@ static Mbma myMbma;
 static Mblem myMblem;
 static Mwu myMwu;
 static Parser myParser;
-static MBTagger myCGNTagger;
+static CGNTagger myCGNTagger;
+static UctoTokenizer tokenizer;
+
 
 bool parse_args( TimblOpts& Opts ) {
   string value;
@@ -312,32 +312,6 @@ bool parse_args( TimblOpts& Opts ) {
     return false;
   }
 
-  string tagset = configuration.lookUp( "settings", "tagger" );
-  if ( tagset.empty() ){
-    *Log(theErrLog) << "Unable to find settings for Tagger" << endl;
-    return false;
-  }
-
-  string rulesName = configuration.lookUp( "rulesFile", "tokenizer" );
-  if ( rulesName.empty() ){
-    *Log(theErrLog) << "no rulesFile found in configuration" << endl;
-    return false;
-  }
-  else {
-    tokenizer.setErrorLog( theErrLog );
-    if ( !tokenizer.init( rulesName ) )
-      return false;
-  }
-  string debug = configuration.lookUp( "debug", "tokenizer" );
-  if ( debug.empty() )
-    tokenizer.setDebug( tpDebug );
-  else
-    tokenizer.setDebug( Timbl::stringTo<int>(debug) );
-
-  if ( Opts.Find ('Q', value, mood)) {
-      tokenizer.setQuoteDetection(true);
-  };
-
   if ( !doServer && TestFileName.empty() && fileNames.empty() ){
     *Log(theErrLog) << "no frogging without input!" << endl;
     return false;
@@ -350,21 +324,27 @@ bool froginit(){
     // we use fork(). omp (GCC version) doesn't do well when omp is used
     // before the fork!
     // see: http://bisqwit.iki.fi/story/howto/openmp/#OpenmpAndFork
-    bool stat = myCGNTagger.init( configuration );
+    bool stat = tokenizer.init( configuration );
     if ( stat ){
-      bool stat = myMblem.init( configuration );
+      tokenizer.setPassThru( !doTok );
+      tokenizer.setSentencePerLineInput( doSentencePerLine );
+      tokenizer.setInputEncoding( encoding );
+      stat = myCGNTagger.init( configuration );
       if ( stat ){
-	stat = myMbma.init( configuration );
-	if ( stat ) {
-	  if ( doMwu ){
-	    stat = myMwu.init( configuration );
-	    if ( stat && doParse )
-	      stat = myParser.init( configuration );
-	  }
-	  else {
-	    if ( doParse )
-	      *Log(theErrLog) << " Parser disabled, because MWU is deselected" << endl;
-	    doParse = false;;
+	stat = myMblem.init( configuration );
+	if ( stat ){
+	  stat = myMbma.init( configuration );
+	  if ( stat ) {
+	    if ( doMwu ){
+	      stat = myMwu.init( configuration );
+	      if ( stat && doParse )
+		stat = myParser.init( configuration );
+	    }
+	    else {
+	      if ( doParse )
+		*Log(theErrLog) << " Parser disabled, because MWU is deselected" << endl;
+	      doParse = false;;
+	    }
 	  }
 	}
       }
@@ -375,6 +355,7 @@ bool froginit(){
     }
   }
   else {
+    bool tokStat = true;
     bool lemStat = true;
     bool mwuStat = true;
     bool mbaStat = true;
@@ -382,6 +363,15 @@ bool froginit(){
     bool tagStat = true;
 #pragma omp parallel sections
     {
+#pragma omp section
+      {
+	tokStat = tokenizer.init( configuration );
+	if ( tokStat ){
+	  tokenizer.setPassThru( !doTok );
+	  tokenizer.setSentencePerLineInput( doSentencePerLine );
+	  tokenizer.setInputEncoding( encoding );
+	}
+      }
 #pragma omp section
       lemStat = myMblem.init( configuration );
 #pragma omp section
@@ -407,8 +397,11 @@ bool froginit(){
 	}
       }
     }   // end omp parallel sections
-    if ( ! ( tagStat && lemStat && mbaStat && mwuStat && parStat ) ){
+    if ( ! ( tokStat && tagStat && lemStat && mbaStat && mwuStat && parStat ) ){
       *Log(theErrLog) << "Initialization failed for: ";
+      if ( ! ( tokStat ) ){
+	*Log(theErrLog) << "[tokenizer] ";
+      }	
       if ( ! ( tagStat ) ){
 	*Log(theErrLog) << "[tagger] ";
       }	
@@ -636,19 +629,9 @@ void Test( istream& IN,
 	   const string& xmlOutFile,
 	   const string& tmpDir ) {
 
-  string eosmarker = "";
-  tokenizer.setEosMarker( eosmarker );
-  tokenizer.setVerbose( false );
-  tokenizer.setPassThru( !doTok );
-  tokenizer.setSentenceDetection( true ); //detection of sentences
-  tokenizer.setParagraphDetection( false ); //detection of paragraphs
-  tokenizer.setSentencePerLineInput( doSentencePerLine );
-  if ( !encoding.empty() )
-    tokenizer.setInputEncoding( encoding );
-  
-  tokenizer.setXMLOutput( true, "frog" );
   string line;  
   Document doc = tokenizer.tokenize( IN ); 
+  
   doc.declare( AnnotationType::POS, "mbt-pos");
   doc.declare( AnnotationType::LEMMA, "mbt-lemma");
 

@@ -36,11 +36,11 @@
 using namespace std;
 using namespace folia;
 
-MBTagger::MBTagger(){
+CGNTagger::CGNTagger(){
   tagger = 0;
 }
 
-MBTagger::~MBTagger(){
+CGNTagger::~CGNTagger(){
   delete tagger;
 }
 
@@ -173,9 +173,9 @@ void fillSubSetTable(){
 }
 
  
-bool MBTagger::init( const Configuration& conf ){
+bool CGNTagger::init( const Configuration& conf ){
   if ( tagger != 0 ){
-    *Log(theErrLog) << "MBTagger is already initialized!" << endl;
+    *Log(theErrLog) << "CGNTagger is already initialized!" << endl;
     return false;
   }  
   string tagset = conf.lookUp( "settings", "tagger" );
@@ -351,7 +351,7 @@ void addTag( FoliaElement *word, const string& inputTag, double confidence ){
   }
 }
 
-string MBTagger::Classify( FoliaElement *sent ){
+string CGNTagger::Classify( FoliaElement *sent ){
   string tagged;
   vector<Word*> swords = sent->words();
   if ( !swords.empty() ) {

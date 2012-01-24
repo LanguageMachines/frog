@@ -7,7 +7,7 @@ bin_PROGRAMS = frog
 
 frog_SOURCES = mbma_mod.cxx mblem_mod.cxx mwu_chunker_mod.cxx \
 	Frog.cxx Frog-util.cxx Parser.cxx cgn_tagger_mod.cxx \
-	Configuration.cxx
+	Configuration.cxx ucto_tokenizer_mod.cxx
 
 
 TESTS_ENVIRONMENT = $(SHELL) -x
