@@ -57,7 +57,7 @@
 #include "frog/mblem_mod.h"
 #include "frog/mwu_chunker_mod.h"
 #include "frog/cgn_tagger_mod.h"
-#include "frog/ner_tagger_mod.h"
+#include "frog/iob_tagger_mod.h"
 #include "frog/Parser.h"
 
 using namespace std;
@@ -81,7 +81,7 @@ int tpDebug = 0; //0 for none, more for more output
 string sep = " "; // "&= " for cgi 
 bool doTok = true;
 bool doMwu = true;
-bool doNER = false;
+bool doIOB = false;
 bool doParse = true;
 bool doDirTest = false;
 bool doServer = false;
@@ -121,7 +121,7 @@ void usage( ) {
        << "\t --testdir=<directory>  All files in this dir will be tested)\n"
        << "\t -n                     Assume input file to hold one sentence per line\n"
        << "\t============= MODULE SELECTION ==========================================\n"
-       << "\t --skip=[mptn]  Skip Tokenizer (t), NER Tagger (n), Multi-Word Units (m) or Parser (p) \n"
+       << "\t --skip=[mpti]  Skip Tokenizer (t), IOB Chunker (i), Multi-Word Units (m) or Parser (p) \n"
        << "\t============= CONFIGURATION OPTIONS =====================================\n"
        << "\t -c <filename>    Set configuration file (default " << configFileName << ")\n"
        << "\t============= OUTPUT OPTIONS ============================================\n"
@@ -145,7 +145,7 @@ static Mblem myMblem;
 static Mwu myMwu;
 static Parser myParser;
 static CGNTagger myCGNTagger;
-static NERTagger myNERTagger;
+static IOBTagger myIOBTagger;
 static UctoTokenizer tokenizer;
 
 
@@ -190,8 +190,8 @@ bool parse_args( TimblOpts& Opts ) {
       doTok = false;
     if ( skip.find_first_of("mM") != string::npos )
       doMwu = false;
-    if ( skip.find_first_of("nN") != string::npos )
-      doNER = true;
+    if ( skip.find_first_of("iI") != string::npos )
+      doIOB = true;
     if ( skip.find_first_of("pP") != string::npos )
       doParse = false;
     Opts.Delete("skip");
@@ -335,8 +335,8 @@ bool froginit(){
       tokenizer.setInputEncoding( encoding );
       stat = myCGNTagger.init( configuration );
       if ( stat ){
-	if ( doNER )
-	  stat = myNERTagger.init( configuration );
+	if ( doIOB )
+	  stat = myIOBTagger.init( configuration );
 	if ( stat ){
 	  stat = myMblem.init( configuration );
 	  if ( stat ){
@@ -369,7 +369,7 @@ bool froginit(){
     bool mbaStat = true;
     bool parStat = true;
     bool tagStat = true;
-    bool nerStat = true;
+    bool iobStat = true;
 #pragma omp parallel sections
     {
 #pragma omp section
@@ -388,8 +388,8 @@ bool froginit(){
       tagStat = myCGNTagger.init( configuration );
 #pragma omp section 
       {
-	if ( doNER )
-	  nerStat = myNERTagger.init( configuration );
+	if ( doIOB )
+	  iobStat = myIOBTagger.init( configuration );
       }
 #pragma omp section
       {
@@ -410,7 +410,7 @@ bool froginit(){
 	}
       }
     }   // end omp parallel sections
-    if ( ! ( tokStat && nerStat && tagStat && lemStat 
+    if ( ! ( tokStat && iobStat && tagStat && lemStat 
 	     && mbaStat && mwuStat && parStat ) ){
       *Log(theErrLog) << "Initialization failed for: ";
       if ( ! ( tokStat ) ){
@@ -419,8 +419,8 @@ bool froginit(){
       if ( ! ( tagStat ) ){
 	*Log(theErrLog) << "[tagger] ";
       }	
-      if ( ! ( nerStat ) ){
-	*Log(theErrLog) << "[NER] ";
+      if ( ! ( iobStat ) ){
+	*Log(theErrLog) << "[IOB] ";
       }	
       if ( ! ( lemStat ) ){
 	*Log(theErrLog) << "[lemmatizer] ";
@@ -669,8 +669,8 @@ void Test( istream& IN,
   
   *Log(theErrLog) << "tokenisation took:" << timers.tokTimer << endl;
   *Log(theErrLog) << "tagging took:     " << timers.tagTimer << endl;
-  if ( doNER )
-    *Log(theErrLog) << "NER took:     " << timers.nerTimer << endl;
+  if ( doIOB)
+    *Log(theErrLog) << "IOB chunking took:     " << timers.nerTimer << endl;
   *Log(theErrLog) << "MBA took:         " << timers.mbmaTimer << endl;
   *Log(theErrLog) << "Mblem took:       " << timers.mblemTimer << endl;
   if ( doMwu )
