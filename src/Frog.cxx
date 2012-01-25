@@ -72,6 +72,7 @@ string tmpDirName;
 string outputFileName;
 bool wantOUT;
 string XMLoutFileName;
+bool getXML;
 bool wantXML;
 string outputDirName;
 string xmlDirName;
@@ -299,6 +300,12 @@ bool parse_args( TimblOpts& Opts ) {
     Opts.Delete('X');
   }
   
+  getXML = false;
+  if ( Opts.Find ('x', value, mood)) {
+    getXML = true;
+    Opts.Delete('x');
+  }
+  
   if ( !outputFileName.empty() && !testDirName.empty() ){
     *Log(theErrLog) << "useless -o value" << endl;
     return false;
@@ -333,6 +340,7 @@ bool froginit(){
     if ( stat ){
       tokenizer.setSentencePerLineInput( doSentencePerLine );
       tokenizer.setInputEncoding( encoding );
+      tokenizer.setInputXml( getXML );
       stat = myCGNTagger.init( configuration );
       if ( stat ){
 	if ( doIOB )
@@ -378,6 +386,7 @@ bool froginit(){
 	if ( tokStat ){
 	  tokenizer.setSentencePerLineInput( doSentencePerLine );
 	  tokenizer.setInputEncoding( encoding );
+	  tokenizer.setInputXml( getXML );
 	}
       }
 #pragma omp section
@@ -634,8 +643,7 @@ ostream &showResults( ostream& os, const FoliaElement* sentence ){
 }
 
 
-
-void Test( istream& IN,
+void Test( Document& doc,
 	   ostream& outStream,
 	   TimerBlock& timers,
 	   Common::Timer &frogTimer,
@@ -643,13 +651,8 @@ void Test( istream& IN,
 	   const string& tmpDir ) {
 
   string line;  
-  Document doc = tokenizer.tokenize( IN ); 
-  
   doc.declare( AnnotationType::POS, "mbt-pos");
   doc.declare( AnnotationType::LEMMA, "mbt-lemma");
-
-  // Tokenize the whole input into one FoLiA document.
-  // This is nog a good idea on the long term, I think
 
   vector<Sentence*> sentences = doc.sentences();
   size_t numS = sentences.size();
@@ -691,6 +694,28 @@ void Test( istream& IN,
   return;
 }
 
+void Test( const string& infilename,
+	   ostream& outStream,
+	   TimerBlock& timers,
+	   Common::Timer &frogTimer,
+	   const string& xmlOutFile,
+	   const string& tmpDir ) {
+  if ( getXML ){
+    Document doc;
+    doc.readFromFile( infilename );
+    tokenizer.tokenize( doc );
+    Test( doc, outStream, timers, frogTimer, xmlOutFile, tmpDir );
+  }
+  else {
+    // Tokenize the whole input into one FoLiA document.
+    // This is nog a good idea on the long term, I think
+    ifstream IN( infilename.c_str() );
+    Document doc = tokenizer.tokenize( IN );
+    Test( doc, outStream, timers, frogTimer, xmlOutFile, tmpDir );
+  }
+}
+
+
 void TestFile( const string& infilename, 
 	       const string& outFileName,
 	       const string& xmlOutFile ) {
@@ -699,8 +724,6 @@ void TestFile( const string& infilename,
   Common::Timer frogTimer;
   frogTimer.start();
 
-  string TestFileName = ""; //untokenised!
-  
   ofstream outStream;
   if ( !outFileName.empty() ){
     if ( outStream.open( outFileName.c_str() ), outStream.bad() ){
@@ -708,14 +731,10 @@ void TestFile( const string& infilename,
       exit( EXIT_FAILURE );
     }
   }
-  TestFileName = infilename; //untokenised!
-
-  ifstream IN( TestFileName.c_str() );
-
   if (!outFileName.empty()) {
-    Test(IN, outStream, timers, frogTimer, xmlOutFile, tmpDirName );
+    Test( infilename, outStream, timers, frogTimer, xmlOutFile, tmpDirName );
   } else {
-    Test(IN, cout, timers, frogTimer, xmlOutFile, tmpDirName );
+    Test( infilename, cout, timers, frogTimer, xmlOutFile, tmpDirName );
   }
   
   if ( !outFileName.empty() )
@@ -742,7 +761,8 @@ void TestServer( Sockets::ServerSocket &conn) {
       TimerBlock timers;
       Common::Timer frogTimer;
       frogTimer.start();
-      Test(inputstream, outputstream, timers, frogTimer, "", tmpDirName );
+      Document doc = tokenizer.tokenize( inputstream ); 
+      Test( doc, outputstream, timers, frogTimer, "", tmpDirName );
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  )
 	throw( runtime_error( "write to client failed" ) );
       

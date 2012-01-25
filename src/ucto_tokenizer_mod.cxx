@@ -97,9 +97,28 @@ void UctoTokenizer::setInputEncoding( const std::string & enc ){
     throw runtime_error( "ucto tokenizer not initalized" );
 }
 
+void UctoTokenizer::setInputXml( bool b ){
+  if ( tokenizer ){
+    *Log(theErrLog) << "setXML= " << Timbl::toString(b) << endl;
+    bool d = tokenizer->setXMLInput( b );
+    *Log(theErrLog) << "old setXML= " << Timbl::toString(d) << endl;
+    d = tokenizer->setXMLInput( b );
+    *Log(theErrLog) << "new setXML= " << Timbl::toString(d) << endl;    
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initalized" );
+}
+
 folia::Document UctoTokenizer::tokenize( istream& is ){
   if ( tokenizer )
     return tokenizer->tokenize( is );
+  else
+    throw runtime_error( "ucto tokenizer not initalized" );
+}
+
+bool UctoTokenizer::tokenize( folia::Document& doc ){
+  if ( tokenizer )
+    return tokenizer->tokenize( doc );
   else
     throw runtime_error( "ucto tokenizer not initalized" );
 

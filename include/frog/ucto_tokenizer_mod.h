@@ -42,7 +42,9 @@ class UctoTokenizer {
   bool init( const Configuration&, bool );
   void setSentencePerLineInput( bool );
   void setInputEncoding( const std::string & );
+  void setInputXml( bool );
   folia::Document tokenize( std::istream& );
+  bool tokenize( folia::Document& );
  private:
   Tokenizer::TokenizerClass *tokenizer;
   LogStream *uctoLog;
