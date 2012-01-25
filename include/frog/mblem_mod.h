@@ -62,6 +62,7 @@ class Mblem {
   int debug;
   std::map <std::string,std::string> classMap;
   std::vector<mblemData> mblemResult;
+  LogStream *mblemLog;
 };
 
 #endif

@@ -57,6 +57,7 @@
 #include "frog/mblem_mod.h"
 #include "frog/mwu_chunker_mod.h"
 #include "frog/cgn_tagger_mod.h"
+#include "frog/ner_tagger_mod.h"
 #include "frog/Parser.h"
 
 using namespace std;
@@ -80,6 +81,7 @@ int tpDebug = 0; //0 for none, more for more output
 string sep = " "; // "&= " for cgi 
 bool doTok = true;
 bool doMwu = true;
+bool doNER = false;
 bool doParse = true;
 bool doDirTest = false;
 bool doServer = false;
@@ -119,7 +121,7 @@ void usage( ) {
        << "\t --testdir=<directory>  All files in this dir will be tested)\n"
        << "\t -n                     Assume input file to hold one sentence per line\n"
        << "\t============= MODULE SELECTION ==========================================\n"
-       << "\t --skip=[mpt]  Skip Tokenizer (t), Multi-Word Units (m) or Parser (p) \n"
+       << "\t --skip=[mptn]  Skip Tokenizer (t), NER Tagger (n), Multi-Word Units (m) or Parser (p) \n"
        << "\t============= CONFIGURATION OPTIONS =====================================\n"
        << "\t -c <filename>    Set configuration file (default " << configFileName << ")\n"
        << "\t============= OUTPUT OPTIONS ============================================\n"
@@ -143,6 +145,7 @@ static Mblem myMblem;
 static Mwu myMwu;
 static Parser myParser;
 static CGNTagger myCGNTagger;
+static NERTagger myNERTagger;
 static UctoTokenizer tokenizer;
 
 
@@ -187,6 +190,8 @@ bool parse_args( TimblOpts& Opts ) {
       doTok = false;
     if ( skip.find_first_of("mM") != string::npos )
       doMwu = false;
+    if ( skip.find_first_of("nN") != string::npos )
+      doNER = true;
     if ( skip.find_first_of("pP") != string::npos )
       doParse = false;
     Opts.Delete("skip");
@@ -331,19 +336,23 @@ bool froginit(){
       tokenizer.setInputEncoding( encoding );
       stat = myCGNTagger.init( configuration );
       if ( stat ){
-	stat = myMblem.init( configuration );
+	if ( doNER )
+	  stat = myNERTagger.init( configuration );
 	if ( stat ){
-	  stat = myMbma.init( configuration );
-	  if ( stat ) {
-	    if ( doMwu ){
-	      stat = myMwu.init( configuration );
-	      if ( stat && doParse )
-		stat = myParser.init( configuration );
-	    }
-	    else {
-	      if ( doParse )
-		*Log(theErrLog) << " Parser disabled, because MWU is deselected" << endl;
-	      doParse = false;;
+	  stat = myMblem.init( configuration );
+	  if ( stat ){
+	    stat = myMbma.init( configuration );
+	    if ( stat ) {
+	      if ( doMwu ){
+		stat = myMwu.init( configuration );
+		if ( stat && doParse )
+		  stat = myParser.init( configuration );
+	      }
+	      else {
+		if ( doParse )
+		  *Log(theErrLog) << " Parser disabled, because MWU is deselected" << endl;
+		doParse = false;;
+	      }
 	    }
 	  }
 	}
@@ -361,6 +370,7 @@ bool froginit(){
     bool mbaStat = true;
     bool parStat = true;
     bool tagStat = true;
+    bool nerStat = true;
 #pragma omp parallel sections
     {
 #pragma omp section
@@ -378,6 +388,11 @@ bool froginit(){
       mbaStat = myMbma.init( configuration );
 #pragma omp section 
       tagStat = myCGNTagger.init( configuration );
+#pragma omp section 
+      {
+	if ( doNER )
+	  nerStat = myNERTagger.init( configuration );
+      }
 #pragma omp section
       {
 	if ( doMwu ){
@@ -397,13 +412,17 @@ bool froginit(){
 	}
       }
     }   // end omp parallel sections
-    if ( ! ( tokStat && tagStat && lemStat && mbaStat && mwuStat && parStat ) ){
+    if ( ! ( tokStat && nerStat && tagStat && lemStat 
+	     && mbaStat && mwuStat && parStat ) ){
       *Log(theErrLog) << "Initialization failed for: ";
       if ( ! ( tokStat ) ){
 	*Log(theErrLog) << "[tokenizer] ";
       }	
       if ( ! ( tagStat ) ){
 	*Log(theErrLog) << "[tagger] ";
+      }	
+      if ( ! ( nerStat ) ){
+	*Log(theErrLog) << "[NER] ";
       }	
       if ( ! ( lemStat ) ){
 	*Log(theErrLog) << "[lemmatizer] ";
@@ -441,36 +460,32 @@ void TestSentence( FoliaElement* sent,
 #pragma omp section
 	{
 	  timers.mbmaTimer.start();
-	  if (tpDebug) cout << "Calling mbma..." << endl;
+	  if (tpDebug) 
+	    *Log(theErrLog) << "Calling mbma..." << endl;
 	  mbmaLemma = myMbma.Classify( swords[i] );
 	  timers.mbmaTimer.stop();
 	}
 #pragma omp section
 	{
 	  timers.mblemTimer.start();
-	  if (tpDebug) cout << "Calling mblem..." << endl;
+	  if (tpDebug) 
+	    *Log(theErrLog) << "Calling mblem..." << endl;
 	  mblemLemma = myMblem.Classify( swords[i] );
 	  timers.mblemTimer.stop();
 	}
-      }
+      } // omp sections
       if (tpDebug) {
-	cout   << "tagged word[" << i <<"]: " << swords[i]->str() << " tag "
-	       << swords[i]->pos() << endl;
-	cout << "analysis: " << mblemLemma << " " << mbmaLemma << endl;
+	*Log(theErrLog) << "tagged word[" << i <<"]: " << swords[i]->str() 
+			<< " tag " << swords[i]->pos() << endl;
+	*Log(theErrLog) << "analysis: " << mblemLemma << " " << mbmaLemma << endl;
       }
     } //for int i = 0 to num_words
 
     if ( doMwu ){
       if ( swords.size() > 0 ){
-	if (tpDebug)
-	  cout << "starting mwu Chunking ... \n";
 	timers.mwuTimer.start();
 	myMwu.Classify( sent );
 	timers.mwuTimer.stop();
-      }
-      if (tpDebug) {
-	cout << "\n\nfinished mwu chunking!\n";
-	cout << myMwu << endl;
       }
     }
     if ( doParse ){  
@@ -656,6 +671,8 @@ void Test( istream& IN,
   
   *Log(theErrLog) << "tokenisation took:" << timers.tokTimer << endl;
   *Log(theErrLog) << "tagging took:     " << timers.tagTimer << endl;
+  if ( doNER )
+    *Log(theErrLog) << "NER took:     " << timers.nerTimer << endl;
   *Log(theErrLog) << "MBA took:         " << timers.mbmaTimer << endl;
   *Log(theErrLog) << "Mblem took:       " << timers.mblemTimer << endl;
   if ( doMwu )
@@ -760,7 +777,7 @@ int main(int argc, char *argv[]) {
 	return EXIT_FAILURE;
       }
       
-      if ((tpDebug) || (doServer)) {
+      if ( doServer ) {
       	//don't mangle debug output, so run 1 thread then.. also run in one thread in server mode, forking is too expensive for lots of small snippets
       	omp_set_num_threads( 1 );
       }

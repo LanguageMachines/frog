@@ -37,17 +37,22 @@
 
 using namespace std;
 
+UctoTokenizer::UctoTokenizer() {
+  tokenizer = 0; 
+  uctoLog = new LogStream( theErrLog, "tok-" );
+};
+
 bool UctoTokenizer::init( const Configuration& conf ){
   if ( tokenizer )
     throw runtime_error( "ucto tokenizer is already initalized" );
   tokenizer = new Tokenizer::TokenizerClass();
   string rulesName = conf.lookUp( "rulesFile", "tokenizer" );
   if ( rulesName.empty() ){
-    *Log(theErrLog) << "no rulesFile found in configuration" << endl;
+    *Log(uctoLog) << "no rulesFile found in configuration" << endl;
     return false;
   }
   else {
-    tokenizer->setErrorLog( theErrLog );
+    tokenizer->setErrorLog( uctoLog );
     if ( !tokenizer->init( rulesName ) )
       return false;
   }

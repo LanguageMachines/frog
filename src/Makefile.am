@@ -6,7 +6,8 @@ AM_CPPFLAGS = -I@top_srcdir@/include
 bin_PROGRAMS = frog
 
 frog_SOURCES = mbma_mod.cxx mblem_mod.cxx mwu_chunker_mod.cxx \
-	Frog.cxx Frog-util.cxx Parser.cxx cgn_tagger_mod.cxx \
+	Frog.cxx Frog-util.cxx Parser.cxx \
+	cgn_tagger_mod.cxx ner_tagger_mod.cxx \
 	Configuration.cxx ucto_tokenizer_mod.cxx
 
 

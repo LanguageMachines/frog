@@ -38,10 +38,12 @@ using namespace folia;
 
 CGNTagger::CGNTagger(){
   tagger = 0;
+  cgnLog = new LogStream( theErrLog, "cgn-tagger-" );
 }
 
 CGNTagger::~CGNTagger(){
   delete tagger;
+  delete cgnLog;
 }
 
 static multimap<string,string> cgnSubSets;
@@ -175,12 +177,12 @@ void fillSubSetTable(){
  
 bool CGNTagger::init( const Configuration& conf ){
   if ( tagger != 0 ){
-    *Log(theErrLog) << "CGNTagger is already initialized!" << endl;
+    *Log(cgnLog) << "CGNTagger is already initialized!" << endl;
     return false;
   }  
   string tagset = conf.lookUp( "settings", "tagger" );
   if ( tagset.empty() ){
-    *Log(theErrLog) << "Unable to find settings for Tagger" << endl;
+    *Log(cgnLog) << "Unable to find settings for Tagger" << endl;
     return false;
   }
   fillSubSetTable();
@@ -189,19 +191,20 @@ bool CGNTagger::init( const Configuration& conf ){
     init += " -vc";
   else
     init += " -vcf";
-  tagger = new MbtAPI( init, *theErrLog );
+  tagger = new MbtAPI( init, *cgnLog );
   return tagger != 0;
 }
 
-static bool splitOneWT( const string& inp, string& word, string& tag, string& confidence ){
+bool CGNTagger::splitOneWT( const string& inp, string& word, 
+			    string& tag, string& confidence ){
   bool isKnown = true;
   string in = inp;
   //     split word and tag, and store num of slashes
   if (tpDebug)
-    cout << "split Classify starting with " << in << endl;
+    *Log(cgnLog) << "split Classify starting with " << in << endl;
   string::size_type pos = in.rfind("/");
   if ( pos == string::npos ) {
-    *Log(theErrLog) << "no word/tag/confidence triple in this line: " << in << endl;
+    *Log(cgnLog) << "no word/tag/confidence triple in this line: " << in << endl;
     exit( EXIT_FAILURE );
   }
   else {
@@ -229,22 +232,23 @@ static bool splitOneWT( const string& inp, string& word, string& tag, string& co
       tag = in.substr( pos+1 );
     }
     else {
-      *Log(theErrLog) << "no word/tag/confidence triple in this line: " << in << endl;
+      *Log(cgnLog) << "no word/tag/confidence triple in this line: " << in << endl;
       exit( EXIT_FAILURE );
     }
   }
   if ( tpDebug){
     if ( isKnown )
-      cout << "known";
+      *Log(cgnLog) << "known word: " << word << "\ttag: " << tag 
+		   << "\tconfidence: " << confidence << endl;
     else
-      cout << "unknown";
-    cout << " word: " << word << "\ttag: " << tag << "\tconfidence: " << confidence << endl;
+      *Log(cgnLog) << "unknown word: " << word << "\ttag: " << tag 
+		   << "\tconfidence: " << confidence << endl;
   }
   return isKnown;
 }
 
-static int splitWT( const string& tagged,
-	     vector<string>& tags, vector<double>& conf ){
+int CGNTagger::splitWT( const string& tagged,
+			vector<string>& tags, vector<double>& conf ){
   vector<string> words;
   vector<string> tagwords;
   vector<bool> known;
@@ -257,7 +261,7 @@ static int splitWT( const string& tagged,
     bool isKnown = splitOneWT( tagwords[i], word, tag, confs );
     double confidence;
     if ( !stringTo<double>( confs, confidence ) ){
-      *Log(theErrLog) << "tagger confused. Expected a double, got '" << confs << "'" << endl;
+      *Log(cgnLog) << "tagger confused. Expected a double, got '" << confs << "'" << endl;
       exit( EXIT_FAILURE );
     }
     words.push_back( word );
@@ -266,9 +270,9 @@ static int splitWT( const string& tagged,
     conf.push_back( confidence );
   }
   if (tpDebug) {
-    cout << "#tagged_words: " << num_words << endl;
+    *Log(cgnLog) << "#tagged_words: " << num_words << endl;
     for( size_t i = 0; i < num_words; i++) 
-      cout   << "\ttagged word[" << i <<"]: " << words[i] << (known[i]?"/":"//")
+      *Log(cgnLog)   << "\ttagged word[" << i <<"]: " << words[i] << (known[i]?"/":"//")
 	     << tags[i] << " <" << conf[i] << ">" << endl;
   }
   return num_words;
@@ -363,15 +367,13 @@ string CGNTagger::Classify( FoliaElement *sent ){
       if ( w < swords.size()-1 )
 	sentence += " ";
     }
-    if (tpDebug > 0 ) *Log(theErrLog) << "[DEBUG] SENTENCE: " << sentence << endl;
-    
     if (tpDebug) 
-      cout << "in: " << sentence << endl;
+      *Log(cgnLog) << "in: " << sentence << endl;
     tagged = tagger->Tag(sentence);
     if (tpDebug) {
-      cout << "sentence: " << sentence
-	   <<"\ntagged: "<< tagged
-	   << endl;
+      *Log(cgnLog) << "sentence: " << sentence << endl
+		   << "tagged: "<< tagged
+		   << endl;
     }
     vector<double> conf;
     vector<string> tags;

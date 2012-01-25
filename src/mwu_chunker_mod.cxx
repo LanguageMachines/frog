@@ -87,7 +87,14 @@ void mwuAna::addEntity( FoliaElement *sent ){
   }
 }
 
-Mwu::~Mwu(){ reset(); }
+Mwu::Mwu(){
+  mwuLog = new LogStream( theErrLog, "mwu-" );
+}
+
+Mwu::~Mwu(){ 
+  reset();
+  delete mwuLog;
+}
 
 void Mwu::reset(){
   for( size_t i=0; i< mWords.size(); ++i ){
@@ -102,7 +109,7 @@ void Mwu::add( FoliaElement *word ){
 
 
 bool Mwu::read_mwus( const string& fname) {
-  *Log(theErrLog) << "read mwus " + fname + "\n";
+  *Log(mwuLog) << "read mwus " + fname << endl;
   ifstream mwufile(fname.c_str(), ios::in);
   if(mwufile.bad()){
     return false;
@@ -117,7 +124,7 @@ bool Mwu::read_mwus( const string& fname) {
       MWUs.insert( make_pair( key, res2 ) );
     }
     else {
-      *Log(theErrLog) << "invalid entry in MWU file " << line << endl;
+      *Log(mwuLog) << "invalid entry in MWU file " << line << endl;
       return false;
     }
   }
@@ -126,14 +133,14 @@ bool Mwu::read_mwus( const string& fname) {
   
 bool Mwu::init( const Configuration& config ) {
   myCFS = "_";
-  *Log(theErrLog) << "initiating mwuChunker ... \n";
+  *Log(mwuLog) << "initiating mwuChunker..." << endl;
   debug = tpDebug;
   string db = config.lookUp( "debug", "mwu" );
   if ( !db.empty() )
     debug = stringTo<int>( db );
   string att = config.lookUp( "t", "mwu" );  
   if ( att.empty() ){
-    *Log(theErrLog) << "cannot find attribute 't' in configfile" << endl;
+    *Log(mwuLog) << "cannot find attribute 't' in configfile" << endl;
     return false;
   }
   mwuFileName = prefix( config.configDir(), att );
@@ -141,7 +148,7 @@ bool Mwu::init( const Configuration& config ) {
   if ( !att.empty() )
     myCFS = att;
   if (!read_mwus(mwuFileName)) {
-    *Log(theErrLog) << "Cannot read mwu file " << mwuFileName << endl;
+    *Log(mwuLog) << "Cannot read mwu file " << mwuFileName << endl;
     return false;
   }
   return true;
@@ -167,7 +174,7 @@ void Mwu::Classify( FoliaElement *sent ){
 
 void Mwu::Classify(){
   if ( debug )
-    cout << "\nStarting mwu Classify\n";
+    *Log(mwuLog) << "Starting mwu Classify" << endl;
   mymap2::iterator best_match;
   size_t matchLength = 0;
   size_t max = mWords.size();
@@ -189,31 +196,31 @@ void Mwu::Classify(){
   for( i = 0; i < max; i++) {
     string word = mWords[i]->getWord();
     if ( debug )
-      cout << "checking word[" << i <<"]: " << word << endl;
+      *Log(mwuLog) << "checking word[" << i <<"]: " << word << endl;
     pair<mymap2::iterator, mymap2::iterator> matches = MWUs.equal_range(word);
     if ( matches.first != MWUs.end() ) {
       //match
       mymap2::iterator current_match = matches.first;
       if (  debug  ) {
-	cout << "MWU: match found!\t" << current_match->first << endl;
+	*Log(mwuLog) << "MWU: match found!\t" << current_match->first << endl;
       }
       while(current_match != matches.second && current_match != MWUs.end()) {
 	vector<string> match = current_match->second;
 	size_t max_match = match.size();
 	size_t j = 0;
 	if ( debug )
-	  cout << "checking " << max_match << " matches\n";
+	  *Log(mwuLog) << "checking " << max_match << " matches:" << endl;
 	for(; i + j + 1 < max && j < max_match; j++) {
 	  if ( match[j] != mWords[i+j+1]->getWord() ) {
 	    if ( debug )
-	      cout << "match " << j <<" (" << match[j] 
+	      *Log(mwuLog) << "match " << j <<" (" << match[j] 
 		   << ") doesn't match with word " << i+ j + 1
-		   << " (" << mWords[i+j + 1]->getWord() <<")\n";
+			   << " (" << mWords[i+j + 1]->getWord() <<")" << endl;
 	    // mismatch in jth word of current mwu
 	    break;
 	  }
 	  else if ( debug )
-	    cout << " matched " <<  mWords[i+j+1]->getWord() << " j=" << j << endl;
+	    *Log(mwuLog) << " matched " <<  mWords[i+j+1]->getWord() << " j=" << j << endl;
 	  
 	}
 	if (j == max_match && j > matchLength ){
@@ -225,9 +232,9 @@ void Mwu::Classify(){
       } // while
       if( debug ){
 	if (matchLength >0 ) {
-	  cout << "MWU: found match starting with " << (*best_match).first << endl;
+	  *Log(mwuLog) << "MWU: found match starting with " << (*best_match).first << endl;
 	} else {
-	  cout <<"MWU: no match\n";
+	  *Log(mwuLog) <<"MWU: no match" << endl;
 	}
       }
       // we found a matching mwu, break out of loop thru sentence, 
@@ -237,24 +244,24 @@ void Mwu::Classify(){
     } //match found
     else { 
       if( debug )
-	cout <<"MWU:check: no match\n";
+	*Log(mwuLog) <<"MWU:check: no match" << endl;
     }
   } //for (i < max)
   if (matchLength > 0 ) {
     //concat
     if ( debug )
-      cout << "mwu found, processing\n";
+      *Log(mwuLog) << "mwu found, processing" << endl;
     for ( size_t j = 1; j <= matchLength; ++j) {
       if ( debug )
-	cout << "concat " << mWords[i+j]->getWord() << endl;
+	*Log(mwuLog) << "concat " << mWords[i+j]->getWord() << endl;
       mWords[i]->merge( mWords[i+j] );
     }
     vector<mwuAna*>::iterator anatmp1 = mWords.begin() + i;
     vector<mwuAna*>::iterator anatmp2 = ++anatmp1 + matchLength;
     mWords.erase(anatmp1, anatmp2);
     if ( debug ){
-      cout << "tussenstand:" << endl;
-      cout << *this << endl;
+      *Log(mwuLog) << "tussenstand:" << endl;
+      *Log(mwuLog) << *this << endl;
     }      
     Classify( );
   } //if (matchLength)

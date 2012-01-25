@@ -26,8 +26,8 @@
       timbl@uvt.nl
 */
 
-#ifndef __MWU_CHUNKER__
-#define __MWU_CHUNKER__
+#ifndef MWU_CHUNKER_H
+#define MWU_CHUNKER_H
 
 #include "libfolia/folia.h"
 
@@ -60,6 +60,7 @@ class Configuration;
 class Mwu {
   friend std::ostream& operator<< (std::ostream&, const Mwu& );
  public:
+  Mwu();
   ~Mwu();
   void reset();
   bool init( const Configuration& );
@@ -75,6 +76,7 @@ class Mwu {
   std::string mwuFileName;
   std::vector<mwuAna*> mWords;
   mymap2 MWUs;
+  LogStream *mwuLog;
 };
 
 #endif

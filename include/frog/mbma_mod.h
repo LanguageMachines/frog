@@ -45,7 +45,7 @@ class Configuration;
 class Mbma {
  public:
   Mbma();
-  ~Mbma() { cleanUp(); };
+  ~Mbma();
   bool init( const Configuration& );
   bool Classify( folia::FoliaElement * );
   std::string getIname( char ) const;
@@ -80,6 +80,7 @@ class Mbma {
   std::map<std::string,std::string> tagNames;  
   std::map<std::string,std::string> TAGconv;
   std::vector<MBMAana> analysis;
+  LogStream *mbmaLog;
 };
 
 class MBMAana {
@@ -114,7 +115,7 @@ class MBMAana {
   std::string tag;
   std::string infl;
   std::vector<std::string> morphemes;
-  std::string description;  
+  std::string description; 
 };
 
 #endif

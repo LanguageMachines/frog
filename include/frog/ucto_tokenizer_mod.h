@@ -37,6 +37,8 @@ class Configuration;
 
 class UctoTokenizer {
  public:
+  UctoTokenizer();
+  ~UctoTokenizer() { delete tokenizer; delete uctoLog; };
   bool init( const Configuration& );
   void setPassThru( bool b );
   void setSentencePerLineInput( bool b );
@@ -44,6 +46,7 @@ class UctoTokenizer {
   folia::Document tokenize( std::istream& );
  private:
   Tokenizer::TokenizerClass *tokenizer;
+  LogStream *uctoLog;
 };
 
 #endif 

@@ -42,12 +42,14 @@ using namespace std;
 using namespace folia;
 
 Mblem::Mblem(): myLex(0),punctuation( "?...,:;\\'`(){}[]%#+-_=/!" ), 
-		history(20), debug(0) {}
+		history(20), debug(0) {
+  mblemLog = new LogStream( theErrLog, "mblem" );
+}
 
 void Mblem::read_transtable( const string& tableName ) {
   ifstream bron( tableName.c_str() );
   if ( !bron ) {
-    *Log(theErrLog) << "translation table file '" << tableName 
+    *Log(mblemLog) << "translation table file '" << tableName 
 		    << "' appears to be missing." << endl;
     exit(1);
   }
@@ -67,7 +69,8 @@ void Mblem::read_transtable( const string& tableName ) {
 }
 
 bool Mblem::init( const Configuration& config ) {
-  *Log(theErrLog) << "Initiating lemmatizer...\n";
+  *Log(mblemLog) << "Initiating lemmatizer..." << endl;
+  debug = tpDebug;
   string db = config.lookUp( "debug", "mblem" );
   if ( !db.empty() )
     debug = stringTo<int>( db );
@@ -92,14 +95,14 @@ bool Mblem::init( const Configuration& config ) {
 }
 
 Mblem::~Mblem(){
-  //    *Log(theErrLog) << "cleaning up MBLEM stuff" << endl;
+  //    *Log(mblemLog) << "cleaning up MBLEM stuff" << endl;
   delete myLex;
   myLex = 0;
 }
 
 string Mblem::make_instance( const UnicodeString& in ) {
   if (debug)
-    cout << "making instance from: " << in << endl;
+    *Log(mblemLog) << "making instance from: " << in << endl;
   UnicodeString instance = "";
   size_t length = in.length();
   size_t j;
@@ -116,7 +119,7 @@ string Mblem::make_instance( const UnicodeString& in ) {
   instance += "?";
   string result = UnicodeToUTF8(instance);
   if (debug)
-    cout << "inst: " << instance << endl;
+    *Log(mblemLog) << "inst: " << instance << endl;
   
   return result;
 }
@@ -170,12 +173,6 @@ string Mblem::postprocess( FoliaElement *word ){
   {
     tag = word->pos();
   }
-  if ( debug ){
-    cout << "\n\tlemmas: ";
-    for( vector<mblemData>::const_iterator it=mblemResult.begin(); 
-	 it != mblemResult.end(); ++it)
-      cout << it->getLemma() << "/ "<< it->getTag()<< " ";
-  }
   string res;
   size_t index = 0;
   size_t nrlookup = mblemResult.size();
@@ -189,14 +186,14 @@ string Mblem::postprocess( FoliaElement *word ){
   
   if ( index == nrlookup ) {
     if (debug)
-      cout << "NO CORRESPONDING TAG! " << tag << endl;
+      *Log(mblemLog) << "NO CORRESPONDING TAG! " << tag << endl;
     res = mblemResult[0].getLemma();
   }
   else {
     res = mblemResult[index].getLemma();
   }
   if (debug)
-    cout << "final MBLEM lemma: " << res << endl;
+    *Log(mblemLog) << "final MBLEM lemma: " << res << endl;
   addAnnotation( word, res );
   return res;
 } 
@@ -220,18 +217,18 @@ string Mblem::Classify( FoliaElement *sword ){
   string classString;
   myLex->Classify( inst, classString );
   if (debug)
-    cout << "class: " << classString  << endl;
+    *Log(mblemLog) << "class: " << classString  << endl;
   // 1st find all alternatives
   vector<string> parts;
   int numParts = split_at( classString, parts, "|" );
   if ( numParts < 1 ){
-    cout << "no alternatives found" << endl;
+    *Log(mblemLog) << "no alternatives found" << endl;
   }
   int index = 0;
   while ( index < numParts ) {
     UnicodeString part = UTF8ToUnicode( parts[index++] );
     if (debug)
-      cout <<"part = " << part << endl;
+      *Log(mblemLog) <<"part = " << part << endl;
     UnicodeString insstr;
     UnicodeString delstr;
     UnicodeString prefix;
@@ -259,7 +256,7 @@ string Mblem::Classify( FoliaElement *sword ){
 	  else 
 	    prefix = UnicodeString( part, lpos );
 	  if (debug)
-	    cout << "prefix=" << prefix << endl;
+	    *Log(mblemLog) << "prefix=" << prefix << endl;
 	}
 	break;
       }
@@ -272,7 +269,7 @@ string Mblem::Classify( FoliaElement *sword ){
 	  else 
 	    delstr = UnicodeString( part, lpos );
 	  if (debug)
-	    cout << "delstr=" << delstr << endl;
+	    *Log(mblemLog) << "delstr=" << delstr << endl;
 	}
 	break;
       }
@@ -285,7 +282,7 @@ string Mblem::Classify( FoliaElement *sword ){
 	  else 
 	    insstr = UnicodeString( part, lpos);
 	  if (debug)
-	    cout << "insstr=" << insstr << endl;
+	    *Log(mblemLog) << "insstr=" << insstr << endl;
 	}
 	break;
       }
@@ -296,15 +293,15 @@ string Mblem::Classify( FoliaElement *sword ){
     } // while lpos < pl
     
     if (debug){
-      cout << "part: " << part << " split up in: " << endl;
-      cout << "pre-prefix word: '" << uWord << "' prefix: '"
+      *Log(mblemLog) << "part: " << part << " split up in: " << endl;
+      *Log(mblemLog) << "pre-prefix word: '" << uWord << "' prefix: '"
 	   << prefix << "'" << endl;
     }	
     long prefixpos = 0;
     if ( !prefix.isEmpty() ) {
       prefixpos = uWord.indexOf(prefix);
       if (debug)
-	cout << "prefixpos = " << prefixpos << endl;
+	*Log(mblemLog) << "prefixpos = " << prefixpos << endl;
       // repair cases where there's actually not a prefix present
       if (prefixpos > uWord.length()-2) {
 	prefixpos = 0;
@@ -313,14 +310,14 @@ string Mblem::Classify( FoliaElement *sword ){
     }
     
     if (debug)
-      cout << "prefixpos = " << prefixpos << endl;
+      *Log(mblemLog) << "prefixpos = " << prefixpos << endl;
     UnicodeString lemma = "";
     if (prefixpos >= 0) {
       lemma = UnicodeString( uWord, 0L, prefixpos );
       prefixpos = prefixpos + prefix.length();
     }
     if (debug)
-      cout << "post prefix != 0 word: "<< uWord 
+      *Log(mblemLog) << "post prefix != 0 word: "<< uWord 
 	   << " lemma: " << lemma
 	   << " prefix: " << prefix
 	   << " insstr: " << insstr
@@ -348,16 +345,15 @@ string Mblem::Classify( FoliaElement *sword ){
       lemma = uWord;
     }
     if ( debug )
-      cout << "appending lemma " << lemma << " and tag " << restag << endl;
+      *Log(mblemLog) << "appending lemma " << lemma << " and tag " << restag << endl;
     mblemResult.push_back( mblemData( UnicodeToUTF8(lemma), restag ) );
   } // while
   if ( debug ){
-    cout << "stored lemma and tag options: " << mblemResult.size() << " lemma's and " << mblemResult.size() << " tags:\n";
+    *Log(mblemLog) << "stored lemma and tag options: " << mblemResult.size() << " lemma's and " << mblemResult.size() << " tags:" << endl;
     for( size_t index=0; index < mblemResult.size(); ++index ){
-      cout << "lemma alt: " << mblemResult[index].getLemma() << endl;
-      cout << "tag alt: " << mblemResult[index].getTag() << endl;
+      *Log(mblemLog) << "lemma alt: " << mblemResult[index].getLemma()
+		     << "\ttag alt: " << mblemResult[index].getTag() << endl;
     }
-    cout << "\n\n";
   }
   string res = postprocess( sword ); 
   return res;

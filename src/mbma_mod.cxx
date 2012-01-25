@@ -44,7 +44,14 @@ using namespace folia;
 const long int LEFT =  6; // left context
 const long int RIGHT = 6; // right context
 
-Mbma::Mbma(): MTreeFilename( "dm.igtree" ), MTree(0) { }
+Mbma::Mbma(): MTreeFilename( "dm.igtree" ), MTree(0) { 
+  mbmaLog = new LogStream( theErrLog, "mbma-" );
+}
+
+Mbma::~Mbma() { 
+  cleanUp(); 
+  delete mbmaLog;
+};
 
 void Mbma::fillMaps() {
   //
@@ -100,7 +107,7 @@ void Mbma::init_cgn( const string& dir ) {
       vector<string> tmp;
       size_t num = split_at(line, tmp, " ");
       if ( num < 2 ){
-	*Log(theErrLog) << "splitting '" << line << "' failed" << endl;
+	*Log(mbmaLog) << "splitting '" << line << "' failed" << endl;
 	throw ( runtime_error("panic") );
       }
       TAGconv.insert( make_pair( tmp[0], tmp[1] ) );
@@ -123,7 +130,7 @@ void Mbma::init_cgn( const string& dir ) {
 }
   
 bool Mbma::init( const Configuration& config ) {
-  *Log(theErrLog) << "Initiating morphological analyzer...\n";
+  *Log(mbmaLog) << "Initiating morphological analyzer..." << endl;
   debugFlag = tpDebug;
   string db = config.lookUp( "debug", "mbma" );
   if ( !db.empty() )
@@ -144,7 +151,7 @@ bool Mbma::init( const Configuration& config ) {
 }
   
 void Mbma::cleanUp(){
-  // *Log(theErrLog) << "cleaning up MBMA stuff " << endl;
+  // *Log(mbmaLog) << "cleaning up MBMA stuff " << endl;
   delete MTree;
   MTree = 0;
 }
@@ -152,14 +159,14 @@ void Mbma::cleanUp(){
 vector<string> Mbma::make_instances( const UnicodeString& word ){
   vector<string> insts;
   if (debugFlag > 2)
-    cout << "word: " << word << "\twl : " << word.length() << endl;
+    *Log(mbmaLog) << "word: " << word << "\twl : " << word.length() << endl;
   for( long i=0; i < word.length(); ++i ) {
     if (debugFlag > 10)
-      cout << "itt #:" << i << endl;
+      *Log(mbmaLog) << "itt #:" << i << endl;
     UnicodeString inst;
     for ( long j=i ; j <= i + RIGHT + LEFT; ++j ) {
       if (debugFlag > 10)
-	cout << " " << j-LEFT << ": ";
+	*Log(mbmaLog) << " " << j-LEFT << ": ";
       if ( j < LEFT || j >= word.length()+LEFT )
 	inst += "_,";
       else {
@@ -170,11 +177,11 @@ vector<string> Mbma::make_instances( const UnicodeString& word ){
 	inst += ",";
       }
       if (debugFlag > 10)
-	cout << " : " << inst << endl;
+	*Log(mbmaLog) << " : " << inst << endl;
     }
     inst += "?";
     if (debugFlag > 2)
-      cout << "inst #" << i << " : " << inst << endl;
+      *Log(mbmaLog) << "inst #" << i << " : " << inst << endl;
     // classify res
     insts.push_back( UnicodeToUTF8(inst) );
     // store res
@@ -216,7 +223,7 @@ string Mbma::calculate_ins_del( const string& in_class,
   size_t pos = in_class.find("+");
   if ( pos != string::npos ) { 
     if ( debugFlag){
-      cout << "calculate ins/del for " << in_class << endl;
+      *Log(mbmaLog) << "calculate ins/del for " << in_class << endl;
     }
     pos++;
     if (in_class[pos]=='D') { // delete operation 
@@ -236,8 +243,8 @@ string Mbma::calculate_ins_del( const string& in_class,
     if ( pos != string::npos )
       result_class += in_class.substr( pos );
     if ( debugFlag){
-      cout << "Insert = " << insertstring << ", delete=" << deletestring << endl;
-      cout << "result class=" << result_class << endl;
+      *Log(mbmaLog) << "Insert = " << insertstring << ", delete=" << deletestring << endl;
+      *Log(mbmaLog) << "result class=" << result_class << endl;
     }
   }
   return result_class;
@@ -267,7 +274,7 @@ vector<waStruct> Mbma::Step1( unsigned int step,
   for ( long k=0; k< word.length(); ++k ) { 
     this_class = find_class( step, classParts[k], nranal );
     if ( debugFlag){
-      cout << "Step1::" << step << " " << this_class << endl;
+      *Log(mbmaLog) << "Step1::" << step << " " << this_class << endl;
     }
     string deletestring;
     string insertstring;
@@ -381,7 +388,7 @@ void Mbma::resolve_inflections( vector<waStruct>& ana,
     ++step;
     if ( this_class[0]=='i') { 
       if (debugFlag){
-	cout << "thisclass >" << this_class << "<" << endl;
+	*Log(mbmaLog) << "thisclass >" << this_class << "<" << endl;
       }	  
       /* given the specific selections of certain inflections,
 	 change the tag!  */
@@ -392,8 +399,7 @@ void Mbma::resolve_inflections( vector<waStruct>& ana,
 	 the morpheme itself. This is not always the case, but it works  */
       if ( !newtag.empty() ) {
 	if ( debugFlag  ){
-	  cout << "selects " << newtag;
-	  cout << endl;
+	  *Log(mbmaLog) << "selects " << newtag << endl;
 	}
 	/* go left */
 	if ( basictags.find(prev->act[0]) != string::npos ){
@@ -414,7 +420,7 @@ MBMAana Mbma::addInflect( const vector<waStruct>& ana,
     // go back to the last non-inflectional tag 
     thisclass = it->act;
     if (debugFlag){
-      cout << "final tag " << thisclass << endl;
+      *Log(mbmaLog) << "final tag " << thisclass << endl;
     }
     if ( thisclass[0] != 'i' )
       found=true;
@@ -433,13 +439,13 @@ MBMAana Mbma::addInflect( const vector<waStruct>& ana,
   if ( tit == tagNames.end() ){
     // unknown tag
     if (debugFlag)
-      cout << "added X 4" << endl;
+      *Log(mbmaLog) << "added X 4" << endl;
     outTag = "X";
     descr = "unknown";
   }
   else {
     if (debugFlag)
-      cout << "added (4) " << tit->second << endl;
+      *Log(mbmaLog) << "added (4) " << tit->second << endl;
     outTag = tit->first;
     descr = tit->second;
   }
@@ -456,7 +462,7 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
     }
     string this_class= it->act;
     if (debugFlag)
-      cout << "unpacking thisclass "<< this_class << endl;
+      *Log(mbmaLog) << "unpacking thisclass "<< this_class << endl;
     if ( inflect.empty() && !this_class.empty() &&
 	 this_class.find("_") == string::npos &&
 	 this_class[0]=='i' ){
@@ -466,29 +472,29 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
 	  map<char,string>::const_iterator csIt = iNames.find(this_class[i]);
 	  if ( csIt == iNames.end() ){
 	    if (debugFlag)
-	      cout << "added X 1" << endl;
+	      *Log(mbmaLog) << "added X 1" << endl;
 	    inflect += "X";
 	  }
 	  else {
 	    if (debugFlag)
-	      cout << "added (1) (" << csIt->first << ") " << csIt->second << endl;
+	      *Log(mbmaLog) << "added (1) (" << csIt->first << ") " << csIt->second << endl;
 	    inflect += this_class[i];
 	  }
 	}
       }
       if ( debugFlag )
-	cout << "found inflection " << inflect << endl;
+	*Log(mbmaLog) << "found inflection " << inflect << endl;
     }
     if (debugFlag)	
-      cout << "morphemes now: |" << morphemes << "|" << endl;
+      *Log(mbmaLog) << "morphemes now: |" << morphemes << "|" << endl;
     ++it;
   }
   if (debugFlag)	
-    cout << "inflectAndAffix: " << inflect << " - " << morphemes << endl;
+    *Log(mbmaLog) << "inflectAndAffix: " << inflect << " - " << morphemes << endl;
   if ( inflect.empty() ){
     MBMAana retVal;
     if (debugFlag)
-      cout << "no Inflection addTag: " << retVal << endl;
+      *Log(mbmaLog) << "no Inflection addTag: " << retVal << endl;
     return retVal;
   }
   else {
@@ -496,7 +502,7 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
     // tag and stick it at the end
     MBMAana retVal = addInflect( ana, inflect, morphemes );
     if (debugFlag)
-      cout << "Inflection addTag: " << retVal << endl;
+      *Log(mbmaLog) << "Inflection addTag: " << retVal << endl;
     return retVal;
   }
 }
@@ -534,10 +540,11 @@ void Mbma::execute( const UnicodeString& word,
   }
   
   if (debugFlag){
-    cout << "mbma_bb, word=" << word << ", classes=<";
+    string out = "mbma_bb, word=" + UnicodeToUTF8(word) + ", classes=<";
     for ( size_t i=0; i < classes.size(); ++i )
-      cout << classes[i] << ",";
-    cout << ">" << endl;
+      out += classes[i] + ",";
+    out += ">";
+    *Log(mbmaLog) << out << endl;
   }    
   /* then for each analysis, produce a labeled bracketed string */
   
@@ -548,15 +555,14 @@ void Mbma::execute( const UnicodeString& word,
     vector<waStruct> ana = Step1( step, word, nranal, 
 				  classParts, basictags );
     if (debugFlag)
-      cout << "intermediate analysis 1: " << ana << endl;
+      *Log(mbmaLog) << "intermediate analysis 1: " << ana << endl;
     resolve_inflections( ana, basictags );
     /* finally, unpack the tag and inflection names to make everything readable */
     if (debugFlag)
-      cout << "intermediate analysis 3: " << ana << endl;
+      *Log(mbmaLog) << "intermediate analysis 3: " << ana << endl;
     MBMAana tmp = inflectAndAffix( ana );
     if (debugFlag){
-      cout << "b_out: " << endl;
-      cout << tmp << endl;
+      *Log(mbmaLog) << "b_out: " << tmp << endl;
     }
     analysis.push_back( tmp );
   }
@@ -592,15 +598,12 @@ void Mbma::addMorph( FoliaElement *word,
 void Mbma::postprocess( FoliaElement *fword, PosAnnotation *pos ){
   if (debugFlag){
     for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      cout << it->getTag() << it->getInflection()<< " ";
-    cout << "\n\tmorph analyses: ";
+      *Log(mbmaLog) << "tag " <<  it->getTag() + " inflection: " << it->getInflection() << endl;
+    *Log(mbmaLog) << "morph analyses: " << endl;;
     for (vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      cout << it->getMorph() << " ";
-    cout << endl <<endl;
+      *Log(mbmaLog) << it->getMorph() << endl;
+    *Log(mbmaLog) << "before morpho: " << endl;
   }
-  
-  if (debugFlag)
-      cout << "before morpho: " << endl;
   const string tag = pos->feat("head");
   map<string,string>::const_iterator tagIt = TAGconv.find( tag );
   if ( tagIt == TAGconv.end() ) {
@@ -608,30 +611,30 @@ void Mbma::postprocess( FoliaElement *fword, PosAnnotation *pos ){
     // this should never happen
     //
     if (debugFlag){
-      cout << "no match!\n";
+      *Log(mbmaLog) << "no match!" << endl;
     } 
     throw ValueError( "unknown pos tag value '" + tag + "'" );
   }
   else {
     if (debugFlag){
-      cout << "#matches: " << tagIt->first << " " << tagIt->second << endl;
+      *Log(mbmaLog) << "#matches: " << tagIt->first << " " << tagIt->second << endl;
     }
     size_t match = 0;	
     vector<size_t> matches;
     for ( size_t m_index = 0; m_index <analysis.size(); ++m_index ) {
       if (debugFlag)
-	cout << "comparing " << tagIt->second << " with " << analysis[m_index].getTag() << endl;
+	*Log(mbmaLog) << "comparing " << tagIt->second << " with " << analysis[m_index].getTag() << endl;
       if ( tagIt->second == analysis[m_index].getTag() ) {
 	match++;
 	matches.push_back( m_index );
       }
     }
     if (debugFlag) {
-      cout << "main tag " << tagIt->second
+      *Log(mbmaLog) << "main tag " << tagIt->second
 	   << " matches " << match 
 	   << " morpho analyses: " << endl;
       for( size_t p=0; p < match; ++p )  {
-	cout << "\tmatch #" << p << " : " << analysis[matches[p]].getMorph() << endl;
+	*Log(mbmaLog) << "\tmatch #" << p << " : " << analysis[matches[p]].getMorph() << endl;
       }
     }
     //should be(come?) a switch
@@ -654,13 +657,13 @@ void Mbma::postprocess( FoliaElement *fword, PosAnnotation *pos ){
     else {
       vector<Feature*> feats = pos->select<Feature>();
       if (debugFlag){
-	cout << "tag: " << tag << endl;
+	*Log(mbmaLog) << "tag: " << tag << endl;
 	for ( size_t q =0 ; q < feats.size(); ++q ) {
-	  cout << "\tpart #" << q << ": " << feats[q]->cls() << endl;
+	  *Log(mbmaLog) << "\tpart #" << q << ": " << feats[q]->cls() << endl;
 	}
       }
       if (debugFlag)
-	cout << "multiple lemma's\n";
+	*Log(mbmaLog) << "multiple lemma's" << endl;
       map<string, int> possible_lemmas;
       // find unique lemma's
       for ( size_t q = 0; q < match; ++q ) {
@@ -677,10 +680,10 @@ void Mbma::postprocess( FoliaElement *fword, PosAnnotation *pos ){
 	}
       }
       if (debugFlag)
-	cout << "#unique lemma's: " << possible_lemmas.size() << endl;
+	*Log(mbmaLog) << "#unique lemma's: " << possible_lemmas.size() << endl;
       if ( possible_lemmas.size() < 1) {
 	if (debugFlag)
-	  cout << "Problem!, no possible lemma's" << endl;
+	  *Log(mbmaLog) << "Problem!, no possible lemma's" << endl;
 	return;
       }
       // append all unique lemmas
@@ -693,7 +696,7 @@ void Mbma::postprocess( FoliaElement *fword, PosAnnotation *pos ){
 	int match_count = 0;
 	string inflection = analysis[matches[q]].getInflection();
 	if (debugFlag)
-	  cout << "matching " << inflection << " with " << tag << endl;
+	  *Log(mbmaLog) << "matching " << inflection << " with " << tag << endl;
 	for ( size_t u=0; u < feats.size(); ++u ) {
 	  map<string,string>::const_iterator conv_tag_p = TAGconv.find(feats[u]->cls());
 	  if (conv_tag_p != TAGconv.end()) {
@@ -703,7 +706,7 @@ void Mbma::postprocess( FoliaElement *fword, PosAnnotation *pos ){
 	  }
 	}
 	if (debugFlag)
-	  cout << "score: " << match_count << " max was " << max_count << endl;
+	  *Log(mbmaLog) << "score: " << match_count << " max was " << max_count << endl;
 	if (match_count >= max_count) {
 	  string key;
 	  const vector<string> *ma = &analysis[matches[q]].getMorph();
@@ -723,7 +726,7 @@ void Mbma::postprocess( FoliaElement *fword, PosAnnotation *pos ){
 	  string tmp;
 	  for ( size_t p=0; p < it->second->size(); ++p )
 	    tmp += "[" + (*it->second)[p] + "]";
-	  cout << "MBMA add lemma: " << tmp << endl;
+	  *Log(mbmaLog) << "MBMA add lemma: " << tmp << endl;
 	}
 	addMorph( fword, *it->second );
 	++it;
@@ -750,7 +753,7 @@ bool Mbma::Classify( FoliaElement* sword ){
   }
   uWord.toLower();
   if (debugFlag)
-    cout << "Classify word: " << uWord << endl;
+    *Log(mbmaLog) << "Classify word: " << uWord << endl;
   
   vector<string> insts = make_instances( uWord );
   vector<string> classes;
@@ -760,7 +763,7 @@ bool Mbma::Classify( FoliaElement* sword ){
     double d;
     MTree->Classify( insts[i], ans, db, d );
     if ( debugFlag )
-      cerr << "itt #" << i << ": timbl gave class= " << ans 
+      *Log(mbmaLog) << "itt #" << i << ": timbl gave class= " << ans 
 	   << " from distrib= " << db << endl; 
     classes.push_back( ans);
   }
