@@ -329,9 +329,8 @@ bool froginit(){
     // we use fork(). omp (GCC version) doesn't do well when omp is used
     // before the fork!
     // see: http://bisqwit.iki.fi/story/howto/openmp/#OpenmpAndFork
-    bool stat = tokenizer.init( configuration );
+    bool stat = tokenizer.init( configuration, !doTok );
     if ( stat ){
-      tokenizer.setPassThru( !doTok );
       tokenizer.setSentencePerLineInput( doSentencePerLine );
       tokenizer.setInputEncoding( encoding );
       stat = myCGNTagger.init( configuration );
@@ -375,9 +374,8 @@ bool froginit(){
     {
 #pragma omp section
       {
-	tokStat = tokenizer.init( configuration );
+	tokStat = tokenizer.init( configuration, !doTok );
 	if ( tokStat ){
-	  tokenizer.setPassThru( !doTok );
 	  tokenizer.setSentencePerLineInput( doSentencePerLine );
 	  tokenizer.setInputEncoding( encoding );
 	}

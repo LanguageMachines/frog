@@ -42,20 +42,12 @@ UctoTokenizer::UctoTokenizer() {
   uctoLog = new LogStream( theErrLog, "tok-" );
 };
 
-bool UctoTokenizer::init( const Configuration& conf ){
+bool UctoTokenizer::init( const Configuration& conf, bool pass ){
   if ( tokenizer )
     throw runtime_error( "ucto tokenizer is already initalized" );
   tokenizer = new Tokenizer::TokenizerClass();
-  string rulesName = conf.lookUp( "rulesFile", "tokenizer" );
-  if ( rulesName.empty() ){
-    *Log(uctoLog) << "no rulesFile found in configuration" << endl;
-    return false;
-  }
-  else {
-    tokenizer->setErrorLog( uctoLog );
-    if ( !tokenizer->init( rulesName ) )
-      return false;
-  }
+  tokenizer->setErrorLog( uctoLog );
+  *Log(uctoLog) << endl;
   string debug = conf.lookUp( "debug", "tokenizer" );
   if ( debug.empty() ){
     debug = conf.lookUp( "debug" );
@@ -65,19 +57,28 @@ bool UctoTokenizer::init( const Configuration& conf ){
   }
   else
     tokenizer->setDebug( Timbl::stringTo<int>(debug) );
+  if ( pass ){
+    // when passthru, we don't further initialize the tokenizer
+    // it wil run in minimal mode then.
+    tokenizer->setPassThru( true ); 
+  }
+  else {
+    string rulesName = conf.lookUp( "rulesFile", "tokenizer" );
+    if ( rulesName.empty() ){
+      *Log(uctoLog) << "no rulesFile found in configuration" << endl;
+      return false;
+    }
+    else {
+      if ( !tokenizer->init( rulesName ) )
+	return false;
+    }
+  }
   tokenizer->setEosMarker( "" );
   tokenizer->setVerbose( false );
   tokenizer->setSentenceDetection( true ); //detection of sentences
   tokenizer->setParagraphDetection( false ); //detection of paragraphs  
   tokenizer->setXMLOutput( true, "frog" );
   return true;
-}
-
-void UctoTokenizer::setPassThru( bool b ) { 
-  if ( tokenizer )
-    tokenizer->setPassThru( b ); 
-  else
-    throw runtime_error( "ucto tokenizer not initalized" );
 }
 
 void UctoTokenizer::setSentencePerLineInput( bool b ) {

@@ -98,6 +98,7 @@ Mblem::~Mblem(){
   //    *Log(mblemLog) << "cleaning up MBLEM stuff" << endl;
   delete myLex;
   myLex = 0;
+  delete mblemLog;
 }
 
 string Mblem::make_instance( const UnicodeString& in ) {
