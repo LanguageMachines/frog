@@ -480,9 +480,11 @@ void TestSentence( FoliaElement* sent,
       }
 #pragma omp section
       {
-	timers.iobTimer.start();
-	string chunked = myIOBTagger.Classify( sent );
-	timers.iobTimer.stop();
+	if ( doIOB ){
+	  timers.iobTimer.start();
+	  string chunked = myIOBTagger.Classify( sent );
+	  timers.iobTimer.stop();
+	}
       }
     }
     for ( size_t i = 0; i < swords.size(); ++i ) {

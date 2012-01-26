@@ -47,7 +47,8 @@ IOBTagger::~IOBTagger(){
 }
  
 bool IOBTagger::init( const Configuration& conf ){
-  *Log(iobLog) << "IOB Chunker Init" << endl;
+  if (tpDebug) 
+    *Log(iobLog) << "IOB Chunker Init" << endl;
   if ( tagger != 0 ){
     *Log(iobLog) << "IOBTagger is already initialized!" << endl;
     return false;
@@ -165,7 +166,9 @@ void IOBTagger::addIOBTags( FoliaElement *sent,
   }
   FoliaElement *cur = 0;
   for ( size_t i=0; i < tags.size(); ++i ){
-    *Log(iobLog) << "tag = " << tags[i] << endl;
+
+    if (tpDebug) 
+      *Log(iobLog) << "tag = " << tags[i] << endl;
     vector<string> tagwords;
     size_t num_words = Timbl::split_at( tags[i], tagwords, "_" );
     if ( num_words != 2 ){
@@ -214,14 +217,14 @@ string IOBTagger::Classify( FoliaElement *sent ){
       if ( w < swords.size()-1 )
 	sentence += " ";
     }
-    //    if (tpDebug) 
+    if (tpDebug) 
       *Log(iobLog) << "IOB in: " << sentence << endl;
     tagged = tagger->Tag(sentence);
-    //    if (tpDebug) {
+    if (tpDebug) {
       *Log(iobLog) << "sentence: " << sentence << endl
 		   << "IOB tagged: "<< tagged
 		   << endl;
-      //    }
+    }
     vector<double> conf;
     vector<string> tags;
     int num_words = splitWT( tagged, tags, conf );
