@@ -99,11 +99,7 @@ void UctoTokenizer::setInputEncoding( const std::string & enc ){
 
 void UctoTokenizer::setInputXml( bool b ){
   if ( tokenizer ){
-    *Log(theErrLog) << "setXML= " << Timbl::toString(b) << endl;
-    bool d = tokenizer->setXMLInput( b );
-    *Log(theErrLog) << "old setXML= " << Timbl::toString(d) << endl;
-    d = tokenizer->setXMLInput( b );
-    *Log(theErrLog) << "new setXML= " << Timbl::toString(d) << endl;    
+    tokenizer->setXMLInput( b );
   }
   else
     throw runtime_error( "ucto tokenizer not initalized" );

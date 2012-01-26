@@ -303,6 +303,20 @@ bool parse_args( TimblOpts& Opts ) {
   getXML = false;
   if ( Opts.Find ('x', value, mood)) {
     getXML = true;
+    if ( !value.empty() ){
+      if ( ! (xmlDirName.empty() && 
+	      testDirName.empty() && 
+	      TestFileName.empty() ) ){
+	*Log(theErrLog) << "-x may not provide a value when --testdir or --xmldir is provided" << endl;
+	return false;
+      }
+      TestFileName = value;
+      ifstream is( value.c_str() );
+      if ( !is ){
+	*Log(theErrLog) << "input stream " << value << " is not readable" << endl;
+	return false;
+      }
+    }
     Opts.Delete('x');
   }
   
@@ -730,15 +744,12 @@ void TestFile( const string& infilename,
       *Log(theErrLog) << "unable to open outputfile: " << outFileName << endl;
       exit( EXIT_FAILURE );
     }
-  }
-  if (!outFileName.empty()) {
     Test( infilename, outStream, timers, frogTimer, xmlOutFile, tmpDirName );
-  } else {
+    *Log(theErrLog) << "results stored in " << outFileName << endl;
+  }
+  else {
     Test( infilename, cout, timers, frogTimer, xmlOutFile, tmpDirName );
   }
-  
-  if ( !outFileName.empty() )
-    *Log(theErrLog) << "results stored in " << outFileName << endl;
 }
 
 
@@ -809,10 +820,20 @@ int main(int argc, char *argv[]) {
 	set<string>::const_iterator it = fileNames.begin();
 	while ( it != fileNames.end() ){
 	  string testName = testDirName +"/" + *it;
-	  string outName = outPath + *it + ".out";
+	  string outName;
+	  if ( getXML ){
+	    if ( !outPath.empty() )
+	      outName = outPath + *it + ".out";
+	  }
+	  else
+	    outName = outPath + *it + ".out";
 	  string xmlName;
-	  if ( !xmlDirName.empty() )
-	    xmlName = xmlPath + *it + ".xml";
+	  if ( !xmlDirName.empty() ){
+	    if ( it->rfind(".xml") == string::npos )
+	      xmlName = xmlPath + *it + ".xml";
+	    else
+	      xmlName = xmlPath + *it;
+	  }
 	  else if ( wantXML )
 	    xmlName = *it + ".xml"; // do not clobber the inputdir!
 	  TestFile( testName, outName, xmlName );
