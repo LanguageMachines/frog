@@ -59,7 +59,7 @@ public:
   Common::Timer mbmaTimer;
   Common::Timer mwuTimer;
   Common::Timer tagTimer;
-  Common::Timer nerTimer;
+  Common::Timer iobTimer;
   Common::Timer prepareTimer;
   Common::Timer pairsTimer;
   Common::Timer relsTimer;

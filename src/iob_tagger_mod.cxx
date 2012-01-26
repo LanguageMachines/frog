@@ -47,7 +47,7 @@ IOBTagger::~IOBTagger(){
 }
  
 bool IOBTagger::init( const Configuration& conf ){
-  *Log(iobLog) << "Ner Init" << endl;
+  *Log(iobLog) << "IOB Chunker Init" << endl;
   if ( tagger != 0 ){
     *Log(iobLog) << "IOBTagger is already initialized!" << endl;
     return false;
@@ -148,7 +148,58 @@ int IOBTagger::splitWT( const string& tagged,
   return num_words;
 }
 
-void addIOBTag( FoliaElement *word, const string& inputTag, double confidence ){
+void IOBTagger::addIOBTags( FoliaElement *sent, 
+			    const vector<Word*>& words,
+			    const vector<string>& tags,
+			    const vector<double>& confs ){
+  FoliaElement *el = 0;
+  try {
+    el = sent->annotation<ChunkingLayer>("iob" );
+  }
+  catch(...){
+    el = new ChunkingLayer("iob");
+#pragma omp critical(foliaupdate)
+    {
+      sent->append( el );
+    }
+  }
+  FoliaElement *cur = 0;
+  for ( size_t i=0; i < tags.size(); ++i ){
+    *Log(iobLog) << "tag = " << tags[i] << endl;
+    vector<string> tagwords;
+    size_t num_words = Timbl::split_at( tags[i], tagwords, "_" );
+    if ( num_words != 2 ){
+      *Log(iobLog) << "expected <POS>_<IOB>, got: " << tags[i] << endl;
+      exit( EXIT_FAILURE );
+    }
+    if ( tagwords[1] == "O" )
+      continue;
+    vector<string> iob;
+    num_words = Timbl::split_at( tagwords[1], iob, "-" );
+    if ( num_words != 2 ){
+      *Log(iobLog) << "expected <IOB>-tag, got: " << tagwords[1] << endl;
+      exit( EXIT_FAILURE );
+    }
+    if ( iob[0] == "B" ){
+      FoliaElement *e = new Chunk("class='" + iob[1] +"'");
+      cur = e;
+#pragma omp critical(foliaupdate)
+      {
+	el->append( e );
+	cur->append( words[i] );
+      }
+    }
+    else if ( iob[0] == "I" ){
+      if ( !cur ){
+	*Log(iobLog) << "totale paniek" << endl;
+	exit( EXIT_FAILURE );
+      }
+#pragma omp critical(foliaupdate)
+      {
+	cur->append( words[i] );
+      }
+    }
+  }
 }
 
 string IOBTagger::Classify( FoliaElement *sent ){
@@ -163,20 +214,18 @@ string IOBTagger::Classify( FoliaElement *sent ){
       if ( w < swords.size()-1 )
 	sentence += " ";
     }
-    if (tpDebug) 
+    //    if (tpDebug) 
       *Log(iobLog) << "IOB in: " << sentence << endl;
     tagged = tagger->Tag(sentence);
-    if (tpDebug) {
+    //    if (tpDebug) {
       *Log(iobLog) << "sentence: " << sentence << endl
 		   << "IOB tagged: "<< tagged
 		   << endl;
-    }
+      //    }
     vector<double> conf;
     vector<string> tags;
     int num_words = splitWT( tagged, tags, conf );
-    for ( int i = 0; i < num_words; ++i ) {
-      addIOBTag( swords[i], tags[i], conf[i] );
-    }
+    addIOBTags( sent, swords, tags, conf );
   }
   return tagged;
 }

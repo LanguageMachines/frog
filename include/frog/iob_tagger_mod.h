@@ -37,13 +37,17 @@ class IOBTagger {
   ~IOBTagger();
   bool init( const Configuration& );
   std::string Classify( folia::FoliaElement * );
+  void addIOBTags( folia::FoliaElement *, 
+		   const std::vector<folia::Word*>&,
+		   const std::vector<std::string>&,
+		   const std::vector<double>& );
+ private:
   bool splitOneWT( const std::string&, 
 		   std::string& word, std::string& tag,
 		   std::string& confidence );
   int splitWT( const std::string&,
 	       std::vector<std::string>&,
 	       std::vector<double>& );
- private:
   MbtAPI *tagger;
   LogStream *iobLog;
 };

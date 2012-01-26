@@ -1,0 +1,8 @@
+e <utt>
+l chunker.train.lex.ambi.05
+k chunker.train.known.dwdwdwfWawaw
+u chunker.train.unknown.dwdwdwppsssFawaw
+p dwdwdwfWawaw
+P dwdwdwppsssFawaw
+O -G0 K:-d ID -a tribl2 -m M -L 1 -k 7 -w gr U:-d IL -a ib1 -m M -L 2 -k 15 -w nw
+L chunker.train.top1000

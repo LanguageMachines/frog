@@ -470,9 +470,21 @@ void TestSentence( FoliaElement* sent,
 		   TimerBlock& timers ){
   vector<Word*> swords = sent->words();
   if ( !swords.empty() ) {
-    timers.tagTimer.start();
-    string tagged = myCGNTagger.Classify( sent );
-    timers.tagTimer.stop();
+#pragma omp parallel sections
+    {
+#pragma omp section
+      {
+	timers.tagTimer.start();
+	string tagged = myCGNTagger.Classify( sent );
+	timers.tagTimer.stop();
+      }
+#pragma omp section
+      {
+	timers.iobTimer.start();
+	string chunked = myIOBTagger.Classify( sent );
+	timers.iobTimer.stop();
+      }
+    }
     for ( size_t i = 0; i < swords.size(); ++i ) {
       string mbmaLemma;
       string mblemLemma;
@@ -687,7 +699,7 @@ void Test( Document& doc,
   *Log(theErrLog) << "tokenisation took:" << timers.tokTimer << endl;
   *Log(theErrLog) << "tagging took:     " << timers.tagTimer << endl;
   if ( doIOB)
-    *Log(theErrLog) << "IOB chunking took:     " << timers.nerTimer << endl;
+    *Log(theErrLog) << "IOB chunking took:     " << timers.iobTimer << endl;
   *Log(theErrLog) << "MBA took:         " << timers.mbmaTimer << endl;
   *Log(theErrLog) << "Mblem took:       " << timers.mblemTimer << endl;
   if ( doMwu )
