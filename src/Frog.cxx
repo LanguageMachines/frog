@@ -722,7 +722,7 @@ void Test( const string& infilename,
   }
   else {
     // Tokenize the whole input into one FoLiA document.
-    // This is nog a good idea on the long term, I think
+    // This is not a good idea on the long term, I think
     ifstream IN( infilename.c_str() );
     Document doc = tokenizer.tokenize( IN );
     Test( doc, outStream, timers, frogTimer, xmlOutFile, tmpDir );
@@ -755,14 +755,14 @@ void TestFile( const string& infilename,
 
 void TestServer( Sockets::ServerSocket &conn) {
   //by Maarten van Gompel
-
+  
   try {
     while (true) {
       string data = "";      
       if ( !conn.read( data ) )	 //read data from client
 	throw( runtime_error( "read failed" ) );
-      if (tpDebug)
-	std::cerr << "Received: [" << data << "]" << "\n";
+      //      if (tpDebug)
+      *Log(theErrLog) << "Received: [" << data << "]" << "\n";
       
       istringstream inputstream(data,istringstream::in);
       ostringstream outputstream;
@@ -772,7 +772,13 @@ void TestServer( Sockets::ServerSocket &conn) {
       TimerBlock timers;
       Common::Timer frogTimer;
       frogTimer.start();
-      Document doc = tokenizer.tokenize( inputstream ); 
+      Document doc;
+      if ( getXML ){
+	doc.readFromString( data );
+	tokenizer.tokenize( doc );
+      }
+      else 
+	doc = tokenizer.tokenize( inputstream ); 
       Test( doc, outputstream, timers, frogTimer, "", tmpDirName );
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  )
 	throw( runtime_error( "write to client failed" ) );
