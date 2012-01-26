@@ -761,10 +761,9 @@ void TestServer( Sockets::ServerSocket &conn) {
       string data = "";      
       if ( !conn.read( data ) )	 //read data from client
 	throw( runtime_error( "read failed" ) );
-      //      if (tpDebug)
-      *Log(theErrLog) << "Received: [" << data << "]" << "\n";
+      if (tpDebug)
+	*Log(theErrLog) << "Received: [" << data << "]" << endl;
       
-      istringstream inputstream(data,istringstream::in);
       ostringstream outputstream;
       
       *Log(theErrLog) << "Processing... " << endl;
@@ -772,14 +771,17 @@ void TestServer( Sockets::ServerSocket &conn) {
       TimerBlock timers;
       Common::Timer frogTimer;
       frogTimer.start();
-      Document doc;
       if ( getXML ){
+	Document doc;
 	doc.readFromString( data );
 	tokenizer.tokenize( doc );
+	Test( doc, outputstream, timers, frogTimer, "", tmpDirName );
       }
-      else 
-	doc = tokenizer.tokenize( inputstream ); 
-      Test( doc, outputstream, timers, frogTimer, "", tmpDirName );
+      else {
+	istringstream inputstream(data,istringstream::in);
+	Document doc = tokenizer.tokenize( inputstream ); 
+	Test( doc, outputstream, timers, frogTimer, "", tmpDirName );
+      }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  )
 	throw( runtime_error( "write to client failed" ) );
       
