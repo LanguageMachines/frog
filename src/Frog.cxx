@@ -82,7 +82,7 @@ int tpDebug = 0; //0 for none, more for more output
 string sep = " "; // "&= " for cgi 
 bool doTok = true;
 bool doMwu = true;
-bool doIOB = false;
+bool doIOB = true;
 bool doParse = true;
 bool doDirTest = false;
 bool doServer = false;
@@ -192,7 +192,7 @@ bool parse_args( TimblOpts& Opts ) {
     if ( skip.find_first_of("mM") != string::npos )
       doMwu = false;
     if ( skip.find_first_of("iI") != string::npos )
-      doIOB = true;
+      doIOB = false;
     if ( skip.find_first_of("pP") != string::npos )
       doParse = false;
     Opts.Delete("skip");
