@@ -50,6 +50,7 @@ class IOBTagger {
 	       std::vector<double>& );
   MbtAPI *tagger;
   LogStream *iobLog;
+  int debug;
 };
 
 #endif // IOB_TAGGER_MOD_H

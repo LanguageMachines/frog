@@ -47,7 +47,11 @@ IOBTagger::~IOBTagger(){
 }
  
 bool IOBTagger::init( const Configuration& conf ){
-  if (tpDebug) 
+  debug = tpDebug;
+  string db = conf.lookUp( "debug", "IOB" );
+  if ( !db.empty() )
+    debug = folia::stringTo<int>( db );
+  if (debug) 
     *Log(iobLog) << "IOB Chunker Init" << endl;
   if ( tagger != 0 ){
     *Log(iobLog) << "IOBTagger is already initialized!" << endl;
@@ -72,7 +76,7 @@ bool IOBTagger::splitOneWT( const string& inp, string& word,
   bool isKnown = true;
   string in = inp;
   //     split word and tag, and store num of slashes
-  if (tpDebug)
+  if (debug)
     *Log(iobLog) << "split Classify starting with " << in << endl;
   string::size_type pos = in.rfind("/");
   if ( pos == string::npos ) {
@@ -108,7 +112,7 @@ bool IOBTagger::splitOneWT( const string& inp, string& word,
       exit( EXIT_FAILURE );
     }
   }
-  if ( tpDebug){
+  if ( debug){
     if ( isKnown )
       *Log(iobLog) << "known";
     else
@@ -140,7 +144,7 @@ int IOBTagger::splitWT( const string& tagged,
     known.push_back( isKnown );
     conf.push_back( confidence );
   }
-  if (tpDebug) {
+  if (debug) {
     *Log(iobLog) << "#tagged_words: " << num_words << endl;
     for( size_t i = 0; i < num_words; i++) 
       *Log(iobLog)   << "\ttagged word[" << i <<"]: " << words[i] << (known[i]?"/":"//")
@@ -167,7 +171,7 @@ void IOBTagger::addIOBTags( FoliaElement *sent,
   FoliaElement *cur = 0;
   for ( size_t i=0; i < tags.size(); ++i ){
 
-    if (tpDebug) 
+    if (debug) 
       *Log(iobLog) << "tag = " << tags[i] << endl;
     vector<string> tagwords;
     size_t num_words = Timbl::split_at( tags[i], tagwords, "_" );
@@ -194,12 +198,21 @@ void IOBTagger::addIOBTags( FoliaElement *sent,
     }
     else if ( iob[0] == "I" ){
       if ( !cur ){
-	*Log(iobLog) << "totale paniek" << endl;
-	exit( EXIT_FAILURE );
-      }
+	// Problem: a dangling I
+	// Replace by 'B'
+	FoliaElement *e = new Chunk("class='" + iob[1] +"'");
+	cur = e;
 #pragma omp critical(foliaupdate)
-      {
-	cur->append( words[i] );
+	{
+	  el->append( e );
+	  cur->append( words[i] );
+	}
+      }
+      else {
+#pragma omp critical(foliaupdate)
+	{
+	  cur->append( words[i] );
+	}
       }
     }
   }
@@ -217,10 +230,10 @@ string IOBTagger::Classify( FoliaElement *sent ){
       if ( w < swords.size()-1 )
 	sentence += " ";
     }
-    if (tpDebug) 
+    if (debug) 
       *Log(iobLog) << "IOB in: " << sentence << endl;
     tagged = tagger->Tag(sentence);
-    if (tpDebug) {
+    if (debug) {
       *Log(iobLog) << "sentence: " << sentence << endl
 		   << "IOB tagged: "<< tagged
 		   << endl;
