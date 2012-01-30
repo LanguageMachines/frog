@@ -15,10 +15,11 @@ config_DATA = mblem.transtable  mblem.tree mblem.tree.wgt \
 	chunker.train.lex.ambi.05 \
 	chunker.train.lex \
 	chunker.train.settings \
-	chunker.train.10paxes \
+	chunker.train.5paxes \
 	chunker.train.top1000 \
-	chunker.train.known.dwdwdwfWawaw \
-	chunker.train.unknown.dwdwdwppsssFawaw \
+	chunker.train.known.dddfWaa \
+	chunker.train.known.dddfWaa.wgt \
+	chunker.train.unknown.chnppddwFasss \
 	Frog.mbdp.1.0.dir.ibase \
 	Frog.mbdp.1.0.dir.ibase.wgt \
 	Frog.mbdp.1.0.pairs.sampled.ibase \
