@@ -571,6 +571,53 @@ Dependency *lookupDep( const Word *word,
   return 0;
 }
 
+string lookupChunk( const vector<Word *>& mwu, 
+		    const vector<Chunk*>& chunks ){
+  string endresult;
+  for ( size_t j=0; j < mwu.size(); ++j ){
+    if ( tpDebug ){
+      using folia::operator<<;
+      *Log(theErrLog) << "\nlookup "<< mwu[j] << " in " << chunks << endl;
+    }
+    string result;
+    for ( size_t i=0; i < chunks.size(); ++i ){
+      if ( tpDebug ){
+	*Log(theErrLog) << "\nprobeer " << chunks[i] << endl;
+      }
+      try {
+	vector<Word*> v = chunks[i]->select<Word>();
+	bool first = true;
+	for ( size_t k=0; k < v.size(); ++k ){
+	  if ( v[k] == mwu[j] ){
+	    if (tpDebug){
+	      *Log(theErrLog) << "\nfound word " << v[k] << endl;
+	    }
+	    if ( first )
+	      result += "B-" + chunks[i]->cls();
+	    else
+	      result += "I-" + chunks[i]->cls();
+	    break;
+	  }
+	  else
+	    first = false;
+	}
+      }
+      catch ( exception& e ){
+	if  (tpDebug > 0) 
+	  *Log(theErrLog) << "get Chunks results failed: " 
+			  << e.what() << endl;      
+      }
+    }
+    if ( result.empty() )
+      endresult += "O";
+    else
+      endresult += result;
+    if ( j < mwu.size()-1 )
+      endresult += "_";
+  }
+  return endresult;
+}
+
 void displayMWU( ostream& os, size_t index, 
 		 const vector<Word*> mwu ){
   string wrd;
@@ -633,6 +680,7 @@ ostream &showResults( ostream& os, const FoliaElement* sentence ){
   vector<Word*> words = sentence->words();
   vector<Entity*> entities = sentence->select<Entity>();
   vector<Dependency*> dependencies = sentence->select<Dependency>();
+  vector<Chunk*> chunking = sentence->select<Chunk>();
   size_t index = 1;
   map<FoliaElement*, int> enumeration;
   vector<vector<Word*> > mwus;
@@ -648,6 +696,15 @@ ostream &showResults( ostream& os, const FoliaElement* sentence ){
   }
   for( size_t i=0; i < mwus.size(); ++i ){
     displayMWU( os, i+1, mwus[i] );
+    if ( doIOB ){
+      string cls;
+      bool first = true;
+      string s = lookupChunk( mwus[i], chunking );
+      os << "\t" << s;
+    }
+    else {
+      os << "\t\t";
+    }
     if ( doParse ){
       string cls;
       Dependency *dep = lookupDep( mwus[i][0], dependencies );
