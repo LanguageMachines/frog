@@ -176,6 +176,10 @@ void fillSubSetTable(){
 
  
 bool CGNTagger::init( const Configuration& conf ){
+  debug = tpDebug;
+  string db = conf.lookUp( "debug", "tagger" );
+  if ( !db.empty() )
+    debug = folia::stringTo<int>( db );
   if ( tagger != 0 ){
     *Log(cgnLog) << "CGNTagger is already initialized!" << endl;
     return false;
@@ -200,7 +204,7 @@ bool CGNTagger::splitOneWT( const string& inp, string& word,
   bool isKnown = true;
   string in = inp;
   //     split word and tag, and store num of slashes
-  if (tpDebug)
+  if (debug)
     *Log(cgnLog) << "split Classify starting with " << in << endl;
   string::size_type pos = in.rfind("/");
   if ( pos == string::npos ) {
@@ -236,7 +240,7 @@ bool CGNTagger::splitOneWT( const string& inp, string& word,
       exit( EXIT_FAILURE );
     }
   }
-  if ( tpDebug){
+  if ( debug){
     if ( isKnown )
       *Log(cgnLog) << "known word: " << word << "\ttag: " << tag 
 		   << "\tconfidence: " << confidence << endl;
@@ -269,7 +273,7 @@ int CGNTagger::splitWT( const string& tagged,
     known.push_back( isKnown );
     conf.push_back( confidence );
   }
-  if (tpDebug) {
+  if (debug) {
     *Log(cgnLog) << "#tagged_words: " << num_words << endl;
     for( size_t i = 0; i < num_words; i++) 
       *Log(cgnLog)   << "\ttagged word[" << i <<"]: " << words[i] << (known[i]?"/":"//")
@@ -367,10 +371,10 @@ string CGNTagger::Classify( FoliaElement *sent ){
       if ( w < swords.size()-1 )
 	sentence += " ";
     }
-    if (tpDebug) 
+    if (debug) 
       *Log(cgnLog) << "in: " << sentence << endl;
     tagged = tagger->Tag(sentence);
-    if (tpDebug) {
+    if (debug) {
       *Log(cgnLog) << "sentence: " << sentence << endl
 		   << "tagged: "<< tagged
 		   << endl;

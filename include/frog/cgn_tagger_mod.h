@@ -46,6 +46,7 @@ class CGNTagger {
 	       std::vector<double>& );
   MbtAPI *tagger;  
   LogStream *cgnLog;
+  int debug;
 };
 
 #endif // CGN_TAGGER_MOD_H
