@@ -215,8 +215,19 @@ bool CGNTagger::splitOneWT( const string& inp, string& word,
     confidence = in.substr( pos+1 );
     in.erase( pos );
   }
+
+  bool unknown = false;
   pos = in.rfind("//");
-  if ( pos != string::npos ) {
+  if ( pos != string::npos ){
+    string::size_type spos = in.rfind("/");
+    if ( spos > pos+1 ){
+      pos = spos;
+    }
+    else
+      unknown = true;
+  }
+  
+  if ( unknown ) {
     // double slash: lets's hope is is an unknown word
     if ( pos == 0 ){
       // but this is definitely something like //LET() 
@@ -277,7 +288,7 @@ int CGNTagger::splitWT( const string& tagged,
     *Log(cgnLog) << "#tagged_words: " << num_words << endl;
     for( size_t i = 0; i < num_words; i++) 
       *Log(cgnLog)   << "\ttagged word[" << i <<"]: " << words[i] << (known[i]?"/":"//")
-	     << tags[i] << " <" << conf[i] << ">" << endl;
+		     << tags[i] << " <" << conf[i] << ">" << endl;
   }
   return num_words;
 }

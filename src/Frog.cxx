@@ -118,11 +118,12 @@ void usage( ) {
   cout << "\t============= INPUT MODE (mandatory, choose one) ========================\n"
        << "\t -e <encoding>          specify encoding of the input (default UTF-8)\n"
        << "\t -t <testfile>          Run frog on this file\n"
-       << "\t -S <port>              Run as server instead of reading from testfile)\n"
-       << "\t --testdir=<directory>  All files in this dir will be tested)\n"
+       << "\t -x <testfile>          Run frog on this FoLiA XML file\n"
+       << "\t -S <port>              Run as server instead of reading from testfile\n"
+       << "\t --testdir=<directory>  All files in this dir will be tested\n"
        << "\t -n                     Assume input file to hold one sentence per line\n"
        << "\t============= MODULE SELECTION ==========================================\n"
-       << "\t --skip=[mpti]  Skip Tokenizer (t), IOB Chunker (i), Multi-Word Units (m) or Parser (p) \n"
+       << "\t --skip=[mptc]  Skip Tokenizer (t), IOB Chunker (c), Multi-Word Units (m) or Parser (p) \n"
        << "\t============= CONFIGURATION OPTIONS =====================================\n"
        << "\t -c <filename>    Set configuration file (default " << configFileName << ")\n"
        << "\t============= OUTPUT OPTIONS ============================================\n"
@@ -191,7 +192,7 @@ bool parse_args( TimblOpts& Opts ) {
       doTok = false;
     if ( skip.find_first_of("mM") != string::npos )
       doMwu = false;
-    if ( skip.find_first_of("iI") != string::npos )
+    if ( skip.find_first_of("cC") != string::npos )
       doIOB = false;
     if ( skip.find_first_of("pP") != string::npos )
       doParse = false;
