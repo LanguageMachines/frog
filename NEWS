@@ -1,7 +1,14 @@
 0.12.10 - 2012-xx-xx
 [Ko vd Sloot]
+  * made debug handling better and the same for all modules
+  * added IOB chunker
+  * added -x option
+  * added --xmldir option
   * fixed --skip=t. It was totally ignored!?
   * removed the 0.12.2 patch. TimblServer solves it now.
+  * fixed problem with tags containing //
+  * update usage()
+  * updated man page
 
 0.12.9 - 2012-01-12
 [Ko vd Sloot]
