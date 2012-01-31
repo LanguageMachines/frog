@@ -42,7 +42,7 @@ UctoTokenizer::UctoTokenizer() {
   uctoLog = new LogStream( theErrLog, "tok-" );
 };
 
-bool UctoTokenizer::init( const Configuration& conf, bool pass ){
+bool UctoTokenizer::init( const Configuration& conf, const string & docid, bool pass ){
   if ( tokenizer )
     throw runtime_error( "ucto tokenizer is already initalized" );
   tokenizer = new Tokenizer::TokenizerClass();
@@ -77,7 +77,7 @@ bool UctoTokenizer::init( const Configuration& conf, bool pass ){
   tokenizer->setVerbose( false );
   tokenizer->setSentenceDetection( true ); //detection of sentences
   tokenizer->setParagraphDetection( false ); //detection of paragraphs  
-  tokenizer->setXMLOutput( true, "frog" );
+  tokenizer->setXMLOutput( true, docid );
   return true;
 }
 

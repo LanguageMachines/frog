@@ -70,6 +70,7 @@ string TestFileName;
 string testDirName;
 string tmpDirName;
 string outputFileName;
+string docid = "untitled";
 bool wantOUT;
 string XMLoutFileName;
 bool getXML;
@@ -123,15 +124,16 @@ void usage( ) {
        << "\t --testdir=<directory>  All files in this dir will be tested\n"
        << "\t -n                     Assume input file to hold one sentence per line\n"
        << "\t============= MODULE SELECTION ==========================================\n"
-       << "\t --skip=[mptc]  Skip Tokenizer (t), IOB Chunker (c), Multi-Word Units (m) or Parser (p) \n"
+       << "\t --skip=[mptc]    Skip Tokenizer (t), Chunker (c), Multi-Word Units (m) or Parser (p) \n"
        << "\t============= CONFIGURATION OPTIONS =====================================\n"
        << "\t -c <filename>    Set configuration file (default " << configFileName << ")\n"
-       << "\t============= OUTPUT OPTIONS ============================================\n"
-       << "\t --tmpdir=<directory> (location to store intermediate files. Default /tmp )\n"
-       << "\t -o <outputfile>	      Output to file, instead of default stdout\n"
-       << "\t -X <xmlfile>      Output also to an XML file in folia format\n"
-       << "\t --outputdir=<dir> Output to dir, instead of default stdout\n"
-       << "\t --xmldir=<dir> Use 'dir' to output FoliA XML to.\n"      
+       << "\t============= OUTPUT OPTIONS ============================================\n"      
+       << "\t -o <outputfile>	    Output columned output to file, instead of default stdout\n"
+       << "\t -X <xmlfile>          Output also to an XML file in FoLiA format\n"
+	   << "\t --id=<docid> 			(Document ID, used in FoLiA output. Default 'untitled')\n"
+       << "\t --outputdir=<dir>     Output to dir, instead of default stdout\n"
+       << "\t --xmldir=<dir>        Use 'dir' to output FoliA XML to.\n"
+       << "\t --tmpdir=<directory>  (location to store intermediate files. Default /tmp )\n"      
        << "\t --keep-parser-files=[yes|no] keep intermediate parser files, (last sentence only)\n"
        << "\t============= OTHER OPTIONS ============================================\n"
        << "\t -h. give some help.\n"
@@ -282,6 +284,10 @@ bool parse_args( TimblOpts& Opts ) {
     Opts.Delete('o');
   };
   wantXML = false;
+  if ( Opts.Find ( "id", value, mood)) {
+  	docid = value;
+  	Opts.Delete( "id");
+  }  
   if ( Opts.Find( "xmldir", value, mood)) {
     xmlDirName = value;
 #ifdef HAVE_DIRENT_H
@@ -351,7 +357,7 @@ bool froginit(){
     // we use fork(). omp (GCC version) doesn't do well when omp is used
     // before the fork!
     // see: http://bisqwit.iki.fi/story/howto/openmp/#OpenmpAndFork
-    bool stat = tokenizer.init( configuration, !doTok );
+    bool stat = tokenizer.init( configuration, docid, !doTok );
     if ( stat ){
       tokenizer.setSentencePerLineInput( doSentencePerLine );
       tokenizer.setInputEncoding( encoding );
@@ -397,7 +403,7 @@ bool froginit(){
     {
 #pragma omp section
       {
-	tokStat = tokenizer.init( configuration, !doTok );
+	tokStat = tokenizer.init( configuration, docid, !doTok );
 	if ( tokStat ){
 	  tokenizer.setSentencePerLineInput( doSentencePerLine );
 	  tokenizer.setInputEncoding( encoding );
