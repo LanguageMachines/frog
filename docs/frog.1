@@ -1,7 +1,7 @@
-.TH frog 1 "2011 December 22"
+.TH frog 1 "2012 January 31"
 
 .SH NAME
-frog - Dutch morpho-syntactic analyzer and dependency parser
+frog - Dutch morpho-syntactic analyzer, IOB chunker and dependency parser
 .SH SYNOPSYS
 frog [options]
 
@@ -9,7 +9,7 @@ frog -t test-file
 
 .SH DESCRIPTION
 frog is an integration of memory-based natural language processing (NLP) modules developed for Dutch.
-frog's current version will tokenize, tag, lemmatize, and morphologically segment word tokens in Dutch text files, and will assign a dependency graph to each sentence.
+frog's current version will tokenize, tag, lemmatize, and morphologically segment word tokens in Dutch text files, add IOB chunks and will assign a dependency graph to each sentence.
 
 .SH OPTIONS
 
@@ -53,9 +53,9 @@ send output to 'file' instead of stdout. Defaults to the name of the inputfile w
 send all output to 'dir' instead of stdout. Creates filenames from the inputfilename(s) with '.out' appended.
 .RE
 
-.BR --skip =[mpt]
+.BR --skip =[mptc]
 .RS
-skip parts of the proces: Tokenizer (t), Multi-Word unit (m) or Parser (p)
+skip parts of the proces: Tokenizer (t), Chunker (c), Multi-Word unit (m) or Parser (p)
 .RE
 
 .BR -Q
@@ -73,10 +73,22 @@ Run a server on 'port'
 process 'file'
 .RE
 
-.BR --tmpdir =<dir>
+.BR -x " <xmlfile>"
+.RS
+process 'xmlfile', which is supposed to be in FoLiA format! If 'xmlfile' is empty, and 
+.BR --testdir =<dir> 
+is provided, all files in 'dir' will be processed as FoLia XML.
+.RE
+
+.BR --testdir =<dir>
 .RS
 process all files in 'dir'. see also 
 .B --outputdir
+.RE
+
+.BR --tmpdir =<dir>
+.RS
+location to store intermediate files. Default /tmp.
 .RE
 
 .BR -V " or " --version
@@ -84,7 +96,7 @@ process all files in 'dir'. see also
 show version info
 .RE
 
-.BR --xmldir " <dir>"
+.BR --xmldir =<dir>
 .RS
 generate FoLiA XML output and send it to 'dir'. Creates filenames from the inputfilename with '.xml' appended.
 .RE
