@@ -100,7 +100,7 @@ AC_ARG_WITH(timbl,
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
 PKG_CHECK_MODULES([timbl], [timbl >= 6.4.2] )
 CXXFLAGS="$CXXFLAGS $timbl_CFLAGS"
-LIBS="$LIBS $timbl_LIBS"
+LIBS="$timbl_LIBS $LIBS"
 
 AC_ARG_WITH(timblserver,
        [  --with-timblserver=DIR     use timblserver installed in <DIR>],
@@ -108,7 +108,7 @@ AC_ARG_WITH(timblserver,
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
 PKG_CHECK_MODULES([timblserver], [timblserver >= 1.4] )
 CXXFLAGS="$CXXFLAGS $timblserver_CFLAGS"
-LIBS="$LIBS $timblserver_LIBS"
+LIBS="$timblserver_LIBS $LIBS"
 
 AC_ARG_WITH(mbt,
        [  --with-mbt=DIR       use mbt installed in <DIR>],
@@ -116,7 +116,7 @@ AC_ARG_WITH(mbt,
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
 PKG_CHECK_MODULES([mbt], [mbt >= 3.2.7] )
 CXXFLAGS="$CXXFLAGS $mbt_CFLAGS"
-LIBS="$LIBS $mbt_LIBS"
+LIBS="$mbt_LIBS $LIBS"
 
 AC_ARG_WITH(folia,
        [  --with-folia=DIR       use ucto installed in <DIR>],
@@ -125,7 +125,7 @@ AC_ARG_WITH(folia,
 AC_MSG_NOTICE( [pkg-config search path: $PKG_CONFIG_PATH] )
 PKG_CHECK_MODULES([folia],[folia >= 0.5])
 CXXFLAGS="$CXXFLAGS $folia_CFLAGS"
-LIBS="$LIBS $folia_LIBS"
+LIBS="$folia_LIBS $LIBS"
 
 AC_ARG_WITH(ucto,
        [  --with-ucto=DIR       use ucto installed in <DIR>],
@@ -133,7 +133,7 @@ AC_ARG_WITH(ucto,
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
 PKG_CHECK_MODULES([ucto], [ucto >= 0.4.9] )
 CXXFLAGS="$CXXFLAGS $ucto_CFLAGS"
-LIBS="$LIBS $ucto_LIBS"
+LIBS="$ucto_LIBS $LIBS"
 
 #
 # the ac_python_devel.m4 script tramples upon $LIBS, so we save it
