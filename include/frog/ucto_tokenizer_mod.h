@@ -39,7 +39,7 @@ class UctoTokenizer {
  public:
   UctoTokenizer();
   ~UctoTokenizer() { delete tokenizer; delete uctoLog; };
-  bool init( const Configuration&, bool );
+  bool init( const Configuration&, const std::string&, bool );
   void setSentencePerLineInput( bool );
   void setInputEncoding( const std::string & );
   void setInputXml( bool );
