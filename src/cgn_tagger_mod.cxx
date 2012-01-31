@@ -355,16 +355,16 @@ void addTag( FoliaElement *word, const string& inputTag, double confidence ){
       confidence = 1.0;
     tagPartS = cgnTag.substr( openH+1, closeH-openH-1 );
   }
-  KWargs args = getArgs( "set='mbt-pos', head='" + mainTag
+  KWargs args = getArgs( "set='http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn', head='" + mainTag
 			 + "', cls='" + cgnTag
-			 + "', annotator='" + annotator + "', confidence='" 
+			 + "', confidence='" 
 			 + toString(confidence) + "'" );
   FoliaElement *pos = word->addPosAnnotation( args );
   vector<string> tagParts;
   size_t numParts = Timbl::split_at( tagPartS, tagParts, "," );
   for ( size_t i=0; i < numParts; ++i ){
-    string arg = "set='mbt-pos', subset='" + getSubSet( tagParts[i], mainTag ) 
-      + "', cls='" + tagParts[i] + "', annotator='MBT'";
+    string arg = "set='http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn', subset='" + getSubSet( tagParts[i], mainTag ) 
+      + "', cls='" + tagParts[i] + "'";
     FoliaElement *feat = new folia::Feature( arg );
     pos->append( feat );
   }

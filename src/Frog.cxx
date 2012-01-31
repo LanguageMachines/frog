@@ -743,8 +743,6 @@ void Test( Document& doc,
 	   const string& tmpDir ) {
 
   string line;  
-  doc.declare( AnnotationType::POS, "mbt-pos");
-  doc.declare( AnnotationType::LEMMA, "mbt-lemma");
 
   vector<Sentence*> sentences = doc.sentences();
   size_t numS = sentences.size();
@@ -795,14 +793,21 @@ void Test( const string& infilename,
   if ( getXML ){
     Document doc;
     doc.readFromFile( infilename );
+    //TODO: process and add declarations
     tokenizer.tokenize( doc );
     Test( doc, outStream, timers, frogTimer, xmlOutFile, tmpDir );
   }
   else {
     // Tokenize the whole input into one FoLiA document.
-    // This is not a good idea on the long term, I think
+    // This is not a good idea on the long term, I think (agreed [proycon] )
     ifstream IN( infilename.c_str() );
     Document doc = tokenizer.tokenize( IN );
+    const string versionstring = VERSION;    
+    doc.declare( AnnotationType::POS, "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn", "annotator='frog-mbpos-" +  versionstring+  "', annotatortype='auto'");
+  	doc.declare( AnnotationType::LEMMA, "http://ilk.uvt.nl/folia/sets/frog-mblem-nl", "annotator='frog-mblem-"+  versionstring +"', annotatortype='auto'");
+  	if (doIOB) doc.declare( AnnotationType::CHUNKING, "http://ilk.uvt.nl/folia/sets/frog-chunker-nl", "annotator='frog-chunker-"+  versionstring +"', annotatortype='auto'");
+  	if (doMwu) doc.declare( AnnotationType::ENTITY, "http://ilk.uvt.nl/folia/sets/frog-mwu-nl", "annotator='frog-mwu-"+  versionstring +"', annotatortype='auto'");
+  	if (doParse) doc.declare( AnnotationType::DEPENDENCY, "http://ilk.uvt.nl/folia/sets/frog-depparse-nl", "annotator='frog-depparse-"+  versionstring +"', annotatortype='auto'");
     Test( doc, outStream, timers, frogTimer, xmlOutFile, tmpDir );
   }
 }

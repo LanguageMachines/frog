@@ -160,8 +160,8 @@ bool isSimilar( const string& tag, const string& cgnTag ){
 
 void addAnnotation( FoliaElement *word,
 		    const string& cls ){
-  KWargs args = getArgs( "set='mbt-lemma', cls='" 
-				       + escape(cls) + "', annotator='mblem'" );
+  KWargs args = getArgs( "set='http://ilk.uvt.nl/folia/sets/frog-mblem-nl', cls='" 
+				       + escape(cls) + "'" );
 #pragma omp critical(foliaupdate)
   {
     word->addLemmaAnnotation( args );
