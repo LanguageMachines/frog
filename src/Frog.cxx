@@ -130,7 +130,7 @@ void usage( ) {
        << "\t============= OUTPUT OPTIONS ============================================\n"      
        << "\t -o <outputfile>	    Output columned output to file, instead of default stdout\n"
        << "\t -X <xmlfile>          Output also to an XML file in FoLiA format\n"
-	   << "\t --id=<docid> 			(Document ID, used in FoLiA output. Default 'untitled')\n"
+       << "\t --id=<docid>          Document ID, used in FoLiA output. (Default 'untitled')\n"
        << "\t --outputdir=<dir>     Output to dir, instead of default stdout\n"
        << "\t --xmldir=<dir>        Use 'dir' to output FoliA XML to.\n"
        << "\t --tmpdir=<directory>  (location to store intermediate files. Default /tmp )\n"      
@@ -285,8 +285,8 @@ bool parse_args( TimblOpts& Opts ) {
   };
   wantXML = false;
   if ( Opts.Find ( "id", value, mood)) {
-  	docid = value;
-  	Opts.Delete( "id");
+    docid = value;
+    Opts.Delete( "id");
   }  
   if ( Opts.Find( "xmldir", value, mood)) {
     xmlDirName = value;
@@ -741,9 +741,24 @@ void Test( Document& doc,
 	   Common::Timer &frogTimer,
 	   const string& xmlOutFile,
 	   const string& tmpDir ) {
-
-  string line;  
-
+  // first we make sure that the doc will accept out annotations, by
+  // declaring them in the doc
+  //
+  const string versionstring = VERSION;    
+  doc.declare( AnnotationType::POS, 
+	       "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn", "annotator='frog-mbpos-" +  versionstring+  "', annotatortype='auto'" );
+  doc.declare( AnnotationType::LEMMA, 
+	       "http://ilk.uvt.nl/folia/sets/frog-mblem-nl", "annotator='frog-mblem-"+  versionstring +"', annotatortype='auto'");
+  if (doIOB)
+    doc.declare( AnnotationType::CHUNKING, 
+		 "http://ilk.uvt.nl/folia/sets/frog-chunker-nl", "annotator='frog-chunker-"+  versionstring +"', annotatortype='auto'");
+  if (doMwu) 
+    doc.declare( AnnotationType::ENTITY,
+		 "http://ilk.uvt.nl/folia/sets/frog-mwu-nl", "annotator='frog-mwu-"+  versionstring +"', annotatortype='auto'");
+  if (doParse) 
+    doc.declare( AnnotationType::DEPENDENCY,
+		 "http://ilk.uvt.nl/folia/sets/frog-depparse-nl", "annotator='frog-depparse-"+  versionstring +"', annotatortype='auto'");
+  
   vector<Sentence*> sentences = doc.sentences();
   size_t numS = sentences.size();
   if ( numS > 0 ) { //process sentences 
@@ -802,12 +817,6 @@ void Test( const string& infilename,
     // This is not a good idea on the long term, I think (agreed [proycon] )
     ifstream IN( infilename.c_str() );
     Document doc = tokenizer.tokenize( IN );
-    const string versionstring = VERSION;    
-    doc.declare( AnnotationType::POS, "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn", "annotator='frog-mbpos-" +  versionstring+  "', annotatortype='auto'");
-  	doc.declare( AnnotationType::LEMMA, "http://ilk.uvt.nl/folia/sets/frog-mblem-nl", "annotator='frog-mblem-"+  versionstring +"', annotatortype='auto'");
-  	if (doIOB) doc.declare( AnnotationType::CHUNKING, "http://ilk.uvt.nl/folia/sets/frog-chunker-nl", "annotator='frog-chunker-"+  versionstring +"', annotatortype='auto'");
-  	if (doMwu) doc.declare( AnnotationType::ENTITY, "http://ilk.uvt.nl/folia/sets/frog-mwu-nl", "annotator='frog-mwu-"+  versionstring +"', annotatortype='auto'");
-  	if (doParse) doc.declare( AnnotationType::DEPENDENCY, "http://ilk.uvt.nl/folia/sets/frog-depparse-nl", "annotator='frog-depparse-"+  versionstring +"', annotatortype='auto'");
     Test( doc, outStream, timers, frogTimer, xmlOutFile, tmpDir );
   }
 }
