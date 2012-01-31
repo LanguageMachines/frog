@@ -749,6 +749,8 @@ void Test( Document& doc,
 	       "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn", "annotator='frog-mbpos-" +  versionstring+  "', annotatortype='auto'" );
   doc.declare( AnnotationType::LEMMA, 
 	       "http://ilk.uvt.nl/folia/sets/frog-mblem-nl", "annotator='frog-mblem-"+  versionstring +"', annotatortype='auto'");
+  doc.declare( AnnotationType::MORPHOLOGICAL, 
+	       "http://ilk.uvt.nl/folia/sets/frog-mbma-nl", "annotator='frog-mbma-"+  versionstring +"', annotatortype='auto'");
   if (doIOB)
     doc.declare( AnnotationType::CHUNKING, 
 		 "http://ilk.uvt.nl/folia/sets/frog-chunker-nl", "annotator='frog-chunker-"+  versionstring +"', annotatortype='auto'");
@@ -853,7 +855,7 @@ void TestServer( Sockets::ServerSocket &conn) {
       string data = "";      
       if ( !conn.read( data ) )	 //read data from client
 	throw( runtime_error( "read failed" ) );
-      if (tpDebug)
+      //      if (tpDebug)
 	*Log(theErrLog) << "Received: [" << data << "]" << endl;
       
       ostringstream outputstream;
