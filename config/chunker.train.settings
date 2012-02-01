@@ -4,5 +4,5 @@ k chunker.train.known.dddfWaa
 u chunker.train.unknown.chnppddwFasss
 p dddfWaa
 P chnppddwFasss
-O -G0 K:-a IGTree -w gr U:-a tribl2 -m M -L 2 -w gr -k 7 -d IL
+O -G0 +vs K:-a IGTree -w gr U:-a tribl2 -m M -L 2 -w gr -k 7 -d IL
 L chunker.train.top1000
