@@ -542,7 +542,6 @@ vector<Word*> lookup( Word *word, const vector<Entity*>& entities ){
     vec = entities[p]->select<Word>();
     if ( !vec.empty() ){
       if ( vec[0]->id() == word->id() ) {
-	// cerr << "found " << vec << endl;
 	return vec;
       }
     }
@@ -785,12 +784,12 @@ void Test( Document& doc,
   
   frogTimer.stop();  
   
-  *Log(theErrLog) << "tokenisation took:" << timers.tokTimer << endl;
-  *Log(theErrLog) << "tagging took:     " << timers.tagTimer << endl;
+  *Log(theErrLog) << "tokenisation took:  " << timers.tokTimer << endl;
+  *Log(theErrLog) << "tagging took:       " << timers.tagTimer << endl;
   if ( doIOB)
-    *Log(theErrLog) << "IOB chunking took:     " << timers.iobTimer << endl;
-  *Log(theErrLog) << "MBA took:         " << timers.mbmaTimer << endl;
-  *Log(theErrLog) << "Mblem took:       " << timers.mblemTimer << endl;
+    *Log(theErrLog) << "IOB chunking took:  " << timers.iobTimer << endl;
+  *Log(theErrLog) << "MBA took:           " << timers.mbmaTimer << endl;
+  *Log(theErrLog) << "Mblem took:         " << timers.mblemTimer << endl;
   if ( doMwu )
     *Log(theErrLog) << "MWU resolving took: " << timers.mwuTimer << endl;
   if ( doParse ){
@@ -801,7 +800,7 @@ void Test( Document& doc,
     *Log(theErrLog) << "Parsing (csi)     took: " << timers.csiTimer << endl;
     *Log(theErrLog) << "Parsing (total)   took: " << timers.parseTimer << endl;
   }
-  *Log(theErrLog) << "Frogging took:      " << frogTimer << endl;
+  *Log(theErrLog) << "Frogging in total took: " << frogTimer << endl;
   if ( !xmlOutFile.empty() ){
     doc.save( xmlOutFile );
     *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
@@ -984,7 +983,7 @@ int main(int argc, char *argv[]) {
 	
 	srand((unsigned)time(0));
 	
-	std::cerr << "Listening on port " << listenport << "\n";
+	*Log(theErrLog) << "Listening on port " << listenport << "\n";
 	
 	try
 	  {
@@ -1000,10 +999,10 @@ int main(int argc, char *argv[]) {
 	      
 	      Sockets::ServerSocket conn;
 	      if ( server.accept( conn ) ){
-		std::cerr << "New connection...\n";
+		*Log(theErrLog) << "New connection...\n";
 		int pid = fork();				
 		if (pid < 0) {
-		  std::cerr << "ERROR on fork\n";
+		  *Log(theErrLog) << "ERROR on fork\n";
 		  exit(EXIT_FAILURE);
 		} else if (pid == 0)  {
 		  //		  server = NULL;
@@ -1017,7 +1016,7 @@ int main(int argc, char *argv[]) {
 	    }
 	  } catch ( std::exception& e )
 	  {
-	    std::cerr << "Server error:" << e.what() << "\nExiting.\n";
+	    *Log(theErrLog) << "Server error:" << e.what() << "\nExiting.\n";
 	    exit(EXIT_FAILURE);
 	  }
 	
