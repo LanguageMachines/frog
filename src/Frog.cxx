@@ -760,19 +760,27 @@ void Test( Document& doc,
   if (doParse) 
     doc.declare( AnnotationType::DEPENDENCY,
 		 "http://ilk.uvt.nl/folia/sets/frog-depparse-nl", "annotator='frog-depparse-"+  versionstring +"', annotatortype='auto'");
-  
+
+  if ( tpDebug > 5 )
+    *Log(theErrLog) << "Testing document :" << doc << endl;
   vector<Sentence*> sentences = doc.sentences();
   size_t numS = sentences.size();
   if ( numS > 0 ) { //process sentences 
-    if  (tpDebug > 0) *Log(theErrLog) << "[tokenize] " << numS << " sentence(s) in buffer, processing..." << endl;
+    if  (tpDebug > 0) 
+      *Log(theErrLog) << "found " << numS << " sentence(s) in document." << endl;
     for ( size_t i = 0; i < numS; i++) {
       /* ******* Begin process sentence  ********** */
       TestSentence( sentences[i],  tmpDir, timers ); 
-      //NOTE- full sentences are passed (which may span multiple lines) (MvG)         
-      showResults( outStream, sentences[i] ); 
+      //NOTE- full sentences are passed (which may span multiple lines) (MvG)
+      if ( !(doServer && wantXML) )
+	showResults( outStream, sentences[i] ); 
     }
-  } else {
-    if  (tpDebug > 0) *Log(theErrLog) << "[tokenize] No sentences yet, reading on..." << endl;
+    if ( doServer && wantXML )
+      outStream << doc << endl;
+  } 
+  else {
+    if  (tpDebug > 0) 
+      *Log(theErrLog) << "No sentences found in document. " << endl;
   }
   
   frogTimer.stop();  
@@ -852,32 +860,54 @@ void TestServer( Sockets::ServerSocket &conn) {
   
   try {
     while (true) {
-      string data = "";      
-      if ( !conn.read( data ) )	 //read data from client
-	throw( runtime_error( "read failed" ) );
-      //      if (tpDebug)
-	*Log(theErrLog) << "Received: [" << data << "]" << endl;
-      
       ostringstream outputstream;
-      
-      *Log(theErrLog) << "Processing... " << endl;
-      
       TimerBlock timers;
       Common::Timer frogTimer;
       frogTimer.start();
       if ( getXML ){
+	string result;
+	string s;
+	while ( conn.read(s) ){
+	  result += s + "\n";
+	  if ( s.empty() )
+	    break;
+	}
+	if ( result.size() < 50 ){
+	  // a FoLia doc must be at least a few 100 bytes
+	  // so this is wrong. Just bail out
+	  throw( runtime_error( "read garbage" ) );
+	}
+	if ( tpDebug )
+	  *Log(theErrLog) << "received data [" << result << "]" << endl;	
 	Document doc;
-	doc.readFromString( data );
+	try {
+	  doc.readFromString( result );
+	}
+	catch ( std::exception& e ){
+	  *Log(theErrLog) << "FoLiaParsing failed:" << endl
+			  << e.what() << endl;	  
+	  throw;
+	}
+	*Log(theErrLog) << "Processing... " << endl;
 	tokenizer.tokenize( doc );
 	Test( doc, outputstream, timers, frogTimer, "", tmpDirName );
       }
       else {
+	string data = "";      
+	if ( !conn.read( data ) )	 //read data from client
+	  throw( runtime_error( "read failed" ) );
+	if (tpDebug)
+	  *Log(theErrLog) << "Received: [" << data << "]" << endl;
+	*Log(theErrLog) << "Processing... " << endl;
 	istringstream inputstream(data,istringstream::in);
 	Document doc = tokenizer.tokenize( inputstream ); 
 	Test( doc, outputstream, timers, frogTimer, "", tmpDirName );
       }
-      if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  )
+      if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
+	if (tpDebug)
+	  *Log(theErrLog) << "socket " << conn.getMessage() << endl;	
 	throw( runtime_error( "write to client failed" ) );
+      }
       
     }
   }
