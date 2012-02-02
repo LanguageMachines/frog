@@ -807,20 +807,35 @@ void Test( Document& doc,
 }
 
 void Test( const string& infilename,
-	   ostream* outStream,
+	   const string& outName,
 	   const string& xmlOutFile ) {
   // stuff the whole input into one FoLiA document.
   // This is not a good idea on the long term, I think (agreed [proycon] )
+  ostream *os;
+  if ( outName.empty() ){
+    os = &cout;
+  }
+  else {
+    os = new ofstream( outName.c_str() );
+    if ( os->bad() ){
+      *Log(theErrLog) << "unable to open outputfile: " << outName << endl;
+      exit( EXIT_FAILURE );
+    }
+  }
   if ( getXML ){
     Document doc;
     doc.readFromFile( infilename );
     tokenizer.tokenize( doc );
-    Test( doc, *outStream, xmlOutFile );
+    Test( doc, *os, xmlOutFile );
   }
   else {
     ifstream IN( infilename.c_str() );
     Document doc = tokenizer.tokenize( IN );
-    Test( doc, *outStream, xmlOutFile );
+    Test( doc, *os, xmlOutFile );
+  }
+  if ( !outName.empty() ){
+    *Log(theErrLog) << "results stored in " << outName << endl;
+    delete os;
   }
 }
 
@@ -934,22 +949,7 @@ int main(int argc, char *argv[]) {
 	  }
 	  else if ( wantXML )
 	    xmlName = *it + ".xml"; // do not clobber the inputdir!
-	  ostream *os;
-	  if ( outName.empty() ){
-	    os = &cout;
-	  }
-	  else {
-	    os = new ofstream( outName.c_str() );
-	    if ( os->bad() ){
-	      *Log(theErrLog) << "unable to open outputfile: " << outName << endl;
-	      exit( EXIT_FAILURE );
-	    }
-	  }
-	  Test( testName, os, xmlName );
-	  if ( !outName.empty() ){
-	    *Log(theErrLog) << "results stored in " << outName << endl;
-	    delete os;
-	  }
+	  Test( testName, outName, xmlName );
 	  ++it;
 	}
       }
@@ -1007,22 +1007,7 @@ int main(int argc, char *argv[]) {
 	  XMLoutFileName = TestFileName + ".xml";
 	if ( wantOUT && outputFileName.empty() )
 	  outputFileName = TestFileName + ".out";
-	ostream* os;
-	if ( outputFileName.empty() ){
-	  os = &cout;
-	}
-	else {
-	  os = new ofstream( outputFileName.c_str() );
-	  if ( os->bad() ){
-	    *Log(theErrLog) << "unable to open outputfile: " << outputFileName << endl;
-	    exit( EXIT_FAILURE );
-	  }
-	}
-	Test( TestFileName, os, XMLoutFileName );
-	if ( !outputFileName.empty() ){
-	  *Log(theErrLog) << "results stored in " << outputFileName << endl;
-	  delete os;
-	}	  
+	Test( TestFileName, outputFileName, XMLoutFileName );
       }
     }
     else {
