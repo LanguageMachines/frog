@@ -737,7 +737,6 @@ ostream &showResults( ostream& os, const FoliaElement* sentence ){
 void Test( Document& doc,
 	   ostream& outStream,
 	   TimerBlock& timers,
-	   Common::Timer &frogTimer,
 	   const string& xmlOutFile,
 	   const string& tmpDir ) {
   // first we make sure that the doc will accept out annotations, by
@@ -776,16 +775,20 @@ void Test( Document& doc,
     }
     if ( doServer && wantXML )
       outStream << doc << endl;
+    if ( !xmlOutFile.empty() ){
+      doc.save( xmlOutFile );
+      *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
+    }
   } 
   else {
     if  (tpDebug > 0) 
       *Log(theErrLog) << "No sentences found in document. " << endl;
   }
   
-  frogTimer.stop();  
+  timers.frogTimer.stop();  
   
   *Log(theErrLog) << "tokenisation took:  " << timers.tokTimer << endl;
-  *Log(theErrLog) << "tagging took:       " << timers.tagTimer << endl;
+  *Log(theErrLog) << "CGN tagging took:   " << timers.tagTimer << endl;
   if ( doIOB)
     *Log(theErrLog) << "IOB chunking took:  " << timers.iobTimer << endl;
   *Log(theErrLog) << "MBA took:           " << timers.mbmaTimer << endl;
@@ -800,33 +803,27 @@ void Test( Document& doc,
     *Log(theErrLog) << "Parsing (csi)     took: " << timers.csiTimer << endl;
     *Log(theErrLog) << "Parsing (total)   took: " << timers.parseTimer << endl;
   }
-  *Log(theErrLog) << "Frogging in total took: " << frogTimer << endl;
-  if ( !xmlOutFile.empty() ){
-    doc.save( xmlOutFile );
-    *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
-  }
+  *Log(theErrLog) << "Frogging in total took: " << timers.frogTimer << endl;
   return;
 }
 
 void Test( const string& infilename,
 	   ostream& outStream,
 	   TimerBlock& timers,
-	   Common::Timer &frogTimer,
 	   const string& xmlOutFile,
 	   const string& tmpDir ) {
+  // stuff the whole input into one FoLiA document.
+  // This is not a good idea on the long term, I think (agreed [proycon] )
   if ( getXML ){
     Document doc;
     doc.readFromFile( infilename );
-    //TODO: process and add declarations
     tokenizer.tokenize( doc );
-    Test( doc, outStream, timers, frogTimer, xmlOutFile, tmpDir );
+    Test( doc, outStream, timers, xmlOutFile, tmpDir );
   }
   else {
-    // Tokenize the whole input into one FoLiA document.
-    // This is not a good idea on the long term, I think (agreed [proycon] )
     ifstream IN( infilename.c_str() );
     Document doc = tokenizer.tokenize( IN );
-    Test( doc, outStream, timers, frogTimer, xmlOutFile, tmpDir );
+    Test( doc, outStream, timers, xmlOutFile, tmpDir );
   }
 }
 
@@ -836,8 +833,7 @@ void TestFile( const string& infilename,
 	       const string& xmlOutFile ) {
   // init's are done
   TimerBlock timers;
-  Common::Timer frogTimer;
-  frogTimer.start();
+  timers.frogTimer.start();
 
   ofstream outStream;
   if ( !outFileName.empty() ){
@@ -845,11 +841,11 @@ void TestFile( const string& infilename,
       *Log(theErrLog) << "unable to open outputfile: " << outFileName << endl;
       exit( EXIT_FAILURE );
     }
-    Test( infilename, outStream, timers, frogTimer, xmlOutFile, tmpDirName );
+    Test( infilename, outStream, timers, xmlOutFile, tmpDirName );
     *Log(theErrLog) << "results stored in " << outFileName << endl;
   }
   else {
-    Test( infilename, cout, timers, frogTimer, xmlOutFile, tmpDirName );
+    Test( infilename, cout, timers, xmlOutFile, tmpDirName );
   }
 }
 
@@ -861,8 +857,7 @@ void TestServer( Sockets::ServerSocket &conn) {
     while (true) {
       ostringstream outputstream;
       TimerBlock timers;
-      Common::Timer frogTimer;
-      frogTimer.start();
+      timers.frogTimer.start();
       if ( getXML ){
 	string result;
 	string s;
@@ -889,7 +884,7 @@ void TestServer( Sockets::ServerSocket &conn) {
 	}
 	*Log(theErrLog) << "Processing... " << endl;
 	tokenizer.tokenize( doc );
-	Test( doc, outputstream, timers, frogTimer, "", tmpDirName );
+	Test( doc, outputstream, timers, "", tmpDirName );
       }
       else {
 	string data = "";      
@@ -900,7 +895,7 @@ void TestServer( Sockets::ServerSocket &conn) {
 	*Log(theErrLog) << "Processing... " << endl;
 	istringstream inputstream(data,istringstream::in);
 	Document doc = tokenizer.tokenize( inputstream ); 
-	Test( doc, outputstream, timers, frogTimer, "", tmpDirName );
+	Test( doc, outputstream, timers, "", tmpDirName );
       }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
 	if (tpDebug)

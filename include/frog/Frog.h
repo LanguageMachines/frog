@@ -27,10 +27,8 @@
 */                                                                   
 
 
-#ifndef __DEMO_OPTIONS__
-#define __DEMO_OPTIONS__
-
-#define MAX_NAMELEN 2048 
+#ifndef FROG_H
+#define FROG_H
 
 #include <set>
 #include "timbl/LogStream.h"
@@ -65,6 +63,7 @@ public:
   Common::Timer relsTimer;
   Common::Timer dirTimer;
   Common::Timer csiTimer;
+  Common::Timer frogTimer;
 };
 
 #endif
