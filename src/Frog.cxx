@@ -473,7 +473,6 @@ bool froginit(){
 }
 
 void TestSentence( FoliaElement* sent,
-		   const string& tmpDir,
 		   TimerBlock& timers ){
   vector<Word*> swords = sent->words();
   if ( !swords.empty() ) {
@@ -531,7 +530,7 @@ void TestSentence( FoliaElement* sent,
       }
     }
     if ( doParse ){  
-      myParser.Parse( sent, tmpDir, timers );
+      myParser.Parse( sent, tmpDirName, timers );
     }
   }
 }
@@ -704,7 +703,6 @@ ostream &showResults( ostream& os, const FoliaElement* sentence ){
     displayMWU( os, i+1, mwus[i] );
     if ( doIOB ){
       string cls;
-      bool first = true;
       string s = lookupChunk( mwus[i], chunking );
       os << "\t" << s;
     }
@@ -735,8 +733,7 @@ ostream &showResults( ostream& os, const FoliaElement* sentence ){
 
 void Test( Document& doc,
 	   ostream& outStream,
-	   const string& xmlOutFile,
-	   const string& tmpDir ) {
+	   const string& xmlOutFile = "" ) {
   TimerBlock timers;
   timers.frogTimer.start();
   
@@ -760,6 +757,7 @@ void Test( Document& doc,
     doc.declare( AnnotationType::DEPENDENCY,
 		 "http://ilk.uvt.nl/folia/sets/frog-depparse-nl", "annotator='frog-depparse-"+  versionstring +"', annotatortype='auto'");
 
+
   if ( tpDebug > 5 )
     *Log(theErrLog) << "Testing document :" << doc << endl;
   vector<Sentence*> sentences = doc.sentences();
@@ -769,7 +767,7 @@ void Test( Document& doc,
       *Log(theErrLog) << "found " << numS << " sentence(s) in document." << endl;
     for ( size_t i = 0; i < numS; i++) {
       /* ******* Begin process sentence  ********** */
-      TestSentence( sentences[i],  tmpDir, timers ); 
+      TestSentence( sentences[i], timers ); 
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)
       if ( !(doServer && wantXML) )
 	showResults( outStream, sentences[i] ); 
@@ -809,43 +807,22 @@ void Test( Document& doc,
 }
 
 void Test( const string& infilename,
-	   ostream& outStream,
-	   const string& xmlOutFile,
-	   const string& tmpDir ) {
+	   ostream* outStream,
+	   const string& xmlOutFile ) {
   // stuff the whole input into one FoLiA document.
   // This is not a good idea on the long term, I think (agreed [proycon] )
   if ( getXML ){
     Document doc;
     doc.readFromFile( infilename );
     tokenizer.tokenize( doc );
-    Test( doc, outStream, xmlOutFile, tmpDir );
+    Test( doc, *outStream, xmlOutFile );
   }
   else {
     ifstream IN( infilename.c_str() );
     Document doc = tokenizer.tokenize( IN );
-    Test( doc, outStream, xmlOutFile, tmpDir );
+    Test( doc, *outStream, xmlOutFile );
   }
 }
-
-
-void TestFile( const string& infilename, 
-	       const string& outFileName,
-	       const string& xmlOutFile ) {
-  // init's are done
-  ofstream outStream;
-  if ( !outFileName.empty() ){
-    if ( outStream.open( outFileName.c_str() ), outStream.bad() ){
-      *Log(theErrLog) << "unable to open outputfile: " << outFileName << endl;
-      exit( EXIT_FAILURE );
-    }
-    Test( infilename, outStream, xmlOutFile, tmpDirName );
-    *Log(theErrLog) << "results stored in " << outFileName << endl;
-  }
-  else {
-    Test( infilename, cout, xmlOutFile, tmpDirName );
-  }
-}
-
 
 void TestServer( Sockets::ServerSocket &conn) {
   //by Maarten van Gompel
@@ -879,7 +856,7 @@ void TestServer( Sockets::ServerSocket &conn) {
 	}
 	*Log(theErrLog) << "Processing... " << endl;
 	tokenizer.tokenize( doc );
-	Test( doc, outputstream, "", tmpDirName );
+	Test( doc, outputstream );
       }
       else {
 	string data = "";      
@@ -890,7 +867,7 @@ void TestServer( Sockets::ServerSocket &conn) {
 	*Log(theErrLog) << "Processing... " << endl;
 	istringstream inputstream(data,istringstream::in);
 	Document doc = tokenizer.tokenize( inputstream ); 
-	Test( doc, outputstream, "", tmpDirName );
+	Test( doc, outputstream );
       }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
 	if (tpDebug)
@@ -957,7 +934,22 @@ int main(int argc, char *argv[]) {
 	  }
 	  else if ( wantXML )
 	    xmlName = *it + ".xml"; // do not clobber the inputdir!
-	  TestFile( testName, outName, xmlName );
+	  ostream *os;
+	  if ( outName.empty() ){
+	    os = &cout;
+	  }
+	  else {
+	    os = new ofstream( outName.c_str() );
+	    if ( os->bad() ){
+	      *Log(theErrLog) << "unable to open outputfile: " << outName << endl;
+	      exit( EXIT_FAILURE );
+	    }
+	  }
+	  Test( testName, os, xmlName );
+	  if ( !outName.empty() ){
+	    *Log(theErrLog) << "results stored in " << outName << endl;
+	    delete os;
+	  }
 	  ++it;
 	}
       }
@@ -1015,7 +1007,22 @@ int main(int argc, char *argv[]) {
 	  XMLoutFileName = TestFileName + ".xml";
 	if ( wantOUT && outputFileName.empty() )
 	  outputFileName = TestFileName + ".out";
-	TestFile( TestFileName, outputFileName, XMLoutFileName );
+	ostream* os;
+	if ( outputFileName.empty() ){
+	  os = &cout;
+	}
+	else {
+	  os = new ofstream( outputFileName.c_str() );
+	  if ( os->bad() ){
+	    *Log(theErrLog) << "unable to open outputfile: " << outputFileName << endl;
+	    exit( EXIT_FAILURE );
+	  }
+	}
+	Test( TestFileName, os, XMLoutFileName );
+	if ( !outputFileName.empty() ){
+	  *Log(theErrLog) << "results stored in " << outputFileName << endl;
+	  delete os;
+	}	  
       }
     }
     else {
