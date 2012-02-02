@@ -73,8 +73,8 @@ string outputFileName;
 string docid = "untitled";
 bool wantOUT;
 string XMLoutFileName;
-bool getXML;
-bool wantXML;
+bool doXMLin;
+bool doXMLout;
 string outputDirName;
 string xmlDirName;
 set<string> fileNames;
@@ -283,7 +283,7 @@ bool parse_args( TimblOpts& Opts ) {
     outputFileName = value;
     Opts.Delete('o');
   };
-  wantXML = false;
+  doXMLout = false;
   if ( Opts.Find ( "id", value, mood)) {
     docid = value;
     Opts.Delete( "id");
@@ -298,18 +298,18 @@ bool parse_args( TimblOpts& Opts ) {
       }
     }
 #endif
-    wantXML = true;
+    doXMLout = true;
     Opts.Delete( "xmldir");
   }
   else if ( Opts.Find ('X', value, mood)) {
-    wantXML = true;
+    doXMLout = true;
     XMLoutFileName = value;
     Opts.Delete('X');
   }
   
-  getXML = false;
+  doXMLin = false;
   if ( Opts.Find ('x', value, mood)) {
-    getXML = true;
+    doXMLin = true;
     if ( !value.empty() ){
       if ( ! (xmlDirName.empty() && 
 	      testDirName.empty() && 
@@ -361,7 +361,7 @@ bool froginit(){
     if ( stat ){
       tokenizer.setSentencePerLineInput( doSentencePerLine );
       tokenizer.setInputEncoding( encoding );
-      tokenizer.setInputXml( getXML );
+      tokenizer.setInputXml( doXMLin );
       stat = myCGNTagger.init( configuration );
       if ( stat ){
 	if ( doIOB )
@@ -407,7 +407,7 @@ bool froginit(){
 	if ( tokStat ){
 	  tokenizer.setSentencePerLineInput( doSentencePerLine );
 	  tokenizer.setInputEncoding( encoding );
-	  tokenizer.setInputXml( getXML );
+	  tokenizer.setInputXml( doXMLin );
 	}
       }
 #pragma omp section
@@ -769,10 +769,10 @@ void Test( Document& doc,
       /* ******* Begin process sentence  ********** */
       TestSentence( sentences[i], timers ); 
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)
-      if ( !(doServer && wantXML) )
+      if ( !(doServer && doXMLout) )
 	showResults( outStream, sentences[i] ); 
     }
-    if ( doServer && wantXML )
+    if ( doServer && doXMLout )
       outStream << doc << endl;
     if ( !xmlOutFile.empty() ){
       doc.save( xmlOutFile );
@@ -822,7 +822,7 @@ void Test( const string& infilename,
       exit( EXIT_FAILURE );
     }
   }
-  if ( getXML ){
+  if ( doXMLin ){
     Document doc;
     doc.readFromFile( infilename );
     tokenizer.tokenize( doc );
@@ -845,7 +845,7 @@ void TestServer( Sockets::ServerSocket &conn) {
   try {
     while (true) {
       ostringstream outputstream;
-      if ( getXML ){
+      if ( doXMLin ){
 	string result;
 	string s;
 	while ( conn.read(s) ){
@@ -934,7 +934,7 @@ int main(int argc, char *argv[]) {
 	while ( it != fileNames.end() ){
 	  string testName = testDirName +"/" + *it;
 	  string outName;
-	  if ( getXML ){
+	  if ( doXMLin ){
 	    if ( !outPath.empty() )
 	      outName = outPath + *it + ".out";
 	  }
@@ -947,7 +947,7 @@ int main(int argc, char *argv[]) {
 	    else
 	      xmlName = xmlPath + *it;
 	  }
-	  else if ( wantXML )
+	  else if ( doXMLout )
 	    xmlName = *it + ".xml"; // do not clobber the inputdir!
 	  Test( testName, outName, xmlName );
 	  ++it;
@@ -1003,7 +1003,7 @@ int main(int argc, char *argv[]) {
 	  }
 	
       } else {
-	if ( wantXML && XMLoutFileName.empty() )
+	if ( doXMLout && XMLoutFileName.empty() )
 	  XMLoutFileName = TestFileName + ".xml";
 	if ( wantOUT && outputFileName.empty() )
 	  outputFileName = TestFileName + ".out";
