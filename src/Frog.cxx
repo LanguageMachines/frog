@@ -522,7 +522,7 @@ void TestSentence( FoliaElement* sent,
 	*Log(theErrLog) << "analysis: " << mblemLemma << " " << mbmaLemma << endl;
       }
     } //for int i = 0 to num_words
-
+    
     if ( doMwu ){
       if ( swords.size() > 0 ){
 	timers.mwuTimer.start();
@@ -733,12 +733,13 @@ ostream &showResults( ostream& os, const FoliaElement* sentence ){
   return os;
 }
 
-
 void Test( Document& doc,
 	   ostream& outStream,
-	   TimerBlock& timers,
 	   const string& xmlOutFile,
 	   const string& tmpDir ) {
+  TimerBlock timers;
+  timers.frogTimer.start();
+  
   // first we make sure that the doc will accept out annotations, by
   // declaring them in the doc
   //
@@ -809,7 +810,6 @@ void Test( Document& doc,
 
 void Test( const string& infilename,
 	   ostream& outStream,
-	   TimerBlock& timers,
 	   const string& xmlOutFile,
 	   const string& tmpDir ) {
   // stuff the whole input into one FoLiA document.
@@ -818,12 +818,12 @@ void Test( const string& infilename,
     Document doc;
     doc.readFromFile( infilename );
     tokenizer.tokenize( doc );
-    Test( doc, outStream, timers, xmlOutFile, tmpDir );
+    Test( doc, outStream, xmlOutFile, tmpDir );
   }
   else {
     ifstream IN( infilename.c_str() );
     Document doc = tokenizer.tokenize( IN );
-    Test( doc, outStream, timers, xmlOutFile, tmpDir );
+    Test( doc, outStream, xmlOutFile, tmpDir );
   }
 }
 
@@ -832,20 +832,17 @@ void TestFile( const string& infilename,
 	       const string& outFileName,
 	       const string& xmlOutFile ) {
   // init's are done
-  TimerBlock timers;
-  timers.frogTimer.start();
-
   ofstream outStream;
   if ( !outFileName.empty() ){
     if ( outStream.open( outFileName.c_str() ), outStream.bad() ){
       *Log(theErrLog) << "unable to open outputfile: " << outFileName << endl;
       exit( EXIT_FAILURE );
     }
-    Test( infilename, outStream, timers, xmlOutFile, tmpDirName );
+    Test( infilename, outStream, xmlOutFile, tmpDirName );
     *Log(theErrLog) << "results stored in " << outFileName << endl;
   }
   else {
-    Test( infilename, cout, timers, xmlOutFile, tmpDirName );
+    Test( infilename, cout, xmlOutFile, tmpDirName );
   }
 }
 
@@ -856,8 +853,6 @@ void TestServer( Sockets::ServerSocket &conn) {
   try {
     while (true) {
       ostringstream outputstream;
-      TimerBlock timers;
-      timers.frogTimer.start();
       if ( getXML ){
 	string result;
 	string s;
@@ -884,7 +879,7 @@ void TestServer( Sockets::ServerSocket &conn) {
 	}
 	*Log(theErrLog) << "Processing... " << endl;
 	tokenizer.tokenize( doc );
-	Test( doc, outputstream, timers, "", tmpDirName );
+	Test( doc, outputstream, "", tmpDirName );
       }
       else {
 	string data = "";      
@@ -895,7 +890,7 @@ void TestServer( Sockets::ServerSocket &conn) {
 	*Log(theErrLog) << "Processing... " << endl;
 	istringstream inputstream(data,istringstream::in);
 	Document doc = tokenizer.tokenize( inputstream ); 
-	Test( doc, outputstream, timers, "", tmpDirName );
+	Test( doc, outputstream, "", tmpDirName );
       }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
 	if (tpDebug)
