@@ -1,32 +1,42 @@
 $Id$
 $URL$
 
-Getting and Installing Dependency Parser files for Frog.
+Getting and installing Dependency Parser files for Frog.
 
 First download the latest parser files from: 
 http://ilk.uvt.nl/frog/Frog.mbdp-latest.tar.gz
 
-Unpack this file into the Frog configuration directory as folows:
+Unpack this file into the Frog configuration directory as follows:
 
-Determine this directory. Usually that is /usr/local/etc/frog when Frog is 
-installed using a package, or with 'make install'.
-If you used './configure' with the '--prefix=<some-path>' option, the Frog
-configuration can be found in '<some-path>/etc/frog'
+* Determine the location of the Frog configuration directory.  If you
+  installed Frog with a package manager or as root with 'make
+  install', this would typically be
 
-use:
-> ls <install-path>/frog.cfg
-to check this.
-   
-Now unpack:	
-> sudo cp Frog.mbdp-latest.tar.gz <install-path>
-> cd <install-path>
-> sudo tar zxf Frog.mbdp-latest.tar.gz
-or:
->  tar zxf Frog.mbdp-latest.tar.gz
+  /usr/local/etc/frog 
 
-You must have root permissions to write into directories like /usr/local/etc/ 
-so probably you must use 'sudo' go extract the tarball there.
+  If you used './configure' with the '--prefix=<some-path>' option,
+  the Frog configuration can be found in 
 
-That should be enough.
+  <some-path>/etc/frog
 
+* Double check this by checking whether this directory contains the
+  file frog.cfg:
 
+  > ls <install-path>/frog.cfg
+
+* If you need root permission to write in <install-path>, do the
+  following:
+
+  > sudo cp Frog.mbdp-latest.tar.gz <install-path>
+  > cd <install-path>
+  > sudo tar zxf Frog.mbdp-latest.tar.gz
+
+  Alternatively, if you have write permission in <install-path>,
+
+  > cp Frog.mbdp-latest.tar.gz <install-path>
+  > cd <install-path>
+  > tar zxf Frog.mbdp-latest.tar.gz
+
+* Frog will now automatically find the parser files and will run the
+  dependency parser, unless this module is skipped explicitly with
+  --skip=p.
