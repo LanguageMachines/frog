@@ -112,6 +112,7 @@ bool keepIntermediateFiles = false;
 */
 
 Configuration configuration;
+static string smallConfigFileName = string(SYSCONF_PATH) + '/' + PACKAGE + '/' + "small-frog.cfg";
 static string configFileName = string(SYSCONF_PATH) + '/' + PACKAGE + '/' + "frog.cfg";
 
 void usage( ) {
@@ -173,11 +174,15 @@ bool parse_args( TimblOpts& Opts ) {
 
   if ( configuration.fill( configFileName ) ){
     cerr << "config read from: " << configFileName << endl;
-    //    configuration.dump( cout );
   }
   else {
-    cerr << "failed te read configuration from! '" << configFileName << "'" << endl;
-    return false;
+    if ( configuration.fill( smallConfigFileName ) ){
+      cerr << "config read from: " << smallConfigFileName << endl;
+    }
+    else {
+      cerr << "failed te read configuration from! '" << configFileName << "'" << endl;
+      return false;
+    }
   }
 
   // debug opts
