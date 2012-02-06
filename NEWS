@@ -1,5 +1,7 @@
-0.12.10 - 2012-xx-xx
+0.12.10 - 2012-02-06
 [Ko vd Sloot]
+  * now frog ships with small-frog.cfg. Larger config is to be distributed
+    separately from the DPconfig directory.
   * made debug handling better and the same for all modules
   * added IOB chunker
   * added -x option
