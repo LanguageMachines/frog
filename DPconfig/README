@@ -14,16 +14,18 @@ If you used './configure' with the '--prefix=<some-path>' option, the Frog
 configuration can be found in '<some-path>/etc/frog'
 
 use:
-> ls <some-path>/frog.cfg
+> ls <install-path>/frog.cfg
 to check this.
-
-Now unpack:
-> sudo tar zxf Frog.mbdp-latest.tar.gz /usr/local/etc/frog
+   
+Now unpack:	
+> sudo cp Frog.mbdp-latest.tar.gz <install-path>
+> cd <install-path>
+> sudo tar zxf Frog.mbdp-latest.tar.gz
 or:
->  tar zxf Frog.mbdp-latest.tar.gz <some-path>/etc/frog
+>  tar zxf Frog.mbdp-latest.tar.gz
 
-You must have root permissions to write into /usr/local/etc/ so probably you 
-must use 'sudo' there.
+You must have root permissions to write into directories like /usr/local/etc/ 
+so probably you must use 'sudo' go extract the tarball there.
 
 That should be enough.
 
