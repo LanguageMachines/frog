@@ -20,12 +20,6 @@ config_DATA = mblem.transtable  mblem.tree mblem.tree.wgt \
 	chunker.train.known.dddfWaa \
 	chunker.train.known.dddfWaa.wgt \
 	chunker.train.unknown.chnppddwFasss \
-	Frog.mbdp.1.0.dir.ibase \
-	Frog.mbdp.1.0.dir.ibase.wgt \
-	Frog.mbdp.1.0.pairs.sampled.ibase \
-	Frog.mbdp.1.0.pairs.sampled.ibase.wgt \
-	Frog.mbdp.1.0.rels.ibase \
-	Frog.mbdp.1.0.rels.ibase.wgt \
 	cgntags.main cgntags.sub frog.cfg 
 
 configdir = $(sysconfdir)/$(PACKAGE)
