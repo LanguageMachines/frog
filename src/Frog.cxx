@@ -435,7 +435,7 @@ bool froginit(){
 	if ( doMwu ){
 	  mwuStat = myMwu.init( configuration );
 	  if ( mwuStat && doParse ){
-	    if ( configuration.lookUp("dummy", "parser" ).empty() ){
+	    if ( configuration.lookUp("pairsFile", "parser" ).empty() ){
 	      sleep(2);
 	      // wait for the other threads to complete
 	      // so out message is well visable at the end.
