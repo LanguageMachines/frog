@@ -61,7 +61,7 @@ string fixControl( const string& s, char c ){
     rString = "\n";
     break;
   default:
-    throw logic_error("invalid char for ficControl" );
+    throw logic_error("invalid char for fixControl" );
   }
   string::size_type pos1 = s.find( sString );
   if ( pos1 == string::npos ){

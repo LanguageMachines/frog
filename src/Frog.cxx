@@ -373,13 +373,22 @@ bool froginit(){
 	    if ( stat ) {
 	      if ( doMwu ){
 		stat = myMwu.init( configuration );
-		if ( stat && doParse )
+		if ( stat && doParse ){
+		  if ( configuration.lookUp("dummy", "parser" ).empty() ){
+		    *Log(theErrLog) << "IMPORTANT!" << endl;
+		    *Log(theErrLog) << "the Dependency Parser is not installed!" << endl;
+		    *Log(theErrLog) << "Please see http://ilk.uvt.nl/frog for information about " << endl;
+		    *Log(theErrLog) << "how to obtain and install the needed files." << endl;
+		    *Log(theErrLog) << "To run frog without the parser, add '--skip=p' to your command." << endl;
+		    exit(EXIT_FAILURE);
+		  }
 		  stat = myParser.init( configuration );
+		}
 	      }
 	      else {
 		if ( doParse )
 		  *Log(theErrLog) << " Parser disabled, because MWU is deselected" << endl;
-		doParse = false;;
+		doParse = false;
 	      }
 	    }
 	  }
@@ -426,11 +435,24 @@ bool froginit(){
 	if ( doMwu ){
 	  mwuStat = myMwu.init( configuration );
 	  if ( mwuStat && doParse ){
-	    Common::Timer initTimer;
-	    initTimer.start();
-	    parStat = myParser.init( configuration );
-	    initTimer.stop();
-	    *Log(theErrLog) << "init Parse took: " << initTimer << endl;
+	    if ( configuration.lookUp("dummy", "parser" ).empty() ){
+	      sleep(2);
+	      // wait for the other threads to complete
+	      // so out message is well visable at the end.
+	      *Log(theErrLog) << "IMPORTANT!" << endl;
+	      *Log(theErrLog) << "The Dependency Parser must be installed seperately." << endl;
+	      *Log(theErrLog) << "Please see http://ilk.uvt.nl/frog for information about " << endl;
+	      *Log(theErrLog) << "how to obtain and install the needed files." << endl;
+	      *Log(theErrLog) << "To run frog without the parser, add '--skip=p' to your command." << endl;
+	      exit(EXIT_FAILURE);
+	    }
+	    if ( doParse ){
+	      Common::Timer initTimer;
+	      initTimer.start();
+	      parStat = myParser.init( configuration );
+	      initTimer.stop();
+	      *Log(theErrLog) << "init Parse took: " << initTimer << endl;
+	    }
 	  }
 	}
 	else {
