@@ -112,8 +112,9 @@ bool keepIntermediateFiles = false;
 */
 
 Configuration configuration;
-static string smallConfigFileName = string(SYSCONF_PATH) + '/' + PACKAGE + '/' + "small-frog.cfg";
-static string configFileName = string(SYSCONF_PATH) + '/' + PACKAGE + '/' + "frog.cfg";
+static string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
+static string smallConfigFileName =  configDir + "small-frog.cfg";
+static string configFileName = configDir + "frog.cfg";
 
 void usage( ) {
   cout << endl << "Options:\n";
@@ -135,12 +136,12 @@ void usage( ) {
        << "\t --outputdir=<dir>     Output to dir, instead of default stdout\n"
        << "\t --xmldir=<dir>        Use 'dir' to output FoliA XML to.\n"
        << "\t --tmpdir=<directory>  (location to store intermediate files. Default /tmp )\n"      
-       << "\t --keep-parser-files=[yes|no] keep intermediate parser files, (last sentence only)\n"
+       << "\t --keep-parser-files=[yes|no] keep intermediate parser files. (last sentence only).\n"
        << "\t============= OTHER OPTIONS ============================================\n"
        << "\t -h. give some help.\n"
-       << "\t -V or --version . Show version info.\n"
-       << "\t -d <debug level> (for more verbosity)\n"
-       << "\t -Q               Enable quote detection in tokeniser\n";
+       << "\t -V or --version .   Show version info.\n"
+       << "\t -d <debug level>    (for more verbosity)\n"
+       << "\t -Q                   Enable quote detection in tokeniser.\n";
 }
 
 //**** stuff to process commandline options *********************************
@@ -159,7 +160,7 @@ bool parse_args( TimblOpts& Opts ) {
   bool mood;
   if ( Opts.Find('V', value, mood ) ||
        Opts.Find("version", value, mood ) ){
-    // we alreade did that
+    // we already did show what we wanted.
     exit( EXIT_SUCCESS );
   }
   if ( Opts.Find ('h', value, mood)) {
@@ -937,6 +938,7 @@ int main(int argc, char *argv[]) {
        << Timbl::VersionName() << ", "
        << TimblServer::VersionName() << ", "
        << Tagger::VersionName() << "]" << endl;
+  cout << "configdir: " << configDir << endl;
   try {
     TimblOpts Opts(argc, argv);
         

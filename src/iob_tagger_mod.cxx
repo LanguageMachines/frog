@@ -156,7 +156,7 @@ int IOBTagger::splitWT( const string& tagged,
 void IOBTagger::addIOBTags( FoliaElement *sent, 
 			    const vector<Word*>& words,
 			    const vector<string>& tags,
-			    const vector<double>& confs ){
+			    const vector<double>& ){
   FoliaElement *el = 0;
   try {
     el = sent->annotation<ChunkingLayer>("iob" );
@@ -240,7 +240,7 @@ string IOBTagger::Classify( FoliaElement *sent ){
     }
     vector<double> conf;
     vector<string> tags;
-    int num_words = splitWT( tagged, tags, conf );
+    splitWT( tagged, tags, conf );
     addIOBTags( sent, swords, tags, conf );
   }
   return tagged;

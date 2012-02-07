@@ -8,21 +8,13 @@ http://ilk.uvt.nl/frog/Frog.mbdp-latest.tar.gz
 
 Unpack this file into the Frog configuration directory as follows:
 
-* Determine the location of the Frog configuration directory.  If you
-  installed Frog with a package manager or as root with 'make
-  install', this would typically be
+* Determine the location of the Frog configuration directory. Frog will
+  tell you this, just do:
 
-  /usr/local/etc/frog 
+  > frog -V
 
-  If you used './configure' with the '--prefix=<some-path>' option,
-  the Frog configuration can be found in 
-
-  <some-path>/etc/frog
-
-* Double check this by checking whether this directory contains the
-  file frog.cfg:
-
-  > ls <install-path>/frog.cfg
+  and frog will (among other information) tell you:
+  configdir: <install-path>
 
 * If you need root permission to write in <install-path>, do the
   following:
