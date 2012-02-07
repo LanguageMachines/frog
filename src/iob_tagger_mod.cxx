@@ -174,7 +174,7 @@ int IOBTagger::splitWT( const string& tagged,
 void IOBTagger::addIOBTags( FoliaElement *sent, 
 			    const vector<Word*>& words,
 			    const vector<string>& tags,
-			    const vector<double>& ){
+			    const vector<double>& confs ){
   FoliaElement *el = 0;
   try {
     el = sent->annotation<ChunkingLayer>("iob" );
@@ -186,9 +186,10 @@ void IOBTagger::addIOBTags( FoliaElement *sent,
       sent->append( el );
     }
   }
-  FoliaElement *cur = 0;
+  vector<Word*> stack;
+  vector<double> dstack;
+  string curIOB;
   for ( size_t i=0; i < tags.size(); ++i ){
-
     if (debug) 
       *Log(iobLog) << "tag = " << tags[i] << endl;
     vector<string> tagwords;
@@ -197,8 +198,28 @@ void IOBTagger::addIOBTags( FoliaElement *sent,
       *Log(iobLog) << "expected <POS>_<IOB>, got: " << tags[i] << endl;
       exit( EXIT_FAILURE );
     }
-    if ( tagwords[1] == "O" )
+    if ( tagwords[1] == "O" ){
+      if ( !stack.empty() ){
+	double c = 1;
+	for ( size_t i=0; i < dstack.size(); ++i )
+	  c *= dstack[i];
+	FoliaElement *e = new Chunk("class='" + curIOB +
+				    "', confidence='" + toString(c) + "'");
+#pragma omp critical(foliaupdate)
+	{
+	  el->append( e );
+	}
+	for ( size_t i=0; i < stack.size(); ++i ){
+#pragma omp critical(foliaupdate)
+	  {
+	    e->append( stack[i] );
+	  }
+	}
+	dstack.clear();
+	stack.clear();
+      }
       continue;
+    }
     vector<string> iob;
     num_words = Timbl::split_at( tagwords[1], iob, "-" );
     if ( num_words != 2 ){
@@ -206,33 +227,29 @@ void IOBTagger::addIOBTags( FoliaElement *sent,
       exit( EXIT_FAILURE );
     }
     if ( iob[0] == "B" ){
-      FoliaElement *e = new Chunk("class='" + iob[1] +"'");
-      cur = e;
-#pragma omp critical(foliaupdate)
-      {
-	el->append( e );
-	cur->append( words[i] );
-      }
-    }
-    else if ( iob[0] == "I" ){
-      if ( !cur ){
-	// Problem: a dangling I
-	// Replace by 'B'
-	FoliaElement *e = new Chunk("class='" + iob[1] +"'");
-	cur = e;
+      if ( !stack.empty() ){
+	double c = 1;
+	for ( size_t i=0; i < dstack.size(); ++i )
+	  c *= dstack[i];
+	FoliaElement *e = new Chunk("class='" + curIOB +
+				    "', confidence='" + toString(c) + "'");
 #pragma omp critical(foliaupdate)
 	{
 	  el->append( e );
-	  cur->append( words[i] );
 	}
-      }
-      else {
+	for ( size_t i=0; i < stack.size(); ++i ){
 #pragma omp critical(foliaupdate)
-	{
-	  cur->append( words[i] );
+	  {
+	    e->append( stack[i] );
+	  }
 	}
+	dstack.clear();
+	stack.clear();
       }
     }
+    curIOB = iob[1];
+    dstack.push_back( confs[i] );
+    stack.push_back( words[i] );
   }
 }
 
