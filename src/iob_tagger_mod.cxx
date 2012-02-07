@@ -198,35 +198,21 @@ void IOBTagger::addIOBTags( FoliaElement *sent,
       *Log(iobLog) << "expected <POS>_<IOB>, got: " << tags[i] << endl;
       exit( EXIT_FAILURE );
     }
-    if ( tagwords[1] == "O" ){
-      if ( !stack.empty() ){
-	double c = 1;
-	for ( size_t i=0; i < dstack.size(); ++i )
-	  c *= dstack[i];
-	FoliaElement *e = new Chunk("class='" + curIOB +
-				    "', confidence='" + toString(c) + "'");
-#pragma omp critical(foliaupdate)
-	{
-	  el->append( e );
-	}
-	for ( size_t i=0; i < stack.size(); ++i ){
-#pragma omp critical(foliaupdate)
-	  {
-	    e->append( stack[i] );
-	  }
-	}
-	dstack.clear();
-	stack.clear();
-      }
-      continue;
-    }
     vector<string> iob;
-    num_words = Timbl::split_at( tagwords[1], iob, "-" );
-    if ( num_words != 2 ){
-      *Log(iobLog) << "expected <IOB>-tag, got: " << tagwords[1] << endl;
-      exit( EXIT_FAILURE );
+    if ( tagwords[1] == "O" ){
+      if ( stack.empty() )
+	continue;
+      else
+	iob.push_back("O");
     }
-    if ( iob[0] == "B" ){
+    else {
+      num_words = Timbl::split_at( tagwords[1], iob, "-" );
+      if ( num_words != 2 ){
+	*Log(iobLog) << "expected <IOB>-tag, got: " << tagwords[1] << endl;
+	exit( EXIT_FAILURE );
+      }
+    }
+    if ( iob[0] == "B" || iob[0] == "O" ){
       if ( !stack.empty() ){
 	double c = 1;
 	for ( size_t i=0; i < dstack.size(); ++i )
@@ -247,9 +233,11 @@ void IOBTagger::addIOBTags( FoliaElement *sent,
 	stack.clear();
       }
     }
-    curIOB = iob[1];
-    dstack.push_back( confs[i] );
-    stack.push_back( words[i] );
+    if ( iob[0] != "O" ){
+      curIOB = iob[1];
+      dstack.push_back( confs[i] );
+      stack.push_back( words[i] );
+    }
   }
 }
 
