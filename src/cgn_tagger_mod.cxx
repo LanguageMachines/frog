@@ -180,6 +180,23 @@ bool CGNTagger::init( const Configuration& conf ){
   string db = conf.lookUp( "debug", "tagger" );
   if ( !db.empty() )
     debug = folia::stringTo<int>( db );
+  switch ( debug ){
+  case 0:
+  case 1:
+    break;
+  case 2:
+  case 3:
+  case 4:
+    cgnLog->setlevel(LogDebug);
+    break;
+  case 5:
+  case 6:
+  case 7:
+    cgnLog->setlevel(LogHeavy);
+    break;
+  default:
+    cgnLog->setlevel(LogExtreme);
+  }    
   if ( tagger != 0 ){
     *Log(cgnLog) << "CGNTagger is already initialized!" << endl;
     return false;

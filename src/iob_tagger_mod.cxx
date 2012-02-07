@@ -51,6 +51,23 @@ bool IOBTagger::init( const Configuration& conf ){
   string db = conf.lookUp( "debug", "IOB" );
   if ( !db.empty() )
     debug = folia::stringTo<int>( db );
+  switch ( debug ){
+  case 0:
+  case 1:
+    break;
+  case 2:
+  case 3:
+  case 4:
+    iobLog->setlevel(LogDebug);
+    break;
+  case 5:
+  case 6:
+  case 7:
+    iobLog->setlevel(LogHeavy);
+    break;
+  default:
+    iobLog->setlevel(LogExtreme);
+  }    
   if (debug) 
     *Log(iobLog) << "IOB Chunker Init" << endl;
   if ( tagger != 0 ){
@@ -123,7 +140,8 @@ bool IOBTagger::splitOneWT( const string& inp, string& word,
 }
 
 int IOBTagger::splitWT( const string& tagged,
-			vector<string>& tags, vector<double>& conf ){
+			vector<string>& tags, 
+			vector<double>& conf ){
   vector<string> words;
   vector<string> tagwords;
   vector<bool> known;
