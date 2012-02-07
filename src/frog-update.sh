@@ -10,6 +10,12 @@ fi
 
 confdir=$2
 
+if ! test -d $confdir
+then
+    echo "frog didn't return a valid config dir. Maybe an old version?"
+    exit 1
+fi
+
 cd $confdir
 echo "entered frog config dir: " $confdir
 
@@ -21,7 +27,7 @@ then
 	cp frog.cfg frog.cfg.1
 	echo "created a backup copy of 'frog.cfg' :: 'frog.cfg.1'"
     else
-	echo found $last
+#	echo found $last
 	new=frog.cfg.`echo $last | awk -F \. {'print ++$3'}`
 	cp frog.cfg $new
 	echo "created a backup copy of 'frog.cfg' :: '$new'"
