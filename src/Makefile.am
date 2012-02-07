@@ -15,5 +15,5 @@ frog_SOURCES = mbma_mod.cxx mblem_mod.cxx mwu_chunker_mod.cxx \
 TESTS_ENVIRONMENT = $(SHELL) -x
 TESTS = tst.sh
 
-EXTRA_DIST = tst.sh
+EXTRA_DIST = tst.sh frog-dp-update.sh
 CLEANFILES = tst.out
