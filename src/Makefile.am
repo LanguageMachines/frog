@@ -3,7 +3,7 @@
 
 AM_CPPFLAGS = -I@top_srcdir@/include
 
-bin_SCRIPTS = frog-update.sh
+bin_SCRIPTS = frog-dp-update.sh
 bin_PROGRAMS = frog
 
 frog_SOURCES = mbma_mod.cxx mblem_mod.cxx mwu_chunker_mod.cxx \
