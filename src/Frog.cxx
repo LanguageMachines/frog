@@ -380,7 +380,7 @@ bool froginit(){
 	      if ( doMwu ){
 		stat = myMwu.init( configuration );
 		if ( stat && doParse ){
-		  if ( configuration.lookUp("dummy", "parser" ).empty() ){
+		  if ( configuration.lookUp("pairsFile", "parser" ).empty() ){
 		    *Log(theErrLog) << "IMPORTANT!" << endl;
 		    *Log(theErrLog) << "the Dependency Parser is not installed!" << endl;
 		    *Log(theErrLog) << "Please see http://ilk.uvt.nl/frog for information about " << endl;
