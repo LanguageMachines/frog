@@ -171,6 +171,27 @@ int IOBTagger::splitWT( const string& tagged,
   return num_words;
 }
 
+void addChunk( FoliaElement *chunks, 
+	       const vector<Word*>& words,
+	       const vector<double>& confs,
+	       const string& IOB ){
+  double c = 1;
+  for ( size_t i=0; i < confs.size(); ++i )
+    c *= confs[i];
+  FoliaElement *e = new Chunk("class='" + IOB +
+			      "', confidence='" + toString(c) + "'");
+#pragma omp critical(foliaupdate)
+  {
+    chunks->append( e );
+  }
+  for ( size_t i=0; i < words.size(); ++i ){
+#pragma omp critical(foliaupdate)
+    {
+      e->append( words[i] );
+    }
+  }
+}
+
 void IOBTagger::addIOBTags( FoliaElement *sent, 
 			    const vector<Word*>& words,
 			    const vector<string>& tags,
@@ -200,8 +221,9 @@ void IOBTagger::addIOBTags( FoliaElement *sent,
     }
     vector<string> iob;
     if ( tagwords[1] == "O" ){
-      if ( stack.empty() )
+      if ( stack.empty() ){
 	continue;
+      }
       else
 	iob.push_back("O");
     }
@@ -214,30 +236,20 @@ void IOBTagger::addIOBTags( FoliaElement *sent,
     }
     if ( iob[0] == "B" || iob[0] == "O" ){
       if ( !stack.empty() ){
-	double c = 1;
-	for ( size_t i=0; i < dstack.size(); ++i )
-	  c *= dstack[i];
-	FoliaElement *e = new Chunk("class='" + curIOB +
-				    "', confidence='" + toString(c) + "'");
-#pragma omp critical(foliaupdate)
-	{
-	  el->append( e );
-	}
-	for ( size_t i=0; i < stack.size(); ++i ){
-#pragma omp critical(foliaupdate)
-	  {
-	    e->append( stack[i] );
-	  }
-	}
+	addChunk( el, stack, dstack, curIOB );
 	dstack.clear();
 	stack.clear();
       }
     }
     if ( iob[0] != "O" ){
-      curIOB = iob[1];
+      if ( iob[0] == "B" || curIOB.empty() )
+	curIOB = iob[1];
       dstack.push_back( confs[i] );
       stack.push_back( words[i] );
     }
+  }
+  if ( !stack.empty() ){
+    addChunk( el, stack, dstack, curIOB );
   }
 }
 
