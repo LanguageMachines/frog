@@ -3,7 +3,8 @@
   * added a simple script: frog-dp-update.sh
     this installs the DP config and a full functional frog.cfg
   * some small cleanups in iob-chunker code.
-  * added newest chunker configuration
+  * added newest chunker configuration, now also gives confidence values
+  * fixed some problems with iob chunker
 
 0.12.10 - 2012-02-06
 [Ko vd Sloot]

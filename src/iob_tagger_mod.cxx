@@ -54,6 +54,7 @@ bool IOBTagger::init( const Configuration& conf ){
   switch ( debug ){
   case 0:
   case 1:
+    iobLog->setlevel(LogNormal);
     break;
   case 2:
   case 3:
@@ -220,12 +221,20 @@ void IOBTagger::addIOBTags( FoliaElement *sent,
       exit( EXIT_FAILURE );
     }
     vector<string> iob;
+    if (debug) 
+      *Log(iobLog) << "IOB = " << tagwords[1] << endl;
     if ( tagwords[1] == "O" ){
-      if ( stack.empty() ){
-	continue;
+      if ( !stack.empty() ){
+	if (debug) {
+	  *Log(iobLog) << "O spit out " << curIOB << endl;
+	  using folia::operator<<;
+	  *Log(iobLog) << "spit out " << stack << endl;	
+	}
+	addChunk( el, stack, dstack, curIOB );
+	dstack.clear();
+	stack.clear();
       }
-      else
-	iob.push_back("O");
+      continue;
     }
     else {
       num_words = Timbl::split_at( tagwords[1], iob, "-" );
@@ -234,21 +243,32 @@ void IOBTagger::addIOBTags( FoliaElement *sent,
 	exit( EXIT_FAILURE );
       }
     }
-    if ( iob[0] == "B" || iob[0] == "O" ){
+    if ( iob[0] == "B" ||
+	 ( iob[0] == "I" && stack.empty() ) ||
+	 ( iob[0] == "I" && iob[1] != curIOB ) ){
+      // an I without preceding B is handled as a B
+      // an I with a different TAG is also handled as a B
       if ( !stack.empty() ){
+	if ( debug ){
+	  *Log(iobLog) << "B spit out " << curIOB << endl;
+	  using folia::operator<<;
+	  *Log(iobLog) << "spit out " << stack << endl;	
+	}
 	addChunk( el, stack, dstack, curIOB );
 	dstack.clear();
 	stack.clear();
       }
+      curIOB = iob[1];
     }
-    if ( iob[0] != "O" ){
-      if ( iob[0] == "B" || curIOB.empty() )
-	curIOB = iob[1];
-      dstack.push_back( confs[i] );
-      stack.push_back( words[i] );
-    }
+    dstack.push_back( confs[i] );
+    stack.push_back( words[i] );
   }
   if ( !stack.empty() ){
+    if ( debug ){
+      *Log(iobLog) << "END spit out " << curIOB << endl;
+      using folia::operator<<;
+      *Log(iobLog) << "spit out " << stack << endl;	
+    }
     addChunk( el, stack, dstack, curIOB );
   }
 }
