@@ -1,6 +1,6 @@
 #! /bin/sh
 
-set `/home/sloot/usr/local/bin/frog -V`
+set `frog -V`
 
 if [ $? -ne 0 ]
 then
