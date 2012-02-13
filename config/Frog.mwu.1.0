@@ -230,6 +230,7 @@ email_address N_SPEC
 email_adres N_N
 e-mail_verkeer N_N
 embedded_system SPEC_SPEC
+en_/_of VG_LET_VG
 en_dergelijke VG_ADJ
 en_ga_zo_maar_door VG_WW_BW_BW_VZ
 enig_document VNW_N
@@ -636,7 +637,6 @@ nu_eenmaal BW_BW
 nummer_1_hits N_TW_N
 'n_week_of LID_VG
 och_arme TSW_ADJ
-of_dat VG_VG
 off_shoring SPEC_SPEC
 of_ook_wel VG_BW_BW
 of_zo VG_BW
