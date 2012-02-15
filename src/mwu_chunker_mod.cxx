@@ -64,16 +64,16 @@ void mwuAna::addEntity( FoliaElement *sent ){
   if ( fwords.size() > 1 ){
     FoliaElement *el = 0;
     try {
-      el = sent->annotation<EntitiesLayer>( );
+      el = sent->annotation<EntitiesLayer>( "mwu" );
     }
     catch(...){
-      el = new EntitiesLayer("");
+      el = new EntitiesLayer("set='mwu'");
 #pragma omp critical(foliaupdate)
       {
 	sent->append( el );
       }
     }
-    FoliaElement *e = new Entity("");
+    FoliaElement *e = new Entity("set='mwu'");
 #pragma omp critical(foliaupdate)
     {
       el->append( e );

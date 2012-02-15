@@ -20,6 +20,14 @@ config_DATA = mblem.transtable  mblem.tree mblem.tree.wgt \
 	chunker.train.known.dddwfWawa \
 	chunker.train.known.dddwfWawa.wgt \
 	chunker.train.unknown.chnppddwFawsss \
+	ner.data.lex.ambi.05 \
+	ner.data.lex \
+	ner.data.settings \
+	ner.data.5paxes \
+	ner.data.top1000 \
+	ner.data.known.dddwfWawa \
+	ner.data.known.dddwfWawa.wgt \
+	ner.data.unknown.chnppddwFawsss \
 	cgntags.main cgntags.sub small-frog.cfg 
 
 configdir = $(sysconfdir)/$(PACKAGE)

@@ -58,6 +58,7 @@ public:
   Common::Timer mwuTimer;
   Common::Timer tagTimer;
   Common::Timer iobTimer;
+  Common::Timer nerTimer;
   Common::Timer prepareTimer;
   Common::Timer pairsTimer;
   Common::Timer relsTimer;

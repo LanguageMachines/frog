@@ -58,6 +58,7 @@
 #include "frog/mwu_chunker_mod.h"
 #include "frog/cgn_tagger_mod.h"
 #include "frog/iob_tagger_mod.h"
+#include "frog/ner_tagger_mod.h"
 #include "frog/Parser.h"
 
 using namespace std;
@@ -85,6 +86,7 @@ string sep = " "; // "&= " for cgi
 bool doTok = true;
 bool doMwu = true;
 bool doIOB = true;
+bool doNER = true;
 bool doParse = true;
 bool doDirTest = false;
 bool doServer = false;
@@ -155,6 +157,7 @@ static Mwu myMwu;
 static Parser myParser;
 static CGNTagger myCGNTagger;
 static IOBTagger myIOBTagger;
+static NERTagger myNERTagger;
 static UctoTokenizer tokenizer;
 
 
@@ -208,6 +211,8 @@ bool parse_args( TimblOpts& Opts ) {
       doMwu = false;
     if ( skip.find_first_of("cC") != string::npos )
       doIOB = false;
+    if ( skip.find_first_of("nN") != string::npos )
+      doNER = false;
     if ( skip.find_first_of("pP") != string::npos )
       doParse = false;
     Opts.Delete("skip");
@@ -392,6 +397,8 @@ bool froginit(){
       if ( stat ){
 	if ( doIOB )
 	  stat = myIOBTagger.init( configuration );
+	if ( stat && doNER )
+	  stat = myNERTagger.init( configuration );
 	if ( stat ){
 	  stat = myMblem.init( configuration );
 	  if ( stat ){
@@ -434,6 +441,7 @@ bool froginit(){
     bool parStat = true;
     bool tagStat = true;
     bool iobStat = true;
+    bool nerStat = true;
 #pragma omp parallel sections
     {
 #pragma omp section
@@ -455,6 +463,11 @@ bool froginit(){
       {
 	if ( doIOB )
 	  iobStat = myIOBTagger.init( configuration );
+      }
+#pragma omp section 
+      {
+	if ( doNER )
+	  nerStat = myNERTagger.init( configuration );
       }
 #pragma omp section
       {
@@ -488,7 +501,7 @@ bool froginit(){
 	}
       }
     }   // end omp parallel sections
-    if ( ! ( tokStat && iobStat && tagStat && lemStat 
+    if ( ! ( tokStat && iobStat && nerStat && tagStat && lemStat 
 	     && mbaStat && mwuStat && parStat ) ){
       *Log(theErrLog) << "Initialization failed for: ";
       if ( ! ( tokStat ) ){
@@ -499,6 +512,9 @@ bool froginit(){
       }	
       if ( ! ( iobStat ) ){
 	*Log(theErrLog) << "[IOB] ";
+      }	
+      if ( ! ( nerStat ) ){
+	*Log(theErrLog) << "[NER] ";
       }	
       if ( ! ( lemStat ) ){
 	*Log(theErrLog) << "[lemmatizer] ";
@@ -561,18 +577,66 @@ Dependency *lookupDep( const Word *word,
   return 0;
 }
 
-string lookupChunk( const vector<Word *>& mwu, 
-		    const vector<Chunk*>& chunks ){
+string lookupNEREntity( const vector<Word *>& mwu, 
+			const vector<Entity*>& entities ){
   string endresult;
   for ( size_t j=0; j < mwu.size(); ++j ){
     if ( tpDebug ){
       using folia::operator<<;
-      *Log(theErrLog) << "\nlookup "<< mwu[j] << " in " << chunks << endl;
+      *Log(theErrLog) << "lookup "<< mwu[j] << " in " << entities << endl;
+    }
+    string result;
+    for ( size_t i=0; i < entities.size(); ++i ){
+      if ( tpDebug ){
+	*Log(theErrLog) << "probeer " << entities[i] << endl;
+      }
+      try {
+	vector<Word*> v = entities[i]->select<Word>();
+	bool first = true;
+	for ( size_t k=0; k < v.size(); ++k ){
+	  if ( v[k] == mwu[j] ){
+	    if (tpDebug){
+	      *Log(theErrLog) << "found word " << v[k] << endl;
+	    }
+	    if ( first )
+	      result += "B-" + uppercase(entities[i]->cls());
+	    else
+	      result += "I-" + uppercase(entities[i]->cls());
+	    break;
+	  }
+	  else
+	    first = false;
+	}
+      }
+      catch ( exception& e ){
+	if  (tpDebug > 0) 
+	  *Log(theErrLog) << "get NER results failed: " 
+			  << e.what() << endl;      
+      }
+    }
+    if ( result.empty() )
+      endresult += "O";
+    else
+      endresult += result;
+    if ( j < mwu.size()-1 )
+      endresult += "_";
+  }
+  return endresult;
+}
+
+
+string lookupIOBChunk( const vector<Word *>& mwu, 
+		       const vector<Chunk*>& chunks ){
+  string endresult;
+  for ( size_t j=0; j < mwu.size(); ++j ){
+    if ( tpDebug ){
+      using folia::operator<<;
+      *Log(theErrLog) << "lookup "<< mwu[j] << " in " << chunks << endl;
     }
     string result;
     for ( size_t i=0; i < chunks.size(); ++i ){
       if ( tpDebug ){
-	*Log(theErrLog) << "\nprobeer " << chunks[i] << endl;
+	*Log(theErrLog) << "probeer " << chunks[i] << endl;
       }
       try {
 	vector<Word*> v = chunks[i]->select<Word>();
@@ -580,7 +644,7 @@ string lookupChunk( const vector<Word *>& mwu,
 	for ( size_t k=0; k < v.size(); ++k ){
 	  if ( v[k] == mwu[j] ){
 	    if (tpDebug){
-	      *Log(theErrLog) << "\nfound word " << v[k] << endl;
+	      *Log(theErrLog) << "found word " << v[k] << endl;
 	    }
 	    if ( first )
 	      result += "B-" + chunks[i]->cls();
@@ -672,7 +736,8 @@ ostream &showResults( ostream& os,
   vector<Word*> words = sentence->words();
   vector<Entity*> entities = sentence->select<Entity>();
   vector<Dependency*> dependencies = sentence->select<Dependency>();
-  vector<Chunk*> chunking = sentence->select<Chunk>();
+  vector<Chunk*> iob_chunking = sentence->select<Chunk>();
+  vector<Entity*> ner_chunking = sentence->select<Entity>("ner");
   size_t index = 1;
   map<FoliaElement*, int> enumeration;
   vector<vector<Word*> > mwus;
@@ -688,9 +753,17 @@ ostream &showResults( ostream& os,
   }
   for( size_t i=0; i < mwus.size(); ++i ){
     displayMWU( os, i+1, mwus[i] );
+    if ( doNER ){
+      string cls;
+      string s = lookupNEREntity( mwus[i], ner_chunking );
+      os << "\t" << s;
+    }
+    else {
+      os << "\t\t";
+    }
     if ( doIOB ){
       string cls;
-      string s = lookupChunk( mwus[i], chunking );
+      string s = lookupIOBChunk( mwus[i], iob_chunking );
       os << "\t" << s;
     }
     else {
@@ -740,6 +813,14 @@ void TestSentence( const vector<Sentence*>& sentences,
 	  timers.iobTimer.start();
 	  string chunked = myIOBTagger.Classify( sent );
 	  timers.iobTimer.stop();
+	}
+      }
+#pragma omp section
+      {
+	if ( doNER ){
+	  timers.nerTimer.start();
+	  string chunked = myNERTagger.Classify( sent );
+	  timers.nerTimer.stop();
 	}
       }
     }
@@ -813,10 +894,19 @@ void Test( Document& doc,
 	       "http://ilk.uvt.nl/folia/sets/frog-mbma-nl", "annotator='frog-mbma-"+  versionstring +"', annotatortype='auto'");
   if (doIOB)
     doc.declare( AnnotationType::CHUNKING, 
-		 "http://ilk.uvt.nl/folia/sets/frog-chunker-nl", "annotator='frog-chunker-"+  versionstring +"', annotatortype='auto'");
+		 "http://ilk.uvt.nl/folia/sets/frog-chunker-nl",
+		 "annotator='frog-chunker-"+  versionstring 
+		 +"', annotatortype='auto'");
+  if (doNER)
+    doc.declare( AnnotationType::ENTITY, 
+		 "http://ilk.uvt.nl/folia/sets/frog-ner-nl", 
+		 "annotator='frog-ner-"+  versionstring
+		 + "', annotatortype='auto'");
   if (doMwu) 
     doc.declare( AnnotationType::ENTITY,
-		 "http://ilk.uvt.nl/folia/sets/frog-mwu-nl", "annotator='frog-mwu-"+  versionstring +"', annotatortype='auto'");
+		 "http://ilk.uvt.nl/folia/sets/frog-mwu-nl", 
+		 "annotator='frog-mwu-"+  versionstring 
+		 + "', annotatortype='auto'");
   if (doParse) 
     doc.declare( AnnotationType::DEPENDENCY,
 		 "http://ilk.uvt.nl/folia/sets/frog-depparse-nl", "annotator='frog-depparse-"+  versionstring +"', annotatortype='auto'");
@@ -852,6 +942,8 @@ void Test( Document& doc,
   *Log(theErrLog) << "CGN tagging took:   " << timers.tagTimer << endl;
   if ( doIOB)
     *Log(theErrLog) << "IOB chunking took:  " << timers.iobTimer << endl;
+  if ( doNER)
+    *Log(theErrLog) << "NER took:           " << timers.nerTimer << endl;
   *Log(theErrLog) << "MBA took:           " << timers.mbmaTimer << endl;
   *Log(theErrLog) << "Mblem took:         " << timers.mblemTimer << endl;
   if ( doMwu )
@@ -1044,10 +1136,10 @@ int main(int argc, char *argv[]) {
 	      
 	      Sockets::ServerSocket conn;
 	      if ( server.accept( conn ) ){
-		*Log(theErrLog) << "New connection...\n";
+		*Log(theErrLog) << "New connection..." << endl;
 		int pid = fork();				
 		if (pid < 0) {
-		  *Log(theErrLog) << "ERROR on fork\n";
+		  *Log(theErrLog) << "ERROR on fork" << endl;
 		  exit(EXIT_FAILURE);
 		} else if (pid == 0)  {
 		  //		  server = NULL;
@@ -1061,7 +1153,7 @@ int main(int argc, char *argv[]) {
 	    }
 	  } catch ( std::exception& e )
 	  {
-	    *Log(theErrLog) << "Server error:" << e.what() << "\nExiting.\n";
+	    *Log(theErrLog) << "Server error:" << e.what() << " Exiting." << endl;
 	    exit(EXIT_FAILURE);
 	  }
 	
