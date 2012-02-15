@@ -734,16 +734,19 @@ ostream &showResults( ostream& os,
 		      const Sentence* sentence,
 		      bool showParse ){
   vector<Word*> words = sentence->words();
-  vector<Entity*> entities = sentence->select<Entity>();
+  vector<Entity*> mwu_entities = sentence->select<Entity>("mwu");
+  // using folia::operator<<;
+  // *Log(theErrLog) << "mwu entities " << mwu_entities << endl;
   vector<Dependency*> dependencies = sentence->select<Dependency>();
-  vector<Chunk*> iob_chunking = sentence->select<Chunk>();
-  vector<Entity*> ner_chunking = sentence->select<Entity>("ner");
+  vector<Chunk*> iob_chunking = sentence->select<Chunk>("iob");
+  vector<Entity*> ner_entities = sentence->select<Entity>("ner");
+  //  *Log(theErrLog) << "ner entities " << ner_entities << endl;
   size_t index = 1;
   map<FoliaElement*, int> enumeration;
   vector<vector<Word*> > mwus;
   for( size_t i=0; i < words.size(); ++i ){
     Word *word = words[i];
-    vector<Word*> mwu = lookup( word, entities );
+    vector<Word*> mwu = lookup( word, mwu_entities );
     for ( size_t j=0; j < mwu.size(); ++j ){
       enumeration[mwu[j]] = index;
     }
@@ -755,7 +758,7 @@ ostream &showResults( ostream& os,
     displayMWU( os, i+1, mwus[i] );
     if ( doNER ){
       string cls;
-      string s = lookupNEREntity( mwus[i], ner_chunking );
+      string s = lookupNEREntity( mwus[i], ner_entities );
       os << "\t" << s;
     }
     else {

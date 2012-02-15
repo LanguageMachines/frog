@@ -123,7 +123,7 @@ AC_ARG_WITH(folia,
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
 AC_MSG_NOTICE( [pkg-config search path: $PKG_CONFIG_PATH] )
-PKG_CHECK_MODULES([folia],[folia >= 0.7])
+PKG_CHECK_MODULES([folia],[folia >= 0.8])
 CXXFLAGS="$CXXFLAGS $folia_CFLAGS"
 LIBS="$folia_LIBS $LIBS"
 
