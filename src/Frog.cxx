@@ -738,7 +738,7 @@ ostream &showResults( ostream& os,
   // using folia::operator<<;
   // *Log(theErrLog) << "mwu entities " << mwu_entities << endl;
   vector<Dependency*> dependencies = sentence->select<Dependency>();
-  vector<Chunk*> iob_chunking = sentence->select<Chunk>("iob");
+  vector<Chunk*> iob_chunking = sentence->select<Chunk>();
   vector<Entity*> ner_entities = sentence->select<Entity>("ner");
   //  *Log(theErrLog) << "ner entities " << ner_entities << endl;
   size_t index = 1;
