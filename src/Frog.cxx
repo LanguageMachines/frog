@@ -782,7 +782,7 @@ void TestSentence( const vector<Sentence*>& sentences,
     if ( doParse ){
       if ( maxParserTokens != 0 && swords.size() > maxParserTokens ){
 	*Log(theErrLog) << "WARNING!" << endl;
-	*Log(theErrLog) << "Sentence " << index+1 << " isn't parsed because it containes " << swords.size() << " tokens, and you provided the --max-parser-tokens=" << maxParserTokens << " option." << endl;
+	*Log(theErrLog) << "Sentence " << index+1 << " isn't parsed because it contains " << swords.size() << " tokens, and you provided the --max-parser-tokens=" << maxParserTokens << " option." << endl;
 	showParse = false;
       }
       else {
