@@ -80,6 +80,7 @@ string xmlDirName;
 set<string> fileNames;
 string ProgName;
 int tpDebug = 0; //0 for none, more for more output
+unsigned int maxParserTokens = 0; // 0 for unlimited
 string sep = " "; // "&= " for cgi 
 bool doTok = true;
 bool doMwu = true;
@@ -125,6 +126,8 @@ void usage( ) {
        << "\t -S <port>              Run as server instead of reading from testfile\n"
        << "\t --testdir=<directory>  All files in this dir will be tested\n"
        << "\t -n                     Assume input file to hold one sentence per line\n"
+       << "\t --max-parser-tokens=<n> inhibit parsing when a sentence contains over 'n' tokens. (default: no limit)\n"
+
        << "\t============= MODULE SELECTION ==========================================\n"
        << "\t --skip=[mptc]    Skip Tokenizer (t), Chunker (c), Multi-Word Units (m) or Parser (p) \n"
        << "\t============= CONFIGURATION OPTIONS =====================================\n"
@@ -188,7 +191,10 @@ bool parse_args( TimblOpts& Opts ) {
 
   // debug opts
   if ( Opts.Find ('d', value, mood)) {
-    tpDebug = atoi(value.c_str());
+    if ( !Timbl::stringTo<int>( value, tpDebug ) ){
+      *Log(theErrLog) << "-d value should be an integer" << endl;
+      return false;
+    }
     Opts.Delete('d');
   };
   if ( Opts.Find ('n', value, mood)) {
@@ -211,10 +217,24 @@ bool parse_args( TimblOpts& Opts ) {
     encoding = value;
   }
   
+  if ( Opts.Find( "max-parser-tokens", value, mood ) ){
+    if ( value.empty() ){
+      *Log(theErrLog) << "max-parser-tokens option without value " << endl;
+      return false;
+    }
+    else {
+      if ( !Timbl::stringTo<unsigned int>( value, maxParserTokens ) ){
+	*Log(theErrLog) << "max-parser-tokens value should be an integer" << endl;
+	return false;
+      }
+    }
+    Opts.Delete("max-parser-tokens");
+  }
   if ( Opts.Find( "keep-parser-files", value, mood ) ){
     if ( value.empty() ||
 	 value == "true" || value == "TRUE" || value =="yes" || value == "YES" )
       keepIntermediateFiles = true;
+    Opts.Delete("keep-parser-files");
   }
   tmpDirName = configuration.lookUp( "tmpdir", "global" );
   if ( Opts.Find ( "tmpdir", value, mood)) {
@@ -500,69 +520,6 @@ bool froginit(){
   return true;
 }
 
-void TestSentence( FoliaElement* sent,
-		   TimerBlock& timers ){
-  vector<Word*> swords = sent->words();
-  if ( !swords.empty() ) {
-#pragma omp parallel sections
-    {
-#pragma omp section
-      {
-	timers.tagTimer.start();
-	string tagged = myCGNTagger.Classify( sent );
-	timers.tagTimer.stop();
-      }
-#pragma omp section
-      {
-	if ( doIOB ){
-	  timers.iobTimer.start();
-	  string chunked = myIOBTagger.Classify( sent );
-	  timers.iobTimer.stop();
-	}
-      }
-    }
-    for ( size_t i = 0; i < swords.size(); ++i ) {
-      string mbmaLemma;
-      string mblemLemma;
-#pragma omp parallel sections
-      {
-#pragma omp section
-	{
-	  timers.mbmaTimer.start();
-	  if (tpDebug) 
-	    *Log(theErrLog) << "Calling mbma..." << endl;
-	  mbmaLemma = myMbma.Classify( swords[i] );
-	  timers.mbmaTimer.stop();
-	}
-#pragma omp section
-	{
-	  timers.mblemTimer.start();
-	  if (tpDebug) 
-	    *Log(theErrLog) << "Calling mblem..." << endl;
-	  mblemLemma = myMblem.Classify( swords[i] );
-	  timers.mblemTimer.stop();
-	}
-      } // omp sections
-      if (tpDebug) {
-	*Log(theErrLog) << "tagged word[" << i <<"]: " << swords[i]->str() 
-			<< " tag " << swords[i]->pos() << endl;
-	*Log(theErrLog) << "analysis: " << mblemLemma << " " << mbmaLemma << endl;
-      }
-    } //for int i = 0 to num_words
-    
-    if ( doMwu ){
-      if ( swords.size() > 0 ){
-	timers.mwuTimer.start();
-	myMwu.Classify( sent );
-	timers.mwuTimer.stop();
-      }
-    }
-    if ( doParse ){  
-      myParser.Parse( sent, tmpDirName, timers );
-    }
-  }
-}
-
 vector<Word*> lookup( Word *word, const vector<Entity*>& entities ){
   vector<Word*> vec;
   for ( size_t p=0; p < entities.size(); ++p ){
@@ -709,7 +666,9 @@ void displayMWU( ostream& os, size_t index,
   os << index << "\t" << wrd << "\t" << lemma << "\t" << morph << "\t" << pos << "\t" << std::fixed << conf;
 }  
 
-ostream &showResults( ostream& os, const FoliaElement* sentence ){
+ostream &showResults( ostream& os, 
+		      const Sentence* sentence,
+		      bool showParse ){
   vector<Word*> words = sentence->words();
   vector<Entity*> entities = sentence->select<Entity>();
   vector<Dependency*> dependencies = sentence->select<Dependency>();
@@ -737,7 +696,7 @@ ostream &showResults( ostream& os, const FoliaElement* sentence ){
     else {
       os << "\t\t";
     }
-    if ( doParse ){
+    if ( showParse ){
       string cls;
       Dependency *dep = lookupDep( mwus[i][0], dependencies );
       if ( dep ){
@@ -758,6 +717,83 @@ ostream &showResults( ostream& os, const FoliaElement* sentence ){
     os << endl;
   return os;
 }
+
+void TestSentence( const vector<Sentence*>& sentences,
+		   size_t index,
+		   ostream& outStream,
+		   TimerBlock& timers ){
+  Sentence *sent = sentences[index];
+  vector<Word*> swords = sent->words();
+  bool showParse = doParse;
+  if ( !swords.empty() ) {
+#pragma omp parallel sections
+    {
+#pragma omp section
+      {
+	timers.tagTimer.start();
+	string tagged = myCGNTagger.Classify( sent );
+	timers.tagTimer.stop();
+      }
+#pragma omp section
+      {
+	if ( doIOB ){
+	  timers.iobTimer.start();
+	  string chunked = myIOBTagger.Classify( sent );
+	  timers.iobTimer.stop();
+	}
+      }
+    }
+    for ( size_t i = 0; i < swords.size(); ++i ) {
+      string mbmaLemma;
+      string mblemLemma;
+#pragma omp parallel sections
+      {
+#pragma omp section
+	{
+	  timers.mbmaTimer.start();
+	  if (tpDebug) 
+	    *Log(theErrLog) << "Calling mbma..." << endl;
+	  mbmaLemma = myMbma.Classify( swords[i] );
+	  timers.mbmaTimer.stop();
+	}
+#pragma omp section
+	{
+	  timers.mblemTimer.start();
+	  if (tpDebug) 
+	    *Log(theErrLog) << "Calling mblem..." << endl;
+	  mblemLemma = myMblem.Classify( swords[i] );
+	  timers.mblemTimer.stop();
+	}
+      } // omp sections
+      if (tpDebug) {
+	*Log(theErrLog) << "tagged word[" << i <<"]: " << swords[i]->str() 
+			<< " tag " << swords[i]->pos() << endl;
+	*Log(theErrLog) << "analysis: " << mblemLemma << " " << mbmaLemma << endl;
+      }
+    } //for int i = 0 to num_words
+    
+    if ( doMwu ){
+      if ( swords.size() > 0 ){
+	timers.mwuTimer.start();
+	myMwu.Classify( sent );
+	timers.mwuTimer.stop();
+      }
+    }
+    if ( doParse ){
+      if ( maxParserTokens != 0 && swords.size() > maxParserTokens ){
+	*Log(theErrLog) << "WARNING!" << endl;
+	*Log(theErrLog) << "Sentence " << index+1 << " isn't parsed because it containes " << swords.size() << " tokens, and you provided the --max-parser-tokens=" << maxParserTokens << " option." << endl;
+	showParse = false;
+      }
+      else {
+	myParser.Parse( sent, tmpDirName, timers );
+      }
+    }
+  }
+  if ( !(doServer && doXMLout) )
+    showResults( outStream, sent, showParse );
+}
+
 
 void Test( Document& doc,
 	   ostream& outStream,
@@ -795,10 +831,8 @@ void Test( Document& doc,
       *Log(theErrLog) << "found " << numS << " sentence(s) in document." << endl;
     for ( size_t i = 0; i < numS; i++) {
       /* ******* Begin process sentence  ********** */
-      TestSentence( sentences[i], timers ); 
+      TestSentence( sentences, i, outStream, timers ); 
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)
-      if ( !(doServer && doXMLout) )
-	showResults( outStream, sentences[i] ); 
     }
     if ( doServer && doXMLout )
       outStream << doc << endl;
