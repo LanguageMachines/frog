@@ -376,14 +376,20 @@ void addTag( FoliaElement *word, const string& inputTag, double confidence ){
 			 + "', cls='" + cgnTag
 			 + "', confidence='" 
 			 + toString(confidence) + "'" );
-  FoliaElement *pos = word->addPosAnnotation( args );
+#pragma omp critical(foliaupdate)
+  {
+    FoliaElement *pos = word->addPosAnnotation( args );
+  }
   vector<string> tagParts;
   size_t numParts = Timbl::split_at( tagPartS, tagParts, "," );
   for ( size_t i=0; i < numParts; ++i ){
     string arg = "set='http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn', subset='" + getSubSet( tagParts[i], mainTag ) 
       + "', cls='" + tagParts[i] + "'";
     FoliaElement *feat = new folia::Feature( arg );
-    pos->append( feat );
+#pragma omp critical(foliaupdate)
+    {
+      pos->append( feat );
+    }
   }
 }
 
