@@ -376,9 +376,10 @@ void addTag( FoliaElement *word, const string& inputTag, double confidence ){
 			 + "', cls='" + cgnTag
 			 + "', confidence='" 
 			 + toString(confidence) + "'" );
+  FoliaElement *pos = 0;
 #pragma omp critical(foliaupdate)
   {
-    FoliaElement *pos = word->addPosAnnotation( args );
+    pos = word->addPosAnnotation( args );
   }
   vector<string> tagParts;
   size_t numParts = Timbl::split_at( tagPartS, tagParts, "," );
