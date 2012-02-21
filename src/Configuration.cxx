@@ -232,3 +232,12 @@ string Configuration::lookUp( const string& att, const string& section ) const {
       return it2->second;
   }
 }
+
+bool Configuration::hasSection( const string& section ) const {
+  if ( !section.empty() ){
+    sssMap::const_iterator it1 = myMap.find( section );
+    if ( it1 != myMap.end() )
+      return true;
+  }
+  return false;
+}

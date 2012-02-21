@@ -35,6 +35,7 @@ class Configuration {
 public:
   bool fill( const std::string& );
   bool fill( const std::string&, const std::string& );
+  bool hasSection( const std::string& ) const;
   std::string lookUp( const std::string&, const std::string& = "" ) const;
   void dump( std::ostream& );
   std::string configDir() const { return cdir; };

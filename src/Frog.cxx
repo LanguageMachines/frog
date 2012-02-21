@@ -384,6 +384,43 @@ bool parse_args( TimblOpts& Opts ) {
 }
 
 bool froginit(){  
+  // for some modules init can take a long time
+  // so first make sure it will not fail on some trivialities
+  //
+  if ( doTok && !configuration.hasSection("tokenizer") ){
+    *Log(theErrLog) << "Missing [[tokenizer]] section in config file." << endl;
+    return false;
+  }
+  if ( doIOB && !configuration.hasSection("IOB") ){
+    *Log(theErrLog) << "Missing [[IOB]] section in config file." << endl;
+    return false;
+  }
+  if ( doNER && !configuration.hasSection("NER") ){
+    *Log(theErrLog) << "Missing [[NER]] section in config file." << endl;
+    return false;
+  }
+  if ( doMwu ){
+    if ( !configuration.hasSection("mwu") ){
+      *Log(theErrLog) << "Missing [[mwu]] section in config file." << endl;
+      return false;
+    }
+  }
+  else if ( doParse ){
+    *Log(theErrLog) << " Parser disabled, because MWU is deselected" << endl;
+    doParse = false;
+  }
+  
+  if ( doParse ){
+    if ( !configuration.hasSection( "parser" ) ){
+      *Log(theErrLog) << "IMPORTANT!" << endl;
+      *Log(theErrLog) << "the Dependency Parser is not installed!" << endl;
+      *Log(theErrLog) << "Please see http://ilk.uvt.nl/frog for information about " << endl;
+      *Log(theErrLog) << "how to obtain and install the needed files." << endl;
+      *Log(theErrLog) << "To run frog without the parser, add '--skip=p' to your command." << endl;
+      return false;
+    }
+  }
+
   if ( doServer ){
     // we use fork(). omp (GCC version) doesn't do well when omp is used
     // before the fork!
@@ -407,21 +444,8 @@ bool froginit(){
 	      if ( doMwu ){
 		stat = myMwu.init( configuration );
 		if ( stat && doParse ){
-		  if ( configuration.lookUp("pairsFile", "parser" ).empty() ){
-		    *Log(theErrLog) << "IMPORTANT!" << endl;
-		    *Log(theErrLog) << "the Dependency Parser is not installed!" << endl;
-		    *Log(theErrLog) << "Please see http://ilk.uvt.nl/frog for information about " << endl;
-		    *Log(theErrLog) << "how to obtain and install the needed files." << endl;
-		    *Log(theErrLog) << "To run frog without the parser, add '--skip=p' to your command." << endl;
-		    exit(EXIT_FAILURE);
-		  }
 		  stat = myParser.init( configuration );
 		}
-	      }
-	      else {
-		if ( doParse )
-		  *Log(theErrLog) << " Parser disabled, because MWU is deselected" << endl;
-		doParse = false;
 	      }
 	    }
 	  }
@@ -474,30 +498,12 @@ bool froginit(){
 	if ( doMwu ){
 	  mwuStat = myMwu.init( configuration );
 	  if ( mwuStat && doParse ){
-	    if ( configuration.lookUp("pairsFile", "parser" ).empty() ){
-	      sleep(2);
-	      // wait for the other threads to complete
-	      // so out message is well visable at the end.
-	      *Log(theErrLog) << "IMPORTANT!" << endl;
-	      *Log(theErrLog) << "The Dependency Parser must be installed seperately." << endl;
-	      *Log(theErrLog) << "Please see http://ilk.uvt.nl/frog for information about " << endl;
-	      *Log(theErrLog) << "how to obtain and install the needed files." << endl;
-	      *Log(theErrLog) << "To run frog without the parser, add '--skip=p' to your command." << endl;
-	      exit(EXIT_FAILURE);
-	    }
-	    if ( doParse ){
-	      Common::Timer initTimer;
-	      initTimer.start();
-	      parStat = myParser.init( configuration );
-	      initTimer.stop();
-	      *Log(theErrLog) << "init Parse took: " << initTimer << endl;
-	    }
+	    Common::Timer initTimer;
+	    initTimer.start();
+	    parStat = myParser.init( configuration );
+	    initTimer.stop();
+	    *Log(theErrLog) << "init Parse took: " << initTimer << endl;
 	  }
-	}
-	else {
-	  if ( doParse )
-	    *Log(theErrLog) << " Parser disabled, because MWU is deselected" << endl;
-	  doParse = false;
 	}
       }
     }   // end omp parallel sections
