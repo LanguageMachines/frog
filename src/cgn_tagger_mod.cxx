@@ -372,10 +372,11 @@ void addTag( FoliaElement *word, const string& inputTag, double confidence ){
       confidence = 1.0;
     tagPartS = cgnTag.substr( openH+1, closeH-openH-1 );
   }
-  KWargs args = getArgs( "set='http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn', head='" + mainTag
-			 + "', cls='" + cgnTag
-			 + "', confidence='" 
-			 + toString(confidence) + "'" );
+  KWargs args;
+  args["set"]  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
+  args["head"] = mainTag;
+  args["cls"]  = cgnTag;
+  args["confidence"]= toString(confidence);
   FoliaElement *pos = 0;
 #pragma omp critical(foliaupdate)
   {
@@ -384,9 +385,11 @@ void addTag( FoliaElement *word, const string& inputTag, double confidence ){
   vector<string> tagParts;
   size_t numParts = Timbl::split_at( tagPartS, tagParts, "," );
   for ( size_t i=0; i < numParts; ++i ){
-    string arg = "set='http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn', subset='" + getSubSet( tagParts[i], mainTag ) 
-      + "', cls='" + tagParts[i] + "'";
-    FoliaElement *feat = new folia::Feature( arg );
+    KWargs args;
+    args["set"]    = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
+    args["subset"] = getSubSet( tagParts[i], mainTag );
+    args["cls"]    = tagParts[i];
+    FoliaElement *feat = new folia::Feature( args );
 #pragma omp critical(foliaupdate)
     {
       pos->append( feat );

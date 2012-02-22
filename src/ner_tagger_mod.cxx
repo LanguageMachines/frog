@@ -179,8 +179,11 @@ static void addEntity( FoliaElement *entities,
   double c = 1;
   for ( size_t i=0; i < confs.size(); ++i )
     c *= confs[i];
-  FoliaElement *e = new Entity("class='" + NER +
-			       "', confidence='" + toString(c) + "', set='ner'");
+  KWargs args;
+  args["class"] = NER;
+  args["confidence"] =  toString(c);
+  args["set"] = "ner";
+  FoliaElement *e = new Entity(args);
 #pragma omp critical(foliaupdate)
   {
     entities->append( e );

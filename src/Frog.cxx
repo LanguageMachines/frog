@@ -86,7 +86,7 @@ string sep = " "; // "&= " for cgi
 bool doTok = true;
 bool doMwu = true;
 bool doIOB = true;
-bool doNER = true;
+bool doNER = false;
 bool doParse = true;
 bool doDirTest = false;
 bool doServer = false;

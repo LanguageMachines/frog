@@ -570,23 +570,22 @@ void Mbma::execute( const UnicodeString& word,
 
 void Mbma::addMorph( FoliaElement *word, 
 		     const vector<string>& lemmas ){
-  FoliaElement *ml = new MorphologyLayer("");
+  FoliaElement *ml = new MorphologyLayer();
 #pragma omp critical(foliaupdate)
   {
     word->append( ml );
   }
   int offset = 0;
-  string args = "annotator='mbma'";
   for ( size_t p=0; p < lemmas.size(); ++p ){
-    FoliaElement *m = new Morpheme("");
+    FoliaElement *m = new Morpheme();
 #pragma omp critical(foliaupdate)
     {
       ml->append( m );
     }
-    FoliaElement *t = 
-      new TextContent( "value='" + escape( lemmas[p]) + 
-			      "', offset='" + toString(offset) + "'" );
-
+    KWargs args;
+    args["value"] = lemmas[p];
+    args["offset"] = toString(offset);
+    FoliaElement *t = new TextContent( args );
     offset += lemmas[p].length();
 #pragma omp critical(foliaupdate)
     {
