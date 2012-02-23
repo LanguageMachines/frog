@@ -746,8 +746,7 @@ void Parser::prepareParse( FoliaElement *sent, parseData& pd ) {
 
   pd.clear();
   vector<Word*> fwords = sent->words();
-  vector<Entity*> entities = sent->select<Entity>();
-  
+  vector<Entity*> entities = sent->select<Entity>("http://ilk.uvt.nl/folia/sets/frog-mwu-nl");
   for( size_t i=0; i < fwords.size(); ++i ){
     Word *word = fwords[i];
     vector<Word*> mwu = lookup( word, entities );
@@ -845,7 +844,7 @@ void Parser::prepareParse( FoliaElement *sent, parseData& pd ) {
        KWargs args;
        args["generate-id"] = sent->id();
        args["class"] = roles[i];
-       FoliaElement *d = new Dependency( args );
+       FoliaElement *d = new Dependency( sent->doc(), args );
 #pragma omp critical(foliaupdate)
        {
        dl->append( d );

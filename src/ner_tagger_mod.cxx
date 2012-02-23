@@ -182,8 +182,8 @@ static void addEntity( FoliaElement *entities,
   KWargs args;
   args["class"] = NER;
   args["confidence"] =  toString(c);
-  args["set"] = "ner";
-  FoliaElement *e = new Entity(args);
+  args["set"] = "http://ilk.uvt.nl/folia/sets/frog-ner-nl";
+  FoliaElement *e = new Entity(entities->doc(), args);
 #pragma omp critical(foliaupdate)
   {
     entities->append( e );
@@ -202,10 +202,10 @@ void NERTagger::addNERTags( FoliaElement *sent,
 			    const vector<double>& confs ){
   FoliaElement *el = 0;
   try {
-    el = sent->annotation<EntitiesLayer>("ner" );
+    el = sent->annotation<EntitiesLayer>();
   }
   catch(...){
-    el = new EntitiesLayer("set='ner'");
+    el = new EntitiesLayer();
 #pragma omp critical(foliaupdate)
     {
       sent->append( el );

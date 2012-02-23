@@ -45,7 +45,6 @@ using namespace std;
 
 mwuAna::mwuAna( FoliaElement *fwrd ){
   spec = false;
-  //  fword = fwrd;
   word = fwrd->str();
   string tag = fwrd->annotation<PosAnnotation>()->feat("head");
   if ( tag == "SPEC" ){
@@ -60,20 +59,18 @@ void mwuAna::merge( const mwuAna *add ){
   delete add;
 }
 
-void mwuAna::addEntity( FoliaElement *sent ){
+EntitiesLayer *mwuAna::addEntity( Sentence *sent, EntitiesLayer *el ){
   if ( fwords.size() > 1 ){
-    FoliaElement *el = 0;
-    try {
-      el = sent->annotation<EntitiesLayer>( "mwu" );
-    }
-    catch(...){
-      el = new EntitiesLayer("set='mwu'");
+    if ( el == 0 ){
+      el = new EntitiesLayer();
 #pragma omp critical(foliaupdate)
       {
 	sent->append( el );
       }
     }
-    FoliaElement *e = new Entity("set='mwu'");
+    KWargs args;
+    args["set"] = "http://ilk.uvt.nl/folia/sets/frog-mwu-nl";
+    FoliaElement *e = new Entity( el->doc(), args );
 #pragma omp critical(foliaupdate)
     {
       el->append( e );
@@ -85,6 +82,7 @@ void mwuAna::addEntity( FoliaElement *sent ){
       }
     }
   }
+  return el;
 }
 
 Mwu::Mwu(){
@@ -161,14 +159,15 @@ ostream &operator <<( ostream& os,
   return os;
 }
 
-void Mwu::Classify( FoliaElement *sent ){
+void Mwu::Classify( Sentence *sent ){
   reset();
   vector<Word*> words = sent->words();
   for ( size_t i=0; i < words.size(); ++i )
     add( words[i] );  
   Classify();
+  EntitiesLayer *el = 0;
   for( size_t i = 0; i < mWords.size(); ++i ){
-    mWords[i]->addEntity( sent );
+    el = mWords[i]->addEntity( sent, el );
   }
 }
 

@@ -86,7 +86,7 @@ string sep = " "; // "&= " for cgi
 bool doTok = true;
 bool doMwu = true;
 bool doIOB = true;
-bool doNER = false;
+bool doNER = true;
 bool doParse = true;
 bool doDirTest = false;
 bool doServer = false;
@@ -740,12 +740,12 @@ ostream &showResults( ostream& os,
 		      const Sentence* sentence,
 		      bool showParse ){
   vector<Word*> words = sentence->words();
-  vector<Entity*> mwu_entities = sentence->select<Entity>("mwu");
+  vector<Entity*> mwu_entities = sentence->select<Entity>("http://ilk.uvt.nl/folia/sets/frog-mwu-nl");
   // using folia::operator<<;
   // *Log(theErrLog) << "mwu entities " << mwu_entities << endl;
   vector<Dependency*> dependencies = sentence->select<Dependency>();
   vector<Chunk*> iob_chunking = sentence->select<Chunk>();
-  vector<Entity*> ner_entities = sentence->select<Entity>("ner");
+  vector<Entity*> ner_entities = sentence->select<Entity>("http://ilk.uvt.nl/folia/sets/frog-ner-nl");
   //  *Log(theErrLog) << "ner entities " << ner_entities << endl;
   size_t index = 1;
   map<FoliaElement*, int> enumeration;
@@ -890,7 +890,6 @@ void Test( Document& doc,
 	   const string& xmlOutFile = "" ) {
   TimerBlock timers;
   timers.frogTimer.start();
-  
   // first we make sure that the doc will accept out annotations, by
   // declaring them in the doc
   //

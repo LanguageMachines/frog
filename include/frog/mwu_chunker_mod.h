@@ -44,7 +44,8 @@ class mwuAna {
   }
 
   bool isSpec(){ return spec; };
-  void addEntity( folia::FoliaElement * );
+  folia::EntitiesLayer *addEntity( folia::Sentence *,
+				   folia::EntitiesLayer * );
   
  protected:
     mwuAna(){};
@@ -64,7 +65,7 @@ class Mwu {
   ~Mwu();
   void reset();
   bool init( const Configuration& );
-  void Classify( folia::FoliaElement* );
+  void Classify( folia::Sentence * );
   void add( folia::FoliaElement * );
   std::vector<mwuAna*>& getAna(){ return mWords; };
   std::string myCFS;

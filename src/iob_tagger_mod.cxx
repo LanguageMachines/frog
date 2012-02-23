@@ -182,7 +182,7 @@ void addChunk( FoliaElement *chunks,
   KWargs args;
   args["class"] = IOB;
   args["confidence"] = toString(c);
-  FoliaElement *e = new Chunk( args );
+  FoliaElement *e = new Chunk( chunks->doc(), args );
 #pragma omp critical(foliaupdate)
   {
     chunks->append( e );
