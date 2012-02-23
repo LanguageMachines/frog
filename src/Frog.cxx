@@ -82,7 +82,6 @@ set<string> fileNames;
 string ProgName;
 int tpDebug = 0; //0 for none, more for more output
 unsigned int maxParserTokens = 0; // 0 for unlimited
-string sep = " "; // "&= " for cgi 
 bool doTok = true;
 bool doMwu = true;
 bool doIOB = true;

@@ -172,7 +172,7 @@ int NERTagger::splitWT( const string& tagged,
   return num_words;
 }
 
-static void addEntity( FoliaElement *entities, 
+static void addEntity( EntitiesLayer *entities, 
 		       const vector<Word*>& words,
 		       const vector<double>& confs,
 		       const string& NER ){
@@ -183,7 +183,7 @@ static void addEntity( FoliaElement *entities,
   args["class"] = NER;
   args["confidence"] =  toString(c);
   args["set"] = "http://ilk.uvt.nl/folia/sets/frog-ner-nl";
-  FoliaElement *e = new Entity(entities->doc(), args);
+  Entity *e = new Entity(entities->doc(), args);
 #pragma omp critical(foliaupdate)
   {
     entities->append( e );
@@ -196,11 +196,11 @@ static void addEntity( FoliaElement *entities,
   }
 }
 
-void NERTagger::addNERTags( FoliaElement *sent, 
+void NERTagger::addNERTags( Sentence *sent, 
 			    const vector<Word*>& words,
 			    const vector<string>& tags,
 			    const vector<double>& confs ){
-  FoliaElement *el = 0;
+  EntitiesLayer *el = 0;
   try {
     el = sent->annotation<EntitiesLayer>();
   }
@@ -268,7 +268,7 @@ void NERTagger::addNERTags( FoliaElement *sent,
   }
 }
 
-string NERTagger::Classify( FoliaElement *sent ){
+string NERTagger::Classify( Sentence *sent ){
   string tagged;
   vector<Word*> swords = sent->words();
   if ( !swords.empty() ) {
