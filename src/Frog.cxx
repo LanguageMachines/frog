@@ -130,7 +130,7 @@ void usage( ) {
        << "\t --max-parser-tokens=<n> inhibit parsing when a sentence contains over 'n' tokens. (default: no limit)\n"
 
        << "\t============= MODULE SELECTION ==========================================\n"
-       << "\t --skip=[mptc]    Skip Tokenizer (t), Chunker (c), Multi-Word Units (m) or Parser (p) \n"
+       << "\t --skip=[mptnc]    Skip Tokenizer (t), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"
        << "\t============= CONFIGURATION OPTIONS =====================================\n"
        << "\t -c <filename>    Set configuration file (default " << configFileName << ")\n"
        << "\t============= OUTPUT OPTIONS ============================================\n"      
