@@ -1,3 +1,11 @@
+0.12.13 - 2012-02-27
+ * adapted to libfolia 0.8, which is more strict on set definitions
+ * added an IOB NER
+ * added a --max-parser-tokens option
+ * the mwu list is reduced a lot (by AntalB)
+ * fixed a threading problem
+ * code refactoring continues
+
 0.12.12 - 2012-02-09
 [Ko vd Sloot]
   * fixed stupid error in frog-dp-update script
