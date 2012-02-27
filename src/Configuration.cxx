@@ -211,6 +211,24 @@ void Configuration::dump( ostream& os ){
   }
 }
 
+std::string Configuration::set( const string& att, 
+				const string& val,
+				const std::string& sect ){
+  string oldVal;
+  string section = sect;
+  if ( section.empty() )
+    section = "global";
+  sssMap::iterator it1 = myMap.find( section );
+  if ( it1 != myMap.end() ){
+    ssMap::iterator it2 = it1->second.find( att );
+    if ( it2 != it1->second.end() ){
+      oldVal = it2->second;
+    }
+    it1->second[att] = val;
+  }
+  return oldVal;
+}
+
 string Configuration::lookUp( const string& att, const string& section ) const {
   sssMap::const_iterator it1;
   if ( section.empty() )

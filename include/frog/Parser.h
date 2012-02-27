@@ -80,7 +80,7 @@ struct parseData;
 
 class Parser {
  public:
- Parser():pairs(0),dir(0),rels(0),PI(0),isInit(false){};
+ Parser():pairs(0),dir(0),rels(0),PI(0),isInit(false),keepIntermediate(false){};
   ~Parser();
   bool init( const Configuration& );
   void Parse( folia::FoliaElement *, const std::string&, TimerBlock& );
@@ -98,6 +98,7 @@ class Parser {
   bool isInit;
   std::string fileName;
   LogStream *parseLog;
+  bool keepIntermediate;
 };
 
 

@@ -38,15 +38,12 @@
 std::string prefix( const std::string&, const std::string& );
 bool existsDir( const std::string& );
 std::string& trim(std::string &str);
-std::string escape( const std::string& );
 
 void getFileNames( const std::string&, std::set<std::string>& );
 
 extern LogStream *theErrLog;
 
 extern int tpDebug;
-extern bool keepIntermediateFiles;
-extern bool doServer;
 extern Configuration configuration;
 
 class TimerBlock{

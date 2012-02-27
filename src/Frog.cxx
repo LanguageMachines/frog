@@ -85,14 +85,13 @@ unsigned int maxParserTokens = 0; // 0 for unlimited
 bool doTok = true;
 bool doMwu = true;
 bool doIOB = true;
-bool doNER = true;
+bool doNER = false;
 bool doParse = true;
 bool doDirTest = false;
 bool doServer = false;
 bool doSentencePerLine = false;
 string listenport = "void";
 string encoding;
-bool keepIntermediateFiles = false;
 
 /* assumptions:
    each components gets its own configfile per cmdline options
@@ -237,7 +236,7 @@ bool parse_args( TimblOpts& Opts ) {
   if ( Opts.Find( "keep-parser-files", value, mood ) ){
     if ( value.empty() ||
 	 value == "true" || value == "TRUE" || value =="yes" || value == "YES" )
-      keepIntermediateFiles = true;
+      configuration.set( "keepIntermediateFiles", "true", "parser" );
     Opts.Delete("keep-parser-files");
   }
   tmpDirName = configuration.lookUp( "tmpdir", "global" );

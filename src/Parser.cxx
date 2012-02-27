@@ -189,6 +189,12 @@ bool Parser::init( const Configuration& configuration ){
       problem = true;
     }
   }
+  att = configuration.lookUp( "keepIntermediateFiles", "parser" );
+  if ( att == "true" ){
+    keepIntermediate = true;
+  }
+  else if ( !att.empty() )
+    *Log(parseLog) << "invalid 'keepIntermediateFiles' option: " << att << endl;
   att = configuration.lookUp( "pairsFile", "parser" );
   if ( !att.empty() )
     pairsFileName = prefix( cDir, att );
@@ -943,7 +949,7 @@ void Parser::Parse( FoliaElement *sent,
   else
     *Log(parseLog) << "couldn't open results file: " << resFileName << endl;
 
-  if ( !keepIntermediateFiles ){
+  if ( !keepIntermediate ){
     remove( fileName.c_str() );
     remove( resFileName.c_str() );
     remove( pairsOutName.c_str() );
