@@ -1,10 +1,10 @@
-1	Dit	dit	[dit]	VNW(aanw,pron,stan,vol,3o,ev)	0.777085	B-NP		
-2	is	zijn	[zijn]	WW(pv,tgw,ev)	0.999891	B-VP		
-3	een	een	[een]	LID(onbep,stan,agr)	0.999113	B-NP		
-4	test	test	[test]	N(soort,ev,basis,zijd,stan)	0.824786	I-NP		
-5	op	op	[op]	VZ(init)	0.998108	B-PP		
-6	de	de	[de]	LID(bep,stan,rest)	0.999964	B-NP		
-7	datum	datum	[datum]	N(soort,ev,basis,zijd,stan)	0.997691	I-NP		
-8	09-01-2012	09-01-2012	[09-01-2012]	TW(hoofd,vrij)	0.533224	B-NP		
-9	!	!	[!]	LET()	0.995005	O		
+1	Dit	dit	[dit]	VNW(aanw,pron,stan,vol,3o,ev)	0.777085	O	B-NP		
+2	is	zijn	[zijn]	WW(pv,tgw,ev)	0.999891	O	B-VP		
+3	een	een	[een]	LID(onbep,stan,agr)	0.999113	O	B-NP		
+4	test	test	[test]	N(soort,ev,basis,zijd,stan)	0.824786	O	I-NP		
+5	op	op	[op]	VZ(init)	0.998108	O	B-PP		
+6	de	de	[de]	LID(bep,stan,rest)	0.999964	O	B-NP		
+7	datum	datum	[datum]	N(soort,ev,basis,zijd,stan)	0.997691	O	I-NP		
+8	09-01-2012	09-01-2012	[09-01-2012]	TW(hoofd,vrij)	0.533224	O	B-NP		
+9	!	!	[!]	LET()	0.995005	O	O		
 
