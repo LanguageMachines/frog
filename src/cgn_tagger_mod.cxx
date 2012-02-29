@@ -389,9 +389,9 @@ void addTag( FoliaElement *word, const string& inputTag, double confidence ){
     args["set"]    = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
     args["subset"] = getSubSet( tagParts[i], mainTag );
     args["cls"]    = tagParts[i];
-    FoliaElement *feat = new folia::Feature( args );
 #pragma omp critical(foliaupdate)
     {
+      FoliaElement *feat = new folia::Feature( args );
       pos->append( feat );
     }
   }

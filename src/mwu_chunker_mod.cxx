@@ -62,17 +62,18 @@ void mwuAna::merge( const mwuAna *add ){
 EntitiesLayer *mwuAna::addEntity( Sentence *sent, EntitiesLayer *el ){
   if ( fwords.size() > 1 ){
     if ( el == 0 ){
-      el = new EntitiesLayer();
 #pragma omp critical(foliaupdate)
       {
+	el = new EntitiesLayer();
 	sent->append( el );
       }
     }
     KWargs args;
     args["set"] = "http://ilk.uvt.nl/folia/sets/frog-mwu-nl";
-    FoliaElement *e = new Entity( el->doc(), args );
+    Entity *e=0;
 #pragma omp critical(foliaupdate)
     {
+      e = new Entity( el->doc(), args );
       el->append( e );
     }
     for ( size_t p=0; p < fwords.size(); ++p ){

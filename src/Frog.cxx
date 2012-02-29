@@ -830,7 +830,7 @@ void TestSentence( const vector<Sentence*>& sentences,
 	  timers.nerTimer.stop();
 	}
       }
-    }
+    } // parallel sections
     for ( size_t i = 0; i < swords.size(); ++i ) {
       string mbmaLemma;
       string mblemLemma;
@@ -852,7 +852,7 @@ void TestSentence( const vector<Sentence*>& sentences,
 	  mblemLemma = myMblem.Classify( swords[i] );
 	  timers.mblemTimer.stop();
 	}
-      } // omp sections
+      } // omp parallel sections
       if (tpDebug) {
 	*Log(theErrLog) << "tagged word[" << i <<"]: " << swords[i]->str() 
 			<< " tag " << swords[i]->pos() << endl;
@@ -881,7 +881,6 @@ void TestSentence( const vector<Sentence*>& sentences,
   if ( !(doServer && doXMLout) )
     showResults( outStream, sent, showParse );
 }
-
 
 void Test( Document& doc,
 	   ostream& outStream,
@@ -1081,7 +1080,7 @@ int main(int argc, char *argv[]) {
       }
       
       if ( doServer ) {
-      	//don't mangle debug output, so run 1 thread then.. also run in one thread in server mode, forking is too expensive for lots of small snippets
+      	// run in one thread in server mode, forking is too expensive for lots of small snippets
       	omp_set_num_threads( 1 );
       }
       if ( !fileNames.empty() ) {

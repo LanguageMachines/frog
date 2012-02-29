@@ -183,9 +183,10 @@ static void addEntity( EntitiesLayer *entities,
   args["class"] = NER;
   args["confidence"] =  toString(c);
   args["set"] = "http://ilk.uvt.nl/folia/sets/frog-ner-nl";
-  Entity *e = new Entity(entities->doc(), args);
+  Entity *e = 0;
 #pragma omp critical(foliaupdate)
   {
+    e = new Entity(entities->doc(), args);
     entities->append( e );
   }
   for ( size_t i=0; i < words.size(); ++i ){
@@ -205,9 +206,9 @@ void NERTagger::addNERTags( Sentence *sent,
     el = sent->annotation<EntitiesLayer>();
   }
   catch(...){
-    el = new EntitiesLayer();
 #pragma omp critical(foliaupdate)
     {
+      el = new EntitiesLayer();
       sent->append( el );
     }
   }

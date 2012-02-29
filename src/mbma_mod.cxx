@@ -654,13 +654,6 @@ void Mbma::postprocess( FoliaElement *fword, PosAnnotation *pos ){
       addMorph( fword, ma );
     } 
     else {
-      vector<Feature*> feats = pos->select<Feature>();
-      if (debugFlag){
-	*Log(mbmaLog) << "tag: " << tag << endl;
-	for ( size_t q =0 ; q < feats.size(); ++q ) {
-	  *Log(mbmaLog) << "\tpart #" << q << ": " << feats[q]->cls() << endl;
-	}
-      }
       if (debugFlag)
 	*Log(mbmaLog) << "multiple lemma's" << endl;
       map<string, int> possible_lemmas;
@@ -689,6 +682,13 @@ void Mbma::postprocess( FoliaElement *fword, PosAnnotation *pos ){
       // find best match
       // loop through all subParts of the tag
       // and match with inflections from each m
+      vector<Feature*> feats = pos->select<Feature>();
+      if (debugFlag){
+	*Log(mbmaLog) << "tag: " << tag << endl;
+	for ( size_t q =0 ; q < feats.size(); ++q ) {
+	  *Log(mbmaLog) << "\tpart #" << q << ": " << feats[q]->cls() << endl;
+	}
+      }
       map <string, const vector<string>* > bestMatches;
       int max_count = 0;
       for ( size_t q=0; q < match; ++q ) {

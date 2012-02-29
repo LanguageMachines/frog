@@ -176,21 +176,22 @@ void addChunk( FoliaElement *chunks,
 	       const vector<Word*>& words,
 	       const vector<double>& confs,
 	       const string& IOB ){
-  double c = 1;
+  double conf = 1;
   for ( size_t i=0; i < confs.size(); ++i )
-    c *= confs[i];
+    conf *= confs[i];
   KWargs args;
   args["class"] = IOB;
-  args["confidence"] = toString(c);
-  FoliaElement *e = new Chunk( chunks->doc(), args );
+  args["confidence"] = toString(conf);
+  FoliaElement *chunk = 0;
 #pragma omp critical(foliaupdate)
   {
-    chunks->append( e );
+    chunk = new Chunk( chunks->doc(), args );
+    chunks->append( chunk );
   }
   for ( size_t i=0; i < words.size(); ++i ){
 #pragma omp critical(foliaupdate)
     {
-      e->append( words[i] );
+      chunk->append( words[i] );
     }
   }
 }
@@ -204,9 +205,9 @@ void IOBTagger::addIOBTags( FoliaElement *sent,
     el = sent->annotation<ChunkingLayer>();
   }
   catch(...){
-    el = new ChunkingLayer();
 #pragma omp critical(foliaupdate)
     {
+      el = new ChunkingLayer();
       sent->append( el );
     }
   }
