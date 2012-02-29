@@ -201,12 +201,12 @@ void IOBTagger::addIOBTags( FoliaElement *sent,
 			    const vector<string>& tags,
 			    const vector<double>& confs ){
   FoliaElement *el = 0;
-  try {
-    el = sent->annotation<ChunkingLayer>();
-  }
-  catch(...){
 #pragma omp critical(foliaupdate)
-    {
+  {
+    try {
+      el = sent->annotation<ChunkingLayer>();
+    }
+    catch(...){
       el = new ChunkingLayer();
       sent->append( el );
     }

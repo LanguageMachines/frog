@@ -202,12 +202,12 @@ void NERTagger::addNERTags( Sentence *sent,
 			    const vector<string>& tags,
 			    const vector<double>& confs ){
   EntitiesLayer *el = 0;
-  try {
-    el = sent->annotation<EntitiesLayer>();
-  }
-  catch(...){
 #pragma omp critical(foliaupdate)
-    {
+  {
+    try {
+      el = sent->annotation<EntitiesLayer>();
+    }
+    catch(...){
       el = new EntitiesLayer();
       sent->append( el );
     }

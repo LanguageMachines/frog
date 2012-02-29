@@ -46,10 +46,17 @@ using namespace std;
 mwuAna::mwuAna( FoliaElement *fwrd ){
   spec = false;
   word = fwrd->str();
-  string tag = fwrd->annotation<PosAnnotation>()->feat("head");
+  string tag;
+#pragma omp critical(foliaupdate)
+  {
+    tag = fwrd->annotation<PosAnnotation>()->feat("head");
+  }
   if ( tag == "SPEC" ){
-    vector<Feature*> feats = fwrd->select<Feature>();
-    spec = ( feats.size() == 1 && feats[0]->cls() == "deeleigen" );
+#pragma omp critical(foliaupdate)
+    {
+      vector<Feature*> feats = fwrd->select<Feature>();
+      spec = ( feats.size() == 1 && feats[0]->cls() == "deeleigen" );
+    }
   }
   fwords.push_back( fwrd );
 }  
@@ -162,7 +169,11 @@ ostream &operator <<( ostream& os,
 
 void Mwu::Classify( Sentence *sent ){
   reset();
-  vector<Word*> words = sent->words();
+  vector<Word*> words;
+#pragma omp critical(foliaupdate)
+  {
+    words = sent->words();
+  }
   for ( size_t i=0; i < words.size(); ++i )
     add( words[i] );  
   Classify();
