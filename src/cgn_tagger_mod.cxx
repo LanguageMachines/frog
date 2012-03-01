@@ -232,20 +232,15 @@ bool CGNTagger::splitOneWT( const string& inp, string& word,
     confidence = in.substr( pos+1 );
     in.erase( pos );
   }
-
-  bool unknown = false;
-  pos = in.rfind("//");
-  if ( pos != string::npos ){
-    string::size_type spos = in.rfind("/");
-    if ( spos > pos+1 ){
-      pos = spos;
-    }
-    else
-      unknown = true;
-  }
-  
-  if ( unknown ) {
-    // double slash: lets's hope is is an unknown word
+  if (debug)
+    *Log(cgnLog) << "split Classify after confidence stripping " << in << endl;
+  pos = in.rfind("/");
+  //  cerr << "pos = " << pos << endl;
+  string::size_type dpos = in.rfind("//"); 
+  //  cerr << "dpos = " << dpos << endl;
+  if ( dpos != string::npos && dpos > pos ){
+    isKnown = false;
+    pos = dpos;
     if ( pos == 0 ){
       // but this is definitely something like //LET() 
       word = "/";
@@ -255,7 +250,6 @@ bool CGNTagger::splitOneWT( const string& inp, string& word,
       word = in.substr( 0, pos );
       tag = in.substr( pos+2 );
     }
-    isKnown = false;
   } 
   else {
     pos = in.rfind("/");

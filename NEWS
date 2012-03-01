@@ -1,3 +1,8 @@
+0.12.15 - 2012-03-01
+ * NER failed on input with a trailing '/'. fixed, and also
+   used same code for IOB and CGN (where it was fixed different).
+   Needless code duplication in sight!
+
 0.12.14 - 2012-02-29
  * NER was disabled. fixed
 
