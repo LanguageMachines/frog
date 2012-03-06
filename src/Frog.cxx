@@ -811,14 +811,14 @@ void TestSentence( const vector<Sentence*>& sentences,
 #pragma omp section
       {
 	timers.tagTimer.start();
-	string tagged = myCGNTagger.Classify( sent );
+	myCGNTagger.Classify( sent );
 	timers.tagTimer.stop();
       }
 #pragma omp section
       {
 	if ( doIOB ){
 	  timers.iobTimer.start();
-	  string chunked = myIOBTagger.Classify( sent );
+	  myIOBTagger.Classify( sent );
 	  timers.iobTimer.stop();
 	}
       }
@@ -826,7 +826,7 @@ void TestSentence( const vector<Sentence*>& sentences,
       {
 	if ( doNER ){
 	  timers.nerTimer.start();
-	  string chunked = myNERTagger.Classify( sent );
+	  myNERTagger.Classify( sent );
 	  timers.nerTimer.stop();
 	}
       }

@@ -207,101 +207,9 @@ bool CGNTagger::init( const Configuration& conf ){
     return false;
   }
   fillSubSetTable();
-  string init = "-s " + configuration.configDir() + tagset;
-  if ( Tagger::Version() == "3.2.6" )
-    init += " -vc";
-  else
-    init += " -vcf";
+  string init = "-s " + configuration.configDir() + tagset + " -vcf";
   tagger = new MbtAPI( init, *cgnLog );
   return tagger != 0;
-}
-
-bool CGNTagger::splitOneWT( const string& inp, string& word, 
-			    string& tag, string& confidence ){
-  bool isKnown = true;
-  string in = inp;
-  //     split word and tag, and store num of slashes
-  if (debug)
-    *Log(cgnLog) << "split Classify starting with " << in << endl;
-  string::size_type pos = in.rfind("/");
-  if ( pos == string::npos ) {
-    *Log(cgnLog) << "no word/tag/confidence triple in this line: " << in << endl;
-    exit( EXIT_FAILURE );
-  }
-  else {
-    confidence = in.substr( pos+1 );
-    in.erase( pos );
-  }
-  if (debug)
-    *Log(cgnLog) << "split Classify after confidence stripping " << in << endl;
-  pos = in.rfind("/");
-  //  cerr << "pos = " << pos << endl;
-  string::size_type dpos = in.rfind("//"); 
-  //  cerr << "dpos = " << dpos << endl;
-  if ( dpos != string::npos && dpos > pos ){
-    isKnown = false;
-    pos = dpos;
-    if ( pos == 0 ){
-      // but this is definitely something like //LET() 
-      word = "/";
-      tag = in.substr(pos+2);
-    }
-    else {
-      word = in.substr( 0, pos );
-      tag = in.substr( pos+2 );
-    }
-  } 
-  else {
-    pos = in.rfind("/");
-    if ( pos != string::npos ) {
-      word = in.substr( 0, pos );
-      tag = in.substr( pos+1 );
-    }
-    else {
-      *Log(cgnLog) << "no word/tag/confidence triple in this line: " << in << endl;
-      exit( EXIT_FAILURE );
-    }
-  }
-  if ( debug){
-    if ( isKnown )
-      *Log(cgnLog) << "known word: " << word << "\ttag: " << tag 
-		   << "\tconfidence: " << confidence << endl;
-    else
-      *Log(cgnLog) << "unknown word: " << word << "\ttag: " << tag 
-		   << "\tconfidence: " << confidence << endl;
-  }
-  return isKnown;
-}
-
-int CGNTagger::splitWT( const string& tagged,
-			vector<string>& tags, vector<double>& conf ){
-  vector<string> words;
-  vector<string> tagwords;
-  vector<bool> known;
-  tags.clear();
-  conf.clear();
-  size_t num_words = Timbl::split_at( tagged, tagwords, " " );
-  num_words--; // the last "word" is <utt> which gets added by the tagger
-  for( size_t i = 0; i < num_words; ++i ) {
-    string word, tag, confs;
-    bool isKnown = splitOneWT( tagwords[i], word, tag, confs );
-    double confidence;
-    if ( !stringTo<double>( confs, confidence ) ){
-      *Log(cgnLog) << "tagger confused. Expected a double, got '" << confs << "'" << endl;
-      exit( EXIT_FAILURE );
-    }
-    words.push_back( word );
-    tags.push_back( tag );
-    known.push_back( isKnown );
-    conf.push_back( confidence );
-  }
-  if (debug) {
-    *Log(cgnLog) << "#tagged_words: " << num_words << endl;
-    for( size_t i = 0; i < num_words; i++) 
-      *Log(cgnLog)   << "\ttagged word[" << i <<"]: " << words[i] << (known[i]?"/":"//")
-		     << tags[i] << " <" << conf[i] << ">" << endl;
-  }
-  return num_words;
 }
 
 string getSubSet( const string& val, const string& head ){
@@ -391,8 +299,7 @@ void addTag( FoliaElement *word, const string& inputTag, double confidence ){
   }
 }
 
-string CGNTagger::Classify( FoliaElement *sent ){
-  string tagged;
+void CGNTagger::Classify( FoliaElement *sent ){
   vector<Word*> swords = sent->words();
   if ( !swords.empty() ) {
     vector<string> words;
@@ -404,21 +311,23 @@ string CGNTagger::Classify( FoliaElement *sent ){
 	sentence += " ";
     }
     if (debug) 
-      *Log(cgnLog) << "in: " << sentence << endl;
-    tagged = tagger->Tag(sentence);
-    if (debug) {
-      *Log(cgnLog) << "sentence: " << sentence << endl
-		   << "tagged: "<< tagged
-		   << endl;
+      *Log(cgnLog) << "CGN tagger in: " << sentence << endl;
+    vector<TagResult> tagv = tagger->TagLine(sentence);
+    if ( tagv.size() != swords.size() ){
+      throw runtime_error( "CGN tagger is confused" );
     }
-    vector<double> conf;
-    vector<string> tags;
-    int num_words = splitWT( tagged, tags, conf );
-    for ( int i = 0; i < num_words; ++i ) {
-      addTag( swords[i], tags[i], conf[i] );
+    if ( debug ){
+      *Log(cgnLog) << "CGN tagger out: " << endl;
+      for ( size_t i=0; i < tagv.size(); ++i ){
+	*Log(cgnLog) << "[" << i << "] : word=" << tagv[i].word() 
+		     << " tag=" << tagv[i].assignedTag() 
+		     << " confidence=" << tagv[i].confidence() << endl;
+      }
+    }
+    for ( size_t i=0; i < tagv.size(); ++i ){
+      addTag( swords[i], tagv[i].assignedTag(), tagv[i].confidence() );
     }
   }
-  return tagged;
 }
 
 

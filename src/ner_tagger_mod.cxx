@@ -80,100 +80,9 @@ bool NERTagger::init( const Configuration& conf ){
     *Log(nerLog) << "Unable to find settings for NER" << endl;
     return false;
   }
-  string init = "-s " + configuration.configDir() + tagset;
-  if ( Tagger::Version() == "3.2.6" )
-    init += " -vc";
-  else
-    init += " -vcf";
+  string init = "-s " + configuration.configDir() + tagset + " -vcf";
   tagger = new MbtAPI( init, *nerLog );
   return tagger != 0;
-}
-
-bool NERTagger::splitOneWT( const string& inp, string& word, 
-			    string& tag, string& confidence ){
-  bool isKnown = true;
-  string in = inp;
-  //     split word and tag, and store num of slashes
-  if (debug)
-    *Log(nerLog) << "split Classify starting with " << in << endl;
-  string::size_type pos = in.rfind("/");
-  if ( pos == string::npos ) {
-    *Log(nerLog) << "no word/tag/confidence triple in this line: " << in << endl;
-    exit( EXIT_FAILURE );
-  }
-  else {
-    confidence = in.substr( pos+1 );
-    in.erase( pos );
-  }
-  if (debug)
-    *Log(nerLog) << "split Classify after confidence stripping " << in << endl;
-  pos = in.rfind("/");
-  //  cerr << "pos = " << pos << endl;
-  string::size_type dpos = in.rfind("//"); 
-  //  cerr << "dpos = " << dpos << endl;
-  if ( dpos != string::npos && dpos > pos ){
-    isKnown = false;
-    pos = dpos;
-    if ( pos == 0 ){
-      // but this is definitely something like //LET() 
-      word = "/";
-      tag = in.substr(pos+2);
-    }
-    else {
-      word = in.substr( 0, pos );
-      tag = in.substr( pos+2 );
-    }
-  } 
-  else {
-    if ( pos != string::npos ) {
-      word = in.substr( 0, pos );
-      tag = in.substr( pos+1 );
-    }
-    else {
-      *Log(nerLog) << "no word/tag/confidence triple in this line: " << in << endl;
-      exit( EXIT_FAILURE );
-    }
-  }
-  if ( debug){
-    if ( isKnown )
-      *Log(nerLog) << "known";
-    else
-      *Log(nerLog) << "unknown";
-    *Log(nerLog) << " word: " << word << "\ttag: " << tag << "\tconfidence: " << confidence << endl;
-  }
-  return isKnown;
-}
-
-int NERTagger::splitWT( const string& tagged,
-			vector<string>& tags, 
-			vector<double>& conf ){
-  vector<string> words;
-  vector<string> tagwords;
-  vector<bool> known;
-  tags.clear();
-  conf.clear();
-  size_t num_words = Timbl::split_at( tagged, tagwords, " " );
-  num_words--; // the last "word" is <utt> which gets added by the tagger
-  for( size_t i = 0; i < num_words; ++i ) {
-    string word, tag, confs;
-    bool isKnown = splitOneWT( tagwords[i], word, tag, confs );
-    double confidence;
-    if ( !stringTo<double>( confs, confidence ) ){
-      *Log(nerLog) << "tagger confused. Expected a double, got '" << confs << "'" << endl;
-      exit( EXIT_FAILURE );
-    }
-    words.push_back( word );
-    tags.push_back( tag );
-    known.push_back( isKnown );
-    conf.push_back( confidence );
-  }
-  if (debug) {
-    *Log(nerLog) << "#tagged_words: " << num_words << endl;
-    for( size_t i = 0; i < num_words; i++) 
-      *Log(nerLog)   << "\ttagged word[" << i <<"]: " << words[i] << (known[i]?"/":"//")
-	     << tags[i] << " <" << conf[i] << ">" << endl;
-  }
-  return num_words;
 }
 
 static void addEntity( EntitiesLayer *entities, 
@@ -273,8 +182,7 @@ void NERTagger::addNERTags( Sentence *sent,
   }
 }
 
-string NERTagger::Classify( Sentence *sent ){
-  string tagged;
+void NERTagger::Classify( Sentence *sent ){
   vector<Word*> swords = sent->words();
   if ( !swords.empty() ) {
     vector<string> words;
@@ -287,18 +195,26 @@ string NERTagger::Classify( Sentence *sent ){
     }
     if (debug) 
       *Log(nerLog) << "NER in: " << sentence << endl;
-    tagged = tagger->Tag(sentence);
-    if (debug) {
-      *Log(nerLog) << "sentence: " << sentence << endl
-		   << "NER tagged: "<< tagged
-		   << endl;
+    vector<TagResult> tagv = tagger->TagLine(sentence);
+    if ( tagv.size() != swords.size() ){
+      throw runtime_error( "NER tagger is confused" );
+    }
+    if ( debug ){
+      *Log(nerLog) << "NER tagger out: " << endl;
+      for ( size_t i=0; i < tagv.size(); ++i ){
+	*Log(nerLog) << "[" << i << "] : word=" << tagv[i].word() 
+		     << " tag=" << tagv[i].assignedTag() 
+		     << " confidence=" << tagv[i].confidence() << endl;
+      }
     }
     vector<double> conf;
-    vector<string> tags;
-    splitWT( tagged, tags, conf );
+    vector<string> tags;    
+    for ( size_t i=0; i < tagv.size(); ++i ){
+      tags.push_back( tagv[i].assignedTag() );
+      conf.push_back( tagv[i].confidence() );
+    }
     addNERTags( sent, swords, tags, conf );
   }
-  return tagged;
 }
 
 

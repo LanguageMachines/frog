@@ -1,7 +1,6 @@
 0.12.15 - 2012-03-01
- * NER failed on input with a trailing '/'. fixed, and also
-   used same code for IOB and CGN (where it was fixed different).
-   Needless code duplication in sight!
+ * using the new Mbt 3.2.8 API for Tagging.
+   The code is much simpler and less error-prone now.
 
 0.12.14 - 2012-02-29
  * NER was disabled. fixed

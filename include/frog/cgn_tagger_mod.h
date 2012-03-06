@@ -36,14 +36,8 @@ class CGNTagger {
   CGNTagger();
   ~CGNTagger();
   bool init( const Configuration& );
-  std::string Classify( folia::FoliaElement * );
+  void Classify( folia::FoliaElement * );
  private:
-  bool splitOneWT( const std::string&, 
-		   std::string& word, std::string& tag,
-		   std::string& confidence );
-  int splitWT( const std::string&,
-	       std::vector<std::string>&,
-	       std::vector<double>& );
   MbtAPI *tagger;  
   LogStream *cgnLog;
   int debug;

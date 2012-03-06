@@ -36,18 +36,12 @@ class NERTagger {
   NERTagger();
   ~NERTagger();
   bool init( const Configuration& );
-  std::string Classify( folia::Sentence * );
+  void Classify( folia::Sentence * );
   void addNERTags( folia::Sentence *, 
 		   const std::vector<folia::Word*>&,
 		   const std::vector<std::string>&,
 		   const std::vector<double>& );
  private:
-  bool splitOneWT( const std::string&, 
-		   std::string& word, std::string& tag,
-		   std::string& confidence );
-  int splitWT( const std::string&,
-	       std::vector<std::string>&,
-	       std::vector<double>& );
   MbtAPI *tagger;
   LogStream *nerLog;
   int debug;
