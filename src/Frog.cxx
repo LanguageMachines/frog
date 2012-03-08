@@ -476,11 +476,17 @@ bool froginit(){
 	}
       }
 #pragma omp section
-      lemStat = myMblem.init( configuration );
+      {
+	lemStat = myMblem.init( configuration );
+      }
 #pragma omp section
-      mbaStat = myMbma.init( configuration );
+      {
+	mbaStat = myMbma.init( configuration );
+      }
 #pragma omp section 
-      tagStat = myCGNTagger.init( configuration );
+      {
+	tagStat = myCGNTagger.init( configuration );
+      }
 #pragma omp section 
       {
 	if ( doIOB )
