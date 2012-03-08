@@ -1,8 +1,8 @@
-e <utt>
+e EL
 l ner.data.lex.ambi.05
-k ner.data.known.dddwfWawa
-u ner.data.unknown.chnppddwFawsss
-p dddwfWawa
-P chnppddwFawsss
-O -G0 +D +vs K:-a IGTree -w gr U:-a ib1 -m M -L 2 -k 5 -w gr -d ID
-L ner.data.top1000
+k ner.data.known.ddwdwfWawaa
+u ner.data.unknown.chnppddwdwFawawasss
+p ddwdwfWawaa
+P chnppddwdwFawawasss
+O +vS -FColumns K: -a4     U: -a2 -q2 -mM -k19 -dID
+L ner.data.top500
