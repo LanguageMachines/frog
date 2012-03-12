@@ -214,7 +214,7 @@ void IOBTagger::addIOBTags( FoliaElement *sent,
 void IOBTagger::addDeclaration( Document& doc ) const {
   doc.declare( AnnotationType::CHUNKING, 
 	       tagset,
-	       "annotator='frog-iob-" + version
+	       "annotator='frog-chunker-" + version
 	       + "', annotatortype='auto'");
 }
 
