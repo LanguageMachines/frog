@@ -34,6 +34,7 @@
 
 #include "ucto/unicode.h"
 #include "libfolia/folia.h"
+#include "libfolia/document.h"
 #include "frog/Frog.h"
 #include "frog/Configuration.h"
 #include "frog/mblem_mod.h"
@@ -74,6 +75,18 @@ bool Mblem::init( const Configuration& config ) {
   string db = config.lookUp( "debug", "mblem" );
   if ( !db.empty() )
     debug = stringTo<int>( db );
+  string val = config.lookUp( "version", "mblem" );
+  if ( val.empty() ){
+    version = "1.0";
+  }
+  else
+    version = val;
+  val = config.lookUp( "set", "mblem" );
+  if ( val.empty() ){
+    tagset = "http://ilk.uvt.nl/folia/sets/frog-mblem-nl";
+  }
+  else
+    tagset = val;
   
   string transName = config.lookUp( "transFile", "mblem" );
   if ( !transName.empty() ){
@@ -158,10 +171,10 @@ bool isSimilar( const string& tag, const string& cgnTag ){
     similar( tag, cgnTag, "ovt,1,ev" );
 }
 
-void addAnnotation( FoliaElement *word,
-		    const string& cls ){
+void Mblem::addAnnotation( FoliaElement *word,
+			   const string& cls ){
   KWargs args;
-  args["set"]="http://ilk.uvt.nl/folia/sets/frog-mblem-nl";
+  args["set"]=tagset;
   args["cls"]=cls;
 #pragma omp critical(foliaupdate)
   {
@@ -199,6 +212,13 @@ string Mblem::postprocess( FoliaElement *word ){
   addAnnotation( word, res );
   return res;
 } 
+
+void Mblem::addDeclaration( Document& doc ) const {
+  doc.declare( AnnotationType::LEMMA, 
+	       tagset,
+	       "annotator='frog-mblem-" + version
+	       + "', annotatortype='auto'");
+}
 
 string Mblem::Classify( FoliaElement *sword ){
   string word;

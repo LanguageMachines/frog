@@ -44,7 +44,8 @@ class mwuAna {
   }
 
   bool isSpec(){ return spec; };
-  folia::EntitiesLayer *addEntity( folia::Sentence *,
+  folia::EntitiesLayer *addEntity( const std::string&,
+				   folia::Sentence *,
 				   folia::EntitiesLayer * );
   
  protected:
@@ -65,8 +66,10 @@ class Mwu {
   ~Mwu();
   void reset();
   bool init( const Configuration& );
+  void addDeclaration( folia::Document& ) const;
   void Classify( folia::Sentence * );
   void add( folia::FoliaElement * );
+  std::string getTagset() const { return tagset; };
   std::vector<mwuAna*>& getAna(){ return mWords; };
   std::string myCFS;
  private:
@@ -78,6 +81,8 @@ class Mwu {
   std::vector<mwuAna*> mWords;
   mymap2 MWUs;
   LogStream *mwuLog;
+  std::string version;
+  std::string tagset;
 };
 
 #endif

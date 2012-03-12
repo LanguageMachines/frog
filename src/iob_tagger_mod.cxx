@@ -30,6 +30,7 @@
 
 #include "mbt/MbtAPI.h"
 #include "libfolia/folia.h"
+#include "libfolia/document.h"
 #include "frog/Frog.h"
 #include "frog/iob_tagger_mod.h"
 
@@ -75,31 +76,52 @@ bool IOBTagger::init( const Configuration& conf ){
     *Log(iobLog) << "IOBTagger is already initialized!" << endl;
     return false;
   }  
-  string tagset = conf.lookUp( "settings", "IOB" );
-  if ( tagset.empty() ){
+  string val = conf.lookUp( "settings", "IOB" );
+  if ( val.empty() ){
     *Log(iobLog) << "Unable to find settings for IOB" << endl;
     return false;
   }
-  string init = "-s " + configuration.configDir() + tagset + " -vcf";
+  string settings = val;
+  val = conf.lookUp( "version", "IOB" );
+  if ( val.empty() ){
+    version = "1.0";
+  }
+  else
+    version = val;
+  val = conf.lookUp( "set", "IOB" );
+  if ( val.empty() ){
+    tagset = "http://ilk.uvt.nl/folia/sets/frog-chunker-nl";
+  }
+  else
+    tagset = val;
+
+  string init = "-s " + configuration.configDir() + settings + " -vcf";
   tagger = new MbtAPI( init, *iobLog );
   return tagger != 0;
 }
 
-void addChunk( FoliaElement *chunks, 
-	       const vector<Word*>& words,
-	       const vector<double>& confs,
-	       const string& IOB ){
+void IOBTagger::addChunk( FoliaElement *chunks, 
+			  const vector<Word*>& words,
+			  const vector<double>& confs,
+			  const string& IOB ){
   double conf = 1;
   for ( size_t i=0; i < confs.size(); ++i )
     conf *= confs[i];
   KWargs args;
   args["class"] = IOB;
+  args["set"] = tagset;
   args["confidence"] = toString(conf);
   FoliaElement *chunk = 0;
 #pragma omp critical(foliaupdate)
   {
-    chunk = new Chunk( chunks->doc(), args );
-    chunks->append( chunk );
+    try {
+      chunk = new Chunk( chunks->doc(), args );
+      chunks->append( chunk );
+    }
+    catch ( exception& e ){
+      *Log(iobLog) << "addChunk failed: " << e.what() << endl;
+      exit( EXIT_FAILURE );
+    }
   }
   for ( size_t i=0; i < words.size(); ++i ){
 #pragma omp critical(foliaupdate)
@@ -187,6 +209,13 @@ void IOBTagger::addIOBTags( FoliaElement *sent,
     }
     addChunk( el, stack, dstack, curIOB );
   }
+}
+
+void IOBTagger::addDeclaration( Document& doc ) const {
+  doc.declare( AnnotationType::CHUNKING, 
+	       tagset,
+	       "annotator='frog-iob-" + version
+	       + "', annotatortype='auto'");
 }
 
 void IOBTagger::Classify( FoliaElement *sent ){

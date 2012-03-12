@@ -83,8 +83,11 @@ class Parser {
  Parser():pairs(0),dir(0),rels(0),PI(0),isInit(false),keepIntermediate(false){};
   ~Parser();
   bool init( const Configuration& );
-  void Parse( folia::FoliaElement *, const std::string&, TimerBlock& );
-  void prepareParse( folia::FoliaElement *, parseData& );
+  void addDeclaration( folia::Document& doc ) const;
+  void Parse( folia::Sentence *, 
+	      const std::string&, const std::string&, TimerBlock& );
+  void prepareParse( folia::Sentence *, 
+		     const std::string&, parseData& );
   void createParserFile( const parseData& );
  private:
   void createRelDir( const parseData& );
@@ -99,6 +102,9 @@ class Parser {
   std::string fileName;
   LogStream *parseLog;
   bool keepIntermediate;
+  std::string version;
+  std::string tagset;
+
 };
 
 

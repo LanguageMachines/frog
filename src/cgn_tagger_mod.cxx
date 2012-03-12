@@ -30,6 +30,7 @@
 
 #include "mbt/MbtAPI.h"
 #include "libfolia/folia.h"
+#include "libfolia/document.h"
 #include "frog/Frog.h"
 #include "frog/cgn_tagger_mod.h"
 
@@ -201,13 +202,26 @@ bool CGNTagger::init( const Configuration& conf ){
     *Log(cgnLog) << "CGNTagger is already initialized!" << endl;
     return false;
   }  
-  string tagset = conf.lookUp( "settings", "tagger" );
-  if ( tagset.empty() ){
+  string val = conf.lookUp( "settings", "tagger" );
+  if ( val.empty() ){
     *Log(cgnLog) << "Unable to find settings for Tagger" << endl;
     return false;
   }
+  string settings =  val;
+  val = conf.lookUp( "version", "tagger" );
+  if ( val.empty() ){
+    version = "1.0";
+  }
+  else
+    version = val;
+  val = conf.lookUp( "set", "tagger" );
+  if ( val.empty() ){
+    tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
+  }
+  else
+    tagset = val;
   fillSubSetTable();
-  string init = "-s " + configuration.configDir() + tagset + " -vcf";
+  string init = "-s " + configuration.configDir() + settings + " -vcf";
   tagger = new MbtAPI( init, *cgnLog );
   return tagger != 0;
 }
@@ -240,14 +254,13 @@ string getSubSet( const string& val, const string& head ){
 			   "' whithin the constraints for '" + head + "'" );
 }
 
-void addTag( FoliaElement *word, const string& inputTag, double confidence ){
+void addTag( FoliaElement *word, const string& tagset,
+	     const string& inputTag, double confidence ){
   string cgnTag = inputTag;
   string mainTag;
   string tagPartS;
-  string annotator = "MBT";
   string ucto_class = word->cls();
   if ( ucto_class == "ABBREVIATION-KNOWN" ){
-    annotator = "ucto";
     mainTag = "SPEC";
     tagPartS = "afk";
     cgnTag = "SPEC(afk)";
@@ -256,7 +269,6 @@ void addTag( FoliaElement *word, const string& inputTag, double confidence ){
   else if ( ucto_class == "SMILEY" ||
 	    ucto_class == "URL-WWW" ||
 	    ucto_class == "E-MAIL" ){
-    annotator = "ucto";
     mainTag = "SPEC";
     tagPartS = "symb";
     cgnTag = "SPEC(symb)";
@@ -275,7 +287,7 @@ void addTag( FoliaElement *word, const string& inputTag, double confidence ){
     tagPartS = cgnTag.substr( openH+1, closeH-openH-1 );
   }
   KWargs args;
-  args["set"]  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
+  args["set"]  = tagset;
   args["head"] = mainTag;
   args["cls"]  = cgnTag;
   args["confidence"]= toString(confidence);
@@ -288,7 +300,7 @@ void addTag( FoliaElement *word, const string& inputTag, double confidence ){
   size_t numParts = Timbl::split_at( tagPartS, tagParts, "," );
   for ( size_t i=0; i < numParts; ++i ){
     KWargs args;
-    args["set"]    = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
+    args["set"]    = tagset;
     args["subset"] = getSubSet( tagParts[i], mainTag );
     args["cls"]    = tagParts[i];
 #pragma omp critical(foliaupdate)
@@ -297,6 +309,12 @@ void addTag( FoliaElement *word, const string& inputTag, double confidence ){
       pos->append( feat );
     }
   }
+}
+
+void CGNTagger::addDeclaration( Document& doc ) const {
+  doc.declare( AnnotationType::POS, tagset,
+	       "annotator='frog-mbpos-" + version
+	       + "', annotatortype='auto'");
 }
 
 void CGNTagger::Classify( FoliaElement *sent ){
@@ -325,9 +343,7 @@ void CGNTagger::Classify( FoliaElement *sent ){
       }
     }
     for ( size_t i=0; i < tagv.size(); ++i ){
-      addTag( swords[i], tagv[i].assignedTag(), tagv[i].confidence() );
+      addTag( swords[i], tagset, tagv[i].assignedTag(), tagv[i].confidence() );
     }
   }
 }
-
-

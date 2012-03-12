@@ -37,7 +37,8 @@
 #include "timbl/TimblAPI.h"
 
 #include "frog/Frog.h" // defines etc.
-#include "libfolia/folia.h" // defines etc.
+#include "libfolia/folia.h" 
+#include "libfolia/document.h"
 #include "frog/mwu_chunker_mod.h"
 
 using namespace folia;
@@ -66,7 +67,8 @@ void mwuAna::merge( const mwuAna *add ){
   delete add;
 }
 
-EntitiesLayer *mwuAna::addEntity( Sentence *sent, EntitiesLayer *el ){
+EntitiesLayer *mwuAna::addEntity( const std::string& tagset,
+				  Sentence *sent, EntitiesLayer *el ){
   if ( fwords.size() > 1 ){
     if ( el == 0 ){
 #pragma omp critical(foliaupdate)
@@ -76,7 +78,7 @@ EntitiesLayer *mwuAna::addEntity( Sentence *sent, EntitiesLayer *el ){
       }
     }
     KWargs args;
-    args["set"] = "http://ilk.uvt.nl/folia/sets/frog-mwu-nl";
+    args["set"] = tagset;
     Entity *e=0;
 #pragma omp critical(foliaupdate)
     {
@@ -141,22 +143,34 @@ bool Mwu::init( const Configuration& config ) {
   myCFS = "_";
   *Log(mwuLog) << "initiating mwuChunker..." << endl;
   debug = tpDebug;
-  string db = config.lookUp( "debug", "mwu" );
-  if ( !db.empty() )
-    debug = stringTo<int>( db );
-  string att = config.lookUp( "t", "mwu" );  
-  if ( att.empty() ){
+  string val = config.lookUp( "debug", "mwu" );
+  if ( !val.empty() )
+    debug = stringTo<int>( val );
+  val = config.lookUp( "t", "mwu" );  
+  if ( val.empty() ){
     *Log(mwuLog) << "cannot find attribute 't' in configfile" << endl;
     return false;
   }
-  mwuFileName = prefix( config.configDir(), att );
-  att = config.lookUp( "c", "mwu" );  
-  if ( !att.empty() )
-    myCFS = att;
-  if (!read_mwus(mwuFileName)) {
+  mwuFileName = prefix( config.configDir(), val );
+  val = config.lookUp( "c", "mwu" );  
+  if ( !val.empty() )
+    myCFS = val;
+  if ( !read_mwus(mwuFileName) ) {
     *Log(mwuLog) << "Cannot read mwu file " << mwuFileName << endl;
     return false;
   }
+  val = config.lookUp( "version", "mwu" );
+  if ( val.empty() ){
+    version = "1.0";
+  }
+  else
+    version = val;
+  val = config.lookUp( "set", "mwu" );
+  if ( val.empty() ){
+    tagset = "http://ilk.uvt.nl/folia/sets/frog-mwu-nl";
+  }
+  else
+    tagset = val;
   return true;
 }
 
@@ -165,6 +179,13 @@ ostream &operator <<( ostream& os,
   for( size_t i = 0; i < mwu.mWords.size(); ++i )
     os << i+1 << "\t" << mwu.mWords[i]->getWord() << endl;
   return os;
+}
+
+void Mwu::addDeclaration( Document& doc ) const {
+  doc.declare( AnnotationType::ENTITY, 
+	       tagset,
+	       "annotator='frog-mwu-" + version
+	       + "', annotatortype='auto'");
 }
 
 void Mwu::Classify( Sentence *sent ){
@@ -179,7 +200,7 @@ void Mwu::Classify( Sentence *sent ){
   Classify();
   EntitiesLayer *el = 0;
   for( size_t i = 0; i < mWords.size(); ++i ){
-    el = mWords[i]->addEntity( sent, el );
+    el = mWords[i]->addEntity( tagset, sent, el );
   }
 }
 

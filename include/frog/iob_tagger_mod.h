@@ -36,15 +36,23 @@ class IOBTagger {
   IOBTagger();
   ~IOBTagger();
   bool init( const Configuration& );
+  void addDeclaration( folia::Document& ) const;
   void Classify( folia::FoliaElement * );
+  std::string getTagset() const { return tagset; };
+ private:
+  void addChunk( folia::FoliaElement *, 
+		 const std::vector<folia::Word*>&,
+		 const std::vector<double>&,
+		 const std::string& );
   void addIOBTags( folia::FoliaElement *, 
 		   const std::vector<folia::Word*>&,
 		   const std::vector<std::string>&,
 		   const std::vector<double>& );
- private:
   MbtAPI *tagger;
   LogStream *iobLog;
   int debug;
+  std::string version;
+  std::string tagset;
 };
 
 #endif // IOB_TAGGER_MOD_H

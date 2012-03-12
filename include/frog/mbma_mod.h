@@ -47,6 +47,7 @@ class Mbma {
   Mbma();
   ~Mbma();
   bool init( const Configuration& );
+  void addDeclaration( folia::Document& doc ) const;
   bool Classify( folia::FoliaElement * );
   std::string getIname( char ) const;
  private:
@@ -80,6 +81,8 @@ class Mbma {
   std::map<std::string,std::string> tagNames;  
   std::map<std::string,std::string> TAGconv;
   std::vector<MBMAana> analysis;
+  std::string version;
+  std::string tagset;
   LogStream *mbmaLog;
 };
 

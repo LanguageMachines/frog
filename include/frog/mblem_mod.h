@@ -49,11 +49,14 @@ class Mblem {
   Mblem();
   ~Mblem();
   bool init( const Configuration& );
+  void addDeclaration( folia::Document& doc ) const;
   std::string Classify( folia::FoliaElement * );
  private:
   void read_transtable( const std::string& );
   void create_MBlem_defaults();
   bool readsettings( const std::string& dir, const std::string& fname );
+  void addAnnotation( folia::FoliaElement*,
+		      const std::string&);
   std::string make_instance( const UnicodeString& in );
   std::string postprocess( folia::FoliaElement * );
   Timbl::TimblAPI *myLex;
@@ -62,6 +65,8 @@ class Mblem {
   int debug;
   std::map <std::string,std::string> classMap;
   std::vector<mblemData> mblemResult;
+  std::string version;
+  std::string tagset;
   LogStream *mblemLog;
 };
 

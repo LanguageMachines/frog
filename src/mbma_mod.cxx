@@ -36,6 +36,7 @@
 #include "frog/Frog.h"
 #include "frog/Configuration.h"
 #include "libfolia/folia.h"
+#include "libfolia/document.h"
 #include "frog/mbma_mod.h"
 
 using namespace std;
@@ -135,6 +136,18 @@ bool Mbma::init( const Configuration& config ) {
   string db = config.lookUp( "debug", "mbma" );
   if ( !db.empty() )
     debugFlag = stringTo<int>( db );
+  string val = config.lookUp( "version", "mbma" );
+  if ( val.empty() ){
+    version = "1.0";
+  }
+  else
+    version = val;
+  val = config.lookUp( "set", "mbma" );
+  if ( val.empty() ){
+    tagset = "http://ilk.uvt.nl/folia/sets/frog-mbma-nl";
+  }
+  else
+    tagset = val;
   string tfName = config.lookUp( "treeFile", "mbma" );
   if ( tfName.empty() )
     tfName = "mbma.igtree";
@@ -734,6 +747,12 @@ void Mbma::postprocess( FoliaElement *fword, PosAnnotation *pos ){
   }
 }  // postprocess
 
+void Mbma::addDeclaration( Document& doc ) const {
+  doc.declare( AnnotationType::MORPHOLOGICAL, tagset,
+	       "annotator='frog-mbma-" +  version + 
+	       "', annotatortype='auto'");
+}
+  
 bool Mbma::Classify( FoliaElement* sword ){
   UnicodeString uWord;
   PosAnnotation *pos;

@@ -36,11 +36,15 @@ class CGNTagger {
   CGNTagger();
   ~CGNTagger();
   bool init( const Configuration& );
+  void addDeclaration( folia::Document& ) const;
   void Classify( folia::FoliaElement * );
+  std::string getTagset() const { return tagset; };
  private:
   MbtAPI *tagger;  
   LogStream *cgnLog;
   int debug;
+  std::string tagset;
+  std::string version;
 };
 
 #endif // CGN_TAGGER_MOD_H

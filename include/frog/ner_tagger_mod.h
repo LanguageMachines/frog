@@ -37,14 +37,18 @@ class NERTagger {
   ~NERTagger();
   bool init( const Configuration& );
   void Classify( folia::Sentence * );
+  void addDeclaration( folia::Document& ) const;
   void addNERTags( folia::Sentence *, 
 		   const std::vector<folia::Word*>&,
 		   const std::vector<std::string>&,
 		   const std::vector<double>& );
+  std::string getTagset() const { return tagset; };
  private:
   MbtAPI *tagger;
   LogStream *nerLog;
   int debug;
+  std::string version;
+  std::string tagset;
 };
 
 #endif // NER_TAGGER_MOD_H

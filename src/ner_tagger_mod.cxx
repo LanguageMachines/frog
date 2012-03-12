@@ -30,6 +30,7 @@
 
 #include "mbt/MbtAPI.h"
 #include "libfolia/folia.h"
+#include "libfolia/document.h"
 #include "frog/Frog.h"
 #include "frog/ner_tagger_mod.h"
 
@@ -75,17 +76,32 @@ bool NERTagger::init( const Configuration& conf ){
     *Log(nerLog) << "NER Tagger is already initialized!" << endl;
     return false;
   }  
-  string tagset = conf.lookUp( "settings", "NER" );
-  if ( tagset.empty() ){
+  string val = conf.lookUp( "settings", "NER" );
+  if ( val.empty() ){
     *Log(nerLog) << "Unable to find settings for NER" << endl;
     return false;
   }
-  string init = "-s " + configuration.configDir() + tagset + " -vcf";
+  string settings = val;
+  val = conf.lookUp( "version", "NER" );
+  if ( val.empty() ){
+    version = "1.0";
+  }
+  else
+    version = val;
+  val = conf.lookUp( "set", "NER" );
+  if ( val.empty() ){
+    tagset = "http://ilk.uvt.nl/folia/sets/frog-ner-nl";
+  }
+  else
+    tagset = val;
+
+  string init = "-s " + configuration.configDir() + settings + " -vcf";
   tagger = new MbtAPI( init, *nerLog );
   return tagger != 0;
 }
 
 static void addEntity( EntitiesLayer *entities, 
+		       const string& tagset,
 		       const vector<Word*>& words,
 		       const vector<double>& confs,
 		       const string& NER ){
@@ -95,7 +111,7 @@ static void addEntity( EntitiesLayer *entities,
   KWargs args;
   args["class"] = NER;
   args["confidence"] =  toString(c);
-  args["set"] = "http://ilk.uvt.nl/folia/sets/frog-ner-nl";
+  args["set"] = tagset;
   Entity *e = 0;
 #pragma omp critical(foliaupdate)
   {
@@ -139,7 +155,7 @@ void NERTagger::addNERTags( Sentence *sent,
 	  using folia::operator<<;
 	  *Log(nerLog) << "spit out " << stack << endl;	
 	}
-	addEntity( el, stack, dstack, curNER );
+	addEntity( el, tagset, stack, dstack, curNER );
 	dstack.clear();
 	stack.clear();
       }
@@ -163,7 +179,7 @@ void NERTagger::addNERTags( Sentence *sent,
 	  using folia::operator<<;
 	  *Log(nerLog) << "spit out " << stack << endl;	
 	}
-	addEntity( el, stack, dstack, curNER );
+	addEntity( el, tagset, stack, dstack, curNER );
 	dstack.clear();
 	stack.clear();
       }
@@ -178,8 +194,15 @@ void NERTagger::addNERTags( Sentence *sent,
       using folia::operator<<;
       *Log(nerLog) << "spit out " << stack << endl;	
     }
-    addEntity( el, stack, dstack, curNER );
+    addEntity( el, tagset, stack, dstack, curNER );
   }
+}
+
+void NERTagger::addDeclaration( Document& doc ) const {
+  doc.declare( AnnotationType::ENTITY, 
+	       tagset,
+	       "annotator='frog-ner-" + version
+	       + "', annotatortype='auto'");
 }
 
 void NERTagger::Classify( Sentence *sent ){

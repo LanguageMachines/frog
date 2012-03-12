@@ -40,6 +40,7 @@
 #include "config.h"
 #include "timbl/TimblAPI.h"
 #include "libfolia/folia.h"
+#include "libfolia/document.h"
 #include "frog/Frog.h"
 #include "frog/Configuration.h"
 #include "frog/Parser.h"
@@ -176,11 +177,23 @@ bool Parser::init( const Configuration& configuration ){
   bool problem = false;
   *Log(parseLog) << "initiating parser ... " << endl;
   string cDir = configuration.configDir();
-  string att = configuration.lookUp( "maxDepSpan", "parser" );
-  if ( !att.empty() ){
-    size_t gs = stringTo<size_t>( att );
+  string val = configuration.lookUp( "version", "parser" );
+  if ( val.empty() ){
+    version = "1.0";
+  }
+  else
+    version = val;
+  val = configuration.lookUp( "set", "parser" );
+  if ( val.empty() ){
+    tagset = "http://ilk.uvt.nl/folia/sets/frog-depparse-nl";
+  }
+  else
+    tagset = val;
+  val = configuration.lookUp( "maxDepSpan", "parser" );
+  if ( !val.empty() ){
+    size_t gs = stringTo<size_t>( val );
     if ( gs < 50 ){
-      maxDepSpanS = att;
+      maxDepSpanS = val;
       maxDepSpan = gs;
     }
     else {
@@ -189,51 +202,51 @@ bool Parser::init( const Configuration& configuration ){
       problem = true;
     }
   }
-  att = configuration.lookUp( "keepIntermediateFiles", "parser" );
-  if ( att == "true" ){
+  val = configuration.lookUp( "keepIntermediateFiles", "parser" );
+  if ( val == "true" ){
     keepIntermediate = true;
   }
-  else if ( !att.empty() )
-    *Log(parseLog) << "invalid 'keepIntermediateFiles' option: " << att << endl;
-  att = configuration.lookUp( "pairsFile", "parser" );
-  if ( !att.empty() )
-    pairsFileName = prefix( cDir, att );
+  else if ( !val.empty() )
+    *Log(parseLog) << "invalid 'keepIntermediateFiles' option: " << val << endl;
+  val = configuration.lookUp( "pairsFile", "parser" );
+  if ( !val.empty() )
+    pairsFileName = prefix( cDir, val );
   else {
     *Log(parseLog) << "missing pairsFile option" << endl;
     problem = true;
   }
-  att = configuration.lookUp( "pairsOptions", "parser" );
-  if ( !att.empty() )
-    pairsOptions = att;
+  val = configuration.lookUp( "pairsOptions", "parser" );
+  if ( !val.empty() )
+    pairsOptions = val;
   else {
     *Log(parseLog) << "missing pairsOptions option" << endl;
     problem = true;
   }
-  att = configuration.lookUp( "dirFile", "parser" );
-  if ( !att.empty() )
-    dirFileName = prefix( cDir, att );
+  val = configuration.lookUp( "dirFile", "parser" );
+  if ( !val.empty() )
+    dirFileName = prefix( cDir, val );
   else {
     *Log(parseLog) << "missing dirFile option" << endl;
     problem = true;
   }
-  att = configuration.lookUp( "dirOptions", "parser" );
-  if ( !att.empty() ){
-    dirOptions = att;
+  val = configuration.lookUp( "dirOptions", "parser" );
+  if ( !val.empty() ){
+    dirOptions = val;
   }
   else {
     *Log(parseLog) << "missing dirOptions option" << endl;
     problem = true;
   }
-  att = configuration.lookUp( "relsFile", "parser" );
-  if ( !att.empty() )
-    relsFileName = prefix( cDir, att );
+  val = configuration.lookUp( "relsFile", "parser" );
+  if ( !val.empty() )
+    relsFileName = prefix( cDir, val );
   else {
     *Log(parseLog) << "missing relsFile option" << endl;
     problem = true;
   }
-  att = configuration.lookUp( "relsOptions", "parser" );
-  if ( !att.empty() ){
-    relsOptions = att;
+  val = configuration.lookUp( "relsOptions", "parser" );
+  if ( !val.empty() ){
+    relsOptions = val;
   }
   else {
     *Log(parseLog) << "missing relsOptions option" << endl;
@@ -748,11 +761,17 @@ void Parser::createRelDir( const parseData& pd ){
   }
 }
 
-void Parser::prepareParse( FoliaElement *sent, parseData& pd ) {
+void Parser::addDeclaration( Document& doc ) const {
+  doc.declare( AnnotationType::DEPENDENCY, tagset,
+	       "annotator='frog-depparse-" + version
+	       + "', annotatortype='auto'");
+}
 
+void Parser::prepareParse( Sentence *sent, const string& setname,
+			   parseData& pd ) {
   pd.clear();
   vector<Word*> fwords = sent->words();
-  vector<Entity*> entities = sent->select<Entity>("http://ilk.uvt.nl/folia/sets/frog-mwu-nl");
+  vector<Entity*> entities = sent->select<Entity>(setname);
   for( size_t i=0; i < fwords.size(); ++i ){
     Word *word = fwords[i];
     vector<Word*> mwu = lookup( word, entities );
@@ -877,7 +896,7 @@ void Parser::prepareParse( FoliaElement *sent, parseData& pd ) {
  }
  
  
-void Parser::Parse( FoliaElement *sent,
+void Parser::Parse( Sentence *sent, const string& mwuSet,
 		    const string& tmpDirName, TimerBlock& timers ){
   pid_t pid = getpid();
   string pids = toString( pid );
@@ -901,7 +920,7 @@ void Parser::Parse( FoliaElement *sent,
   remove( resFileName.c_str() );
   timers.prepareTimer.start();
   parseData pd;  
-  prepareParse( sent, pd );
+  prepareParse( sent, mwuSet, pd );
   timers.prepareTimer.stop();
 #pragma omp parallel sections
   {

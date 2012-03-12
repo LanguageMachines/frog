@@ -744,12 +744,12 @@ ostream &showResults( ostream& os,
 		      const Sentence* sentence,
 		      bool showParse ){
   vector<Word*> words = sentence->words();
-  vector<Entity*> mwu_entities = sentence->select<Entity>("http://ilk.uvt.nl/folia/sets/frog-mwu-nl");
+  vector<Entity*> mwu_entities = sentence->select<Entity>( myMwu.getTagset() );
   // using folia::operator<<;
   // *Log(theErrLog) << "mwu entities " << mwu_entities << endl;
   vector<Dependency*> dependencies = sentence->select<Dependency>();
   vector<Chunk*> iob_chunking = sentence->select<Chunk>();
-  vector<Entity*> ner_entities = sentence->select<Entity>("http://ilk.uvt.nl/folia/sets/frog-ner-nl");
+  vector<Entity*> ner_entities = sentence->select<Entity>( myNERTagger.getTagset() );
   //  *Log(theErrLog) << "ner entities " << ner_entities << endl;
   size_t index = 1;
   map<FoliaElement*, int> enumeration;
@@ -880,7 +880,7 @@ void TestSentence( const vector<Sentence*>& sentences,
 	showParse = false;
       }
       else {
-	myParser.Parse( sent, tmpDirName, timers );
+	myParser.Parse( sent, myMwu.getTagset(), tmpDirName, timers );
       }
     }
   }
@@ -896,33 +896,19 @@ void Test( Document& doc,
   // first we make sure that the doc will accept out annotations, by
   // declaring them in the doc
   //
-  const string versionstring = VERSION;    
-  doc.declare( AnnotationType::POS, 
-	       "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn", "annotator='frog-mbpos-" +  versionstring+  "', annotatortype='auto'" );
-  doc.declare( AnnotationType::LEMMA, 
-	       "http://ilk.uvt.nl/folia/sets/frog-mblem-nl", "annotator='frog-mblem-"+  versionstring +"', annotatortype='auto'");
-  doc.declare( AnnotationType::MORPHOLOGICAL, 
-	       "http://ilk.uvt.nl/folia/sets/frog-mbma-nl", "annotator='frog-mbma-"+  versionstring +"', annotatortype='auto'");
+  
+  const string versionstring = VERSION;
+  myCGNTagger.addDeclaration( doc );
+  myMblem.addDeclaration( doc );
+  myMbma.addDeclaration( doc );
   if (doIOB)
-    doc.declare( AnnotationType::CHUNKING, 
-		 "http://ilk.uvt.nl/folia/sets/frog-chunker-nl",
-		 "annotator='frog-chunker-"+  versionstring 
-		 +"', annotatortype='auto'");
+    myIOBTagger.addDeclaration( doc );
   if (doNER)
-    doc.declare( AnnotationType::ENTITY, 
-		 "http://ilk.uvt.nl/folia/sets/frog-ner-nl", 
-		 "annotator='frog-ner-"+  versionstring
-		 + "', annotatortype='auto'");
+    myNERTagger.addDeclaration( doc );
   if (doMwu) 
-    doc.declare( AnnotationType::ENTITY,
-		 "http://ilk.uvt.nl/folia/sets/frog-mwu-nl", 
-		 "annotator='frog-mwu-"+  versionstring 
-		 + "', annotatortype='auto'");
+    myMwu.addDeclaration( doc );
   if (doParse) 
-    doc.declare( AnnotationType::DEPENDENCY,
-		 "http://ilk.uvt.nl/folia/sets/frog-depparse-nl", "annotator='frog-depparse-"+  versionstring +"', annotatortype='auto'");
-
-
+    myParser.addDeclaration( doc );
   if ( tpDebug > 5 )
     *Log(theErrLog) << "Testing document :" << doc << endl;
   vector<Sentence*> sentences = doc.sentences();
