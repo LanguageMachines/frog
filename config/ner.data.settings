@@ -4,5 +4,5 @@ k ner.data.known.ddwdwfWawawaa
 u ner.data.unknown.chnppddwdwFawawaasss
 p ddwdwfWawawaa
 P chnppddwdwFawawaasss
-O +vS -FColumns K: -a1 U: -a2 -q2 -mM -k19 -dID
+O +vS -G -FColumns K: -a1 U: -a2 -q2 -mM -k19 -dID
 L ner.data.top1000

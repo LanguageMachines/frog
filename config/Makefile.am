@@ -23,11 +23,11 @@ config_DATA = mblem.transtable  mblem.tree mblem.tree.wgt \
 	ner.data.lex.ambi.05 \
 	ner.data.lex \
 	ner.data.settings \
-	ner.data.5paxes \
+	ner.data.10paxes \
 	ner.data.top1000 \
-	ner.data.known.dddwfWawa \
-	ner.data.known.dddwfWawa.wgt \
-	ner.data.unknown.chnppddwFawsss \
+	ner.data.known.ddwdwfWawawaa \
+	ner.data.known.ddwdwfWawawaa.wgt \
+	ner.data.unknown.chnppddwdwFawawaasss \
 	cgntags.main cgntags.sub small-frog.cfg 
 
 configdir = $(sysconfdir)/$(PACKAGE)
