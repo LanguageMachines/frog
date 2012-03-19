@@ -119,11 +119,11 @@ CXXFLAGS="$CXXFLAGS $mbt_CFLAGS"
 LIBS="$mbt_LIBS $LIBS"
 
 AC_ARG_WITH(folia,
-       [  --with-folia=DIR       use ucto installed in <DIR>],
-       [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
-       [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
+       [  --with-folia=DIR       use libfolia installed in <DIR>],
+       [PKG_CONFIG_PATH="$withval/lib/pkgconfig:$PKG_CONFIG_PATH"],
+       [PKG_CONFIG_PATH="$prefix/lib/pkgconfig:$PKG_CONFIG_PATH"])
 AC_MSG_NOTICE( [pkg-config search path: $PKG_CONFIG_PATH] )
-PKG_CHECK_MODULES([folia],[folia >= 0.8])
+PKG_CHECK_MODULES([folia],[folia >= 0.9])
 CXXFLAGS="$CXXFLAGS $folia_CFLAGS"
 LIBS="$folia_LIBS $LIBS"
 
