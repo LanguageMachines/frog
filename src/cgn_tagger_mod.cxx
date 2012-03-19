@@ -254,7 +254,7 @@ string getSubSet( const string& val, const string& head ){
 			   "' whithin the constraints for '" + head + "'" );
 }
 
-void addTag( FoliaElement *word, const string& tagset,
+void addTag( Word *word, const string& tagset,
 	     const string& inputTag, double confidence ){
   string cgnTag = inputTag;
   string mainTag;
@@ -291,7 +291,7 @@ void addTag( FoliaElement *word, const string& tagset,
   args["head"] = mainTag;
   args["cls"]  = cgnTag;
   args["confidence"]= toString(confidence);
-  FoliaElement *pos = 0;
+  folia::FoliaElement *pos = 0;
 #pragma omp critical(foliaupdate)
   {
     pos = word->addPosAnnotation( args );
@@ -305,7 +305,7 @@ void addTag( FoliaElement *word, const string& tagset,
     args["cls"]    = tagParts[i];
 #pragma omp critical(foliaupdate)
     {
-      FoliaElement *feat = new folia::Feature( args );
+      folia::Feature *feat = new folia::Feature( args );
       pos->append( feat );
     }
   }
@@ -317,7 +317,7 @@ void CGNTagger::addDeclaration( Document& doc ) const {
 	       + "', annotatortype='auto'");
 }
 
-void CGNTagger::Classify( FoliaElement *sent ){
+void CGNTagger::Classify( Sentence *sent ){
   vector<Word*> swords = sent->words();
   if ( !swords.empty() ) {
     vector<string> words;

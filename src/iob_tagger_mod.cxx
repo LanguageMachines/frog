@@ -100,7 +100,7 @@ bool IOBTagger::init( const Configuration& conf ){
   return tagger != 0;
 }
 
-void IOBTagger::addChunk( FoliaElement *chunks, 
+void IOBTagger::addChunk( ChunkingLayer *chunks, 
 			  const vector<Word*>& words,
 			  const vector<double>& confs,
 			  const string& IOB ){
@@ -111,7 +111,7 @@ void IOBTagger::addChunk( FoliaElement *chunks,
   args["class"] = IOB;
   args["set"] = tagset;
   args["confidence"] = toString(conf);
-  FoliaElement *chunk = 0;
+  Chunk *chunk = 0;
 #pragma omp critical(foliaupdate)
   {
     try {
@@ -131,11 +131,11 @@ void IOBTagger::addChunk( FoliaElement *chunks,
   }
 }
 
-void IOBTagger::addIOBTags( FoliaElement *sent, 
+void IOBTagger::addIOBTags( Sentence *sent, 
 			    const vector<Word*>& words,
 			    const vector<string>& tags,
 			    const vector<double>& confs ){
-  FoliaElement *el = 0;
+  ChunkingLayer *el = 0;
 #pragma omp critical(foliaupdate)
   {
     try {
@@ -218,7 +218,7 @@ void IOBTagger::addDeclaration( Document& doc ) const {
 	       + "', annotatortype='auto'");
 }
 
-void IOBTagger::Classify( FoliaElement *sent ){
+void IOBTagger::Classify( Sentence *sent ){
   vector<Word*> swords = sent->words();
   if ( !swords.empty() ) {
     vector<string> words;

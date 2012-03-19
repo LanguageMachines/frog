@@ -44,7 +44,7 @@
 using namespace folia;
 using namespace std;
 
-mwuAna::mwuAna( FoliaElement *fwrd ){
+mwuAna::mwuAna( Word *fwrd ){
   spec = false;
   word = fwrd->str();
   string tag;
@@ -111,7 +111,7 @@ void Mwu::reset(){
   mWords.clear();
 }
 
-void Mwu::add( FoliaElement *word ){
+void Mwu::add( Word *word ){
   mWords.push_back( new mwuAna( word ) );
 }
 

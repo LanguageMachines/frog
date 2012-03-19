@@ -839,7 +839,7 @@ void Parser::prepareParse( Sentence *sent, const string& setname,
   }
 }
 
- void appendParseResult( FoliaElement *sent, 
+ void appendParseResult( Sentence *sent, 
 			 parseData& pd,
 			 istream& is ){
    string line;
@@ -859,7 +859,7 @@ void Parser::prepareParse( Sentence *sent, const string& setname,
      }
      ++cnt;
    }
-   FoliaElement *dl = new DependenciesLayer();
+   DependenciesLayer *dl = new DependenciesLayer();
 #pragma omp critical(foliaupdate)
    {
      sent->append( dl );
@@ -869,27 +869,27 @@ void Parser::prepareParse( Sentence *sent, const string& setname,
        KWargs args;
        args["generate-id"] = sent->id();
        args["class"] = roles[i];
-       FoliaElement *d = new Dependency( sent->doc(), args );
+       Dependency *d = new Dependency( sent->doc(), args );
 #pragma omp critical(foliaupdate)
        {
        dl->append( d );
        }
-       FoliaElement *h = new DependencyHead();
+       DependencyHead *dh = new DependencyHead();
 #pragma omp critical(foliaupdate)
        {
 	 for ( size_t j=0; j < pd.mwus[nums[i]-1].size(); ++ j ){
-	   h->append( pd.mwus[nums[i]-1][j] );
+	   dh->append( pd.mwus[nums[i]-1][j] );
 	 }
-	 d->append( h );
+	 d->append( dh );
        }
-
+       
 #pragma omp critical(foliaupdate)
        {
-	 h = new DependencyDependent();
+	 DependencyDependent *dd = new DependencyDependent();
 	 for ( size_t j=0; j < pd.mwus[i].size(); ++ j ){
-	   h->append( pd.mwus[i][j] );
+	   dd->append( pd.mwus[i][j] );
 	 }
-	 d->append( h );
+	 d->append( dd );
        }
      }
    }

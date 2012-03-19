@@ -37,7 +37,7 @@ class CGNTagger {
   ~CGNTagger();
   bool init( const Configuration& );
   void addDeclaration( folia::Document& ) const;
-  void Classify( folia::FoliaElement * );
+  void Classify( folia::Sentence * );
   std::string getTagset() const { return tagset; };
  private:
   MbtAPI *tagger;  

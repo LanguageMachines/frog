@@ -581,16 +581,16 @@ void Mbma::execute( const UnicodeString& word,
   }
 }
 
-void Mbma::addMorph( FoliaElement *word, 
+void Mbma::addMorph( Word *word, 
 		     const vector<string>& lemmas ){
-  FoliaElement *ml = new MorphologyLayer();
+  MorphologyLayer *ml = new MorphologyLayer();
 #pragma omp critical(foliaupdate)
   {
     word->append( ml );
   }
   int offset = 0;
   for ( size_t p=0; p < lemmas.size(); ++p ){
-    FoliaElement *m = new Morpheme();
+    Morpheme *m = new Morpheme();
 #pragma omp critical(foliaupdate)
     {
       ml->append( m );
@@ -598,7 +598,7 @@ void Mbma::addMorph( FoliaElement *word,
     KWargs args;
     args["value"] = lemmas[p];
     args["offset"] = toString(offset);
-    FoliaElement *t = new TextContent( args );
+    TextContent *t = new TextContent( args );
     offset += lemmas[p].length();
 #pragma omp critical(foliaupdate)
     {
@@ -607,7 +607,7 @@ void Mbma::addMorph( FoliaElement *word,
   }
 }	  
       
-void Mbma::postprocess( FoliaElement *fword, PosAnnotation *pos ){
+void Mbma::postprocess( Word *fword, PosAnnotation *pos ){
   if (debugFlag){
     for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
       *Log(mbmaLog) << "tag " <<  it->getTag() + " inflection: " << it->getInflection() << endl;
@@ -753,7 +753,7 @@ void Mbma::addDeclaration( Document& doc ) const {
 	       "', annotatortype='auto'");
 }
   
-bool Mbma::Classify( FoliaElement* sword ){
+bool Mbma::Classify( Word* sword ){
   UnicodeString uWord;
   PosAnnotation *pos;
 #pragma omp critical(foliaupdate)

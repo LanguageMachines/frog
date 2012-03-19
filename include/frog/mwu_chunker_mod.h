@@ -34,7 +34,7 @@
 class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );
  public:
-  mwuAna( folia::FoliaElement * );
+  mwuAna( folia::Word * );
   virtual ~mwuAna() {};
   
   void merge( const mwuAna * );
@@ -52,7 +52,7 @@ class mwuAna {
     mwuAna(){};
     std::string word;
     bool spec;
-    std::vector<folia::FoliaElement *> fwords;
+    std::vector<folia::Word *> fwords;
 };
 
 #define mymap2 std::multimap<std::string, std::vector<std::string> >
@@ -68,7 +68,7 @@ class Mwu {
   bool init( const Configuration& );
   void addDeclaration( folia::Document& ) const;
   void Classify( folia::Sentence * );
-  void add( folia::FoliaElement * );
+  void add( folia::Word * );
   std::string getTagset() const { return tagset; };
   std::vector<mwuAna*>& getAna(){ return mWords; };
  private:

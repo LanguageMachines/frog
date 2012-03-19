@@ -171,7 +171,7 @@ bool isSimilar( const string& tag, const string& cgnTag ){
     similar( tag, cgnTag, "ovt,1,ev" );
 }
 
-void Mblem::addAnnotation( FoliaElement *word,
+void Mblem::addAnnotation( Word *word,
 			   const string& cls ){
   KWargs args;
   args["set"]=tagset;
@@ -182,7 +182,7 @@ void Mblem::addAnnotation( FoliaElement *word,
   }
 }
   
-string Mblem::postprocess( FoliaElement *word ){
+string Mblem::postprocess( Word *word ){
   string tag;
 #pragma omp critical(foliaupdate)
   {
@@ -220,7 +220,7 @@ void Mblem::addDeclaration( Document& doc ) const {
 	       + "', annotatortype='auto'");
 }
 
-string Mblem::Classify( FoliaElement *sword ){
+string Mblem::Classify( Word *sword ){
   string word;
   string tag;
 #pragma omp critical(foliaupdate)

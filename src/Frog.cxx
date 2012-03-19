@@ -893,11 +893,8 @@ void Test( Document& doc,
 	   const string& xmlOutFile = "" ) {
   TimerBlock timers;
   timers.frogTimer.start();
-  // first we make sure that the doc will accept out annotations, by
+  // first we make sure that the doc will accept our annotations, by
   // declaring them in the doc
-  //
-  
-  const string versionstring = VERSION;
   myCGNTagger.addDeclaration( doc );
   myMblem.addDeclaration( doc );
   myMbma.addDeclaration( doc );

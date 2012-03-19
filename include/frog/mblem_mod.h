@@ -50,15 +50,15 @@ class Mblem {
   ~Mblem();
   bool init( const Configuration& );
   void addDeclaration( folia::Document& doc ) const;
-  std::string Classify( folia::FoliaElement * );
+  std::string Classify( folia::Word * );
  private:
   void read_transtable( const std::string& );
   void create_MBlem_defaults();
   bool readsettings( const std::string& dir, const std::string& fname );
-  void addAnnotation( folia::FoliaElement*,
+  void addAnnotation( folia::Word *,
 		      const std::string&);
   std::string make_instance( const UnicodeString& in );
-  std::string postprocess( folia::FoliaElement * );
+  std::string postprocess( folia::Word * );
   Timbl::TimblAPI *myLex;
   std::string punctuation;
   size_t history;
