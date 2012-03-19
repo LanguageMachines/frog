@@ -140,7 +140,6 @@ bool Mwu::read_mwus( const string& fname) {
 }
   
 bool Mwu::init( const Configuration& config ) {
-  myCFS = "_";
   *Log(mwuLog) << "initiating mwuChunker..." << endl;
   debug = tpDebug;
   string val = config.lookUp( "debug", "mwu" );
@@ -152,9 +151,6 @@ bool Mwu::init( const Configuration& config ) {
     return false;
   }
   mwuFileName = prefix( config.configDir(), val );
-  val = config.lookUp( "c", "mwu" );  
-  if ( !val.empty() )
-    myCFS = val;
   if ( !read_mwus(mwuFileName) ) {
     *Log(mwuLog) << "Cannot read mwu file " << mwuFileName << endl;
     return false;

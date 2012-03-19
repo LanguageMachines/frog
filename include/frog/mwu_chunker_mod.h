@@ -71,7 +71,6 @@ class Mwu {
   void add( folia::FoliaElement * );
   std::string getTagset() const { return tagset; };
   std::vector<mwuAna*>& getAna(){ return mWords; };
-  std::string myCFS;
  private:
   bool readsettings( const std::string&, const std::string&);
   bool read_mwus( const std::string& );
