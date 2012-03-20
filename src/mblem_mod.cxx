@@ -60,10 +60,14 @@ void Mblem::read_transtable( const string& tableName ) {
     bron >> className;
     bron >> ws;
     bron >> classCode;
-    if ( classMap.find( classCode ) == classMap.end() )
+    if ( classMap.find( classCode ) == classMap.end() ){
       // stupid HACK to only accept first occurence
       // multiple occurences is a NO NO i think
       classMap[classCode] = className;
+    }
+    // else {
+    //   *Log(mblemLog) << "multiple entry " << className << " " << classCode << " in translation table file: " << tableName  << " (Ignored) " << endl;      
+    // }
     bron >> ws;
   }
   return;
@@ -251,120 +255,144 @@ string Mblem::Classify( Word *sword ){
     UnicodeString part = UTF8ToUnicode( parts[index++] );
     if (debug)
       *Log(mblemLog) <<"part = " << part << endl;
-    UnicodeString insstr;
-    UnicodeString delstr;
-    UnicodeString prefix;
+    UnicodeString lemma = "";
     string restag;
-    size_t lpos = part.indexOf("+");
-    if ( lpos != string::npos )
-      restag = UnicodeToUTF8( UnicodeString( part, 0, lpos ) );
-    else 
-      restag =  UnicodeToUTF8( part );
-    if ( classMap.size() > 0 ){
-      map<string,string>::const_iterator it = classMap.find(restag);
-      if ( it != classMap.end() )
-	restag = it->second;
+    int lpos = part.indexOf("+");
+    if ( lpos < 0 ){ // nothing to edit
+      restag = UnicodeToUTF8( part );
+      lemma = uWord;
     }
-    size_t  pl = part.length();
-    lpos++;
-    while(lpos < pl) {
-      switch( part[lpos] ) {
-      case 'P': {
-	if (part[lpos-1] =='+') {
-	  lpos++;
-	  size_t tmppos = part.indexOf("+", lpos);
-	  if ( tmppos != string::npos )
-	    prefix = UnicodeString( part, lpos, tmppos - lpos );
-	  else 
-	    prefix = UnicodeString( part, lpos );
-	  if (debug)
-	    *Log(mblemLog) << "prefix=" << prefix << endl;
+    else {
+      restag = UnicodeToUTF8( UnicodeString( part, 0, lpos ) );
+      UnicodeString editstr = UnicodeString( part, lpos );
+      UnicodeString insstr;
+      UnicodeString delstr;
+      UnicodeString prefix;
+      bool done = false;
+      for ( int lpos=0; !done && lpos < editstr.length(); ++lpos ) {
+	if ( debug )
+	  *Log(mblemLog) << "editstr[" << lpos << "] = " 
+			 << UnicodeToUTF8(editstr[lpos]) << endl;
+	switch( editstr[lpos] ) {
+	case 'P': {
+	  if (editstr[lpos-1] =='+') {
+	    lpos++;
+	    int tmppos = editstr.indexOf("+", lpos);
+	    *Log(mblemLog) << "tmppos = " << tmppos << endl;
+	    if ( tmppos >=0 ){
+	      prefix = UnicodeString( editstr, lpos, tmppos - lpos );
+	      lpos = tmppos - 1;
+	    }
+	    else {
+	      prefix = UnicodeString( editstr, lpos );
+	      done = true;
+	    }
+	    if (debug)
+	      *Log(mblemLog) << "prefix=" << prefix << endl;
+	  }
+	  break;
 	}
-	break;
-      }
-      case 'D': {
-	if (part[lpos-1] =='+') {
-	  lpos++;
-	  size_t tmppos = part.indexOf("+", lpos);
-	  if ( tmppos != string::npos )
-	    delstr = UnicodeString( part, lpos, tmppos - lpos );
-	  else 
-	    delstr = UnicodeString( part, lpos );
-	  if (debug)
-	    *Log(mblemLog) << "delstr=" << delstr << endl;
+	case 'D': {
+	  if (editstr[lpos-1] =='+') {
+	    lpos++;
+	    int tmppos = editstr.indexOf("+", lpos);
+	    if ( tmppos >= 0 ){
+	      delstr = UnicodeString( editstr, lpos, tmppos - lpos );
+	      lpos = tmppos - 1;
+	    }
+	    else {
+	      delstr = UnicodeString( editstr, lpos );
+	      done = true;
+	    }
+	    if (debug)
+	      *Log(mblemLog) << "delstr=" << delstr << endl;
+	  }
+	  break;
 	}
-	break;
-      }
-      case 'I': {
-	if (part[lpos-1] =='+') {
-	  lpos++;
-	  size_t tmppos = part.indexOf("+", lpos);
-	  if ( tmppos != string::npos )
-	    insstr = UnicodeString( part, lpos, tmppos - lpos);
-	  else 
-	    insstr = UnicodeString( part, lpos);
-	  if (debug)
-	    *Log(mblemLog) << "insstr=" << insstr << endl;
+	case 'I': {
+	  if (editstr[lpos-1] =='+') {
+	    lpos++;
+	    int tmppos = editstr.indexOf("+", lpos);
+	    if ( tmppos >=0 ){
+	      insstr = UnicodeString( editstr, lpos, tmppos - lpos);
+	      lpos = tmppos - 1;
+	    }
+	    else {
+	      insstr = UnicodeString( editstr, lpos);
+	      done = true;
+	    }
+	    if (debug)
+	      *Log(mblemLog) << "insstr=" << insstr << endl;
+	  }
+	  break;
 	}
-	break;
+	default:
+	  break;
+	}
       }
-      default:
-	break;
+      if (debug){
+	*Log(mblemLog) << "pre-prefix word: '" << uWord << "' prefix: '"
+		       << prefix << "'" << endl;
+      }	
+      int prefixpos = 0;
+      if ( !prefix.isEmpty() ) {
+	prefixpos = uWord.indexOf(prefix);
+	if (debug)
+	  *Log(mblemLog) << "prefixpos = " << prefixpos << endl;
+	// repair cases where there's actually not a prefix present
+	if (prefixpos > uWord.length()-2) {
+	  prefixpos = 0;
+	  prefix.remove();
+	}
       }
-      lpos++;
-    } // while lpos < pl
-    
-    if (debug){
-      *Log(mblemLog) << "part: " << part << " split up in: " << endl;
-      *Log(mblemLog) << "pre-prefix word: '" << uWord << "' prefix: '"
-	   << prefix << "'" << endl;
-    }	
-    long prefixpos = 0;
-    if ( !prefix.isEmpty() ) {
-      prefixpos = uWord.indexOf(prefix);
+      
       if (debug)
 	*Log(mblemLog) << "prefixpos = " << prefixpos << endl;
-      // repair cases where there's actually not a prefix present
-      if (prefixpos > uWord.length()-2) {
-	prefixpos = 0;
-	prefix.remove();
+      if (prefixpos >= 0) {
+	lemma = UnicodeString( uWord, 0L, prefixpos );
+	prefixpos = prefixpos + prefix.length();
+      }
+      if (debug)
+	*Log(mblemLog) << "post prefix != 0 word: "<< uWord 
+		       << " lemma: " << lemma
+		       << " prefix: " << prefix
+		       << " insstr: " << insstr
+		       << " delstr: " << delstr
+		       << " l_delstr=" << delstr.length()
+		       << " l_word=" << uWord.length()
+		       << endl;
+      
+      if ( uWord.endsWith( delstr ) ){
+	if ( uWord.length() - delstr.length() > 0 ){
+	  UnicodeString part;
+	  part = UnicodeString( uWord, prefixpos, uWord.length() - delstr.length() - prefixpos );
+	  lemma += part + insstr;
+	}
+	else if ( insstr.isEmpty() ){
+	  // do not delete whole word
+	  lemma += UnicodeString( uWord, prefixpos, uWord.length() ); // uWord;
+	}
+	else {
+	  // but replace if possible
+	  lemma += insstr;
+	}
+      }
+      else if ( lemma.isEmpty() ){
+	lemma = uWord;
       }
     }
-    
-    if (debug)
-      *Log(mblemLog) << "prefixpos = " << prefixpos << endl;
-    UnicodeString lemma = "";
-    if (prefixpos >= 0) {
-      lemma = UnicodeString( uWord, 0L, prefixpos );
-      prefixpos = prefixpos + prefix.length();
-    }
-    if (debug)
-      *Log(mblemLog) << "post prefix != 0 word: "<< uWord 
-	   << " lemma: " << lemma
-	   << " prefix: " << prefix
-	   << " insstr: " << insstr
-	   << " delstr: " << delstr
-	   << " l_delstr=" << delstr.length()
-	   << " l_word=" << uWord.length()
-	   << endl;
-    
-    if ( uWord.endsWith( delstr ) ){
-      if ( uWord.length() - delstr.length() > 0 ){
-	UnicodeString part;
-	part = UnicodeString( uWord, prefixpos, uWord.length() - delstr.length() - prefixpos );
-	lemma += part + insstr;
+    if ( classMap.size() > 0 ){
+      map<string,string>::const_iterator it = classMap.find(restag);
+      if ( debug )
+	*Log(mblemLog) << "looking up " << restag << endl;
+      if ( it != classMap.end() ){
+	restag = it->second;
+	if ( debug )
+	  *Log(mblemLog) << "found " << restag << endl;
       }
-      else if ( insstr.isEmpty() ){
-	// do not delete whole word
-	lemma += uWord;
-      }
-      else {
-	// but replace if possible
-	lemma += insstr;
-      }
-    }
-    else if ( lemma.isEmpty() ){
-      lemma = uWord;
+      else
+	*Log(mblemLog) << "problem: found no translation for " 
+		       << restag << " using it 'as-is'" << endl;
     }
     if ( debug )
       *Log(mblemLog) << "appending lemma " << lemma << " and tag " << restag << endl;
