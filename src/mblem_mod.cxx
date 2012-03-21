@@ -363,13 +363,13 @@ string Mblem::Classify( Word *sword ){
 		       << endl;
       
       if ( uWord.endsWith( delstr ) ){
-	if ( uWord.length() - delstr.length() > 0 ){
-	  UnicodeString part;
-	  part = UnicodeString( uWord, prefixpos, uWord.length() - delstr.length() - prefixpos );
+	if ( uWord.length() > delstr.length() ){
+	  // chop delstr from the back, but do not delete the whole word
+	  UnicodeString part = UnicodeString( uWord, prefixpos, uWord.length() - delstr.length() - prefixpos );
 	  lemma += part + insstr;
 	}
 	else if ( insstr.isEmpty() ){
-	  // do not delete whole word
+	  // no replacement, just take part after the prefix
 	  lemma += UnicodeString( uWord, prefixpos, uWord.length() ); // uWord;
 	}
 	else {
@@ -381,7 +381,8 @@ string Mblem::Classify( Word *sword ){
 	lemma = uWord;
       }
     }
-    if ( classMap.size() > 0 ){
+    if ( !classMap.empty() ){
+      // translate TAG(number) stuf back to CGN things
       map<string,string>::const_iterator it = classMap.find(restag);
       if ( debug )
 	*Log(mblemLog) << "looking up " << restag << endl;
