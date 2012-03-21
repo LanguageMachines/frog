@@ -278,7 +278,8 @@ string Mblem::Classify( Word *sword ){
 	  if (editstr[lpos-1] =='+') {
 	    lpos++;
 	    int tmppos = editstr.indexOf("+", lpos);
-	    *Log(mblemLog) << "tmppos = " << tmppos << endl;
+	    if ( debug )
+	      *Log(mblemLog) << "tmppos = " << tmppos << endl;
 	    if ( tmppos >=0 ){
 	      prefix = UnicodeString( editstr, lpos, tmppos - lpos );
 	      lpos = tmppos - 1;

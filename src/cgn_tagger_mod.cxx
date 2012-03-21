@@ -318,7 +318,11 @@ void CGNTagger::addDeclaration( Document& doc ) const {
 }
 
 void CGNTagger::Classify( Sentence *sent ){
-  vector<Word*> swords = sent->words();
+  vector<Word*> swords;
+#pragma omp critical(foliaupdate)
+  {  
+    swords = sent->words();
+  }
   if ( !swords.empty() ) {
     vector<string> words;
     string sentence; // the tagger needs the whole sentence

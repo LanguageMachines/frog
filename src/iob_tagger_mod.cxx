@@ -219,7 +219,11 @@ void IOBTagger::addDeclaration( Document& doc ) const {
 }
 
 void IOBTagger::Classify( Sentence *sent ){
-  vector<Word*> swords = sent->words();
+  vector<Word*> swords;
+#pragma omp critical(foliaupdate)
+  {  
+    swords = sent->words();
+  }
   if ( !swords.empty() ) {
     vector<string> words;
     string sentence; // the tagger needs the whole sentence

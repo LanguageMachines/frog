@@ -869,22 +869,15 @@ void Parser::prepareParse( Sentence *sent, const string& setname,
        KWargs args;
        args["generate-id"] = sent->id();
        args["class"] = roles[i];
-       Dependency *d = new Dependency( sent->doc(), args );
 #pragma omp critical(foliaupdate)
        {
-       dl->append( d );
-       }
-       DependencyHead *dh = new DependencyHead();
-#pragma omp critical(foliaupdate)
-       {
+	 Dependency *d = new Dependency( sent->doc(), args );
+	 dl->append( d );
+	 DependencyHead *dh = new DependencyHead();
 	 for ( size_t j=0; j < pd.mwus[nums[i]-1].size(); ++ j ){
 	   dh->append( pd.mwus[nums[i]-1][j] );
 	 }
 	 d->append( dh );
-       }
-       
-#pragma omp critical(foliaupdate)
-       {
 	 DependencyDependent *dd = new DependencyDependent();
 	 for ( size_t j=0; j < pd.mwus[i].size(); ++ j ){
 	   dd->append( pd.mwus[i][j] );

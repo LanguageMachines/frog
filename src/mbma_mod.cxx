@@ -181,14 +181,14 @@ vector<string> Mbma::make_instances( const UnicodeString& word ){
       if (debugFlag > 10)
 	*Log(mbmaLog) << " " << j-LEFT << ": ";
       if ( j < LEFT || j >= word.length()+LEFT )
-	inst += "_,";
+	inst += '_';
       else {
 	if (word[j-LEFT] == ',' )
-	  inst += "C";
+	  inst += 'C';
 	else
 	  inst += word[j-LEFT];
-	inst += ",";
       }
+      inst += ",";
       if (debugFlag > 10)
 	*Log(mbmaLog) << " : " << inst << endl;
     }
@@ -202,14 +202,6 @@ vector<string> Mbma::make_instances( const UnicodeString& word ){
   return insts;
 }
   
-string extract_from( const string& line, char from ){
-  size_t pos = line.find( from );
-  if ( pos != string::npos )
-    return line.substr( pos+1 );
-  else
-    return "";
-}
-
 string extract( const string& line, size_t start, char to ){
   return line.substr( start, line.find( to , start ) - start );
 }
@@ -345,11 +337,10 @@ vector<waStruct> Mbma::Step1( unsigned int step,
   ana.push_back( waItem );
   waItem.clear();
   
-  /* without changes, but with inflection */
-  if ( this_class.find("/") != string::npos &&
-       this_class != "E/P" ) { 
-    string inflection = "i";
-    inflection += extract_from( this_class, '/' );
+  // do we have inflection?
+  size_t pos = this_class.find( '/' );
+  if ( pos != string::npos && this_class != "E/P" ) { 
+    string inflection = "i" + this_class.substr( pos+1 );
     waItem.act = inflection;
     ana.push_back( waItem );
   }
@@ -427,26 +418,26 @@ MBMAana Mbma::addInflect( const vector<waStruct>& ana,
 			  const string& inflect, 
 			  const vector<string>& morph ){
   bool found = false;
-  string thisclass;
+  string the_act;
   vector<waStruct>::const_reverse_iterator it = ana.rbegin();
   while ( !found && it != ana.rend() ) { 
     // go back to the last non-inflectional tag 
-    thisclass = it->act;
+    the_act = it->act;
     if (debugFlag){
-      *Log(mbmaLog) << "final tag " << thisclass << endl;
+      *Log(mbmaLog) << "final tag " << the_act << endl;
     }
-    if ( thisclass[0] != 'i' )
+    if ( the_act[0] != 'i' )
       found=true;
     else { 
       ++it;
     }
   }
-  string::size_type pos = thisclass.find_first_of("_/");
+  string::size_type pos = the_act.find_first_of("_/");
   string tag;
   if ( pos != string::npos )
-    tag = thisclass.substr( 0, pos );
+    tag = the_act.substr( 0, pos );
   else 
-    tag = thisclass;
+    tag = the_act;
   string outTag, descr;
   map<string,string>::const_iterator tit = tagNames.find( tag ); 
   if ( tit == tagNames.end() ){
@@ -473,16 +464,16 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
     if ( !it->word.isEmpty() ){
       morphemes.push_back( UnicodeToUTF8(it->word) );
     }
-    string this_class= it->act;
+    string this_act= it->act;
     if (debugFlag)
-      *Log(mbmaLog) << "unpacking thisclass "<< this_class << endl;
-    if ( inflect.empty() && !this_class.empty() &&
-	 this_class.find("_") == string::npos &&
-	 this_class[0]=='i' ){
-      for ( size_t i=1; i< this_class.length(); ++i ) {
-	if (this_class[i]!='/') {
+      *Log(mbmaLog) << "unpacking act "<< this_act << endl;
+    if ( inflect.empty() && !this_act.empty() &&
+	 this_act.find("_") == string::npos &&
+	 this_act[0]=='i' ){
+      for ( size_t i=1; i< this_act.length(); ++i ) {
+	if (this_act[i]!='/') {
 	  // check if it is a known inflection
-	  map<char,string>::const_iterator csIt = iNames.find(this_class[i]);
+	  map<char,string>::const_iterator csIt = iNames.find(this_act[i]);
 	  if ( csIt == iNames.end() ){
 	    if (debugFlag)
 	      *Log(mbmaLog) << "added X 1" << endl;
@@ -491,7 +482,7 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
 	  else {
 	    if (debugFlag)
 	      *Log(mbmaLog) << "added (1) (" << csIt->first << ") " << csIt->second << endl;
-	    inflect += this_class[i];
+	    inflect += this_act[i];
 	  }
 	}
       }
@@ -520,21 +511,13 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
   }
 }
 
-/* "based on mbma.c" is an understatement. The postprocessing is going
-   to be a copy'n'paste from mbma.c for now, since nobody understands
-   the orig code anymore, and there is no time to relearn it now. So
-   it's just going to have a new, and more flexible
-   front-end/wrapper/whatever.
-*/
-
 void Mbma::execute( const UnicodeString& word, 
 		    const vector<string>& classes ){
   const string basictags = "NAQVDOBPYIXZ";
   analysis.clear();
-  /* determine the largest number of alternative analyses 
-     and store every part in a vector of string vectors
-  */
-  int nranal=1;
+  // determine all alternative analyses, remember the largest
+  // and store every part in a vector of string vectors
+  int largest_anal=1;
   vector<vector<string> > classParts;
   classParts.resize( classes.size() );
   for ( unsigned int j=0; j< classes.size(); ++j ){
@@ -542,10 +525,11 @@ void Mbma::execute( const UnicodeString& word,
     int num = split_at( classes[j], parts, "|" );
     if ( num > 0 ){
       classParts[j] = parts;
-      if ( num > nranal )
-	nranal = num;
+      if ( num > largest_anal )
+	largest_anal = num;
     }
     else {
+      // only one, create a dummy
       vector<string> dummy;
       dummy.push_back( classes[j] );
       classParts[j] = dummy;
@@ -559,13 +543,10 @@ void Mbma::execute( const UnicodeString& word,
     out += ">";
     *Log(mbmaLog) << out << endl;
   }    
-  /* then for each analysis, produce a labeled bracketed string */
   
-  /* produce a basic bracketed string, taking care of
-     insertions, deletions, and replacements */
-  
-  for ( unsigned int step=nranal; step> 0; --step ) { 
-    vector<waStruct> ana = Step1( step, word, nranal, 
+  // now loop over all the analysis
+  for ( unsigned int step=largest_anal; step> 0; --step ) { 
+    vector<waStruct> ana = Step1( step, word, largest_anal, 
 				  classParts, basictags );
     if (debugFlag)
       *Log(mbmaLog) << "intermediate analysis 1: " << ana << endl;
@@ -777,18 +758,15 @@ bool Mbma::Classify( Word* sword ){
   vector<string> classes;
   for( size_t i=0; i < insts.size(); ++i ) {
     string ans;
-    string db;
-    double d;
-    MTree->Classify( insts[i], ans, db, d );
+    MTree->Classify( insts[i], ans );
     if ( debugFlag )
-      *Log(mbmaLog) << "itt #" << i << ": timbl gave class= " << ans 
-	   << " from distrib= " << db << endl; 
+      *Log(mbmaLog) << "itt #" << i << ": timbl gave class= " << ans << endl; 
     classes.push_back( ans);
   }
+
   // fix for 1st char class ==0
   if ( classes[0] == "0" )
-    classes[0] = "X";
-  
+    classes[0] = "X";  
   execute( uWord, classes );
   postprocess( sword, pos );
   return true;
