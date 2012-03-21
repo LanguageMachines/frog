@@ -252,6 +252,11 @@ string Mbma::calculate_ins_del( const string& in_class,
       *Log(mbmaLog) << "result class=" << result_class << endl;
     }
   }
+  else {
+    if ( debugFlag ){
+      *Log(mbmaLog) << "calculate_ins_del: do nothing" << endl;
+    }
+  }
   return result_class;
 }
 
@@ -301,9 +306,9 @@ vector<waStruct> Mbma::Step1( unsigned int step,
 	( insertstring != "be" ) )
       tobeignored = insertstring.length();
     
-    /* encountering POS tag */
     if ( basictags.find(this_class[0]) != string::npos &&
 	 this_class != "PE" ) { 
+      // encountering POS tag
       if ( !previoustag.empty() ) { 
 	waItem.act = previoustag;
 	ana.push_back( waItem );
@@ -318,8 +323,7 @@ vector<waStruct> Mbma::Step1( unsigned int step,
 	  ana.push_back( waItem );
 	  waItem.clear();
 	}
-	previoustag = "i";
-	previoustag += this_class;
+	previoustag = "i" + this_class;
       }
     }
     /* copy the next character */
@@ -621,8 +625,8 @@ void Mbma::postprocess( Word *fword, PosAnnotation *pos ){
     }
     if (debugFlag) {
       *Log(mbmaLog) << "main tag " << tagIt->second
-	   << " matches " << match 
-	   << " morpho analyses: " << endl;
+		    << " matches " << match 
+		    << " morpho analyses: " << endl;
       for( size_t p=0; p < match; ++p )  {
 	*Log(mbmaLog) << "\tmatch #" << p << " : " << analysis[matches[p]].getMorph() << endl;
       }
