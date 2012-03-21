@@ -242,7 +242,7 @@ string Mbma::calculate_ins_del( const string& in_class,
       pos += deletestring.length()+1;
       insertstring = extract( in_class, pos+1, '/' );
     }
-    /* spelling change done; remove from this_class */
+    /* spelling change done; remove from in_class */
     result_class = extract( in_class, 0, '+' );
     pos = in_class.find("/");
     if ( pos != string::npos )
@@ -276,10 +276,10 @@ vector<waStruct> Mbma::Step1( unsigned int step,
   string this_class;
   string previoustag;
   waStruct waItem;
-  for ( long k=0; k< word.length(); ++k ) { 
+  for ( long k=0; k < word.length(); ++k ) { 
     this_class = find_class( step, classParts[k], nranal );
     if ( debugFlag){
-      *Log(mbmaLog) << "Step1::" << step << " " << this_class << endl;
+      *Log(mbmaLog) << "Step::" << step << " " << this_class << endl;
     }
     string deletestring;
     string insertstring;
@@ -496,9 +496,9 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
   if (debugFlag)	
     *Log(mbmaLog) << "inflectAndAffix: " << inflect << " - " << morphemes << endl;
   if ( inflect.empty() ){
-    MBMAana retVal;
     if (debugFlag)
-      *Log(mbmaLog) << "no Inflection addTag: " << retVal << endl;
+      *Log(mbmaLog) << "Inflection: none " << endl;
+    MBMAana retVal;
     return retVal;
   }
   else {
@@ -506,7 +506,7 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
     // tag and stick it at the end
     MBMAana retVal = addInflect( ana, inflect, morphemes );
     if (debugFlag)
-      *Log(mbmaLog) << "Inflection addTag: " << retVal << endl;
+      *Log(mbmaLog) << "Inflection: " << retVal << endl;
     return retVal;
   }
 }
@@ -537,7 +537,7 @@ void Mbma::execute( const UnicodeString& word,
   }
   
   if (debugFlag){
-    string out = "mbma_bb, word=" + UnicodeToUTF8(word) + ", classes=<";
+    string out = "alternatives: word=" + UnicodeToUTF8(word) + ", classes=<";
     for ( size_t i=0; i < classes.size(); ++i )
       out += classes[i] + ",";
     out += ">";
@@ -555,9 +555,6 @@ void Mbma::execute( const UnicodeString& word,
     if (debugFlag)
       *Log(mbmaLog) << "intermediate analysis 3: " << ana << endl;
     MBMAana tmp = inflectAndAffix( ana );
-    if (debugFlag){
-      *Log(mbmaLog) << "b_out: " << tmp << endl;
-    }
     analysis.push_back( tmp );
   }
 }
@@ -773,9 +770,8 @@ bool Mbma::Classify( Word* sword ){
 }
 
 ostream& operator<< ( ostream& os, const MBMAana& a ){
-  os << a.tag << " " 
-     << a.infl << " >>>> " << a.morphemes << " <<<< [[[[ "
-     << a.description << " ]]]] ";
+  os << "tag: " << a.tag << " infl:" << a.infl << " morhemes: " 
+     << a.morphemes << " description: " << a.description;
   return os;
 }
 
