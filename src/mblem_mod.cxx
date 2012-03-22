@@ -175,8 +175,7 @@ bool isSimilar( const string& tag, const string& cgnTag ){
     similar( tag, cgnTag, "ovt,1,ev" );
 }
 
-void Mblem::addAnnotation( Word *word,
-			   const string& cls ){
+void Mblem::addLemma( FoliaElement *word, const string& cls ){
   KWargs args;
   args["set"]=tagset;
   args["cls"]=cls;
@@ -186,35 +185,52 @@ void Mblem::addAnnotation( Word *word,
   }
 }
   
+void Mblem::addAltLemma( Word *word, const string& cls ){
+  Alternative *alt = new Alternative();
+#pragma omp critical(foliaupdate)
+  {
+    word->append( alt );
+  }
+  addLemma( alt, cls );
+}
+  
 string Mblem::postprocess( Word *word ){
   string tag;
 #pragma omp critical(foliaupdate)
   {
     tag = word->pos();
   }
-  string res;
   size_t index = 0;
   size_t nrlookup = mblemResult.size();
-  while ( index < nrlookup &&
-	  !isSimilar( tag, mblemResult[index].getTag() ) ){
+  bool none=true;
+  string result;
+  while ( index < nrlookup 
+	  && none     // for nowm we DO NOT add Alt Nodes
+	  ){
+    if (debug)
+      *Log(mblemLog) << "compare cgn-tag " << tag << " with " << mblemResult[index].getTag() << endl;
+    if ( isSimilar( tag, mblemResult[index].getTag() ) ){
+      if ( debug )
+	*Log(mblemLog) << "similar! " << endl;
+      string res = mblemResult[index].getLemma();
+      if ( none ){
+	addLemma( word, res );
+	result = res;
+      }
+      else
+	addAltLemma( word, res );
+      none = false;
+    }
     ++index;
   }
-  // Here index is either < nrlookup which means there is some similarity
-  // between tag and  mblem[index].getTag(), 
-  // or == nrlookup, which means no match
   
-  if ( index == nrlookup ) {
+  if ( none  ) {
     if (debug)
       *Log(mblemLog) << "NO CORRESPONDING TAG! " << tag << endl;
-    res = mblemResult[0].getLemma();
+    result = mblemResult[0].getLemma();
+    addLemma( word, result );
   }
-  else {
-    res = mblemResult[index].getLemma();
-  }
-  if (debug)
-    *Log(mblemLog) << "final MBLEM lemma: " << res << endl;
-  addAnnotation( word, res );
-  return res;
+  return result;
 } 
 
 void Mblem::addDeclaration( Document& doc ) const {
@@ -233,7 +249,7 @@ string Mblem::Classify( Word *sword ){
     tag = sword->annotation<PosAnnotation>()->feat("head");
   }
   if ( tag == "SPEC" || tag == "LET" ) {
-    addAnnotation( sword, word );
+    addLemma( sword, word );
     return word;
   }
   UnicodeString uWord = UTF8ToUnicode(word);
@@ -400,7 +416,7 @@ string Mblem::Classify( Word *sword ){
       *Log(mblemLog) << "appending lemma " << lemma << " and tag " << restag << endl;
     mblemResult.push_back( mblemData( UnicodeToUTF8(lemma), restag ) );
   } // while
-  if ( debug ){
+  if ( debug ) {
     *Log(mblemLog) << "stored lemma and tag options: " << mblemResult.size() << " lemma's and " << mblemResult.size() << " tags:" << endl;
     for( size_t index=0; index < mblemResult.size(); ++index ){
       *Log(mblemLog) << "lemma alt: " << mblemResult[index].getLemma()

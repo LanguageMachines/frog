@@ -55,8 +55,8 @@ class Mblem {
   void read_transtable( const std::string& );
   void create_MBlem_defaults();
   bool readsettings( const std::string& dir, const std::string& fname );
-  void addAnnotation( folia::Word *,
-		      const std::string&);
+  void addLemma( folia::FoliaElement *, const std::string&);
+  void addAltLemma( folia::Word *, const std::string&);
   std::string make_instance( const UnicodeString& in );
   std::string postprocess( folia::Word * );
   Timbl::TimblAPI *myLex;
