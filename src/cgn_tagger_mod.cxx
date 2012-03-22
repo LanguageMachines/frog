@@ -254,12 +254,13 @@ string getSubSet( const string& val, const string& head ){
 			   "' whithin the constraints for '" + head + "'" );
 }
 
-void addTag( Word *word, const string& tagset,
-	     const string& inputTag, double confidence ){
+void CGNTagger::addTag( Word *word, const string& inputTag, double confidence ){
   string cgnTag = inputTag;
   string mainTag;
   string tagPartS;
   string ucto_class = word->cls();
+  if ( debug )
+    *Log(cgnLog) << "ucto class= " << ucto_class << endl;
   if ( ucto_class == "ABBREVIATION-KNOWN" ){
     mainTag = "SPEC";
     tagPartS = "afk";
@@ -267,7 +268,7 @@ void addTag( Word *word, const string& tagset,
     confidence = 1.0;
   }
   else if ( ucto_class == "SMILEY" ||
-	    ucto_class == "URL-WWW" ||
+	    ucto_class.find("URL") == 0 ||
 	    ucto_class == "E-MAIL" ){
     mainTag = "SPEC";
     tagPartS = "symb";
@@ -347,7 +348,7 @@ void CGNTagger::Classify( Sentence *sent ){
       }
     }
     for ( size_t i=0; i < tagv.size(); ++i ){
-      addTag( swords[i], tagset, tagv[i].assignedTag(), tagv[i].confidence() );
+      addTag( swords[i], tagv[i].assignedTag(), tagv[i].confidence() );
     }
   }
 }
