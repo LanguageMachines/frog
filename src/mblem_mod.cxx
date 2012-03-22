@@ -232,7 +232,7 @@ string Mblem::Classify( Word *sword ){
     word = sword->str();
     tag = sword->annotation<PosAnnotation>()->feat("head");
   }
-  if ( tag == "SPEC" ) {
+  if ( tag == "SPEC" || tag == "LET" ) {
     addAnnotation( sword, word );
     return word;
   }

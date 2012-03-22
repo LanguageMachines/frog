@@ -744,7 +744,7 @@ bool Mbma::Classify( Word* sword ){
     pos = sword->annotation<PosAnnotation>();
   }
   string tag = pos->feat("head");
-  if ( tag == "SPEC" ){
+  if ( tag == "SPEC" || tag == "LET" ){
     string word = UnicodeToUTF8( uWord );
     vector<string> tmp;
     tmp.push_back( word );
