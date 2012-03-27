@@ -5870,7 +5870,7 @@ Classes
 5863	N(17)+Ddekes
 5864	TW(6)+Deenre+Iéén
 5865	ADJ(25)|BW(1)|TW(6)+Deens+Iéén
-5866	N(15)+Dtje|TW(15)+Dtje|TW(15)|TW(15)+Deentje+Iéé|N(15)+Deentje+Iéén|TW(15)+Deentje+Iéén
+5866	N(15)+Dtje|TW(15)+Dtje|TW(15)|N(15)+Deentje+Iéén|TW(15)+Deentje+Iéén
 5867	N(17)+Dtjes|TW(4)+Deentjes+Iéén
 5868	ADJ(16)+Ders|ADJ(14)
 5869	ADJ(4)+Dmen+Iam|ADJ(4)
@@ -5878,7 +5878,7 @@ Classes
 5871	ADJ(33)|ADJ(15)|ADJ(20)|ADJ(22)|ADJ(25)|ADJ(26)|BW(1)
 5872	ADJ(34)+De|ADJ(19)+De|ADJ(21)+De|ADJ(21)|ADJ(21)+Deerdere+Ivroeg
 5873	ADJ(28)|BW(1)|TW(16)|TW(12)|TW(16)+Deerst+Iéén|TW(12)+Deerst+Iéén
-5874	TW(12)+Drste+In|TW(16)+De|TW(16)|TW(12)|TW(12)+Deerste+Iéé|TW(16)+Deerste+Iéén|TW(12)+Deerste+Iéén
+5874	TW(12)+Drste+In|TW(16)+De|TW(16)|TW(12)|TW(16)+Deerste+Iéén|TW(12)+Deerste+Iéén
 5875	N(16)+Ds|ADJ(6)|ADJ(20)|ADJ(25)|N(13)|N(16)
 5876	N(15)+Detje|N(15)+Dtje
 5877	N(17)+Detjes|N(17)+Dtjes

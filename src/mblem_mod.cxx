@@ -204,9 +204,7 @@ string Mblem::postprocess( Word *word ){
   size_t nrlookup = mblemResult.size();
   bool none=true;
   string result;
-  while ( index < nrlookup 
-	  && none     // for nowm we DO NOT add Alt Nodes
-	  ){
+  while ( index < nrlookup  ){
     if (debug)
       *Log(mblemLog) << "compare cgn-tag " << tag << " with " << mblemResult[index].getTag() << endl;
     if ( isSimilar( tag, mblemResult[index].getTag() ) ){
@@ -216,10 +214,12 @@ string Mblem::postprocess( Word *word ){
       if ( none ){
 	addLemma( word, res );
 	result = res;
+	none = false;
       }
-      else
+      else {
+	// there are more matching lemmas. add them as alternatives
 	addAltLemma( word, res );
-      none = false;
+      }
     }
     ++index;
   }
