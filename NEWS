@@ -1,7 +1,7 @@
 0.12.15 - 2012-03-28
  * using the new Mbt 3.2.8 API for Tagging.
    The code is much simpler and less error-prone now.
- * We no longer ship the datafiles. use frogdata package instead
+ * We no longer ship the datafiles. Use frogdata package instead
 
 0.12.14 - 2012-02-29
  * NER was disabled. fixed
