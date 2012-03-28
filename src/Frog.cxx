@@ -114,7 +114,6 @@ string encoding;
 
 Configuration configuration;
 static string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
-static string smallConfigFileName =  configDir + "small-frog.cfg";
 static string configFileName = configDir + "frog.cfg";
 
 void usage( ) {
@@ -181,13 +180,9 @@ bool parse_args( TimblOpts& Opts ) {
     cerr << "config read from: " << configFileName << endl;
   }
   else {
-    if ( configuration.fill( smallConfigFileName ) ){
-      cerr << "config read from: " << smallConfigFileName << endl;
-    }
-    else {
-      cerr << "failed te read configuration from! '" << configFileName << "'" << endl;
-      return false;
-    }
+    cerr << "failed te read configuration from! '" << configFileName << "'" << endl;
+    cerr << "did you correctly install the frogdata package?" << endl;
+    return false;
   }
 
   // debug opts
@@ -408,17 +403,6 @@ bool froginit(){
     doParse = false;
   }
   
-  if ( doParse ){
-    if ( !configuration.hasSection( "parser" ) ){
-      *Log(theErrLog) << "IMPORTANT!" << endl;
-      *Log(theErrLog) << "the Dependency Parser is not installed!" << endl;
-      *Log(theErrLog) << "Please see http://ilk.uvt.nl/frog for information about " << endl;
-      *Log(theErrLog) << "how to obtain and install the needed files." << endl;
-      *Log(theErrLog) << "To run frog without the parser, add '--skip=p' to your command." << endl;
-      return false;
-    }
-  }
-
   if ( doServer ){
     // we use fork(). omp (GCC version) doesn't do well when omp is used
     // before the fork!
