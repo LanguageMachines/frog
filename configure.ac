@@ -170,7 +170,6 @@ AC_CHECK_HEADERS( [Python.h], , AC_MSG_FAILURE("can't find Python C API") )
 AC_OUTPUT([
   Makefile
   m4/Makefile
-  config/Makefile
   docs/Makefile
   scripts/Makefile
   tests/Makefile
