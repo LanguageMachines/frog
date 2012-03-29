@@ -1,6 +1,9 @@
-0.12.15 - 2012-03-28
+0.12.15 - 2012-03-29
  * using the new Mbt 3.2.8 API for Tagging.
    The code is much simpler and less error-prone now.
+ * depends on libfolia 0.9
+ * improved mblem module: <alt> tags for alternative readings, faster too
+ * refactoctoring all over the place
  * We no longer ship the datafiles. Use frogdata package instead
 
 0.12.14 - 2012-02-29
