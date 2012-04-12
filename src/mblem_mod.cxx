@@ -268,83 +268,37 @@ string Mblem::Classify( Word *sword ){
   }
   int index = 0;
   while ( index < numParts ) {
-    UnicodeString part = UTF8ToUnicode( parts[index++] );
-    if (debug)
-      *Log(mblemLog) <<"part = " << part << endl;
-    UnicodeString lemma = "";
+    string partS = parts[index++]; 
+    UnicodeString lemma;
     string restag;
-    int lpos = part.indexOf("+");
-    if ( lpos < 0 ){ // nothing to edit
-      restag = UnicodeToUTF8( part );
+    string::size_type pos = partS.find("+");
+    if ( pos == string::npos ){ 
+      // nothing to edit
+      restag = partS;
       lemma = uWord;
     }
     else {
-      restag = UnicodeToUTF8( UnicodeString( part, 0, lpos ) );
-      UnicodeString editstr = UnicodeString( part, lpos );
+      // some edit info available, like: WW(27)+Dgekomen+Ikomen
+      vector<string> edits;
+      size_t n = split_at( partS, edits, "+" );
+      restag = edits[0]; // the first one is the POS tag
+
       UnicodeString insstr;
       UnicodeString delstr;
       UnicodeString prefix;
-      bool done = false;
-      for ( int lpos=0; !done && lpos < editstr.length(); ++lpos ) {
-	if ( debug )
-	  *Log(mblemLog) << "editstr[" << lpos << "] = " 
-			 << UnicodeToUTF8(editstr[lpos]) << endl;
-	switch( editstr[lpos] ) {
-	case 'P': {
-	  if (editstr[lpos-1] =='+') {
-	    lpos++;
-	    int tmppos = editstr.indexOf("+", lpos);
-	    if ( debug )
-	      *Log(mblemLog) << "tmppos = " << tmppos << endl;
-	    if ( tmppos >=0 ){
-	      prefix = UnicodeString( editstr, lpos, tmppos - lpos );
-	      lpos = tmppos - 1;
-	    }
-	    else {
-	      prefix = UnicodeString( editstr, lpos );
-	      done = true;
-	    }
-	    if (debug)
-	      *Log(mblemLog) << "prefix=" << prefix << endl;
-	  }
+      for ( size_t l=1; l < edits.size(); ++l ) {
+	switch ( edits[l][0] ){
+	case 'P':
+	  prefix = UTF8ToUnicode( edits[l].substr( 1 ) );
 	  break;
-	}
-	case 'D': {
-	  if (editstr[lpos-1] =='+') {
-	    lpos++;
-	    int tmppos = editstr.indexOf("+", lpos);
-	    if ( tmppos >= 0 ){
-	      delstr = UnicodeString( editstr, lpos, tmppos - lpos );
-	      lpos = tmppos - 1;
-	    }
-	    else {
-	      delstr = UnicodeString( editstr, lpos );
-	      done = true;
-	    }
-	    if (debug)
-	      *Log(mblemLog) << "delstr=" << delstr << endl;
-	  }
+	case 'I':
+	  insstr = UTF8ToUnicode( edits[l].substr( 1 ) );
 	  break;
-	}
-	case 'I': {
-	  if (editstr[lpos-1] =='+') {
-	    lpos++;
-	    int tmppos = editstr.indexOf("+", lpos);
-	    if ( tmppos >=0 ){
-	      insstr = UnicodeString( editstr, lpos, tmppos - lpos);
-	      lpos = tmppos - 1;
-	    }
-	    else {
-	      insstr = UnicodeString( editstr, lpos);
-	      done = true;
-	    }
-	    if (debug)
-	      *Log(mblemLog) << "insstr=" << insstr << endl;
-	  }
+	case 'D':
+	  delstr =  UTF8ToUnicode( edits[l].substr( 1 ) );
 	  break;
-	}
 	default:
-	  break;
+	  *Log(mblemLog) << "Error: strange value in editstring: " << edits[l] << endl;
 	}
       }
       if (debug){
