@@ -353,6 +353,9 @@ string Mblem::Classify( Word *sword ){
       }	
       int prefixpos = 0;
       if ( !prefix.isEmpty() ) {
+	// Whenever Toads makemblem is improved, (the infamous 
+	// 'tegemoetgekomen' example), this should probably
+	// become prefixpos = uWord.lastIndexOf(prefix);
 	prefixpos = uWord.indexOf(prefix);
 	if (debug)
 	  *Log(mblemLog) << "prefixpos = " << prefixpos << endl;
