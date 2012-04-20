@@ -186,9 +186,10 @@ void Mblem::addLemma( FoliaElement *word, const string& cls ){
 }
   
 void Mblem::addAltLemma( Word *word, const string& cls ){
-  Alternative *alt = new Alternative();
+  Alternative *alt = 0;
 #pragma omp critical(foliaupdate)
   {
+    alt = new Alternative( word->doc(), "generate_id='" + word->id() + "'");
     word->append( alt );
   }
   addLemma( alt, cls );
