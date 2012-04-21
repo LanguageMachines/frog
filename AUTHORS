@@ -1,20 +1,29 @@
 Authors:
 
-People that wrote and rewrote the Frog code, starting from 0.1
+People who wrote and rewrote the Frog code, starting from 0.1
 
-Berjan Busser
+Bertjan Busser
 Antal van den Bosch
 Maarten van Gompel
 Ko van der Sloot
 
 Contributors:
 
-People that contributed to Frog by suggesting improvements, 
-filing bug reports, asking the right questions etc.
+People who contributed code for NLP modules that found
+their way into Frog:
+
+Sander Canisius (CSI-DP)
+Jakub Zavrel (MBT)
+
+People who contributed to Frog by suggesting improvements, 
+filing bug reports, asking the right questions etc.:
 
 Walter Daelemans
+Micha Hulsbosch
+Emmanuel Keuleers
 Martin Reynaart
 Frederik Vaassen
-and many others
+
+and many others.
 
 
