@@ -327,20 +327,24 @@ string Mblem::Classify( Word *sword ){
 	prefixpos = prefixpos + prefix.length();
       }
       if (debug)
-	*Log(mblemLog) << "post prefix != 0 word: "<< uWord 
+	*Log(mblemLog) << "post word: "<< uWord 
 		       << " lemma: " << lemma
 		       << " prefix: " << prefix
-		       << " insstr: " << insstr
 		       << " delstr: " << delstr
-		       << " l_delstr=" << delstr.length()
-		       << " l_word=" << uWord.length()
+		       << " insstr: " << insstr
 		       << endl;
       
       if ( uWord.endsWith( delstr ) ){
 	if ( uWord.length() > delstr.length() ){
 	  // chop delstr from the back, but do not delete the whole word
-	  UnicodeString part = UnicodeString( uWord, prefixpos, uWord.length() - delstr.length() - prefixpos );
-	  lemma += part + insstr;
+	  if ( uWord.length() == delstr.length() + 1  && insstr.isEmpty() ){
+	    // do not mangle short words too
+	    lemma += uWord;
+	  }
+	  else {
+	    UnicodeString part = UnicodeString( uWord, prefixpos, uWord.length() - delstr.length() - prefixpos );
+	    lemma += part + insstr;
+	  }
 	}
 	else if ( insstr.isEmpty() ){
 	  // no replacement, just take part after the prefix
