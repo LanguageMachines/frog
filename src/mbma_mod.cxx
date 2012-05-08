@@ -220,16 +220,18 @@ string find_class( unsigned int step,
   }
   return result;
 }
-  
+
 string Mbma::calculate_ins_del( const string& in_class, 
 				string& deletestring,
-				string& insertstring ){
+				string& insertstring,
+				bool& participle ){
   string result_class = in_class;
   size_t pos = in_class.find("+");
   if ( pos != string::npos ) { 
     if ( debugFlag){
       *Log(mbmaLog) << "calculate ins/del for " << in_class << endl;
     }
+    participle = ( in_class.find( 'p' ) < pos );
     pos++;
     if (in_class[pos]=='D') { // delete operation 
       deletestring = extract( in_class, pos+1, '/' );
@@ -288,7 +290,8 @@ vector<waStruct> Mbma::Step1( unsigned int step,
     }
     string deletestring;
     string insertstring;
-    this_class = calculate_ins_del( this_class, deletestring, insertstring);
+    bool participle;
+    this_class = calculate_ins_del( this_class, deletestring, insertstring, participle );
     if ( deletestring == "eeer" )
       deletestring = "eer";
     /* exceptions */
@@ -301,9 +304,10 @@ vector<waStruct> Mbma::Step1( unsigned int step,
     UnicodeString last = UTF8ToUnicode( deletestring );
     waItem.word += last;
     // delete the insertstring :-) 
-    if (( tobeignored == 0 ) &&
-	( insertstring != "ge" ) &&
-	( insertstring != "be" ) )
+    if ( tobeignored == 0 &&
+	 ( !participle || 
+	   ( insertstring != "ge" &&
+	     insertstring != "be" ) ) )
       tobeignored = insertstring.length();
     
     if ( basictags.find(this_class[0]) != string::npos &&
@@ -546,6 +550,7 @@ void Mbma::execute( const UnicodeString& word,
       out += classes[i] + ",";
     out += ">";
     *Log(mbmaLog) << out << endl;
+    *Log(mbmaLog) << "ClassParts : " << classParts << endl;
   }    
   
   // now loop over all the analysis

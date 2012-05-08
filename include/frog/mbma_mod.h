@@ -58,7 +58,8 @@ class Mbma {
   std::vector<std::string> make_instances( const UnicodeString& word );
   std::string calculate_ins_del( const std::string& in_class, 
 				 std::string& deletestring,
-				 std::string& insertstring );
+				 std::string& insertstring,
+				 bool& );
   std::vector<waStruct> Step1( unsigned int step, 
 			       const UnicodeString& word, int nranal,
 			       const std::vector<std::vector<std::string> >& classParts,
