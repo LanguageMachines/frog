@@ -49,7 +49,7 @@ class Mbma {
   bool init( const Configuration& );
   void addDeclaration( folia::Document& doc ) const;
   bool Classify( folia::Word * );
-  std::string getIname( char ) const;
+  std::vector<std::vector<std::string> > analyze( const std::string& );
  private:
   void cleanUp();
   bool readsettings( const std::string&, const std::string& );

@@ -203,7 +203,12 @@ vector<string> Mbma::make_instances( const UnicodeString& word ){
 }
   
 string extract( const string& line, size_t start, char to ){
-  return line.substr( start, line.find( to , start ) - start );
+  string::size_type pos = line.find( to , start );
+  if ( to == '>' && pos == string::npos ){
+    cerr << "invalid edit value in line " << line << endl;
+    return "";
+  }
+  return line.substr( start, pos - start );
 }
 
 string find_class( unsigned int step, 
@@ -597,7 +602,7 @@ void Mbma::addMorph( Word *word,
 void Mbma::postprocess( Word *fword, PosAnnotation *pos ){
   if (debugFlag){
     for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      *Log(mbmaLog) << "tag " <<  it->getTag() + " inflection: " << it->getInflection() << endl;
+      *Log(mbmaLog) <<  *it << endl;
     *Log(mbmaLog) << "morph analyses: " << endl;;
     for (vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
       *Log(mbmaLog) << it->getMorph() << endl;
@@ -765,8 +770,10 @@ bool Mbma::Classify( Word* sword ){
   for( size_t i=0; i < insts.size(); ++i ) {
     string ans;
     MTree->Classify( insts[i], ans );
-    if ( debugFlag )
+    if ( debugFlag ){
       *Log(mbmaLog) << "itt #" << i << ": timbl gave class= " << ans << endl; 
+      *Log(mbmaLog) << "\t\t" << "matched at depth=" << MTree->matchDepth() << endl; 
+    }
     classes.push_back( ans);
   }
 
@@ -776,6 +783,47 @@ bool Mbma::Classify( Word* sword ){
   execute( uWord, classes );
   postprocess( sword, pos );
   return true;
+}
+
+vector<vector<string> > Mbma::analyze( const string& wrd ){
+  string word = Timbl::compress( wrd );
+  if ( word.find(' ') != string::npos ){
+    throw ValueError( "mbma::analyze() word is not a single word '" + word + "'" );    
+  }
+  UnicodeString uWord = UTF8ToUnicode(word);
+  uWord.toLower();
+  if (debugFlag)
+    *Log(mbmaLog) << "analyze word: " << uWord << endl;
+  vector<string> insts = make_instances( uWord );
+  vector<string> classes;
+  for( size_t i=0; i < insts.size(); ++i ) {
+    string ans;
+    MTree->Classify( insts[i], ans );
+    if ( debugFlag ){
+      *Log(mbmaLog) << "itt #" << i << ": timbl gave class= " << ans << endl; 
+      *Log(mbmaLog) << "\t\t" << "matched at depth=" << MTree->matchDepth() << endl; 
+    }
+    classes.push_back( ans);
+  }
+  // fix for 1st char class == 0
+  if ( classes[0] == "0" )
+    classes[0] = "X";  
+  execute( uWord, classes );
+  vector<vector<string> > result;
+
+  for (vector<MBMAana>::const_iterator it=analysis.begin(); 
+       it != analysis.end(); 
+       it++ ){
+    vector<string> mors = it->getMorph();
+    if ( debugFlag ){
+      *Log(mbmaLog) << "Morps " << mors << endl;
+    }
+    result.push_back( mors );
+  }
+  if ( debugFlag ){
+    *Log(mbmaLog) << "result of morph analyses: " << result << endl;
+  }
+  return result;
 }
 
 ostream& operator<< ( ostream& os, const MBMAana& a ){
