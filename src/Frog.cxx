@@ -1051,11 +1051,13 @@ int main(int argc, char *argv[]) {
 	cerr << "terminated." << endl;
 	return EXIT_FAILURE;
       }
-      
+
+#ifdef HAVE_OPENMP      
       if ( doServer ) {
       	// run in one thread in server mode, forking is too expensive for lots of small snippets
       	omp_set_num_threads( 1 );
       }
+#endif
       if ( !fileNames.empty() ) {
 	string outPath;
 	string xmlPath;

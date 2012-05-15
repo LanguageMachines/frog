@@ -54,9 +54,9 @@ if test x"$acx_pthread_ok" = xyes; then
 fi
 
 # check for OpenMP
-OPENMP_CHECK( [CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"],
-	      [AC_MSG_ERROR([We need OpenMP, please use a recent compiler!])])
-
+OPENMP_CHECK( [CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+	      AC_DEFINE(HAVE_OPENMP, 1 , Define to 1 if you have OpenMP )],
+	      [AC_MSG_NOTICE(We don't have OpenMP. Multithreaded testing is disabled)] )
 
 if test $prefix = "NONE"; then
    prefix="$ac_default_prefix"
