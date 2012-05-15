@@ -508,6 +508,10 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
   }
   if (debugFlag)	
     *Log(mbmaLog) << "inflectAndAffix: " << inflect << " - " << morphemes << endl;
+  
+#ifdef OLD_VERSION
+  // this creates empty MBMAana's
+  // seems dead wrong…
   if ( inflect.empty() ){
     if (debugFlag)
       *Log(mbmaLog) << "Inflection: none " << endl;
@@ -522,6 +526,14 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
       *Log(mbmaLog) << "Inflection: " << retVal << endl;
     return retVal;
   }
+#else
+  // go back to the last non-inflectional
+  // tag and stick it at the end. 
+  MBMAana retVal = addInflect( ana, inflect, morphemes );
+  if (debugFlag)
+    *Log(mbmaLog) << "Inflection: " << retVal << endl;
+  return retVal;
+#endif
 }
 
 void Mbma::execute( const UnicodeString& word, 
