@@ -211,21 +211,6 @@ string extract( const string& line, size_t start, char to ){
   return line.substr( start, pos - start );
 }
 
-string find_class( unsigned int step, 
-		   const vector<string>& classes,
-		   unsigned int nranal ){
-  string result = classes[0];
-  if ( nranal > 1 ){
-    if ( classes.size() > 1 ){
-      if ( classes.size() >= step )
-	result = classes[step-1];
-      else
-	result = "0";
-    }
-  }
-  return result;
-}
-
 string Mbma::calculate_ins_del( const string& in_class, 
 				string& deletestring,
 				string& insertstring,
@@ -280,7 +265,7 @@ ostream& operator<< ( ostream& os, const vector<waStruct>& V ){
 }
 
 vector<waStruct> Mbma::Step1( unsigned int step, 
-			      const UnicodeString& word, int nranal,
+			      const UnicodeString& word,
 			      const vector<vector<string> >& classParts,
 			      const string& basictags ) {
   vector<waStruct> ana;
@@ -289,7 +274,7 @@ vector<waStruct> Mbma::Step1( unsigned int step,
   string previoustag;
   waStruct waItem;
   for ( long k=0; k < word.length(); ++k ) { 
-    this_class = find_class( step, classParts[k], nranal );
+    this_class = classParts[step][k];
     if ( debugFlag){
       *Log(mbmaLog) << "Step::" << step << " " << this_class << endl;
     }
@@ -306,8 +291,8 @@ vector<waStruct> Mbma::Step1( unsigned int step,
       eexcept = true;
     }
     // insert the deletestring :-) 
-    UnicodeString last = UTF8ToUnicode( deletestring );
-    waItem.word += last;
+    UnicodeString dels = UTF8ToUnicode( deletestring );
+    waItem.word += dels;
     // delete the insertstring :-) 
     if ( tobeignored == 0 &&
 	 ( !participle || 
@@ -536,10 +521,25 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
 #endif
 }
 
-void Mbma::execute( const UnicodeString& word, 
-		    const vector<string>& classes ){
-  const string basictags = "NAQVDOBPYIXZ";
-  analysis.clear();
+#define OLD_STEP
+
+#ifdef OLD_STEP
+string find_class( unsigned int step, 
+		   const vector<string>& classes,
+		   unsigned int nranal ){
+  string result = classes[0];
+  if ( nranal > 1 ){
+    if ( classes.size() > 1 ){
+      if ( classes.size() > step )
+	result = classes[step];
+      else
+	result = "0";
+    }
+  }
+  return result;
+}
+
+vector<vector<string> > generate_all_perms( const vector<string>& classes ){
   // determine all alternative analyses, remember the largest
   // and store every part in a vector of string vectors
   int largest_anal=1;
@@ -560,20 +560,93 @@ void Mbma::execute( const UnicodeString& word,
       classParts[j] = dummy;
     }
   }
+  //
+  // now expand the result
+  vector<vector<string> > result;
+  for ( int step=0; step < largest_anal; ++step ){
+    vector<string> item(classParts.size());
+    for ( size_t k=0; k < classParts.size(); ++k ) { 
+      item[k] = find_class( step, classParts[k], largest_anal );
+    }
+    result.push_back( item );
+  }
+  return result;
+}
+#else  
+
+bool next_perm( vector< vector<string>::const_iterator >& its,
+		const vector<vector<string> >& parts ){
+  int count=0;
+  for ( size_t i=0; i < parts.size(); ++i ){
+    ++its[i];
+    if ( its[i] == parts[i].end() ){
+      if ( i == parts.size() -1 )
+	return false;
+      its[i] = parts[i].begin();
+    }
+    else 
+      return true;
+  }
+  return false;
+}
+
+vector<vector<string> > generate_all_perms( const vector<string>& classes ){
   
-  if (debugFlag){
+  // determine all alternative analyses
+  // store every part in a vector of string vectors
+  vector<vector<string> > classParts;
+  classParts.resize( classes.size() );
+  for ( unsigned int j=0; j< classes.size(); ++j ){
+    vector<string> parts;
+    int num = split_at( classes[j], parts, "|" );
+    if ( num > 0 ){
+      classParts[j] = parts;
+    }
+    else {
+      // only one, create a dummy
+      vector<string> dummy;
+      dummy.push_back( classes[j] );
+      classParts[j] = dummy;
+    }
+  }
+  //
+  // now expand
+  vector< vector<string>::const_iterator > its( parts.size() );
+  for ( size_t i=0; i<parts.size(); ++i ){
+    its[i] = parts[i].begin();
+  }
+  vector<vector<string> > result;
+  bool more = true;
+  while ( more ){
+    vector<string> item(parts.size());
+    for( size_t j=0; j< parts.size(); ++j ){
+      item[j] = *its[j];
+    }
+    result.push_back( item );
+    more = next_perm( its, parts );
+  }
+  return result;
+}
+#endif
+
+void Mbma::execute( const UnicodeString& word, 
+		    const vector<string>& classes ){
+  const string basictags = "NAQVDOBPYIXZ";
+  analysis.clear();
+
+  vector<vector<string> > allParts = generate_all_perms( classes );
+  if ( debugFlag ){
     string out = "alternatives: word=" + UnicodeToUTF8(word) + ", classes=<";
     for ( size_t i=0; i < classes.size(); ++i )
       out += classes[i] + ",";
     out += ">";
     *Log(mbmaLog) << out << endl;
-    *Log(mbmaLog) << "ClassParts : " << classParts << endl;
+    *Log(mbmaLog) << "allParts : " << allParts << endl;
   }    
   
   // now loop over all the analysis
-  for ( unsigned int step=largest_anal; step> 0; --step ) { 
-    vector<waStruct> ana = Step1( step, word, largest_anal, 
-				  classParts, basictags );
+  for ( unsigned int step=0; step < allParts.size(); ++step ) { 
+    vector<waStruct> ana = Step1( step, word, allParts, basictags );
     if (debugFlag)
       *Log(mbmaLog) << "intermediate analysis 1: " << ana << endl;
     resolve_inflections( ana, basictags );

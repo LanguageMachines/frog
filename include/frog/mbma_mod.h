@@ -61,7 +61,7 @@ class Mbma {
 				 std::string& insertstring,
 				 bool& );
   std::vector<waStruct> Step1( unsigned int step, 
-			       const UnicodeString& word, int nranal,
+			       const UnicodeString& word, 
 			       const std::vector<std::vector<std::string> >& classParts,
 			       const std::string& basictags );
   void resolve_inflections( std::vector<waStruct>& , const std::string& );

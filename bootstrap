@@ -50,6 +50,12 @@ aclocal=aclocal
       then
          found=true
          break
+      else
+	if test -f ${d}ax_define_dir.m4
+      	then
+	  found=true
+          break
+        fi
       fi
    done
 
