@@ -88,6 +88,13 @@ void UctoTokenizer::setSentencePerLineInput( bool b ) {
     throw runtime_error( "ucto tokenizer not initalized" );
 };
 
+void UctoTokenizer::setQuoteDetection( bool b ) {
+  if ( tokenizer )
+    tokenizer->setQuoteDetection( b ); 
+  else
+    throw runtime_error( "ucto tokenizer not initalized" );
+};
+
 void UctoTokenizer::setInputEncoding( const std::string & enc ){
   if ( tokenizer ){
     if ( !enc.empty() )

@@ -90,6 +90,7 @@ bool doParse = true;
 bool doDirTest = false;
 bool doServer = false;
 bool doSentencePerLine = false;
+bool doQuoteDetection = false;
 string listenport = "void";
 string encoding;
 
@@ -195,6 +196,9 @@ bool parse_args( TimblOpts& Opts ) {
   };
   if ( Opts.Find ('n', value, mood)) {
     doSentencePerLine = true;
+  };
+  if ( Opts.Find ('Q', value, mood)) {
+    doQuoteDetection = true;
   };
   if ( Opts.Find( "skip", value, mood)) {
     string skip = value;
@@ -410,6 +414,7 @@ bool froginit(){
     bool stat = tokenizer.init( configuration, docid, !doTok );
     if ( stat ){
       tokenizer.setSentencePerLineInput( doSentencePerLine );
+      tokenizer.setQuoteDetection( doQuoteDetection );
       tokenizer.setInputEncoding( encoding );
       tokenizer.setInputXml( doXMLin );
       stat = myCGNTagger.init( configuration );
@@ -455,6 +460,7 @@ bool froginit(){
 	tokStat = tokenizer.init( configuration, docid, !doTok );
 	if ( tokStat ){
 	  tokenizer.setSentencePerLineInput( doSentencePerLine );
+	  tokenizer.setQuoteDetection( doQuoteDetection );
 	  tokenizer.setInputEncoding( encoding );
 	  tokenizer.setInputXml( doXMLin );
 	}
