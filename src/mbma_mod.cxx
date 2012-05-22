@@ -856,8 +856,8 @@ bool Mbma::Classify( Word* sword ){
     string ans;
     MTree->Classify( insts[i], ans );
     if ( debugFlag ){
-      *Log(mbmaLog) << "itt #" << i << ": timbl gave class= " << ans << endl; 
-      *Log(mbmaLog) << "\t\t" << "matched at depth=" << MTree->matchDepth() << endl; 
+      *Log(mbmaLog) << "itt #" << i << ": timbl gave class= " << ans 
+		    << ", it matched at depth=" << MTree->matchDepth() << endl; 
     }
     classes.push_back( ans);
   }
