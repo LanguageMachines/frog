@@ -3,9 +3,10 @@
 
 AM_CPPFLAGS = -I@top_srcdir@/include
 
-bin_PROGRAMS = frog
+bin_PROGRAMS = frog mbma
 
 frog_SOURCES = Frog.cxx
+mbma_SOURCES = mbma_prog.cxx
 
 LDADD = libfrog.la
 lib_LTLIBRARIES = libfrog.la
