@@ -45,7 +45,7 @@ using namespace folia;
 const long int LEFT =  6; // left context
 const long int RIGHT = 6; // right context
 
-Mbma::Mbma(): MTreeFilename( "dm.igtree" ), MTree(0) { 
+Mbma::Mbma(): MTreeFilename( "dm.igtree" ), MTree(0), transliterator(0) { 
   mbmaLog = new LogStream( theErrLog, "mbma-" );
 }
 
@@ -129,6 +129,17 @@ void Mbma::init_cgn( const string& dir ) {
   else
     throw ( runtime_error( "unable to open:" + fn ) );
 }
+
+void Mbma::init_filter( ){
+  UErrorCode stat = U_ZERO_ERROR;
+  transliterator = Transliterator::createInstance( "NFD; [:M:] Remove; NFC",
+						   UTRANS_FORWARD,
+						   stat );
+  if ( U_FAILURE( stat ) ){
+    throw runtime_error( "initFilter FAILED !" );
+  }
+}
+
   
 bool Mbma::init( const Configuration& config ) {
   *Log(mbmaLog) << "Initiating morphological analyzer..." << endl;
@@ -154,7 +165,11 @@ bool Mbma::init( const Configuration& config ) {
   MTreeFilename = prefix( config.configDir(), tfName );
   fillMaps();
   init_cgn( config.configDir() );
-    //Read in (igtree) data
+  string dof = config.lookUp( "filter_diacritics", "mbma" );
+  if ( dof == "true" || dof == "TRUE" || dof =="yes" || dof == "YES" ){
+    init_filter();
+  }
+  //Read in (igtree) data
   string opts = config.lookUp( "timblOpts", "mbma" );
   if ( opts.empty() )
     opts = "-a1";
@@ -829,7 +844,17 @@ void Mbma::addDeclaration( Document& doc ) const {
 	       "annotator='frog-mbma-" +  version + 
 	       "', annotatortype='auto'");
 }
-  
+
+UnicodeString Mbma::filterDiacritics( const UnicodeString& in ) const {
+  if ( transliterator ){
+    UnicodeString result = in;
+    transliterator->transliterate( result );
+    return result;
+  }
+  else
+    return in;
+}
+
 bool Mbma::Classify( Word* sword ){
   UnicodeString uWord;
   PosAnnotation *pos;
@@ -847,6 +872,7 @@ bool Mbma::Classify( Word* sword ){
     return true;
   }
   uWord.toLower();
+  uWord = filterDiacritics( uWord );
   if (debugFlag)
     *Log(mbmaLog) << "Classify word: " << uWord << endl;
   

@@ -29,6 +29,8 @@
 #ifndef MBMA_MOD_H
 #define MBMA_MOD_H
 
+#include <unicode/translit.h>
+
 class MBMAana;
 
 struct waStruct {
@@ -55,6 +57,8 @@ class Mbma {
   bool readsettings( const std::string&, const std::string& );
   void fillMaps();
   void init_cgn( const std::string& );
+  void init_filter( );
+  UnicodeString filterDiacritics( const UnicodeString& ) const;
   std::vector<std::string> make_instances( const UnicodeString& word );
   std::string calculate_ins_del( const std::string& in_class, 
 				 std::string& deletestring,
@@ -83,6 +87,7 @@ class Mbma {
   std::string version;
   std::string tagset;
   LogStream *mbmaLog;
+  Transliterator *transliterator;
 };
 
 class MBMAana {
