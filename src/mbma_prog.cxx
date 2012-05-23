@@ -52,10 +52,10 @@ using namespace Timbl;
 
 LogStream my_default_log( cerr, "mbma", StampMessage ); // fall-back
 LogStream *theErrLog = &my_default_log;  // fill the externals
+int tpDebug = 0; //0 for none, more for more output
 
 string TestFileName;
 string ProgName;
-int tpDebug = 0; //0 for none, more for more output
 
 Configuration configuration;
 static string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
@@ -64,7 +64,7 @@ static string configFileName = configDir + "frog.cfg";
 void usage( ) {
   cout << endl << "Options:\n";
   cout << "\t============= INPUT MODE (mandatory, choose one) ========================\n"
-       << "\t -t <testfile>          Run frog on this file\n"
+       << "\t -t <testfile>          Run mbma on this file\n"
        << "\t -c <filename>    Set configuration file (default " << configFileName << ")\n"
        << "\t============= OTHER OPTIONS ============================================\n"
        << "\t -h. give some help.\n"
@@ -96,17 +96,19 @@ bool parse_args( TimblOpts& Opts ) {
     cerr << "config read from: " << configFileName << endl;
   }
   else {
-    cerr << "failed te read configuration from! '" << configFileName << "'" << endl;
+    cerr << "failed to read configuration from! '" << configFileName << "'" << endl;
     cerr << "did you correctly install the frogdata package?" << endl;
     return false;
   }
 
   // debug opts
   if ( Opts.Find ('d', value, mood)) {
-    if ( !Timbl::stringTo<int>( value, tpDebug ) ){
+    int debug = 0;
+    if ( !Timbl::stringTo<int>( value, debug ) ){
       cerr << "-d value should be an integer" << endl;
       return false;
     }
+    configuration.set( "debug", value, "mbma" );
     Opts.Delete('d');
   };
 
