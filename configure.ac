@@ -10,9 +10,6 @@ AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADER([config.h])
 
-# AC_DEFINE_DIR is defined in acinclude.m4
-AC_DEFINE_DIR([SYSCONF_PATH], sysconfdir, sysconfdir)
-
 if test x"${CXXFLAGS+set}" = xset; then
   # the user set CXXFLAGS; don't override it.
   cxx_flags_were_set=true
@@ -31,6 +28,9 @@ AC_PROG_RANLIB
 # use libtool
 AC_PROG_LIBTOOL
 AC_SUBST([LIBTOOL_DEPS])
+
+SYSCONFDIR=$sysconfdir
+AC_SUBST([SYSCONFDIR])
 
 # when running tests, use CXX
 AC_LANG([C++])
