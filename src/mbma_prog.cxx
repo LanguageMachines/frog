@@ -36,21 +36,19 @@
 #include <vector>
 #include <map>
 
+#include "config.h"
 #include "timbl/TimblAPI.h"
 #include "timbl/LogStream.h"
-#include "timblserver/TimblServerAPI.h"
-
-// individual module headers
-
-#include "config.h"
-#include "frog/Configuration.h"
 #include "libfolia/folia.h"
+#include "frog/ucto_tokenizer_mod.h"
+#include "frog/cgn_tagger_mod.h"
+#include "frog/Configuration.h"
 #include "frog/mbma_mod.h"
 
 using namespace std;
 using namespace Timbl;
 
-LogStream my_default_log( cerr, "mbma", StampMessage ); // fall-back
+LogStream my_default_log( cerr, "", StampMessage ); // fall-back
 LogStream *theErrLog = &my_default_log;  // fill the externals
 int tpDebug = 0; //0 for none, more for more output
 
@@ -60,6 +58,9 @@ string ProgName;
 Configuration configuration;
 static string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
 static string configFileName = configDir + "frog.cfg";
+
+static UctoTokenizer tokenizer;
+static CGNTagger tagger;
 
 void usage( ) {
   cout << endl << "Options:\n";
@@ -129,7 +130,15 @@ bool init(){
   // so first make sure it will not fail on some trivialities
   //
   if ( !myMbma.init( configuration ) ){
-    cerr << "Initialization failed." << endl;
+    cerr << "MBMA Initialization failed." << endl;
+    return false;
+  }
+  if ( !tokenizer.init( configuration, "", false ) ){
+    cerr << "UCTO Initialization failed." << endl;
+    return false;
+  }
+  if ( !tagger.init( configuration ) ){
+    cerr << "CGN Initialization failed." << endl;
     return false;
   }
   cerr << "Initialization done." << endl;
@@ -139,17 +148,20 @@ bool init(){
 void Test( istream& in ){
   string line;
   while ( getline( in, line ) ){
-    vector<string> words;
-    split_at_first_of( line, words, " \t\"',./;':<>?!`~()@#$%^&*-_=+[]{}\\|" );
-    for ( size_t w=0; w < words.size(); ++w ){
-      vector<vector<string> > res = myMbma.analyze( words[w] );
-      cout << words[w] << "\t";
-      for ( size_t i=0; i < res.size(); ++i ){
-	cout << res[i];
-	if ( i < res.size()-1 )
-	  cout << "/";
+    vector<string> sentences = tokenizer.tokenize( line );
+    for ( size_t s=0; s < sentences.size(); ++s ){
+      vector<TagResult> tagv = tagger.tagLine(sentences[s]);
+      for ( size_t w=0; w < tagv.size(); ++w ){
+	vector<vector<string> > res = myMbma.analyze( tagv[w].word() );
+	cout << tagv[w].word() << " {" << tagv[w].assignedTag() << "}\t";
+	for ( size_t i=0; i < res.size(); ++i ){
+	  cout << res[i];
+	  if ( i < res.size()-1 )
+	    cout << "/";
+	}
+	cout << endl;
       }
-      cout << endl;
+      cout << "<utt>" << endl << endl;
     }
     cout << endl;
   }

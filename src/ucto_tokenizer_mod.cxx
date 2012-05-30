@@ -112,6 +112,15 @@ void UctoTokenizer::setInputXml( bool b ){
     throw runtime_error( "ucto tokenizer not initalized" );
 }
 
+vector<string> UctoTokenizer::tokenize( const string& line ){
+  if ( tokenizer ){
+    tokenizer->tokenizeLine( line );
+    return tokenizer->getSentences();
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initalized" );
+}
+
 folia::Document UctoTokenizer::tokenize( istream& is ){
   if ( tokenizer )
     return tokenizer->tokenize( is );

@@ -29,6 +29,8 @@
 #ifndef CGN_TAGGER_MOD_H
 #define CGN_TAGGER_MOD_H
 
+#include "mbt/MbtAPI.h"
+
 class Configuration;
 
 class CGNTagger {
@@ -39,6 +41,7 @@ class CGNTagger {
   void addDeclaration( folia::Document& ) const;
   void addTag( folia::Word *, const std::string&, double );
   void Classify( folia::Sentence * );
+  std::vector<TagResult> tagLine( const std::string& );
   std::string getTagset() const { return tagset; };
  private:
   MbtAPI *tagger;  
