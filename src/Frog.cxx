@@ -76,6 +76,7 @@ bool wantOUT;
 string XMLoutFileName;
 bool doXMLin;
 bool doXMLout;
+bool doKanon;
 string outputDirName;
 string xmlDirName;
 set<string> fileNames;
@@ -334,7 +335,10 @@ bool parse_args( TimblOpts& Opts ) {
     XMLoutFileName = value;
     Opts.Delete('X');
   }
-  
+  if ( Opts.Find ("KANON", value, mood) ){
+    doKanon = true;
+    Opts.Delete( "KANON" );
+  }
   doXMLin = false;
   if ( Opts.Find ('x', value, mood)) {
     doXMLin = true;
@@ -911,7 +915,7 @@ void Test( Document& doc,
     if ( doServer && doXMLout )
       outStream << doc << endl;
     if ( !xmlOutFile.empty() ){
-      doc.save( xmlOutFile );
+      doc.save( xmlOutFile, doKanon );
       *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
     }
   } 
