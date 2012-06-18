@@ -851,6 +851,13 @@ bool Mbma::Classify( Word* sword ){
     addMorph( sword, tmp );
     return true;
   }
+  Classify( uWord );
+  postprocess( sword, pos );
+  return true;
+}
+
+void Mbma::Classify( const UnicodeString& word ){
+  UnicodeString uWord = word;
   uWord.toLower();
   uWord = filterDiacritics( uWord );
   if (debugFlag)
@@ -867,13 +874,11 @@ bool Mbma::Classify( Word* sword ){
     }
     classes.push_back( ans);
   }
-
+  
   // fix for 1st char class ==0
   if ( classes[0] == "0" )
     classes[0] = "X";  
   execute( uWord, classes );
-  postprocess( sword, pos );
-  return true;
 }
 
 vector<vector<string> > Mbma::analyze( const string& wrd ){
@@ -882,26 +887,8 @@ vector<vector<string> > Mbma::analyze( const string& wrd ){
     throw ValueError( "mbma::analyze() word is not a single word '" + word + "'" );    
   }
   UnicodeString uWord = UTF8ToUnicode(word);
-  uWord.toLower();
-  if (debugFlag)
-    *Log(mbmaLog) << "analyze word: " << uWord << endl;
-  vector<string> insts = make_instances( uWord );
-  vector<string> classes;
-  for( size_t i=0; i < insts.size(); ++i ) {
-    string ans;
-    MTree->Classify( insts[i], ans );
-    if ( debugFlag ){
-      *Log(mbmaLog) << "itt #" << i << ": timbl gave class= " << ans << endl; 
-      *Log(mbmaLog) << "\t\t" << "matched at depth=" << MTree->matchDepth() << endl; 
-    }
-    classes.push_back( ans);
-  }
-  // fix for 1st char class == 0
-  if ( classes[0] == "0" )
-    classes[0] = "X";  
-  execute( uWord, classes );
+  Classify( uWord );
   vector<vector<string> > result;
-
   for (vector<MBMAana>::const_iterator it=analysis.begin(); 
        it != analysis.end(); 
        it++ ){
