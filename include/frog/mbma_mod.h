@@ -52,7 +52,8 @@ class Mbma {
   void addDeclaration( folia::Document& doc ) const;
   bool Classify( folia::Word * );
   void Classify( const UnicodeString& );
-  std::vector<std::vector<std::string> > analyze( const std::string& );
+  std::vector<std::vector<std::string> > analyze( const std::string&,
+						  const std::string& );
  private:
   void cleanUp();
   bool readsettings( const std::string&, const std::string& );
@@ -76,7 +77,9 @@ class Mbma {
   MBMAana inflectAndAffix( const std::vector<waStruct>& ana );
   void execute( const UnicodeString& word, 
 		const std::vector<std::string>& classes );
-  void postprocess( folia::Word *, folia::PosAnnotation * );
+  void postprocess( folia::Word *,
+		    const std::string&, 
+		    const std::vector<std::string>& );
   int debugFlag;
   void addMorph( folia::Word *, const std::vector<std::string>& );
   std::string MTreeFilename;

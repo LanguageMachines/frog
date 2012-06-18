@@ -678,8 +678,10 @@ void Mbma::addMorph( Word *word,
     }
   }
 }	  
-      
-void Mbma::postprocess( Word *fword, PosAnnotation *pos ){
+
+void Mbma::postprocess( Word *fword,
+			const string& head, 
+			const vector<string>& feats ){
   if (debugFlag){
     for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
       *Log(mbmaLog) <<  *it << endl;
@@ -688,41 +690,41 @@ void Mbma::postprocess( Word *fword, PosAnnotation *pos ){
       *Log(mbmaLog) << it->getMorph() << endl;
     *Log(mbmaLog) << "before morpho: " << endl;
   }
-  const string tag = pos->feat("head");
-  map<string,string>::const_iterator tagIt = TAGconv.find( tag );
+  map<string,string>::const_iterator tagIt = TAGconv.find( head );
   if ( tagIt == TAGconv.end() ) {
     //
     // this should never happen
     //
-    if (debugFlag){
-      *Log(mbmaLog) << "no match!" << endl;
-    } 
-    throw ValueError( "unknown pos tag value '" + tag + "'" );
+    throw ValueError( "unknown head feature '" + head + "'" );
   }
   else {
     if (debugFlag){
       *Log(mbmaLog) << "#matches: " << tagIt->first << " " << tagIt->second << endl;
     }
-    size_t match = 0;	
-    vector<size_t> matches;
-    for ( size_t m_index = 0; m_index <analysis.size(); ++m_index ) {
-      if (debugFlag)
-	*Log(mbmaLog) << "comparing " << tagIt->second << " with " << analysis[m_index].getTag() << endl;
-      if ( tagIt->second == analysis[m_index].getTag() ) {
-	match++;
-	matches.push_back( m_index );
+    vector<MBMAana>::iterator ait = analysis.begin();
+    while ( ait != analysis.end() ){
+      if ( tagIt->second == ait->getTag() ) {
+	if (debugFlag)
+	  *Log(mbmaLog) << "comparing " << tagIt->second << " with " 
+			<< ait->getTag() << " (OK)" << endl;
+	ait++;
+      }
+      else {
+	if (debugFlag)
+	  *Log(mbmaLog) << "comparing " << tagIt->second << " with " 
+			<< ait->getTag() << " (rejected)" << endl;
+	ait = analysis.erase( ait );
       }
     }
+    size_t matched = analysis.size();
     if (debugFlag) {
-      *Log(mbmaLog) << "main tag " << tagIt->second
-		    << " matches " << match 
+      *Log(mbmaLog) << "main tag " << tagIt->second << " matches " << matched
 		    << " morpho analyses: " << endl;
-      for( size_t p=0; p < match; ++p )  {
-	*Log(mbmaLog) << "\tmatch #" << p << " : " << analysis[matches[p]].getMorph() << endl;
+      for( size_t p=0; p < matched; ++p )  {
+	*Log(mbmaLog) << "\tmatch #" << p << " : " << analysis[p].getMorph() << endl;
       }
     }
-    //should be(come?) a switch
-    if ( match == 0 ) {
+    if ( matched == 0 ) {
       // fallback option: use the word and pretend it's a lemma ;-)
       UnicodeString word;
 #pragma omp critical(foliaupdate)
@@ -734,8 +736,8 @@ void Mbma::postprocess( Word *fword, PosAnnotation *pos ){
       tmp.push_back( UnicodeToUTF8(word) );
       addMorph( fword, tmp );
     }
-    else if (match == 1) {
-      const vector<string> ma = analysis[matches[0]].getMorph();
+    else if ( matched == 1 ) {
+      const vector<string> ma = analysis[0].getMorph();
       addMorph( fword, ma );
     } 
     else {
@@ -743,8 +745,8 @@ void Mbma::postprocess( Word *fword, PosAnnotation *pos ){
 	*Log(mbmaLog) << "multiple lemma's" << endl;
       map<string, int> possible_lemmas;
       // find unique lemma's
-      for ( size_t q = 0; q < match; ++q ) {
-	const vector<string> ma = analysis[matches[q]].getMorph();
+      for ( size_t q = 0; q < matched; ++q ) {
+	const vector<string> ma = analysis[q].getMorph();
 	string key;
 	for ( size_t p=0; p < ma.size(); ++p )
 	  key += ma[p];
@@ -756,8 +758,10 @@ void Mbma::postprocess( Word *fword, PosAnnotation *pos ){
 	  lemmaIt->second++;
 	}
       }
-      if (debugFlag)
+      if (debugFlag){
 	*Log(mbmaLog) << "#unique lemma's: " << possible_lemmas.size() << endl;
+	*Log(mbmaLog) << possible_lemmas << endl;
+      }
       if ( possible_lemmas.size() < 1) {
 	if (debugFlag)
 	  *Log(mbmaLog) << "Problem!, no possible lemma's" << endl;
@@ -765,35 +769,37 @@ void Mbma::postprocess( Word *fword, PosAnnotation *pos ){
       }
       // append all unique lemmas
       // find best match
-      // loop through all subParts of the tag
+      // loop through all subfeatures of the tag
       // and match with inflections from each m
-      vector<Feature*> feats = pos->select<Feature>();
       if (debugFlag){
-	*Log(mbmaLog) << "tag: " << tag << endl;
+	*Log(mbmaLog) << "head: " << head << endl;
 	for ( size_t q =0 ; q < feats.size(); ++q ) {
-	  *Log(mbmaLog) << "\tpart #" << q << ": " << feats[q]->cls() << endl;
+	  *Log(mbmaLog) << "\tpart #" << q << ": " << feats[q] << endl;
 	}
       }
       map <string, const vector<string>* > bestMatches;
       int max_count = 0;
-      for ( size_t q=0; q < match; ++q ) {
+      for ( size_t q=0; q < analysis.size(); ++q ) {
 	int match_count = 0;
-	string inflection = analysis[matches[q]].getInflection();
+	string inflection = analysis[q].getInflection();
 	if (debugFlag)
-	  *Log(mbmaLog) << "matching " << inflection << " with " << tag << endl;
+	  *Log(mbmaLog) << "matching " << inflection << " with " << head << endl;
 	for ( size_t u=0; u < feats.size(); ++u ) {
-	  map<string,string>::const_iterator conv_tag_p = TAGconv.find(feats[u]->cls());
+	  map<string,string>::const_iterator conv_tag_p = TAGconv.find(feats[u]);
 	  if (conv_tag_p != TAGconv.end()) {
 	    string c = conv_tag_p->second;
-	    if ( inflection.find( c ) != string::npos )
+	    *Log(mbmaLog) << "found " << feats[u] << " ==> " << c << endl;
+	    if ( inflection.find( c ) != string::npos ){
+	      *Log(mbmaLog) << "it is in the inflection " << endl;
 	      match_count++;
+	    }
 	  }
 	}
 	if (debugFlag)
 	  *Log(mbmaLog) << "score: " << match_count << " max was " << max_count << endl;
 	if (match_count >= max_count) {
 	  string key;
-	  const vector<string> *ma = &analysis[matches[q]].getMorph();
+	  const vector<string> *ma = &analysis[q].getMorph();
 	  for ( size_t p=0; p < ma->size(); ++p )
 	    key += (*ma)[p] + "+"; // create uniqe keys
 	  
@@ -817,8 +823,8 @@ void Mbma::postprocess( Word *fword, PosAnnotation *pos ){
       }
     }
   }
-}  // postprocess
-
+}
+      
 void Mbma::addDeclaration( Document& doc ) const {
   doc.declare( AnnotationType::MORPHOLOGICAL, tagset,
 	       "annotator='frog-mbma-" +  version + 
@@ -838,21 +844,29 @@ UnicodeString Mbma::filterDiacritics( const UnicodeString& in ) const {
 bool Mbma::Classify( Word* sword ){
   UnicodeString uWord;
   PosAnnotation *pos;
+  string head;
 #pragma omp critical(foliaupdate)
   {
     uWord = sword->text();
     pos = sword->annotation<PosAnnotation>();
+    head = pos->feat("head");
   }
-  string tag = pos->feat("head");
-  if ( tag == "SPEC" || tag == "LET" ){
+  if ( head == "SPEC" || head == "LET" ){
     string word = UnicodeToUTF8( uWord );
     vector<string> tmp;
     tmp.push_back( word );
     addMorph( sword, tmp );
     return true;
   }
+  vector<string> featVals;
+#pragma omp critical(foliaupdate)
+  {
+    vector<Feature*> feats = pos->select<Feature>();
+    for ( size_t i = 0; i < feats.size(); ++i )
+      featVals.push_back( feats[i]->cls() );
+  }
   Classify( uWord );
-  postprocess( sword, pos );
+  postprocess( sword, head, featVals );
   return true;
 }
 
@@ -881,20 +895,26 @@ void Mbma::Classify( const UnicodeString& word ){
   execute( uWord, classes );
 }
 
-vector<vector<string> > Mbma::analyze( const string& wrd ){
+vector<vector<string> > Mbma::analyze( const string& wrd,
+				       const string& tag ){
   string word = Timbl::compress( wrd );
   if ( word.find(' ') != string::npos ){
     throw ValueError( "mbma::analyze() word is not a single word '" + word + "'" );    
   }
   UnicodeString uWord = UTF8ToUnicode(word);
   Classify( uWord );
+  // vector<string> v;
+  // size_t num = Timbl::split_at_first_of( tag, v, "(,)" );
+  // for ( size_t i=0; i < v.size(); ++i ){
+  //   cerr << "feat[" << i << "]=" << v[i] << endl;
+  // }
   vector<vector<string> > result;
   for (vector<MBMAana>::const_iterator it=analysis.begin(); 
        it != analysis.end(); 
        it++ ){
     vector<string> mors = it->getMorph();
     if ( debugFlag ){
-      *Log(mbmaLog) << "Morps " << mors << endl;
+      *Log(mbmaLog) << "Morphs " << mors << endl;
     }
     result.push_back( mors );
   }

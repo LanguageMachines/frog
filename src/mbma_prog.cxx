@@ -152,7 +152,8 @@ void Test( istream& in ){
     for ( size_t s=0; s < sentences.size(); ++s ){
       vector<TagResult> tagv = tagger.tagLine(sentences[s]);
       for ( size_t w=0; w < tagv.size(); ++w ){
-	vector<vector<string> > res = myMbma.analyze( tagv[w].word() );
+	vector<vector<string> > res = myMbma.analyze( tagv[w].word(),
+						      tagv[w].assignedTag() );
 	cout << tagv[w].word() << " {" << tagv[w].assignedTag() << "}\t";
 	for ( size_t i=0; i < res.size(); ++i ){
 	  cout << res[i];
