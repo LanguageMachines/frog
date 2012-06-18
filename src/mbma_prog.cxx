@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
   cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
   ProgName = argv[0];
   cerr << "based on [" << Timbl::VersionName() << "]" << endl;
-  cout << "configdir: " << configDir << endl;
+  cerr << "configdir: " << configDir << endl;
   try {
     TimblOpts Opts(argc, argv);
     if ( parse_args(Opts) ){
