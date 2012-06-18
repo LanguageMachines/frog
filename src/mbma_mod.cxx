@@ -743,30 +743,6 @@ void Mbma::postprocess( Word *fword,
     else {
       if (debugFlag)
 	*Log(mbmaLog) << "multiple lemma's" << endl;
-      map<string, int> possible_lemmas;
-      // find unique lemma's
-      for ( size_t q = 0; q < matched; ++q ) {
-	const vector<string> ma = analysis[q].getMorph();
-	string key;
-	for ( size_t p=0; p < ma.size(); ++p )
-	  key += ma[p];
-	map<string, int>::iterator lemmaIt = possible_lemmas.find( key );
-	if (lemmaIt == possible_lemmas.end()){
-	  possible_lemmas.insert( make_pair( key,1 ) );
-	}
-	else {
-	  lemmaIt->second++;
-	}
-      }
-      if (debugFlag){
-	*Log(mbmaLog) << "#unique lemma's: " << possible_lemmas.size() << endl;
-	*Log(mbmaLog) << possible_lemmas << endl;
-      }
-      if ( possible_lemmas.size() < 1) {
-	if (debugFlag)
-	  *Log(mbmaLog) << "Problem!, no possible lemma's" << endl;
-	return;
-      }
       // append all unique lemmas
       // find best match
       // loop through all subfeatures of the tag
