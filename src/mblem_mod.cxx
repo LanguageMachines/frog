@@ -194,41 +194,50 @@ void Mblem::addAltLemma( Word *word, const string& cls ){
   addLemma( alt, cls );
 }
   
-string Mblem::postprocess( Word *word ){
-  string tag;
-#pragma omp critical(foliaupdate)
-  {
-    tag = word->pos();
-  }
-  size_t index = 0;
-  size_t nrlookup = mblemResult.size();
-  bool none=true;
-  string result;
-  while ( index < nrlookup  ){
+void Mblem::postprocess( const UnicodeString& uWord,
+			 const string& postag ){
+  vector<mblemData>::iterator it = mblemResult.begin();
+  while( it != mblemResult.end() ){
     if (debug)
-      *Log(mblemLog) << "compare cgn-tag " << tag << " with " << mblemResult[index].getTag() << endl;
-    if ( isSimilar( tag, mblemResult[index].getTag() ) ){
+      *Log(mblemLog) << "compare cgn-tag " << postag << " with " << it->getTag() << " ";
+    if ( isSimilar( postag, it->getTag() ) ){
       if ( debug )
 	*Log(mblemLog) << "similar! " << endl;
-      string res = mblemResult[index].getLemma();
-      if ( none ){
+      ++it;
+    }
+    else {
+      if ( debug )
+	*Log(mblemLog) << "NOT similar! " << endl;	
+      it = mblemResult.erase(it);
+    }
+  }
+  if ( debug && mblemResult.empty() )
+    *Log(mblemLog) << "NO CORRESPONDING TAG! " << postag << endl;
+}
+
+string Mblem::getResult( Word *word, const UnicodeString& uWord ){
+  string result;
+  if ( mblemResult.empty() ){
+    // just return the word as a lemma
+    result = UnicodeToUTF8( uWord );
+    addLemma( word, result );
+  }
+  else {
+    bool first = true;
+    vector<mblemData>::iterator it = mblemResult.begin();
+    while( it != mblemResult.end() ){
+      string res = it->getLemma();
+      if ( first ){
 	addLemma( word, res );
 	result = res;
-	none = false;
+	first = false;
       }
       else {
 	// there are more matching lemmas. add them as alternatives
 	addAltLemma( word, res );
       }
+      ++it;
     }
-    ++index;
-  }
-  
-  if ( none  ) {
-    if (debug)
-      *Log(mblemLog) << "NO CORRESPONDING TAG! " << tag << endl;
-    result = mblemResult[0].getLemma();
-    addLemma( word, result );
   }
   return result;
 } 
@@ -243,9 +252,11 @@ void Mblem::addDeclaration( Document& doc ) const {
 string Mblem::Classify( Word *sword ){
   string word;
   string tag;
+  string pos;
 #pragma omp critical(foliaupdate)
   {  
     word = sword->str();
+    pos = sword->pos();
     tag = sword->annotation<PosAnnotation>()->feat("head");
   }
   if ( tag == "SPEC" || tag == "LET" ) {
@@ -254,6 +265,13 @@ string Mblem::Classify( Word *sword ){
   }
   UnicodeString uWord = UTF8ToUnicode(word);
   uWord.toLower();
+  Classify( uWord );
+  postprocess( uWord, pos ); 
+  string res = getResult( sword, uWord ); 
+  return res;
+}
+
+void Mblem::Classify( const UnicodeString& uWord ){
   mblemResult.clear();
   string inst = make_instance(uWord);  
   string classString;
@@ -384,6 +402,20 @@ string Mblem::Classify( Word *sword ){
 		     << "\ttag alt: " << mblemResult[index].getTag() << endl;
     }
   }
-  string res = postprocess( sword ); 
-  return res;
+}
+
+vector<pair<string,string> > Mblem::analyze( const string& wrd,
+					     const string& tag ){
+  string word = Timbl::compress( wrd );
+  if ( word.find(' ') != string::npos ){
+    throw ValueError( "mblem::analyze() word is not a single word '" + word + "'" );    
+  }
+  UnicodeString uWord = UTF8ToUnicode(word);
+  Classify( uWord );
+  vector<pair<string,string> > result;
+  for ( size_t i=0; i < mblemResult.size(); ++i ){
+    result.push_back( make_pair( mblemResult[i].getLemma(),
+				 mblemResult[i].getTag() ) );
+  }
+  return result;
 }

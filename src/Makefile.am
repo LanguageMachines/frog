@@ -3,10 +3,11 @@
 
 AM_CPPFLAGS = -I@top_srcdir@/include
 AM_CXXFLAGS = -DSYSCONF_PATH=\"$(SYSCONFDIR)\" -DPYTHONDIR=\"$(PYTHONDIR)\"
-bin_PROGRAMS = frog mbma
+bin_PROGRAMS = frog mbma mblem
 
 frog_SOURCES = Frog.cxx
 mbma_SOURCES = mbma_prog.cxx
+mblem_SOURCES = mblem_prog.cxx
 
 LDADD = libfrog.la
 lib_LTLIBRARIES = libfrog.la

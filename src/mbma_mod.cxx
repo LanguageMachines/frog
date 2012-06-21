@@ -884,6 +884,7 @@ vector<vector<string> > Mbma::analyze( const string& wrd,
   // for ( size_t i=0; i < v.size(); ++i ){
   //   cerr << "feat[" << i << "]=" << v[i] << endl;
   // }
+  // postprocess( v[0], v );
   vector<vector<string> > result;
   for (vector<MBMAana>::const_iterator it=analysis.begin(); 
        it != analysis.end(); 
