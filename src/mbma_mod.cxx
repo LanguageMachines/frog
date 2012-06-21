@@ -295,7 +295,7 @@ vector<waStruct> Mbma::Step1( unsigned int step,
     }
     string deletestring;
     string insertstring;
-    bool participle;
+    bool participle = false;
     this_class = calculate_ins_del( this_class, deletestring, insertstring, participle );
     if ( deletestring == "eeer" )
       deletestring = "eer";
