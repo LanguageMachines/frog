@@ -54,6 +54,7 @@ class Mbma {
   void Classify( const UnicodeString& );
   std::vector<std::vector<std::string> > analyze( const std::string&,
 						  const std::string& );
+  void filterHead( const std::string& );
  private:
   void cleanUp();
   bool readsettings( const std::string&, const std::string& );

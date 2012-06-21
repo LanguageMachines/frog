@@ -54,6 +54,7 @@ int tpDebug = 0; //0 for none, more for more output
 
 string TestFileName;
 string ProgName;
+bool doAll = false;
 
 Configuration configuration;
 static string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
@@ -121,6 +122,10 @@ bool parse_args( TimblOpts& Opts ) {
       return false;
     }
     Opts.Delete('t');
+  };
+  if ( Opts.Find( 'a', value, mood )) {
+    doAll = true;
+    Opts.Delete('a');
   };
   return true;
 }

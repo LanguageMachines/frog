@@ -298,6 +298,8 @@ void Mblem::Classify( const UnicodeString& uWord ){
       // some edit info available, like: WW(27)+Dgekomen+Ikomen
       vector<string> edits;
       size_t n = split_at( partS, edits, "+" );
+      if ( n < 1 )
+	throw runtime_error( "invalid editstring: " + partS );
       restag = edits[0]; // the first one is the POS tag
 
       UnicodeString insstr;

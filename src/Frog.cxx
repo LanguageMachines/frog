@@ -832,8 +832,6 @@ void TestSentence( const vector<Sentence*>& sentences,
       }
     } // parallel sections
     for ( size_t i = 0; i < swords.size(); ++i ) {
-      string mbmaLemma;
-      string mblemLemma;
 #pragma omp parallel sections
       {
 #pragma omp section
@@ -841,7 +839,7 @@ void TestSentence( const vector<Sentence*>& sentences,
 	  timers.mbmaTimer.start();
 	  if (tpDebug) 
 	    *Log(theErrLog) << "Calling mbma..." << endl;
-	  mbmaLemma = myMbma.Classify( swords[i] );
+	  myMbma.Classify( swords[i] );
 	  timers.mbmaTimer.stop();
 	}
 #pragma omp section
@@ -849,15 +847,10 @@ void TestSentence( const vector<Sentence*>& sentences,
 	  timers.mblemTimer.start();
 	  if (tpDebug) 
 	    *Log(theErrLog) << "Calling mblem..." << endl;
-	  mblemLemma = myMblem.Classify( swords[i] );
+	  myMblem.Classify( swords[i] );
 	  timers.mblemTimer.stop();
 	}
       } // omp parallel sections
-      if (tpDebug) {
-	*Log(theErrLog) << "tagged word[" << i <<"]: " << swords[i]->str() 
-			<< " tag " << swords[i]->pos() << endl;
-	*Log(theErrLog) << "analysis: " << mblemLemma << " " << mbmaLemma << endl;
-      }
     } //for int i = 0 to num_words
     
     if ( doMwu ){
