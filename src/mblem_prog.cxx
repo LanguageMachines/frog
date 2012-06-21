@@ -54,6 +54,7 @@ int tpDebug = 0; //0 for none, more for more output
 
 string TestFileName;
 string ProgName;
+bool doAll = false;
 
 Configuration configuration;
 static string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
@@ -63,9 +64,11 @@ static UctoTokenizer tokenizer;
 static CGNTagger tagger;
 
 void usage( ) {
-  cout << endl << "Options:\n";
+  cout << endl << "mblem [options] testfile" << endl
+       << "Options:n" << endl;
   cout << "\t============= INPUT MODE (mandatory, choose one) ========================\n"
-       << "\t -t <testfile>          Run mbblem on this file\n"
+       << "\t -t <testfile>    Run mblem on this file\n"
+       << "\t -a               give ALL result. Not just the chosen one(s)\n"
        << "\t -c <filename>    Set configuration file (default " << configFileName << ")\n"
        << "\t============= OTHER OPTIONS ============================================\n"
        << "\t -h. give some help.\n"
@@ -76,6 +79,7 @@ void usage( ) {
 static Mblem myMblem;
 
 bool parse_args( TimblOpts& Opts ) {
+  cerr << "start " << Opts << endl;
   string value;
   bool mood;
   if ( Opts.Find('V', value, mood ) ||
@@ -121,6 +125,19 @@ bool parse_args( TimblOpts& Opts ) {
       return false;
     }
     Opts.Delete('t');
+  }
+  else if ( Opts.Find( '?', value, mood )) {
+    TestFileName = value;
+    ifstream is( value.c_str() );
+    if ( !is ){
+      cerr << "input stream " << value << " is not readable" << endl;
+      return false;
+    }
+    Opts.Delete('?');
+  };
+  if ( Opts.Find( 'a', value, mood )) {
+    doAll = true;
+    Opts.Delete('t');
   };
   return true;
 }
@@ -152,8 +169,11 @@ void Test( istream& in ){
     for ( size_t s=0; s < sentences.size(); ++s ){
       vector<TagResult> tagv = tagger.tagLine(sentences[s]);
       for ( size_t w=0; w < tagv.size(); ++w ){
-	vector<pair<string,string> > res = myMblem.analyze( tagv[w].word(),
-							    tagv[w].assignedTag() );
+	UnicodeString uWord = folia::UTF8ToUnicode(tagv[w].word());
+	myMblem.Classify( uWord );
+	if ( !doAll )
+	  myMblem.filterTag( tagv[w].assignedTag() );
+	vector<pair<string,string> > res = myMblem.getResult();
 	cout << tagv[w].word() << " {" << tagv[w].assignedTag() << "}\t";
 	for ( size_t i=0; i < res.size(); ++i ){
 	  cout << res[i].first << "[" << res[i].second << "]";

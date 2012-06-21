@@ -194,8 +194,7 @@ void Mblem::addAltLemma( Word *word, const string& cls ){
   addLemma( alt, cls );
 }
   
-void Mblem::postprocess( const UnicodeString& uWord,
-			 const string& postag ){
+void Mblem::filterTag( const string& postag ){
   vector<mblemData>::iterator it = mblemResult.begin();
   while( it != mblemResult.end() ){
     if (debug)
@@ -215,7 +214,7 @@ void Mblem::postprocess( const UnicodeString& uWord,
     *Log(mblemLog) << "NO CORRESPONDING TAG! " << postag << endl;
 }
 
-string Mblem::getResult( Word *word, const UnicodeString& uWord ){
+string Mblem::getFoLiAResult( Word *word, const UnicodeString& uWord ){
   string result;
   if ( mblemResult.empty() ){
     // just return the word as a lemma
@@ -266,8 +265,8 @@ string Mblem::Classify( Word *sword ){
   UnicodeString uWord = UTF8ToUnicode(word);
   uWord.toLower();
   Classify( uWord );
-  postprocess( uWord, pos ); 
-  string res = getResult( sword, uWord ); 
+  filterTag( pos ); 
+  string res = getFoLiAResult( sword, uWord ); 
   return res;
 }
 
@@ -404,14 +403,7 @@ void Mblem::Classify( const UnicodeString& uWord ){
   }
 }
 
-vector<pair<string,string> > Mblem::analyze( const string& wrd,
-					     const string& tag ){
-  string word = Timbl::compress( wrd );
-  if ( word.find(' ') != string::npos ){
-    throw ValueError( "mblem::analyze() word is not a single word '" + word + "'" );    
-  }
-  UnicodeString uWord = UTF8ToUnicode(word);
-  Classify( uWord );
+vector<pair<string,string> > Mblem::getResult() const {
   vector<pair<string,string> > result;
   for ( size_t i=0; i < mblemResult.size(); ++i ){
     result.push_back( make_pair( mblemResult[i].getLemma(),
