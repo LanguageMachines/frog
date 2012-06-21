@@ -761,15 +761,20 @@ void Mbma::postprocess( Word *fword,
     for ( size_t q=0; q < analysis.size(); ++q ) {
       int match_count = 0;
       string inflection = analysis[q].getInflection();
-      if (debugFlag)
+      if (debugFlag){
 	*Log(mbmaLog) << "matching " << inflection << " with " << head << endl;
+      }
       for ( size_t u=0; u < feats.size(); ++u ) {
 	map<string,string>::const_iterator conv_tag_p = TAGconv.find(feats[u]);
 	if (conv_tag_p != TAGconv.end()) {
 	  string c = conv_tag_p->second;
-	  *Log(mbmaLog) << "found " << feats[u] << " ==> " << c << endl;
+	  if (debugFlag){
+	    *Log(mbmaLog) << "found " << feats[u] << " ==> " << c << endl;
+	  }
 	  if ( inflection.find( c ) != string::npos ){
-	    *Log(mbmaLog) << "it is in the inflection " << endl;
+	    if (debugFlag){
+	      *Log(mbmaLog) << "it is in the inflection " << endl;
+	    }
 	    match_count++;
 	  }
 	}
