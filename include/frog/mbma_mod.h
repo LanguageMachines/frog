@@ -55,6 +55,7 @@ class Mbma {
   std::vector<std::vector<std::string> > analyze( const std::string&,
 						  const std::string& );
   void filterHead( const std::string& );
+  std::map<std::string, const std::vector<std::string>* > filterFeats( const std::vector<std::string>& );
  private:
   void cleanUp();
   bool readsettings( const std::string&, const std::string& );

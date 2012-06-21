@@ -707,20 +707,83 @@ void Mbma::filterHead( const string& head ){
   }
 }
 
+map <string, const vector<string>* > Mbma::filterFeats( const vector<string>& feats ){
+  map <string, const vector<string>* > bestMatches;
+  if ( analysis.size() == 0 )
+    return bestMatches;
+  if ( analysis.size() == 1 ){
+    bestMatches.insert( make_pair("1", &analysis[0].getMorph() ) );
+    return bestMatches;
+  }
+  // find best match
+  // loop through all subfeatures of the tag
+  // and match with inflections from each m
+  int max_count = 0;
+  for ( size_t q=0; q < analysis.size(); ++q ) {
+    int match_count = 0;
+    string inflection = analysis[q].getInflection();
+    if (debugFlag){
+      *Log(mbmaLog) << "matching " << inflection << " with " << feats << endl;
+    }
+    for ( size_t u=0; u < feats.size(); ++u ) {
+      map<string,string>::const_iterator conv_tag_p = TAGconv.find(feats[u]);
+      if (conv_tag_p != TAGconv.end()) {
+	string c = conv_tag_p->second;
+	if (debugFlag){
+	  *Log(mbmaLog) << "found " << feats[u] << " ==> " << c << endl;
+	}
+	if ( inflection.find( c ) != string::npos ){
+	  if (debugFlag){
+	    *Log(mbmaLog) << "it is in the inflection " << endl;
+	  }
+	  match_count++;
+	}
+      }
+    }
+    if (debugFlag)
+      *Log(mbmaLog) << "score: " << match_count << " max was " << max_count << endl;
+    if (match_count >= max_count) {
+      string key;
+      const vector<string> *ma = &analysis[q].getMorph();
+      for ( size_t p=0; p < ma->size(); ++p )
+	key += (*ma)[p] + "+"; // create uniqe keys
+      
+      if (match_count > max_count) {
+	max_count = match_count;
+	bestMatches.clear();
+      }
+      bestMatches.insert( make_pair(key, ma ) );
+    }
+  }
+  return bestMatches;
+}
+
 void Mbma::postprocess( Word *fword,
 			const string& head, 
 			const vector<string>& feats ){
   if (debugFlag){
+    *Log(mbmaLog) << "postprocess with tag, head: " << head << endl;
+    for ( size_t q =0 ; q < feats.size(); ++q ) {
+      *Log(mbmaLog) << "\tpart #" << q << ": " << feats[q] << endl;
+    }
+    *Log(mbmaLog) << "at start, analysis is:" << endl;
     for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
       *Log(mbmaLog) <<  *it << endl;
     *Log(mbmaLog) << "morph analyses: " << endl;;
     for (vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
       *Log(mbmaLog) << it->getMorph() << endl;
-    *Log(mbmaLog) << "before morpho: " << endl;
   }
   filterHead( head );
-  size_t matched = analysis.size();
-  if ( matched == 0 ) {
+  if (debugFlag){
+    *Log(mbmaLog) << "after first filter, analysis is:" << endl;
+    for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
+      *Log(mbmaLog) <<  *it << endl;
+    *Log(mbmaLog) << "morph analyses: " << endl;;
+    for (vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
+      *Log(mbmaLog) << it->getMorph() << endl;
+  }
+  map <string, const vector<string>* > bestMatches = filterFeats( feats );
+  if ( bestMatches.size() == 0 ){
     // fallback option: use the word and pretend it's a lemma ;-)
     UnicodeString word;
 #pragma omp critical(foliaupdate)
@@ -736,64 +799,7 @@ void Mbma::postprocess( Word *fword,
     tmp.push_back( UnicodeToUTF8(word) );
     addMorph( fword, tmp );
   }
-  else if ( matched == 1 ) {
-    const vector<string> ma = analysis[0].getMorph();
-    if (debugFlag){
-      *Log(mbmaLog) << "single lemma: " << ma << endl;
-    }
-    addMorph( fword, ma );
-  } 
   else {
-    if (debugFlag)
-      *Log(mbmaLog) << "multiple lemma's" << endl;
-    // append all unique lemmas
-    // find best match
-    // loop through all subfeatures of the tag
-    // and match with inflections from each m
-    if (debugFlag){
-      *Log(mbmaLog) << "head: " << head << endl;
-      for ( size_t q =0 ; q < feats.size(); ++q ) {
-	*Log(mbmaLog) << "\tpart #" << q << ": " << feats[q] << endl;
-      }
-    }
-    map <string, const vector<string>* > bestMatches;
-    int max_count = 0;
-    for ( size_t q=0; q < analysis.size(); ++q ) {
-      int match_count = 0;
-      string inflection = analysis[q].getInflection();
-      if (debugFlag){
-	*Log(mbmaLog) << "matching " << inflection << " with " << head << endl;
-      }
-      for ( size_t u=0; u < feats.size(); ++u ) {
-	map<string,string>::const_iterator conv_tag_p = TAGconv.find(feats[u]);
-	if (conv_tag_p != TAGconv.end()) {
-	  string c = conv_tag_p->second;
-	  if (debugFlag){
-	    *Log(mbmaLog) << "found " << feats[u] << " ==> " << c << endl;
-	  }
-	  if ( inflection.find( c ) != string::npos ){
-	    if (debugFlag){
-	      *Log(mbmaLog) << "it is in the inflection " << endl;
-	    }
-	    match_count++;
-	  }
-	}
-      }
-      if (debugFlag)
-	*Log(mbmaLog) << "score: " << match_count << " max was " << max_count << endl;
-      if (match_count >= max_count) {
-	string key;
-	const vector<string> *ma = &analysis[q].getMorph();
-	for ( size_t p=0; p < ma->size(); ++p )
-	  key += (*ma)[p] + "+"; // create uniqe keys
-	
-	if (match_count > max_count) {
-	  max_count = match_count;
-	  bestMatches.clear();
-	}
-	bestMatches.insert( make_pair(key, ma ) );
-      }
-    }
     map< string, const vector<string> *>::const_iterator it = bestMatches.begin();
     while ( it != bestMatches.end() ){
       if (debugFlag){
