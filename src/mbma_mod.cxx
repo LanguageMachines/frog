@@ -707,12 +707,12 @@ void Mbma::filterHead( const string& head ){
   }
 }
 
-map <string, const vector<string>* > Mbma::filterFeats( const vector<string>& feats ){
-  map <string, const vector<string>* > bestMatches;
+set<size_t> Mbma::filterFeats( const vector<string>& feats ){
+  set<size_t> bestMatches;
   if ( analysis.size() == 0 )
     return bestMatches;
   if ( analysis.size() == 1 ){
-    bestMatches.insert( make_pair("1", &analysis[0].getMorph() ) );
+    bestMatches.insert(0);
     return bestMatches;
   }
   // find best match
@@ -743,16 +743,11 @@ map <string, const vector<string>* > Mbma::filterFeats( const vector<string>& fe
     if (debugFlag)
       *Log(mbmaLog) << "score: " << match_count << " max was " << max_count << endl;
     if (match_count >= max_count) {
-      string key;
-      const vector<string> *ma = &analysis[q].getMorph();
-      for ( size_t p=0; p < ma->size(); ++p )
-	key += (*ma)[p] + "+"; // create uniqe keys
-      
       if (match_count > max_count) {
 	max_count = match_count;
 	bestMatches.clear();
       }
-      bestMatches.insert( make_pair(key, ma ) );
+      bestMatches.insert(q);
     }
   }
   return bestMatches;
@@ -782,7 +777,7 @@ void Mbma::postprocess( Word *fword,
     for (vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
       *Log(mbmaLog) << it->getMorph() << endl;
   }
-  map <string, const vector<string>* > bestMatches = filterFeats( feats );
+  set<size_t> bestMatches = filterFeats( feats );
   if ( bestMatches.size() == 0 ){
     // fallback option: use the word and pretend it's a lemma ;-)
     UnicodeString word;
@@ -800,16 +795,21 @@ void Mbma::postprocess( Word *fword,
     addMorph( fword, tmp );
   }
   else {
-    map< string, const vector<string> *>::const_iterator it = bestMatches.begin();
+    map<string, vector<string> > unique;
+    set<size_t>::const_iterator it = bestMatches.begin();
     while ( it != bestMatches.end() ){
-      if (debugFlag){
-	string tmp;
-	for ( size_t p=0; p < it->second->size(); ++p )
-	  tmp += "[" + (*it->second)[p] + "]";
-	*Log(mbmaLog) << "MBMA add lemma: " << tmp << endl;
+      vector<string> v = analysis[*it].getMorph();
+      string tmp;
+      for ( size_t p=0; p < v.size(); ++p ) {
+	tmp += v[p] + "+";
       }
-      addMorph( fword, *it->second );
+      unique[tmp] = v;
       ++it;
+    }
+    map<string, vector<string> >::const_iterator sit = unique.begin();
+    while( sit != unique.end() ){
+      addMorph( fword, sit->second );
+      ++sit;
     }
   }
 }
