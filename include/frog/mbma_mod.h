@@ -55,7 +55,7 @@ class Mbma {
   std::vector<std::vector<std::string> > analyze( const std::string&,
 						  const std::string& );
   void filterHead( const std::string& );
-  std::set<size_t> filterFeats( const std::vector<std::string>& );
+  void filterFeats( const std::vector<std::string>& );
  private:
   void cleanUp();
   bool readsettings( const std::string&, const std::string& );
@@ -98,11 +98,27 @@ class Mbma {
 
 class MBMAana {
   friend std::ostream& operator<< ( std::ostream& , const MBMAana& );
+  friend std::ostream& operator<< ( std::ostream& , const MBMAana* );
   public:
   MBMAana() {
     tag = "";
     infl = "";
     description = "";    
+  };
+  MBMAana(const MBMAana& other ) {
+    tag = other.tag;
+    infl = other.infl;
+    description = other.description;
+    morphemes = other.morphemes;
+  };
+  MBMAana& operator= (const MBMAana& other ) {
+    if ( this != &other ){
+      tag = other.tag;
+      infl = other.infl;
+      description = other.description;
+      morphemes = other.morphemes;
+    }
+    return *this;
   };
  MBMAana( const std::string& _tag,
 	  const std::string& _infl,

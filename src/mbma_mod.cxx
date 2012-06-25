@@ -707,14 +707,11 @@ void Mbma::filterHead( const string& head ){
   }
 }
 
-set<size_t> Mbma::filterFeats( const vector<string>& feats ){
-  set<size_t> bestMatches;
-  if ( analysis.size() == 0 )
-    return bestMatches;
-  if ( analysis.size() == 1 ){
-    bestMatches.insert(0);
-    return bestMatches;
+void Mbma::filterFeats( const vector<string>& feats ){
+  if ( analysis.size() < 2 ){
+    return;
   }
+  set<const MBMAana *> bestMatches;
   // find best match
   // loop through all subfeatures of the tag
   // and match with inflections from each m
@@ -747,10 +744,19 @@ set<size_t> Mbma::filterFeats( const vector<string>& feats ){
 	max_count = match_count;
 	bestMatches.clear();
       }
-      bestMatches.insert(q);
+      bestMatches.insert(&analysis[q]);
     }
   }
-  return bestMatches;
+  // so now we have "the" best matches.
+  // Weed the rest
+  vector<MBMAana> res;
+  set<const MBMAana*>::const_iterator bit = bestMatches.begin();
+  while ( bit != bestMatches.end() ){
+    res.push_back( **bit );
+    ++bit;
+  }
+  analysis = res;
+  return;
 }
 
 void Mbma::postprocess( Word *fword,
@@ -769,16 +775,16 @@ void Mbma::postprocess( Word *fword,
       *Log(mbmaLog) << it->getMorph() << endl;
   }
   filterHead( head );
-  if (debugFlag){
-    *Log(mbmaLog) << "after first filter, analysis is:" << endl;
+  filterFeats( feats );
+  if ( debugFlag ){
+    *Log(mbmaLog) << "after filter, analysis is:" << endl;
     for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
       *Log(mbmaLog) <<  *it << endl;
     *Log(mbmaLog) << "morph analyses: " << endl;;
     for (vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
       *Log(mbmaLog) << it->getMorph() << endl;
   }
-  set<size_t> bestMatches = filterFeats( feats );
-  if ( bestMatches.size() == 0 ){
+  if ( analysis.size() == 0 ){
     // fallback option: use the word and pretend it's a lemma ;-)
     UnicodeString word;
 #pragma omp critical(foliaupdate)
@@ -796,9 +802,9 @@ void Mbma::postprocess( Word *fword,
   }
   else {
     map<string, vector<string> > unique;
-    set<size_t>::const_iterator it = bestMatches.begin();
-    while ( it != bestMatches.end() ){
-      vector<string> v = analysis[*it].getMorph();
+    vector<MBMAana>::iterator it=analysis.begin();
+    while (  it != analysis.end() ){
+      vector<string> v = it->getMorph();
       string tmp;
       for ( size_t p=0; p < v.size(); ++p ) {
 	tmp += v[p] + "+";
@@ -917,6 +923,14 @@ vector<vector<string> > Mbma::analyze( const string& wrd,
 ostream& operator<< ( ostream& os, const MBMAana& a ){
   os << "tag: " << a.tag << " infl:" << a.infl << " morhemes: " 
      << a.morphemes << " description: " << a.description;
+  return os;
+}
+
+ostream& operator<< ( ostream& os, const MBMAana *a ){
+  if ( a )
+    os << *a;
+  else 
+    os << "no-mbma";
   return os;
 }
 
