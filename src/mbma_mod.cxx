@@ -682,16 +682,12 @@ void Mbma::addMorph( Word *word,
 void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   // first we select only the matching heads
   if (debugFlag){
-    *Log(mbmaLog) << "filter with tag, head: " << head << endl;
-    for ( size_t q =0 ; q < feats.size(); ++q ) {
-      *Log(mbmaLog) << "\tpart #" << q << ": " << feats[q] << endl;
-    }
-    *Log(mbmaLog) << "at start, analysis is:" << endl;
+    *Log(mbmaLog) << "filter with tag, head: " << head 
+		  << " feats: " << feats << endl;
+    *Log(mbmaLog) << "filter:start, analysis is:" << endl;
+    int i=1;
     for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      *Log(mbmaLog) <<  *it << endl;
-    *Log(mbmaLog) << "morph analyses: " << endl;;
-    for (vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      *Log(mbmaLog) << it->getMorph() << endl;
+      *Log(mbmaLog) << i++ << " - " << *it << endl;
   }
   map<string,string>::const_iterator tagIt = TAGconv.find( head );
   if ( tagIt == TAGconv.end() ) {
@@ -718,11 +714,9 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   }
   if (debugFlag){
     *Log(mbmaLog) << "filter: analysis after first step" << endl;
+    int i=1;
     for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      *Log(mbmaLog) <<  *it << endl;
-    *Log(mbmaLog) << "morph analyses: " << endl;;
-    for (vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      *Log(mbmaLog) << it->getMorph() << endl;
+      *Log(mbmaLog) << i++ << " - " << *it << endl;
   }
 
   if ( analysis.size() < 2 ){
@@ -781,11 +775,9 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   }
   if (debugFlag){
     *Log(mbmaLog) << "filter: analysis after second step" << endl;
+    int i=1;
     for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      *Log(mbmaLog) <<  *it << endl;
-    *Log(mbmaLog) << "morph analyses: " << endl;;
-    for (vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      *Log(mbmaLog) << it->getMorph() << endl;
+      *Log(mbmaLog) << i++ << " - " <<  *it << endl;
     *Log(mbmaLog) << "start looking for doubles" << endl;
   }
   //
@@ -811,12 +803,10 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   }
   analysis = result;
   if (debugFlag){
-    *Log(mbmaLog) << "filter: analysis without doubles" << endl;
+    *Log(mbmaLog) << "filter: definitive analysis:" << endl;
+    int i=1;
     for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      *Log(mbmaLog) <<  *it << endl;
-    *Log(mbmaLog) << "morph analyses: " << endl;;
-    for (vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      *Log(mbmaLog) << it->getMorph() << endl;
+      *Log(mbmaLog) << i++ << " - " << *it << endl;
     *Log(mbmaLog) << "done filtering" << endl;
   }
   return;
