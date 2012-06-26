@@ -316,6 +316,7 @@ vector<waStruct> Mbma::Step1( unsigned int step,
 	     insertstring != "be" ) ) )
       tobeignored = insertstring.length();
     
+    assert( this_class != "PE" );
     if ( basictags.find(this_class[0]) != string::npos &&
 	 this_class != "PE" ) { 
       // encountering POS tag
@@ -432,17 +433,20 @@ void Mbma::resolve_inflections( vector<waStruct>& ana,
 MBMAana Mbma::addInflect( const vector<waStruct>& ana,
 			  const string& inflect, 
 			  const vector<string>& morph ){
-  bool found = false;
   string the_act;
   vector<waStruct>::const_reverse_iterator it = ana.rbegin();
-  while ( !found && it != ana.rend() ) { 
+  while ( it != ana.rend() ) { 
     // go back to the last non-inflectional tag 
     the_act = it->act;
     if (debugFlag){
-      *Log(mbmaLog) << "final tag " << the_act << endl;
+      *Log(mbmaLog) << "examine act " << the_act << endl;
     }
-    if ( the_act[0] != 'i' )
-      found=true;
+    if ( the_act[0] != 'i' ){
+      if (debugFlag){
+	*Log(mbmaLog) << "final tag " << the_act << endl;
+      }
+      break;
+    }
     else { 
       ++it;
     }
@@ -778,7 +782,7 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   if (debugFlag){
     *Log(mbmaLog) << "filter: analysis after second step" << endl;
     int i=1;
-    for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
+    for(vector<const MBMAana*>::const_iterator it=res.begin(); it != res.end(); it++)
       *Log(mbmaLog) << i++ << " - " <<  *it << endl;
     *Log(mbmaLog) << "start looking for doubles" << endl;
   }
