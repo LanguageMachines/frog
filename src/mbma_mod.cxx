@@ -393,34 +393,35 @@ string change_tag( const char ch ){
 void Mbma::resolve_inflections( vector<waStruct>& ana, 
 				const string& basictags ) {
   // resolve all clearly resolvable implicit selections of inflectional tags
-  vector<waStruct>::iterator prev = ana.begin();
-  vector<waStruct>::const_iterator it = ana.begin();
-  int step = 0;
-  while ( it != ana.end() ){
-    string this_class = it->act;
-    if ( step > 1 ){
-      ++prev;
-    }
-    ++it;
-    ++step;
-    if ( this_class[0]=='i') { 
+  for ( vector<waStruct>::iterator it = ana.begin(); 
+	it != ana.end(); 
+	++it ){
+    if ( ana.begin() == it )
+      continue; // start at second
+    string act = it->act;
+    if ( act[0]=='i') { 
+      // it is an inflection tag
       if (debugFlag){
-	*Log(mbmaLog) << "thisclass >" << this_class << "<" << endl;
+	*Log(mbmaLog) << "act: >" << act << "<" << endl;
       }	  
-      /* given the specific selections of certain inflections,
-	 change the tag!  */
-      string newtag = change_tag( this_class[1] );
+      // given the specific selections of certain inflections,
+      //    change the act!
+      string newact = change_tag( act[1] );
       
       /* apply the change. Remember, the idea is that an inflection is
 	 far more certain of the tag of its predecessing morpheme than
 	 the morpheme itself. This is not always the case, but it works  */
-      if ( !newtag.empty() ) {
+      if ( !newact.empty() ) {
 	if ( debugFlag  ){
-	  *Log(mbmaLog) << "selects " << newtag << endl;
+	  *Log(mbmaLog) << "selects " << newact << endl;
 	}
-	/* go left */
-	if ( basictags.find(prev->act[0]) != string::npos ){
-	  prev->act[0] = newtag[0];
+	// change the previous act
+	if ( basictags.find((it-1)->act[0]) != string::npos ){
+	  if ( debugFlag  ){
+	    *Log(mbmaLog) << "replace " << (it-1)->act[0] << " by " 
+			  << newact[0] << endl;
+	  }
+	  (it-1)->act[0] = newact[0];
 	}
       }
     }
