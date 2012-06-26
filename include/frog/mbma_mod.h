@@ -52,10 +52,8 @@ class Mbma {
   void addDeclaration( folia::Document& doc ) const;
   bool Classify( folia::Word * );
   void Classify( const UnicodeString& );
-  std::vector<std::vector<std::string> > analyze( const std::string&,
-						  const std::string& );
-  void filterHead( const std::string& );
-  void filterFeats( const std::vector<std::string>& );
+  void filterTag( const std::string&, const std::vector<std::string>& );
+  std::vector<std::vector<std::string> > getResult() const;
  private:
   void cleanUp();
   bool readsettings( const std::string&, const std::string& );
@@ -63,6 +61,7 @@ class Mbma {
   void init_cgn( const std::string& );
   void init_filter( );
   UnicodeString filterDiacritics( const UnicodeString& ) const;
+  void getFoLiAResult( folia::Word *, const UnicodeString& ) const;
   std::vector<std::string> make_instances( const UnicodeString& word );
   std::string calculate_ins_del( const std::string& in_class, 
 				 std::string& deletestring,
@@ -79,11 +78,8 @@ class Mbma {
   MBMAana inflectAndAffix( const std::vector<waStruct>& ana );
   void execute( const UnicodeString& word, 
 		const std::vector<std::string>& classes );
-  void postprocess( folia::Word *,
-		    const std::string&, 
-		    const std::vector<std::string>& );
   int debugFlag;
-  void addMorph( folia::Word *, const std::vector<std::string>& );
+  void addMorph( folia::Word *, const std::vector<std::string>& ) const;
   std::string MTreeFilename;
   Timbl::TimblAPI *MTree;
   std::map<char,std::string> iNames;  
@@ -104,21 +100,6 @@ class MBMAana {
     tag = "";
     infl = "";
     description = "";    
-  };
-  MBMAana(const MBMAana& other ) {
-    tag = other.tag;
-    infl = other.infl;
-    description = other.description;
-    morphemes = other.morphemes;
-  };
-  MBMAana& operator= (const MBMAana& other ) {
-    if ( this != &other ){
-      tag = other.tag;
-      infl = other.infl;
-      description = other.description;
-      morphemes = other.morphemes;
-    }
-    return *this;
   };
  MBMAana( const std::string& _tag,
 	  const std::string& _infl,

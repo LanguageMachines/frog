@@ -157,8 +157,20 @@ void Test( istream& in ){
     for ( size_t s=0; s < sentences.size(); ++s ){
       vector<TagResult> tagv = tagger.tagLine(sentences[s]);
       for ( size_t w=0; w < tagv.size(); ++w ){
-	vector<vector<string> > res = myMbma.analyze( tagv[w].word(),
-						      tagv[w].assignedTag() );
+	UnicodeString uWord = folia::UTF8ToUnicode(tagv[w].word());
+	myMbma.Classify( uWord );
+	if ( !doAll ){
+	  vector<string> v;
+	  size_t num = Timbl::split_at_first_of( tagv[w].assignedTag(), 
+						 v, "(,)" );
+	  if ( num < 1 ){
+	    throw runtime_error( "error: tag not in right format " );    
+	  }
+	  string head = v[0];
+	  v.erase(v.begin());
+	  myMbma.filterTag( head, v );
+	}
+	vector<vector<string> > res = myMbma.getResult();
 	cout << tagv[w].word() << " {" << tagv[w].assignedTag() << "}\t";
 	for ( size_t i=0; i < res.size(); ++i ){
 	  cout << res[i];

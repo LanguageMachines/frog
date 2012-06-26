@@ -654,7 +654,7 @@ void Mbma::execute( const UnicodeString& word,
 }
 
 void Mbma::addMorph( Word *word, 
-		     const vector<string>& lemmas ){
+		     const vector<string>& lemmas ) const {
   MorphologyLayer *ml = new MorphologyLayer();
 #pragma omp critical(foliaupdate)
   {
@@ -679,12 +679,23 @@ void Mbma::addMorph( Word *word,
   }
 }	  
 
-void Mbma::filterHead( const string& head ){
+void Mbma::filterTag( const string& head,  const vector<string>& feats ){
+  // first we select only the matching heads
+  if (debugFlag){
+    *Log(mbmaLog) << "filter with tag, head: " << head << endl;
+    for ( size_t q =0 ; q < feats.size(); ++q ) {
+      *Log(mbmaLog) << "\tpart #" << q << ": " << feats[q] << endl;
+    }
+    *Log(mbmaLog) << "at start, analysis is:" << endl;
+    for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
+      *Log(mbmaLog) <<  *it << endl;
+    *Log(mbmaLog) << "morph analyses: " << endl;;
+    for (vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
+      *Log(mbmaLog) << it->getMorph() << endl;
+  }
   map<string,string>::const_iterator tagIt = TAGconv.find( head );
   if ( tagIt == TAGconv.end() ) {
-    //
     // this should never happen
-    //
     throw ValueError( "unknown head feature '" + head + "'" );
   }
   if (debugFlag){
@@ -705,16 +716,29 @@ void Mbma::filterHead( const string& head ){
       ait = analysis.erase( ait );
     }
   }
-}
+  if (debugFlag){
+    *Log(mbmaLog) << "filter: analysis after first step" << endl;
+    for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
+      *Log(mbmaLog) <<  *it << endl;
+    *Log(mbmaLog) << "morph analyses: " << endl;;
+    for (vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
+      *Log(mbmaLog) << it->getMorph() << endl;
+  }
 
-void Mbma::filterFeats( const vector<string>& feats ){
   if ( analysis.size() < 2 ){
+    if (debugFlag ){
+      *Log(mbmaLog) << "analysis has size: " << analysis.size() 
+		    << " so skip next filter" << endl;
+    }
     return;
   }
-  set<const MBMAana *> bestMatches;
+  // ok there are several analysis left.
+  // try to select on the features:
+  //
   // find best match
   // loop through all subfeatures of the tag
   // and match with inflections from each m
+  set<const MBMAana *> bestMatches;
   int max_count = 0;
   for ( size_t q=0; q < analysis.size(); ++q ) {
     int match_count = 0;
@@ -749,48 +773,59 @@ void Mbma::filterFeats( const vector<string>& feats ){
   }
   // so now we have "the" best matches.
   // Weed the rest
-  vector<MBMAana> res;
+  vector<const MBMAana*> res;
   set<const MBMAana*>::const_iterator bit = bestMatches.begin();
   while ( bit != bestMatches.end() ){
-    res.push_back( **bit );
+    res.push_back( *bit );
     ++bit;
   }
-  analysis = res;
+  if (debugFlag){
+    *Log(mbmaLog) << "filter: analysis after second step" << endl;
+    for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
+      *Log(mbmaLog) <<  *it << endl;
+    *Log(mbmaLog) << "morph analyses: " << endl;;
+    for (vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
+      *Log(mbmaLog) << it->getMorph() << endl;
+    *Log(mbmaLog) << "start looking for doubles" << endl;
+  }
+  //
+  // but now we still might have doubles
+  //
+  map<string, const MBMAana*> unique;
+  vector<const MBMAana*>::iterator it=res.begin();
+  while (  it != res.end() ){
+    vector<string> v = (*it)->getMorph();
+    string tmp;
+    // create an unique key
+    for ( size_t p=0; p < v.size(); ++p ) {
+      tmp += v[p] + "+";
+    }
+    unique[tmp] = *it;
+    ++it;
+  }
+  vector<MBMAana> result;
+  map<string, const MBMAana*>::const_iterator uit=unique.begin();
+  while ( uit != unique.end() ){
+    result.push_back( *(uit->second) );
+    ++uit;
+  }
+  analysis = result;
+  if (debugFlag){
+    *Log(mbmaLog) << "filter: analysis without doubles" << endl;
+    for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
+      *Log(mbmaLog) <<  *it << endl;
+    *Log(mbmaLog) << "morph analyses: " << endl;;
+    for (vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
+      *Log(mbmaLog) << it->getMorph() << endl;
+    *Log(mbmaLog) << "done filtering" << endl;
+  }
   return;
 }
 
-void Mbma::postprocess( Word *fword,
-			const string& head, 
-			const vector<string>& feats ){
-  if (debugFlag){
-    *Log(mbmaLog) << "postprocess with tag, head: " << head << endl;
-    for ( size_t q =0 ; q < feats.size(); ++q ) {
-      *Log(mbmaLog) << "\tpart #" << q << ": " << feats[q] << endl;
-    }
-    *Log(mbmaLog) << "at start, analysis is:" << endl;
-    for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      *Log(mbmaLog) <<  *it << endl;
-    *Log(mbmaLog) << "morph analyses: " << endl;;
-    for (vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      *Log(mbmaLog) << it->getMorph() << endl;
-  }
-  filterHead( head );
-  filterFeats( feats );
-  if ( debugFlag ){
-    *Log(mbmaLog) << "after filter, analysis is:" << endl;
-    for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      *Log(mbmaLog) <<  *it << endl;
-    *Log(mbmaLog) << "morph analyses: " << endl;;
-    for (vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      *Log(mbmaLog) << it->getMorph() << endl;
-  }
+void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
   if ( analysis.size() == 0 ){
-    // fallback option: use the word and pretend it's a lemma ;-)
-    UnicodeString word;
-#pragma omp critical(foliaupdate)
-    {
-      word = fword->text();
-    }
+    // fallback option: use the lowercased word and pretend it's a lemma ;-)
+    UnicodeString word = uword;
     word.toLower();
     if ( debugFlag ){
       *Log(mbmaLog) << "no matches found, use the word instead: " 
@@ -801,25 +836,14 @@ void Mbma::postprocess( Word *fword,
     addMorph( fword, tmp );
   }
   else {
-    map<string, vector<string> > unique;
-    vector<MBMAana>::iterator it=analysis.begin();
-    while (  it != analysis.end() ){
-      vector<string> v = it->getMorph();
-      string tmp;
-      for ( size_t p=0; p < v.size(); ++p ) {
-	tmp += v[p] + "+";
-      }
-      unique[tmp] = v;
-      ++it;
-    }
-    map<string, vector<string> >::const_iterator sit = unique.begin();
-    while( sit != unique.end() ){
-      addMorph( fword, sit->second );
+    vector<MBMAana>::const_iterator sit = analysis.begin();
+    while( sit != analysis.end() ){
+      addMorph( fword, sit->getMorph() );
       ++sit;
     }
   }
 }
-      
+  
 void Mbma::addDeclaration( Document& doc ) const {
   doc.declare( AnnotationType::MORPHOLOGICAL, tagset,
 	       "annotator='frog-mbma-" +  version + 
@@ -861,7 +885,8 @@ bool Mbma::Classify( Word* sword ){
       featVals.push_back( feats[i]->cls() );
   }
   Classify( uWord );
-  postprocess( sword, head, featVals );
+  filterTag( head, featVals );
+  getFoLiAResult( sword, uWord );
   return true;
 }
 
@@ -890,20 +915,7 @@ void Mbma::Classify( const UnicodeString& word ){
   execute( uWord, classes );
 }
 
-vector<vector<string> > Mbma::analyze( const string& wrd,
-				       const string& tag ){
-  string word = Timbl::compress( wrd );
-  if ( word.find(' ') != string::npos ){
-    throw ValueError( "mbma::analyze() word is not a single word '" + word + "'" );    
-  }
-  UnicodeString uWord = UTF8ToUnicode(word);
-  Classify( uWord );
-  // vector<string> v;
-  // size_t num = Timbl::split_at_first_of( tag, v, "(,)" );
-  // for ( size_t i=0; i < v.size(); ++i ){
-  //   cerr << "feat[" << i << "]=" << v[i] << endl;
-  // }
-  // postprocess( v[0], v );
+vector<vector<string> > Mbma::getResult() const {
   vector<vector<string> > result;
   for (vector<MBMAana>::const_iterator it=analysis.begin(); 
        it != analysis.end(); 
