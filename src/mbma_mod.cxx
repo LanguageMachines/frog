@@ -262,6 +262,7 @@ string Mbma::calculate_ins_del( const string& in_class,
   else {
     if ( debugFlag ){
       *Log(mbmaLog) << "calculate_ins_del: do nothing" << endl;
+      *Log(mbmaLog) << "result class=" << result_class << endl;
     }
   }
   return result_class;
@@ -413,7 +414,7 @@ void Mbma::resolve_inflections( vector<waStruct>& ana,
 	 the morpheme itself. This is not always the case, but it works  */
       if ( !newact.empty() ) {
 	if ( debugFlag  ){
-	  *Log(mbmaLog) << "selects " << newact << endl;
+	  *Log(mbmaLog) << act[1] << " selects " << newact << endl;
 	}
 	// change the previous act
 	if ( basictags.find((it-1)->act[0]) != string::npos ){
