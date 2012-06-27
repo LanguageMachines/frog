@@ -1,5 +1,5 @@
 # $Id$
 # $URL$
 
-man1_MANS = frog.1 frog-dp-update.1
-EXTRA_DIST = frog.1 frog-dp-update.1
+man1_MANS = frog.1 mbma.1 mblem.1
+EXTRA_DIST = frog.1 mblem.1 mblem.1
