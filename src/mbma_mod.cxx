@@ -316,9 +316,7 @@ vector<waStruct> Mbma::Step1( unsigned int step,
 	     insertstring != "be" ) ) )
       tobeignored = insertstring.length();
     
-    assert( this_class != "PE" );
-    if ( basictags.find(this_class[0]) != string::npos &&
-	 this_class != "PE" ) { 
+    if ( basictags.find(this_class[0]) != string::npos ){
       // encountering POS tag
       if ( !previoustag.empty() ) { 
 	waItem.act = previoustag;
@@ -329,6 +327,7 @@ vector<waStruct> Mbma::Step1( unsigned int step,
     }
     else { 
       if ( this_class[0] !='0' ){ 
+	// encountering inflection info
 	if ( !previoustag.empty() ) { 
 	  waItem.act = previoustag;
 	  ana.push_back( waItem );
@@ -355,6 +354,7 @@ vector<waStruct> Mbma::Step1( unsigned int step,
   // do we have inflection?
   size_t pos = this_class.find( '/' );
   if ( pos != string::npos && this_class != "E/P" ) { 
+    // tags like 0/te3 N/e 0/P etc.
     string inflection = "i" + this_class.substr( pos+1 );
     waItem.act = inflection;
     ana.push_back( waItem );
@@ -362,7 +362,7 @@ vector<waStruct> Mbma::Step1( unsigned int step,
   return ana;
 }
 
-string change_tag( const char ch ){
+string select_tag( const char ch ){
   string newtag;
   switch( ch ){
   case 'm':
@@ -407,23 +407,24 @@ void Mbma::resolve_inflections( vector<waStruct>& ana,
 	*Log(mbmaLog) << "act: >" << act << "<" << endl;
       }	  
       // given the specific selections of certain inflections,
-      //    change the act!
-      string newact = change_tag( act[1] );
+      //    select a tag!
+      string new_tag = select_tag( act[1] );
       
-      /* apply the change. Remember, the idea is that an inflection is
-	 far more certain of the tag of its predecessing morpheme than
-	 the morpheme itself. This is not always the case, but it works  */
-      if ( !newact.empty() ) {
+      // apply the change. Remember, the idea is that an inflection is
+      // far more certain of the tag of its predecessing morpheme than
+      // the morpheme itself. 
+      // This is not always the case, but it works
+      if ( !new_tag.empty() ) {
 	if ( debugFlag  ){
-	  *Log(mbmaLog) << act[1] << " selects " << newact << endl;
+	  *Log(mbmaLog) << act[1] << " selects " << new_tag << endl;
 	}
 	// change the previous act
 	if ( basictags.find((it-1)->act[0]) != string::npos ){
 	  if ( debugFlag  ){
 	    *Log(mbmaLog) << "replace " << (it-1)->act[0] << " by " 
-			  << newact[0] << endl;
+			  << new_tag[0] << endl;
 	  }
-	  (it-1)->act[0] = newact[0];
+	  (it-1)->act[0] = new_tag[0];
 	}
       }
     }
@@ -461,17 +462,15 @@ MBMAana Mbma::addInflect( const vector<waStruct>& ana,
   map<string,string>::const_iterator tit = tagNames.find( tag ); 
   if ( tit == tagNames.end() ){
     // unknown tag
-    if (debugFlag)
-      *Log(mbmaLog) << "added X 4" << endl;
     outTag = "X";
     descr = "unknown";
   }
   else {
-    if (debugFlag)
-      *Log(mbmaLog) << "added (4) " << tit->second << endl;
     outTag = tit->first;
     descr = tit->second;
   }
+  if (debugFlag)
+    *Log(mbmaLog) << "added (4) " << outTag << " " << descr << endl;
   return MBMAana( outTag, inflect, morph, descr );
 }
 
@@ -577,7 +576,6 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
 
 bool next_perm( vector< vector<string>::const_iterator >& its,
 		const vector<vector<string> >& parts ){
-  int count=0;
   for ( size_t i=0; i < parts.size(); ++i ){
     ++its[i];
     if ( its[i] == parts[i].end() ){
@@ -612,19 +610,19 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
   }
   //
   // now expand
-  vector< vector<string>::const_iterator > its( parts.size() );
-  for ( size_t i=0; i<parts.size(); ++i ){
-    its[i] = parts[i].begin();
+  vector< vector<string>::const_iterator > its( classParts.size() );
+  for ( size_t i=0; i<classParts.size(); ++i ){
+    its[i] = classParts[i].begin();
   }
   vector<vector<string> > result;
   bool more = true;
   while ( more ){
-    vector<string> item(parts.size());
-    for( size_t j=0; j< parts.size(); ++j ){
+    vector<string> item(classParts.size());
+    for( size_t j=0; j< classParts.size(); ++j ){
       item[j] = *its[j];
     }
     result.push_back( item );
-    more = next_perm( its, parts );
+    more = next_perm( its, classParts );
   }
   return result;
 }
@@ -725,7 +723,7 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
       *Log(mbmaLog) << i++ << " - " << *it << endl;
   }
 
-  if ( analysis.size() < 2 ){
+  if ( analysis.size() < 1 ){
     if (debugFlag ){
       *Log(mbmaLog) << "analysis has size: " << analysis.size() 
 		    << " so skip next filter" << endl;
