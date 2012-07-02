@@ -1,62 +1,52 @@
-frog 0.12
+frog - A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
 
-  A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
-
-  http://ilk.uvt.nl/frog
+http://ilk.uvt.nl/frog
  
-  Copyright 2006, 2012 Bertjan Busser, Antal van den Bosch, and Ko
-  van der Sloot
-  ILK Research Group, Faculty of Humanities, Tilburg University
-  http://ilk.uvt.nl
+Copyright 2006, 2012 Bertjan Busser, Antal van den Bosch, and Ko van der Sloot
 
-  frog is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
+ILK Research Group, Faculty of Humanities, Tilburg University http://ilk.uvt.nl
 
-  frog is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+frog is free software; you can redistribute it and/or modify it under the terms
+of the GNU General Public License as published by the Free Software Foundation;
+either version 3 of the License, or (at your option) any later version.
 
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+frog is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  For questions and suggestions, see:
+You should have received a copy of the GNU General Public License along with
+this program.  If not, see <http://www.gnu.org/licenses/>.
+
+For questions and suggestions, see:
       http://ilk.uvt.nl/software.html
-  or send mail to:
+or send mail to:
       timbl@uvt.nl
 
----------------------------------------------------------------------
+-------------------------------------------------------------------------------
 Preliminary note
 
-Frog can be considered alpha software, and is in a fair state of flux.
-Some intended functionalities are not there yet, such as a dependency
-parser. These will be added very soon. Other functionalities are there, but
-have not been fully tested yet, such as the multi-word chunker. More
-generally, error handling and reporting is still under development.
+Frog can be considered alpha software, and is in a fair state of flux.  Some
+intended functionalities are not there yet, such as a dependency parser. These
+will be added very soon. Other functionalities are there, but have not been
+fully tested yet, such as the multi-word chunker. More generally, error
+handling and reporting is still under development.
 
----------------------------------------------------------------------
+-------------------------------------------------------------------------------
 Installation and Quick Start
-
-TDo DO
-
-
----------------------------------------------------------------------
-Credits
-
-Many thanks go out to the people who made the developments of the
-Frog components possible: Walter Daelemans, Jakub Zavrel, Ko van
-der Sloot, Sabine Buchholz, Sander Canisius, Gert Durieux, and Peter
-Berck. 
-
-Thanks to Erik Tjong Kim Sang and Lieve Macken for stress-testing the
-first versions of Tadpole, de predecessor of Frog
-
-
----------------------------------------------------------------------
-References
 
 TODO
 
+-------------------------------------------------------------------------------
+Credits
 
+Many thanks go out to the people who made the developments of the Frog
+components possible: Walter Daelemans, Jakub Zavrel, Ko van der Sloot, Sabine
+Buchholz, Sander Canisius, Gert Durieux, and Peter Berck. 
+
+Thanks to Erik Tjong Kim Sang and Lieve Macken for stress-testing the first
+versions of Tadpole, the predecessor of Frog
+
+-------------------------------------------------------------------------------
+References
+
+TODO
