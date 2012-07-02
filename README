@@ -25,11 +25,10 @@ or send mail to:
 -------------------------------------------------------------------------------
 Preliminary note
 
-Frog can be considered alpha software, and is in a fair state of flux.  Some
-intended functionalities are not there yet, such as a dependency parser. These
-will be added very soon. Other functionalities are there, but have not been
-fully tested yet, such as the multi-word chunker. More generally, error
-handling and reporting is still under development.
+Frog can be considered beta software, and, as of 2012-06, is being stabilized.
+As of 2012-06, all planned functionality (including a dependency parser, the
+multi-word chunker, error handling and reporting) has been implemented and
+tested.
 
 -------------------------------------------------------------------------------
 Installation and Quick Start
