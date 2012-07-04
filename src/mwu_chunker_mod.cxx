@@ -184,17 +184,19 @@ void Mwu::addDeclaration( Document& doc ) const {
 	       + "', annotatortype='auto'");
 }
 
-void Mwu::Classify( Sentence *sent ){
+void Mwu::Classify( const vector<Word*>& words ){
+  if ( words.empty() )
+    return;
   reset();
-  vector<Word*> words;
-#pragma omp critical(foliaupdate)
-  {
-    words = sent->words();
-  }
   for ( size_t i=0; i < words.size(); ++i )
     add( words[i] );  
   Classify();
   EntitiesLayer *el = 0;
+  Sentence *sent;
+#pragma omp critical(foliaupdate)
+  {
+    sent = words[0]->sentence();
+  }
   for( size_t i = 0; i < mWords.size(); ++i ){
     el = mWords[i]->addEntity( tagset, sent, el );
   }

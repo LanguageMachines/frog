@@ -67,7 +67,7 @@ class Mwu {
   void reset();
   bool init( const Configuration& );
   void addDeclaration( folia::Document& ) const;
-  void Classify( folia::Sentence * );
+  void Classify( const std::vector<folia::Word *>& );
   void add( folia::Word * );
   std::string getTagset() const { return tagset; };
   std::vector<mwuAna*>& getAna(){ return mWords; };

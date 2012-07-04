@@ -84,9 +84,9 @@ class Parser {
   ~Parser();
   bool init( const Configuration& );
   void addDeclaration( folia::Document& doc ) const;
-  void Parse( folia::Sentence *, 
+  void Parse( const std::vector<folia::Word *>&, 
 	      const std::string&, const std::string&, TimerBlock& );
-  void prepareParse( folia::Sentence *, 
+  void prepareParse( const std::vector<folia::Word *>&, 
 		     const std::string&, parseData& );
   void createParserFile( const parseData& );
  private:

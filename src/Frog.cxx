@@ -854,7 +854,7 @@ bool TestSentence( Sentence* sent,
     if ( doMwu ){
       if ( swords.size() > 0 ){
 	timers.mwuTimer.start();
-	myMwu.Classify( sent );
+	myMwu.Classify( swords );
 	timers.mwuTimer.stop();
       }
     }
@@ -863,7 +863,7 @@ bool TestSentence( Sentence* sent,
 	showParse = false;
       }
       else {
-	myParser.Parse( sent, myMwu.getTagset(), tmpDirName, timers );
+	myParser.Parse( swords, myMwu.getTagset(), tmpDirName, timers );
       }
     }
   }

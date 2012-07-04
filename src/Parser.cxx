@@ -767,10 +767,11 @@ void Parser::addDeclaration( Document& doc ) const {
 	       + "', annotatortype='auto'");
 }
 
-void Parser::prepareParse( Sentence *sent, const string& setname,
+void Parser::prepareParse( const vector<Word *>& fwords,
+			   const string& setname,
 			   parseData& pd ) {
   pd.clear();
-  vector<Word*> fwords = sent->words();
+  Sentence *sent = fwords[0]->sentence();
   vector<Entity*> entities = sent->select<Entity>(setname);
   for( size_t i=0; i < fwords.size(); ++i ){
     Word *word = fwords[i];
@@ -839,57 +840,59 @@ void Parser::prepareParse( Sentence *sent, const string& setname,
   }
 }
 
- void appendParseResult( Sentence *sent, 
-			 parseData& pd,
-			 istream& is ){
-   string line;
-   int cnt=0;
-   vector<int> nums;
-   vector<string> roles;
-   while ( getline( is, line ) ){
-     vector<string> parts;
-     int num = Timbl::split_at( line, parts, " " );
-     if ( num > 7 ){
-       if ( Timbl::stringTo<int>( parts[0] ) != cnt+1 ){
-	 *Log(theErrLog) << "confused! " << endl;
-	 *Log(theErrLog) << "got line '" << line << "'" << endl;
-       }
-       nums.push_back( Timbl::stringTo<int>(parts[6]) );
-       roles.push_back( parts[7] );
-     }
-     ++cnt;
-   }
-   DependenciesLayer *dl = new DependenciesLayer();
+void appendParseResult( const vector<Word *>& words,
+			parseData& pd,
+			istream& is ){
+  string line;
+  int cnt=0;
+  vector<int> nums;
+  vector<string> roles;
+  while ( getline( is, line ) ){
+    vector<string> parts;
+    int num = Timbl::split_at( line, parts, " " );
+    if ( num > 7 ){
+      if ( Timbl::stringTo<int>( parts[0] ) != cnt+1 ){
+	*Log(theErrLog) << "confused! " << endl;
+	*Log(theErrLog) << "got line '" << line << "'" << endl;
+      }
+      nums.push_back( Timbl::stringTo<int>(parts[6]) );
+      roles.push_back( parts[7] );
+    }
+    ++cnt;
+  }
+  DependenciesLayer *dl = new DependenciesLayer();
+  Sentence *sent;
 #pragma omp critical(foliaupdate)
-   {
-     sent->append( dl );
-   }
-   for ( size_t i=0; i < nums.size(); ++i ){
-     if ( nums[i] != 0 ){
-       KWargs args;
-       args["generate-id"] = sent->id();
-       args["class"] = roles[i];
+  {
+    sent = words[0]->sentence();
+    sent->append( dl );
+  }
+  for ( size_t i=0; i < nums.size(); ++i ){
+    if ( nums[i] != 0 ){
+      KWargs args;
+      args["generate-id"] = sent->id();
+      args["class"] = roles[i];
 #pragma omp critical(foliaupdate)
-       {
-	 Dependency *d = new Dependency( sent->doc(), args );
-	 dl->append( d );
-	 DependencyHead *dh = new DependencyHead();
-	 for ( size_t j=0; j < pd.mwus[nums[i]-1].size(); ++ j ){
-	   dh->append( pd.mwus[nums[i]-1][j] );
-	 }
-	 d->append( dh );
-	 DependencyDependent *dd = new DependencyDependent();
-	 for ( size_t j=0; j < pd.mwus[i].size(); ++ j ){
-	   dd->append( pd.mwus[i][j] );
-	 }
-	 d->append( dd );
-       }
-     }
-   }
- }
- 
- 
-void Parser::Parse( Sentence *sent, const string& mwuSet,
+      {
+	Dependency *d = new Dependency( sent->doc(), args );
+	dl->append( d );
+	DependencyHead *dh = new DependencyHead();
+	for ( size_t j=0; j < pd.mwus[nums[i]-1].size(); ++ j ){
+	  dh->append( pd.mwus[nums[i]-1][j] );
+	}
+	d->append( dh );
+	DependencyDependent *dd = new DependencyDependent();
+	for ( size_t j=0; j < pd.mwus[i].size(); ++ j ){
+	  dd->append( pd.mwus[i][j] );
+	}
+	d->append( dd );
+      }
+    }
+  }
+}
+
+
+void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
 		    const string& tmpDirName, TimerBlock& timers ){
   pid_t pid = getpid();
   string pids = toString( pid );
@@ -899,7 +902,7 @@ void Parser::Parse( Sentence *sent, const string& mwuSet,
     *Log(parseLog) << "Parser is not initialized!" << endl;
     exit(1);
   }
-  if ( !sent ){
+  if ( words.empty() ){
     *Log(parseLog) << "unable to parse an analisis without words" << endl;
     return;
   }
@@ -913,7 +916,7 @@ void Parser::Parse( Sentence *sent, const string& mwuSet,
   remove( resFileName.c_str() );
   timers.prepareTimer.start();
   parseData pd;  
-  prepareParse( sent, mwuSet, pd );
+  prepareParse( words, mwuSet, pd );
   timers.prepareTimer.stop();
 #pragma omp parallel sections
   {
@@ -956,7 +959,7 @@ void Parser::Parse( Sentence *sent, const string& mwuSet,
   timers.csiTimer.stop();
   ifstream resFile( resFileName.c_str() );
   if ( resFile ){
-    appendParseResult( sent, pd, resFile );
+    appendParseResult( words, pd, resFile );
   }
   else
     *Log(parseLog) << "couldn't open results file: " << resFileName << endl;
