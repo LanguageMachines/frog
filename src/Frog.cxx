@@ -802,7 +802,7 @@ bool TestSentence( Sentence* sent,
 		   ostream& outStream,
 		   TimerBlock& timers ){
   vector<Word*> swords = sent->words();
-  bool showParse = doParse;
+  bool showParse = true;
   if ( !swords.empty() ) {
 #pragma omp parallel sections
     {
@@ -899,7 +899,7 @@ void Test( Document& doc,
       /* ******* Begin process sentence  ********** */
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)
       bool showParse = TestSentence( sentences[i], outStream, timers ); 
-      if ( showParse ){
+      if ( !showParse ){
 	*Log(theErrLog) << "WARNING!" << endl;
 	*Log(theErrLog) << "Sentence " << i+1 << " isn't parsed because it contains more tokens then set with the --max-parser-tokens=" << maxParserTokens << " option." << endl;
       }
