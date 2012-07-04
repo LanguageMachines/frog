@@ -897,10 +897,12 @@ void Test( Document& doc,
       *Log(theErrLog) << "found " << numS << " sentence(s) in document." << endl;
     for ( size_t i = 0; i < numS; i++) {
       /* ******* Begin process sentence  ********** */
-      bool showParse = TestSentence( sentences[i], outStream, timers ); 
-      *Log(theErrLog) << "WARNING!" << endl;
-      *Log(theErrLog) << "Sentence " << i+1 << " isn't parsed because it contains more tokens then set with the --max-parser-tokens=" << maxParserTokens << " option." << endl;
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)
+      bool showParse = TestSentence( sentences[i], outStream, timers ); 
+      if ( showParse ){
+	*Log(theErrLog) << "WARNING!" << endl;
+	*Log(theErrLog) << "Sentence " << i+1 << " isn't parsed because it contains more tokens then set with the --max-parser-tokens=" << maxParserTokens << " option." << endl;
+      }
       if ( !(doServer && doXMLout) )
 	showResults( outStream, sentences[i], showParse );
     }
