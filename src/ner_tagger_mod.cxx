@@ -126,13 +126,15 @@ static void addEntity( EntitiesLayer *entities,
   }
 }
 
-void NERTagger::addNERTags( Sentence *sent, 
-			    const vector<Word*>& words,
+void NERTagger::addNERTags( const vector<Word*>& words,
 			    const vector<string>& tags,
 			    const vector<double>& confs ){
+  if ( words.empty() )
+    return;
   EntitiesLayer *el = 0;
 #pragma omp critical(foliaupdate)
   {
+    Sentence *sent = words[0]->sentence();
     try {
       el = sent->annotation<EntitiesLayer>();
     }
@@ -205,12 +207,7 @@ void NERTagger::addDeclaration( Document& doc ) const {
 	       + "', annotatortype='auto'");
 }
 
-void NERTagger::Classify( Sentence *sent ){
-  vector<Word*> swords;
-#pragma omp critical(foliaupdate)
-  {
-    swords = sent->words();
-  }
+void NERTagger::Classify( const vector<Word *>& swords ){
   if ( !swords.empty() ) {
     vector<string> words;
     string sentence; // the tagger needs the whole sentence
@@ -240,7 +237,7 @@ void NERTagger::Classify( Sentence *sent ){
       tags.push_back( tagv[i].assignedTag() );
       conf.push_back( tagv[i].confidence() );
     }
-    addNERTags( sent, swords, tags, conf );
+    addNERTags( swords, tags, conf );
   }
 }
 

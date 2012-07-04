@@ -325,12 +325,7 @@ vector<TagResult> CGNTagger::tagLine( const string& line ){
     throw runtime_error( "CGNTagger is not initialized" );
 }
 
-void CGNTagger::Classify( Sentence *sent ){
-  vector<Word*> swords;
-#pragma omp critical(foliaupdate)
-  {  
-    swords = sent->words();
-  }
+void CGNTagger::Classify( const vector<Word*>& swords ){
   if ( !swords.empty() ) {
     vector<string> words;
     string sentence; // the tagger needs the whole sentence

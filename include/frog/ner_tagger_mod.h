@@ -36,10 +36,9 @@ class NERTagger {
   NERTagger();
   ~NERTagger();
   bool init( const Configuration& );
-  void Classify( folia::Sentence * );
+  void Classify( const std::vector<folia::Word *>& );
   void addDeclaration( folia::Document& ) const;
-  void addNERTags( folia::Sentence *, 
-		   const std::vector<folia::Word*>&,
+  void addNERTags( const std::vector<folia::Word*>&,
 		   const std::vector<std::string>&,
 		   const std::vector<double>& );
   std::string getTagset() const { return tagset; };

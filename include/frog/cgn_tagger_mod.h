@@ -40,7 +40,7 @@ class CGNTagger {
   bool init( const Configuration& );
   void addDeclaration( folia::Document& ) const;
   void addTag( folia::Word *, const std::string&, double );
-  void Classify( folia::Sentence * );
+  void Classify( const std::vector<folia::Word *>& );
   std::vector<TagResult> tagLine( const std::string& );
   std::string getTagset() const { return tagset; };
  private:

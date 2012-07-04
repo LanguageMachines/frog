@@ -802,21 +802,21 @@ bool TestSentence( Sentence* sent,
 		   ostream& outStream,
 		   TimerBlock& timers ){
   vector<Word*> swords = sent->words();
-  bool showParse = true;
+  bool showParse = doParse;
   if ( !swords.empty() ) {
 #pragma omp parallel sections
     {
 #pragma omp section
       {
 	timers.tagTimer.start();
-	myCGNTagger.Classify( sent );
+	myCGNTagger.Classify( swords );
 	timers.tagTimer.stop();
       }
 #pragma omp section
       {
 	if ( doIOB ){
 	  timers.iobTimer.start();
-	  myIOBTagger.Classify( sent );
+	  myIOBTagger.Classify( swords );
 	  timers.iobTimer.stop();
 	}
       }
@@ -824,7 +824,7 @@ bool TestSentence( Sentence* sent,
       {
 	if ( doNER ){
 	  timers.nerTimer.start();
-	  myNERTagger.Classify( sent );
+	  myNERTagger.Classify( swords );
 	  timers.nerTimer.stop();
 	}
       }
@@ -899,7 +899,7 @@ void Test( Document& doc,
       /* ******* Begin process sentence  ********** */
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)
       bool showParse = TestSentence( sentences[i], outStream, timers ); 
-      if ( !showParse ){
+      if ( doParse && !showParse ){
 	*Log(theErrLog) << "WARNING!" << endl;
 	*Log(theErrLog) << "Sentence " << i+1 << " isn't parsed because it contains more tokens then set with the --max-parser-tokens=" << maxParserTokens << " option." << endl;
       }

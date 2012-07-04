@@ -37,15 +37,14 @@ class IOBTagger {
   ~IOBTagger();
   bool init( const Configuration& );
   void addDeclaration( folia::Document& ) const;
-  void Classify( folia::Sentence * );
+  void Classify( const std::vector<folia::Word *>& );
   std::string getTagset() const { return tagset; };
  private:
   void addChunk( folia::ChunkingLayer *, 
 		 const std::vector<folia::Word*>&,
 		 const std::vector<double>&,
 		 const std::string& );
-  void addIOBTags( folia::Sentence *, 
-		   const std::vector<folia::Word*>&,
+  void addIOBTags( const std::vector<folia::Word*>&,
 		   const std::vector<std::string>&,
 		   const std::vector<double>& );
   MbtAPI *tagger;

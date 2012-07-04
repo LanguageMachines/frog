@@ -131,13 +131,15 @@ void IOBTagger::addChunk( ChunkingLayer *chunks,
   }
 }
 
-void IOBTagger::addIOBTags( Sentence *sent, 
-			    const vector<Word*>& words,
+void IOBTagger::addIOBTags( const vector<Word*>& words,
 			    const vector<string>& tags,
 			    const vector<double>& confs ){
+  if ( words.empty() )
+    return;
   ChunkingLayer *el = 0;
 #pragma omp critical(foliaupdate)
   {
+    Sentence *sent = words[0]->sentence();
     try {
       el = sent->annotation<ChunkingLayer>();
     }
@@ -218,12 +220,7 @@ void IOBTagger::addDeclaration( Document& doc ) const {
 	       + "', annotatortype='auto'");
 }
 
-void IOBTagger::Classify( Sentence *sent ){
-  vector<Word*> swords;
-#pragma omp critical(foliaupdate)
-  {  
-    swords = sent->words();
-  }
+void IOBTagger::Classify( const vector<Word *>& swords ){
   if ( !swords.empty() ) {
     vector<string> words;
     string sentence; // the tagger needs the whole sentence
@@ -253,7 +250,7 @@ void IOBTagger::Classify( Sentence *sent ){
       tags.push_back( tagv[i].assignedTag() );
       conf.push_back( tagv[i].confidence() );
     }
-    addIOBTags( sent, swords, tags, conf );
+    addIOBTags( swords, tags, conf );
   }
 }
 
