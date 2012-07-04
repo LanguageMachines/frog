@@ -798,11 +798,9 @@ ostream &showResults( ostream& os,
   return os;
 }
 
-void TestSentence( const vector<Sentence*>& sentences,
-		   size_t index,
+bool TestSentence( Sentence* sent,
 		   ostream& outStream,
 		   TimerBlock& timers ){
-  Sentence *sent = sentences[index];
   vector<Word*> swords = sent->words();
   bool showParse = doParse;
   if ( !swords.empty() ) {
@@ -862,8 +860,6 @@ void TestSentence( const vector<Sentence*>& sentences,
     }
     if ( doParse ){
       if ( maxParserTokens != 0 && swords.size() > maxParserTokens ){
-	*Log(theErrLog) << "WARNING!" << endl;
-	*Log(theErrLog) << "Sentence " << index+1 << " isn't parsed because it contains " << swords.size() << " tokens, and you provided the --max-parser-tokens=" << maxParserTokens << " option." << endl;
 	showParse = false;
       }
       else {
@@ -871,8 +867,7 @@ void TestSentence( const vector<Sentence*>& sentences,
       }
     }
   }
-  if ( !(doServer && doXMLout) )
-    showResults( outStream, sent, showParse );
+  return showParse;
 }
 
 void Test( Document& doc,
@@ -902,8 +897,12 @@ void Test( Document& doc,
       *Log(theErrLog) << "found " << numS << " sentence(s) in document." << endl;
     for ( size_t i = 0; i < numS; i++) {
       /* ******* Begin process sentence  ********** */
-      TestSentence( sentences, i, outStream, timers ); 
+      bool showParse = TestSentence( sentences[i], outStream, timers ); 
+      *Log(theErrLog) << "WARNING!" << endl;
+      *Log(theErrLog) << "Sentence " << i+1 << " isn't parsed because it contains more tokens then set with the --max-parser-tokens=" << maxParserTokens << " option." << endl;
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)
+      if ( !(doServer && doXMLout) )
+	showResults( outStream, sentences[i], showParse );
     }
     if ( doServer && doXMLout )
       outStream << doc << endl;
