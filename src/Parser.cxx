@@ -777,11 +777,11 @@ void Parser::prepareParse( const vector<Word *>& fwords,
     Word *word = fwords[i];
     vector<Word*> mwu = lookup( word, entities );
     if ( !mwu.empty() ){
-      string word;
+      string multi_word;
       string head;
       string mod;
       for ( size_t p=0; p < mwu.size(); ++p ){
-	word += mwu[p]->str();
+	multi_word += mwu[p]->str();
 	PosAnnotation *postag = mwu[p]->annotation<PosAnnotation>();
 	head += postag->feat("head");
 	vector<folia::Feature*> feats = postag->select<folia::Feature>();
@@ -791,12 +791,12 @@ void Parser::prepareParse( const vector<Word *>& fwords,
 	    mod += "|";
 	}
 	if ( p < mwu.size() -1 ){
-	  word += "_";
+	  multi_word += "_";
 	  head += "_";
 	  mod += "_";
 	}
       }
-      pd.words.push_back( word );
+      pd.words.push_back( multi_word );
       pd.heads.push_back( head );
       pd.mods.push_back( mod );
       pd.mwus.push_back( mwu );

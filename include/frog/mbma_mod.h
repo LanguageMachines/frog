@@ -50,7 +50,7 @@ class Mbma {
   ~Mbma();
   bool init( const Configuration& );
   void addDeclaration( folia::Document& doc ) const;
-  bool Classify( folia::Word * );
+  void Classify( folia::Word * );
   void Classify( const UnicodeString& );
   void filterTag( const std::string&, const std::vector<std::string>& );
   std::vector<std::vector<std::string> > getResult() const;

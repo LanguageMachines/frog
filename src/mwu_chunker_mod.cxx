@@ -188,8 +188,9 @@ void Mwu::Classify( const vector<Word*>& words ){
   if ( words.empty() )
     return;
   reset();
-  for ( size_t i=0; i < words.size(); ++i )
-    add( words[i] );  
+  for ( size_t i=0; i < words.size(); ++i ){
+    add( words[i] );
+  }
   Classify();
   EntitiesLayer *el = 0;
   Sentence *sent;

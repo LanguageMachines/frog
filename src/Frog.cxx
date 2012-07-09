@@ -557,16 +557,23 @@ vector<Word*> lookup( Word *word, const vector<Entity*>& entities ){
 
 Dependency *lookupDep( const Word *word, 
 		       const vector<Dependency*>&dependencies ){
-  //  cerr << "\nlookup "<< word << " in " << dependencies << endl;
+  if ( tpDebug ){
+    using folia::operator<<;
+    *Log( theErrLog ) << "lookup "<< word << " in " << dependencies << endl;
+  }
   for ( size_t i=0; i < dependencies.size(); ++i ){
-    //    cerr << "\nprobeer " << dependencies[i] << endl;
+    if ( tpDebug ){
+      *Log( theErrLog ) << "probeer " << dependencies[i] << endl;
+    }
     try {
       vector<DependencyDependent*> dv = dependencies[i]->select<DependencyDependent>();
       if ( !dv.empty() ){
 	vector<Word*> v = dv[0]->select<Word>();
 	for ( size_t j=0; j < v.size(); ++j ){
 	  if ( v[j] == word ){
-	    //	    cerr << "\nfound word " << v[j] << endl;
+ 	    if ( tpDebug ){
+	      *Log(theErrLog) << "\nfound word " << v[j] << endl;
+	    }
 	    return dependencies[i];
 	  }
 	}

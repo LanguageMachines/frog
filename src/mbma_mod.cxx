@@ -854,7 +854,7 @@ UnicodeString Mbma::filterDiacritics( const UnicodeString& in ) const {
     return in;
 }
 
-bool Mbma::Classify( Word* sword ){
+void Mbma::Classify( Word* sword ){
   UnicodeString uWord;
   PosAnnotation *pos;
   string head;
@@ -869,19 +869,19 @@ bool Mbma::Classify( Word* sword ){
     vector<string> tmp;
     tmp.push_back( word );
     addMorph( sword, tmp );
-    return true;
   }
-  vector<string> featVals;
+  else {
+    vector<string> featVals;
 #pragma omp critical(foliaupdate)
-  {
-    vector<Feature*> feats = pos->select<Feature>();
-    for ( size_t i = 0; i < feats.size(); ++i )
-      featVals.push_back( feats[i]->cls() );
+    {
+      vector<Feature*> feats = pos->select<Feature>();
+      for ( size_t i = 0; i < feats.size(); ++i )
+	featVals.push_back( feats[i]->cls() );
+    }
+    Classify( uWord );
+    filterTag( head, featVals );
+    getFoLiAResult( sword, uWord );
   }
-  Classify( uWord );
-  filterTag( head, featVals );
-  getFoLiAResult( sword, uWord );
-  return true;
 }
 
 void Mbma::Classify( const UnicodeString& word ){

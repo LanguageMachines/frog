@@ -214,31 +214,28 @@ void Mblem::filterTag( const string& postag ){
     *Log(mblemLog) << "NO CORRESPONDING TAG! " << postag << endl;
 }
 
-string Mblem::getFoLiAResult( Word *word, const UnicodeString& uWord ){
-  string result;
+void Mblem::getFoLiAResult( Word *word, const UnicodeString& uWord ){
   if ( mblemResult.empty() ){
     // just return the word as a lemma
-    result = UnicodeToUTF8( uWord );
+    string result = UnicodeToUTF8( uWord );
     addLemma( word, result );
   }
   else {
     bool first = true;
     vector<mblemData>::iterator it = mblemResult.begin();
     while( it != mblemResult.end() ){
-      string res = it->getLemma();
+      string result = it->getLemma();
       if ( first ){
-	addLemma( word, res );
-	result = res;
+	addLemma( word, result );
 	first = false;
       }
       else {
 	// there are more matching lemmas. add them as alternatives
-	addAltLemma( word, res );
+	addAltLemma( word, result );
       }
       ++it;
     }
   }
-  return result;
 } 
 
 void Mblem::addDeclaration( Document& doc ) const {
@@ -248,7 +245,7 @@ void Mblem::addDeclaration( Document& doc ) const {
 	       + "', annotatortype='auto'");
 }
 
-string Mblem::Classify( Word *sword ){
+void Mblem::Classify( Word *sword ){
   string word;
   string tag;
   string pos;
@@ -260,14 +257,13 @@ string Mblem::Classify( Word *sword ){
   }
   if ( tag == "SPEC" || tag == "LET" ) {
     addLemma( sword, word );
-    return word;
+    return;
   }
   UnicodeString uWord = UTF8ToUnicode(word);
   uWord.toLower();
   Classify( uWord );
   filterTag( pos ); 
-  string res = getFoLiAResult( sword, uWord ); 
-  return res;
+  getFoLiAResult( sword, uWord ); 
 }
 
 void Mblem::Classify( const UnicodeString& uWord ){
