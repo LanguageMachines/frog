@@ -423,10 +423,12 @@ bool froginit(){
       tokenizer.setInputXml( doXMLin );
       stat = myCGNTagger.init( configuration );
       if ( stat ){
-	if ( doIOB )
+	if ( doIOB ){
 	  stat = myIOBTagger.init( configuration );
-	if ( stat && doNER )
+	}
+	if ( stat && doNER ){
 	  stat = myNERTagger.init( configuration );
+	}
 	if ( stat ){
 	  stat = myMblem.init( configuration );
 	  if ( stat ){
@@ -573,7 +575,7 @@ Dependency *lookupDep( const Word *word,
 	vector<Word*> v = dv[0]->select<Word>();
 	for ( size_t j=0; j < v.size(); ++j ){
 	  if ( v[j] == word ){
- 	    if ( tpDebug ){
+	    if ( tpDebug ){
 	      *Log(theErrLog) << "\nfound word " << v[j] << endl;
 	    }
 	    return dependencies[i];
@@ -748,12 +750,24 @@ ostream &showResults( ostream& os,
 		      bool showParse ){
   vector<Word*> words = sentence->words();
   vector<Entity*> mwu_entities = sentence->select<Entity>( myMwu.getTagset() );
-  // using folia::operator<<;
-  // *Log(theErrLog) << "mwu entities " << mwu_entities << endl;
   vector<Dependency*> dependencies = sentence->select<Dependency>();
   vector<Chunk*> iob_chunking = sentence->select<Chunk>();
   vector<Entity*> ner_entities = sentence->select<Entity>( myNERTagger.getTagset() );
-  //  *Log(theErrLog) << "ner entities " << ner_entities << endl;
+  static set<ElementType> excludeSet;
+  vector<Sentence*> parts = sentence->select<Sentence>( excludeSet );
+  if ( !doQuoteDetection )
+    assert( parts.size() == 0 );
+  for ( size_t i=0; i < parts.size(); ++i ){
+    vector<Entity*> ents = parts[i]->select<Entity>( myMwu.getTagset() );
+    mwu_entities.insert( mwu_entities.end(), ents.begin(), ents.end() );
+    vector<Dependency*> deps = parts[i]->select<Dependency>();
+    dependencies.insert( dependencies.end(), deps.begin(), deps.end() );
+    vector<Chunk*> chunks = parts[i]->select<Chunk>();
+    iob_chunking.insert( iob_chunking.end(), chunks.begin(), chunks.end() );
+    vector<Entity*> ners = parts[i]->select<Entity>( myNERTagger.getTagset() );
+    ner_entities.insert( ner_entities.end(), ners.begin(), ners.end() );
+  }
+
   size_t index = 1;
   map<FoliaElement*, int> enumeration;
   vector<vector<Word*> > mwus;
@@ -790,7 +804,16 @@ ostream &showResults( ostream& os,
       Dependency *dep = lookupDep( mwus[i][0], dependencies );
       if ( dep ){
 	vector<DependencyHead*> w = dep->select<DependencyHead>();
-	os << "\t" << enumeration.find(w[0]->index(0))->second << "\t" << dep->cls();
+	size_t num;
+	if ( w[0]->index(0)->isinstance( PlaceHolder_t ) ){
+	  string indexS = w[0]->index(0)->str();
+	  FoliaElement *pnt = w[0]->index(0)->doc()->index(indexS);
+	  num = enumeration.find(pnt->index(0))->second;
+	}
+	else {
+	  num = enumeration.find(w[0]->index(0))->second;
+	}
+	os << "\t" << num << "\t" << dep->cls();
       }
       else {
 	os << "\t"<< 0 << "\tROOT";
@@ -810,7 +833,11 @@ ostream &showResults( ostream& os,
 bool TestSentence( Sentence* sent,
 		   ostream& outStream,
 		   TimerBlock& timers ){
-  vector<Word*> swords = sent->words();
+  vector<Word*> swords;
+  if ( doQuoteDetection )
+    swords = sent->wordParts();
+  else
+    swords = sent->words();
   bool showParse = doParse;
   if ( !swords.empty() ) {
 #pragma omp parallel sections
@@ -897,9 +924,16 @@ void Test( Document& doc,
     myMwu.addDeclaration( doc );
   if (doParse) 
     myParser.addDeclaration( doc );
-  if ( tpDebug > 5 )
+
+  //  if ( tpDebug > 5 )
     *Log(theErrLog) << "Testing document :" << doc << endl;
-  vector<Sentence*> sentences = doc.sentences();
+  
+  vector<Sentence*> topsentences = doc.sentences();
+  vector<Sentence*> sentences;
+  if ( doQuoteDetection )
+    sentences = doc.sentenceParts();
+  else
+    sentences = topsentences;
   size_t numS = sentences.size();
   if ( numS > 0 ) { //process sentences 
     if  (tpDebug > 0) 
@@ -912,8 +946,10 @@ void Test( Document& doc,
 	*Log(theErrLog) << "WARNING!" << endl;
 	*Log(theErrLog) << "Sentence " << i+1 << " isn't parsed because it contains more tokens then set with the --max-parser-tokens=" << maxParserTokens << " option." << endl;
       }
+    }
+    for ( size_t i = 0; i < topsentences.size(); ++i ) {
       if ( !(doServer && doXMLout) )
-	showResults( outStream, sentences[i], showParse );
+	showResults( outStream, topsentences[i], doParse );
     }
     if ( doServer && doXMLout )
       outStream << doc << endl;
