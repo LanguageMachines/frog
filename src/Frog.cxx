@@ -179,7 +179,7 @@ bool parse_args( TimblOpts& Opts ) {
   };
 
   if ( configuration.fill( configFileName ) ){
-    cerr << "config read from: " << configFileName << endl;
+    *Log(theErrLog) << "config read from: " << configFileName << endl;
   }
   else {
     cerr << "failed te read configuration from! '" << configFileName << "'" << endl;
@@ -483,13 +483,15 @@ bool froginit(){
       }
 #pragma omp section 
       {
-	if ( doIOB )
+	if ( doIOB ){
 	  iobStat = myIOBTagger.init( configuration );
+	}
       }
 #pragma omp section 
       {
-	if ( doNER )
+	if ( doNER ){
 	  nerStat = myNERTagger.init( configuration );
+	}
       }
 #pragma omp section
       {
@@ -1044,7 +1046,6 @@ void TestServer( Sockets::ServerSocket &conn) {
 
 
 int main(int argc, char *argv[]) {
-  std::ios_base::sync_with_stdio(false);
   cerr << "frog " << VERSION << " (c) ILK 1998 - 2012" << endl;
   cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
   ProgName = argv[0];
@@ -1053,7 +1054,8 @@ int main(int argc, char *argv[]) {
        << Timbl::VersionName() << ", "
        << TimblServer::VersionName() << ", "
        << Tagger::VersionName() << "]" << endl;
-  cout << "configdir: " << configDir << endl;
+  //  cout << "configdir: " << configDir << endl;
+  std::ios_base::sync_with_stdio(false);
   try {
     TimblOpts Opts(argc, argv);
         

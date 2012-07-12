@@ -246,6 +246,8 @@ void Mblem::addDeclaration( Document& doc ) const {
 }
 
 void Mblem::Classify( Word *sword ){
+  if ( sword->isinstance(PlaceHolder_t ) )
+    return;
   string word;
   string tag;
   string pos;

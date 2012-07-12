@@ -124,6 +124,8 @@ void IOBTagger::addChunk( ChunkingLayer *chunks,
     }
   }
   for ( size_t i=0; i < words.size(); ++i ){
+    if ( words[i]->isinstance(PlaceHolder_t) )
+      continue;
 #pragma omp critical(foliaupdate)
     {
       chunk->append( words[i] );

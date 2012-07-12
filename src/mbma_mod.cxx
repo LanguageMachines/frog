@@ -855,6 +855,8 @@ UnicodeString Mbma::filterDiacritics( const UnicodeString& in ) const {
 }
 
 void Mbma::Classify( Word* sword ){
+  if ( sword->isinstance(PlaceHolder_t) )
+    return;
   UnicodeString uWord;
   PosAnnotation *pos;
   string head;
