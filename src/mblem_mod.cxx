@@ -32,7 +32,6 @@
 #include <fstream>
 #include "timbl/TimblAPI.h"
 
-#include "ucto/unicode.h"
 #include "libfolia/folia.h"
 #include "libfolia/document.h"
 #include "frog/Frog.h"
