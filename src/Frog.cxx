@@ -94,6 +94,7 @@ bool doSentencePerLine = false;
 bool doQuoteDetection = false;
 string listenport = "void";
 string encoding;
+string uttmark = "";
 
 /* assumptions:
    each components gets its own configfile per cmdline options
@@ -126,6 +127,8 @@ void usage( ) {
        << "\t -x <testfile>          Run frog on this FoLiA XML file\n"
        << "\t -S <port>              Run as server instead of reading from testfile\n"
        << "\t --testdir=<directory>  All files in this dir will be tested\n"
+       << "\t --uttmarker=<mark>     utterances are separated by 'mark' symbols"
+       << "\t                        (default none)\n"
        << "\t -n                     Assume input file to hold one sentence per line\n"
        << "\t --max-parser-tokens=<n> inhibit parsing when a sentence contains over 'n' tokens. (default: no limit)\n"
 
@@ -372,6 +375,10 @@ bool parse_args( TimblOpts& Opts ) {
     doServer = true;
     listenport= value;
   }
+
+  if ( Opts.Find ("uttmarker", value, mood)) {
+    uttmark = value;
+  }
   if ( !outputDirName.empty() && testDirName.empty() ){
     *Log(theErrLog) << "useless -outputdir option" << endl;
     return false;
@@ -421,6 +428,7 @@ bool froginit(){
       tokenizer.setQuoteDetection( doQuoteDetection );
       tokenizer.setInputEncoding( encoding );
       tokenizer.setInputXml( doXMLin );
+      tokenizer.setUttMarker( uttmark );
       stat = myCGNTagger.init( configuration );
       if ( stat ){
 	if ( doIOB ){
@@ -469,6 +477,7 @@ bool froginit(){
 	  tokenizer.setQuoteDetection( doQuoteDetection );
 	  tokenizer.setInputEncoding( encoding );
 	  tokenizer.setInputXml( doXMLin );
+	  tokenizer.setUttMarker( uttmark );
 	}
       }
 #pragma omp section

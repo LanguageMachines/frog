@@ -81,6 +81,15 @@ bool UctoTokenizer::init( const Configuration& conf, const string & docid, bool 
   return true;
 }
 
+void UctoTokenizer::setUttMarker( const string& u ) {
+  if ( tokenizer ){
+    if ( !u.empty() )
+      tokenizer->setEosMarker( u ); 
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initalized" );
+};
+
 void UctoTokenizer::setSentencePerLineInput( bool b ) {
   if ( tokenizer )
     tokenizer->setSentencePerLineInput( b ); 
