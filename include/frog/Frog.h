@@ -31,7 +31,7 @@
 #define FROG_H
 
 #include <set>
-#include "timbl/LogStream.h"
+#include "ticcutils/LogStream.h"
 #include "libfolia/foliautils.h"
 #include "frog/Configuration.h"
 

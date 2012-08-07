@@ -934,7 +934,7 @@ void Test( Document& doc,
   if (doParse) 
     myParser.addDeclaration( doc );
 
-  //  if ( tpDebug > 5 )
+  if ( tpDebug > 5 )
     *Log(theErrLog) << "Testing document :" << doc << endl;
   
   vector<Sentence*> topsentences = doc.sentences();

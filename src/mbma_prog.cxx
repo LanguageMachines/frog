@@ -38,7 +38,7 @@
 
 #include "config.h"
 #include "timbl/TimblAPI.h"
-#include "timbl/LogStream.h"
+#include "ticcutils/LogStream.h"
 #include "libfolia/folia.h"
 #include "frog/ucto_tokenizer_mod.h"
 #include "frog/cgn_tagger_mod.h"
