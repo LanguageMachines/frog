@@ -47,7 +47,6 @@ bool UctoTokenizer::init( const Configuration& conf, const string & docid, bool 
     throw runtime_error( "ucto tokenizer is already initalized" );
   tokenizer = new Tokenizer::TokenizerClass();
   tokenizer->setErrorLog( uctoLog );
-  *Log(uctoLog) << endl;
   string debug = conf.lookUp( "debug", "tokenizer" );
   if ( debug.empty() ){
     debug = conf.lookUp( "debug" );
