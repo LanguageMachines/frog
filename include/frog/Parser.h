@@ -100,7 +100,7 @@ class Parser {
   PythonInterface *PI;
   bool isInit;
   std::string fileName;
-  LogStream *parseLog;
+  TiCC::LogStream *parseLog;
   bool keepIntermediate;
   std::string version;
   std::string tagset;

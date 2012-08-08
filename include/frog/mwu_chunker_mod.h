@@ -79,7 +79,7 @@ class Mwu {
   std::string mwuFileName;
   std::vector<mwuAna*> mWords;
   mymap2 MWUs;
-  LogStream *mwuLog;
+  TiCC::LogStream *mwuLog;
   std::string version;
   std::string tagset;
 };

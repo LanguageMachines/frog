@@ -70,7 +70,7 @@ class Mblem {
   std::vector<mblemData> mblemResult;
   std::string version;
   std::string tagset;
-  LogStream *mblemLog;
+  TiCC::LogStream *mblemLog;
 };
 
 #endif

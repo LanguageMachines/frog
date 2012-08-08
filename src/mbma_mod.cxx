@@ -41,6 +41,7 @@
 
 using namespace std;
 using namespace folia;
+using namespace TiCC;
 
 const long int LEFT =  6; // left context
 const long int RIGHT = 6; // right context

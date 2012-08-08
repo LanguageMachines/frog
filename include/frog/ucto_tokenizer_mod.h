@@ -50,7 +50,7 @@ class UctoTokenizer {
   std::vector<std::string> tokenize( const std::string&  );
  private:
   Tokenizer::TokenizerClass *tokenizer;
-  LogStream *uctoLog;
+  TiCC::LogStream *uctoLog;
 };
 
 #endif 

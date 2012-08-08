@@ -31,7 +31,7 @@
 #include <iostream>
 #include <fstream>
 #include "timbl/TimblAPI.h"
-
+#include "ticcutils/LogStream.h"
 #include "libfolia/folia.h"
 #include "libfolia/document.h"
 #include "frog/Frog.h"
@@ -39,6 +39,7 @@
 #include "frog/mblem_mod.h"
 
 using namespace std;
+using namespace TiCC;
 using namespace folia;
 
 Mblem::Mblem(): myLex(0),punctuation( "?...,:;\\'`(){}[]%#+-_=/!" ), 

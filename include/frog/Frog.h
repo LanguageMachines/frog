@@ -41,7 +41,7 @@ std::string& trim(std::string &str);
 
 void getFileNames( const std::string&, std::set<std::string>& );
 
-extern LogStream *theErrLog;
+extern TiCC::LogStream *theErrLog;
 
 extern int tpDebug;
 extern Configuration configuration;

@@ -41,8 +41,9 @@
 #include "libfolia/document.h"
 #include "frog/mwu_chunker_mod.h"
 
-using namespace folia;
 using namespace std;
+using namespace TiCC;
+using namespace folia;
 
 mwuAna::mwuAna( Word *fwrd ){
   spec = false;

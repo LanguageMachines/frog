@@ -46,6 +46,7 @@
 #include "frog/Parser.h"
 
 using namespace std;
+using namespace TiCC;
 using namespace folia;
 
 PythonInterface::PythonInterface( ) {

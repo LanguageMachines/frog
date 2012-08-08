@@ -88,7 +88,7 @@ class Mbma {
   std::vector<MBMAana> analysis;
   std::string version;
   std::string tagset;
-  LogStream *mbmaLog;
+  TiCC::LogStream *mbmaLog;
   Transliterator *transliterator;
 };
 

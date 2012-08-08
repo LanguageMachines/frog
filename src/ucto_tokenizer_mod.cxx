@@ -36,6 +36,7 @@
 #include "frog/ucto_tokenizer_mod.h"
 
 using namespace std;
+using namespace TiCC;
 
 UctoTokenizer::UctoTokenizer() {
   tokenizer = 0; 
