@@ -571,7 +571,7 @@ vector<Word*> lookup( Word *word, const vector<Entity*>& entities ){
 Dependency *lookupDep( const Word *word, 
 		       const vector<Dependency*>&dependencies ){
   if ( tpDebug ){
-    using folia::operator<<;
+    using TiCC::operator<<;
     *Log( theErrLog ) << "lookup "<< word << " in " << dependencies << endl;
   }
   for ( size_t i=0; i < dependencies.size(); ++i ){
@@ -606,7 +606,7 @@ string lookupNEREntity( const vector<Word *>& mwu,
   string endresult;
   for ( size_t j=0; j < mwu.size(); ++j ){
     if ( tpDebug ){
-      using folia::operator<<;
+      using TiCC::operator<<;
       *Log(theErrLog) << "lookup "<< mwu[j] << " in " << entities << endl;
     }
     string result;
@@ -654,7 +654,7 @@ string lookupIOBChunk( const vector<Word *>& mwu,
   string endresult;
   for ( size_t j=0; j < mwu.size(); ++j ){
     if ( tpDebug ){
-      using folia::operator<<;
+      using TiCC::operator<<;
       *Log(theErrLog) << "lookup "<< mwu[j] << " in " << chunks << endl;
     }
     string result;

@@ -298,7 +298,7 @@ void CGNTagger::addTag( Word *word, const string& inputTag, double confidence ){
     pos = word->addPosAnnotation( args );
   }
   vector<string> tagParts;
-  size_t numParts = Timbl::split_at( tagPartS, tagParts, "," );
+  size_t numParts = TiCC::split_at( tagPartS, tagParts, "," );
   for ( size_t i=0; i < numParts; ++i ){
     KWargs args;
     args["set"]    = tagset;

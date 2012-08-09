@@ -850,7 +850,7 @@ void appendParseResult( const vector<Word *>& words,
   vector<string> roles;
   while ( getline( is, line ) ){
     vector<string> parts;
-    int num = Timbl::split_at( line, parts, " " );
+    int num = TiCC::split_at( line, parts, " " );
     if ( num > 7 ){
       if ( Timbl::stringTo<int>( parts[0] ) != cnt+1 ){
 	*Log(theErrLog) << "confused! " << endl;

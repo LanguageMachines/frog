@@ -161,7 +161,7 @@ void Test( istream& in ){
 	myMbma.Classify( uWord );
 	if ( !doAll ){
 	  vector<string> v;
-	  size_t num = Timbl::split_at_first_of( tagv[w].assignedTag(), 
+	  size_t num = TiCC::split_at_first_of( tagv[w].assignedTag(), 
 						 v, "(,)" );
 	  if ( num < 1 ){
 	    throw runtime_error( "error: tag not in right format " );    

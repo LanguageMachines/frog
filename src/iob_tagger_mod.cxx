@@ -157,7 +157,7 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
     if (debug) 
       *Log(iobLog) << "tag = " << tags[i] << endl;
     vector<string> tagwords;
-    size_t num_words = Timbl::split_at( tags[i], tagwords, "_" );
+    size_t num_words = TiCC::split_at( tags[i], tagwords, "_" );
     if ( num_words != 2 ){
       *Log(iobLog) << "expected <POS>_<IOB>, got: " << tags[i] << endl;
       exit( EXIT_FAILURE );
@@ -169,7 +169,7 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
       if ( !stack.empty() ){
 	if (debug) {
 	  *Log(iobLog) << "O spit out " << curIOB << endl;
-	  using folia::operator<<;
+	  using TiCC::operator<<;
 	  *Log(iobLog) << "spit out " << stack << endl;	
 	}
 	addChunk( el, stack, dstack, curIOB );
@@ -179,7 +179,7 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
       continue;
     }
     else {
-      num_words = Timbl::split_at( tagwords[1], iob, "-" );
+      num_words = TiCC::split_at( tagwords[1], iob, "-" );
       if ( num_words != 2 ){
 	*Log(iobLog) << "expected <IOB>-tag, got: " << tagwords[1] << endl;
 	exit( EXIT_FAILURE );
@@ -193,7 +193,7 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
       if ( !stack.empty() ){
 	if ( debug ){
 	  *Log(iobLog) << "B spit out " << curIOB << endl;
-	  using folia::operator<<;
+	  using TiCC::operator<<;
 	  *Log(iobLog) << "spit out " << stack << endl;	
 	}
 	addChunk( el, stack, dstack, curIOB );
@@ -208,7 +208,7 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
   if ( !stack.empty() ){
     if ( debug ){
       *Log(iobLog) << "END spit out " << curIOB << endl;
-      using folia::operator<<;
+      using TiCC::operator<<;
       *Log(iobLog) << "spit out " << stack << endl;	
     }
     addChunk( el, stack, dstack, curIOB );

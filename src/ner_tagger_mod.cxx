@@ -154,7 +154,7 @@ void NERTagger::addNERTags( const vector<Word*>& words,
       if ( !stack.empty() ){
 	if (debug) {
 	  *Log(nerLog) << "O spit out " << curNER << endl;
-	  using folia::operator<<;
+	  using TiCC::operator<<;
 	  *Log(nerLog) << "spit out " << stack << endl;	
 	}
 	addEntity( el, tagset, stack, dstack, curNER );
@@ -164,7 +164,7 @@ void NERTagger::addNERTags( const vector<Word*>& words,
       continue;
     }
     else {
-      size_t num_words = Timbl::split_at( tags[i], ner, "-" );
+      size_t num_words = TiCC::split_at( tags[i], ner, "-" );
       if ( num_words != 2 ){
 	*Log(nerLog) << "expected <NER>-tag, got: " << tags[i] << endl;
 	exit( EXIT_FAILURE );
@@ -178,7 +178,7 @@ void NERTagger::addNERTags( const vector<Word*>& words,
       if ( !stack.empty() ){
 	if ( debug ){
 	  *Log(nerLog) << "B spit out " << curNER << endl;
-	  using folia::operator<<;
+	  using TiCC::operator<<;
 	  *Log(nerLog) << "spit out " << stack << endl;	
 	}
 	addEntity( el, tagset, stack, dstack, curNER );
@@ -193,7 +193,7 @@ void NERTagger::addNERTags( const vector<Word*>& words,
   if ( !stack.empty() ){
     if ( debug ){
       *Log(nerLog) << "END spit out " << curNER << endl;
-      using folia::operator<<;
+      using TiCC::operator<<;
       *Log(nerLog) << "spit out " << stack << endl;	
     }
     addEntity( el, tagset, stack, dstack, curNER );

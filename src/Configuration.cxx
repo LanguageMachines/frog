@@ -28,8 +28,9 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include <stdexcept>
 #include <iostream>
-#include "timbl/StringOps.h"
+#include "ticcutils/StringOps.h"
 #include "frog/Configuration.h"
 
 
@@ -101,7 +102,7 @@ bool Configuration::fill( const string& fileName ){
   string inLine;
   string section = "global";
   while ( getline( is, inLine ) ){
-    string line = Timbl::compress(inLine);
+    string line = TiCC::trim(inLine);
     if ( line.empty() )
       continue;
     if ( line[0] == '#' )
@@ -118,7 +119,7 @@ bool Configuration::fill( const string& fileName ){
       }
     else {
       vector<string> parts;
-      int num = Timbl::split_at( line, parts, "=" );
+      int num = TiCC::split_at( line, parts, "=" );
       if ( num == 2 ){
 	string val = parts[1];
 	if ( val[0] == '"' && val[val.length()-1] == '"' )
@@ -149,7 +150,7 @@ bool Configuration::fill( const string& fileName, const string& section ){
   string localsection;
   //  cerr << "looking for section = " << section << endl;
   while ( getline( is, inLine ) ){
-    string line = Timbl::compress(inLine);
+    string line = TiCC::trim(inLine);
     if ( line.empty() )
       continue;
     if ( line[0] == '#' )
@@ -167,7 +168,7 @@ bool Configuration::fill( const string& fileName, const string& section ){
     else if ( localsection == section ){
       found = true;
       vector<string> parts;
-      int num = Timbl::split_at( line, parts, "=" );
+      int num = TiCC::split_at( line, parts, "=" );
       if ( num == 2 ){
 	string val = parts[1];
 	if ( val[0] == '"' && val[val.length()-1] == '"' )
