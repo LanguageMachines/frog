@@ -1064,9 +1064,19 @@ void TestServer( Sockets::ServerSocket &conn) {
 	Test( doc, outputstream );
       }
       else {
-	string data = "";      
-	if ( !conn.read( data ) )	 //read data from client
-	  throw( runtime_error( "read failed" ) );
+	string data = "";
+	if ( doSentencePerLine ){
+	  if ( !conn.read( data ) )	 //read data from client
+	    throw( runtime_error( "read failed" ) );
+	}
+	else {
+	  string line;
+	  while( conn.read(line) ){
+	    if ( line == "EOT" )
+	      break;
+	    data += line + "\n";
+	  }
+	}
 	if (tpDebug)
 	  *Log(theErrLog) << "Received: [" << data << "]" << endl;
 	*Log(theErrLog) << "Processing... " << endl;
