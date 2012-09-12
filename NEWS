@@ -1,3 +1,11 @@
+0.12.16 - 2012-xx-xx
+ * the servermode now kan handle multiline input (non XML only).
+   Can be switched of with the -n option. 
+ * A lot of refactoring regarding FoLiA stuff
+ * the -Q option now works
+ * added a --uttmarker option
+ * added mbma and mblem 'man' programs
+
 0.12.15 - 2012-03-29
  * using the new Mbt 3.2.8 API for Tagging.
    The code is much simpler and less error-prone now.
