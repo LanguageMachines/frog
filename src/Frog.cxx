@@ -812,7 +812,7 @@ ostream &showResults( ostream& os,
       string cls;
       Dependency *dep = lookupDep( mwus[i][0], dependencies );
       if ( dep ){
-	vector<DependencyHead*> w = dep->select<DependencyHead>();
+	vector<Headwords*> w = dep->select<Headwords>();
 	size_t num;
 	if ( w[0]->index(0)->isinstance( PlaceHolder_t ) ){
 	  string indexS = w[0]->index(0)->str();

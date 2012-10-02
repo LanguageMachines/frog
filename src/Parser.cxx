@@ -877,7 +877,7 @@ void appendParseResult( const vector<Word *>& words,
       {
 	Dependency *d = new Dependency( sent->doc(), args );
 	dl->append( d );
-	DependencyHead *dh = new DependencyHead();
+	Headwords *dh = new Headwords();
 	for ( size_t j=0; j < pd.mwus[nums[i]-1].size(); ++ j ){
 	  dh->append( pd.mwus[nums[i]-1][j] );
 	}
