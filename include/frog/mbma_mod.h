@@ -79,7 +79,10 @@ class Mbma {
   void execute( const UnicodeString& word, 
 		const std::vector<std::string>& classes );
   int debugFlag;
+  void addMorph( folia::MorphologyLayer *, 
+		 const std::vector<std::string>& ) const;
   void addMorph( folia::Word *, const std::vector<std::string>& ) const;
+  void addAltMorph( folia::Word *, const std::vector<std::string>& ) const;
   std::string MTreeFilename;
   Timbl::TimblAPI *MTree;
   std::map<char,std::string> iNames;  

@@ -658,13 +658,28 @@ void Mbma::execute( const UnicodeString& word,
   }
 }
 
+void Mbma::addAltMorph( Word *word, 
+			const vector<string>& lemmas ) const {
+  MorphologyLayer *ml = 0;
+#pragma omp critical(foliaupdate)
+  {
+    ml = word->addAlternative<MorphologyLayer>();
+  }
+  addMorph( ml, lemmas );
+}
+
 void Mbma::addMorph( Word *word, 
-		     const vector<string>& lemmas ) const {
+			  const vector<string>& lemmas ) const {
   MorphologyLayer *ml = new MorphologyLayer();
 #pragma omp critical(foliaupdate)
   {
     word->append( ml );
   }
+  addMorph( ml, lemmas );
+}
+
+void Mbma::addMorph( MorphologyLayer *ml, 
+		     const vector<string>& lemmas ) const {
   int offset = 0;
   for ( size_t p=0; p < lemmas.size(); ++p ){
     Morpheme *m = new Morpheme();
@@ -833,7 +848,10 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
   else {
     vector<MBMAana>::const_iterator sit = analysis.begin();
     while( sit != analysis.end() ){
-      addMorph( fword, sit->getMorph() );
+      if ( sit == analysis.begin() )
+	addMorph( fword, sit->getMorph() );
+      else
+	addAltMorph( fword, sit->getMorph() );
       ++sit;
     }
   }
