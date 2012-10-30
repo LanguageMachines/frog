@@ -70,7 +70,7 @@ EOT
    fi
 
 
-if $automake --version|head -1 |grep '1\.[4-8]'; then
+if $automake --version|head -1 |grep ' 1\.[4-8]'; then
     echo "automake 1.4-1.8 is active. You should use automake 1.9 or later"
     if test -f /etc/debian_version; then
         echo " sudo apt-get install automake1.9"
@@ -79,7 +79,7 @@ if $automake --version|head -1 |grep '1\.[4-8]'; then
     exit 1
 fi
 
-if $aclocal --version|head -1 |grep '1\.[4-8]'; then
+if $aclocal --version|head -1 |grep ' 1\.[4-8]'; then
     echo "aclocal 1.4-1.8 is active. You should use aclocal 1.9 or later"
     if test -f /etc/debian_version; then	
         echo " sudo apt-get install aclocal1.9"
