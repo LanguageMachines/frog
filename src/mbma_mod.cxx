@@ -660,16 +660,18 @@ void Mbma::execute( const UnicodeString& word,
 
 void Mbma::addAltMorph( Word *word, 
 			const vector<string>& lemmas ) const {
-  MorphologyLayer *ml = 0;
+  Alternative *alt = new Alternative();
+  MorphologyLayer *ml = new MorphologyLayer();
 #pragma omp critical(foliaupdate)
   {
-    ml = word->addAlternative<MorphologyLayer>();
+    alt->append( ml );
+    word->append( alt );
   }
   addMorph( ml, lemmas );
 }
 
 void Mbma::addMorph( Word *word, 
-			  const vector<string>& lemmas ) const {
+		     const vector<string>& lemmas ) const {
   MorphologyLayer *ml = new MorphologyLayer();
 #pragma omp critical(foliaupdate)
   {
