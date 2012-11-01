@@ -268,6 +268,7 @@ void CGNTagger::addTag( Word *word, const string& inputTag, double confidence ){
     confidence = 1.0;
   }
   else if ( ucto_class == "SMILEY" ||
+	    ucto_class == "REVERSE-SMILEY" ||
 	    ucto_class.find("URL") == 0 ||
 	    ucto_class == "E-MAIL" ){
     mainTag = "SPEC";
