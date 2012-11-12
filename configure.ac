@@ -155,7 +155,7 @@ AC_ARG_WITH(python,
 
 #we need Python > 2.5.x
 AM_PATH_PYTHON([2.5],
-	[PYTHONDIR=$(pkgpythondir)
+	[PYTHONDIR=${pkgpythondir}
 	 AC_SUBST([PYTHONDIR])],
 	[:])
 
