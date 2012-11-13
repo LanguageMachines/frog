@@ -81,7 +81,12 @@ bool NERTagger::init( const Configuration& conf ){
     *Log(nerLog) << "Unable to find settings for NER" << endl;
     return false;
   }
-  string settings = val;
+  string settings;
+  if ( val[0] == '/' ) // an absolute path
+    settings = val;
+  else
+    settings =  configuration.configDir() + val;
+
   val = conf.lookUp( "version", "NER" );
   if ( val.empty() ){
     version = "1.0";
@@ -95,9 +100,9 @@ bool NERTagger::init( const Configuration& conf ){
   else
     tagset = val;
 
-  string init = "-s " + configuration.configDir() + settings + " -vcf";
+  string init = "-s " + settings + " -vcf";
   tagger = new MbtAPI( init, *nerLog );
-  return tagger != 0;
+  return tagger->isInit();
 }
 
 static void addEntity( EntitiesLayer *entities, 

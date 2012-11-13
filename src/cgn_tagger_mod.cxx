@@ -207,7 +207,12 @@ bool CGNTagger::init( const Configuration& conf ){
     *Log(cgnLog) << "Unable to find settings for Tagger" << endl;
     return false;
   }
-  string settings =  val;
+  string settings;
+  if ( val[0] == '/' ) // an absolute path
+    settings = val;
+  else
+    settings =  configuration.configDir() + val;
+
   val = conf.lookUp( "version", "tagger" );
   if ( val.empty() ){
     version = "1.0";
@@ -221,9 +226,9 @@ bool CGNTagger::init( const Configuration& conf ){
   else
     tagset = val;
   fillSubSetTable();
-  string init = "-s " + configuration.configDir() + settings + " -vcf";
+  string init = "-s " + settings + " -vcf";
   tagger = new MbtAPI( init, *cgnLog );
-  return tagger != 0;
+  return tagger->isInit();
 }
 
 string getSubSet( const string& val, const string& head ){

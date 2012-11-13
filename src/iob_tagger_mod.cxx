@@ -81,7 +81,12 @@ bool IOBTagger::init( const Configuration& conf ){
     *Log(iobLog) << "Unable to find settings for IOB" << endl;
     return false;
   }
-  string settings = val;
+  string settings;
+  if ( val[0] == '/' ) // an absolute path
+    settings = val;
+  else
+    settings =  configuration.configDir() + val;
+
   val = conf.lookUp( "version", "IOB" );
   if ( val.empty() ){
     version = "1.0";
@@ -95,9 +100,9 @@ bool IOBTagger::init( const Configuration& conf ){
   else
     tagset = val;
 
-  string init = "-s " + configuration.configDir() + settings + " -vcf";
+  string init = "-s " + settings + " -vcf";
   tagger = new MbtAPI( init, *iobLog );
-  return tagger != 0;
+  return tagger->isInit();
 }
 
 void IOBTagger::addChunk( ChunkingLayer *chunks, 
