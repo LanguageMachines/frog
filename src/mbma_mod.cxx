@@ -34,7 +34,7 @@
 #include <timbl/TimblAPI.h>
 
 #include "frog/Frog.h"
-#include "frog/Configuration.h"
+#include "ticcutils/Configuration.h"
 #include "libfolia/folia.h"
 #include "libfolia/document.h"
 #include "frog/mbma_mod.h"

@@ -29,13 +29,11 @@
 #ifndef IOB_TAGGER_MOD_H
 #define IOB_TAGGER_MOD_H
 
-class Configuration;
-
 class IOBTagger {
  public:
   IOBTagger();
   ~IOBTagger();
-  bool init( const Configuration& );
+  bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
   void Classify( const std::vector<folia::Word *>& );
   std::string getTagset() const { return tagset; };

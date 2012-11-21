@@ -42,13 +42,11 @@ struct waStruct {
   }
 };
 
-class Configuration;
-
 class Mbma {
  public:
   Mbma();
   ~Mbma();
-  bool init( const Configuration& );
+  bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;
   void Classify( folia::Word * );
   void Classify( const UnicodeString& );

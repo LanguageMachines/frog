@@ -57,15 +57,13 @@ class mwuAna {
 
 #define mymap2 std::multimap<std::string, std::vector<std::string> >
 
-class Configuration;
-
 class Mwu {
   friend std::ostream& operator<< (std::ostream&, const Mwu& );
  public:
   Mwu();
   ~Mwu();
   void reset();
-  bool init( const Configuration& );
+  bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
   void Classify( const std::vector<folia::Word *>& );
   void add( folia::Word * );

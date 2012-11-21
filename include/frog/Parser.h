@@ -31,8 +31,6 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-class Configuration;
-
 class PyObjectRef {
  private:
   PyObject* ref;
@@ -82,7 +80,7 @@ class Parser {
  public:
  Parser():pairs(0),dir(0),rels(0),PI(0),isInit(false),keepIntermediate(false){};
   ~Parser();
-  bool init( const Configuration& );
+  bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;
   void Parse( const std::vector<folia::Word *>&, 
 	      const std::string&, const std::string&, TimerBlock& );

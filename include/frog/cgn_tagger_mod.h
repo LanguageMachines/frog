@@ -31,13 +31,11 @@
 
 #include "mbt/MbtAPI.h"
 
-class Configuration;
-
 class CGNTagger {
  public:
   CGNTagger();
   ~CGNTagger();
-  bool init( const Configuration& );
+  bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
   void addTag( folia::Word *, const std::string&, double );
   void Classify( const std::vector<folia::Word *>& );

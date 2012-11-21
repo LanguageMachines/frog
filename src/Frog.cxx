@@ -49,7 +49,7 @@
 
 #include "config.h"
 #include "frog/Frog.h"
-#include "frog/Configuration.h"
+#include "ticcutils/Configuration.h"
 #include "libfolia/document.h"
 #include "libfolia/folia.h"
 #include "frog/ucto_tokenizer_mod.h"
@@ -63,6 +63,7 @@
 
 using namespace std;
 using namespace folia;
+using namespace TiCC;
 
 LogStream my_default_log( cerr, "frog-", StampMessage ); // fall-back
 LogStream *theErrLog = &my_default_log;  // fill the externals

@@ -33,13 +33,11 @@
 #include "libfolia/document.h"
 #include "ucto/tokenize.h"
 
-class Configuration;
-
 class UctoTokenizer {
  public:
   UctoTokenizer();
   ~UctoTokenizer() { delete tokenizer; delete uctoLog; };
-  bool init( const Configuration&, const std::string&, bool );
+  bool init( const TiCC::Configuration&, const std::string&, bool );
   void setUttMarker( const std::string& );
   void setSentencePerLineInput( bool );
   void setInputEncoding( const std::string& );

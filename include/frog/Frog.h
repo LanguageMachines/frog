@@ -32,8 +32,8 @@
 
 #include <set>
 #include "ticcutils/LogStream.h"
+#include "ticcutils/Configuration.h"
 #include "libfolia/foliautils.h"
-#include "frog/Configuration.h"
 
 std::string prefix( const std::string&, const std::string& );
 bool existsDir( const std::string& );
@@ -44,7 +44,7 @@ void getFileNames( const std::string&, std::set<std::string>& );
 extern TiCC::LogStream *theErrLog;
 
 extern int tpDebug;
-extern Configuration configuration;
+extern TiCC::Configuration configuration;
 
 class TimerBlock{
 public:

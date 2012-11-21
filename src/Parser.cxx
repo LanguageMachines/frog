@@ -42,7 +42,7 @@
 #include "libfolia/folia.h"
 #include "libfolia/document.h"
 #include "frog/Frog.h"
-#include "frog/Configuration.h"
+#include "ticcutils/Configuration.h"
 #include "frog/Parser.h"
 
 using namespace std;

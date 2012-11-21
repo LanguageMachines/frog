@@ -39,10 +39,10 @@
 #include "config.h"
 #include "timbl/TimblAPI.h"
 #include "ticcutils/LogStream.h"
+#include "ticcutils/Configuration.h"
 #include "libfolia/folia.h"
 #include "frog/ucto_tokenizer_mod.h"
 #include "frog/cgn_tagger_mod.h"
-#include "frog/Configuration.h"
 #include "frog/mblem_mod.h"
 
 using namespace std;

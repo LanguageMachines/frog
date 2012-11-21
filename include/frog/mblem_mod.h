@@ -42,13 +42,11 @@ class mblemData {
   std::string tag;
 };
 
-class Configuration;
-
 class Mblem {
  public:
   Mblem();
   ~Mblem();
-  bool init( const Configuration& );
+  bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;
   void Classify( folia::Word * );
   void Classify( const UnicodeString& );

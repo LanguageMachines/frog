@@ -29,13 +29,11 @@
 #ifndef NER_TAGGER_MOD_H
 #define NER_TAGGER_MOD_H
 
-class Configuration;
-
 class NERTagger {
  public:
   NERTagger();
   ~NERTagger();
-  bool init( const Configuration& );
+  bool init( const TiCC::Configuration& );
   void Classify( const std::vector<folia::Word *>& );
   void addDeclaration( folia::Document& ) const;
   void addNERTags( const std::vector<folia::Word*>&,
