@@ -113,7 +113,7 @@ bool parse_args( TimblOpts& Opts ) {
       cerr << "-d value should be an integer" << endl;
       return false;
     }
-    configuration.set( "debug", value, "mblem" );
+    configuration.setatt( "debug", value, "mblem" );
     Opts.Delete('d');
   };
 

@@ -240,7 +240,7 @@ bool parse_args( TimblOpts& Opts ) {
   if ( Opts.Find( "keep-parser-files", value, mood ) ){
     if ( value.empty() ||
 	 value == "true" || value == "TRUE" || value =="yes" || value == "YES" )
-      configuration.set( "keepIntermediateFiles", "true", "parser" );
+      configuration.setatt( "keepIntermediateFiles", "true", "parser" );
     Opts.Delete("keep-parser-files");
   }
   tmpDirName = configuration.lookUp( "tmpdir", "global" );

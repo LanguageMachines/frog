@@ -110,7 +110,7 @@ bool parse_args( TimblOpts& Opts ) {
       cerr << "-d value should be an integer" << endl;
       return false;
     }
-    configuration.set( "debug", value, "mbma" );
+    configuration.setatt( "debug", value, "mbma" );
     Opts.Delete('d');
   };
 
