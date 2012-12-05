@@ -224,7 +224,7 @@ void IOBTagger::addDeclaration( Document& doc ) const {
   doc.declare( AnnotationType::CHUNKING, 
 	       tagset,
 	       "annotator='frog-chunker-" + version
-	       + "', annotatortype='auto'");
+	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
 void IOBTagger::Classify( const vector<Word *>& swords ){

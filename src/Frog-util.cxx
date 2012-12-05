@@ -101,3 +101,13 @@ string& trim(string &str)  //3rd party function. TODO: test if utf-8 safe? (MvG)
     return str;
 }
 
+string getTime() {
+  time_t Time;
+  time(&Time);
+  tm curtime;
+  localtime_r(&Time,&curtime);
+  char buf[256];
+  strftime( buf, 100, "%Y-%m-%dT%X", &curtime );
+  string res = buf;
+  return res;
+}

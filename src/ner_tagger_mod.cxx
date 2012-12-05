@@ -209,7 +209,7 @@ void NERTagger::addDeclaration( Document& doc ) const {
   doc.declare( AnnotationType::ENTITY, 
 	       tagset,
 	       "annotator='frog-ner-" + version
-	       + "', annotatortype='auto'");
+	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
 void NERTagger::Classify( const vector<Word *>& swords ){

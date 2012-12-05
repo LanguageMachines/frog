@@ -862,7 +862,7 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
 void Mbma::addDeclaration( Document& doc ) const {
   doc.declare( AnnotationType::MORPHOLOGICAL, tagset,
 	       "annotator='frog-mbma-" +  version + 
-	       "', annotatortype='auto'");
+	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
 UnicodeString Mbma::filterDiacritics( const UnicodeString& in ) const {
