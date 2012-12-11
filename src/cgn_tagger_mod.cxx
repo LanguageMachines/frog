@@ -345,11 +345,14 @@ void CGNTagger::Classify( const vector<Word*>& swords ){
       *Log(cgnLog) << "CGN tagger in: " << sentence << endl;
     vector<TagResult> tagv = tagger->TagLine(sentence);
     if ( tagv.size() != swords.size() ){
-      if ( debug ){
-	for ( size_t i=0; i < tagv.size(); ++i ){
-	  *Log(cgnLog) << "[" << i << "] : word=" << tagv[i].word() 
-		       << " tag=" << tagv[i].assignedTag() << endl;
-	}
+      *Log(cgnLog) << "mismatch between number of <w> tags and the tagger result." << endl;
+      *Log(cgnLog) << "words according to <w> tags: " << endl;
+      for ( size_t w = 0; w < swords.size(); ++w ) {
+	*Log(cgnLog) << "w[" << w << "]= " << swords[w]->str() << endl;
+      }
+      *Log(cgnLog) << "words according to CGN tagger: " << endl;    
+      for ( size_t i=0; i < tagv.size(); ++i ){
+	*Log(cgnLog) << "word[" << i << "]=" << tagv[i].word() << endl;
       }
       throw runtime_error( "CGN tagger is confused" );
     }

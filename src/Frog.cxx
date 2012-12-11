@@ -1013,9 +1013,19 @@ void Test( const string& infilename,
       exit( EXIT_FAILURE );
     }
   }
+  *Log(theErrLog) << "Frogging " << infilename << endl;
   if ( doXMLin ){
     Document doc;
-    doc.readFromFile( infilename );
+    try {
+      doc.readFromFile( infilename );
+    }
+    catch ( exception &e ){
+      *Log(theErrLog) << "retrieving FoLiA from '" << infilename << "' failed" << endl;
+      if ( !outName.empty() ){
+	delete os;
+      }
+      return;
+    }
     tokenizer.tokenize( doc );
     Test( doc, *os, xmlOutFile );
   }
