@@ -56,7 +56,7 @@ mwuAna::mwuAna( Word *fwrd ){
   if ( tag == "SPEC" ){
 #pragma omp critical(foliaupdate)
     {
-      vector<Feature*> feats = fwrd->select<Feature>();
+      vector<Feature*> feats = fwrd->select<Feature>( );
       spec = ( feats.size() == 1 && feats[0]->cls() == "deeleigen" );
     }
   }
@@ -168,6 +168,7 @@ bool Mwu::init( const Configuration& config ) {
   }
   else
     tagset = val;
+
   return true;
 }
 

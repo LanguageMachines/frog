@@ -160,6 +160,14 @@ bool Mbma::init( const Configuration& config ) {
   }
   else
     tagset = val;
+
+  val = config.lookUp( "set", "tagger" );
+  if ( val.empty() ){
+    cgn_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
+  }
+  else
+    cgn_tagset = val;
+
   string tfName = config.lookUp( "treeFile", "mbma" );
   if ( tfName.empty() )
     tfName = "mbma.igtree";
@@ -884,7 +892,7 @@ void Mbma::Classify( Word* sword ){
 #pragma omp critical(foliaupdate)
   {
     uWord = sword->text();
-    pos = sword->annotation<PosAnnotation>();
+    pos = sword->annotation<PosAnnotation>( cgn_tagset );
     head = pos->feat("head");
   }
   if ( head == "SPEC" || head == "LET" ){

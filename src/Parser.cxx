@@ -190,6 +190,14 @@ bool Parser::init( const Configuration& configuration ){
   }
   else
     tagset = val;
+
+  val = configuration.lookUp( "set", "tagger" );
+  if ( val.empty() ){
+    cgn_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
+  }
+  else
+    cgn_tagset = val;
+
   val = configuration.lookUp( "maxDepSpan", "parser" );
   if ( !val.empty() ){
     size_t gs = stringTo<size_t>( val );
@@ -783,7 +791,7 @@ void Parser::prepareParse( const vector<Word *>& fwords,
       string mod;
       for ( size_t p=0; p < mwu.size(); ++p ){
 	multi_word += mwu[p]->str();
-	PosAnnotation *postag = mwu[p]->annotation<PosAnnotation>();
+	PosAnnotation *postag = mwu[p]->annotation<PosAnnotation>( cgn_tagset );
 	head += postag->feat("head");
 	vector<folia::Feature*> feats = postag->select<folia::Feature>();
 	for ( size_t j=0; j < feats.size(); ++j ){
@@ -805,7 +813,7 @@ void Parser::prepareParse( const vector<Word *>& fwords,
     }
     else {
       pd.words.push_back( word->str() );
-      PosAnnotation *postag = word->annotation<PosAnnotation>();
+      PosAnnotation *postag = word->annotation<PosAnnotation>( cgn_tagset );
       string head = postag->feat("head");
       pd.heads.push_back( head );
       string mod;

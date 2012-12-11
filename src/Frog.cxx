@@ -708,7 +708,7 @@ void displayMWU( ostream& os, size_t index,
     Word *word = mwu[p];
     try { 
       wrd += word->str();
-      PosAnnotation *postag = word->annotation<PosAnnotation>();
+      PosAnnotation *postag = word->annotation<PosAnnotation>( );
       pos += postag->cls();
       if ( p < mwu.size() -1 ){
 	wrd += "_";

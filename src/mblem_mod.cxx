@@ -91,6 +91,13 @@ bool Mblem::init( const Configuration& config ) {
   }
   else
     tagset = val;
+
+  val = config.lookUp( "set", "tagger" );
+  if ( val.empty() ){
+    cgn_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
+  }
+  else
+    cgn_tagset = val;
   
   string transName = config.lookUp( "transFile", "mblem" );
   if ( !transName.empty() ){
@@ -256,7 +263,7 @@ void Mblem::Classify( Word *sword ){
   {  
     word = sword->str();
     pos = sword->pos();
-    tag = sword->annotation<PosAnnotation>()->feat("head");
+    tag = sword->annotation<PosAnnotation>( cgn_tagset )->feat("head");
   }
   if ( tag == "SPEC" || tag == "LET" ) {
     addLemma( sword, word );

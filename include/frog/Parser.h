@@ -102,6 +102,7 @@ class Parser {
   bool keepIntermediate;
   std::string version;
   std::string tagset;
+  std::string cgn_tagset;
 
 };
 
