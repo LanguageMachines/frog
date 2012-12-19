@@ -85,6 +85,8 @@ string ProgName;
 int tpDebug = 0; //0 for none, more for more output
 unsigned int maxParserTokens = 0; // 0 for unlimited
 bool doTok = true;
+bool doLemma = true;
+bool doMorph = true;
 bool doMwu = true;
 bool doIOB = true;
 bool doNER = true;
@@ -134,7 +136,7 @@ void usage( ) {
        << "\t --max-parser-tokens=<n> inhibit parsing when a sentence contains over 'n' tokens. (default: no limit)\n"
 
        << "\t============= MODULE SELECTION ==========================================\n"
-       << "\t --skip=[mptnc]    Skip Tokenizer (t), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"
+       << "\t --skip=[mptncla]    Skip Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"
        << "\t============= CONFIGURATION OPTIONS =====================================\n"
        << "\t -c <filename>    Set configuration file (default " << configFileName << ")\n"
        << "\t============= OUTPUT OPTIONS ============================================\n"      
@@ -209,6 +211,10 @@ bool parse_args( TimblOpts& Opts ) {
     string skip = value;
     if ( skip.find_first_of("tT") != string::npos )
       doTok = false;
+    if ( skip.find_first_of("lL") != string::npos )
+      doLemma = false;
+    if ( skip.find_first_of("aA") != string::npos )
+      doMorph = false;
     if ( skip.find_first_of("mM") != string::npos )
       doMwu = false;
     if ( skip.find_first_of("cC") != string::npos )
@@ -438,16 +444,16 @@ bool froginit(){
 	if ( stat && doNER ){
 	  stat = myNERTagger.init( configuration );
 	}
-	if ( stat ){
+	if ( stat && doLemma ){
 	  stat = myMblem.init( configuration );
-	  if ( stat ){
-	    stat = myMbma.init( configuration );
-	    if ( stat ) {
-	      if ( doMwu ){
-		stat = myMwu.init( configuration );
-		if ( stat && doParse ){
-		  stat = myParser.init( configuration );
-		}
+	}
+	if ( stat && doMorph ){
+	  stat = myMbma.init( configuration );
+	  if ( stat ) {
+	    if ( doMwu ){
+	      stat = myMwu.init( configuration );
+	      if ( stat && doParse ){
+		stat = myParser.init( configuration );
 	      }
 	    }
 	  }
@@ -483,11 +489,15 @@ bool froginit(){
       }
 #pragma omp section
       {
-	lemStat = myMblem.init( configuration );
+	if ( doLemma ){
+	  lemStat = myMblem.init( configuration );
+	}
       }
 #pragma omp section
       {
-	mbaStat = myMbma.init( configuration );
+	if ( doMorph ){
+	  mbaStat = myMbma.init( configuration );
+	}
       }
 #pragma omp section 
       {
@@ -880,19 +890,23 @@ bool TestSentence( Sentence* sent,
       {
 #pragma omp section
 	{
-	  timers.mbmaTimer.start();
-	  if (tpDebug) 
-	    *Log(theErrLog) << "Calling mbma..." << endl;
-	  myMbma.Classify( swords[i] );
-	  timers.mbmaTimer.stop();
+	  if ( doMorph ){
+	    timers.mbmaTimer.start();
+	    if (tpDebug) 
+	      *Log(theErrLog) << "Calling mbma..." << endl;
+	    myMbma.Classify( swords[i] );
+	    timers.mbmaTimer.stop();
+	  }
 	}
 #pragma omp section
 	{
-	  timers.mblemTimer.start();
-	  if (tpDebug) 
-	    *Log(theErrLog) << "Calling mblem..." << endl;
-	  myMblem.Classify( swords[i] );
-	  timers.mblemTimer.stop();
+	  if ( doLemma ){
+	    timers.mblemTimer.start();
+	    if (tpDebug) 
+	      *Log(theErrLog) << "Calling mblem..." << endl;
+	    myMblem.Classify( swords[i] );
+	    timers.mblemTimer.stop();
+	  }
 	}
       } // omp parallel sections
     } //for int i = 0 to num_words
@@ -924,8 +938,10 @@ void Test( Document& doc,
   // first we make sure that the doc will accept our annotations, by
   // declaring them in the doc
   myCGNTagger.addDeclaration( doc );
-  myMblem.addDeclaration( doc );
-  myMbma.addDeclaration( doc );
+  if ( doLemma )
+    myMblem.addDeclaration( doc );
+  if ( doMorph )
+    myMbma.addDeclaration( doc );
   if (doIOB)
     myIOBTagger.addDeclaration( doc );
   if (doNER)
@@ -981,8 +997,10 @@ void Test( Document& doc,
     *Log(theErrLog) << "IOB chunking took:  " << timers.iobTimer << endl;
   if ( doNER)
     *Log(theErrLog) << "NER took:           " << timers.nerTimer << endl;
-  *Log(theErrLog) << "MBA took:           " << timers.mbmaTimer << endl;
-  *Log(theErrLog) << "Mblem took:         " << timers.mblemTimer << endl;
+  if ( doMorph )
+    *Log(theErrLog) << "MBA took:           " << timers.mbmaTimer << endl;
+  if ( doLemma )
+    *Log(theErrLog) << "Mblem took:         " << timers.mblemTimer << endl;
   if ( doMwu )
     *Log(theErrLog) << "MWU resolving took: " << timers.mwuTimer << endl;
   if ( doParse ){
