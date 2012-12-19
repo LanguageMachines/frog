@@ -40,7 +40,8 @@ bool existsDir( const std::string& );
 std::string& trim(std::string &str);
 std::string getTime();
 
-void getFileNames( const std::string&, std::set<std::string>& );
+void getFileNames( const std::string&, const std::string&, 
+		   std::set<std::string>& );
 
 extern TiCC::LogStream *theErrLog;
 

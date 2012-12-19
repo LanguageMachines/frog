@@ -61,7 +61,9 @@ bool existsDir( const string& dirName ){
   return result;
 }
 
-void getFileNames( const string& dirName, set<string>& fileNames ){
+void getFileNames( const string& dirName,
+		   const string& ext, 
+		   set<string>& fileNames ){
   DIR *dir = opendir( dirName.c_str() );
   if ( !dir )
     return;
@@ -69,14 +71,18 @@ void getFileNames( const string& dirName, set<string>& fileNames ){
     struct stat sb;
     struct dirent *entry = readdir( dir );
     while ( entry ){
-      if (entry->d_name[0] != '.') {
-        string fullName = dirName + "/" + entry->d_name;
-        if ( stat( fullName.c_str(), &sb ) >= 0 ){
+      if ( entry->d_name[0] != '.' ) {
+	string filename = entry->d_name;
+	if ( ext.empty() ||
+	     filename.rfind( ext ) != string::npos ) {
+	  string fullName = dirName + "/" + filename;
+	  if ( stat( fullName.c_str(), &sb ) >= 0 ){
             if ( (sb.st_mode & S_IFMT) == S_IFREG )
-                fileNames.insert( entry->d_name );
-        }
-       }
-       entry = readdir( dir );
+	      fileNames.insert( entry->d_name );
+	  }
+	}
+      }
+      entry = readdir( dir );
     }
     closedir( dir );
   }

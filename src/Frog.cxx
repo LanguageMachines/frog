@@ -278,7 +278,10 @@ bool parse_args( TimblOpts& Opts ) {
 	*Log(theErrLog) << "input dir " << testDirName << " not readable" << endl;
 	return false;
       }
-      getFileNames( testDirName, fileNames );
+      if ( doXMLin )
+	getFileNames( testDirName, ".xml", fileNames );
+      else
+	getFileNames( testDirName, "", fileNames );
       if ( fileNames.empty() ){
 	*Log(theErrLog) << "error: couln't find any files in directory: " 
 	     << testDirName << endl;
