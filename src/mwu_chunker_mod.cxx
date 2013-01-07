@@ -2,7 +2,7 @@
   $Id$
   $URL$
 
-  Copyright (c) 2006 - 2012
+  Copyright (c) 2006 - 2013
   Tilburg University
 
   This file is part of frog.

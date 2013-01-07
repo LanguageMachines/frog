@@ -2,7 +2,7 @@
   $Id:$
   $URL:$
 
-  Copyright (c) 2006 - 2012
+  Copyright (c) 2006 - 2013
   Tilburg University
 
   A Morphological-Analyzer for Dutch
@@ -192,7 +192,7 @@ void Test( istream& in ){
 
 int main(int argc, char *argv[]) {
   std::ios_base::sync_with_stdio(false);
-  cerr << "mblem " << VERSION << " (c) ILK 1998 - 2012" << endl;
+  cerr << "mblem " << VERSION << " (c) ILK 1998 - 2013" << endl;
   cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
   ProgName = argv[0];
   cerr << "based on [" << Timbl::VersionName() << "]" << endl;
