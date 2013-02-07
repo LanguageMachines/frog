@@ -52,6 +52,7 @@ class Mblem {
   void Classify( const UnicodeString& );
   std::vector<std::pair<std::string,std::string> > getResult() const;
   void filterTag( const std::string&  );
+  void makeUnique();
  private:
   void read_transtable( const std::string& );
   void create_MBlem_defaults();

@@ -221,6 +221,29 @@ void Mblem::filterTag( const string& postag ){
     *Log(mblemLog) << "NO CORRESPONDING TAG! " << postag << endl;
 }
 
+void Mblem::makeUnique( ){
+  vector<mblemData>::iterator it = mblemResult.begin();
+  while( it != mblemResult.end() ){
+    string lemma = it->getLemma();
+    vector<mblemData>::iterator it2 = it+1;
+    while( it2 != mblemResult.end() ){
+      if (debug)
+	*Log(mblemLog) << "compare lemma " << lemma << " with " << it2->getLemma() << " ";
+      if ( lemma == it2->getLemma() ){
+	if ( debug )
+	  *Log(mblemLog) << "equal " << endl;
+	it2 = mblemResult.erase(it2);
+      }
+      else {
+	if ( debug )
+	  *Log(mblemLog) << "NOT equal! " << endl;	
+	++it2;
+      }
+    }
+    ++it;
+  }
+}
+
 void Mblem::getFoLiAResult( Word *word, const UnicodeString& uWord ){
   if ( mblemResult.empty() ){
     // just return the word as a lemma
@@ -273,6 +296,7 @@ void Mblem::Classify( Word *sword ){
   uWord.toLower();
   Classify( uWord );
   filterTag( pos ); 
+  makeUnique(); 
   getFoLiAResult( sword, uWord ); 
 }
 
