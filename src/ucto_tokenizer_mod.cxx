@@ -123,7 +123,13 @@ void UctoTokenizer::setInputXml( bool b ){
 
 vector<string> UctoTokenizer::tokenize( const string& line ){
   if ( tokenizer ){
-    tokenizer->tokenizeLine( line );
+    if ( tokenizer->getPassThru() ){
+      bool bos = true;
+      tokenizer->passthruLine( line, bos );
+    }
+    else {
+      tokenizer->tokenizeLine( line );
+    }
     return tokenizer->getSentences();
   }
   else

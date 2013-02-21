@@ -1,10 +1,13 @@
-0.12.16 - 2012-xx-xx
+0.12.17 - 2013-xx-xx
  * the servermode now kan handle multiline input (non XML only).
    Can be switched of with the -n option. 
  * A lot of refactoring regarding FoLiA stuff
  * the -Q option now works
  * added a --uttmarker option
  * added mbma and mblem 'man' programs
+
+0.12.16 - 2013-02-19
+ * bug fix release. Some stuff was moved from Timbl to libticcutils
 
 0.12.15 - 2012-03-29
  * using the new Mbt 3.2.8 API for Tagging.
