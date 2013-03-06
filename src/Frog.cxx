@@ -280,15 +280,6 @@ bool parse_args( TimblOpts& Opts ) {
 	*Log(theErrLog) << "input dir " << testDirName << " not readable" << endl;
 	return false;
       }
-      if ( doXMLin )
-	getFileNames( testDirName, ".xml", fileNames );
-      else
-	getFileNames( testDirName, "", fileNames );
-      if ( fileNames.empty() ){
-	*Log(theErrLog) << "error: couln't find any files in directory: " 
-	     << testDirName << endl;
-	return false;
-      }
     }
     else {
       *Log(theErrLog) << "empty testdir name!" << endl;
@@ -403,7 +394,17 @@ bool parse_args( TimblOpts& Opts ) {
     *Log(theErrLog) << "useless -outputdir option" << endl;
     return false;
   }
-
+  if ( !testDirName.empty() ){
+    if ( doXMLin )
+      getFileNames( testDirName, ".xml", fileNames );
+    else
+      getFileNames( testDirName, "", fileNames );
+    if ( fileNames.empty() ){
+      *Log(theErrLog) << "error: couln't find any files in directory: " 
+		      << testDirName << endl;
+      return false;
+    }
+  }
   if ( !doServer && TestFileName.empty() && fileNames.empty() ){
     *Log(theErrLog) << "no frogging without input!" << endl;
     return false;
@@ -1160,10 +1161,9 @@ int main(int argc, char *argv[]) {
         
     if ( parse_args(Opts) ){
       if (  !froginit() ){
-	cerr << "terminated." << endl;
-	return EXIT_FAILURE;
+	throw runtime_error( "init failed" );
       }
-
+      
 #ifdef HAVE_OPENMP      
       if ( doServer ) {
       	// run in one thread in server mode, forking is too expensive for lots of small snippets
@@ -1232,7 +1232,7 @@ int main(int argc, char *argv[]) {
 		int pid = fork();				
 		if (pid < 0) {
 		  *Log(theErrLog) << "ERROR on fork" << endl;
-		  exit(EXIT_FAILURE);
+		  throw runtime_error( "FORK failed" );
 		} else if (pid == 0)  {
 		  //		  server = NULL;
 		  TestServer(conn );
@@ -1246,7 +1246,7 @@ int main(int argc, char *argv[]) {
 	  } catch ( std::exception& e )
 	  {
 	    *Log(theErrLog) << "Server error:" << e.what() << " Exiting." << endl;
-	    exit(EXIT_FAILURE);
+	    throw;
 	  }
 	
       } else {
@@ -1258,14 +1258,12 @@ int main(int argc, char *argv[]) {
       }
     }
     else {
-      return EXIT_FAILURE;
+      throw runtime_error( "invalid arguments" );
     }
   }
   catch ( const exception& e ){
     *Log(theErrLog) << "fatal error: " << e.what() << endl;
     return EXIT_FAILURE;
   }
-  //  delete tagger;
-  
   return EXIT_SUCCESS;
 }
