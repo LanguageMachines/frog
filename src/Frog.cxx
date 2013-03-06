@@ -73,6 +73,7 @@ string testDirName;
 string tmpDirName;
 string outputFileName;
 string docid = "untitled";
+string textclass;
 bool wantOUT;
 string XMLoutFileName;
 bool doXMLin;
@@ -127,7 +128,8 @@ void usage( ) {
   cout << "\t============= INPUT MODE (mandatory, choose one) ========================\n"
        << "\t -e <encoding>          specify encoding of the input (default UTF-8)\n"
        << "\t -t <testfile>          Run frog on this file\n"
-       << "\t -x <testfile>          Run frog on this FoLiA XML file\n"
+       << "\t -x <testfile>          Run frog on this FoLiA XML file. Or the files form 'testdir'\n"
+       << "\t --textclass=<cls>      use the specified class to for search text in the the FoLia docs.\n"
        << "\t -S <port>              Run as server instead of reading from testfile\n"
        << "\t --testdir=<directory>  All files in this dir will be tested\n"
        << "\t --uttmarker=<mark>     utterances are separated by 'mark' symbols"
@@ -371,6 +373,14 @@ bool parse_args( TimblOpts& Opts ) {
     }
     Opts.Delete('x');
   }
+  if ( Opts.Find ( "textclass", value, mood)) {
+    if ( !doXMLin ){
+      *Log(theErrLog) << "--textclass is only valid when -x is also present" << endl;
+      return false;
+    }
+    textclass = value;
+    Opts.Delete( "textclass");
+  }  
   
   if ( !outputFileName.empty() && !testDirName.empty() ){
     *Log(theErrLog) << "useless -o value" << endl;
@@ -439,6 +449,7 @@ bool froginit(){
       tokenizer.setInputEncoding( encoding );
       tokenizer.setInputXml( doXMLin );
       tokenizer.setUttMarker( uttmark );
+      tokenizer.setTextClass( textclass );
       stat = myCGNTagger.init( configuration );
       if ( stat ){
 	if ( doIOB ){
@@ -488,6 +499,7 @@ bool froginit(){
 	  tokenizer.setInputEncoding( encoding );
 	  tokenizer.setInputXml( doXMLin );
 	  tokenizer.setUttMarker( uttmark );
+	  tokenizer.setTextClass( textclass );
 	}
       }
 #pragma omp section

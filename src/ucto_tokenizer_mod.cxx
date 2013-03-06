@@ -113,6 +113,15 @@ void UctoTokenizer::setInputEncoding( const std::string & enc ){
     throw runtime_error( "ucto tokenizer not initalized" );
 }
 
+void UctoTokenizer::setTextClass( const std::string& cls ){
+  if ( tokenizer ){
+    if ( !cls.empty() )
+      tokenizer->setTextClass( cls );
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initalized" );
+}
+
 void UctoTokenizer::setInputXml( bool b ){
   if ( tokenizer ){
     tokenizer->setXMLInput( b );

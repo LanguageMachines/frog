@@ -43,6 +43,7 @@ class UctoTokenizer {
   void setInputEncoding( const std::string& );
   void setQuoteDetection( bool );
   void setInputXml( bool );
+  void setTextClass( const std::string& );
   folia::Document tokenize( std::istream& );
   bool tokenize( folia::Document& );
   std::vector<std::string> tokenize( const std::string&  );
