@@ -266,7 +266,13 @@ void CGNTagger::addTag( Word *word, const string& inputTag, double confidence ){
   string ucto_class = word->cls();
   if ( debug )
     *Log(cgnLog) << "ucto class= " << ucto_class << endl;
-  if ( ucto_class == "ABBREVIATION-KNOWN" ){
+  if ( ucto_class == "PUNCTUATION" && cgnTag.find("SPEC(") != string::npos ){
+    mainTag = "LET";
+    tagPartS = "";
+    cgnTag = "LET()";
+    confidence = 1.0;
+  }
+  else if ( ucto_class == "ABBREVIATION-KNOWN" ){
     mainTag = "SPEC";
     tagPartS = "afk";
     cgnTag = "SPEC(afk)";
