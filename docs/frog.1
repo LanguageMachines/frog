@@ -99,6 +99,12 @@ process all files in 'dir'. When the input mode is XML, only '.xml' files are te
 location to store intermediate files. Default /tmp.
 .RE
 
+.BR --threads =<n>
+.RS
+use a maximum of 'n' threads. The default is to take whatever is needed.
+In servermode we always run on 1 thread.
+.RE
+
 .BR -V " or " --version
 .RS
 show version info

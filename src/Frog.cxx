@@ -130,13 +130,12 @@ void usage( ) {
        << "\t -t <testfile>          Run frog on this file\n"
        << "\t -x <testfile>          Run frog on this FoLiA XML file. Or the files form 'testdir'\n"
        << "\t --textclass=<cls>      use the specified class to for search text in the the FoLia docs.\n"
-       << "\t -S <port>              Run as server instead of reading from testfile\n"
        << "\t --testdir=<directory>  All files in this dir will be tested\n"
        << "\t --uttmarker=<mark>     utterances are separated by 'mark' symbols"
        << "\t                        (default none)\n"
        << "\t -n                     Assume input file to hold one sentence per line\n"
        << "\t --max-parser-tokens=<n> inhibit parsing when a sentence contains over 'n' tokens. (default: no limit)\n"
-
+       << "\t -Q                   Enable quote detection in tokeniser.\n"
        << "\t============= MODULE SELECTION ==========================================\n"
        << "\t --skip=[mptncla]    Skip Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"
        << "\t============= CONFIGURATION OPTIONS =====================================\n"
@@ -153,7 +152,11 @@ void usage( ) {
        << "\t -h. give some help.\n"
        << "\t -V or --version .   Show version info.\n"
        << "\t -d <debug level>    (for more verbosity)\n"
-       << "\t -Q                   Enable quote detection in tokeniser.\n";
+       << "\t -S <port>              Run as server instead of reading from testfile\n"
+#ifdef HAVE_OPENMP      
+       << "\t --threads=<n>       Use a maximun of 'n' threads. Default: all we can get. \n"
+#endif
+       << "\t                     (but always 1 for server mode)\n";
 }
 
 //**** stuff to process commandline options *********************************
@@ -245,6 +248,26 @@ bool parse_args( TimblOpts& Opts ) {
     }
     Opts.Delete("max-parser-tokens");
   }
+
+  if ( Opts.Find ('S', value, mood)) {
+    doServer = true;
+    listenport= value;
+  }
+#ifdef HAVE_OPENMP      
+  if ( doServer ) {
+    // run in one thread in server mode, forking is too expensive for lots of small snippets
+    omp_set_num_threads( 1 );
+  }
+  else if ( Opts.Find( "threads", value, mood ) ){
+    int num;
+    if ( !Timbl::stringTo<int>( value, num ) || num < 1 ){
+      *Log(theErrLog) << "threads value should be a positive integer" << endl;
+      return false;
+    }
+    omp_set_num_threads( num );
+  }
+#endif
+
   if ( Opts.Find( "keep-parser-files", value, mood ) ){
     if ( value.empty() ||
 	 value == "true" || value == "TRUE" || value =="yes" || value == "YES" )
@@ -381,12 +404,7 @@ bool parse_args( TimblOpts& Opts ) {
     *Log(theErrLog) << "useless -X value" << endl;
     return false;
   }
-
-  if ( Opts.Find ('S', value, mood)) {
-    doServer = true;
-    listenport= value;
-  }
-
+  
   if ( Opts.Find ("uttmarker", value, mood)) {
     uttmark = value;
   }
@@ -1163,13 +1181,6 @@ int main(int argc, char *argv[]) {
       if (  !froginit() ){
 	throw runtime_error( "init failed" );
       }
-      
-#ifdef HAVE_OPENMP      
-      if ( doServer ) {
-      	// run in one thread in server mode, forking is too expensive for lots of small snippets
-      	omp_set_num_threads( 1 );
-      }
-#endif
       if ( !fileNames.empty() ) {
 	string outPath;
 	string xmlPath;
