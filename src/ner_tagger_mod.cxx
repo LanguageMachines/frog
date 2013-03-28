@@ -51,7 +51,7 @@ bool NERTagger::init( const Configuration& conf ){
   debug = tpDebug;
   string db = conf.lookUp( "debug", "NER" );
   if ( !db.empty() )
-    debug = folia::stringTo<int>( db );
+    debug = TiCC::stringTo<int>( db );
   switch ( debug ){
   case 0:
   case 1:
