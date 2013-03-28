@@ -56,7 +56,7 @@ mwuAna::mwuAna( Word *fwrd ){
   if ( tag == "SPEC" ){
 #pragma omp critical(foliaupdate)
     {
-      vector<Feature*> feats = fwrd->select<Feature>( );
+      vector<folia::Feature*> feats = fwrd->select<folia::Feature>( );
       spec = ( feats.size() == 1 && feats[0]->cls() == "deeleigen" );
     }
   }
@@ -145,7 +145,7 @@ bool Mwu::init( const Configuration& config ) {
   debug = tpDebug;
   string val = config.lookUp( "debug", "mwu" );
   if ( !val.empty() )
-    debug = stringTo<int>( val );
+    debug = TiCC::stringTo<int>( val );
   val = config.lookUp( "t", "mwu" );  
   if ( val.empty() ){
     *Log(mwuLog) << "cannot find attribute 't' in configfile" << endl;

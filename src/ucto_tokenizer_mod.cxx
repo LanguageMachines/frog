@@ -56,7 +56,7 @@ bool UctoTokenizer::init( const Configuration& conf, const string & docid, bool 
     tokenizer->setDebug( tpDebug );
   }
   else
-    tokenizer->setDebug( Timbl::stringTo<int>(debug) );
+    tokenizer->setDebug( TiCC::stringTo<int>(debug) );
   if ( pass ){
     // when passthru, we don't further initialize the tokenizer
     // it wil run in minimal mode then.

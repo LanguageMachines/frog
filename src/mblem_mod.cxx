@@ -78,7 +78,7 @@ bool Mblem::init( const Configuration& config ) {
   debug = tpDebug;
   string db = config.lookUp( "debug", "mblem" );
   if ( !db.empty() )
-    debug = stringTo<int>( db );
+    debug = TiCC::stringTo<int>( db );
   string val = config.lookUp( "version", "mblem" );
   if ( val.empty() ){
     version = "1.0";

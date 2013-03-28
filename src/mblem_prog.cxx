@@ -109,7 +109,7 @@ bool parse_args( TimblOpts& Opts ) {
   // debug opts
   if ( Opts.Find ('d', value, mood)) {
     int debug = 0;
-    if ( !Timbl::stringTo<int>( value, debug ) ){
+    if ( !TiCC::stringTo<int>( value, debug ) ){
       cerr << "-d value should be an integer" << endl;
       return false;
     }

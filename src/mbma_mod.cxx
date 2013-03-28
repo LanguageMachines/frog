@@ -147,7 +147,7 @@ bool Mbma::init( const Configuration& config ) {
   debugFlag = tpDebug;
   string db = config.lookUp( "debug", "mbma" );
   if ( !db.empty() )
-    debugFlag = stringTo<int>( db );
+    debugFlag = TiCC::stringTo<int>( db );
   string val = config.lookUp( "version", "mbma" );
   if ( val.empty() ){
     version = "1.0";
@@ -905,7 +905,7 @@ void Mbma::Classify( Word* sword ){
     vector<string> featVals;
 #pragma omp critical(foliaupdate)
     {
-      vector<Feature*> feats = pos->select<Feature>();
+      vector<folia::Feature*> feats = pos->select<folia::Feature>();
       for ( size_t i = 0; i < feats.size(); ++i )
 	featVals.push_back( feats[i]->cls() );
     }

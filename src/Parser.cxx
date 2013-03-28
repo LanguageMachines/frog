@@ -200,7 +200,7 @@ bool Parser::init( const Configuration& configuration ){
 
   val = configuration.lookUp( "maxDepSpan", "parser" );
   if ( !val.empty() ){
-    size_t gs = stringTo<size_t>( val );
+    size_t gs = TiCC::stringTo<size_t>( val );
     if ( gs < 50 ){
       maxDepSpanS = val;
       maxDepSpan = gs;
@@ -860,11 +860,11 @@ void appendParseResult( const vector<Word *>& words,
     vector<string> parts;
     int num = TiCC::split_at( line, parts, " " );
     if ( num > 7 ){
-      if ( Timbl::stringTo<int>( parts[0] ) != cnt+1 ){
+      if ( TiCC::stringTo<int>( parts[0] ) != cnt+1 ){
 	*Log(theErrLog) << "confused! " << endl;
 	*Log(theErrLog) << "got line '" << line << "'" << endl;
       }
-      nums.push_back( Timbl::stringTo<int>(parts[6]) );
+      nums.push_back( TiCC::stringTo<int>(parts[6]) );
       roles.push_back( parts[7] );
     }
     ++cnt;

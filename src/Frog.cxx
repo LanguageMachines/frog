@@ -200,7 +200,7 @@ bool parse_args( TimblOpts& Opts ) {
 
   // debug opts
   if ( Opts.Find ('d', value, mood)) {
-    if ( !Timbl::stringTo<int>( value, tpDebug ) ){
+    if ( !TiCC::stringTo<int>( value, tpDebug ) ){
       *Log(theErrLog) << "-d value should be an integer" << endl;
       return false;
     }
@@ -241,7 +241,7 @@ bool parse_args( TimblOpts& Opts ) {
       return false;
     }
     else {
-      if ( !Timbl::stringTo<unsigned int>( value, maxParserTokens ) ){
+      if ( !TiCC::stringTo<unsigned int>( value, maxParserTokens ) ){
 	*Log(theErrLog) << "max-parser-tokens value should be an integer" << endl;
 	return false;
       }
@@ -260,7 +260,7 @@ bool parse_args( TimblOpts& Opts ) {
   }
   else if ( Opts.Find( "threads", value, mood ) ){
     int num;
-    if ( !Timbl::stringTo<int>( value, num ) || num < 1 ){
+    if ( !TiCC::stringTo<int>( value, num ) || num < 1 ){
       *Log(theErrLog) << "threads value should be a positive integer" << endl;
       return false;
     }
