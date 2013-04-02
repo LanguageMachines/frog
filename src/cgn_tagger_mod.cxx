@@ -29,8 +29,8 @@
 */
 
 #include "mbt/MbtAPI.h"
-#include "libfolia/folia.h"
-#include "libfolia/document.h"
+#include "folia/folia.h"
+#include "folia/document.h"
 #include "frog/Frog.h"
 #include "frog/cgn_tagger_mod.h"
 
