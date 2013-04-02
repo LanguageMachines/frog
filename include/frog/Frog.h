@@ -33,6 +33,7 @@
 #include <set>
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Configuration.h"
+#include "ticcutils/Timer.h"
 #include "libfolia/foliautils.h"
 
 std::string prefix( const std::string&, const std::string& );
@@ -50,20 +51,20 @@ extern TiCC::Configuration configuration;
 
 class TimerBlock{
 public:
-  Common::Timer parseTimer;
-  Common::Timer tokTimer;
-  Common::Timer mblemTimer;
-  Common::Timer mbmaTimer;
-  Common::Timer mwuTimer;
-  Common::Timer tagTimer;
-  Common::Timer iobTimer;
-  Common::Timer nerTimer;
-  Common::Timer prepareTimer;
-  Common::Timer pairsTimer;
-  Common::Timer relsTimer;
-  Common::Timer dirTimer;
-  Common::Timer csiTimer;
-  Common::Timer frogTimer;
+  TiCC::Timer parseTimer;
+  TiCC::Timer tokTimer;
+  TiCC::Timer mblemTimer;
+  TiCC::Timer mbmaTimer;
+  TiCC::Timer mwuTimer;
+  TiCC::Timer tagTimer;
+  TiCC::Timer iobTimer;
+  TiCC::Timer nerTimer;
+  TiCC::Timer prepareTimer;
+  TiCC::Timer pairsTimer;
+  TiCC::Timer relsTimer;
+  TiCC::Timer dirTimer;
+  TiCC::Timer csiTimer;
+  TiCC::Timer frogTimer;
 };
 
 #endif

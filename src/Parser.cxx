@@ -117,11 +117,11 @@ void PythonInterface::parse( const string& depFile,
 					  inputFile.c_str() );
 }
 
-Common::Timer prepareTimer;
-Common::Timer relsTimer;
-Common::Timer pairsTimer;
-Common::Timer dirTimer;
-Common::Timer csiTimer;
+TiCC::Timer prepareTimer;
+TiCC::Timer relsTimer;
+TiCC::Timer pairsTimer;
+TiCC::Timer dirTimer;
+TiCC::Timer csiTimer;
 
 struct parseData {
   void clear() { words.clear(); heads.clear(); mods.clear(); mwus.clear(); }

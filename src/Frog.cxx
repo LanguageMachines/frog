@@ -200,7 +200,7 @@ bool parse_args( TimblOpts& Opts ) {
 
   // debug opts
   if ( Opts.Find ('d', value, mood)) {
-    if ( !TiCC::stringTo<int>( value, tpDebug ) ){
+    if ( !stringTo<int>( value, tpDebug ) ){
       *Log(theErrLog) << "-d value should be an integer" << endl;
       return false;
     }
@@ -241,7 +241,7 @@ bool parse_args( TimblOpts& Opts ) {
       return false;
     }
     else {
-      if ( !TiCC::stringTo<unsigned int>( value, maxParserTokens ) ){
+      if ( !stringTo<unsigned int>( value, maxParserTokens ) ){
 	*Log(theErrLog) << "max-parser-tokens value should be an integer" << endl;
 	return false;
       }
@@ -260,7 +260,7 @@ bool parse_args( TimblOpts& Opts ) {
   }
   else if ( Opts.Find( "threads", value, mood ) ){
     int num;
-    if ( !TiCC::stringTo<int>( value, num ) || num < 1 ){
+    if ( !stringTo<int>( value, num ) || num < 1 ){
       *Log(theErrLog) << "threads value should be a positive integer" << endl;
       return false;
     }
@@ -554,7 +554,7 @@ bool froginit(){
 	if ( doMwu ){
 	  mwuStat = myMwu.init( configuration );
 	  if ( mwuStat && doParse ){
-	    Common::Timer initTimer;
+	    Timer initTimer;
 	    initTimer.start();
 	    parStat = myParser.init( configuration );
 	    initTimer.stop();
