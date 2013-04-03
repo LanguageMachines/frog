@@ -33,8 +33,6 @@
 #include "timbl/TimblAPI.h"
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Configuration.h"
-#include "folia/folia.h"
-#include "folia/document.h"
 #include "frog/Frog.h"
 #include "frog/mblem_mod.h"
 

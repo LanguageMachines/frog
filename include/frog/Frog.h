@@ -34,7 +34,7 @@
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Configuration.h"
 #include "ticcutils/Timer.h"
-#include "folia/foliautils.h"
+#include "libfolia/document.h"
 
 std::string prefix( const std::string&, const std::string& );
 bool existsDir( const std::string& );

@@ -50,8 +50,6 @@
 #include "config.h"
 #include "frog/Frog.h"
 #include "ticcutils/Configuration.h"
-#include "folia/document.h"
-#include "folia/folia.h"
 #include "frog/ucto_tokenizer_mod.h"
 #include "frog/mbma_mod.h"
 #include "frog/mblem_mod.h"

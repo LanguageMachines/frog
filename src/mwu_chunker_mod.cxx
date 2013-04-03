@@ -37,8 +37,6 @@
 #include "timbl/TimblAPI.h"
 
 #include "frog/Frog.h" // defines etc.
-#include "folia/folia.h" 
-#include "folia/document.h"
 #include "frog/mwu_chunker_mod.h"
 
 using namespace std;

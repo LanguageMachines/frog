@@ -35,8 +35,6 @@
 
 #include "frog/Frog.h"
 #include "ticcutils/Configuration.h"
-#include "folia/folia.h"
-#include "folia/document.h"
 #include "frog/mbma_mod.h"
 
 using namespace std;
