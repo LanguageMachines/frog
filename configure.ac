@@ -98,7 +98,7 @@ AC_ARG_WITH(timbl,
        [  --with-timbl=DIR       use timbl installed in <DIR>],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
-PKG_CHECK_MODULES([timbl], [timbl >= 6.4.2] )
+PKG_CHECK_MODULES([timbl], [timbl >= 6.4.4] )
 CXXFLAGS="$CXXFLAGS $timbl_CFLAGS"
 LIBS="$timbl_LIBS $LIBS"
 
@@ -114,7 +114,7 @@ AC_ARG_WITH(timblserver,
        [  --with-timblserver=DIR     use timblserver installed in <DIR>],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
-PKG_CHECK_MODULES([timblserver], [timblserver >= 1.4] )
+PKG_CHECK_MODULES([timblserver], [timblserver >= 1.7] )
 CXXFLAGS="$CXXFLAGS $timblserver_CFLAGS"
 LIBS="$timblserver_LIBS $LIBS"
 
@@ -122,7 +122,7 @@ AC_ARG_WITH(mbt,
        [  --with-mbt=DIR       use mbt installed in <DIR>],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
-PKG_CHECK_MODULES([mbt], [mbt >= 3.2.8] )
+PKG_CHECK_MODULES([mbt], [mbt >= 3.2.10] )
 CXXFLAGS="$CXXFLAGS $mbt_CFLAGS"
 LIBS="$mbt_LIBS $LIBS"
 

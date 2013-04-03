@@ -1,10 +1,12 @@
-0.12.17 - 2013-xx-xx
+0.12.17 - 2013-04-03
  * the servermode now kan handle multiline input (non XML only).
    Can be switched of with the -n option. 
  * A lot of refactoring regarding FoLiA stuff
+ * start using ticcutils
  * the -Q option now works
  * added a --uttmarker option
- * added mbma and mblem 'man' programs
+ * added mbma and mblem programs
+ * updated man pages
 
 0.12.16 - 2013-02-19
  * bug fix release. Some stuff was moved from Timbl to libticcutils
