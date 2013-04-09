@@ -50,6 +50,7 @@
 #include "config.h"
 #include "frog/Frog.h"
 #include "ticcutils/Configuration.h"
+#include "ticcutils/StringOps.h"
 #include "frog/ucto_tokenizer_mod.h"
 #include "frog/mbma_mod.h"
 #include "frog/mblem_mod.h"
@@ -1049,9 +1050,21 @@ void Test( Document& doc,
 
 void Test( const string& infilename,
 	   const string& outName,
-	   const string& xmlOutFile ) {
+	   const string& xmlOutF ) {
   // stuff the whole input into one FoLiA document.
   // This is not a good idea on the long term, I think (agreed [proycon] )
+
+  string xmlOutFile = xmlOutF;
+  if ( doXMLin && !xmlOutFile.empty() ){
+    if ( match_back( infilename, ".gz" ) ){
+      if ( !match_back( xmlOutFile, ".gz" ) )
+	xmlOutFile += ".gz";
+    }
+    else if ( match_back( infilename, ".bz2" ) ){
+      if ( !match_back( xmlOutFile, ".bz2" ) )
+	xmlOutFile += ".bz2";
+    }
+  }
   ostream *os;
   if ( outName.empty() ){
     os = &cout;
