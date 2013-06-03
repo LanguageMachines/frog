@@ -57,7 +57,7 @@ class Mbma {
   bool readsettings( const std::string&, const std::string& );
   void fillMaps();
   void init_cgn( const std::string& );
-  void init_filter( );
+  Transliterator * init_trans();
   UnicodeString filterDiacritics( const UnicodeString& ) const;
   void getFoLiAResult( folia::Word *, const UnicodeString& ) const;
   std::vector<std::string> make_instances( const UnicodeString& word );
@@ -92,6 +92,7 @@ class Mbma {
   std::string cgn_tagset;
   TiCC::LogStream *mbmaLog;
   Transliterator *transliterator;
+  Tokenizer::UnicodeFilter *filter;
 };
 
 class MBMAana {

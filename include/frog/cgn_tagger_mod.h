@@ -47,6 +47,7 @@ class CGNTagger {
   int debug;
   std::string tagset;
   std::string version;
+  Tokenizer::UnicodeFilter *filter;
 };
 
 #endif // CGN_TAGGER_MOD_H

@@ -29,6 +29,7 @@
 */
 
 #include "mbt/MbtAPI.h"
+#include "ucto/unicode.h"
 #include "frog/Frog.h"
 #include "frog/cgn_tagger_mod.h"
 
@@ -37,11 +38,13 @@ using namespace folia;
 
 CGNTagger::CGNTagger(){
   tagger = 0;
+  filter = 0;
   cgnLog = new LogStream( theErrLog, "cgn-tagger-" );
 }
 
 CGNTagger::~CGNTagger(){
   delete tagger;
+  delete filter;
   delete cgnLog;
 }
 
@@ -224,6 +227,14 @@ bool CGNTagger::init( const Configuration& conf ){
   else
     tagset = val;
   fillSubSetTable();
+  string charFile = conf.lookUp( "char_filter_file", "tagger" );
+  if ( charFile.empty() )
+    charFile = conf.lookUp( "char_filter_file" );
+  if ( !charFile.empty() ){
+    charFile = prefix( conf.configDir(), charFile );
+    filter = new Tokenizer::UnicodeFilter();
+    filter->fill( charFile );
+  }
   string init = "-s " + settings + " -vcf";
   tagger = new MbtAPI( init, *cgnLog );
   return tagger->isInit();
@@ -263,8 +274,10 @@ void CGNTagger::addTag( Word *word, const string& inputTag, double confidence ){
   string tagPartS;
   string ucto_class = word->cls();
   if ( debug )
-    *Log(cgnLog) << "ucto class= " << ucto_class << endl;
-  if ( ucto_class == "PUNCTUATION" && cgnTag.find("SPEC(") != string::npos ){
+    *Log(cgnLog) << "ucto class= " << ucto_class << " cgnTag=" << cgnTag << endl;
+  if ( ucto_class == "PUNCTUATION" 
+       && ( cgnTag.find("SPEC(") != string::npos 
+	    || cgnTag.find("LET") != string::npos ) ){
     mainTag = "LET";
     tagPartS = "";
     cgnTag = "LET()";
@@ -337,11 +350,12 @@ vector<TagResult> CGNTagger::tagLine( const string& line ){
 
 void CGNTagger::Classify( const vector<Word*>& swords ){
   if ( !swords.empty() ) {
-    vector<string> words;
     string sentence; // the tagger needs the whole sentence
     for ( size_t w = 0; w < swords.size(); ++w ) {
-      sentence += swords[w]->str();
-      words.push_back( swords[w]->str() );
+      UnicodeString word = swords[w]->text();
+      if ( filter )
+	word = filter->filter( word );
+      sentence += UnicodeToUTF8(word);
       if ( w < swords.size()-1 )
 	sentence += " ";
     }

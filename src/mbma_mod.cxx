@@ -33,8 +33,9 @@
 #include <fstream>
 #include <timbl/TimblAPI.h>
 
-#include "frog/Frog.h"
+#include "ucto/unicode.h"
 #include "ticcutils/Configuration.h"
+#include "frog/Frog.h"
 #include "frog/mbma_mod.h"
 
 using namespace std;
@@ -44,12 +45,15 @@ using namespace TiCC;
 const long int LEFT =  6; // left context
 const long int RIGHT = 6; // right context
 
-Mbma::Mbma(): MTreeFilename( "dm.igtree" ), MTree(0), transliterator(0) { 
+Mbma::Mbma(): MTreeFilename( "dm.igtree" ), MTree(0), 
+	      transliterator(0), filter(0) { 
   mbmaLog = new LogStream( theErrLog, "mbma-" );
 }
 
 Mbma::~Mbma() { 
   cleanUp(); 
+  delete transliterator;
+  delete filter;
   delete mbmaLog;
 };
 
@@ -129,14 +133,15 @@ void Mbma::init_cgn( const string& dir ) {
     throw ( runtime_error( "unable to open:" + fn ) );
 }
 
-void Mbma::init_filter( ){
+Transliterator *Mbma::init_trans( ){
   UErrorCode stat = U_ZERO_ERROR;
-  transliterator = Transliterator::createInstance( "NFD; [:M:] Remove; NFC",
-						   UTRANS_FORWARD,
-						   stat );
+  Transliterator *t = Transliterator::createInstance( "NFD; [:M:] Remove; NFC",
+						      UTRANS_FORWARD,
+						      stat );
   if ( U_FAILURE( stat ) ){
     throw runtime_error( "initFilter FAILED !" );
   }
+  return t;
 }
 
   
@@ -166,6 +171,14 @@ bool Mbma::init( const Configuration& config ) {
   else
     cgn_tagset = val;
 
+  string charFile = config.lookUp( "char_filter_file", "mbma" );
+  if ( charFile.empty() )
+    charFile = config.lookUp( "char_filter_file" );
+  if ( !charFile.empty() ){
+    charFile = prefix( config.configDir(), charFile );
+    filter = new Tokenizer::UnicodeFilter();
+    filter->fill( charFile );
+  }
   string tfName = config.lookUp( "treeFile", "mbma" );
   if ( tfName.empty() )
     tfName = "mbma.igtree";
@@ -174,7 +187,7 @@ bool Mbma::init( const Configuration& config ) {
   init_cgn( config.configDir() );
   string dof = config.lookUp( "filter_diacritics", "mbma" );
   if ( dof == "true" || dof == "TRUE" || dof =="yes" || dof == "YES" ){
-    init_filter();
+    transliterator = init_trans();
   }
   //Read in (igtree) data
   string opts = config.lookUp( "timblOpts", "mbma" );
@@ -893,6 +906,8 @@ void Mbma::Classify( Word* sword ){
     pos = sword->annotation<PosAnnotation>( cgn_tagset );
     head = pos->feat("head");
   }
+  if ( filter )
+    uWord = filter->filter( uWord );
   if ( head == "SPEC" || head == "LET" ){
     string word = UnicodeToUTF8( uWord );
     vector<string> tmp;

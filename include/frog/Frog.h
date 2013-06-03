@@ -38,7 +38,6 @@
 
 std::string prefix( const std::string&, const std::string& );
 bool existsDir( const std::string& );
-std::string& trim(std::string &str);
 std::string getTime();
 
 void getFileNames( const std::string&, const std::string&, 

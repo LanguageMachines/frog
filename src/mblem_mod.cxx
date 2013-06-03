@@ -31,6 +31,7 @@
 #include <iostream>
 #include <fstream>
 #include "timbl/TimblAPI.h"
+#include "ucto/unicode.h"
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Configuration.h"
 #include "frog/Frog.h"
@@ -106,6 +107,16 @@ bool Mblem::init( const Configuration& config ) {
   if ( treeName.empty() )
     treeName = "mblem.tree";
   treeName = prefix( config.configDir(), treeName );
+
+  string charFile = config.lookUp( "char_filter_file", "mblem" );
+  if ( charFile.empty() )
+    charFile = config.lookUp( "char_filter_file" );
+  if ( !charFile.empty() ){
+    charFile = prefix( config.configDir(), charFile );
+    filter = new Tokenizer::UnicodeFilter();
+    filter->fill( charFile );
+  }
+
   string opts = config.lookUp( "timblOpts", "mblem" );
   if ( opts.empty() )
     opts = "-a1";
@@ -128,9 +139,8 @@ string Mblem::make_instance( const UnicodeString& in ) {
     *Log(mblemLog) << "making instance from: " << in << endl;
   UnicodeString instance = "";
   size_t length = in.length();
-  size_t j;
   for ( size_t i=0; i < history; i++) {
-    j = length - history + i;
+    size_t j = length - history + i;
     if (( i < history - length ) &&
 	(length<history))
       instance += "= ";
@@ -277,25 +287,26 @@ void Mblem::addDeclaration( Document& doc ) const {
 void Mblem::Classify( Word *sword ){
   if ( sword->isinstance(PlaceHolder_t ) )
     return;
-  string word;
+  UnicodeString word;
   string tag;
   string pos;
 #pragma omp critical(foliaupdate)
   {  
-    word = sword->str();
+    word = sword->text();
     pos = sword->pos();
     tag = sword->annotation<PosAnnotation>( cgn_tagset )->feat("head");
   }
+  if ( filter )
+    word = filter->filter( word );
   if ( tag == "SPEC" || tag == "LET" ) {
-    addLemma( sword, word );
+    addLemma( sword, UnicodeToUTF8(word) );
     return;
   }
-  UnicodeString uWord = UTF8ToUnicode(word);
-  uWord.toLower();
-  Classify( uWord );
+  word.toLower();
+  Classify( word );
   filterTag( pos ); 
   makeUnique(); 
-  getFoLiAResult( sword, uWord ); 
+  getFoLiAResult( sword, word ); 
 }
 
 void Mblem::Classify( const UnicodeString& uWord ){
