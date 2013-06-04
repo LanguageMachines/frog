@@ -290,15 +290,20 @@ void Mblem::Classify( Word *sword ){
   UnicodeString word;
   string tag;
   string pos;
+  string token_class;
 #pragma omp critical(foliaupdate)
   {  
     word = sword->text();
     pos = sword->pos();
+    token_class = sword->cls();
     tag = sword->annotation<PosAnnotation>( cgn_tagset )->feat("head");
   }
+  if (debug)
+    *Log(mblemLog) << "Classify " << word << "(" << pos << ") [" 
+		   << token_class << "]" << endl;
   if ( filter )
     word = filter->filter( word );
-  if ( tag == "SPEC" || tag == "LET" ) {
+  if ( tag == "SPEC" || tag == "LET" ){
     addLemma( sword, UnicodeToUTF8(word) );
     return;
   }

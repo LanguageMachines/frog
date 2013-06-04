@@ -900,12 +900,17 @@ void Mbma::Classify( Word* sword ){
   UnicodeString uWord;
   PosAnnotation *pos;
   string head;
+  string token_class;
 #pragma omp critical(foliaupdate)
   {
     uWord = sword->text();
     pos = sword->annotation<PosAnnotation>( cgn_tagset );
     head = pos->feat("head");
+    token_class = sword->cls();
   }
+  if (debugFlag)
+    *Log(mbmaLog) << "Classify " << uWord << "(" << pos << ") [" 
+		  << token_class << "]" << endl;
   if ( filter )
     uWord = filter->filter( uWord );
   if ( head == "SPEC" || head == "LET" ){
