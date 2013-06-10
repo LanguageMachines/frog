@@ -440,11 +440,18 @@ void Mbma::resolve_inflections( vector<waStruct>& ana,
 	}
 	// change the previous act
 	if ( basictags.find((it-1)->act[0]) != string::npos ){
-	  if ( debugFlag  ){
-	    *Log(mbmaLog) << "replace " << (it-1)->act[0] << " by " 
-			  << new_tag[0] << endl;
+	  if ( (it-1)->act == "PN" && new_tag == "N" ){
+	    if ( debugFlag  ){
+	      *Log(mbmaLog) << "Don't replace PN by N" << endl;
+	    }
 	  }
-	  (it-1)->act[0] = new_tag[0];
+	  else {
+	    if ( debugFlag  ){
+	      *Log(mbmaLog) << "replace " << (it-1)->act[0] << " by " 
+			    << new_tag[0] << endl;
+	    }
+	    (it-1)->act[0] = new_tag[0];
+	  }
 	}
       }
     }
@@ -740,16 +747,17 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   }
   vector<MBMAana>::iterator ait = analysis.begin();
   while ( ait != analysis.end() ){
-    if ( tagIt->second == ait->getTag() ) {
+    string tagI = ait->getTag();
+    if ( tagIt->second == tagI ){
       if (debugFlag)
 	*Log(mbmaLog) << "comparing " << tagIt->second << " with " 
-		      << ait->getTag() << " (OK)" << endl;
+		      << tagI << " (OK)" << endl;
       ait++;
     }
     else {
       if (debugFlag)
 	*Log(mbmaLog) << "comparing " << tagIt->second << " with " 
-		      << ait->getTag() << " (rejected)" << endl;
+		      << tagI << " (rejected)" << endl;
       ait = analysis.erase( ait );
     }
   }
@@ -911,9 +919,8 @@ void Mbma::Classify( Word* sword ){
 		  << token_class << "]" << endl;
   if ( filter )
     uWord = filter->filter( uWord );
-  if ( head == "LET" 
-       || ( head == "SPEC" && token_class == "WORD" ) ){
-    // take the word over.
+  if ( head == "LET" || head == "SPEC" ){
+    // take over the letter/word 'as-is'.
     string word = UnicodeToUTF8( uWord );
     vector<string> tmp;
     tmp.push_back( word );
