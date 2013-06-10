@@ -212,16 +212,16 @@ void Mblem::addAltLemma( Word *word, const string& cls ){
 void Mblem::filterTag( const string& postag ){
   vector<mblemData>::iterator it = mblemResult.begin();
   while( it != mblemResult.end() ){
-    if (debug)
-      *Log(mblemLog) << "compare cgn-tag " << postag << " with " << it->getTag() << " ";
     if ( isSimilar( postag, it->getTag() ) ){
       if ( debug )
-	*Log(mblemLog) << "similar! " << endl;
+	*Log(mblemLog) << "compare cgn-tag " << postag << " with " 
+		       << it->getTag() << " similar! " << endl;
       ++it;
     }
     else {
       if ( debug )
-	*Log(mblemLog) << "NOT similar! " << endl;	
+	*Log(mblemLog) << "compare cgn-tag " << postag << " with " 
+		       << it->getTag() << " NOT similar! " << endl;
       it = mblemResult.erase(it);
     }
   }
