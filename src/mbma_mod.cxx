@@ -855,15 +855,13 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
 
 void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
   if ( analysis.size() == 0 ){
-    // fallback option: use the lowercased word and pretend it's a lemma ;-)
-    UnicodeString word = uword;
-    word.toLower();
+    // fallback option: use the word and pretend it's a lemma ;-)
     if ( debugFlag ){
       *Log(mbmaLog) << "no matches found, use the word instead: " 
-		    << word << endl;
+		    << uword << endl;
     }
     vector<string> tmp;
-    tmp.push_back( UnicodeToUTF8(word) );
+    tmp.push_back( UnicodeToUTF8(uword) );
     addMorph( fword, tmp );
   }
   else {
@@ -913,13 +911,19 @@ void Mbma::Classify( Word* sword ){
 		  << token_class << "]" << endl;
   if ( filter )
     uWord = filter->filter( uWord );
-  if ( head == "SPEC" || head == "LET" ){
+  if ( head == "LET" 
+       || ( head == "SPEC" && token_class == "WORD" ) ){
+    // take the word over.
     string word = UnicodeToUTF8( uWord );
     vector<string> tmp;
     tmp.push_back( word );
     addMorph( sword, tmp );
   }
   else {
+    UnicodeString lWord = uWord;
+    if ( head != "SPEC" )
+      lWord.toLower();
+    Classify( lWord );
     vector<string> featVals;
 #pragma omp critical(foliaupdate)
     {
@@ -927,16 +931,13 @@ void Mbma::Classify( Word* sword ){
       for ( size_t i = 0; i < feats.size(); ++i )
 	featVals.push_back( feats[i]->cls() );
     }
-    Classify( uWord );
     filterTag( head, featVals );
-    getFoLiAResult( sword, uWord );
+    getFoLiAResult( sword, lWord );
   }
 }
 
 void Mbma::Classify( const UnicodeString& word ){
-  UnicodeString uWord = word;
-  uWord.toLower();
-  uWord = filterDiacritics( uWord );
+  UnicodeString uWord = filterDiacritics( word );
   if (debugFlag)
     *Log(mbmaLog) << "Classify word: " << uWord << endl;
   

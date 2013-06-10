@@ -158,24 +158,31 @@ void Test( istream& in ){
       vector<TagResult> tagv = tagger.tagLine(sentences[s]);
       for ( size_t w=0; w < tagv.size(); ++w ){
 	UnicodeString uWord = folia::UTF8ToUnicode(tagv[w].word());
+	vector<string> v;
+	size_t num = TiCC::split_at_first_of( tagv[w].assignedTag(), 
+					      v, "(,)" );
+	if ( num < 1 ){
+	  throw runtime_error( "error: tag not in right format " );    
+	}
+	string head = v[0];
+	if ( head != "SPEC" )
+	  uWord.toLower();
 	myMbma.Classify( uWord );
 	if ( !doAll ){
-	  vector<string> v;
-	  size_t num = TiCC::split_at_first_of( tagv[w].assignedTag(), 
-						 v, "(,)" );
-	  if ( num < 1 ){
-	    throw runtime_error( "error: tag not in right format " );    
-	  }
-	  string head = v[0];
 	  v.erase(v.begin());
 	  myMbma.filterTag( head, v );
 	}
 	vector<vector<string> > res = myMbma.getResult();
 	cout << tagv[w].word() << " {" << tagv[w].assignedTag() << "}\t";
-	for ( size_t i=0; i < res.size(); ++i ){
-	  cout << res[i];
-	  if ( i < res.size()-1 )
-	    cout << "/";
+	if ( res.size() == 0 ){
+	  cout << "[" << uWord << "]";
+	}
+	else {
+	  for ( size_t i=0; i < res.size(); ++i ){
+	    cout << res[i];
+	    if ( i < res.size()-1 )
+	      cout << "/";
+	  }
 	}
 	cout << endl;
       }
