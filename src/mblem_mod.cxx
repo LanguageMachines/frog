@@ -303,11 +303,13 @@ void Mblem::Classify( Word *sword ){
 		   << token_class << "]" << endl;
   if ( filter )
     word = filter->filter( word );
-  if ( tag == "SPEC" || tag == "LET" ){
+  if ( tag == "LET" 
+       || ( tag == "SPEC" && token_class == "WORD" ) ){
     addLemma( sword, UnicodeToUTF8(word) );
     return;
   }
-  word.toLower();
+  if ( tag != "SPEC")
+    word.toLower();
   Classify( word );
   filterTag( pos ); 
   makeUnique(); 
