@@ -308,20 +308,21 @@ void Mblem::Classify( Word *sword ){
     return;
   }
   else if ( tag == "SPEC" ){ 
-    if ( token_class == "WORD" ) {
-      addLemma( sword, UnicodeToUTF8(word) );
-      return;
-    }
-    else {
+    if ( pos.find("eigen") != string::npos ){
+      // SPEC(deeleigen) might contain suffixes
       if ( token_class == "QUOTE-SUFFIX" ){
 	addLemma( sword, UnicodeToUTF8(UnicodeString( word, 0, word.length()-1)));
-	return;
       }
       else if ( token_class == "WORD-WITHSUFFIX" ){
 	addLemma( sword, UnicodeToUTF8(UnicodeString( word, 0, word.length()-2)));
-	return;
+      }
+      else {
+	addLemma( sword, UnicodeToUTF8(word) );      return;
       }
     }
+    else
+      addLemma( sword, UnicodeToUTF8(word) );
+    return;
   }
   if ( tag != "SPEC")
     word.toLower();
