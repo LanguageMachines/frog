@@ -298,15 +298,30 @@ void Mblem::Classify( Word *sword ){
     token_class = sword->cls();
     tag = sword->annotation<PosAnnotation>( cgn_tagset )->feat("head");
   }
-  if (debug)
+  //  if (debug)
     *Log(mblemLog) << "Classify " << word << "(" << pos << ") [" 
 		   << token_class << "]" << endl;
   if ( filter )
     word = filter->filter( word );
-  if ( tag == "LET" 
-       || ( tag == "SPEC" && token_class == "WORD" ) ){
+  if ( tag == "LET" ){
     addLemma( sword, UnicodeToUTF8(word) );
     return;
+  }
+  else if ( tag == "SPEC" ){ 
+    if ( token_class == "WORD" ) {
+      addLemma( sword, UnicodeToUTF8(word) );
+      return;
+    }
+    else {
+      if ( token_class == "QUOTE-SUFFIX" ){
+	addLemma( sword, UnicodeToUTF8(UnicodeString( word, 0, word.length()-1)));
+	return;
+      }
+      else if ( token_class == "WORD-WITHSUFFIX" ){
+	addLemma( sword, UnicodeToUTF8(UnicodeString( word, 0, word.length()-2)));
+	return;
+      }
+    }
   }
   if ( tag != "SPEC")
     word.toLower();
