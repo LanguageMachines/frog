@@ -298,7 +298,7 @@ void Mblem::Classify( Word *sword ){
     token_class = sword->cls();
     tag = sword->annotation<PosAnnotation>( cgn_tagset )->feat("head");
   }
-  //  if (debug)
+  if (debug)
     *Log(mblemLog) << "Classify " << word << "(" << pos << ") [" 
 		   << token_class << "]" << endl;
   if ( filter )
