@@ -764,35 +764,39 @@ void displayMWU( ostream& os, size_t index,
 	*Log(theErrLog) << "get Postag results failed: " 
 			<< e.what() << endl;            
     }
-    try { 
-      lemma += word->lemma();
-      if ( p < mwu.size() -1 ){
-	lemma += "_";
-      }
-    }
-    catch ( exception& e ){
-      if  (tpDebug > 0) 
-	*Log(theErrLog) << "get Lemma results failed: " 
-			<< e.what() << endl;      
-    }
-    try { 
-      vector<MorphologyLayer*> ml = word->annotations<MorphologyLayer>();
-      for ( size_t q=0; q < ml.size(); ++q ){
-	vector<Morpheme*> m = ml[q]->select<Morpheme>();
-	for ( size_t t=0; t < m.size(); ++t ){
-	  morph += "[" + UnicodeToUTF8( m[t]->text() ) + "]";
+    if ( doLemma ){
+      try { 
+	lemma += word->lemma();
+	if ( p < mwu.size() -1 ){
+	  lemma += "_";
 	}
-	if ( q < ml.size()-1 )
-	  morph += "/";
       }
-      if ( p < mwu.size() -1 ){
-	morph += "_";
+      catch ( exception& e ){
+	if  (tpDebug > 0) 
+	  *Log(theErrLog) << "get Lemma results failed: " 
+			  << e.what() << endl;      
       }
     }
-    catch ( exception& e ){
-      if  (tpDebug > 0) 
-	*Log(theErrLog) << "get Morph results failed: " 
-			<< e.what() << endl;      
+    if ( doMorph ){
+      try { 
+	vector<MorphologyLayer*> ml = word->annotations<MorphologyLayer>();
+	for ( size_t q=0; q < ml.size(); ++q ){
+	  vector<Morpheme*> m = ml[q]->select<Morpheme>();
+	  for ( size_t t=0; t < m.size(); ++t ){
+	    morph += "[" + UnicodeToUTF8( m[t]->text() ) + "]";
+	  }
+	  if ( q < ml.size()-1 )
+	    morph += "/";
+	}
+	if ( p < mwu.size() -1 ){
+	  morph += "_";
+	}
+      }
+      catch ( exception& e ){
+	if  (tpDebug > 0) 
+	  *Log(theErrLog) << "get Morph results failed: " 
+			  << e.what() << endl;      
+      }
     }
   }
   os << index << "\t" << wrd << "\t" << lemma << "\t" << morph << "\t" << pos << "\t" << std::fixed << conf;
