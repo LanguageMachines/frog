@@ -748,7 +748,7 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   vector<MBMAana>::iterator ait = analysis.begin();
   while ( ait != analysis.end() ){
     string tagI = ait->getTag();
-    if ( tagIt->second == tagI ){
+    if ( tagIt->second == tagI || ( tagIt->second == "N" && tagI == "PN" ) ){
       if (debugFlag)
 	*Log(mbmaLog) << "comparing " << tagIt->second << " with " 
 		      << tagI << " (OK)" << endl;
