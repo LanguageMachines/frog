@@ -206,8 +206,6 @@ void Mbma::cleanUp(){
   
 vector<string> Mbma::make_instances( const UnicodeString& word ){
   vector<string> insts;
-  if (debugFlag > 2)
-    *Log(mbmaLog) << "word: " << word << "\twl : " << word.length() << endl;
   for( long i=0; i < word.length(); ++i ) {
     if (debugFlag > 10)
       *Log(mbmaLog) << "itt #:" << i << endl;
@@ -228,9 +226,6 @@ vector<string> Mbma::make_instances( const UnicodeString& word ){
 	*Log(mbmaLog) << " : " << inst << endl;
     }
     inst += "?";
-    if (debugFlag > 2)
-      *Log(mbmaLog) << "inst #" << i << " : " << inst << endl;
-    // classify res
     insts.push_back( UnicodeToUTF8(inst) );
     // store res
   }
@@ -247,8 +242,8 @@ string extract( const string& line, size_t start, char to ){
 }
 
 string Mbma::calculate_ins_del( const string& in_class, 
-				string& deletestring,
-				string& insertstring,
+				UnicodeString& deletestring,
+				UnicodeString& insertstring,
 				bool& participle ){
   string result_class = in_class;
   size_t pos = in_class.find("+");
@@ -259,15 +254,19 @@ string Mbma::calculate_ins_del( const string& in_class,
     participle = ( in_class.find( 'p' ) < pos );
     pos++;
     if (in_class[pos]=='D') { // delete operation 
-      deletestring = extract( in_class, pos+1, '/' );
+      string s = extract( in_class, pos+1, '/' );
+      deletestring = UTF8ToUnicode( s );
     }
     else if ( in_class[pos]=='I') {  //insert operation
-      insertstring = extract( in_class, pos+1, '/' );
+      string s = extract( in_class, pos+1, '/' );
+      insertstring = UTF8ToUnicode( s );
     }
     else if ( in_class[pos]=='R') { // replace operation 
-      deletestring = extract( in_class, pos+1, '>' );
-      pos += deletestring.length()+1;
-      insertstring = extract( in_class, pos+1, '/' );
+      string s = extract( in_class, pos+1, '>' );
+      deletestring = UTF8ToUnicode( s );
+      pos += s.length()+1;
+      s = extract( in_class, pos+1, '/' );
+      insertstring = UTF8ToUnicode( s );
     }
     /* spelling change done; remove from in_class */
     result_class = extract( in_class, 0, '+' );
@@ -312,12 +311,23 @@ vector<waStruct> Mbma::Step1( unsigned int step,
   for ( long k=0; k < word.length(); ++k ) { 
     this_class = classParts[step][k];
     if ( debugFlag){
-      *Log(mbmaLog) << "Step::" << step << " " << this_class << endl;
+      *Log(mbmaLog) << "Step::" << step << " letter:" 
+		    << (char)word[k] << " " << this_class << endl;
+      *Log(mbmaLog) << "TOBEIGNORED = " << tobeignored << endl;
     }
-    string deletestring;
-    string insertstring;
+    UnicodeString deletestring;
+    UnicodeString insertstring;
     bool participle = false;
     this_class = calculate_ins_del( this_class, deletestring, insertstring, participle );
+    if ( insertstring.length() > 0 ){
+      // sanity check
+      for ( int j=0; j < insertstring.length(); ++j ){
+	if ( word[k+j] != insertstring[j] ){
+	  *Log(mbmaLog) << "GROTE PANIEK: " << word[k+j] << " !+ " << insertstring[j] << endl;
+	  insertstring = "";
+	}
+      }
+    }
     if ( deletestring == "eeer" )
       deletestring = "eer";
     /* exceptions */
@@ -326,20 +336,26 @@ vector<waStruct> Mbma::Step1( unsigned int step,
       deletestring = "er";
       eexcept = true;
     }
-    // insert the deletestring :-) 
-    UnicodeString dels = UTF8ToUnicode( deletestring );
-    waItem.word += dels;
-    // delete the insertstring :-) 
-    if ( tobeignored == 0 &&
-	 ( !participle || 
-	   ( insertstring != "ge" &&
-	     insertstring != "be" ) ) )
-      tobeignored = insertstring.length();
-    
+    bool replace = this_class[0] == '0' || 
+      ( deletestring.length() > 0 && insertstring.length() > 0 );
+    if ( !replace ){
+      // insert the deletestring :-) 
+      waItem.word += deletestring;
+      // delete the insertstring :-) 
+      if ( tobeignored == 0 &&
+	   ( !participle || 
+	     ( insertstring != "ge" &&
+	       insertstring != "be" ) ) )
+	tobeignored = insertstring.length();
+      //      *Log(mbmaLog) << "TOBEIGNORED = " << tobeignored << endl;
+    }
     if ( basictags.find(this_class[0]) != string::npos ){
+      //      *Log(mbmaLog) << "FOUND a basic tag " << this_class[0] << endl;
       // encountering POS tag
       if ( !previoustag.empty() ) { 
+	//	*Log(mbmaLog) << "ER IS EEN previous tag: " << previoustag << endl;
 	waItem.act = previoustag;
+	//	*Log(mbmaLog) << "PUSH " << waItem.word << endl;
 	ana.push_back( waItem );
 	waItem.clear();
       }
@@ -347,6 +363,7 @@ vector<waStruct> Mbma::Step1( unsigned int step,
     }
     else { 
       if ( this_class[0] !='0' ){ 
+	//	*Log(mbmaLog) << "handle inflection:" << this_class[0] << endl;
 	// encountering inflection info
 	if ( !previoustag.empty() ) { 
 	  waItem.act = previoustag;
@@ -355,6 +372,17 @@ vector<waStruct> Mbma::Step1( unsigned int step,
 	}
 	previoustag = "i" + this_class;
       }
+    }
+    if ( replace ){
+      // insert the deletestring :-) 
+      waItem.word += deletestring;
+      // delete the insertstring :-) 
+      if ( tobeignored == 0 &&
+	   ( !participle || 
+	     ( insertstring != "ge" &&
+	       insertstring != "be" ) ) )
+	tobeignored = insertstring.length();
+      //      *Log(mbmaLog) << "TOBEIGNORED = " << tobeignored << endl;
     }
     /* copy the next character */
     if ( eexcept ) { 
@@ -945,17 +973,14 @@ void Mbma::Classify( Word* sword ){
 
 void Mbma::Classify( const UnicodeString& word ){
   UnicodeString uWord = filterDiacritics( word );
-  if (debugFlag)
-    *Log(mbmaLog) << "Classify word: " << uWord << endl;
-  
   vector<string> insts = make_instances( uWord );
   vector<string> classes;
   for( size_t i=0; i < insts.size(); ++i ) {
     string ans;
     MTree->Classify( insts[i], ans );
     if ( debugFlag ){
-      *Log(mbmaLog) << "itt #" << i << ": timbl gave class= " << ans 
-		    << ", it matched at depth=" << MTree->matchDepth() << endl; 
+      *Log(mbmaLog) << "itt #" << i << " " << insts[i] << " ==> " << ans 
+		    << ", depth=" << MTree->matchDepth() << endl; 
     }
     classes.push_back( ans);
   }
