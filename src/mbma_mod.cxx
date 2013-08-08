@@ -313,7 +313,6 @@ vector<waStruct> Mbma::Step1( unsigned int step,
     if ( debugFlag){
       *Log(mbmaLog) << "Step::" << step << " letter:" 
 		    << (char)word[k] << " " << this_class << endl;
-      *Log(mbmaLog) << "TOBEIGNORED = " << tobeignored << endl;
     }
     UnicodeString deletestring;
     UnicodeString insertstring;
@@ -336,9 +335,10 @@ vector<waStruct> Mbma::Step1( unsigned int step,
       deletestring = "er";
       eexcept = true;
     }
-    bool replace = this_class[0] == '0' || 
-      ( deletestring.length() > 0 && insertstring.length() > 0 );
-    if ( !replace ){
+    bool nopush = true;
+    // For now, disable the hack 
+    //this_class[0] == '0'; // || ( deletestring.length() > 0 && insertstring.length() > 0 );
+    if ( nopush ){
       // insert the deletestring :-) 
       waItem.word += deletestring;
       // delete the insertstring :-) 
@@ -350,12 +350,15 @@ vector<waStruct> Mbma::Step1( unsigned int step,
       //      *Log(mbmaLog) << "TOBEIGNORED = " << tobeignored << endl;
     }
     if ( basictags.find(this_class[0]) != string::npos ){
-      //      *Log(mbmaLog) << "FOUND a basic tag " << this_class[0] << endl;
+      if ( debugFlag ){
+	*Log(mbmaLog) << "FOUND a basic tag " << this_class[0] << endl;
+      }
       // encountering POS tag
       if ( !previoustag.empty() ) { 
-	//	*Log(mbmaLog) << "ER IS EEN previous tag: " << previoustag << endl;
 	waItem.act = previoustag;
-	//	*Log(mbmaLog) << "PUSH " << waItem.word << endl;
+	if ( debugFlag ){
+	  *Log(mbmaLog) << "PUSH " << waItem.word << endl;
+	}
 	ana.push_back( waItem );
 	waItem.clear();
       }
@@ -363,17 +366,22 @@ vector<waStruct> Mbma::Step1( unsigned int step,
     }
     else { 
       if ( this_class[0] !='0' ){ 
-	//	*Log(mbmaLog) << "handle inflection:" << this_class[0] << endl;
+	if ( debugFlag ){
+	  *Log(mbmaLog) << "handle inflection:" << this_class[0] << endl;
+	}
 	// encountering inflection info
 	if ( !previoustag.empty() ) { 
 	  waItem.act = previoustag;
+	  if ( debugFlag ){
+	    *Log(mbmaLog) << "PUSH " << waItem.word << endl;
+	  }
 	  ana.push_back( waItem );
 	  waItem.clear();
 	}
 	previoustag = "i" + this_class;
       }
     }
-    if ( replace ){
+    if ( !nopush ){
       // insert the deletestring :-) 
       waItem.word += deletestring;
       // delete the insertstring :-) 
