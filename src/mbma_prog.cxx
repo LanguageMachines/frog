@@ -153,6 +153,10 @@ bool init(){
 void Test( istream& in ){
   string line;
   while ( getline( in, line ) ){
+    line = TiCC::trim( line );
+    if ( line.empty() )
+      continue;
+    cerr << "processing: " << line << endl;
     vector<string> sentences = tokenizer.tokenize( line );
     for ( size_t s=0; s < sentences.size(); ++s ){
       vector<TagResult> tagv = tagger.tagLine(sentences[s]);
@@ -210,6 +214,7 @@ int main(int argc, char *argv[]) {
       }
       ifstream in(TestFileName.c_str() );
       if ( in.good() ){
+	cerr << "Processing: " << TestFileName << endl;
 	Test( in );
       }
       else {
