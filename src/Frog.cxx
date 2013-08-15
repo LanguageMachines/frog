@@ -212,6 +212,10 @@ bool parse_args( TimblOpts& Opts ) {
     doQuoteDetection = true;
   };
   if ( Opts.Find( "skip", value, mood)) {
+    if ( value.empty() ){
+      *Log(theErrLog) << "missing a value for --skip (did you forget the '='?)" << endl;      
+      return false;
+    }
     string skip = value;
     if ( skip.find_first_of("tT") != string::npos )
       doTok = false;
@@ -258,6 +262,10 @@ bool parse_args( TimblOpts& Opts ) {
     omp_set_num_threads( 1 );
   }
   else if ( Opts.Find( "threads", value, mood ) ){
+    if ( value.empty() ){
+      *Log(theErrLog) << "missing a value for --threads (did you forget the '='?)" << endl;      
+      return false;
+    }
     int num;
     if ( !stringTo<int>( value, num ) || num < 1 ){
       *Log(theErrLog) << "threads value should be a positive integer" << endl;
@@ -274,7 +282,11 @@ bool parse_args( TimblOpts& Opts ) {
     Opts.Delete("keep-parser-files");
   }
   tmpDirName = configuration.lookUp( "tmpdir", "global" );
-  if ( Opts.Find ( "tmpdir", value, mood)) {
+  if ( Opts.Find ( "tmpdir", value, mood )) {
+    if ( value.empty() ){
+      *Log(theErrLog) << "missing a value for --tmpdir (did you forget the '='?)" << endl;      
+      return false;
+    }
     tmpDirName = value;
     Opts.Delete("tmpdir");
   }
@@ -304,7 +316,7 @@ bool parse_args( TimblOpts& Opts ) {
       }
     }
     else {
-      *Log(theErrLog) << "empty testdir name!" << endl;
+      *Log(theErrLog) << "missing a value for --testdir (did you forget the '='?)" << endl;      
       return false;
     }
 #else
@@ -331,6 +343,10 @@ bool parse_args( TimblOpts& Opts ) {
 	return false;
       }
     }
+    else {
+      *Log(theErrLog) << "missing a value for --outputdir (did you forget the '='?)" << endl;      
+      return false;
+    }
 #endif
     wantOUT = true;
     Opts.Delete( "outputdir");
@@ -342,6 +358,10 @@ bool parse_args( TimblOpts& Opts ) {
   };
   doXMLout = false;
   if ( Opts.Find ( "id", value, mood)) {
+    if ( value.empty() ){
+      *Log(theErrLog) << "missing a value for --id (did you forget the '='?)" << endl;      
+      return false;
+    }
     docid = value;
     Opts.Delete( "id");
   }  
@@ -353,6 +373,10 @@ bool parse_args( TimblOpts& Opts ) {
 	*Log(theErrLog) << "XML output dir " << xmlDirName << " not readable" << endl;
 	return false;
       }
+    }
+    else {
+      *Log(theErrLog) << "missing a value for --xmldir (did you forget the '='?)" << endl;          
+      return false;
     }
 #endif
     doXMLout = true;
@@ -391,6 +415,10 @@ bool parse_args( TimblOpts& Opts ) {
       *Log(theErrLog) << "--textclass is only valid when -x is also present" << endl;
       return false;
     }
+    if ( value.empty() ){
+      *Log(theErrLog) << "missing a value for --textclass (did you forget the '='?)" << endl;      
+      return false;
+    }
     textclass = value;
     Opts.Delete( "textclass");
   }  
@@ -405,6 +433,10 @@ bool parse_args( TimblOpts& Opts ) {
   }
   
   if ( Opts.Find ("uttmarker", value, mood)) {
+    if ( value.empty() ){
+      *Log(theErrLog) << "missing a value for --uttmarker (did you forget the '='?)" << endl;      
+      return false;
+    }
     uttmark = value;
   }
   if ( !outputDirName.empty() && testDirName.empty() ){
