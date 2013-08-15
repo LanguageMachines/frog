@@ -128,7 +128,7 @@ void usage( ) {
        << "\t -e <encoding>          specify encoding of the input (default UTF-8)\n"
        << "\t -t <testfile>          Run frog on this file\n"
        << "\t -x <testfile>          Run frog on this FoLiA XML file. Or the files form 'testdir'\n"
-       << "\t --textclass=<cls>      use the specified class to for search text in the the FoLia docs.\n"
+       << "\t --textclass=<cls>      use the specified class to search for text in the the FoLia docs.\n"
        << "\t --testdir=<directory>  All files in this dir will be tested\n"
        << "\t --uttmarker=<mark>     utterances are separated by 'mark' symbols"
        << "\t                        (default none)\n"
