@@ -6,7 +6,7 @@
   Tilburg University
 
   A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
- 
+
   This file is part of frog
 
   frog is free software; you can redistribute it and/or modify
@@ -31,7 +31,7 @@
 #include "Python.h"
 #include <cstdlib>
 #include <cstdio>
-#include <sys/wait.h> 
+#include <sys/wait.h>
 #include <signal.h>
 #include <string>
 #include <cstring>
@@ -107,13 +107,13 @@ string uttmark = "";
         which sets variables global to that namespace
 	to be used in the init() for that namespace
 
-   Further, 
-   each component provides a Test(File) which writes output to 
+   Further,
+   each component provides a Test(File) which writes output to
         File.<componentname>_out
-   and a Classify(Instance) which produces relevant output 
-        as a string return 
-	or somehwere else, 
-   to be determined later, 
+   and a Classify(Instance) which produces relevant output
+        as a string return
+	or somehwere else,
+   to be determined later,
    after pre- and postprocessing raw classification data
 
 */
@@ -139,20 +139,20 @@ void usage( ) {
        << "\t --skip=[mptncla]    Skip Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"
        << "\t============= CONFIGURATION OPTIONS =====================================\n"
        << "\t -c <filename>    Set configuration file (default " << configFileName << ")\n"
-       << "\t============= OUTPUT OPTIONS ============================================\n"      
+       << "\t============= OUTPUT OPTIONS ============================================\n"
        << "\t -o <outputfile>	    Output columned output to file, instead of default stdout\n"
        << "\t -X <xmlfile>          Output also to an XML file in FoLiA format\n"
        << "\t --id=<docid>          Document ID, used in FoLiA output. (Default 'untitled')\n"
        << "\t --outputdir=<dir>     Output to dir, instead of default stdout\n"
        << "\t --xmldir=<dir>        Use 'dir' to output FoliA XML to.\n"
-       << "\t --tmpdir=<directory>  (location to store intermediate files. Default /tmp )\n"      
+       << "\t --tmpdir=<directory>  (location to store intermediate files. Default /tmp )\n"
        << "\t --keep-parser-files=[yes|no] keep intermediate parser files. (last sentence only).\n"
        << "\t============= OTHER OPTIONS ============================================\n"
        << "\t -h. give some help.\n"
        << "\t -V or --version .   Show version info.\n"
        << "\t -d <debug level>    (for more verbosity)\n"
        << "\t -S <port>              Run as server instead of reading from testfile\n"
-#ifdef HAVE_OPENMP      
+#ifdef HAVE_OPENMP
        << "\t --threads=<n>       Use a maximun of 'n' threads. Default: all we can get. \n"
 #endif
        << "\t                     (but always 1 for server mode)\n";
@@ -213,7 +213,7 @@ bool parse_args( TimblOpts& Opts ) {
   };
   if ( Opts.Find( "skip", value, mood)) {
     if ( value.empty() ){
-      *Log(theErrLog) << "missing a value for --skip (did you forget the '='?)" << endl;      
+      *Log(theErrLog) << "missing a value for --skip (did you forget the '='?)" << endl;
       return false;
     }
     string skip = value;
@@ -237,7 +237,7 @@ bool parse_args( TimblOpts& Opts ) {
   if ( Opts.Find( "e", value, mood)) {
     encoding = value;
   }
-  
+
   if ( Opts.Find( "max-parser-tokens", value, mood ) ){
     if ( value.empty() ){
       *Log(theErrLog) << "max-parser-tokens option without value " << endl;
@@ -256,14 +256,14 @@ bool parse_args( TimblOpts& Opts ) {
     doServer = true;
     listenport= value;
   }
-#ifdef HAVE_OPENMP      
+#ifdef HAVE_OPENMP
   if ( doServer ) {
     // run in one thread in server mode, forking is too expensive for lots of small snippets
     omp_set_num_threads( 1 );
   }
   else if ( Opts.Find( "threads", value, mood ) ){
     if ( value.empty() ){
-      *Log(theErrLog) << "missing a value for --threads (did you forget the '='?)" << endl;      
+      *Log(theErrLog) << "missing a value for --threads (did you forget the '='?)" << endl;
       return false;
     }
     int num;
@@ -284,7 +284,7 @@ bool parse_args( TimblOpts& Opts ) {
   tmpDirName = configuration.lookUp( "tmpdir", "global" );
   if ( Opts.Find ( "tmpdir", value, mood )) {
     if ( value.empty() ){
-      *Log(theErrLog) << "missing a value for --tmpdir (did you forget the '='?)" << endl;      
+      *Log(theErrLog) << "missing a value for --tmpdir (did you forget the '='?)" << endl;
       return false;
     }
     tmpDirName = value;
@@ -316,7 +316,7 @@ bool parse_args( TimblOpts& Opts ) {
       }
     }
     else {
-      *Log(theErrLog) << "missing a value for --testdir (did you forget the '='?)" << endl;      
+      *Log(theErrLog) << "missing a value for --testdir (did you forget the '='?)" << endl;
       return false;
     }
 #else
@@ -344,7 +344,7 @@ bool parse_args( TimblOpts& Opts ) {
       }
     }
     else {
-      *Log(theErrLog) << "missing a value for --outputdir (did you forget the '='?)" << endl;      
+      *Log(theErrLog) << "missing a value for --outputdir (did you forget the '='?)" << endl;
       return false;
     }
 #endif
@@ -359,12 +359,12 @@ bool parse_args( TimblOpts& Opts ) {
   doXMLout = false;
   if ( Opts.Find ( "id", value, mood)) {
     if ( value.empty() ){
-      *Log(theErrLog) << "missing a value for --id (did you forget the '='?)" << endl;      
+      *Log(theErrLog) << "missing a value for --id (did you forget the '='?)" << endl;
       return false;
     }
     docid = value;
     Opts.Delete( "id");
-  }  
+  }
   if ( Opts.Find( "xmldir", value, mood)) {
     xmlDirName = value;
 #ifdef HAVE_DIRENT_H
@@ -375,7 +375,7 @@ bool parse_args( TimblOpts& Opts ) {
       }
     }
     else {
-      *Log(theErrLog) << "missing a value for --xmldir (did you forget the '='?)" << endl;          
+      *Log(theErrLog) << "missing a value for --xmldir (did you forget the '='?)" << endl;
       return false;
     }
 #endif
@@ -395,8 +395,8 @@ bool parse_args( TimblOpts& Opts ) {
   if ( Opts.Find ('x', value, mood)) {
     doXMLin = true;
     if ( !value.empty() ){
-      if ( ! (xmlDirName.empty() && 
-	      testDirName.empty() && 
+      if ( ! (xmlDirName.empty() &&
+	      testDirName.empty() &&
 	      TestFileName.empty() ) ){
 	*Log(theErrLog) << "-x may not provide a value when --testdir or --xmldir is provided" << endl;
 	return false;
@@ -416,13 +416,13 @@ bool parse_args( TimblOpts& Opts ) {
       return false;
     }
     if ( value.empty() ){
-      *Log(theErrLog) << "missing a value for --textclass (did you forget the '='?)" << endl;      
+      *Log(theErrLog) << "missing a value for --textclass (did you forget the '='?)" << endl;
       return false;
     }
     textclass = value;
     Opts.Delete( "textclass");
-  }  
-  
+  }
+
   if ( !outputFileName.empty() && !testDirName.empty() ){
     *Log(theErrLog) << "useless -o value" << endl;
     return false;
@@ -431,10 +431,10 @@ bool parse_args( TimblOpts& Opts ) {
     *Log(theErrLog) << "useless -X value" << endl;
     return false;
   }
-  
+
   if ( Opts.Find ("uttmarker", value, mood)) {
     if ( value.empty() ){
-      *Log(theErrLog) << "missing a value for --uttmarker (did you forget the '='?)" << endl;      
+      *Log(theErrLog) << "missing a value for --uttmarker (did you forget the '='?)" << endl;
       return false;
     }
     uttmark = value;
@@ -449,7 +449,7 @@ bool parse_args( TimblOpts& Opts ) {
     else
       getFileNames( testDirName, "", fileNames );
     if ( fileNames.empty() ){
-      *Log(theErrLog) << "error: couln't find any files in directory: " 
+      *Log(theErrLog) << "error: couln't find any files in directory: "
 		      << testDirName << endl;
       return false;
     }
@@ -461,7 +461,7 @@ bool parse_args( TimblOpts& Opts ) {
   return true;
 }
 
-bool froginit(){  
+bool froginit(){
   // for some modules init can take a long time
   // so first make sure it will not fail on some trivialities
   //
@@ -487,7 +487,7 @@ bool froginit(){
     *Log(theErrLog) << " Parser disabled, because MWU is deselected" << endl;
     doParse = false;
   }
-  
+
   if ( doServer ){
     // we use fork(). omp (GCC version) doesn't do well when omp is used
     // before the fork!
@@ -564,17 +564,17 @@ bool froginit(){
 	  mbaStat = myMbma.init( configuration );
 	}
       }
-#pragma omp section 
+#pragma omp section
       {
 	tagStat = myCGNTagger.init( configuration );
       }
-#pragma omp section 
+#pragma omp section
       {
 	if ( doIOB ){
 	  iobStat = myIOBTagger.init( configuration );
 	}
       }
-#pragma omp section 
+#pragma omp section
       {
 	if ( doNER ){
 	  nerStat = myNERTagger.init( configuration );
@@ -594,30 +594,30 @@ bool froginit(){
 	}
       }
     }   // end omp parallel sections
-    if ( ! ( tokStat && iobStat && nerStat && tagStat && lemStat 
+    if ( ! ( tokStat && iobStat && nerStat && tagStat && lemStat
 	     && mbaStat && mwuStat && parStat ) ){
       *Log(theErrLog) << "Initialization failed for: ";
       if ( ! ( tokStat ) ){
 	*Log(theErrLog) << "[tokenizer] ";
-      }	
+      }
       if ( ! ( tagStat ) ){
 	*Log(theErrLog) << "[tagger] ";
-      }	
+      }
       if ( ! ( iobStat ) ){
 	*Log(theErrLog) << "[IOB] ";
-      }	
+      }
       if ( ! ( nerStat ) ){
 	*Log(theErrLog) << "[NER] ";
-      }	
+      }
       if ( ! ( lemStat ) ){
 	*Log(theErrLog) << "[lemmatizer] ";
-      }	
+      }
       if ( ! ( mbaStat ) ){
 	*Log(theErrLog) << "[morphology] ";
-      }	
+      }
       if ( ! ( mwuStat ) ){
 	*Log(theErrLog) << "[multiword unit] ";
-      }	
+      }
       if ( ! ( parStat ) ){
 	*Log(theErrLog) << "[parser] ";
       }
@@ -644,7 +644,7 @@ vector<Word*> lookup( Word *word, const vector<Entity*>& entities ){
   return vec;
 }
 
-Dependency *lookupDep( const Word *word, 
+Dependency *lookupDep( const Word *word,
 		       const vector<Dependency*>&dependencies ){
   if ( tpDebug ){
     using TiCC::operator<<;
@@ -669,15 +669,15 @@ Dependency *lookupDep( const Word *word,
       }
     }
     catch ( exception& e ){
-      if  (tpDebug > 0) 
-	*Log(theErrLog) << "get Dependency results failed: " 
-			<< e.what() << endl;      
+      if  (tpDebug > 0)
+	*Log(theErrLog) << "get Dependency results failed: "
+			<< e.what() << endl;
     }
   }
   return 0;
 }
 
-string lookupNEREntity( const vector<Word *>& mwu, 
+string lookupNEREntity( const vector<Word *>& mwu,
 			const vector<Entity*>& entities ){
   string endresult;
   for ( size_t j=0; j < mwu.size(); ++j ){
@@ -709,9 +709,9 @@ string lookupNEREntity( const vector<Word *>& mwu,
 	}
       }
       catch ( exception& e ){
-	if  (tpDebug > 0) 
-	  *Log(theErrLog) << "get NER results failed: " 
-			  << e.what() << endl;      
+	if  (tpDebug > 0)
+	  *Log(theErrLog) << "get NER results failed: "
+			  << e.what() << endl;
       }
     }
     if ( result.empty() )
@@ -725,7 +725,7 @@ string lookupNEREntity( const vector<Word *>& mwu,
 }
 
 
-string lookupIOBChunk( const vector<Word *>& mwu, 
+string lookupIOBChunk( const vector<Word *>& mwu,
 		       const vector<Chunk*>& chunks ){
   string endresult;
   for ( size_t j=0; j < mwu.size(); ++j ){
@@ -757,9 +757,9 @@ string lookupIOBChunk( const vector<Word *>& mwu,
 	}
       }
       catch ( exception& e ){
-	if  (tpDebug > 0) 
-	  *Log(theErrLog) << "get Chunks results failed: " 
-			  << e.what() << endl;      
+	if  (tpDebug > 0)
+	  *Log(theErrLog) << "get Chunks results failed: "
+			  << e.what() << endl;
       }
     }
     if ( result.empty() )
@@ -772,7 +772,7 @@ string lookupIOBChunk( const vector<Word *>& mwu,
   return endresult;
 }
 
-void displayMWU( ostream& os, size_t index, 
+void displayMWU( ostream& os, size_t index,
 		 const vector<Word*> mwu ){
   string wrd;
   string pos;
@@ -781,7 +781,7 @@ void displayMWU( ostream& os, size_t index,
   double conf = 1;
   for ( size_t p=0; p < mwu.size(); ++p ){
     Word *word = mwu[p];
-    try { 
+    try {
       wrd += word->str();
       PosAnnotation *postag = word->annotation<PosAnnotation>( );
       pos += postag->cls();
@@ -792,25 +792,25 @@ void displayMWU( ostream& os, size_t index,
       conf *= postag->confidence();
     }
     catch ( exception& e ){
-      if  (tpDebug > 0) 
-	*Log(theErrLog) << "get Postag results failed: " 
-			<< e.what() << endl;            
+      if  (tpDebug > 0)
+	*Log(theErrLog) << "get Postag results failed: "
+			<< e.what() << endl;
     }
     if ( doLemma ){
-      try { 
+      try {
 	lemma += word->lemma();
 	if ( p < mwu.size() -1 ){
 	  lemma += "_";
 	}
       }
       catch ( exception& e ){
-	if  (tpDebug > 0) 
-	  *Log(theErrLog) << "get Lemma results failed: " 
-			  << e.what() << endl;      
+	if  (tpDebug > 0)
+	  *Log(theErrLog) << "get Lemma results failed: "
+			  << e.what() << endl;
       }
     }
     if ( doMorph ){
-      try { 
+      try {
 	vector<MorphologyLayer*> ml = word->annotations<MorphologyLayer>();
 	for ( size_t q=0; q < ml.size(); ++q ){
 	  vector<Morpheme*> m = ml[q]->select<Morpheme>();
@@ -825,16 +825,16 @@ void displayMWU( ostream& os, size_t index,
 	}
       }
       catch ( exception& e ){
-	if  (tpDebug > 0) 
-	  *Log(theErrLog) << "get Morph results failed: " 
-			  << e.what() << endl;      
+	if  (tpDebug > 0)
+	  *Log(theErrLog) << "get Morph results failed: "
+			  << e.what() << endl;
       }
     }
   }
   os << index << "\t" << wrd << "\t" << lemma << "\t" << morph << "\t" << pos << "\t" << std::fixed << conf;
-}  
+}
 
-ostream &showResults( ostream& os, 
+ostream &showResults( ostream& os,
 		      const Sentence* sentence,
 		      bool showParse ){
   vector<Word*> words = sentence->words();
@@ -961,7 +961,7 @@ bool TestSentence( Sentence* sent,
 	{
 	  if ( doMorph ){
 	    timers.mbmaTimer.start();
-	    if (tpDebug) 
+	    if (tpDebug)
 	      *Log(theErrLog) << "Calling mbma..." << endl;
 	    myMbma.Classify( swords[i] );
 	    timers.mbmaTimer.stop();
@@ -971,7 +971,7 @@ bool TestSentence( Sentence* sent,
 	{
 	  if ( doLemma ){
 	    timers.mblemTimer.start();
-	    if (tpDebug) 
+	    if (tpDebug)
 	      *Log(theErrLog) << "Calling mblem..." << endl;
 	    myMblem.Classify( swords[i] );
 	    timers.mblemTimer.stop();
@@ -979,7 +979,7 @@ bool TestSentence( Sentence* sent,
 	}
       } // omp parallel sections
     } //for int i = 0 to num_words
-    
+
     if ( doMwu ){
       if ( swords.size() > 0 ){
 	timers.mwuTimer.start();
@@ -1015,14 +1015,14 @@ void Test( Document& doc,
     myIOBTagger.addDeclaration( doc );
   if (doNER)
     myNERTagger.addDeclaration( doc );
-  if (doMwu) 
+  if (doMwu)
     myMwu.addDeclaration( doc );
-  if (doParse) 
+  if (doParse)
     myParser.addDeclaration( doc );
 
   if ( tpDebug > 5 )
     *Log(theErrLog) << "Testing document :" << doc << endl;
-  
+
   vector<Sentence*> topsentences = doc.sentences();
   vector<Sentence*> sentences;
   if ( doQuoteDetection )
@@ -1030,13 +1030,13 @@ void Test( Document& doc,
   else
     sentences = topsentences;
   size_t numS = sentences.size();
-  if ( numS > 0 ) { //process sentences 
-    if  (tpDebug > 0) 
+  if ( numS > 0 ) { //process sentences
+    if  (tpDebug > 0)
       *Log(theErrLog) << "found " << numS << " sentence(s) in document." << endl;
     for ( size_t i = 0; i < numS; i++) {
       /* ******* Begin process sentence  ********** */
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)
-      bool showParse = TestSentence( sentences[i], outStream, timers ); 
+      bool showParse = TestSentence( sentences[i], outStream, timers );
       if ( doParse && !showParse ){
 	*Log(theErrLog) << "WARNING!" << endl;
 	*Log(theErrLog) << "Sentence " << i+1 << " isn't parsed because it contains more tokens then set with the --max-parser-tokens=" << maxParserTokens << " option." << endl;
@@ -1052,14 +1052,14 @@ void Test( Document& doc,
       doc.save( xmlOutFile, doKanon );
       *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
     }
-  } 
+  }
   else {
-    if  (tpDebug > 0) 
+    if  (tpDebug > 0)
       *Log(theErrLog) << "No sentences found in document. " << endl;
   }
-  
-  timers.frogTimer.stop();  
-  
+
+  timers.frogTimer.stop();
+
   *Log(theErrLog) << "tokenisation took:  " << timers.tokTimer << endl;
   *Log(theErrLog) << "CGN tagging took:   " << timers.tagTimer << endl;
   if ( doIOB)
@@ -1141,7 +1141,7 @@ void Test( const string& infilename,
 
 void TestServer( Sockets::ServerSocket &conn) {
   //by Maarten van Gompel
-  
+
   try {
     while (true) {
       ostringstream outputstream;
@@ -1159,14 +1159,14 @@ void TestServer( Sockets::ServerSocket &conn) {
 	  throw( runtime_error( "read garbage" ) );
 	}
 	if ( tpDebug )
-	  *Log(theErrLog) << "received data [" << result << "]" << endl;	
+	  *Log(theErrLog) << "received data [" << result << "]" << endl;
 	Document doc;
 	try {
 	  doc.readFromString( result );
 	}
 	catch ( std::exception& e ){
 	  *Log(theErrLog) << "FoLiaParsing failed:" << endl
-			  << e.what() << endl;	  
+			  << e.what() << endl;
 	  throw;
 	}
 	*Log(theErrLog) << "Processing... " << endl;
@@ -1191,21 +1191,21 @@ void TestServer( Sockets::ServerSocket &conn) {
 	  *Log(theErrLog) << "Received: [" << data << "]" << endl;
 	*Log(theErrLog) << "Processing... " << endl;
 	istringstream inputstream(data,istringstream::in);
-	Document doc = tokenizer.tokenize( inputstream ); 
+	Document doc = tokenizer.tokenize( inputstream );
 	Test( doc, outputstream );
       }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
 	if (tpDebug)
-	  *Log(theErrLog) << "socket " << conn.getMessage() << endl;	
+	  *Log(theErrLog) << "socket " << conn.getMessage() << endl;
 	throw( runtime_error( "write to client failed" ) );
       }
-      
+
     }
   }
   catch ( std::exception& e ) {
     if (tpDebug)
       *Log(theErrLog) << "connection lost: " << e.what() << endl;
-  } 
+  }
   *Log(theErrLog) << "Connection closed.\n";
 }
 
@@ -1223,7 +1223,7 @@ int main(int argc, char *argv[]) {
   std::ios_base::sync_with_stdio(false);
   try {
     TimblOpts Opts(argc, argv);
-        
+
     if ( parse_args(Opts) ){
       if (  !froginit() ){
 	throw runtime_error( "init failed" );
@@ -1258,20 +1258,20 @@ int main(int argc, char *argv[]) {
 	  ++it;
 	}
       }
-      else if ( doServer ) {  
+      else if ( doServer ) {
 	//first set up some things to deal with zombies
 	struct sigaction action;
 	action.sa_handler = SIG_IGN;
 	sigemptyset(&action.sa_mask);
 #ifdef SA_NOCLDWAIT
 	action.sa_flags = SA_NOCLDWAIT;
-#endif	
-	sigaction(SIGCHLD, &action, NULL); 
-	
+#endif
+	sigaction(SIGCHLD, &action, NULL);
+
 	srand((unsigned)time(0));
-	
+
 	*Log(theErrLog) << "Listening on port " << listenport << "\n";
-	
+
 	try
 	  {
 	    // Create the socket
@@ -1280,14 +1280,14 @@ int main(int argc, char *argv[]) {
 	      throw( runtime_error( "starting server on port " + listenport + " failed" ) );
 	    if ( !server.listen( 5 ) ) {
 	      // maximum of 5 pending requests
-	      throw( runtime_error( "listen(5) failed" ) ); 
+	      throw( runtime_error( "listen(5) failed" ) );
 	    }
 	    while ( true ) {
-	      
+
 	      Sockets::ServerSocket conn;
 	      if ( server.accept( conn ) ){
 		*Log(theErrLog) << "New connection..." << endl;
-		int pid = fork();				
+		int pid = fork();
 		if (pid < 0) {
 		  *Log(theErrLog) << "ERROR on fork" << endl;
 		  throw runtime_error( "FORK failed" );
@@ -1295,7 +1295,7 @@ int main(int argc, char *argv[]) {
 		  //		  server = NULL;
 		  TestServer(conn );
 		  exit(EXIT_SUCCESS);
-		} 
+		}
 	      }
 	      else {
 		throw( runtime_error( "Accept failed" ) );
@@ -1306,7 +1306,7 @@ int main(int argc, char *argv[]) {
 	    *Log(theErrLog) << "Server error:" << e.what() << " Exiting." << endl;
 	    throw;
 	  }
-	
+
       } else {
 	if ( doXMLout && XMLoutFileName.empty() )
 	  XMLoutFileName = TestFileName + ".xml";
