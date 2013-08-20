@@ -14,7 +14,7 @@
 
   frog is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
@@ -45,13 +45,13 @@ using namespace TiCC;
 const long int LEFT =  6; // left context
 const long int RIGHT = 6; // right context
 
-Mbma::Mbma(): MTreeFilename( "dm.igtree" ), MTree(0), 
-	      transliterator(0), filter(0) { 
+Mbma::Mbma(): MTreeFilename( "dm.igtree" ), MTree(0),
+	      transliterator(0), filter(0) {
   mbmaLog = new LogStream( theErrLog, "mbma-" );
 }
 
-Mbma::~Mbma() { 
-  cleanUp(); 
+Mbma::~Mbma() {
+  cleanUp();
   delete transliterator;
   delete filter;
   delete mbmaLog;
@@ -126,7 +126,7 @@ void Mbma::init_cgn( const string& dir ) {
       vector<string> tmp;
       size_t num = split_at(line, tmp, " ");
       if ( num == 2 )
-	TAGconv.insert( make_pair( tmp[0], tmp[1] ) ); 
+	TAGconv.insert( make_pair( tmp[0], tmp[1] ) );
     }
   }
   else
@@ -144,7 +144,7 @@ Transliterator *Mbma::init_trans( ){
   return t;
 }
 
-  
+
 bool Mbma::init( const Configuration& config ) {
   *Log(mbmaLog) << "Initiating morphological analyzer..." << endl;
   debugFlag = tpDebug;
@@ -197,13 +197,13 @@ bool Mbma::init( const Configuration& config ) {
   MTree = new Timbl::TimblAPI(opts);
   return MTree->GetInstanceBase(MTreeFilename);
 }
-  
+
 void Mbma::cleanUp(){
   // *Log(mbmaLog) << "cleaning up MBMA stuff " << endl;
   delete MTree;
   MTree = 0;
 }
-  
+
 vector<string> Mbma::make_instances( const UnicodeString& word ){
   vector<string> insts;
   for( long i=0; i < word.length(); ++i ) {
@@ -231,7 +231,7 @@ vector<string> Mbma::make_instances( const UnicodeString& word ){
   }
   return insts;
 }
-  
+
 string extract( const string& line, size_t start, char to ){
   string::size_type pos = line.find( to , start );
   if ( to == '>' && pos == string::npos ){
@@ -241,19 +241,19 @@ string extract( const string& line, size_t start, char to ){
   return line.substr( start, pos - start );
 }
 
-string Mbma::calculate_ins_del( const string& in_class, 
+string Mbma::calculate_ins_del( const string& in_class,
 				UnicodeString& deletestring,
 				UnicodeString& insertstring,
 				bool& participle ){
   string result_class = in_class;
   size_t pos = in_class.find("+");
-  if ( pos != string::npos ) { 
+  if ( pos != string::npos ) {
     if ( debugFlag){
       *Log(mbmaLog) << "calculate ins/del for " << in_class << endl;
     }
     participle = ( in_class.find( 'p' ) < pos );
     pos++;
-    if (in_class[pos]=='D') { // delete operation 
+    if (in_class[pos]=='D') { // delete operation
       string s = extract( in_class, pos+1, '/' );
       deletestring = UTF8ToUnicode( s );
     }
@@ -261,7 +261,7 @@ string Mbma::calculate_ins_del( const string& in_class,
       string s = extract( in_class, pos+1, '/' );
       insertstring = UTF8ToUnicode( s );
     }
-    else if ( in_class[pos]=='R') { // replace operation 
+    else if ( in_class[pos]=='R') { // replace operation
       string s = extract( in_class, pos+1, '>' );
       deletestring = UTF8ToUnicode( s );
       pos += s.length()+1;
@@ -299,7 +299,7 @@ ostream& operator<< ( ostream& os, const vector<waStruct>& V ){
   return os;
 }
 
-vector<waStruct> Mbma::Step1( unsigned int step, 
+vector<waStruct> Mbma::Step1( unsigned int step,
 			      const UnicodeString& word,
 			      const vector<vector<string> >& classParts,
 			      const string& basictags ) {
@@ -308,10 +308,10 @@ vector<waStruct> Mbma::Step1( unsigned int step,
   string this_class;
   string previoustag;
   waStruct waItem;
-  for ( long k=0; k < word.length(); ++k ) { 
+  for ( long k=0; k < word.length(); ++k ) {
     this_class = classParts[step][k];
     if ( debugFlag){
-      *Log(mbmaLog) << "Step::" << step << " letter:" 
+      *Log(mbmaLog) << "Step::" << step << " letter:"
 		    << (char)word[k] << " " << this_class << endl;
     }
     UnicodeString deletestring;
@@ -331,19 +331,28 @@ vector<waStruct> Mbma::Step1( unsigned int step,
       deletestring = "eer";
     /* exceptions */
     bool eexcept = false;
-    if ( deletestring == "ere" ){ 
+    if ( deletestring == "ere" ){
       deletestring = "er";
       eexcept = true;
     }
-    bool nopush = true;
-    // For now, disable the hack 
-    //this_class[0] == '0'; // || ( deletestring.length() > 0 && insertstring.length() > 0 );
+
+    bool replace =  deletestring.length() > 0 && insertstring.length() > 0;
+    bool nopush = this_class[0] == '0' || !replace;
     if ( nopush ){
-      // insert the deletestring :-) 
+      if ( debugFlag ){
+	*Log(mbmaLog) << " NOPUSH ";
+	if ( replace  ){
+	  *Log(mbmaLog) << " because of REPLACE  " << endl;
+	}
+	else {
+	  *Log(mbmaLog) << " because of 0 class  " << endl;
+	}
+      }
+      // insert the deletestring :-)
       waItem.word += deletestring;
-      // delete the insertstring :-) 
+      // delete the insertstring :-)
       if ( tobeignored == 0 &&
-	   ( !participle || 
+	   ( !participle ||
 	     ( insertstring != "ge" &&
 	       insertstring != "be" ) ) )
 	tobeignored = insertstring.length();
@@ -354,7 +363,7 @@ vector<waStruct> Mbma::Step1( unsigned int step,
 	*Log(mbmaLog) << "FOUND a basic tag " << this_class[0] << endl;
       }
       // encountering POS tag
-      if ( !previoustag.empty() ) { 
+      if ( !previoustag.empty() ) {
 	waItem.act = previoustag;
 	if ( debugFlag ){
 	  *Log(mbmaLog) << "PUSH " << waItem.word << endl;
@@ -364,13 +373,13 @@ vector<waStruct> Mbma::Step1( unsigned int step,
       }
       previoustag = this_class;
     }
-    else { 
-      if ( this_class[0] !='0' ){ 
+    else {
+      if ( this_class[0] !='0' ){
 	if ( debugFlag ){
 	  *Log(mbmaLog) << "handle inflection:" << this_class[0] << endl;
 	}
 	// encountering inflection info
-	if ( !previoustag.empty() ) { 
+	if ( !previoustag.empty() ) {
 	  waItem.act = previoustag;
 	  if ( debugFlag ){
 	    *Log(mbmaLog) << "PUSH " << waItem.word << endl;
@@ -382,22 +391,22 @@ vector<waStruct> Mbma::Step1( unsigned int step,
       }
     }
     if ( !nopush ){
-      // insert the deletestring :-) 
+      // insert the deletestring :-)
       waItem.word += deletestring;
-      // delete the insertstring :-) 
+      // delete the insertstring :-)
       if ( tobeignored == 0 &&
-	   ( !participle || 
+	   ( !participle ||
 	     ( insertstring != "ge" &&
 	       insertstring != "be" ) ) )
 	tobeignored = insertstring.length();
       //      *Log(mbmaLog) << "TOBEIGNORED = " << tobeignored << endl;
     }
     /* copy the next character */
-    if ( eexcept ) { 
+    if ( eexcept ) {
       waItem.word += "e";
       eexcept = false;
     }
-    if ( tobeignored == 0 ) { 
+    if ( tobeignored == 0 ) {
       waItem.word += word[k];
     }
     else if (tobeignored > 0 )
@@ -406,10 +415,10 @@ vector<waStruct> Mbma::Step1( unsigned int step,
   waItem.act = previoustag;
   ana.push_back( waItem );
   waItem.clear();
-  
+
   // do we have inflection?
   size_t pos = this_class.find( '/' );
-  if ( pos != string::npos && this_class != "E/P" ) { 
+  if ( pos != string::npos && this_class != "E/P" ) {
     // tags like 0/te3 N/e 0/P etc.
     string inflection = "i" + this_class.substr( pos+1 );
     waItem.act = inflection;
@@ -448,27 +457,27 @@ string select_tag( const char ch ){
   return newtag;
 }
 
-void Mbma::resolve_inflections( vector<waStruct>& ana, 
+void Mbma::resolve_inflections( vector<waStruct>& ana,
 				const string& basictags ) {
   // resolve all clearly resolvable implicit selections of inflectional tags
-  for ( vector<waStruct>::iterator it = ana.begin(); 
-	it != ana.end(); 
+  for ( vector<waStruct>::iterator it = ana.begin();
+	it != ana.end();
 	++it ){
     if ( ana.begin() == it )
       continue; // start at second
     string act = it->act;
-    if ( act[0]=='i') { 
+    if ( act[0]=='i') {
       // it is an inflection tag
       if (debugFlag){
 	*Log(mbmaLog) << "act: >" << act << "<" << endl;
-      }	  
+      }
       // given the specific selections of certain inflections,
       //    select a tag!
       string new_tag = select_tag( act[1] );
-      
+
       // apply the change. Remember, the idea is that an inflection is
       // far more certain of the tag of its predecessing morpheme than
-      // the morpheme itself. 
+      // the morpheme itself.
       // This is not always the case, but it works
       if ( !new_tag.empty() ) {
 	if ( debugFlag  ){
@@ -483,7 +492,7 @@ void Mbma::resolve_inflections( vector<waStruct>& ana,
 	  }
 	  else {
 	    if ( debugFlag  ){
-	      *Log(mbmaLog) << "replace " << (it-1)->act[0] << " by " 
+	      *Log(mbmaLog) << "replace " << (it-1)->act[0] << " by "
 			    << new_tag[0] << endl;
 	    }
 	    (it-1)->act[0] = new_tag[0];
@@ -495,12 +504,12 @@ void Mbma::resolve_inflections( vector<waStruct>& ana,
 }
 
 MBMAana Mbma::addInflect( const vector<waStruct>& ana,
-			  const string& inflect, 
+			  const string& inflect,
 			  const vector<string>& morph ){
   string the_act;
   vector<waStruct>::const_reverse_iterator it = ana.rbegin();
-  while ( it != ana.rend() ) { 
-    // go back to the last non-inflectional tag 
+  while ( it != ana.rend() ) {
+    // go back to the last non-inflectional tag
     the_act = it->act;
     if (debugFlag){
       *Log(mbmaLog) << "examine act " << the_act << endl;
@@ -511,7 +520,7 @@ MBMAana Mbma::addInflect( const vector<waStruct>& ana,
       }
       break;
     }
-    else { 
+    else {
       ++it;
     }
   }
@@ -519,10 +528,10 @@ MBMAana Mbma::addInflect( const vector<waStruct>& ana,
   string tag;
   if ( pos != string::npos )
     tag = the_act.substr( 0, pos );
-  else 
+  else
     tag = the_act;
   string outTag, descr;
-  map<string,string>::const_iterator tit = tagNames.find( tag ); 
+  map<string,string>::const_iterator tit = tagNames.find( tag );
   if ( tit == tagNames.end() ){
     // unknown tag
     outTag = "X";
@@ -541,7 +550,7 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
   string inflect;
   vector<string> morphemes;
   vector<waStruct>::const_iterator it = ana.begin();
-  while ( it != ana.end() ) { 
+  while ( it != ana.end() ) {
     if ( !it->word.isEmpty() ){
       morphemes.push_back( UnicodeToUTF8(it->word) );
     }
@@ -570,14 +579,14 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
       if ( debugFlag )
 	*Log(mbmaLog) << "found inflection " << inflect << endl;
     }
-    if (debugFlag)	
+    if (debugFlag)
       *Log(mbmaLog) << "morphemes now: |" << morphemes << "|" << endl;
     ++it;
   }
-  if (debugFlag)	
+  if (debugFlag)
     *Log(mbmaLog) << "inflectAndAffix: " << inflect << " - " << morphemes << endl;
   // go back to the last non-inflectional
-  // tag and stick it at the end. 
+  // tag and stick it at the end.
   MBMAana retVal = addInflect( ana, inflect, morphemes );
   if (debugFlag)
     *Log(mbmaLog) << "Inflection: " << retVal << endl;
@@ -587,7 +596,7 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
 #define OLD_STEP
 
 #ifdef OLD_STEP
-string find_class( unsigned int step, 
+string find_class( unsigned int step,
 		   const vector<string>& classes,
 		   unsigned int nranal ){
   string result = classes[0];
@@ -628,14 +637,14 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
   vector<vector<string> > result;
   for ( int step=0; step < largest_anal; ++step ){
     vector<string> item(classParts.size());
-    for ( size_t k=0; k < classParts.size(); ++k ) { 
+    for ( size_t k=0; k < classParts.size(); ++k ) {
       item[k] = find_class( step, classParts[k], largest_anal );
     }
     result.push_back( item );
   }
   return result;
 }
-#else  
+#else
 
 bool next_perm( vector< vector<string>::const_iterator >& its,
 		const vector<vector<string> >& parts ){
@@ -646,14 +655,14 @@ bool next_perm( vector< vector<string>::const_iterator >& its,
 	return false;
       its[i] = parts[i].begin();
     }
-    else 
+    else
       return true;
   }
   return false;
 }
 
 vector<vector<string> > generate_all_perms( const vector<string>& classes ){
-  
+
   // determine all alternative analyses
   // store every part in a vector of string vectors
   vector<vector<string> > classParts;
@@ -691,7 +700,7 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
 }
 #endif
 
-void Mbma::execute( const UnicodeString& word, 
+void Mbma::execute( const UnicodeString& word,
 		    const vector<string>& classes ){
   const string basictags = "NAQVDOBPYIXZ";
   analysis.clear();
@@ -704,10 +713,10 @@ void Mbma::execute( const UnicodeString& word,
     out += ">";
     *Log(mbmaLog) << out << endl;
     *Log(mbmaLog) << "allParts : " << allParts << endl;
-  }    
-  
+  }
+
   // now loop over all the analysis
-  for ( unsigned int step=0; step < allParts.size(); ++step ) { 
+  for ( unsigned int step=0; step < allParts.size(); ++step ) {
     vector<waStruct> ana = Step1( step, word, allParts, basictags );
     if (debugFlag)
       *Log(mbmaLog) << "intermediate analysis 1: " << ana << endl;
@@ -720,7 +729,7 @@ void Mbma::execute( const UnicodeString& word,
   }
 }
 
-void Mbma::addAltMorph( Word *word, 
+void Mbma::addAltMorph( Word *word,
 			const vector<string>& lemmas ) const {
   Alternative *alt = new Alternative();
   MorphologyLayer *ml = new MorphologyLayer();
@@ -732,7 +741,7 @@ void Mbma::addAltMorph( Word *word,
   addMorph( ml, lemmas );
 }
 
-void Mbma::addMorph( Word *word, 
+void Mbma::addMorph( Word *word,
 		     const vector<string>& lemmas ) const {
   MorphologyLayer *ml = new MorphologyLayer();
 #pragma omp critical(foliaupdate)
@@ -742,7 +751,7 @@ void Mbma::addMorph( Word *word,
   addMorph( ml, lemmas );
 }
 
-void Mbma::addMorph( MorphologyLayer *ml, 
+void Mbma::addMorph( MorphologyLayer *ml,
 		     const vector<string>& lemmas ) const {
   int offset = 0;
   for ( size_t p=0; p < lemmas.size(); ++p ){
@@ -761,12 +770,12 @@ void Mbma::addMorph( MorphologyLayer *ml,
       m->append( t );
     }
   }
-}	  
+}
 
 void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   // first we select only the matching heads
   if (debugFlag){
-    *Log(mbmaLog) << "filter with tag, head: " << head 
+    *Log(mbmaLog) << "filter with tag, head: " << head
 		  << " feats: " << feats << endl;
     *Log(mbmaLog) << "filter:start, analysis is:" << endl;
     int i=1;
@@ -786,13 +795,13 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
     string tagI = ait->getTag();
     if ( tagIt->second == tagI || ( tagIt->second == "N" && tagI == "PN" ) ){
       if (debugFlag)
-	*Log(mbmaLog) << "comparing " << tagIt->second << " with " 
+	*Log(mbmaLog) << "comparing " << tagIt->second << " with "
 		      << tagI << " (OK)" << endl;
       ait++;
     }
     else {
       if (debugFlag)
-	*Log(mbmaLog) << "comparing " << tagIt->second << " with " 
+	*Log(mbmaLog) << "comparing " << tagIt->second << " with "
 		      << tagI << " (rejected)" << endl;
       ait = analysis.erase( ait );
     }
@@ -806,7 +815,7 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
 
   if ( analysis.size() < 1 ){
     if (debugFlag ){
-      *Log(mbmaLog) << "analysis has size: " << analysis.size() 
+      *Log(mbmaLog) << "analysis has size: " << analysis.size()
 		    << " so skip next filter" << endl;
     }
     return;
@@ -901,7 +910,7 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
   if ( analysis.size() == 0 ){
     // fallback option: use the word and pretend it's a lemma ;-)
     if ( debugFlag ){
-      *Log(mbmaLog) << "no matches found, use the word instead: " 
+      *Log(mbmaLog) << "no matches found, use the word instead: "
 		    << uword << endl;
     }
     vector<string> tmp;
@@ -919,10 +928,10 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
     }
   }
 }
-  
+
 void Mbma::addDeclaration( Document& doc ) const {
   doc.declare( AnnotationType::MORPHOLOGICAL, tagset,
-	       "annotator='frog-mbma-" +  version + 
+	       "annotator='frog-mbma-" +  version +
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
@@ -951,7 +960,7 @@ void Mbma::Classify( Word* sword ){
     token_class = sword->cls();
   }
   if (debugFlag)
-    *Log(mbmaLog) << "Classify " << uWord << "(" << pos << ") [" 
+    *Log(mbmaLog) << "Classify " << uWord << "(" << pos << ") ["
 		  << token_class << "]" << endl;
   if ( filter )
     uWord = filter->filter( uWord );
@@ -987,22 +996,22 @@ void Mbma::Classify( const UnicodeString& word ){
     string ans;
     MTree->Classify( insts[i], ans );
     if ( debugFlag ){
-      *Log(mbmaLog) << "itt #" << i << " " << insts[i] << " ==> " << ans 
-		    << ", depth=" << MTree->matchDepth() << endl; 
+      *Log(mbmaLog) << "itt #" << i << " " << insts[i] << " ==> " << ans
+		    << ", depth=" << MTree->matchDepth() << endl;
     }
     classes.push_back( ans);
   }
-  
+
   // fix for 1st char class ==0
   if ( classes[0] == "0" )
-    classes[0] = "X";  
+    classes[0] = "X";
   execute( uWord, classes );
 }
 
 vector<vector<string> > Mbma::getResult() const {
   vector<vector<string> > result;
-  for (vector<MBMAana>::const_iterator it=analysis.begin(); 
-       it != analysis.end(); 
+  for (vector<MBMAana>::const_iterator it=analysis.begin();
+       it != analysis.end();
        it++ ){
     vector<string> mors = it->getMorph();
     if ( debugFlag ){
@@ -1017,7 +1026,7 @@ vector<vector<string> > Mbma::getResult() const {
 }
 
 ostream& operator<< ( ostream& os, const MBMAana& a ){
-  os << "tag: " << a.tag << " infl:" << a.infl << " morhemes: " 
+  os << "tag: " << a.tag << " infl:" << a.infl << " morhemes: "
      << a.morphemes << " description: " << a.description;
   return os;
 }
@@ -1025,7 +1034,7 @@ ostream& operator<< ( ostream& os, const MBMAana& a ){
 ostream& operator<< ( ostream& os, const MBMAana *a ){
   if ( a )
     os << *a;
-  else 
+  else
     os << "no-mbma";
   return os;
 }
