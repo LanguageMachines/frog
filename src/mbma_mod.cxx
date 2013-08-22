@@ -341,11 +341,11 @@ vector<waStruct> Mbma::Step1( unsigned int step,
     if ( nopush ){
       if ( debugFlag ){
 	*Log(mbmaLog) << " NOPUSH ";
-	if ( replace  ){
-	  *Log(mbmaLog) << " because of REPLACE  " << endl;
+	if ( !replace  ){
+	  *Log(mbmaLog) << " because of NO REPLACE  " << endl;
 	}
 	else {
-	  *Log(mbmaLog) << " because of 0 class  " << endl;
+	  *Log(mbmaLog) << " because of 0 class " << this_class << endl;
 	}
       }
       // insert the deletestring :-)
@@ -483,19 +483,29 @@ void Mbma::resolve_inflections( vector<waStruct>& ana,
 	if ( debugFlag  ){
 	  *Log(mbmaLog) << act[1] << " selects " << new_tag << endl;
 	}
-	// change the previous act
-	if ( basictags.find((it-1)->act[0]) != string::npos ){
-	  if ( (it-1)->act == "PN" && new_tag == "N" ){
+	// change the previous NON inflectional act
+	vector<waStruct>::iterator pit = it-1;
+	// you might think that inflictional tags all mather
+	// but it seems only the first in a row is honourd
+	// changing this seems to break ...
+	//
+	// while ( pit->act[0] == 'i' ){
+	//   if ( pit == ana.begin() )
+	//     break;
+	//   pit--;
+	// }
+	if ( basictags.find( pit->act[0]) != string::npos ){
+	  if ( pit->act == "PN" && new_tag == "N" ){
 	    if ( debugFlag  ){
 	      *Log(mbmaLog) << "Don't replace PN by N" << endl;
 	    }
 	  }
 	  else {
 	    if ( debugFlag  ){
-	      *Log(mbmaLog) << "replace " << (it-1)->act[0] << " by "
+	      *Log(mbmaLog) << "replace " << pit->act[0] << " by "
 			    << new_tag[0] << endl;
 	    }
-	    (it-1)->act[0] = new_tag[0];
+	    pit->act[0] = new_tag[0];
 	  }
 	}
       }
