@@ -1119,7 +1119,8 @@ void Test( const string& infilename,
       doc.readFromFile( infilename );
     }
     catch ( exception &e ){
-      *Log(theErrLog) << "retrieving FoLiA from '" << infilename << "' failed" << endl;
+      *Log(theErrLog) << "retrieving FoLiA from '" << infilename << "' failed with exception:" << endl;
+      cerr << e.what() << endl;
       if ( !outName.empty() ){
 	delete os;
       }
