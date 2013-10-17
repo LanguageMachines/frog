@@ -22,7 +22,7 @@ automake=automake
 aclocal=aclocal
 
 # if you want to autogenerate a ChangeLog form svn:
-# 
+#
 #  svn2cl, a python script, as used in the GNU Enterprise project.
 #    By jcater (Jason Cater), contributions by reinhard (Reinhard Müller).
 #    Get it from
@@ -46,16 +46,10 @@ aclocal=aclocal
    found=false
    for d in $acdirs
    do
-      if test -f ${d}ac_define_dir.m4
+      if test -f ${d}pkg.m4
       then
          found=true
          break
-      else
-	if test -f ${d}ax_define_dir.m4
-      	then
-	  found=true
-          break
-        fi
       fi
    done
 
@@ -81,7 +75,7 @@ fi
 
 if $aclocal --version|head -1 |grep ' 1\.[4-8]'; then
     echo "aclocal 1.4-1.8 is active. You should use aclocal 1.9 or later"
-    if test -f /etc/debian_version; then	
+    if test -f /etc/debian_version; then
         echo " sudo apt-get install aclocal1.9"
         echo " sudo update-alternatives --config aclocal"
     fi

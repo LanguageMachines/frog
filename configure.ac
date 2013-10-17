@@ -24,10 +24,9 @@ if $cxx_flags_were_set; then
   CXXFLAGS=$CXXFLAGS
 fi
 
-AC_PROG_RANLIB
 # use libtool
 AC_PROG_LIBTOOL
-AC_SUBST([LIBTOOL_DEPS])
+LT_INIT
 
 SYSCONFDIR=$sysconfdir
 AC_SUBST([SYSCONFDIR])
@@ -45,6 +44,7 @@ AC_TYPE_SIZE_T
 
 # Checks for library functions.
 AC_FUNC_FORK
+AC_CHECK_FUNCS([localtime_r])
 
 ACX_PTHREAD([],[AC_MSG_ERROR([We need pthread support!])])
 
