@@ -6,7 +6,7 @@
   Tilburg University
 
   A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
- 
+
   This file is part of frog.
 
   frog is free software; you can redistribute it and/or modify
@@ -34,12 +34,12 @@
 class PyObjectRef {
  private:
   PyObject* ref;
-  
+
  public:
  PyObjectRef() : ref(0) {}
-  
+
  PyObjectRef(PyObject* obj) : ref(obj) {}
-  
+
   void assign(PyObject* obj) {
     // assume ref == 0, otherwhise call Py_DECREF
     if ( ref ){
@@ -47,13 +47,13 @@ class PyObjectRef {
     }
     ref = obj;
   }
-  
+
   operator PyObject* () {
     return ref;
   }
-  
+
   ~PyObjectRef() {
-    Py_XDECREF(ref);
+    //    Py_XDECREF(ref);
   }
 };
 
@@ -61,18 +61,18 @@ class PythonInterface {
  private:
   PyObjectRef module;
   PyObjectRef mainFunction;
-  
+
  public:
   PythonInterface();
   ~PythonInterface();
-  
+
   void parse( const std::string& depFile,
 	      const std::string& modFile,
 	      const std::string& dirFile,
 	      const std::string& maxDist,
 	      const std::string& inputFile,
 	      const std::string& outputFile);
-};  
+};
 
 struct parseData;
 
@@ -82,9 +82,9 @@ class Parser {
   ~Parser();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;
-  void Parse( const std::vector<folia::Word *>&, 
+  void Parse( const std::vector<folia::Word *>&,
 	      const std::string&, const std::string&, TimerBlock& );
-  void prepareParse( const std::vector<folia::Word *>&, 
+  void prepareParse( const std::vector<folia::Word *>&,
 		     const std::string&, parseData& );
   void createParserFile( const parseData& );
  private:
