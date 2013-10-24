@@ -6,7 +6,7 @@
   Tilburg University
 
   A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
- 
+
   This file is part of frog
 
   frog is free software; you can redistribute it and/or modify
@@ -39,9 +39,9 @@ using namespace std;
 using namespace TiCC;
 
 UctoTokenizer::UctoTokenizer() {
-  tokenizer = 0; 
+  tokenizer = 0;
   uctoLog = new LogStream( theErrLog, "tok-" );
-};
+}
 
 bool UctoTokenizer::init( const Configuration& conf, const string & docid, bool pass ){
   if ( tokenizer )
@@ -60,7 +60,7 @@ bool UctoTokenizer::init( const Configuration& conf, const string & docid, bool 
   if ( pass ){
     // when passthru, we don't further initialize the tokenizer
     // it wil run in minimal mode then.
-    tokenizer->setPassThru( true ); 
+    tokenizer->setPassThru( true );
   }
   else {
     string rulesName = conf.lookUp( "rulesFile", "tokenizer" );
@@ -76,7 +76,7 @@ bool UctoTokenizer::init( const Configuration& conf, const string & docid, bool 
   tokenizer->setEosMarker( "" );
   tokenizer->setVerbose( false );
   tokenizer->setSentenceDetection( true ); //detection of sentences
-  tokenizer->setParagraphDetection( false ); //detection of paragraphs  
+  tokenizer->setParagraphDetection( false ); //detection of paragraphs
   tokenizer->setXMLOutput( true, docid );
   return true;
 }
@@ -84,25 +84,25 @@ bool UctoTokenizer::init( const Configuration& conf, const string & docid, bool 
 void UctoTokenizer::setUttMarker( const string& u ) {
   if ( tokenizer ){
     if ( !u.empty() )
-      tokenizer->setEosMarker( u ); 
+      tokenizer->setEosMarker( u );
   }
   else
     throw runtime_error( "ucto tokenizer not initalized" );
-};
+}
 
 void UctoTokenizer::setSentencePerLineInput( bool b ) {
   if ( tokenizer )
-    tokenizer->setSentencePerLineInput( b ); 
+    tokenizer->setSentencePerLineInput( b );
   else
     throw runtime_error( "ucto tokenizer not initalized" );
-};
+}
 
 void UctoTokenizer::setQuoteDetection( bool b ) {
   if ( tokenizer )
-    tokenizer->setQuoteDetection( b ); 
+    tokenizer->setQuoteDetection( b );
   else
     throw runtime_error( "ucto tokenizer not initalized" );
-};
+}
 
 void UctoTokenizer::setInputEncoding( const std::string & enc ){
   if ( tokenizer ){

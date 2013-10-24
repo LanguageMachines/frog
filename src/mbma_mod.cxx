@@ -55,7 +55,7 @@ Mbma::~Mbma() {
   delete transliterator;
   delete filter;
   delete mbmaLog;
-};
+}
 
 void Mbma::fillMaps() {
   //
