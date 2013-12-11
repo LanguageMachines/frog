@@ -290,6 +290,9 @@ string Mbma::calculate_ins_del( const string& in_class,
 
 ostream& operator<< ( ostream& os, const waStruct& a ){
   os << "[" << a.word << "]" << a.act;
+  if ( a.inflect ){
+    os << " (INFLECT)";
+  }
   return os;
 }
 
@@ -358,37 +361,29 @@ vector<waStruct> Mbma::Step1( unsigned int step,
 	tobeignored = insertstring.length();
       //      *Log(mbmaLog) << "TOBEIGNORED = " << tobeignored << endl;
     }
+    if ( this_class[0] !='0' &&
+	 !previoustag.empty() ) {
+      waItem.act = previoustag;
+      if ( debugFlag ){
+	*Log(mbmaLog) << "PUSH " << waItem.word << endl;
+      }
+      ana.push_back( waItem );
+      waItem.clear();
+    }
     if ( basictags.find(this_class[0]) != string::npos ){
+      // encountering POS tag
       if ( debugFlag ){
 	*Log(mbmaLog) << "FOUND a basic tag " << this_class[0] << endl;
       }
-      // encountering POS tag
-      if ( !previoustag.empty() ) {
-	waItem.act = previoustag;
-	if ( debugFlag ){
-	  *Log(mbmaLog) << "PUSH " << waItem.word << endl;
-	}
-	ana.push_back( waItem );
-	waItem.clear();
-      }
       previoustag = this_class;
     }
-    else {
-      if ( this_class[0] !='0' ){
-	if ( debugFlag ){
-	  *Log(mbmaLog) << "handle inflection:" << this_class[0] << endl;
-	}
-	// encountering inflection info
-	if ( !previoustag.empty() ) {
-	  waItem.act = previoustag;
-	  if ( debugFlag ){
-	    *Log(mbmaLog) << "PUSH " << waItem.word << endl;
-	  }
-	  ana.push_back( waItem );
-	  waItem.clear();
-	}
-	previoustag = "i" + this_class;
+    else if ( this_class[0] !='0' ){
+      // encountering inflection info
+      if ( debugFlag ){
+	*Log(mbmaLog) << "handle inflection:" << this_class[0] << endl;
       }
+      waItem.inflect = true;
+      previoustag = this_class;
     }
     if ( !nopush ){
       // insert the deletestring :-)
@@ -420,7 +415,8 @@ vector<waStruct> Mbma::Step1( unsigned int step,
   size_t pos = this_class.find( '/' );
   if ( pos != string::npos && this_class != "E/P" ) {
     // tags like 0/te3 N/e 0/P etc.
-    string inflection = "i" + this_class.substr( pos+1 );
+    string inflection = this_class.substr( pos+1 );
+    waItem.inflect = true;
     waItem.act = inflection;
     ana.push_back( waItem );
   }
@@ -466,14 +462,14 @@ void Mbma::resolve_inflections( vector<waStruct>& ana,
     if ( ana.begin() == it )
       continue; // start at second
     string act = it->act;
-    if ( act[0]=='i') {
+    if ( it->inflect || act[0]=='i') {
       // it is an inflection tag
       if (debugFlag){
 	*Log(mbmaLog) << "act: >" << act << "<" << endl;
       }
       // given the specific selections of certain inflections,
       //    select a tag!
-      string new_tag = select_tag( act[1] );
+      string new_tag = select_tag( act[0] );
 
       // apply the change. Remember, the idea is that an inflection is
       // far more certain of the tag of its predecessing morpheme than
@@ -481,7 +477,7 @@ void Mbma::resolve_inflections( vector<waStruct>& ana,
       // This is not always the case, but it works
       if ( !new_tag.empty() ) {
 	if ( debugFlag  ){
-	  *Log(mbmaLog) << act[1] << " selects " << new_tag << endl;
+	  *Log(mbmaLog) << act[0] << " selects " << new_tag << endl;
 	}
 	// change the previous NON inflectional act
 	vector<waStruct>::iterator pit = it-1;
@@ -524,7 +520,7 @@ MBMAana Mbma::addInflect( const vector<waStruct>& ana,
     if (debugFlag){
       *Log(mbmaLog) << "examine act " << the_act << endl;
     }
-    if ( the_act[0] != 'i' ){
+    if ( !it->inflect ){
       if (debugFlag){
 	*Log(mbmaLog) << "final tag " << the_act << endl;
       }
@@ -569,8 +565,8 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
       *Log(mbmaLog) << "unpacking act "<< this_act << endl;
     if ( inflect.empty() && !this_act.empty() &&
 	 this_act.find("_") == string::npos &&
-	 this_act[0]=='i' ){
-      for ( size_t i=1; i< this_act.length(); ++i ) {
+	 it->inflect ){
+      for ( size_t i=0; i< this_act.length(); ++i ) {
 	if (this_act[i]!='/') {
 	  // check if it is a known inflection
 	  map<char,string>::const_iterator csIt = iNames.find(this_act[i]);
@@ -588,6 +584,7 @@ MBMAana Mbma::inflectAndAffix( const vector<waStruct>& ana ){
       }
       if ( debugFlag )
 	*Log(mbmaLog) << "found inflection " << inflect << endl;
+      // done with this level
     }
     if (debugFlag)
       *Log(mbmaLog) << "morphemes now: |" << morphemes << "|" << endl;
