@@ -325,7 +325,10 @@ vector<waStruct> Mbma::Step1( unsigned int step,
       // sanity check
       for ( int j=0; j < insertstring.length(); ++j ){
 	if ( word[k+j] != insertstring[j] ){
-	  *Log(mbmaLog) << "GROTE PANIEK: " << word[k+j] << " !+ " << insertstring[j] << endl;
+	  *Log(mbmaLog) << "Hmm: deleting " << insertstring << " from "
+			<< word << " is impossible. ("
+			<< word[k+j] << " != " << insertstring[j]
+			<< ") just skipping the deletion." << endl;
 	  insertstring = "";
 	}
       }
