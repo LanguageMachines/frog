@@ -2,7 +2,7 @@
   $Id$
   $URL$
 
-  Copyright (c) 2006 - 2013
+  Copyright (c) 2006 - 2014
   Tilburg University
 
   A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
@@ -1212,7 +1212,7 @@ void TestServer( Sockets::ServerSocket &conn) {
 
 
 int main(int argc, char *argv[]) {
-  cerr << "frog " << VERSION << " (c) ILK 1998 - 2013" << endl;
+  cerr << "frog " << VERSION << " (c) ILK 1998 - 2014" << endl;
   cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
   ProgName = argv[0];
   cerr << "based on [" << Tokenizer::VersionName() << ", "

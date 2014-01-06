@@ -2,11 +2,11 @@
   $Id:$
   $URL:$
 
-  Copyright (c) 2006 - 2013
+  Copyright (c) 2006 - 2014
   Tilburg University
 
   A Morphological-Analyzer for Dutch
- 
+
   This file is part of frog
 
   frog is free software; you can redistribute it and/or modify
@@ -130,7 +130,7 @@ bool parse_args( TimblOpts& Opts ) {
   return true;
 }
 
-bool init(){  
+bool init(){
   // for some modules init can take a long time
   // so first make sure it will not fail on some trivialities
   //
@@ -163,10 +163,10 @@ void Test( istream& in ){
       for ( size_t w=0; w < tagv.size(); ++w ){
 	UnicodeString uWord = folia::UTF8ToUnicode(tagv[w].word());
 	vector<string> v;
-	size_t num = TiCC::split_at_first_of( tagv[w].assignedTag(), 
+	size_t num = TiCC::split_at_first_of( tagv[w].assignedTag(),
 					      v, "(,)" );
 	if ( num < 1 ){
-	  throw runtime_error( "error: tag not in right format " );    
+	  throw runtime_error( "error: tag not in right format " );
 	}
 	string head = v[0];
 	if ( head != "SPEC" )
@@ -200,7 +200,7 @@ void Test( istream& in ){
 
 int main(int argc, char *argv[]) {
   std::ios_base::sync_with_stdio(false);
-  cerr << "mbma " << VERSION << " (c) ILK 1998 - 2013" << endl;
+  cerr << "mbma " << VERSION << " (c) ILK 1998 - 2014" << endl;
   cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
   ProgName = argv[0];
   cerr << "based on [" << Timbl::VersionName() << "]" << endl;

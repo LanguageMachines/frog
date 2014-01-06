@@ -2,11 +2,11 @@
   $Id:$
   $URL:$
 
-  Copyright (c) 2006 - 2013
+  Copyright (c) 2006 - 2014
   Tilburg University
 
   A Morphological-Analyzer for Dutch
- 
+
   This file is part of frog
 
   frog is free software; you can redistribute it and/or modify
@@ -142,7 +142,7 @@ bool parse_args( TimblOpts& Opts ) {
   return true;
 }
 
-bool init(){  
+bool init(){
   // for some modules init can take a long time
   // so first make sure it will not fail on some trivialities
   //
@@ -192,7 +192,7 @@ void Test( istream& in ){
 
 int main(int argc, char *argv[]) {
   std::ios_base::sync_with_stdio(false);
-  cerr << "mblem " << VERSION << " (c) ILK 1998 - 2013" << endl;
+  cerr << "mblem " << VERSION << " (c) ILK 1998 - 2014" << endl;
   cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
   ProgName = argv[0];
   cerr << "based on [" << Timbl::VersionName() << "]" << endl;

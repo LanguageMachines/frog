@@ -2,7 +2,7 @@
   $Id$
   $URL$
 
-  Copyright (c) 2006 - 2013
+  Copyright (c) 2006 - 2014
   Tilburg University
 
   This file is part of frog.
@@ -55,6 +55,137 @@ Mbma::~Mbma() {
   delete transliterator;
   delete filter;
   delete mbmaLog;
+}
+
+namespace CLEX {
+  enum Type { UNASS, N, A, Q, V, D, O, B, P, Y, I, X, Z, PN, AFFIX, XAFFIX,
+	      NEUTRAL };
+
+  Type toCLEX( const string& s ){
+    if ( s == "N" )
+      return N;
+    else if ( s == "A" )
+      return A;
+    else if ( s == "Q" )
+      return V;
+    else if ( s == "V" )
+      return V;
+    else if ( s == "D" )
+      return D;
+    else if ( s == "O" )
+      return O;
+    else if ( s == "B" )
+      return B;
+    else if ( s == "P" )
+      return P;
+    else if ( s == "Y" )
+      return Y;
+    else if ( s == "I" )
+      return I;
+    else if ( s == "X" )
+      return X;
+    else if ( s == "Z" )
+      return Z;
+    else if ( s == "PN" )
+      return PN;
+    else if ( s == "*" )
+      return AFFIX;
+    else if ( s == "x" )
+      return XAFFIX;
+    else if ( s == "0" )
+      return NEUTRAL;
+    else
+      return UNASS;
+  }
+
+  Type toCLEX( const char c ){
+    string s;
+    s += c;
+    return toCLEX(s);
+  }
+
+  string toLongString( const Type& t ){
+    switch ( t ){
+    case N:
+      return "noun";
+    case A:
+      return "adjective";
+    case Q:
+      return "quantifier/numeral";
+    case V:
+      return "verb";
+    case D:
+      return "article";
+    case O:
+      return "pronoun";
+    case B:
+      return "adverb";
+    case P:
+      return "preposition";
+    case Y:
+      return "conjunction";
+    case I:
+      return "interjection";
+    case X:
+      return "unanalysed";
+    case Z:
+      return "expression part";
+    case PN:
+      return "proper noun";
+    case AFFIX:
+      return "affix";
+    case XAFFIX:
+      return "x affix";
+    case NEUTRAL:
+      return "0";
+    default:
+      return "UNASS";
+    }
+  }
+
+  string toString( const Type& t ){
+    switch ( t ){
+    case N:
+      return "N";
+    case A:
+      return "A";
+    case Q:
+      return "Q";
+    case V:
+      return "V";
+    case D:
+      return "D";
+    case O:
+      return "O";
+    case B:
+      return "B";
+    case P:
+      return "P";
+    case Y:
+      return "Y";
+    case I:
+      return "I";
+    case X:
+      return "X";
+    case Z:
+      return "Z";
+    case PN:
+      return "PN";
+    case AFFIX:
+      return "*";
+    case XAFFIX:
+      return "x";
+    case NEUTRAL:
+      return "0";
+    default:
+      return "UNASS";
+    }
+  }
+}
+
+ostream& operator<<( ostream& os, const CLEX::Type t ){
+  os << toString( t );
+  return os;
 }
 
 void Mbma::fillMaps() {
@@ -302,6 +433,148 @@ ostream& operator<< ( ostream& os, const vector<waStruct>& V ){
   return os;
 }
 
+void get_ins_del( const string& in_class,
+		  UnicodeString& deletestring,
+		  UnicodeString& insertstring ){
+  if (in_class[0]=='D') { // delete operation
+    string s = extract( in_class, 1, '/' );
+    deletestring = UTF8ToUnicode( s );
+  }
+  else if ( in_class[0]=='I') {  //insert operation
+    string s = extract( in_class, 1, '/' );
+    insertstring = UTF8ToUnicode( s );
+  }
+  else if ( in_class[0]=='R') { // replace operation
+    string s = extract( in_class, 1, '>' );
+    deletestring = UTF8ToUnicode( s );
+    string::size_type pos = s.length()+1;
+    s = extract( in_class, pos+1, '/' );
+    insertstring = UTF8ToUnicode( s );
+  }
+  cerr << "Insert = " << insertstring << ", delete=" << deletestring << endl;
+}
+
+
+class rule {
+public:
+  rule( const string& );
+  CLEX::Type ResultClass;
+  vector<CLEX::Type> RightHand;
+  UnicodeString ins;
+  UnicodeString del;
+  string inflect;
+  int fixpos;
+  int xfixpos;
+};
+
+ostream& operator<<( ostream& os, const rule& r ){
+  if ( r.ResultClass == CLEX::UNASS ){
+    if ( !r.inflect.empty() ){
+      os << " INFLECTION: " << r.inflect;
+    }
+    else {
+      os << "INVALID! No result node, AND no inflection" << endl;
+    }
+  }
+  else {
+    for ( size_t i = 0; i < r.RightHand.size(); ++i ){
+      os << r.RightHand[i];
+      if ( i < r.RightHand.size()-1 ){
+	os << "+";
+      }
+    }
+    if ( !r.RightHand.empty() ){
+      os << " ==> ";
+    }
+    os << r.ResultClass << " ";
+    if ( !r.inflect.empty() ){
+      os << " INFLECTION: " << r.inflect;
+    }
+  }
+  if ( r.fixpos >= 0 )
+    os << "affix at pos: " << r.fixpos;
+  if ( r.xfixpos >= 0 )
+    os << "x-affix at pos: " << r.xfixpos;
+  if ( !r.ins.isEmpty() )
+    os << " insert='" << r.ins << "'";
+  if ( !r.del.isEmpty() )
+    os << " delete='" << r.del << "'";
+  return os;
+}
+
+rule::rule( const string& s ):ResultClass(CLEX::UNASS),fixpos(-1),xfixpos(-1) {
+  cerr << "extract rule:" << s << endl;
+  string::size_type pos = s.find("_");
+  if ( pos != string::npos ){
+    cerr << "Found a rewrite rule! " << pos << endl;
+    ResultClass = CLEX::toCLEX( s[0] );
+    // a rewrite rule
+    if ( pos != 1 ){
+      cerr << "Surprise! _ on a strange position:" << pos << " in " << s << endl;
+    }
+    else {
+      string rhs;
+      string edit;
+      string::size_type ppos = s.find("+");
+      if ( ppos != string::npos ){
+	edit = s.substr( ppos+1 );
+	rhs = s.substr( pos+1, ppos - pos -1 );
+      }
+      else {
+	rhs = s.substr( pos+1 );
+      }
+      cerr << "RHS = " << rhs << endl;
+      cerr << "EDIT = " << edit << endl;
+      RightHand.resize( rhs.size() );
+      for ( size_t i = 0; i < rhs.size(); ++i ){
+	CLEX::Type tag = CLEX::toCLEX( rhs[i] );
+	if ( tag == CLEX::UNASS ){
+	  cerr << "Unhandles class in rhs=" << rhs << endl;
+	  continue;
+	}
+	else {
+	  cerr << "found tag '" << tag << "' in " << rhs << endl;
+	  RightHand[i] = tag;
+	  if ( tag == CLEX::AFFIX ){
+	    fixpos = i;
+	  }
+	  if ( tag == CLEX::XAFFIX ){
+	    xfixpos = i;
+	  }
+	}
+      }
+      get_ins_del( edit, ins, del );
+    }
+  }
+  else {
+    cerr << "normal rule ? " << s << endl;
+    CLEX::Type tag = CLEX::toCLEX( s[0] );
+    string::size_type pos = s.find("/");
+    if ( pos != string::npos ){
+      cerr << "Found a slash / tag =" << tag << endl;
+      // some inflextion
+      if ( tag != CLEX::UNASS ){
+	// cases like 0/e 0/te2I
+	ResultClass = tag;
+	inflect = s.substr(pos+1);
+	cerr << "SET inflect =" << inflect << endl;
+      }
+      else {
+	// cases like E/P
+	inflect = s;
+      }
+    }
+    else if ( tag != CLEX::UNASS ){
+      // dull case
+      ResultClass = tag;
+    }
+    else {
+      // m
+      inflect = s;
+    }
+  }
+}
+
 vector<waStruct> Mbma::Step1( unsigned int step,
 			      const UnicodeString& word,
 			      const vector<vector<string> >& classParts,
@@ -313,6 +586,8 @@ vector<waStruct> Mbma::Step1( unsigned int step,
   waStruct waItem;
   for ( long k=0; k < word.length(); ++k ) {
     this_class = classParts[step][k];
+    rule cur( this_class );
+    *Log(mbmaLog) << this_class << " gave rule:" << cur << endl;
     if ( debugFlag){
       *Log(mbmaLog) << "Step::" << step << " letter:"
 		    << (char)word[k] << " " << this_class << endl;
