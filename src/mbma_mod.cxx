@@ -399,38 +399,21 @@ ostream& operator<< ( ostream& os, const vector<waStruct>& V ){
   return os;
 }
 
-void get_ins_del( const string& in_class,
-		  UnicodeString& deletestring,
-		  UnicodeString& insertstring ){
-  if (in_class[0]=='D') { // delete operation
-    string s = in_class.substr(1);
-    deletestring = UTF8ToUnicode( s );
-  }
-  else if ( in_class[0]=='I') {  //insert operation
-    string s = in_class.substr(1);
-    insertstring = UTF8ToUnicode( s );
-  }
-  else if ( in_class[0]=='R') { // replace operation
-    string::size_type pos = in_class.find( ">" );
-    string s = in_class.substr( 1, pos-1 );
-    deletestring = UTF8ToUnicode( s );
-    s = in_class.substr( pos+1 );
-    insertstring = UTF8ToUnicode( s );
-  }
-}
-
 class RulePart {
 public:
   RulePart( const string& );
   bool isBasic(){ return isBasicClass( ResultClass ); };
+  void get_ins_del( const string& );
   CLEX::Type ResultClass;
   vector<CLEX::Type> RightHand;
   UnicodeString ins;
   UnicodeString del;
+  UnicodeString word;
   string inflect;
   int fixpos;
   int xfixpos;
   bool participle;
+  bool e_except;
 };
 
 ostream& operator<<( ostream& os, const RulePart& r ){
@@ -465,10 +448,38 @@ ostream& operator<<( ostream& os, const RulePart& r ){
     os << " insert='" << r.ins << "'";
   if ( !r.del.isEmpty() )
     os << " delete='" << r.del << "'";
+  if ( !r.word.isEmpty() )
+    os << " WORD ='" << r.word << "'";
   return os;
 }
 
-RulePart::RulePart( const string& rs ):ResultClass(CLEX::UNASS),fixpos(-1),xfixpos(-1),participle(false) {
+void RulePart::get_ins_del( const string& edit ){
+  if (edit[0]=='D') { // delete operation
+    string s = edit.substr(1);
+    ins = UTF8ToUnicode( s );
+  }
+  else if ( edit[0]=='I') {  //insert operation
+    string s = edit.substr(1);
+    del = UTF8ToUnicode( s );
+  }
+  else if ( edit[0]=='R') { // replace operation
+    string::size_type pos = edit.find( ">" );
+    string s = edit.substr( 1, pos-1 );
+    ins = UTF8ToUnicode( s );
+    s = edit.substr( pos+1 );
+    del = UTF8ToUnicode( s );
+  }
+  /* exceptions */
+  if ( ins == "eeer" ){
+    ins = "eer";
+  }
+  else if ( ins == "ere" ){
+    ins = "er";
+    e_except = true;
+  }
+}
+
+RulePart::RulePart( const string& rs ):ResultClass(CLEX::UNASS),fixpos(-1),xfixpos(-1),participle(false),e_except(false) {
   //  cerr << "extract RulePart:" << rs << endl;
   string edit;
   string s = rs;
@@ -486,9 +497,10 @@ RulePart::RulePart( const string& rs ):ResultClass(CLEX::UNASS),fixpos(-1),xfixp
       edit = rs.substr( ppos+1 );
     }
     //    cerr << "EDIT = " << edit << endl;
-    get_ins_del( edit, ins, del );
+    get_ins_del( edit );
     s = rs.substr(0, ppos );
-    participle = ( s.find( 'p' ) != string::npos );
+    participle = ( s.find( 'p' ) != string::npos ) &&
+      ( del == "ge" || del == "be" );
   }
   string::size_type pos = s.find("_");
   if ( pos != string::npos ){
@@ -571,24 +583,21 @@ ostream& operator<<( ostream& os, const Rule& r ){
   return os;
 }
 
-vector<waStruct> Mbma::Step1( unsigned int step,
-			      const UnicodeString& word,
-			      const vector<vector<string> >& classParts ){
+vector<waStruct> Mbma::Step1( const UnicodeString& word,
+			      const vector<string>& classPart ){
   vector<waStruct> ana;
   size_t tobeignored=0;
   string previoustag;
   waStruct waItem;
-  Rule rule( classParts[step] );
+  Rule rule( classPart );
   //  cerr << "FOUND rule " << rule << endl;
   for ( long k=0; k < word.length(); ++k ) {
     RulePart cur = rule.rules[k];
     if ( debugFlag){
-      *Log(mbmaLog) << "Step::" << step << " letter:"
-		    << (char)word[k] << " act " << cur << endl;
+      *Log(mbmaLog) << "Step1:: letter:" << (char)word[k]
+		    << " act " << cur << endl;
     }
-    UnicodeString deletestring;
-    UnicodeString insertstring;
-    if ( cur.del.length() > 0 ){
+    if ( !cur.del.isEmpty() ){
       // sanity check
       for ( int j=0; j < cur.del.length(); ++j ){
 	if ( word[k+j] != cur.del[j] ){
@@ -600,16 +609,8 @@ vector<waStruct> Mbma::Step1( unsigned int step,
 	}
       }
     }
-    if ( cur.ins == "eeer" )
-      cur.ins = "eer";
-    /* exceptions */
-    bool eexcept = false;
-    if ( cur.ins == "ere" ){
-      cur.ins = "er";
-      eexcept = true;
-    }
 
-    bool replace =  cur.del.length() > 0 && cur.ins.length() > 0;
+    bool replace =  !cur.del.isEmpty() && !cur.ins.isEmpty();
     bool nopush = cur.ResultClass == CLEX::NEUTRAL || !replace;
     if ( nopush ){
       if ( debugFlag ){
@@ -624,10 +625,7 @@ vector<waStruct> Mbma::Step1( unsigned int step,
       // insert the deletestring :-)
       waItem.word += cur.ins;
       // delete the insertstring :-)
-      if ( tobeignored == 0 &&
-	   ( !cur.participle ||
-	     ( cur.del != "ge" &&
-	       cur.del != "be" ) ) )
+      if ( tobeignored == 0 && !cur.participle )
 	tobeignored = cur.del.length();
       //      *Log(mbmaLog) << "TOBEIGNORED = " << tobeignored << endl;
     }
@@ -659,17 +657,13 @@ vector<waStruct> Mbma::Step1( unsigned int step,
       // insert the deletestring :-)
       waItem.word += cur.ins;
       // delete the insertstring :-)
-      if ( tobeignored == 0 &&
-	   ( !cur.participle ||
-	     ( cur.del != "ge" &&
-	       cur.del != "be" ) ) )
+      if ( tobeignored == 0 && !cur.participle )
 	tobeignored = cur.del.length();
       //      *Log(mbmaLog) << "TOBEIGNORED = " << tobeignored << endl;
     }
     /* copy the next character */
-    if ( eexcept ) {
+    if ( cur.e_except ) {
       waItem.word += "e";
-      eexcept = false;
     }
     if ( tobeignored == 0 ) {
       waItem.word += word[k];
@@ -995,7 +989,7 @@ void Mbma::execute( const UnicodeString& word,
 
   // now loop over all the analysis
   for ( unsigned int step=0; step < allParts.size(); ++step ) {
-    vector<waStruct> ana = Step1( step, word, allParts );
+    vector<waStruct> ana = Step1( word, allParts[step] );
     if (debugFlag)
       *Log(mbmaLog) << "intermediate analysis 1: " << ana << endl;
     resolve_inflections( ana, basictags );
