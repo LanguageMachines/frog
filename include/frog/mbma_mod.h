@@ -33,6 +33,34 @@
 
 class MBMAana;
 
+namespace CLEX {
+  enum Type { UNASS, N, A, Q, V, D, O, B, P, Y, I, X, Z, PN, AFFIX, XAFFIX,
+	      NEUTRAL };
+}
+
+class RulePart {
+public:
+  RulePart( const std::string&, const UChar );
+  bool isBasic() const;
+  void get_ins_del( const std::string& );
+  CLEX::Type ResultClass;
+  std::vector<CLEX::Type> RightHand;
+  UnicodeString ins;
+  UnicodeString del;
+  UnicodeString word;
+  std::string inflect;
+  int fixpos;
+  int xfixpos;
+  bool participle;
+  bool e_except;
+};
+
+class Rule {
+public:
+  Rule( const std::vector<std::string>&, const UnicodeString& );
+  std::vector<RulePart> rules;
+};
+
 class waStruct {
  public:
  waStruct():inflect(false){};
@@ -68,10 +96,12 @@ class Mbma {
   std::vector<waStruct> Step1( const UnicodeString&,
 			       const std::vector<std::string>& );
   void resolve_inflections( std::vector<waStruct>& , const std::string& );
+  void resolve_inflections( Rule& );
   MBMAana addInflect( const std::vector<waStruct>& ana,
 		      const std::string&,
 		      const std::vector<std::string>&  );
   MBMAana inflectAndAffix( const std::vector<waStruct>& ana );
+  void inflectAndAffix( Rule& );
   void execute( const UnicodeString& word,
 		const std::vector<std::string>& classes );
   int debugFlag;
