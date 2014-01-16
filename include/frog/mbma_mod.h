@@ -65,14 +65,9 @@ class Mbma {
   UnicodeString filterDiacritics( const UnicodeString& ) const;
   void getFoLiAResult( folia::Word *, const UnicodeString& ) const;
   std::vector<std::string> make_instances( const UnicodeString& word );
-  std::string calculate_ins_del( const std::string& in_class,
-				 UnicodeString& deletestring,
-				 UnicodeString& insertstring,
-				 bool& );
   std::vector<waStruct> Step1( unsigned int step,
 			       const UnicodeString& word,
-			       const std::vector<std::vector<std::string> >& classParts,
-			       const std::string& basictags );
+			       const std::vector<std::vector<std::string> >& classParts );
   void resolve_inflections( std::vector<waStruct>& , const std::string& );
   MBMAana addInflect( const std::vector<waStruct>& ana,
 		      const std::string&,
