@@ -408,6 +408,7 @@ ostream& operator<<( ostream& os, const RulePart& r ){
     os << "INVALID! No result node, AND no inflection" << endl;
   }
   else {
+    os << r.uchar << " - ";
     for ( size_t i = 0; i < r.RightHand.size(); ++i ){
       os << r.RightHand[i];
       if ( i < r.RightHand.size()-1 ){
@@ -418,15 +419,14 @@ ostream& operator<<( ostream& os, const RulePart& r ){
       os << " ==> ";
     }
     os << r.ResultClass << " ";
-    os << r.uchar << " ";
     if ( !r.inflect.empty() ){
       os << " INFLECTION: " << r.inflect;
     }
   }
   if ( r.fixpos >= 0 )
-    os << "affix at pos: " << r.fixpos;
+    os << " affix at pos: " << r.fixpos;
   if ( r.xfixpos >= 0 )
-    os << "x-affix at pos: " << r.xfixpos;
+    os << " x-affix at pos: " << r.xfixpos;
   if ( !r.ins.isEmpty() )
     os << " insert='" << r.ins << "'";
   if ( !r.del.isEmpty() )
@@ -455,11 +455,6 @@ void RulePart::get_ins_del( const string& edit ){
     ins = UTF8ToUnicode( s );
     s = edit.substr( pos+1 );
     del = UTF8ToUnicode( s );
-    replace = true;
-  }
-
-  if ( ins == "ere" ){
-    e_except = true;
   }
 }
 
@@ -468,9 +463,7 @@ RulePart::RulePart( const string& rs, const UChar kar ):
   uchar(kar),
   fixpos(-1),
   xfixpos(-1),
-  participle(false),
-  e_except(false),
-  replace(false)
+  participle(false)
 {
   //  cerr << "extract RulePart:" << rs << endl;
   string edit;
@@ -503,6 +496,14 @@ RulePart::RulePart( const string& rs, const UChar kar ):
     }
     else {
       string rhs = s.substr( pos+1 );
+      //      cerr << "RHS = " << rhs << endl;
+      string::size_type spos = rhs.find("/");
+      if ( spos != string::npos ){
+	// inflection too
+	inflect = rhs.substr( spos+1 );
+	// cerr << "inflect = " << inflect << endl;
+	rhs = rhs.substr( 0, spos );
+      }
       //      cerr << "RHS = " << rhs << endl;
       RightHand.resize( rhs.size() );
       for ( size_t i = 0; i < rhs.size(); ++i ){
@@ -646,14 +647,15 @@ void Mbma::resolve_inflections( Rule& rule ){
 
 vector<waStruct> Mbma::Step1( const UnicodeString& word,
 			      const vector<string>& classPart ){
-  vector<waStruct> ana;
-  size_t tobeignored=0;
-  string previoustag;
-  waStruct waItem;
   Rule rule( classPart, word );
-  //  cerr << "FOUND rule " << rule << endl;
+  if ( debugFlag){
+    *Log(mbmaLog) << "FOUND rule " << rule << endl;
+  }
+  RulePart *last = 0;
   for ( long k=0; k < word.length(); ++k ) {
     RulePart *cur = &rule.rules[k];
+    if ( last == 0 )
+      last = cur;
     if ( debugFlag){
       *Log(mbmaLog) << "Step1:: letter:" << (char)word[k]
 		    << " act " << cur << endl;
@@ -675,133 +677,19 @@ vector<waStruct> Mbma::Step1( const UnicodeString& word,
 	rule.rules[k+j].uchar = "";
       }
     }
-    cur->morpheme += cur->ins;
 
-    bool replace =  !cur->del.isEmpty() && !cur->ins.isEmpty();
-    bool nopush = cur->ResultClass == CLEX::NEUTRAL || !replace;
-    if ( nopush ){
-      if ( debugFlag ){
-	*Log(mbmaLog) << " NOPUSH ";
-	if ( !replace  ){
-	  *Log(mbmaLog) << " because of NO REPLACE  " << endl;
-	}
-	else {
-	  *Log(mbmaLog) << " because of 0 class " << endl;
-	}
-      }
-      // insert the deletestring :-)
-      waItem.word += cur->ins;
-      // delete the insertstring :-)
-      if ( tobeignored == 0 && !cur->participle ){
-	tobeignored = cur->del.length();
-      }
-      //      *Log(mbmaLog) << "TOBEIGNORED = " << tobeignored << endl;
-    }
-    if ( cur->ResultClass != CLEX::NEUTRAL &&
-	 !previoustag.empty() ) {
-      waItem.act = previoustag;
-      if ( debugFlag ){
-	*Log(mbmaLog) << "PUSH " << waItem.word << endl;
-      }
-      ana.push_back( waItem );
-      waItem.clear();
-    }
+    bool inserted = false;
+    bool e_except = false;
     if ( cur->isBasic() ){
       // encountering real POS tag
       if ( debugFlag ){
 	*Log(mbmaLog) << "FOUND a basic tag " << cur->ResultClass << endl;
       }
-      previoustag = toString(cur->ResultClass);
-    }
-    else if ( cur->ResultClass != CLEX::NEUTRAL && !cur->inflect.empty() ){
-      // encountering inflection info
-      if ( debugFlag ){
-	*Log(mbmaLog) << "handle inflection:" << cur->inflect << endl;
-      }
-      waItem.inflect = true;
-      previoustag = cur->inflect;
-    }
-    if ( !nopush ){
-      // insert the deletestring :-)
-      waItem.word += cur->ins;
-      // delete the insertstring :-)
-      if ( tobeignored == 0 && !cur->participle )
-	tobeignored = cur->del.length();
-      //      *Log(mbmaLog) << "TOBEIGNORED = " << tobeignored << endl;
-    }
-    /* copy the next character */
-    if ( cur->e_except ) {
-      waItem.word += "e";
-      cur->morpheme += cur->ins;
-    }
-    if ( tobeignored == 0 ) {
-      waItem.word += word[k];
-    }
-    else if (tobeignored > 0 )
-      tobeignored--;
-  }
-  // cerr << "edited rule " << rule << endl;
-  // resolve_inflections( rule );
-  // inflectAndAffix( rule );
-  // cerr << "modified rule " << rule << endl;
-  waItem.act = previoustag;
-  ana.push_back( waItem );
-  waItem.clear();
-
-  // do we have inflection?
-  string infl = rule.rules[rule.rules.size()-1].inflect;
-  if ( infl.empty() || infl == "E/P" ){
-    return ana;
-  }
-  else {
-    waItem.inflect = true;
-    waItem.act = infl;
-    ana.push_back( waItem );
-  }
-  return ana;
-}
-
-vector<waStruct> Mbma::Step2( const UnicodeString& word,
-			      const vector<string>& classPart ){
-  Rule rule( classPart, word );
-  //  cerr << "FOUND rule " << rule << endl;
-  RulePart *last = 0;
-  for ( long k=0; k < word.length(); ++k ) {
-    RulePart *cur = &rule.rules[k];
-    if ( last == 0 )
-      last = cur;
-    if ( debugFlag){
-      *Log(mbmaLog) << "Step2:: letter:" << (char)word[k]
-		    << " act " << cur << endl;
-    }
-    if ( !cur->del.isEmpty() ){
-      // sanity check
-      for ( int j=0; j < cur->del.length(); ++j ){
-	if ( rule.rules[k+j].uchar != cur->del[j] ){
-	  *Log(mbmaLog) << "Hmm: deleting " << cur->del << " from "
-			<< word << " is impossible. ("
-			<< rule.rules[k+j].uchar << " != " << cur->del[j]
-			<< ") just skipping the deletion." << endl;
-	  cur->del = "";
-	}
-      }
-    }
-    if ( !cur->participle ){
-      for ( int j=0; j < cur->del.length(); ++j ){
-	rule.rules[k+j].uchar = "";
-      }
-    }
-
-    bool inserted  = false;
-    if ( cur->isBasic() ){
-      // encountering real POS tag
-      if ( debugFlag ){
-	*Log(mbmaLog) << "FOUND a basic tag " << cur->ResultClass << endl;
-      }
-      if ( !cur->replace || cur->ins == "eer" ){
+      if ( cur->del.isEmpty() || cur->ins == "eer" ){
 	if ( cur->ins == "ere" ){
 	  // strange exception
 	  last->morpheme += "er";
+	  e_except = true;
 	}
 	else {
 	  last->morpheme += cur->ins;
@@ -821,13 +709,15 @@ vector<waStruct> Mbma::Step2( const UnicodeString& word,
       // insert the deletestring :-)
       last->morpheme += cur->ins;
     }
-    /* copy the next character */
-    if ( cur->e_except ) {
+    if ( e_except ) {
+      // fix exception
       last->morpheme += "e";
     }
     last->morpheme += cur->uchar;
   }
-  //  cerr << "edited rule " << rule << endl;
+  if ( debugFlag ){
+    *Log(mbmaLog) << "edited rule " << rule << endl;
+  }
   // resolve_inflections( rule );
   // inflectAndAffix( rule );
   // cerr << "modified rule " << rule << endl;
@@ -1175,12 +1065,9 @@ void Mbma::execute( const UnicodeString& word,
 
   // now loop over all the analysis
   for ( unsigned int step=0; step < allParts.size(); ++step ) {
-    vector<waStruct> ana = Step2( word, allParts[step] );
-    //    if (debugFlag)
-    //    *Log(mbmaLog) << "intermediate analysis 1: " << ana << endl;
-    //    vector<waStruct> ana2 = Step1( word, allParts[step] );
-    //    if (debugFlag)
-    //    *Log(mbmaLog) << "intermediate analysis 2: " << ana2 << endl;
+    vector<waStruct> ana = Step1( word, allParts[step] );
+    if (debugFlag)
+      *Log(mbmaLog) << "intermediate analysis 1: " << ana << endl;
     resolve_inflections( ana, basictags );
     /* finally, unpack the tag and inflection names to make everything readable */
     if (debugFlag)
