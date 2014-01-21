@@ -55,12 +55,6 @@ public:
   bool participle;
 };
 
-class Rule {
-public:
-  Rule( const std::vector<std::string>&, const UnicodeString& );
-  std::vector<RulePart> rules;
-};
-
 class waStruct {
  public:
  waStruct():inflect(false){};
@@ -73,6 +67,14 @@ class waStruct {
   std::string act;
   bool inflect;
 };
+
+class Rule {
+public:
+  Rule( const std::vector<std::string>&, const UnicodeString& );
+  std::vector<waStruct> toWA() const;
+  std::vector<RulePart> rules;
+};
+
 
 class Mbma {
  public:

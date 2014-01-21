@@ -570,6 +570,28 @@ ostream& operator<<( ostream& os, const Rule& r ){
   return os;
 }
 
+vector<waStruct> Rule::toWA() const {
+  vector<waStruct> ana;
+  for ( size_t k=0; k < rules.size(); ++k ) {
+    waStruct item;
+    if ( !rules[k].inflect.empty() ){
+      item.inflect = true;
+      item.act = rules[k].inflect;
+      item.word = rules[k].morpheme;
+    }
+    else if ( rules[k].ResultClass == CLEX::NEUTRAL
+	      && rules[k].morpheme.isEmpty() ){
+      continue;
+    }
+    else {
+      item.act = toString( rules[k].ResultClass );
+      item.word = rules[k].morpheme;
+      }
+    ana.push_back( item );
+  }
+  return ana;
+}
+
 string select_tag( const char ch ){
   string newtag;
   switch( ch ){
@@ -608,7 +630,7 @@ void Mbma::resolve_inflections( Rule& rule ){
     if ( !inf.empty() ){
       // it is an inflection tag
       if (debugFlag){
-	*Log(mbmaLog) << "inflection: >" << inf << "<" << endl;
+	*Log(mbmaLog) << "x inflection: >" << inf << "<" << endl;
       }
       // given the specific selections of certain inflections,
       //    select a tag!
@@ -620,24 +642,27 @@ void Mbma::resolve_inflections( Rule& rule ){
       // This is not always the case, but it works
       if ( !new_tag.empty() ) {
 	if ( debugFlag  ){
-	  *Log(mbmaLog) << inf[0] << " selects " << new_tag << endl;
+	  *Log(mbmaLog) << inf[0] << " x selects " << new_tag << endl;
 	}
-	for ( size_t k=i-1; k+1 > 0; --k ){
+	for ( size_t k = i-1; k +1 > 0; --k ){
+	  //	  *Log(mbmaLog) << "een terug is " << rule.rules[k].ResultClass << endl;
+	  if ( rule.rules[k].morpheme.isEmpty() )
+	    continue;
 	  if ( rule.rules[k].isBasic() ){
 	    if ( rule.rules[k].ResultClass == CLEX::PN &&
 		 new_tag == "N" ){
 	      if ( debugFlag  ){
-		*Log(mbmaLog) << "Don't replace PN by N" << endl;
+		*Log(mbmaLog) << "x Don't replace PN by N" << endl;
 	      }
 	    }
 	    else {
 	      if ( debugFlag  ){
-		*Log(mbmaLog) << "replace " << rule.rules[k].ResultClass
+		*Log(mbmaLog) << " x replace " << rule.rules[k].ResultClass
 			      << " by " << new_tag << endl;
 	      }
 	      rule.rules[k].ResultClass = CLEX::toCLEX( new_tag );
 	    }
-	    break;
+	    return;
 	  }
 	}
       }
@@ -682,6 +707,8 @@ vector<waStruct> Mbma::Step1( const UnicodeString& word,
     bool e_except = false;
     if ( cur->isBasic() ){
       // encountering real POS tag
+      // start a new morpheme, BUT: inserts are appended to the previous on
+      // except for Replace edits, exception on that again: "eer" inserts
       if ( debugFlag ){
 	*Log(mbmaLog) << "FOUND a basic tag " << cur->ResultClass << endl;
       }
@@ -699,10 +726,7 @@ vector<waStruct> Mbma::Step1( const UnicodeString& word,
       last = cur;
     }
     else if ( cur->ResultClass != CLEX::NEUTRAL && !cur->inflect.empty() ){
-      // encountering inflection info
-      if ( debugFlag ){
-	*Log(mbmaLog) << "handle inflection:" << cur->inflect << endl;
-      }
+      // non 0 inflection starts a new morheme
       last = cur;
     }
     if ( !inserted ){
@@ -713,33 +737,20 @@ vector<waStruct> Mbma::Step1( const UnicodeString& word,
       // fix exception
       last->morpheme += "e";
     }
-    last->morpheme += cur->uchar;
+    last->morpheme += cur->uchar; // mighe be empty because of deletion
   }
   if ( debugFlag ){
     *Log(mbmaLog) << "edited rule " << rule << endl;
   }
-  // resolve_inflections( rule );
+
+  //  vector<waStruct> ana = rule.toWA();
+  //  *Log(mbmaLog) << "intermediate rule " << ana << endl;
+  //  Rule rule2 = rule;
+  resolve_inflections( rule );
+  //  *Log(mbmaLog) << "intermediate analysis x: " << rule2.toWA() << endl;
   // inflectAndAffix( rule );
-  // cerr << "modified rule " << rule << endl;
-  vector<waStruct> ana;
-  for ( size_t k=0; k < rule.rules.size(); ++k ) {
-    waStruct item;
-    if ( !rule.rules[k].inflect.empty() ){
-      item.inflect = true;
-      item.act = rule.rules[k].inflect;
-      item.word = rule.rules[k].morpheme;
-    }
-    else if ( rule.rules[k].ResultClass == CLEX::NEUTRAL
-	      && rule.rules[k].morpheme.isEmpty() ){
-      continue;
-    }
-    else {
-      item.act = toString( rule.rules[k].ResultClass );
-      item.word = rule.rules[k].morpheme;
-    }
-    ana.push_back( item );
-  }
-  return ana;
+  // cerr << "resulting rule " << rule << endl;
+  return rule.toWA();
 }
 
 void Mbma::resolve_inflections( vector<waStruct>& ana,
@@ -779,6 +790,7 @@ void Mbma::resolve_inflections( vector<waStruct>& ana,
 	//     break;
 	//   pit--;
 	// }
+	//	*Log(mbmaLog) << "een terug is " << pit->act << endl;
 	if ( basictags.find( pit->act[0]) != string::npos ){
 	  if ( pit->act == "PN" && new_tag == "N" ){
 	    if ( debugFlag  ){
@@ -1068,10 +1080,10 @@ void Mbma::execute( const UnicodeString& word,
     vector<waStruct> ana = Step1( word, allParts[step] );
     if (debugFlag)
       *Log(mbmaLog) << "intermediate analysis 1: " << ana << endl;
-    resolve_inflections( ana, basictags );
+    //    resolve_inflections( ana, basictags );
     /* finally, unpack the tag and inflection names to make everything readable */
-    if (debugFlag)
-      *Log(mbmaLog) << "intermediate analysis 3: " << ana << endl;
+    //if (debugFlag)
+    //    *Log(mbmaLog) << "intermediate analysis 2: " << ana << endl;
     MBMAana tmp = inflectAndAffix( ana );
     if (debugFlag)
       *Log(mbmaLog) << "added Inflection: " << tmp << endl;
