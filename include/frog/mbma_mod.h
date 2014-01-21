@@ -72,6 +72,7 @@ class Rule {
 public:
   Rule( const std::vector<std::string>&, const UnicodeString& );
   std::vector<waStruct> toWA() const;
+  void resolve_inflections( TiCC::LogStream*, int );
   std::vector<RulePart> rules;
 };
 
@@ -97,7 +98,6 @@ class Mbma {
   std::vector<std::string> make_instances( const UnicodeString& word );
   std::vector<waStruct> Step1( const UnicodeString&,
 			       const std::vector<std::string>& );
-  void resolve_inflections( std::vector<waStruct>& , const std::string& );
   void resolve_inflections( Rule& );
   MBMAana addInflect( const std::vector<waStruct>& ana,
 		      const std::string&,

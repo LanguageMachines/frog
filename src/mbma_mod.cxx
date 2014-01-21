@@ -670,6 +670,53 @@ void Mbma::resolve_inflections( Rule& rule ){
   }
 }
 
+void Rule::resolve_inflections( LogStream* log, int debugFlag ){
+  // resolve all clearly resolvable implicit selections of inflectional tags
+  for ( size_t i = 1; i < rules.size(); ++i ){
+    string inf = rules[i].inflect;
+    if ( !inf.empty() ){
+      // it is an inflection tag
+      if (debugFlag){
+	*Log(log) << " inflection: >" << inf << "<" << endl;
+      }
+      // given the specific selections of certain inflections,
+      //    select a tag!
+      string new_tag = select_tag( inf[0] );
+
+      // apply the change. Remember, the idea is that an inflection is
+      // far more certain of the tag of its predecessing morpheme than
+      // the morpheme itself.
+      // This is not always the case, but it works
+      if ( !new_tag.empty() ) {
+	if ( debugFlag  ){
+	  *Log(log) << inf[0] << " selects " << new_tag << endl;
+	}
+	for ( size_t k = i-1; k +1 > 0; --k ){
+	  //	  *Log(mbmaLog) << "een terug is " << rule.rules[k].ResultClass << endl;
+	  if ( rules[k].morpheme.isEmpty() )
+	    continue;
+	  if ( rules[k].isBasic() ){
+	    if ( rules[k].ResultClass == CLEX::PN &&
+		 new_tag == "N" ){
+	      if ( debugFlag  ){
+		*Log(log) << "Don't replace PN by N" << endl;
+	      }
+	    }
+	    else {
+	      if ( debugFlag  ){
+		*Log(log) << " replace " << rules[k].ResultClass
+			      << " by " << new_tag << endl;
+	      }
+	      rules[k].ResultClass = CLEX::toCLEX( new_tag );
+	    }
+	    return;
+	  }
+	}
+      }
+    }
+  }
+}
+
 vector<waStruct> Mbma::Step1( const UnicodeString& word,
 			      const vector<string>& classPart ){
   Rule rule( classPart, word );
@@ -743,72 +790,13 @@ vector<waStruct> Mbma::Step1( const UnicodeString& word,
     *Log(mbmaLog) << "edited rule " << rule << endl;
   }
 
-  //  vector<waStruct> ana = rule.toWA();
-  //  *Log(mbmaLog) << "intermediate rule " << ana << endl;
-  //  Rule rule2 = rule;
-  resolve_inflections( rule );
+  rule.resolve_inflections( mbmaLog, debugFlag );
   //  *Log(mbmaLog) << "intermediate analysis x: " << rule2.toWA() << endl;
   // inflectAndAffix( rule );
   // cerr << "resulting rule " << rule << endl;
   return rule.toWA();
 }
 
-void Mbma::resolve_inflections( vector<waStruct>& ana,
-				const string& basictags ) {
-  // resolve all clearly resolvable implicit selections of inflectional tags
-  for ( vector<waStruct>::iterator it = ana.begin();
-	it != ana.end();
-	++it ){
-    if ( ana.begin() == it )
-      continue; // start at second
-    string act = it->act;
-    if ( it->inflect || act[0]=='i') {
-      // it is an inflection tag
-      if (debugFlag){
-	*Log(mbmaLog) << "act: >" << act << "<" << endl;
-      }
-      // given the specific selections of certain inflections,
-      //    select a tag!
-      string new_tag = select_tag( act[0] );
-
-      // apply the change. Remember, the idea is that an inflection is
-      // far more certain of the tag of its predecessing morpheme than
-      // the morpheme itself.
-      // This is not always the case, but it works
-      if ( !new_tag.empty() ) {
-	if ( debugFlag  ){
-	  *Log(mbmaLog) << act[0] << " selects " << new_tag << endl;
-	}
-	// change the previous NON inflectional act
-	vector<waStruct>::iterator pit = it-1;
-	// you might think that inflictional tags all mather
-	// but it seems only the first in a row is honourd
-	// changing this seems to break ...
-	//
-	// while ( pit->act[0] == 'i' ){
-	//   if ( pit == ana.begin() )
-	//     break;
-	//   pit--;
-	// }
-	//	*Log(mbmaLog) << "een terug is " << pit->act << endl;
-	if ( basictags.find( pit->act[0]) != string::npos ){
-	  if ( pit->act == "PN" && new_tag == "N" ){
-	    if ( debugFlag  ){
-	      *Log(mbmaLog) << "Don't replace PN by N" << endl;
-	    }
-	  }
-	  else {
-	    if ( debugFlag  ){
-	      *Log(mbmaLog) << "replace " << pit->act[0] << " by "
-			    << new_tag[0] << endl;
-	    }
-	    pit->act[0] = new_tag[0];
-	  }
-	}
-      }
-    }
-  }
-}
 
 MBMAana Mbma::addInflect( const vector<waStruct>& ana,
 			  const string& inflect,
@@ -1080,10 +1068,7 @@ void Mbma::execute( const UnicodeString& word,
     vector<waStruct> ana = Step1( word, allParts[step] );
     if (debugFlag)
       *Log(mbmaLog) << "intermediate analysis 1: " << ana << endl;
-    //    resolve_inflections( ana, basictags );
     /* finally, unpack the tag and inflection names to make everything readable */
-    //if (debugFlag)
-    //    *Log(mbmaLog) << "intermediate analysis 2: " << ana << endl;
     MBMAana tmp = inflectAndAffix( ana );
     if (debugFlag)
       *Log(mbmaLog) << "added Inflection: " << tmp << endl;
