@@ -47,12 +47,14 @@ public:
   std::vector<CLEX::Type> RightHand;
   UnicodeString ins;
   UnicodeString del;
-  UnicodeString word;
+  UnicodeString uchar;
+  UnicodeString morpheme;
   std::string inflect;
   int fixpos;
   int xfixpos;
   bool participle;
   bool e_except;
+  bool replace;
 };
 
 class Rule {
@@ -94,6 +96,8 @@ class Mbma {
   void getFoLiAResult( folia::Word *, const UnicodeString& ) const;
   std::vector<std::string> make_instances( const UnicodeString& word );
   std::vector<waStruct> Step1( const UnicodeString&,
+			       const std::vector<std::string>& );
+  std::vector<waStruct> Step2( const UnicodeString&,
 			       const std::vector<std::string>& );
   void resolve_inflections( std::vector<waStruct>& , const std::string& );
   void resolve_inflections( Rule& );

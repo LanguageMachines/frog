@@ -920,7 +920,6 @@ ostream &showResults( ostream& os,
 }
 
 bool TestSentence( Sentence* sent,
-		   ostream& outStream,
 		   TimerBlock& timers ){
   vector<Word*> swords;
   if ( doQuoteDetection )
@@ -1036,7 +1035,7 @@ void Test( Document& doc,
     for ( size_t i = 0; i < numS; i++) {
       /* ******* Begin process sentence  ********** */
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)
-      bool showParse = TestSentence( sentences[i], outStream, timers );
+      bool showParse = TestSentence( sentences[i], timers );
       if ( doParse && !showParse ){
 	*Log(theErrLog) << "WARNING!" << endl;
 	*Log(theErrLog) << "Sentence " << i+1 << " isn't parsed because it contains more tokens then set with the --max-parser-tokens=" << maxParserTokens << " option." << endl;
