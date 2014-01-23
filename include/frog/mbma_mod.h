@@ -55,24 +55,10 @@ public:
   bool participle;
 };
 
-class waStruct {
- public:
- waStruct():inflect(false){};
-  void clear(){
-    word = "";
-    act = "";
-    inflect = false;
-  }
-  UnicodeString word;
-  std::string act;
-  bool inflect;
-};
 
 class Rule {
 public:
   Rule( const std::vector<std::string>&, const UnicodeString& );
-  std::vector<waStruct> toWA() const;
-  void resolve_inflections( TiCC::LogStream*, int );
   std::vector<RulePart> rules;
 };
 
@@ -96,14 +82,12 @@ class Mbma {
   UnicodeString filterDiacritics( const UnicodeString& ) const;
   void getFoLiAResult( folia::Word *, const UnicodeString& ) const;
   std::vector<std::string> make_instances( const UnicodeString& word );
-  std::vector<waStruct> Step1( const UnicodeString&,
-			       const std::vector<std::string>& );
+  void Step1( Rule& );
   void resolve_inflections( Rule& );
-  MBMAana addInflect( const std::vector<waStruct>& ana,
+  MBMAana addInflect( Rule& rule,
 		      const std::string&,
-		      const std::vector<std::string>&  );
-  MBMAana inflectAndAffix( const std::vector<waStruct>& ana );
-  void inflectAndAffix( Rule& );
+		      const std::vector<std::string>& );
+  MBMAana inflectAndAffix( Rule& );
   void execute( const UnicodeString& word,
 		const std::vector<std::string>& classes );
   int debugFlag;
