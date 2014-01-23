@@ -743,9 +743,9 @@ CLEX::Type Mbma::addInflect( const Rule& rule ){
     }
     if ( !it->morpheme.isEmpty() ){
       if ( it->inflect.empty() ){
-	//	if (debugFlag){
+	if (debugFlag){
 	  *Log(mbmaLog) << "final result class " << it->ResultClass << endl;
-	  //	}
+	}
 	break;
       }
     }
@@ -755,7 +755,7 @@ CLEX::Type Mbma::addInflect( const Rule& rule ){
 }
 
 
-MBMAana Mbma::inflectAndAffix( Rule& rule ){
+string Mbma::inflectAndAffix( Rule& rule ){
   string inflect;
   vector<RulePart>::iterator it = rule.rules.begin();
   while ( it != rule.rules.end() ) {
@@ -789,9 +789,7 @@ MBMAana Mbma::inflectAndAffix( Rule& rule ){
 
   if (debugFlag)
     *Log(mbmaLog) << "inflectAndAffix: " << inflect << endl;
-  CLEX::Type tag = addInflect( rule );
-  MBMAana retVal = MBMAana( tag, rule, inflect );
-  return retVal;
+  return inflect;
 }
 
 #define OLD_STEP
@@ -922,15 +920,18 @@ void Mbma::execute( const UnicodeString& word,
     Step1( rule );
     resolve_inflections( rule );
     //  *Log(mbmaLog) << "intermediate analysis x: " << rule2.toWA() << endl;
-    Rule rule2 = rule;
-    MBMAana tmp2 = inflectAndAffix( rule2 );
-    *Log(mbmaLog) << "1 added Inflection: " << tmp2 << endl;
-    analysis.push_back( tmp2 );
+    string inflect = inflectAndAffix( rule );
+    CLEX::Type tag = addInflect( rule );
+    MBMAana tmp = MBMAana( tag, rule, inflect );
+    if ( debugFlag ){
+      *Log(mbmaLog) << "1 added Inflection: " << tmp << endl;
+    }
+    analysis.push_back( tmp );
   }
 }
 
 void Mbma::addAltMorph( Word *word,
-			const vector<string>& lemmas ) const {
+			const vector<string>& morphs ) const {
   Alternative *alt = new Alternative();
   MorphologyLayer *ml = new MorphologyLayer();
 #pragma omp critical(foliaupdate)
@@ -938,33 +939,33 @@ void Mbma::addAltMorph( Word *word,
     alt->append( ml );
     word->append( alt );
   }
-  addMorph( ml, lemmas );
+  addMorph( ml, morphs );
 }
 
 void Mbma::addMorph( Word *word,
-		     const vector<string>& lemmas ) const {
+		     const vector<string>& morphs ) const {
   MorphologyLayer *ml = new MorphologyLayer();
 #pragma omp critical(foliaupdate)
   {
     word->append( ml );
   }
-  addMorph( ml, lemmas );
+  addMorph( ml, morphs );
 }
 
 void Mbma::addMorph( MorphologyLayer *ml,
-		     const vector<string>& lemmas ) const {
+		     const vector<string>& morphs ) const {
   int offset = 0;
-  for ( size_t p=0; p < lemmas.size(); ++p ){
+  for ( size_t p=0; p < morphs.size(); ++p ){
     Morpheme *m = new Morpheme();
 #pragma omp critical(foliaupdate)
     {
       ml->append( m );
     }
     KWargs args;
-    args["value"] = lemmas[p];
+    args["value"] = morphs[p];
     args["offset"] = toString(offset);
     TextContent *t = new TextContent( args );
-    offset += lemmas[p].length();
+    offset += morphs[p].length();
 #pragma omp critical(foliaupdate)
     {
       m->append( t );
@@ -1108,7 +1109,7 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
 
 void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
   if ( analysis.size() == 0 ){
-    // fallback option: use the word and pretend it's a lemma ;-)
+    // fallback option: use the word and pretend it's a morpheme ;-)
     if ( debugFlag ){
       *Log(mbmaLog) << "no matches found, use the word instead: "
 		    << uword << endl;

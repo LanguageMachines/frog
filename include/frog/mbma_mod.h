@@ -88,7 +88,7 @@ class Mbma {
   void Step1( Rule& );
   void resolve_inflections( Rule& );
   CLEX::Type addInflect( const Rule& rule );
-  MBMAana inflectAndAffix( Rule& );
+  std::string inflectAndAffix( Rule& );
   void execute( const UnicodeString& word,
 		const std::vector<std::string>& classes );
   int debugFlag;
