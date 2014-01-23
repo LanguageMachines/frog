@@ -214,19 +214,19 @@ void Mbma::fillMaps() {
   //
   // first the CELEX POS tag names
   //
-  tagNames["N"] = "noun";
-  tagNames["A"] = "adjective";
-  tagNames["Q"] = "quantifier/numeral";
-  tagNames["V"] = "verb";
-  tagNames["D"] = "article";
-  tagNames["O"] = "pronoun";
-  tagNames["B"] = "adverb";
-  tagNames["P"] = "preposition";
-  tagNames["Y"] = "conjunction";
-  tagNames["I"] = "interjection";
-  tagNames["X"] = "unanalysed";
-  tagNames["Z"] = "expression part";
-  tagNames["PN"] = "proper noun";
+  tagNames[CLEX::N] = "noun";
+  tagNames[CLEX::A] = "adjective";
+  tagNames[CLEX::Q] = "quantifier/numeral";
+  tagNames[CLEX::V] = "verb";
+  tagNames[CLEX::D] = "article";
+  tagNames[CLEX::O] = "pronoun";
+  tagNames[CLEX::B] = "adverb";
+  tagNames[CLEX::P] = "preposition";
+  tagNames[CLEX::Y] = "conjunction";
+  tagNames[CLEX::I] = "interjection";
+  tagNames[CLEX::X] = "unanalysed";
+  tagNames[CLEX::Z] = "expression part";
+  tagNames[CLEX::PN] = "proper noun";
   //
   // now the inflections
   iNames['X'] = "";
@@ -555,6 +555,19 @@ ostream& operator<<( ostream& os, const Rule& r ){
   return os;
 }
 
+vector<string> Rule::extract_morphemes() const {
+  vector<string> morphemes;
+  vector<RulePart>::const_iterator it = rules.begin();
+  while ( it != rules.end() ) {
+    UnicodeString morpheme = it->morpheme;
+    if ( !morpheme.isEmpty() ){
+      morphemes.push_back( UnicodeToUTF8(morpheme) );
+    }
+    ++it;
+  }
+  return morphemes;
+}
+
 string select_tag( const char ch ){
   string newtag;
   switch( ch ){
@@ -704,11 +717,23 @@ void Mbma::Step1( Rule& rule ){
 
 }
 
+MBMAana::MBMAana( CLEX::Type Tag, const Rule& rule,
+		  const string& inflect ){
+  morphemes = rule.extract_morphemes();
+  map<CLEX::Type,string>::const_iterator tit = tagNames.find( Tag );
+  if ( tit == tagNames.end() ){
+    // unknown tag
+    tag = toString(CLEX::X);
+    description = "unknown";
+  }
+  else {
+    tag = toString(Tag);
+    description = tit->second;
+  }
+  infl = inflect;
+}
 
-
-MBMAana Mbma::addInflect( Rule& rule,
-			  const string& inflect,
-			  const vector<string>& morph ){
+CLEX::Type Mbma::addInflect( const Rule& rule ){
   string the_act;
   vector<RulePart>::const_reverse_iterator it = rule.rules.rbegin();
   while ( it != rule.rules.rend() ) {
@@ -718,42 +743,22 @@ MBMAana Mbma::addInflect( Rule& rule,
     }
     if ( !it->morpheme.isEmpty() ){
       if ( it->inflect.empty() ){
-	if (debugFlag){
+	//	if (debugFlag){
 	  *Log(mbmaLog) << "final result class " << it->ResultClass << endl;
-	}
+	  //	}
 	break;
       }
     }
     ++it;
   }
-  string tag = toString( it->ResultClass );
-  string outTag, descr;
-  map<string,string>::const_iterator tit = tagNames.find( tag );
-  if ( tit == tagNames.end() ){
-    // unknown tag
-    outTag = "X";
-    descr = "unknown";
-  }
-  else {
-    outTag = tit->first;
-    descr = tit->second;
-  }
-  if (debugFlag)
-    *Log(mbmaLog) << "x added (4) " << outTag << " " << descr << endl;
-  return MBMAana( outTag, inflect, morph, descr );
+  return it->ResultClass;
 }
+
 
 MBMAana Mbma::inflectAndAffix( Rule& rule ){
   string inflect;
-  vector<string> morphemes;
-  UnicodeString morpheme;
   vector<RulePart>::iterator it = rule.rules.begin();
   while ( it != rule.rules.end() ) {
-    //    cerr << "x bekijk " << *it << endl;
-    if ( !morpheme.isEmpty() ){
-      morphemes.push_back( UnicodeToUTF8(morpheme) );
-    }
-    morpheme = it->morpheme;
     if ( !it->inflect.empty() ){
       //      cerr << "x inflect:'" << it->inflect << "'" << endl;
       if ( inflect.empty() && it->RightHand.empty() ) {
@@ -779,19 +784,13 @@ MBMAana Mbma::inflectAndAffix( Rule& rule ){
 	// done with this level
       }
     }
-    if (debugFlag)
-      *Log(mbmaLog) << "x morphemes now: |" << morphemes << "|" << endl;
     ++it;
-  }
-  if ( !morpheme.isEmpty() ){
-    // don't forget the last one.
-    morphemes.push_back( UnicodeToUTF8(morpheme) );
   }
 
   if (debugFlag)
-    *Log(mbmaLog) << "x inflectAndAffix: " << inflect << " - " << morphemes << endl;
-  // tag and stick it at the end.
-  MBMAana retVal = addInflect( rule, inflect, morphemes );
+    *Log(mbmaLog) << "inflectAndAffix: " << inflect << endl;
+  CLEX::Type tag = addInflect( rule );
+  MBMAana retVal = MBMAana( tag, rule, inflect );
   return retVal;
 }
 

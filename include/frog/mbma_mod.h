@@ -36,6 +36,7 @@ class MBMAana;
 namespace CLEX {
   enum Type { UNASS, N, A, Q, V, D, O, B, P, Y, I, X, Z, PN, AFFIX, XAFFIX,
 	      NEUTRAL };
+  std::string toString( const Type& t );
 }
 
 class RulePart {
@@ -59,9 +60,11 @@ public:
 class Rule {
 public:
   Rule( const std::vector<std::string>&, const UnicodeString& );
+  std::vector<std::string> extract_morphemes() const;
   std::vector<RulePart> rules;
 };
 
+static std::map<CLEX::Type,std::string> tagNames;
 
 class Mbma {
  public:
@@ -84,9 +87,7 @@ class Mbma {
   std::vector<std::string> make_instances( const UnicodeString& word );
   void Step1( Rule& );
   void resolve_inflections( Rule& );
-  MBMAana addInflect( Rule& rule,
-		      const std::string&,
-		      const std::vector<std::string>& );
+  CLEX::Type addInflect( const Rule& rule );
   MBMAana inflectAndAffix( Rule& );
   void execute( const UnicodeString& word,
 		const std::vector<std::string>& classes );
@@ -98,7 +99,6 @@ class Mbma {
   std::string MTreeFilename;
   Timbl::TimblAPI *MTree;
   std::map<char,std::string> iNames;
-  std::map<std::string,std::string> tagNames;
   std::map<std::string,std::string> TAGconv;
   std::vector<MBMAana> analysis;
   std::string version;
@@ -118,11 +118,7 @@ class MBMAana {
     infl = "";
     description = "";
   };
- MBMAana( const std::string& _tag,
-	  const std::string& _infl,
-	  const std::vector<std::string>& _mo,
-	  const std::string& _des ):
-  tag(_tag),infl(_infl),morphemes(_mo), description(_des) {};
+  MBMAana( const CLEX::Type , const Rule&,  const std::string& );
 
   ~MBMAana() {};
 
