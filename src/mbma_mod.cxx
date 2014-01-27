@@ -568,21 +568,21 @@ vector<string> Rule::extract_morphemes() const {
   return morphemes;
 }
 
-string select_tag( const char ch ){
-  string newtag;
+CLEX::Type select_tag( const char ch ){
+  CLEX::Type result = CLEX::UNASS;
   switch( ch ){
   case 'm':
   case 'e':
   case 'd':
   case 'G':
   case 'D':
-    newtag = "N";
+    result = CLEX::N;
   break;
   case 'P':
   case 'C':
   case 'S':
   case 'E':
-    newtag = "A";
+    result = CLEX::A;
   break;
   case 'i':
   case 'p':
@@ -590,17 +590,19 @@ string select_tag( const char ch ){
   case 'v':
   case 'g':
   case 'a':
-    newtag = "V";
+    result = CLEX::V;
   break;
   default:
     break;
   }
-  return newtag;
+  return result;
 }
 
 
 void Mbma::resolve_inflections( Rule& rule ){
   // resolve all clearly resolvable implicit selections of inflectional tags
+  // We take ONLY the first 'hint' of the inflection to find a new CLEX Type
+  // When applicable, we replace the class from the rule
   for ( size_t i = 1; i < rule.rules.size(); ++i ){
     string inf = rule.rules[i].inflect;
     if ( !inf.empty() ){
@@ -610,23 +612,25 @@ void Mbma::resolve_inflections( Rule& rule ){
       }
       // given the specific selections of certain inflections,
       //    select a tag!
-      string new_tag = select_tag( inf[0] );
+      CLEX::Type new_tag = select_tag( inf[0] );
 
       // apply the change. Remember, the idea is that an inflection is
       // far more certain of the tag of its predecessing morpheme than
       // the morpheme itself.
       // This is not always the case, but it works
-      if ( !new_tag.empty() ) {
+      if ( new_tag != CLEX::UNASS ) {
 	if ( debugFlag  ){
 	  *Log(mbmaLog) << inf[0] << " selects " << new_tag << endl;
 	}
 	for ( size_t k = i-1; k +1 > 0; --k ){
 	  //	  *Log(mbmaLog) << "een terug is " << rule.rules[k].ResultClass << endl;
+	  // go back to the previous morpheme
 	  if ( rule.rules[k].morpheme.isEmpty() )
 	    continue;
 	  if ( rule.rules[k].isBasic() ){
+	    // now see if we can replace this class for a better one
 	    if ( rule.rules[k].ResultClass == CLEX::PN &&
-		 new_tag == "N" ){
+		 new_tag == CLEX::N ){
 	      if ( debugFlag  ){
 		*Log(mbmaLog) << "Don't replace PN by N" << endl;
 	      }
@@ -636,7 +640,7 @@ void Mbma::resolve_inflections( Rule& rule ){
 		*Log(mbmaLog) << " replace " << rule.rules[k].ResultClass
 			      << " by " << new_tag << endl;
 	      }
-	      rule.rules[k].ResultClass = CLEX::toCLEX( new_tag );
+	      rule.rules[k].ResultClass = new_tag;
 	    }
 	    return;
 	  }
@@ -646,7 +650,7 @@ void Mbma::resolve_inflections( Rule& rule ){
   }
 }
 
-void Mbma::Step1( Rule& rule ){
+void Mbma::performEdits( Rule& rule ){
   if ( debugFlag){
     *Log(mbmaLog) << "FOUND rule " << rule << endl;
   }
@@ -656,7 +660,7 @@ void Mbma::Step1( Rule& rule ){
     if ( last == 0 )
       last = cur;
     if ( debugFlag){
-      *Log(mbmaLog) << "Step1:: act=" << cur << endl;
+      *Log(mbmaLog) << "edit::act=" << cur << endl;
     }
     if ( !cur->del.isEmpty() ){
       // sanity check
@@ -733,63 +737,63 @@ MBMAana::MBMAana( CLEX::Type Tag, const Rule& rule,
   infl = inflect;
 }
 
-CLEX::Type Mbma::addInflect( const Rule& rule ){
-  string the_act;
+CLEX::Type Mbma::getFinalClass( const Rule& rule ){
+  // Determine the CLEX type of the last NON-inflectional morpheme.
+  CLEX::Type result = CLEX::UNASS;
   vector<RulePart>::const_reverse_iterator it = rule.rules.rbegin();
   while ( it != rule.rules.rend() ) {
-    // go back to the last non-inflectional tag
     if (debugFlag){
       *Log(mbmaLog) << "examine rulepart " << *it << endl;
     }
     if ( !it->morpheme.isEmpty() ){
       if ( it->inflect.empty() ){
+	result = it->ResultClass;
 	if (debugFlag){
-	  *Log(mbmaLog) << "final result class " << it->ResultClass << endl;
+	  *Log(mbmaLog) << "found result class " << it->ResultClass << endl;
 	}
 	break;
       }
     }
     ++it;
   }
-  return it->ResultClass;
+  return result;
 }
 
 
-string Mbma::inflectAndAffix( Rule& rule ){
-  string inflect;
+string Mbma::getCleanInflect( Rule& rule ){
+  // get the FIRST inflection and clean it up by extracting only
+  //  known inflection names
   vector<RulePart>::iterator it = rule.rules.begin();
   while ( it != rule.rules.end() ) {
     if ( !it->inflect.empty() ){
       //      cerr << "x inflect:'" << it->inflect << "'" << endl;
-      if ( inflect.empty() && it->RightHand.empty() ) {
-	for ( size_t i=0; i< it->inflect.length(); ++i ) {
-	  if ( it->inflect[i] != '/' ){
-	    // check if it is a known inflection
-	    //	    cerr << "x bekijk [" << it->inflect[i] << "]" << endl;
-	    map<char,string>::const_iterator csIt = iNames.find(it->inflect[i]);
-	    if ( csIt == iNames.end() ){
-	      if (debugFlag)
-		*Log(mbmaLog) << "added X 1" << endl;
-	      inflect += "X";
-	    }
-	    else {
-	      if (debugFlag)
-		*Log(mbmaLog) << "added (1) (" << csIt->first << ") " << csIt->second << endl;
-	      inflect += it->inflect[i];
-	    }
+      string inflect;
+      for ( size_t i=0; i< it->inflect.length(); ++i ) {
+	if ( it->inflect[i] != '/' ){
+	  // check if it is a known inflection
+	  //	    cerr << "x bekijk [" << it->inflect[i] << "]" << endl;
+	  map<char,string>::const_iterator csIt = iNames.find(it->inflect[i]);
+	  if ( csIt == iNames.end() ){
+	    if (debugFlag)
+	      *Log(mbmaLog) << "added unknown inflection X" << endl;
+	    inflect += "X";
+	  }
+	  else {
+	    if (debugFlag)
+	      *Log(mbmaLog) << "added known inflection " << csIt->first
+			    << " (" << csIt->second << ")" << endl;
+	    inflect += it->inflect[i];
 	  }
 	}
-	if ( debugFlag )
-	  *Log(mbmaLog) << "x found inflection " << inflect << endl;
-	// done with this level
       }
+      if ( debugFlag ){
+	*Log(mbmaLog) << "cleaned inflection " << inflect << endl;
+      }
+      return inflect;
     }
     ++it;
   }
-
-  if (debugFlag)
-    *Log(mbmaLog) << "inflectAndAffix: " << inflect << endl;
-  return inflect;
+  return "";
 }
 
 #define OLD_STEP
@@ -901,7 +905,6 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
 
 void Mbma::execute( const UnicodeString& word,
 		    const vector<string>& classes ){
-  const string basictags = "NAQVDOBPYIXZ";
   analysis.clear();
 
   vector<vector<string> > allParts = generate_all_perms( classes );
@@ -917,11 +920,11 @@ void Mbma::execute( const UnicodeString& word,
   // now loop over all the analysis
   for ( unsigned int step=0; step < allParts.size(); ++step ) {
     Rule rule( allParts[step], word );
-    Step1( rule );
+    performEdits( rule );
     resolve_inflections( rule );
     //  *Log(mbmaLog) << "intermediate analysis x: " << rule2.toWA() << endl;
-    string inflect = inflectAndAffix( rule );
-    CLEX::Type tag = addInflect( rule );
+    string inflect = getCleanInflect( rule );
+    CLEX::Type tag = getFinalClass( rule );
     MBMAana tmp = MBMAana( tag, rule, inflect );
     if ( debugFlag ){
       *Log(mbmaLog) << "1 added Inflection: " << tmp << endl;

@@ -85,10 +85,10 @@ class Mbma {
   UnicodeString filterDiacritics( const UnicodeString& ) const;
   void getFoLiAResult( folia::Word *, const UnicodeString& ) const;
   std::vector<std::string> make_instances( const UnicodeString& word );
-  void Step1( Rule& );
+  void performEdits( Rule& );
   void resolve_inflections( Rule& );
-  CLEX::Type addInflect( const Rule& rule );
-  std::string inflectAndAffix( Rule& );
+  CLEX::Type getFinalClass( const Rule& rule );
+  std::string getCleanInflect( Rule& );
   void execute( const UnicodeString& word,
 		const std::vector<std::string>& classes );
   int debugFlag;
