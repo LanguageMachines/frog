@@ -43,7 +43,8 @@
 
 #include "timbl/TimblAPI.h"
 #include "mbt/MbtAPI.h"
-#include "timblserver/TimblServerAPI.h"
+#include "timblserver/FdStream.h"
+#include "timblserver/ServerBase.h"
 
 // individual module headers
 
