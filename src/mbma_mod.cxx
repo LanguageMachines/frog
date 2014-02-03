@@ -555,6 +555,31 @@ ostream& operator<<( ostream& os, const Rule& r ){
   return os;
 }
 
+ostream& operator<<( ostream& os, const Rule *r ){
+  if ( r )
+    os << *r << endl;
+  else
+    os << "Empty MBMA rule" << endl;
+  return os;
+}
+
+void Rule::reduceZeroNodes(){
+  cerr << "reduce in" << this << endl;
+  vector<RulePart> out;
+  for ( size_t k=0; k < rules.size(); ++k ) {
+    if ( rules[k].ResultClass == CLEX::NEUTRAL
+	 && rules[k].morpheme.isEmpty()
+	 && rules[k].inflect.empty() ){
+      cerr << "Reduce " << rules[k] << endl;
+    }
+    else {
+      out.push_back(rules[k]);
+    }
+  }
+  rules.swap( out );
+  cerr << "reduce out" << this << endl;
+}
+
 vector<string> Rule::extract_morphemes() const {
   vector<string> morphemes;
   vector<RulePart>::const_iterator it = rules.begin();
@@ -622,29 +647,74 @@ void Mbma::resolve_inflections( Rule& rule ){
 	if ( debugFlag  ){
 	  *Log(mbmaLog) << inf[0] << " selects " << new_tag << endl;
 	}
-	for ( size_t k = i-1; k +1 > 0; --k ){
-	  //	  *Log(mbmaLog) << "een terug is " << rule.rules[k].ResultClass << endl;
-	  // go back to the previous morpheme
-	  if ( rule.rules[k].morpheme.isEmpty() )
-	    continue;
-	  if ( rule.rules[k].isBasic() ){
-	    // now see if we can replace this class for a better one
-	    if ( rule.rules[k].ResultClass == CLEX::PN &&
-		 new_tag == CLEX::N ){
-	      if ( debugFlag  ){
-		*Log(mbmaLog) << "Don't replace PN by N" << endl;
-	      }
+	// go back to the previous morpheme
+	size_t k = i-1;
+	//	  *Log(mbmaLog) << "een terug is " << rule.rules[k].ResultClass << endl;
+	if ( rule.rules[k].isBasic() ){
+	  // now see if we can replace this class for a better one
+	  if ( rule.rules[k].ResultClass == CLEX::PN &&
+	       new_tag == CLEX::N ){
+	    if ( debugFlag  ){
+	      *Log(mbmaLog) << "Don't replace PN by N" << endl;
 	    }
-	    else {
-	      if ( debugFlag  ){
-		*Log(mbmaLog) << " replace " << rule.rules[k].ResultClass
-			      << " by " << new_tag << endl;
-	      }
-	      rule.rules[k].ResultClass = new_tag;
+	  }
+	  else {
+	    if ( debugFlag  ){
+	      *Log(mbmaLog) << " replace " << rule.rules[k].ResultClass
+			    << " by " << new_tag << endl;
 	    }
-	    return;
+	    rule.rules[k].ResultClass = new_tag;
+	  }
+	  return;
+	}
+      }
+    }
+  }
+}
+
+void Mbma::resolveCompounds( Rule& rule ){
+  cerr << "check rule for compounds: " << rule << endl;
+  for ( size_t k=0; k < rule.rules.size(); ++k ) {
+    RulePart *cur = &rule.rules[k];
+    size_t len = cur->RightHand.size();
+    if ( len > 1 ){
+      cerr << "YES a possible compound ";
+      for ( size_t i=0; i < len; ++i ){
+	  cerr << cur->RightHand[i] << " ";
+      }
+      cerr << endl;
+      if ( k + 1 >= cur->RightHand.size() ){
+	cerr << "OK er is een kans: ";
+	for ( size_t j=k+1; j; --j ){
+	  if ( !rule.rules[j-1].morpheme.isEmpty() ){
+	    cerr << rule.rules[j-1].morpheme << ": "
+		 << rule.rules[j-1].ResultClass << " ";
 	  }
 	}
+	cerr << endl;
+	size_t pos = len-1;
+	bool matched = false;
+	for ( size_t j=k+1; j; --j ){
+	  if ( rule.rules[j-1].ResultClass == cur->RightHand[pos] ){
+	    cerr << "matched " << rule.rules[j-1].ResultClass << endl;
+	    matched = true;
+	  }
+	  else if ( CLEX::AFFIX == cur->RightHand[pos] ){
+	    cerr << "matched * " << rule.rules[j-1].ResultClass << endl;
+	    matched = true;
+	  }
+	  else {
+	    matched = false;
+	    break;
+	  }
+	  --pos;
+	}
+	if ( matched ){
+	  cerr << "a compound found!" << endl;
+	}
+      }
+      else {
+	cerr << "geen kans" << endl;
       }
     }
   }
@@ -921,6 +991,8 @@ void Mbma::execute( const UnicodeString& word,
   for ( unsigned int step=0; step < allParts.size(); ++step ) {
     Rule rule( allParts[step], word );
     performEdits( rule );
+    rule.reduceZeroNodes();
+    resolveCompounds( rule );
     resolve_inflections( rule );
     //  *Log(mbmaLog) << "intermediate analysis x: " << rule2.toWA() << endl;
     string inflect = getCleanInflect( rule );
