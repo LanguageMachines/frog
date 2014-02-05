@@ -564,20 +564,17 @@ ostream& operator<<( ostream& os, const Rule *r ){
 }
 
 void Rule::reduceZeroNodes(){
-  cerr << "reduce in" << this << endl;
   vector<RulePart> out;
   for ( size_t k=0; k < rules.size(); ++k ) {
     if ( rules[k].ResultClass == CLEX::NEUTRAL
 	 && rules[k].morpheme.isEmpty()
 	 && rules[k].inflect.empty() ){
-      cerr << "Reduce " << rules[k] << endl;
     }
     else {
       out.push_back(rules[k]);
     }
   }
   rules.swap( out );
-  cerr << "reduce out" << this << endl;
 }
 
 vector<string> Rule::extract_morphemes() const {
@@ -673,48 +670,57 @@ void Mbma::resolve_inflections( Rule& rule ){
 }
 
 void Mbma::resolveCompounds( Rule& rule ){
-  cerr << "check rule for compounds: " << rule << endl;
+  //  cerr << "check rule for compounds: " << rule << endl;
   for ( size_t k=0; k < rule.rules.size(); ++k ) {
     RulePart *cur = &rule.rules[k];
     size_t len = cur->RightHand.size();
-    if ( len > 1 ){
-      cerr << "YES a possible compound ";
-      for ( size_t i=0; i < len; ++i ){
-	  cerr << cur->RightHand[i] << " ";
-      }
-      cerr << endl;
-      if ( k + 1 >= cur->RightHand.size() ){
-	cerr << "OK er is een kans: ";
-	for ( size_t j=k+1; j; --j ){
-	  if ( !rule.rules[j-1].morpheme.isEmpty() ){
-	    cerr << rule.rules[j-1].morpheme << ": "
-		 << rule.rules[j-1].ResultClass << " ";
-	  }
+    if ( len > 1 &&
+	 k >= len - 1 ){
+      size_t pos = 0;
+      bool matched = false;
+      for ( size_t j=k-len+1; j <=k; ++j ){
+	if ( rule.rules[j].ResultClass == cur->RightHand[pos] ){
+	  //	  cerr << "matched " << rule.rules[j].ResultClass << endl;
+	  matched = true;
 	}
-	cerr << endl;
-	size_t pos = len-1;
-	bool matched = false;
-	for ( size_t j=k+1; j; --j ){
-	  if ( rule.rules[j-1].ResultClass == cur->RightHand[pos] ){
-	    cerr << "matched " << rule.rules[j-1].ResultClass << endl;
-	    matched = true;
+	else if ( CLEX::AFFIX == cur->RightHand[pos] ){
+	  //	  cerr << "matched * " << rule.rules[j].ResultClass << endl;
+	  matched = true;
+	}
+	else {
+	  matched = false;
+	  //	  cerr << "FAILED " << rule.rules[j].ResultClass << endl;
+	  break;
+	}
+	++pos;
+      }
+      if ( matched ){
+	// Ok so NOW we can construct it.
+	size_t pos = 0;
+	vector<UnicodeString> comp;
+	UnicodeString part;
+	string type;
+	for ( size_t j=k-len+1; j <=k; ++j ){
+	  if ( rule.rules[j].ResultClass == cur->RightHand[pos] ){
+	    type += toString(rule.rules[j].ResultClass);
+	    if ( !part.isEmpty() ){
+	      comp.push_back( part );
+	    }
+	    part = rule.rules[j].morpheme;
 	  }
 	  else if ( CLEX::AFFIX == cur->RightHand[pos] ){
-	    cerr << "matched * " << rule.rules[j-1].ResultClass << endl;
-	    matched = true;
+	    part += rule.rules[j].morpheme;
 	  }
-	  else {
-	    matched = false;
-	    break;
-	  }
-	  --pos;
+	  ++pos;
 	}
-	if ( matched ){
-	  cerr << "a compound found!" << endl;
+	if ( !part.isEmpty() ){
+	  comp.push_back( part );
 	}
-      }
-      else {
-	cerr << "geen kans" << endl;
+	if ( type.length() == 1 ){
+	  cerr << "rejected compound (type=" << type << ") -" << comp << endl;
+	}
+	else {
+	  cerr << "constructed compound (type=" << type << ") -" << comp << endl;}
       }
     }
   }
@@ -992,9 +998,8 @@ void Mbma::execute( const UnicodeString& word,
     Rule rule( allParts[step], word );
     performEdits( rule );
     rule.reduceZeroNodes();
-    resolveCompounds( rule );
+    //    resolveCompounds( rule );
     resolve_inflections( rule );
-    //  *Log(mbmaLog) << "intermediate analysis x: " << rule2.toWA() << endl;
     string inflect = getCleanInflect( rule );
     CLEX::Type tag = getFinalClass( rule );
     MBMAana tmp = MBMAana( tag, rule, inflect );
