@@ -669,22 +669,99 @@ void Mbma::resolve_inflections( Rule& rule ){
   }
 }
 
-void Mbma::resolveCompounds( Rule& rule ){
-  //  cerr << "check rule for compounds: " << rule << endl;
+class BaseBracket {
+public:
+  BaseBracket( CLEX::Type t ): cls(t) {};
+  virtual UnicodeString put() const;
+protected:
+  CLEX::Type cls;
+};
+
+UnicodeString BaseBracket::put() const {
+  UnicodeString result = "[err?]";
+  UnicodeString s = UTF8ToUnicode(toString(cls));
+  result += s;
+  return result;
+}
+
+class BracketLeaf: public BaseBracket {
+public:
+  BracketLeaf( const RulePart& p ):
+    BaseBracket(p.ResultClass), morph(p.morpheme ) {};
+  UnicodeString put() const;
+private:
+  UnicodeString morph;
+};
+
+UnicodeString BracketLeaf::put() const {
+  UnicodeString result = "[";
+  result += morph;
+  result += "_";
+  result += UTF8ToUnicode(toString(cls));
+  result += "]";
+  return result;
+}
+
+class BracketNest: public BaseBracket {
+public:
+  BracketNest( BaseBracket *l1, BaseBracket *l2 ):
+    BaseBracket(CLEX::UNASS),
+    left(l1),right(l2){};
+  UnicodeString put() const;
+private:
+  BaseBracket *left;
+  BaseBracket *right;
+};
+
+UnicodeString BracketNest::put() const {
+  UnicodeString result = "[";
+  result += left->put();
+  result += right->put();
+  result += "]";
+  return result;
+}
+
+ostream& operator<< ( ostream& os, const BaseBracket& c ){
+  os << c.put();
+  return os;
+}
+
+ostream& operator<< ( ostream& os, const BaseBracket *c ){
+  if ( c ){
+    os << c->put();
+  }
+  else {
+    os << "[EMPTY]";
+  }
+  return os;
+}
+
+void Mbma::resolveBrackets( Rule& rule ){
+  //  cerr << "check rule for bracketing: " << rule << endl;
   for ( size_t k=0; k < rule.rules.size(); ++k ) {
     RulePart *cur = &rule.rules[k];
     size_t len = cur->RightHand.size();
+    int center = k;
+    if ( cur->fixpos > 0 ){
+      center = cur->fixpos;
+    }
     if ( len > 1 &&
-	 k >= len - 1 ){
+	 k >= center ){
       size_t pos = 0;
       bool matched = false;
-      for ( size_t j=k-len+1; j <=k; ++j ){
+      for ( size_t j=k-center; j < len; ++j ){
+	// cerr << "bekijk " << rule.rules[j].ResultClass << endl;
+	// cerr << "versus " << cur->RightHand[pos] << endl;
 	if ( rule.rules[j].ResultClass == cur->RightHand[pos] ){
 	  //	  cerr << "matched " << rule.rules[j].ResultClass << endl;
 	  matched = true;
 	}
 	else if ( CLEX::AFFIX == cur->RightHand[pos] ){
 	  //	  cerr << "matched * " << rule.rules[j].ResultClass << endl;
+	  matched = true;
+	}
+	else if ( CLEX::XAFFIX == cur->RightHand[pos] ){
+	  //	  cerr << "matched x " << rule.rules[j].ResultClass << endl;
 	  matched = true;
 	}
 	else {
@@ -698,29 +775,40 @@ void Mbma::resolveCompounds( Rule& rule ){
 	// Ok so NOW we can construct it.
 	size_t pos = 0;
 	vector<UnicodeString> comp;
-	UnicodeString part;
-	string type;
-	for ( size_t j=k-len+1; j <=k; ++j ){
+	BaseBracket *first = 0;
+	for ( size_t j=k-center; j < len; ++j ){
 	  if ( rule.rules[j].ResultClass == cur->RightHand[pos] ){
-	    type += toString(rule.rules[j].ResultClass);
-	    if ( !part.isEmpty() ){
-	      comp.push_back( part );
+	    if ( first ){
+	      BracketLeaf *tmp = new BracketLeaf( rule.rules[j] );
+	      first = new BracketNest( first, tmp );
 	    }
-	    part = rule.rules[j].morpheme;
+	    else {
+	      first = new BracketLeaf( rule.rules[j] );
+	    }
 	  }
 	  else if ( CLEX::AFFIX == cur->RightHand[pos] ){
-	    part += rule.rules[j].morpheme;
+	    if ( first ){
+	      BracketLeaf *tmp = new BracketLeaf( rule.rules[j] );
+	      first = new BracketNest( first, tmp );
+	    }
+	    else {
+	      cerr << "STRANGE!" << endl;
+	    }
+	  }
+	  else if ( CLEX::XAFFIX == cur->RightHand[pos] ){
+	    if ( first ){
+	      BracketLeaf *tmp = new BracketLeaf( rule.rules[j] );
+	      first = new BracketNest( first, tmp );
+	    }
+	    else {
+	      cerr << "STRANGE!" << endl;
+	    }
 	  }
 	  ++pos;
 	}
-	if ( !part.isEmpty() ){
-	  comp.push_back( part );
+	if ( first ){
+	  cerr << "constructed bracketing " << first << endl;
 	}
-	if ( type.length() == 1 ){
-	  cerr << "rejected compound (type=" << type << ") -" << comp << endl;
-	}
-	else {
-	  cerr << "constructed compound (type=" << type << ") -" << comp << endl;}
       }
     }
   }
@@ -998,7 +1086,7 @@ void Mbma::execute( const UnicodeString& word,
     Rule rule( allParts[step], word );
     performEdits( rule );
     rule.reduceZeroNodes();
-    //    resolveCompounds( rule );
+    //    resolveBrackets( rule );
     resolve_inflections( rule );
     string inflect = getCleanInflect( rule );
     CLEX::Type tag = getFinalClass( rule );

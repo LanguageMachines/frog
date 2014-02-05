@@ -87,7 +87,7 @@ class Mbma {
   void getFoLiAResult( folia::Word *, const UnicodeString& ) const;
   std::vector<std::string> make_instances( const UnicodeString& word );
   void performEdits( Rule& );
-  void resolveCompounds( Rule& );
+  void resolveBrackets( Rule& );
   void resolve_inflections( Rule& );
   CLEX::Type getFinalClass( const Rule& rule );
   std::string getCleanInflect( Rule& );
