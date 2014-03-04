@@ -679,11 +679,12 @@ public:
     cls(t)
   {};
   virtual UnicodeString morpheme() const { return "";};
+  virtual size_t infixpos() const { return 0; };
   virtual UnicodeString put() const;
   virtual BaseBracket *append( BaseBracket * ) = 0;
   virtual BaseBracket *append( BaseBracket *, CLEX::Type ) = 0;
   virtual bool isNested() { return false; };
-  virtual void resolveInfix() {};
+  virtual list<BaseBracket *> *getparts() { return 0; };
   CLEX::Type cls;
   vector<CLEX::Type> RightHand;
 };
@@ -695,7 +696,9 @@ public:
   BaseBracket *append( BaseBracket * );
   BaseBracket *append( BaseBracket *, CLEX::Type );
   UnicodeString morpheme() const { return morph;};
+  size_t infixpos() const { return ifpos;};
 private:
+  size_t ifpos;
   UnicodeString morph;
   string orig;
 };
@@ -704,6 +707,7 @@ BracketLeaf::BracketLeaf( const RulePart& p ):
   BaseBracket(p.ResultClass, p.RightHand),
   morph(p.morpheme )
 {
+  ifpos = 0;
   if ( !p.inflect.empty() ){
     orig = p.inflect;
   }
@@ -715,6 +719,8 @@ BracketLeaf::BracketLeaf( const RulePart& p ):
     orig += "_";
     for ( size_t i = 0; i < RightHand.size(); ++i ){
       orig += toString(RightHand[i]);
+      if ( RightHand[i] == CLEX::AFFIX )
+	ifpos = i;
     }
   }
 }
@@ -738,8 +744,8 @@ public:
     return this;
   };
   bool isNested() { return true; };
-  void resolveInfix();
   UnicodeString put() const;
+  list<BaseBracket *> *getparts() { return &parts; };
 private:
   list<BaseBracket *> parts;
 };
@@ -796,7 +802,7 @@ ostream& operator<< ( ostream& os, const BaseBracket *c ){
   return os;
 }
 
-#define DEBUG_BRACKETS
+//#define DEBUG_BRACKETS
 
 void prettyP( ostream& os, const list<BaseBracket*> v ){
   os << "[";
@@ -808,215 +814,154 @@ void prettyP( ostream& os, const list<BaseBracket*> v ){
   os << "]";
 }
 
-void resolveAffix( list<BaseBracket*>& result,
-		   size_t pos,
-		   const vector<CLEX::Type>& RightHand,
-		   CLEX::Type ResultClass ){
-  size_t len = RightHand.size();
-  if ( len <= pos ){
-    list<BaseBracket*>::iterator it = result.begin();
-    size_t j = 0;
-    while ( j != pos-len+1 ){
-      ++j;
-      ++it;
+list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
+					   list<BaseBracket*>::iterator & rpos ){
+  size_t len = (*rpos)->RightHand.size();
+#ifdef DEBUG_BRACKETS
+  cerr << "resolve affix, len = " << len << endl;
+#endif
+  size_t j = len-1;
+  list<BaseBracket*>::iterator it = rpos;
+#ifdef DEBUG_BRACKETS
+  cerr << "j=" << j << " it: " << *it << endl;
+#endif
+  for( size_t i=0; i < len-1; ++i ){
+    --it;
+    --j;
+#ifdef DEBUG_BRACKETS
+    cerr << "j=" << j << " it: " << *it << endl;
+#endif
+  }
+  list<BaseBracket*>::iterator bit = it;
+  bool matched = true;
+  for (; matched && j < len; ++j, ++it ){
+#ifdef DEBUG_BRACKETS
+    cerr << "vergelijk " << *it << " met " << (*rpos)->RightHand[j] << endl;
+#endif
+    if ( (*rpos)->RightHand[j] == CLEX::XAFFIX)
+      continue;
+    else if ( (*rpos)->RightHand[j] == CLEX::AFFIX)
+      continue;
+    else if ( (*rpos)->RightHand[j] != (*it)->cls )
+      matched = false;
+  }
+  if ( matched ){
+#ifdef DEBUG_BRACKETS
+    cerr << "OK een match" << endl;
+#endif
+    it = bit--;
+    BaseBracket *tmp = new BracketNest( (*rpos)->cls );
+    for ( size_t j = 0; j < len; ++j ){
+      tmp->append( *it );
+#ifdef DEBUG_BRACKETS
+      cerr << "erase " << *it << endl;
+#endif
+      it = result.erase(it);
     }
-    list<BaseBracket*>::iterator bit = it;
-    bool matched = true;
-    for (; matched && j <= len; ++j, ++it ){
-      cerr << "vergelijk " << *it << " met " << RightHand[j-1] << endl;
-      if ( RightHand[j-1] == CLEX::XAFFIX)
-	continue;
-      else if ( RightHand[j-1] == CLEX::AFFIX)
-	continue;
-      else if ( RightHand[j-1] != (*it)->cls )
-	matched = false;
-    }
-    if ( matched ){
-      cerr << "OK een match" << endl;
-      it = bit--;
-      BaseBracket *tmp = new BracketNest( ResultClass );
-      for ( size_t j = pos-len+1; j <= len; ++j ){
-	tmp->append( *it );
-	cerr << "erase " << *it << endl;
-	it = result.erase(it);
-      }
-      cerr << "new node:" << tmp << endl;
-      result.insert( ++bit, tmp );
-    }
+#ifdef DEBUG_BRACKETS
+    cerr << "new node:" << tmp << endl;
+#endif
+    result.insert( ++bit, tmp );
+    return bit;
+  }
+  else {
+    return ++rpos;
   }
 }
 
-size_t resolveMyInfix( list<BaseBracket*>& result,
-		       size_t pos,
-		       size_t fpos,
-		       const vector<CLEX::Type>& RightHand,
-		       CLEX::Type ResultClass ){
-  size_t retval = pos;
+list<BaseBracket *>::iterator resolveMyInfix( list<BaseBracket*>& result,
+					      list<BaseBracket*>::iterator& rpos ){
+#ifdef DEBUG_BRACKETS
   cerr << "infix *" << endl;
   cerr << "Start met: "; prettyP( cerr, result ); cerr << endl;
-  size_t len = RightHand.size();
+#endif
+  size_t len = (*rpos)->RightHand.size();
   bool matched = true;
-  list<BaseBracket*>::iterator it = result.begin();
-  cerr << "pos = " << pos << " en fpos = " << fpos << endl;
-  size_t j = 0;
-  while ( j != pos-fpos ){
-    ++j;
-    ++it;
+  size_t fpos = (*rpos)->infixpos();
+#ifdef DEBUG_BRACKETS
+  cerr << "fpos = " << fpos << endl;
+#endif
+  size_t j = fpos;
+  list<BaseBracket*>::iterator it = rpos;
+#ifdef DEBUG_BRACKETS
+  cerr << "it = " << *it << endl;
+#endif
+  for ( size_t i=0; i < fpos; ++i ){
+    --it;
+    --j;
+#ifdef DEBUG_BRACKETS
+    cerr << "j=" << j << " it = " << *it << endl;
+#endif
   }
   list<BaseBracket*>::iterator bit = it;
   list<BaseBracket*>::iterator ait;
   for ( ; matched && (j < len) && it != result.end(); ++j, ++it ){
-    cerr << "MyInfix vergelijk " << *it << " met " << RightHand[j-1] << endl;
+#ifdef DEBUG_BRACKETS
+    cerr << "MyInfix vergelijk " << *it << " met " << (*rpos)->RightHand[j] << endl;
     cerr << "morpheme=" << (*it)->morpheme() << endl;
-    if ( (*it)->isNested() && j != len - 1 ){
-      (*it)->resolveInfix();
-    }
-    else if ( (*it)->morpheme().isEmpty() ){
+#endif
+    if ( (*it)->morpheme().isEmpty() ){
       matched = false;
     }
     else {
-      if ( RightHand[j-1] == CLEX::AFFIX){
+      if ( (*rpos)->RightHand[j] == CLEX::AFFIX){
 	ait = it;
 	continue;
       }
-      if ( RightHand[j-1] == CLEX::XAFFIX)
+      if ( (*rpos)->RightHand[j] == CLEX::XAFFIX)
 	continue;
-      if ( RightHand[j-1] != (*it)->cls
+      if ( (*rpos)->RightHand[j] != (*it)->cls
 	   || (*it)->morpheme().isEmpty() )
 	matched = false;
     }
   }
   if ( matched ){
     size_t count = 0;
+#ifdef DEBUG_BRACKETS
     cerr << "Matched! " << endl;
+#endif
     it = bit;
-    BaseBracket *tmp = new BracketNest( CLEX::UNASS );
-    while ( it != ait ){
+    BaseBracket *tmp = new BracketNest( (*rpos)->cls );
+    while ( count != len  ){
       tmp->append( *it );
+#ifdef DEBUG_BRACKETS
       cerr << "erase " << *it << endl;
+#endif
       it = result.erase(it);
       ++count;
-      --retval;
     }
+#ifdef DEBUG_BRACKETS
     cerr << "current result:"; prettyP(cerr,result); cerr << endl;
     cerr << "new node:" << tmp << endl;
+#endif
     result.insert( it, tmp );
-    ++retval;
+#ifdef DEBUG_BRACKETS
     cerr << "current result:"; prettyP(cerr,result); cerr << endl;
-    it = ait;
-    ++it;
-    tmp = new BracketNest(CLEX::UNASS);
-    cerr << "count = " << count << " len = " << len << endl;
-    while ( ++count < len ){
-      tmp->append( *it );
-      cerr << "erase " << *it << endl;
-      it = result.erase(it);
-      --retval;
-    }
-    cerr << "new node:" << tmp << endl;
-    result.insert( ++ait, tmp );
-    ++retval;
-    cerr << "current result:"; prettyP(cerr,result); cerr << endl;
+#endif
+    return ++it;
   }
-  return retval;
+  return ++rpos;
 }
 
-size_t resolveMyInfix1( list<BaseBracket*>& result,
-			size_t pos,
-			size_t fpos,
-			const vector<CLEX::Type>& RightHand,
-			CLEX::Type ResultClass ){
-  size_t retval = pos;
-  cerr << "my infix 1 *" << endl;
-  cerr << "Start met: "; prettyP( cerr, result ); cerr << endl;
-  size_t len = RightHand.size();
-  bool matched = true;
-  list<BaseBracket*>::iterator it = result.begin();
-  size_t j = 0;
-  while ( j != pos-fpos ){
-    ++j;
-    ++it;
-  }
-  list<BaseBracket*>::iterator bit = it;
-  list<BaseBracket*>::iterator ait;
-  for ( ; matched && j < len; ++j, ++it ){
-    cerr << "My infix 1 vergelijk " << *it << " met " << RightHand[j] << endl;
-    if ( RightHand[j] == CLEX::AFFIX){
-      ait = it;
-      continue;
-    }
-    if ( RightHand[j] == CLEX::XAFFIX)
-      continue;
-    else if ( RightHand[j] != (*it)->cls )
-      matched = false;
-  }
-  if ( matched ){
-    cerr << "Matched! " << endl;
-    it = bit;
-    BaseBracket *tmp = new BracketNest( CLEX::UNASS );
-    while ( it != ait ){
-      tmp->append( *it );
-      cerr << "erase " << *it << endl;
-      it = result.erase(it);
-      --retval;
-    }
-    cerr << "current result:"; prettyP(cerr,result); cerr << endl;
-    cerr << "new node:" << tmp << endl;
-    it = ait;
-    result.insert( it, tmp );
-    ++retval;
-    cerr << "current result:"; prettyP(cerr,result); cerr << endl;
-    it = ait;
-    ++it;
-    tmp = new BracketNest( CLEX::UNASS );
-    while ( it != result.end() ){
-      tmp->append( *it );
-      cerr << "erase " << *it << endl;
-      it = result.erase(it);
-      --retval;
-    }
-    cerr << "new node:" << tmp << endl;
-    result.insert( ++ait, tmp );
-    ++retval;
-    cerr << "current result:"; prettyP(cerr,result); cerr << endl;
-  }
-  else {
-    cerr << "MISMATCH" << endl;
-  }
-  return retval;
-}
-
-void BracketNest::resolveInfix(){
-  cerr << "resolve nested infix: ";
-  prettyP( cerr, parts );
-  cerr << endl;
-  list<BaseBracket*>::iterator it = parts.begin();
+void nestedAffix( list<BaseBracket*>& result ){
   size_t pos = 0;
-  size_t apos = -1;
-  while ( apos == -1 && it != parts.end() ){
-    // search for infix rules
-    cerr << "loop " << pos << endl;
-    if ( !(*it)->RightHand.empty() ){
-      // potential candidate
-      cerr << "AHA" << (*it)->RightHand << endl;
-      for( size_t i = 0; i < (*it)->RightHand.size(); ++i ){
-	if ( (*it)->RightHand[i] == CLEX::AFFIX
-	     && i != (*it)->RightHand.size() -1 ){
-	  cerr << (*it)->RightHand << " HIT at pos " << i << endl;
-	  apos = i;
-	  break;
-	}
-      }
-      if ( apos != -1 )
-	break;
+  list<BaseBracket*>::iterator it = result.begin();
+  while ( it != result.end() ){
+    // search for rules with a * at the end
+    size_t len = (*it)->RightHand.size();
+#ifdef DEBUG_BRACKETS
+    cerr << "bekijk: in het nest: " << *it << endl;
+    cerr << "len = " << len << " and pos= " << pos << endl;
+#endif
+    if ( len > 0
+	 && pos+1 >= len
+	 && (*it)->RightHand[len-1] == CLEX::AFFIX ){
+      it = resolveAffix( result, it );
+    }
+    else {
+      ++it;
     }
     ++pos;
-    ++it;
-  }
-  if ( apos != -1 && apos >= pos ){
-    // found one
-    cerr << "found nested infix, pos = " << pos << " and apos=" << apos << endl;
-    resolveMyInfix1( parts, pos, apos, (*it)->RightHand, (*it)->cls );
   }
 }
 
@@ -1026,6 +971,7 @@ void Mbma::resolveBrackets( Rule& rule ){
   cerr << "check rule for bracketing: " << rule << endl;
 #endif
 
+#define EXPERIMENT
 #ifdef EXPERIMENT
   list<BaseBracket *> result;
   for ( size_t k=0; k < rule.rules.size(); ++k ) {
@@ -1033,33 +979,80 @@ void Mbma::resolveBrackets( Rule& rule ){
     BracketLeaf *tmp = new BracketLeaf( rule.rules[k] );
     result.push_back( tmp );
   }
-  cerr << "STEP 1:"; prettyP( cerr, result ); cerr << endl;
-  for ( size_t k=0; k < rule.rules.size(); ++k ) {
-    // search for rules with a * at the end
-    const RulePart *cur = &rule.rules[k];
-    cerr << "bekijk: " << cur << endl;
-    size_t len = cur->RightHand.size();
-    if ( len > 0 && cur->RightHand[len-1] == CLEX::AFFIX ) {
-      resolveAffix( result, k, cur->RightHand, cur->ResultClass );
-    }
-  }
-  cerr << "STEP 2:"; prettyP( cerr,result ); cerr << endl;
   size_t pos = 0;
-  for ( size_t k=0; k < rule.rules.size(); ++k ) {
-    // search for rules with a * in the middle
-    const RulePart *cur = &rule.rules[k];
-    cerr << "hoofd infix loop bekijk: " << cur << endl;
-    size_t len = cur->RightHand.size();
+#ifdef DEBUG_BRACKETS
+  cerr << "STEP 1:"; prettyP( cerr, result ); cerr << endl;
+#endif
+  list<BaseBracket *>::iterator it = result.begin();
+  while ( it != result.end() ){
+    // search for [s] rules with a * in the middle
+#ifdef DEBUG_BRACKETS
+    cerr << "hoofd infix [s] loop bekijk: " << *it << endl;
+#endif
+    size_t len = (*it)->RightHand.size();
     if ( len > 0
-	 && (cur->fixpos < len-1 ) ) {
-      pos = resolveMyInfix( result, pos, cur->fixpos, cur->RightHand, cur->ResultClass );
+	 && (*it)->infixpos() > 0
+	 && (*it)->morpheme() == "s" ) {
+      it = resolveMyInfix( result, it );
     }
     else {
-      ++pos;
+      ++it;
     }
+    ++pos;
   }
+#ifdef DEBUG_BRACKETS
+  cerr << "STEP 2:"; prettyP( cerr,result ); cerr << endl;
+#endif
+  pos = 0;
+  it = result.begin();
+  while ( it != result.end() ){
+    // search for rules with a * at the end
+#ifdef DEBUG_BRACKETS
+    cerr << "search trailing *: bekijk: " << *it << endl;
+#endif
+    if ( (*it)->isNested() ){
+#ifdef DEBUG_BRACKETS
+      cerr << "nested! " << endl;
+#endif
+      nestedAffix( *(*it)->getparts() );
+      ++it;
+    }
+    else {
+      size_t len = (*it)->RightHand.size();
+      if ( len > 0
+	   && pos+1 >= len
+	   && (*it)->RightHand[len-1] == CLEX::AFFIX ){
+	it = resolveAffix( result, it );
+      }
+      else {
+	++it;
+      }
+    }
+    ++pos;
+  }
+#ifdef DEBUG_BRACKETS
   cerr << "STEP 3:"; prettyP( cerr,result ); cerr << endl;
 #endif
+  pos = 0;
+  it = result.begin();
+  while ( it != result.end() ){
+    // now search for other rules with a * in the middle
+#ifdef DEBUG_BRACKETS
+    cerr << "hoofd infix loop bekijk: " << *it << endl;
+#endif
+    size_t len = (*it)->RightHand.size();
+    if ( len > 0
+	 && (*it)->infixpos() < len-1
+	 && (*it)->morpheme() != "s" ) {
+      it = resolveMyInfix( result, it );
+    }
+    else {
+      ++it;
+    }
+    ++pos;
+  }
+  cerr << "Final Bracketing:"; prettyP( cerr,result ); cerr << endl;
+#else
   BaseBracket *first = 0;
   for ( size_t k=0; k < rule.rules.size(); ++k ) {
     const RulePart *cur = &rule.rules[k];
@@ -1150,6 +1143,7 @@ void Mbma::resolveBrackets( Rule& rule ){
   if ( first ){
     cerr << "final bracketing " << first << endl;
   }
+#endif
 }
 
 void Mbma::performEdits( Rule& rule ){
