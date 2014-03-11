@@ -883,7 +883,6 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
 }
 
 void nestedInfix( list<BaseBracket*>& result ){
-  size_t pos = 0;
   list<BaseBracket*>::iterator it = result.begin();
   while ( it != result.end() ){
     // search for rules with a * in the middle
@@ -891,41 +890,17 @@ void nestedInfix( list<BaseBracket*>& result ){
     size_t ipos = (*it)->infixpos();
 #ifdef DEBUG_BRACKETS
     cerr << "bekijk: in het nest: " << *it << endl;
-    cerr << "len = " << len << " and pos= " << pos
-	 << " and ipos= " << ipos << endl;
+    cerr << "len = " << len << " and ipos= " << ipos << endl;
 #endif
     if ( ipos > 0
-	 && ipos < (len-1)
-	 && pos >= ipos ){
+	 && ipos < (len-1) ){
       it = resolveAffix( result, it );
     }
     else {
       ++it;
     }
-    ++pos;
   }
 }
-
-void nestedAffix( list<BaseBracket*>& result ){
-  size_t pos = 0;
-  list<BaseBracket*>::iterator it = result.begin();
-  while ( it != result.end() ){
-    // search for rules with a * at the end
-    size_t len = (*it)->RightHand.size();
-#ifdef DEBUG_BRACKETS
-    cerr << "bekijk: in het nest: " << *it << endl;
-    cerr << "len = " << len << " and pos= " << pos << endl;
-#endif
-    if ( len > 0
-	 && pos+1 >= len ){
-      it = resolveAffix( result, it );
-    }
-    else {
-      ++it;
-    }
-    ++pos;
-  }
- }
 
 void resolveNouns( list<BaseBracket *>& result ){
   list<BaseBracket*>::iterator it = result.begin();
@@ -972,7 +947,7 @@ void resolveLead( list<BaseBracket *>& result ){
 #ifdef DEBUG_BRACKETS
       cerr << "nested! " << endl;
 #endif
-      nestedAffix( *(*it)->getparts() );
+      resolveLead( *(*it)->getparts() );
       ++it;
     }
     else {
@@ -1000,7 +975,7 @@ void resolveTail( list<BaseBracket*>& result ){
 #ifdef DEBUG_BRACKETS
       cerr << "nested! " << endl;
 #endif
-      nestedAffix( *(*it)->getparts() );
+      resolveTail( *(*it)->getparts() );
       ++it;
     }
     else {
@@ -1355,7 +1330,7 @@ void Mbma::execute( const UnicodeString& word,
     Rule rule( allParts[step], word );
     performEdits( rule );
     rule.reduceZeroNodes();
-    resolveBrackets( rule );
+    //    resolveBrackets( rule );
     resolve_inflections( rule );
     string inflect = getCleanInflect( rule );
     CLEX::Type tag = getFinalClass( rule );
