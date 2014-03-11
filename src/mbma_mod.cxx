@@ -882,47 +882,6 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
   }
 }
 
-
-list<BaseBracket *>::iterator resolveInfix( list<BaseBracket*>& result,
-					    const list<BaseBracket*>::iterator& rpos ){
-#ifdef DEBUG_BRACKETS
-  cerr << "infix *" << endl;
-  cerr << "Start met: "; prettyP( cerr, result ); cerr << endl;
-#endif
-  list<BaseBracket*>::iterator  bit;
-  bool matched = testMatch( result, rpos, bit );
-  if ( matched ){
-    size_t len = (*rpos)->RightHand.size();
-    size_t count = 0;
-#ifdef DEBUG_BRACKETS
-    cerr << "Matched! " << endl;
-#endif
-    list<BaseBracket*>::iterator it = bit;
-    BaseBracket *tmp = new BracketNest( (*rpos)->cls );
-    while ( count != len  ){
-      tmp->append( *it );
-#ifdef DEBUG_BRACKETS
-      cerr << "erase " << *it << endl;
-#endif
-      it = result.erase(it);
-      ++count;
-    }
-#ifdef DEBUG_BRACKETS
-    cerr << "current result:"; prettyP(cerr,result); cerr << endl;
-    cerr << "new node:" << tmp << endl;
-#endif
-    result.insert( it, tmp );
-#ifdef DEBUG_BRACKETS
-    cerr << "current result:"; prettyP(cerr,result); cerr << endl;
-#endif
-    return ++it;
-  }
-  else {
-    list<BaseBracket*>::iterator it = rpos;
-    return ++it;
-  }
-}
-
 void nestedInfix( list<BaseBracket*>& result ){
   size_t pos = 0;
   list<BaseBracket*>::iterator it = result.begin();
@@ -938,7 +897,7 @@ void nestedInfix( list<BaseBracket*>& result ){
     if ( ipos > 0
 	 && ipos < (len-1)
 	 && pos >= ipos ){
-      it = resolveInfix( result, it );
+      it = resolveAffix( result, it );
     }
     else {
       ++it;
@@ -1077,7 +1036,7 @@ void resolveMiddle( list<BaseBracket*>& result ){
       size_t len = (*it)->RightHand.size();
       if ( len > 0
 	   && (*it)->infixpos() < len-1 ){
-	it = resolveInfix( result, it );
+	it = resolveAffix( result, it );
       }
       else {
 	++it;
