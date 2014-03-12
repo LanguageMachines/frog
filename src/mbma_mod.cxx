@@ -679,7 +679,7 @@ public:
     cls(t)
   {};
   virtual UnicodeString morpheme() const { return "";};
-  virtual size_t infixpos() const { return 0; };
+  virtual size_t infixpos() const { return -1; };
   virtual UnicodeString put() const;
   virtual BaseBracket *append( BaseBracket * ) = 0;
   virtual bool isNested() { return false; };
@@ -705,7 +705,7 @@ BracketLeaf::BracketLeaf( const RulePart& p ):
   BaseBracket(p.ResultClass, p.RightHand),
   morph(p.morpheme )
 {
-  ifpos = 0;
+  ifpos = -1;
   if ( !p.inflect.empty() ){
     orig = p.inflect;
   }
@@ -803,7 +803,7 @@ bool testMatch( list<BaseBracket*>& result,
   size_t len = (*rpos)->RightHand.size();
   if ( len == 0 || len > result.size() ){
 #ifdef DEBUG_BRACKETS
-    cerr << "test MATCH FAIL (RHS > result)" << endl;
+    cerr << "test MATCH FAIL (no RHS or RHS > result)" << endl;
 #endif
     return false;
   }
@@ -882,26 +882,6 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
   }
 }
 
-void nestedInfix( list<BaseBracket*>& result ){
-  list<BaseBracket*>::iterator it = result.begin();
-  while ( it != result.end() ){
-    // search for rules with a * in the middle
-    size_t len = (*it)->RightHand.size();
-    size_t ipos = (*it)->infixpos();
-#ifdef DEBUG_BRACKETS
-    cerr << "bekijk: in het nest: " << *it << endl;
-    cerr << "len = " << len << " and ipos= " << ipos << endl;
-#endif
-    if ( ipos > 0
-	 && ipos < (len-1) ){
-      it = resolveAffix( result, it );
-    }
-    else {
-      ++it;
-    }
-  }
-}
-
 void resolveNouns( list<BaseBracket *>& result ){
   list<BaseBracket*>::iterator it = result.begin();
   list<BaseBracket*>::iterator prev = it++;
@@ -951,9 +931,7 @@ void resolveLead( list<BaseBracket *>& result ){
       ++it;
     }
     else {
-      size_t len = (*it)->RightHand.size();
-      if ( len > 0
-	   && (*it)->RightHand[0] == CLEX::AFFIX ){
+      if ( (*it)->infixpos() == 0 ){
 	it = resolveAffix( result, it );
       }
       else {
@@ -964,7 +942,6 @@ void resolveLead( list<BaseBracket *>& result ){
 }
 
 void resolveTail( list<BaseBracket*>& result ){
-  size_t pos = 0;
   list<BaseBracket *>::iterator it = result.begin();
   while ( it != result.end() ){
     // search for rules with a * at the end
@@ -980,16 +957,14 @@ void resolveTail( list<BaseBracket*>& result ){
     }
     else {
       size_t len = (*it)->RightHand.size();
-      if ( len > 0
-	   && pos+1 >= len
-	   && (*it)->RightHand[len-1] == CLEX::AFFIX ){
+      if ( (*it)->infixpos() > 0
+	   && (*it)->infixpos() == len-1 ){
 	it = resolveAffix( result, it );
       }
       else {
 	++it;
       }
     }
-      ++pos;
   }
 }
 
@@ -1004,12 +979,12 @@ void resolveMiddle( list<BaseBracket*>& result ){
 #ifdef DEBUG_BRACKETS
       cerr << "nested! " << endl;
 #endif
-      nestedInfix( *(*it)->getparts() );
+      resolveMiddle( *(*it)->getparts() );
       ++it;
     }
     else {
       size_t len = (*it)->RightHand.size();
-      if ( len > 0
+      if ( (*it)->infixpos() > 0
 	   && (*it)->infixpos() < len-1 ){
 	it = resolveAffix( result, it );
       }
