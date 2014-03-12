@@ -540,6 +540,7 @@ RulePart::RulePart( const string& rs, const UChar kar ):
 }
 
 Rule::Rule( const vector<string>& parts, const UnicodeString& s ){
+  brackets = 0;
   for ( size_t k=0; k < parts.size(); ++k ) {
     string this_class = parts[k];
     RulePart cur( this_class, s[k] );
@@ -669,45 +670,13 @@ void Mbma::resolve_inflections( Rule& rule ){
   }
 }
 
-class BaseBracket {
-public:
-  BaseBracket( CLEX::Type t, const vector<CLEX::Type>& R ):
-    cls(t),
-    RightHand(R)
-  {};
-  BaseBracket( CLEX::Type t ):
-    cls(t)
-  {};
-  virtual UnicodeString morpheme() const { return "";};
-  virtual size_t infixpos() const { return -1; };
-  virtual UnicodeString put() const;
-  virtual BaseBracket *append( BaseBracket * ) = 0;
-  virtual bool isNested() { return false; };
-  virtual list<BaseBracket *> *getparts() { return 0; };
-  CLEX::Type cls;
-  vector<CLEX::Type> RightHand;
-};
-
-class BracketLeaf: public BaseBracket {
-public:
-  BracketLeaf( const RulePart& );
-  UnicodeString put() const;
-  UnicodeString morpheme() const { return morph;};
-  BaseBracket *append( BaseBracket * ){ abort();};
-  size_t infixpos() const { return ifpos;};
-private:
-  size_t ifpos;
-  UnicodeString morph;
-  string orig;
-};
-
 BracketLeaf::BracketLeaf( const RulePart& p ):
   BaseBracket(p.ResultClass, p.RightHand),
   morph(p.morpheme )
 {
   ifpos = -1;
   if ( !p.inflect.empty() ){
-    orig = p.inflect;
+    orig = inflect = p.inflect;
   }
   else if ( RightHand.size() == 0 ){
     orig = toString( cls );
@@ -722,20 +691,6 @@ BracketLeaf::BracketLeaf( const RulePart& p ):
     }
   }
 }
-
-class BracketNest: public BaseBracket {
-public:
-  BracketNest( CLEX::Type t ): BaseBracket( t ){};
-  BaseBracket *append( BaseBracket *t ){
-    parts.push_back( t );
-    return this;
-  };
-  bool isNested() { return true; };
-  UnicodeString put() const;
-  list<BaseBracket *> *getparts() { return &parts; };
-private:
-  list<BaseBracket *> parts;
-};
 
 
 UnicodeString BaseBracket::put() const {
@@ -783,7 +738,7 @@ ostream& operator<< ( ostream& os, const BaseBracket *c ){
 
 //#define DEBUG_BRACKETS
 
-void prettyP( ostream& os, const list<BaseBracket*> v ){
+void prettyP( ostream& os, const list<BaseBracket*>& v ){
   os << "[";
   for ( list<BaseBracket*>::const_iterator it = v.begin();
 	it != v.end();
@@ -882,30 +837,31 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
   }
 }
 
-void resolveNouns( list<BaseBracket *>& result ){
-  list<BaseBracket*>::iterator it = result.begin();
+void resolveNouns( BracketNest *brackets ){
+  list<BaseBracket*> *parts = brackets->getparts();
+  list<BaseBracket*>::iterator it = parts->begin();
   list<BaseBracket*>::iterator prev = it++;
-  while ( it != result.end() ){
+  while ( it != parts->end() ){
     if ( (*prev)->cls == CLEX::N && (*prev)->RightHand.size() == 0
 	 && (*it)->cls == CLEX::N && (*it)->RightHand.size() == 0 ){
       BaseBracket *tmp = new BracketNest( CLEX::N );
       tmp->append( *prev );
       tmp->append( *it );
 #ifdef DEBUG_BRACKETS
-      cerr << "current result:"; prettyP(cerr,result); cerr << endl;
+      cerr << "current result:" << brackets << endl;
       cerr << "new node:" << tmp << endl;
 #endif
 #ifdef DEBUG_BRACKETS
       cerr << "erase " << *prev << endl;
 #endif
-      prev = result.erase(prev);
+      prev = parts->erase(prev);
 #ifdef DEBUG_BRACKETS
       cerr << "erase " << *prev << endl;
 #endif
-      prev = result.erase(prev);
-      result.insert( prev, tmp );
+      prev = parts->erase(prev);
+      parts->insert( prev, tmp );
 #ifdef DEBUG_BRACKETS
-      cerr << "current result:"; prettyP(cerr,result); cerr << endl;
+      cerr << "current result:" << brackets << endl;
 #endif
       it = prev;
       ++it;
@@ -916,9 +872,10 @@ void resolveNouns( list<BaseBracket *>& result ){
   }
 }
 
-void resolveLead( list<BaseBracket *>& result ){
-  list<BaseBracket*>::iterator it = result.begin();
-  while ( it != result.end() ){
+void resolveLead( BracketNest *brackets ){
+  list<BaseBracket*> *parts = brackets->getparts();
+  list<BaseBracket*>::iterator it = parts->begin();
+  while ( it != parts->end() ){
     // search for rules with a * at the begin
 #ifdef DEBUG_BRACKETS
     cerr << "search leading *: bekijk: " << *it << endl;
@@ -927,12 +884,12 @@ void resolveLead( list<BaseBracket *>& result ){
 #ifdef DEBUG_BRACKETS
       cerr << "nested! " << endl;
 #endif
-      resolveLead( *(*it)->getparts() );
+      resolveLead( dynamic_cast<BracketNest*>( (*it) ) );
       ++it;
     }
     else {
       if ( (*it)->infixpos() == 0 ){
-	it = resolveAffix( result, it );
+	it = resolveAffix( *parts, it );
       }
       else {
 	++it;
@@ -941,9 +898,10 @@ void resolveLead( list<BaseBracket *>& result ){
   }
 }
 
-void resolveTail( list<BaseBracket*>& result ){
-  list<BaseBracket *>::iterator it = result.begin();
-  while ( it != result.end() ){
+void resolveTail( BracketNest *brackets ){
+  list<BaseBracket*> *parts = brackets->getparts();
+  list<BaseBracket *>::iterator it = parts->begin();
+  while ( it != parts->end() ){
     // search for rules with a * at the end
 #ifdef DEBUG_BRACKETS
     cerr << "search trailing *: bekijk: " << *it << endl;
@@ -952,14 +910,14 @@ void resolveTail( list<BaseBracket*>& result ){
 #ifdef DEBUG_BRACKETS
       cerr << "nested! " << endl;
 #endif
-      resolveTail( *(*it)->getparts() );
+      resolveTail( dynamic_cast<BracketNest*>( *it ) );
       ++it;
     }
     else {
       size_t len = (*it)->RightHand.size();
       if ( (*it)->infixpos() > 0
 	   && (*it)->infixpos() == len-1 ){
-	it = resolveAffix( result, it );
+	it = resolveAffix( *parts, it );
       }
       else {
 	++it;
@@ -968,9 +926,10 @@ void resolveTail( list<BaseBracket*>& result ){
   }
 }
 
-void resolveMiddle( list<BaseBracket*>& result ){
-  list<BaseBracket*>::iterator it = result.begin();
-  while ( it != result.end() ){
+void resolveMiddle( BracketNest *brackets ){
+  list<BaseBracket*> *parts = brackets->getparts();
+  list<BaseBracket*>::iterator it = parts->begin();
+  while ( it != parts->end() ){
     // now search for other rules with a * in the middle
 #ifdef DEBUG_BRACKETS
     cerr << "hoofd infix loop bekijk: " << *it << endl;
@@ -979,14 +938,14 @@ void resolveMiddle( list<BaseBracket*>& result ){
 #ifdef DEBUG_BRACKETS
       cerr << "nested! " << endl;
 #endif
-      resolveMiddle( *(*it)->getparts() );
+      resolveMiddle( dynamic_cast<BracketNest*>( *it ) );
       ++it;
     }
     else {
       size_t len = (*it)->RightHand.size();
       if ( (*it)->infixpos() > 0
 	   && (*it)->infixpos() < len-1 ){
-	it = resolveAffix( result, it );
+	it = resolveAffix( *parts, it );
       }
       else {
 	++it;
@@ -995,42 +954,63 @@ void resolveMiddle( list<BaseBracket*>& result ){
   }
 }
 
-void Mbma::resolveBrackets( Rule& rule ){
+CLEX::Type getFinalTag( BracketNest *brackets ){
+  // cerr << "get Final Tag from: " << brackets << endl;
+  list<BaseBracket*> *parts = brackets->getparts();
+  list<BaseBracket*>::const_reverse_iterator it = parts->rbegin();
+  while ( it != parts->rend() ){
+    // cerr << "bekijk: " << *it << endl;
+    if ( (*it)->isNested()
+	 || ( (*it)->inflection().empty()
+	      && !(*it)->morpheme().isEmpty() ) ){
+      // cerr << "final tag = " << (*it)->cls << endl;
+      return (*it)->cls;
+    }
+    ++it;
+  }
+  //  cerr << "final tag = X " << endl;
+  return CLEX::X;
+}
+
+CLEX::Type Rule::resolveBrackets() {
 #ifdef DEBUG_BRACKETS
-  cerr << "check rule for bracketing: " << rule << endl;
+  cerr << "check rule for bracketing: " << this << endl;
 #endif
 
-  list<BaseBracket *> result;
-  for ( size_t k=0; k < rule.rules.size(); ++k ) {
+  brackets = new BracketNest( CLEX::UNASS );
+  for ( size_t k=0; k < rules.size(); ++k ) {
     // fill a flat result;
-    BracketLeaf *tmp = new BracketLeaf( rule.rules[k] );
-    result.push_back( tmp );
+    BracketLeaf *tmp = new BracketLeaf( rules[k] );
+    brackets->append( tmp );
   }
 #ifdef DEBUG_BRACKETS
-  cerr << "STEP 1:"; prettyP( cerr, result ); cerr << endl;
+  cerr << "STEP 1:" << brackets << endl;
 #endif
 
-  resolveNouns( result );
+  resolveNouns( brackets );
 
 #ifdef DEBUG_BRACKETS
-  cerr << "STEP 2:"; prettyP( cerr, result ); cerr << endl;
+  cerr << "STEP 2:" << brackets << endl;
 #endif
 
-  resolveLead( result );
+  resolveLead( brackets );
 
 #ifdef DEBUG_BRACKETS
-  cerr << "STEP 3:"; prettyP( cerr,result ); cerr << endl;
+  cerr << "STEP 3:" << brackets << endl;
 #endif
 
-  resolveTail( result );
+  resolveTail( brackets );
 
 #ifdef DEBUG_BRACKETS
-  cerr << "STEP 4:"; prettyP( cerr,result ); cerr << endl;
+  cerr << "STEP 4:" << brackets << endl;
 #endif
 
-  resolveMiddle( result );
+  resolveMiddle( brackets );
 
-  cerr << "Final Bracketing:"; prettyP( cerr,result ); cerr << endl;
+  CLEX::Type finalTag = getFinalTag( brackets );
+  brackets->cls = finalTag;
+  cerr << "Final Bracketing:" << brackets << endl;
+  return finalTag;
 }
 
 void Mbma::performEdits( Rule& rule ){
@@ -1104,9 +1084,9 @@ void Mbma::performEdits( Rule& rule ){
 
 }
 
-MBMAana::MBMAana( CLEX::Type Tag, const Rule& rule,
-		  const string& inflect ){
-  morphemes = rule.extract_morphemes();
+MBMAana::MBMAana( const Rule& r ): rule(r) {
+  CLEX::Type Tag = rule.resolveBrackets();
+  infl = rule.getCleanInflect();
   map<CLEX::Type,string>::const_iterator tit = tagNames.find( Tag );
   if ( tit == tagNames.end() ){
     // unknown tag
@@ -1117,37 +1097,13 @@ MBMAana::MBMAana( CLEX::Type Tag, const Rule& rule,
     tag = toString(Tag);
     description = tit->second;
   }
-  infl = inflect;
 }
 
-CLEX::Type Mbma::getFinalClass( const Rule& rule ){
-  // Determine the CLEX type of the last NON-inflectional morpheme.
-  CLEX::Type result = CLEX::UNASS;
-  vector<RulePart>::const_reverse_iterator it = rule.rules.rbegin();
-  while ( it != rule.rules.rend() ) {
-    if (debugFlag){
-      *Log(mbmaLog) << "examine rulepart " << *it << endl;
-    }
-    if ( !it->morpheme.isEmpty() ){
-      if ( it->inflect.empty() ){
-	result = it->ResultClass;
-	if (debugFlag){
-	  *Log(mbmaLog) << "found result class " << it->ResultClass << endl;
-	}
-	break;
-      }
-    }
-    ++it;
-  }
-  return result;
-}
-
-
-string Mbma::getCleanInflect( Rule& rule ){
+string Rule::getCleanInflect() const {
   // get the FIRST inflection and clean it up by extracting only
   //  known inflection names
-  vector<RulePart>::iterator it = rule.rules.begin();
-  while ( it != rule.rules.end() ) {
+  vector<RulePart>::const_iterator it = rules.begin();
+  while ( it != rules.end() ) {
     if ( !it->inflect.empty() ){
       //      cerr << "x inflect:'" << it->inflect << "'" << endl;
       string inflect;
@@ -1157,21 +1113,17 @@ string Mbma::getCleanInflect( Rule& rule ){
 	  //	    cerr << "x bekijk [" << it->inflect[i] << "]" << endl;
 	  map<char,string>::const_iterator csIt = iNames.find(it->inflect[i]);
 	  if ( csIt == iNames.end() ){
-	    if (debugFlag)
-	      *Log(mbmaLog) << "added unknown inflection X" << endl;
+	    // cerr << "added unknown inflection X" << endl;
 	    inflect += "X";
 	  }
 	  else {
-	    if (debugFlag)
-	      *Log(mbmaLog) << "added known inflection " << csIt->first
-			    << " (" << csIt->second << ")" << endl;
+	    // cerr << "added known inflection " << csIt->first
+	    // 	 << " (" << csIt->second << ")" << endl;
 	    inflect += it->inflect[i];
 	  }
 	}
       }
-      if ( debugFlag ){
-	*Log(mbmaLog) << "cleaned inflection " << inflect << endl;
-      }
+      //      cerr << "cleaned inflection " << inflect << endl;
       return inflect;
     }
     ++it;
@@ -1305,11 +1257,8 @@ void Mbma::execute( const UnicodeString& word,
     Rule rule( allParts[step], word );
     performEdits( rule );
     rule.reduceZeroNodes();
-    //    resolveBrackets( rule );
     resolve_inflections( rule );
-    string inflect = getCleanInflect( rule );
-    CLEX::Type tag = getFinalClass( rule );
-    MBMAana tmp = MBMAana( tag, rule, inflect );
+    MBMAana tmp = MBMAana( rule );
     if ( debugFlag ){
       *Log(mbmaLog) << "1 added Inflection: " << tmp << endl;
     }
@@ -1615,7 +1564,7 @@ vector<vector<string> > Mbma::getResult() const {
 
 ostream& operator<< ( ostream& os, const MBMAana& a ){
   os << "tag: " << a.tag << " infl:" << a.infl << " morhemes: "
-     << a.morphemes << " description: " << a.description;
+     << a.rule.extract_morphemes() << " description: " << a.description;
   return os;
 }
 

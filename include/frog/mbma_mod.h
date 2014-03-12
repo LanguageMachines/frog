@@ -32,12 +32,63 @@
 #include <unicode/translit.h>
 
 class MBMAana;
+class RulePart;
 
 namespace CLEX {
   enum Type { UNASS, N, A, Q, V, D, O, B, P, Y, I, X, Z, PN, AFFIX, XAFFIX,
 	      NEUTRAL };
   std::string toString( const Type& t );
 }
+
+class BaseBracket {
+public:
+ BaseBracket( CLEX::Type t, const std::vector<CLEX::Type>& R ):
+  cls(t),
+    RightHand(R)
+    {};
+  BaseBracket( CLEX::Type t ):
+  cls(t)
+  {};
+  virtual UnicodeString morpheme() const { return "";};
+  virtual std::string inflection() const { return ""; };
+  virtual size_t infixpos() const { return -1; };
+  virtual UnicodeString put() const;
+  virtual BaseBracket *append( BaseBracket * ) = 0;
+  virtual bool isNested() { return false; };
+  virtual std::list<BaseBracket *> *getparts() { return 0; };
+  CLEX::Type cls;
+  std::vector<CLEX::Type> RightHand;
+};
+
+class BracketLeaf: public BaseBracket {
+public:
+  BracketLeaf( const RulePart& );
+  UnicodeString put() const;
+  UnicodeString morpheme() const { return morph; };
+  std::string inflection() const { return inflect; };
+  BaseBracket *append( BaseBracket * ){ abort(); };
+  size_t infixpos() const { return ifpos; };
+private:
+  size_t ifpos;
+  UnicodeString morph;
+  std::string orig;
+  std::string inflect;
+};
+
+class BracketNest: public BaseBracket {
+ public:
+ BracketNest( CLEX::Type t ): BaseBracket( t ){};
+  BaseBracket *append( BaseBracket *t ){
+    parts.push_back( t );
+    return this;
+  };
+  bool isNested() { return true; };
+  UnicodeString put() const;
+  std::list<BaseBracket *> *getparts() { return &parts; };
+private:
+  std::list<BaseBracket *> parts;
+};
+
 
 class RulePart {
 public:
@@ -61,11 +112,15 @@ class Rule {
 public:
   Rule( const std::vector<std::string>&, const UnicodeString& );
   std::vector<std::string> extract_morphemes() const;
+  std::string getCleanInflect() const;
   void reduceZeroNodes();
+  CLEX::Type resolveBrackets( );
   std::vector<RulePart> rules;
+  BracketNest *brackets;
 };
 
 static std::map<CLEX::Type,std::string> tagNames;
+static std::map<char,std::string> iNames;
 
 class Mbma {
  public:
@@ -87,10 +142,8 @@ class Mbma {
   void getFoLiAResult( folia::Word *, const UnicodeString& ) const;
   std::vector<std::string> make_instances( const UnicodeString& word );
   void performEdits( Rule& );
-  void resolveBrackets( Rule& );
   void resolve_inflections( Rule& );
-  CLEX::Type getFinalClass( const Rule& rule );
-  std::string getCleanInflect( Rule& );
+  CLEX::Type getFinalTag( const std::list<BaseBracket*>& );
   void execute( const UnicodeString& word,
 		const std::vector<std::string>& classes );
   int debugFlag;
@@ -100,7 +153,6 @@ class Mbma {
   void addAltMorph( folia::Word *, const std::vector<std::string>& ) const;
   std::string MTreeFilename;
   Timbl::TimblAPI *MTree;
-  std::map<char,std::string> iNames;
   std::map<std::string,std::string> TAGconv;
   std::vector<MBMAana> analysis;
   std::string version;
@@ -115,12 +167,7 @@ class MBMAana {
   friend std::ostream& operator<< ( std::ostream& , const MBMAana& );
   friend std::ostream& operator<< ( std::ostream& , const MBMAana* );
   public:
-  MBMAana() {
-    tag = "";
-    infl = "";
-    description = "";
-  };
-  MBMAana( const CLEX::Type , const Rule&,  const std::string& );
+  MBMAana(const Rule& );
 
   ~MBMAana() {};
 
@@ -128,19 +175,23 @@ class MBMAana {
     return tag;
   };
 
+  const Rule& getRule() const {
+    return rule;
+  };
+
   std::string getInflection() const {
     return infl;
   };
 
-  const std::vector<std::string>& getMorph() const {
-    return morphemes;
+  const std::vector<std::string> getMorph() const {
+    return rule.extract_morphemes();
   };
 
  private:
   std::string tag;
   std::string infl;
-  std::vector<std::string> morphemes;
   std::string description;
+  Rule rule;
 };
 
 #endif
