@@ -781,10 +781,10 @@ bool testMatch( list<BaseBracket*>& result,
       continue;
     else if ( (*rpos)->RightHand[j] == CLEX::AFFIX)
       continue;
-    else if ( (*rpos)->RightHand[j] != (*it)->cls ){
+    else if ( (*rpos)->RightHand[j] != (*it)->tag() ){
 #ifdef DEBUG_BRACKETS
       cerr << "test MATCH FAIL (" << (*rpos)->RightHand[j]
-	   << " != " << (*it)->cls << ")" << endl;
+	   << " != " << (*it)->tag() << ")" << endl;
 #endif
       bpos = result.end();
       return false;
@@ -817,7 +817,7 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
 #endif
     size_t len = (*rpos)->RightHand.size();
     list<BaseBracket*>::iterator it = bit--;
-    BaseBracket *tmp = new BracketNest( (*rpos)->cls );
+    BaseBracket *tmp = new BracketNest( (*rpos)->tag() );
     for ( size_t j = 0; j < len; ++j ){
       tmp->append( *it );
 #ifdef DEBUG_BRACKETS
@@ -837,13 +837,12 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
   }
 }
 
-void resolveNouns( BracketNest *brackets ){
-  list<BaseBracket*> *parts = brackets->getparts();
-  list<BaseBracket*>::iterator it = parts->begin();
+void BracketNest::resolveNouns( ){
+  list<BaseBracket*>::iterator it = parts.begin();
   list<BaseBracket*>::iterator prev = it++;
-  while ( it != parts->end() ){
-    if ( (*prev)->cls == CLEX::N && (*prev)->RightHand.size() == 0
-	 && (*it)->cls == CLEX::N && (*it)->RightHand.size() == 0 ){
+  while ( it != parts.end() ){
+    if ( (*prev)->tag() == CLEX::N && (*prev)->RightHand.size() == 0
+	 && (*it)->tag() == CLEX::N && (*it)->RightHand.size() == 0 ){
       BaseBracket *tmp = new BracketNest( CLEX::N );
       tmp->append( *prev );
       tmp->append( *it );
@@ -854,12 +853,12 @@ void resolveNouns( BracketNest *brackets ){
 #ifdef DEBUG_BRACKETS
       cerr << "erase " << *prev << endl;
 #endif
-      prev = parts->erase(prev);
+      prev = parts.erase(prev);
 #ifdef DEBUG_BRACKETS
       cerr << "erase " << *prev << endl;
 #endif
-      prev = parts->erase(prev);
-      parts->insert( prev, tmp );
+      prev = parts.erase(prev);
+      parts.insert( prev, tmp );
 #ifdef DEBUG_BRACKETS
       cerr << "current result:" << brackets << endl;
 #endif
@@ -872,10 +871,9 @@ void resolveNouns( BracketNest *brackets ){
   }
 }
 
-void resolveLead( BracketNest *brackets ){
-  list<BaseBracket*> *parts = brackets->getparts();
-  list<BaseBracket*>::iterator it = parts->begin();
-  while ( it != parts->end() ){
+void BracketNest::resolveLead( ){
+  list<BaseBracket*>::iterator it = parts.begin();
+  while ( it != parts.end() ){
     // search for rules with a * at the begin
 #ifdef DEBUG_BRACKETS
     cerr << "search leading *: bekijk: " << *it << endl;
@@ -884,12 +882,12 @@ void resolveLead( BracketNest *brackets ){
 #ifdef DEBUG_BRACKETS
       cerr << "nested! " << endl;
 #endif
-      resolveLead( dynamic_cast<BracketNest*>( (*it) ) );
+      (*it)->resolveLead();
       ++it;
     }
     else {
       if ( (*it)->infixpos() == 0 ){
-	it = resolveAffix( *parts, it );
+	it = resolveAffix( parts, it );
       }
       else {
 	++it;
@@ -898,10 +896,9 @@ void resolveLead( BracketNest *brackets ){
   }
 }
 
-void resolveTail( BracketNest *brackets ){
-  list<BaseBracket*> *parts = brackets->getparts();
-  list<BaseBracket *>::iterator it = parts->begin();
-  while ( it != parts->end() ){
+void BracketNest::resolveTail(){
+  list<BaseBracket *>::iterator it = parts.begin();
+  while ( it != parts.end() ){
     // search for rules with a * at the end
 #ifdef DEBUG_BRACKETS
     cerr << "search trailing *: bekijk: " << *it << endl;
@@ -910,14 +907,14 @@ void resolveTail( BracketNest *brackets ){
 #ifdef DEBUG_BRACKETS
       cerr << "nested! " << endl;
 #endif
-      resolveTail( dynamic_cast<BracketNest*>( *it ) );
+      (*it)->resolveTail();
       ++it;
     }
     else {
       size_t len = (*it)->RightHand.size();
       if ( (*it)->infixpos() > 0
 	   && (*it)->infixpos() == len-1 ){
-	it = resolveAffix( *parts, it );
+	it = resolveAffix( parts, it );
       }
       else {
 	++it;
@@ -926,10 +923,9 @@ void resolveTail( BracketNest *brackets ){
   }
 }
 
-void resolveMiddle( BracketNest *brackets ){
-  list<BaseBracket*> *parts = brackets->getparts();
-  list<BaseBracket*>::iterator it = parts->begin();
-  while ( it != parts->end() ){
+void BracketNest::resolveMiddle(){
+  list<BaseBracket*>::iterator it = parts.begin();
+  while ( it != parts.end() ){
     // now search for other rules with a * in the middle
 #ifdef DEBUG_BRACKETS
     cerr << "hoofd infix loop bekijk: " << *it << endl;
@@ -938,14 +934,14 @@ void resolveMiddle( BracketNest *brackets ){
 #ifdef DEBUG_BRACKETS
       cerr << "nested! " << endl;
 #endif
-      resolveMiddle( dynamic_cast<BracketNest*>( *it ) );
+      (*it)->resolveMiddle( );
       ++it;
     }
     else {
       size_t len = (*it)->RightHand.size();
       if ( (*it)->infixpos() > 0
 	   && (*it)->infixpos() < len-1 ){
-	it = resolveAffix( *parts, it );
+	it = resolveAffix( parts, it );
       }
       else {
 	++it;
@@ -954,22 +950,23 @@ void resolveMiddle( BracketNest *brackets ){
   }
 }
 
-CLEX::Type getFinalTag( BracketNest *brackets ){
-  // cerr << "get Final Tag from: " << brackets << endl;
-  list<BaseBracket*> *parts = brackets->getparts();
-  list<BaseBracket*>::const_reverse_iterator it = parts->rbegin();
-  while ( it != parts->rend() ){
+CLEX::Type BracketNest::getFinalTag() {
+  // cerr << "get Final Tag from: " << this << endl;
+  cls = CLEX::X;
+  list<BaseBracket*>::const_reverse_iterator it = parts.rbegin();
+  while ( it != parts.rend() ){
     // cerr << "bekijk: " << *it << endl;
     if ( (*it)->isNested()
 	 || ( (*it)->inflection().empty()
 	      && !(*it)->morpheme().isEmpty() ) ){
-      // cerr << "final tag = " << (*it)->cls << endl;
-      return (*it)->cls;
+      cls = (*it)->tag();
+      // cerr << "final tag = " << cls << endl;
+      break;
     }
     ++it;
   }
   //  cerr << "final tag = X " << endl;
-  return CLEX::X;
+  return cls;
 }
 
 CLEX::Type Rule::resolveBrackets() {
@@ -987,29 +984,30 @@ CLEX::Type Rule::resolveBrackets() {
   cerr << "STEP 1:" << brackets << endl;
 #endif
 
-  resolveNouns( brackets );
+  brackets->resolveNouns( );
 
 #ifdef DEBUG_BRACKETS
   cerr << "STEP 2:" << brackets << endl;
 #endif
 
-  resolveLead( brackets );
+  brackets->resolveLead( );
 
 #ifdef DEBUG_BRACKETS
   cerr << "STEP 3:" << brackets << endl;
 #endif
 
-  resolveTail( brackets );
+  brackets->resolveTail( );
 
 #ifdef DEBUG_BRACKETS
   cerr << "STEP 4:" << brackets << endl;
 #endif
 
-  resolveMiddle( brackets );
+  brackets->resolveMiddle();
 
-  CLEX::Type finalTag = getFinalTag( brackets );
-  brackets->cls = finalTag;
+  CLEX::Type finalTag = brackets->getFinalTag();
+#ifdef DEBUG_BRACKETS
   cerr << "Final Bracketing:" << brackets << endl;
+#endif
   return finalTag;
 }
 

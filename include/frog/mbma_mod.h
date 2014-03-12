@@ -43,9 +43,9 @@ namespace CLEX {
 class BaseBracket {
 public:
  BaseBracket( CLEX::Type t, const std::vector<CLEX::Type>& R ):
-  cls(t),
-    RightHand(R)
-    {};
+  RightHand(R),
+  cls(t)
+   {};
   BaseBracket( CLEX::Type t ):
   cls(t)
   {};
@@ -53,11 +53,15 @@ public:
   virtual std::string inflection() const { return ""; };
   virtual size_t infixpos() const { return -1; };
   virtual UnicodeString put() const;
-  virtual BaseBracket *append( BaseBracket * ) = 0;
+  virtual BaseBracket *append( BaseBracket * ){ abort(); };
   virtual bool isNested() { return false; };
-  virtual std::list<BaseBracket *> *getparts() { return 0; };
-  CLEX::Type cls;
+  virtual void resolveLead(){ abort(); };
+  virtual void resolveTail(){ abort(); };
+  virtual void resolveMiddle(){ abort(); };
+  CLEX::Type tag() const { return cls; };
   std::vector<CLEX::Type> RightHand;
+ protected:
+  CLEX::Type cls;
 };
 
 class BracketLeaf: public BaseBracket {
@@ -66,7 +70,6 @@ public:
   UnicodeString put() const;
   UnicodeString morpheme() const { return morph; };
   std::string inflection() const { return inflect; };
-  BaseBracket *append( BaseBracket * ){ abort(); };
   size_t infixpos() const { return ifpos; };
 private:
   size_t ifpos;
@@ -84,7 +87,11 @@ class BracketNest: public BaseBracket {
   };
   bool isNested() { return true; };
   UnicodeString put() const;
-  std::list<BaseBracket *> *getparts() { return &parts; };
+  void resolveNouns();
+  void resolveLead();
+  void resolveTail();
+  void resolveMiddle();
+  CLEX::Type getFinalTag();
 private:
   std::list<BaseBracket *> parts;
 };
