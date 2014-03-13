@@ -185,6 +185,7 @@ class Mbma {
   std::string version;
   std::string tagset;
   std::string cgn_tagset;
+  std::string clex_tagset;
   TiCC::LogStream *mbmaLog;
   Transliterator *transliterator;
   Tokenizer::UnicodeFilter *filter;

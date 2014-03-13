@@ -322,6 +322,13 @@ bool Mbma::init( const Configuration& config ) {
   else
     cgn_tagset = val;
 
+  val = config.lookUp( "set", "clex" );
+  if ( val.empty() ){
+    clex_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-clex";
+  }
+  else
+    clex_tagset = val;
+
   string charFile = config.lookUp( "char_filter_file", "mbma" );
   if ( charFile.empty() )
     charFile = config.lookUp( "char_filter_file" );
@@ -1316,7 +1323,7 @@ void Mbma::addBracketMorph( Word *word,
     result->append( t );
   }
   args.clear();
-  args["set"] = cgn_tagset;
+  args["set"] = clex_tagset;
   args["cls"] = tag;
 #pragma omp critical(foliaupdate)
   {
@@ -1339,7 +1346,7 @@ void Mbma::addBracketMorph( Word *word,
   int offset = 0;
   list<BaseBracket*>::const_iterator it = rule.brackets->parts.begin();
   while ( it != rule.brackets->parts.end() ){
-    Morpheme *m = (*it)->createMorpheme( word->doc(), cgn_tagset, offset );
+    Morpheme *m = (*it)->createMorpheme( word->doc(), clex_tagset, offset );
     if ( m ){
 #pragma omp critical(foliaupdate)
       {
@@ -1350,7 +1357,7 @@ void Mbma::addBracketMorph( Word *word,
   }
 #else
   int offset = 0;
-  Morpheme *m = rule.brackets->createMorpheme( word->doc(), cgn_tagset, offset );
+  Morpheme *m = rule.brackets->createMorpheme( word->doc(), clex_tagset, offset );
   if ( m ){
 #pragma omp critical(foliaupdate)
     {
@@ -1373,7 +1380,7 @@ void Mbma::addAltBracketMorph( Word *word,
   int offset = 0;
   list<BaseBracket*>::const_iterator it = rule.brackets->parts.begin();
   while ( it != rule.brackets->parts.end() ){
-    Morpheme *m = (*it)->createMorpheme( word->doc(), cgn_tagset, offset );
+    Morpheme *m = (*it)->createMorpheme( word->doc(), clex_tagset, offset );
     if ( m ){
 #pragma omp critical(foliaupdate)
       {
@@ -1384,7 +1391,7 @@ void Mbma::addAltBracketMorph( Word *word,
   }
 #else
   int offset = 0;
-  Morpheme *m = rule.brackets->createMorpheme( word->doc(), cgn_tagset, offset );
+  Morpheme *m = rule.brackets->createMorpheme( word->doc(), clex_tagset, offset );
   if ( m ){
 #pragma omp critical(foliaupdate)
     {
@@ -1415,10 +1422,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     args.clear();
     args["set"]  = tagset;
     args["cls"]  = toString( tag() );
-    folia::FoliaElement *pos = 0;
 #pragma omp critical(foliaupdate)
     {
-      pos = result->addPosAnnotation( args );
+      result->addPosAnnotation( args );
     }
   }
   else if ( status == INFLECTION ){
@@ -1455,10 +1461,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     args.clear();
     args["set"]  = tagset;
     args["cls"]  = orig;
-    folia::FoliaElement *pos = 0;
 #pragma omp critical(foliaupdate)
     {
-      pos = result->addPosAnnotation( args );
+      result->addPosAnnotation( args );
     }
   }
   return result;
@@ -1473,10 +1478,9 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
   args.clear();
   args["set"]  = tagset;
   args["cls"]  = toString( tag() );
-  folia::FoliaElement *pos = 0;
 #pragma omp critical(foliaupdate)
   {
-    pos = result->addPosAnnotation( args );
+    result->addPosAnnotation( args );
   }
   list<BaseBracket*>::const_iterator it = parts.begin();
   string mor;
@@ -1698,10 +1702,16 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
     }
   }
 }
+
 void Mbma::addDeclaration( Document& doc ) const {
   doc.declare( AnnotationType::MORPHOLOGICAL, tagset,
 	       "annotator='frog-mbma-" +  version +
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
+  if ( doDaring ){
+    doc.declare( AnnotationType::POS, clex_tagset,
+		 "annotator='frog-mbma-" +  version +
+		 + "', annotatortype='auto', datetime='" + getTime() + "'");
+  }
 }
 
 UnicodeString Mbma::filterDiacritics( const UnicodeString& in ) const {
