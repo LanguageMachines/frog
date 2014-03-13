@@ -46,7 +46,7 @@ const long int LEFT =  6; // left context
 const long int RIGHT = 6; // right context
 
 Mbma::Mbma(): MTreeFilename( "dm.igtree" ), MTree(0),
-	      transliterator(0), filter(0) {
+	      transliterator(0), filter(0), doDaring(false) {
   mbmaLog = new LogStream( theErrLog, "mbma-" );
 }
 
@@ -677,9 +677,16 @@ BracketLeaf::BracketLeaf( const RulePart& p ):
   ifpos = -1;
   if ( !p.inflect.empty() ){
     orig = inflect = p.inflect;
+    if ( p.ResultClass == CLEX::UNASS ){
+      status = INFLECTION;
+    }
+    else {
+      status = INFO;
+    }
   }
   else if ( RightHand.size() == 0 ){
     orig = toString( cls );
+    status = STEM;
   }
   else {
     orig = toString( cls );
@@ -689,6 +696,7 @@ BracketLeaf::BracketLeaf( const RulePart& p ):
       if ( RightHand[i] == CLEX::AFFIX )
 	ifpos = i;
     }
+    status = DERIVATIONAL;
   }
 }
 
@@ -832,6 +840,9 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
     return bit;
   }
   else {
+    if ( (*rpos)->RightHand.size() > 0 ){
+      (*rpos)->setFail();
+    }
     list<BaseBracket*>::iterator it = rpos;
     return ++it;
   }
@@ -969,7 +980,7 @@ CLEX::Type BracketNest::getFinalTag() {
   return cls;
 }
 
-CLEX::Type Rule::resolveBrackets() {
+CLEX::Type Rule::resolveBrackets( bool daring ) {
 #ifdef DEBUG_BRACKETS
   cerr << "check rule for bracketing: " << this << endl;
 #endif
@@ -983,27 +994,27 @@ CLEX::Type Rule::resolveBrackets() {
 #ifdef DEBUG_BRACKETS
   cerr << "STEP 1:" << brackets << endl;
 #endif
-
-  brackets->resolveNouns( );
-
-#ifdef DEBUG_BRACKETS
-  cerr << "STEP 2:" << brackets << endl;
-#endif
-
-  brackets->resolveLead( );
+  if ( daring ){
+    brackets->resolveNouns( );
 
 #ifdef DEBUG_BRACKETS
-  cerr << "STEP 3:" << brackets << endl;
+    cerr << "STEP 2:" << brackets << endl;
 #endif
 
-  brackets->resolveTail( );
+    brackets->resolveLead( );
 
 #ifdef DEBUG_BRACKETS
-  cerr << "STEP 4:" << brackets << endl;
+    cerr << "STEP 3:" << brackets << endl;
 #endif
 
-  brackets->resolveMiddle();
+    brackets->resolveTail( );
 
+#ifdef DEBUG_BRACKETS
+    cerr << "STEP 4:" << brackets << endl;
+#endif
+
+    brackets->resolveMiddle();
+  }
   CLEX::Type finalTag = brackets->getFinalTag();
 #ifdef DEBUG_BRACKETS
   cerr << "Final Bracketing:" << brackets << endl;
@@ -1082,8 +1093,8 @@ void Mbma::performEdits( Rule& rule ){
 
 }
 
-MBMAana::MBMAana( const Rule& r ): rule(r) {
-  CLEX::Type Tag = rule.resolveBrackets();
+MBMAana::MBMAana( const Rule& r, bool daring ): rule(r) {
+  CLEX::Type Tag = rule.resolveBrackets( daring );
   infl = rule.getCleanInflect();
   map<CLEX::Type,string>::const_iterator tit = tagNames.find( Tag );
   if ( tit == tagNames.end() ){
@@ -1256,7 +1267,7 @@ void Mbma::execute( const UnicodeString& word,
     performEdits( rule );
     rule.reduceZeroNodes();
     resolve_inflections( rule );
-    MBMAana tmp = MBMAana( rule );
+    MBMAana tmp = MBMAana( rule, doDaring );
     if ( debugFlag ){
       *Log(mbmaLog) << "1 added Inflection: " << tmp << endl;
     }
@@ -1284,6 +1295,216 @@ void Mbma::addMorph( Word *word,
     word->append( ml );
   }
   addMorph( ml, morphs );
+}
+
+void Mbma::addBracketMorph( Word *word,
+			    const string& wrd,
+			    const string& tag ) const {
+  MorphologyLayer *ml = new MorphologyLayer();
+#pragma omp critical(foliaupdate)
+  {
+    word->append( ml );
+  }
+  KWargs args;
+  args["class"] = "stem";
+  Morpheme *result = new Morpheme( word->doc(), args );
+  args.clear();
+  args["value"] = wrd;
+  TextContent *t = new TextContent( args );
+#pragma omp critical(foliaupdate)
+  {
+    result->append( t );
+  }
+  args.clear();
+  args["set"] = cgn_tagset;
+  args["cls"] = tag;
+#pragma omp critical(foliaupdate)
+  {
+    result->addPosAnnotation( args );
+  }
+#pragma omp critical(foliaupdate)
+  {
+    ml->append( result );
+  }
+}
+
+void Mbma::addBracketMorph( Word *word,
+			    const Rule& rule ) const {
+  MorphologyLayer *ml = new MorphologyLayer();
+#pragma omp critical(foliaupdate)
+  {
+    word->append( ml );
+  }
+#ifdef NOT_NESTED
+  int offset = 0;
+  list<BaseBracket*>::const_iterator it = rule.brackets->parts.begin();
+  while ( it != rule.brackets->parts.end() ){
+    Morpheme *m = (*it)->createMorpheme( word->doc(), cgn_tagset, offset );
+    if ( m ){
+#pragma omp critical(foliaupdate)
+      {
+	ml->append( m );
+      }
+    }
+    ++it;
+  }
+#else
+  int offset = 0;
+  Morpheme *m = rule.brackets->createMorpheme( word->doc(), cgn_tagset, offset );
+  if ( m ){
+#pragma omp critical(foliaupdate)
+    {
+      ml->append( m );
+    }
+  }
+#endif
+}
+
+void Mbma::addAltBracketMorph( Word *word,
+			       const Rule& rule ) const {
+  Alternative *alt = new Alternative();
+  MorphologyLayer *ml = new MorphologyLayer();
+#pragma omp critical(foliaupdate)
+  {
+    alt->append( ml );
+    word->append( alt );
+  }
+#ifdef NOT_NESTED
+  int offset = 0;
+  list<BaseBracket*>::const_iterator it = rule.brackets->parts.begin();
+  while ( it != rule.brackets->parts.end() ){
+    Morpheme *m = (*it)->createMorpheme( word->doc(), cgn_tagset, offset );
+    if ( m ){
+#pragma omp critical(foliaupdate)
+      {
+	ml->append( m );
+      }
+    }
+    ++it;
+  }
+#else
+  int offset = 0;
+  Morpheme *m = rule.brackets->createMorpheme( word->doc(), cgn_tagset, offset );
+  if ( m ){
+#pragma omp critical(foliaupdate)
+    {
+      ml->append( m );
+    }
+  }
+#endif
+}
+
+Morpheme *BracketLeaf::createMorpheme( Document *doc,
+				       const string& tagset,
+				       int& offset ){
+  Morpheme *result = 0;;
+  if ( status == STEM || status == FAILED ){
+    KWargs args;
+    args["class"] = "stem";
+    result = new Morpheme( doc, args );
+    args.clear();
+    string out = UnicodeToUTF8(morph);
+    args["value"] = out;
+    args["offset"] = toString(offset);
+    TextContent *t = new TextContent( args );
+    offset += out.length();
+#pragma omp critical(foliaupdate)
+    {
+      result->append( t );
+    }
+    args.clear();
+    args["set"]  = tagset;
+    args["cls"]  = toString( tag() );
+    folia::FoliaElement *pos = 0;
+#pragma omp critical(foliaupdate)
+    {
+      pos = result->addPosAnnotation( args );
+    }
+  }
+  else if ( status == INFLECTION ){
+    KWargs args;
+    args["class"] = "inflection";
+    result = new Morpheme( doc, args );
+    args.clear();
+    string out =  UnicodeToUTF8(morph);
+    if ( out.empty() )
+      out = orig;
+    args["value"] = out;
+    args["offset"] = toString(offset);
+    TextContent *t = new TextContent( args );
+    offset += out.length();
+#pragma omp critical(foliaupdate)
+    {
+      result->append( t );
+    }
+  }
+  else if ( status == DERIVATIONAL ){
+    KWargs args;
+    args["class"] = "derivational";
+    result = new Morpheme( doc, args );
+    args.clear();
+    string out = UnicodeToUTF8(morph);
+    args["value"] = out;
+    args["offset"] = toString(offset);
+    TextContent *t = new TextContent( args );
+    offset += out.length();
+#pragma omp critical(foliaupdate)
+    {
+      result->append( t );
+    }
+    args.clear();
+    args["set"]  = tagset;
+    args["cls"]  = orig;
+    folia::FoliaElement *pos = 0;
+#pragma omp critical(foliaupdate)
+    {
+      pos = result->addPosAnnotation( args );
+    }
+  }
+  return result;
+}
+
+Morpheme *BracketNest::createMorpheme( Document *doc,
+				       const string& tagset,
+				       int& offset ){
+  KWargs args;
+  args["class"] = "complex";
+  Morpheme *result = new Morpheme( doc, args );
+  args.clear();
+  args["set"]  = tagset;
+  args["cls"]  = toString( tag() );
+  folia::FoliaElement *pos = 0;
+#pragma omp critical(foliaupdate)
+  {
+    pos = result->addPosAnnotation( args );
+  }
+  list<BaseBracket*>::const_iterator it = parts.begin();
+  string mor;
+  while ( it != parts.end() ){
+    Morpheme *m = (*it)->createMorpheme( doc, tagset, offset );
+    if ( m ){
+      string tmp = m->str();
+      if ( mor.empty() ){
+	mor = tmp;
+      }
+      else {
+	mor += "|" + tmp;
+      }
+#pragma omp critical(foliaupdate)
+      {
+	result->append( m );
+      }
+    }
+    ++it;
+  }
+  args.clear();
+  args["value"] = mor;
+  TextContent *t = new TextContent( args );
+#pragma omp critical(foliaupdate)
+  {
+    result->append( t );
+  }
+  return result;
 }
 
 void Mbma::addMorph( MorphologyLayer *ml,
@@ -1428,6 +1649,7 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   map<string, const MBMAana*>::const_iterator uit=unique.begin();
   while ( uit != unique.end() ){
     result.push_back( *(uit->second) );
+    cerr << "Final Bracketing: " << uit->second->getRule().brackets << endl;
     ++uit;
   }
   analysis = result;
@@ -1448,22 +1670,34 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
       *Log(mbmaLog) << "no matches found, use the word instead: "
 		    << uword << endl;
     }
-    vector<string> tmp;
-    tmp.push_back( UnicodeToUTF8(uword) );
-    addMorph( fword, tmp );
+    if ( doDaring ){
+      addBracketMorph( fword, UnicodeToUTF8(uword), "UNK" );
+    }
+    else {
+      vector<string> tmp;
+      tmp.push_back( UnicodeToUTF8(uword) );
+      addMorph( fword, tmp );
+    }
   }
   else {
     vector<MBMAana>::const_iterator sit = analysis.begin();
     while( sit != analysis.end() ){
-      if ( sit == analysis.begin() )
-	addMorph( fword, sit->getMorph() );
-      else
-	addAltMorph( fword, sit->getMorph() );
+      if ( sit == analysis.begin() ){
+	if ( doDaring )
+	  addBracketMorph( fword, sit->getRule() );
+	else
+	  addMorph( fword, sit->getMorph() );
+      }
+      else {
+	if ( doDaring )
+	  addAltBracketMorph( fword, sit->getRule() );
+	else
+	  addAltMorph( fword, sit->getMorph() );
+      }
       ++sit;
     }
   }
 }
-
 void Mbma::addDeclaration( Document& doc ) const {
   doc.declare( AnnotationType::MORPHOLOGICAL, tagset,
 	       "annotator='frog-mbma-" +  version +
@@ -1502,9 +1736,14 @@ void Mbma::Classify( Word* sword ){
   if ( head == "LET" || head == "SPEC" ){
     // take over the letter/word 'as-is'.
     string word = UnicodeToUTF8( uWord );
-    vector<string> tmp;
-    tmp.push_back( word );
-    addMorph( sword, tmp );
+    if ( doDaring ){
+      addBracketMorph( sword, word, head );
+    }
+    else {
+      vector<string> tmp;
+      tmp.push_back( word );
+      addMorph( sword, tmp );
+    }
   }
   else {
     UnicodeString lWord = uWord;

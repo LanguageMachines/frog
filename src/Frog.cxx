@@ -88,6 +88,7 @@ unsigned int maxParserTokens = 0; // 0 for unlimited
 bool doTok = true;
 bool doLemma = true;
 bool doMorph = true;
+bool doDaringMorph = false;
 bool doMwu = true;
 bool doIOB = true;
 bool doNER = true;
@@ -235,6 +236,16 @@ bool parse_args( TimblOpts& Opts ) {
     Opts.Delete("skip");
   };
 
+  if ( Opts.Find( "daring", value, mood) ) {
+    value = lowercase( value );
+    if ( value == "1" || value == "yes" || value == "true" ){
+      doDaringMorph = true;
+      doMorph = true;
+    }
+    else {
+      doDaringMorph = false;
+    }
+  }
   if ( Opts.Find( "e", value, mood)) {
     encoding = value;
   }
@@ -515,6 +526,8 @@ bool froginit(){
 	if ( stat && doMorph ){
 	  stat = myMbma.init( configuration );
 	  if ( stat ) {
+	    if ( doDaringMorph )
+	      myMbma.setDaring(true);
 	    if ( doMwu ){
 	      stat = myMwu.init( configuration );
 	      if ( stat && doParse ){
@@ -563,6 +576,8 @@ bool froginit(){
       {
 	if ( doMorph ){
 	  mbaStat = myMbma.init( configuration );
+	  if ( doDaringMorph )
+	    myMbma.setDaring(true);
 	}
       }
 #pragma omp section
@@ -810,13 +825,47 @@ void displayMWU( ostream& os, size_t index,
 			  << e.what() << endl;
       }
     }
-    if ( doMorph ){
+    if ( doDaringMorph ){
       try {
 	vector<MorphologyLayer*> ml = word->annotations<MorphologyLayer>();
 	for ( size_t q=0; q < ml.size(); ++q ){
 	  vector<Morpheme*> m = ml[q]->select<Morpheme>();
 	  for ( size_t t=0; t < m.size(); ++t ){
-	    morph += "[" + UnicodeToUTF8( m[t]->text() ) + "]";
+	    if ( m[t]->cls() == "stem"
+		 || m[t]->cls() == "derivational"
+		 || m[t]->cls() == "inflection" ){
+	      string txt = UnicodeToUTF8( m[t]->text() );
+	      morph += "[" + txt + "]";
+	    }
+	  }
+	  if ( q < ml.size()-1 )
+	    morph += "/";
+	}
+	if ( p < mwu.size() -1 ){
+	  morph += "_";
+	}
+      }
+      catch ( exception& e ){
+	if  (tpDebug > 0)
+	  *Log(theErrLog) << "get Morph results failed: "
+			  << e.what() << endl;
+      }
+    }
+    else if ( doMorph ){
+      try {
+	// vector<Morpheme*> mv = word->morphemes();
+	// cerr << mv << endl;
+	// for ( size_t q=0; q < mv.size(); ++q ){
+	//   if ( mv[q]->cls() == "stem"
+	//        || mv[q]->cls() == "inflection" )
+	//     cerr << mv[q]->text() << endl;
+	// }
+	vector<MorphologyLayer*> ml = word->annotations<MorphologyLayer>();
+	for ( size_t q=0; q < ml.size(); ++q ){
+	  vector<Morpheme*> m = ml[q]->select<Morpheme>();
+	  for ( size_t t=0; t < m.size(); ++t ){
+	    string txt = UnicodeToUTF8( m[t]->text() );
+	    morph += "[" + txt + "]";
 	  }
 	  if ( q < ml.size()-1 )
 	    morph += "/";

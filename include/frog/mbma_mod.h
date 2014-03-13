@@ -49,8 +49,11 @@ public:
   BaseBracket( CLEX::Type t ):
   cls(t)
   {};
+  enum Status { INFO, STEM, COMPLEX, INFLECTION, DERIVATIONAL, FAILED };
+
   virtual UnicodeString morpheme() const { return "";};
   virtual std::string inflection() const { return ""; };
+  virtual std::string original() const { return ""; };
   virtual size_t infixpos() const { return -1; };
   virtual UnicodeString put() const;
   virtual BaseBracket *append( BaseBracket * ){ abort(); };
@@ -58,10 +61,15 @@ public:
   virtual void resolveLead(){ abort(); };
   virtual void resolveTail(){ abort(); };
   virtual void resolveMiddle(){ abort(); };
+  virtual folia::Morpheme *createMorpheme( folia::Document *,
+					   const std::string&,
+					   int& ) = 0;
   CLEX::Type tag() const { return cls; };
+  void setFail(){ status = FAILED; };
   std::vector<CLEX::Type> RightHand;
  protected:
   CLEX::Type cls;
+  Status status;
 };
 
 class BracketLeaf: public BaseBracket {
@@ -70,7 +78,11 @@ public:
   UnicodeString put() const;
   UnicodeString morpheme() const { return morph; };
   std::string inflection() const { return inflect; };
+  std::string original() const { return orig; };
   size_t infixpos() const { return ifpos; };
+  folia::Morpheme *createMorpheme( folia::Document *,
+				   const std::string&,
+				   int& );
 private:
   size_t ifpos;
   UnicodeString morph;
@@ -80,7 +92,7 @@ private:
 
 class BracketNest: public BaseBracket {
  public:
- BracketNest( CLEX::Type t ): BaseBracket( t ){};
+ BracketNest( CLEX::Type t ): BaseBracket( t ){ status = COMPLEX; };
   BaseBracket *append( BaseBracket *t ){
     parts.push_back( t );
     return this;
@@ -92,7 +104,9 @@ class BracketNest: public BaseBracket {
   void resolveTail();
   void resolveMiddle();
   CLEX::Type getFinalTag();
-private:
+  folia::Morpheme *createMorpheme( folia::Document *,
+				   const std::string&,
+				   int& );
   std::list<BaseBracket *> parts;
 };
 
@@ -121,7 +135,7 @@ public:
   std::vector<std::string> extract_morphemes() const;
   std::string getCleanInflect() const;
   void reduceZeroNodes();
-  CLEX::Type resolveBrackets( );
+  CLEX::Type resolveBrackets( bool );
   std::vector<RulePart> rules;
   BracketNest *brackets;
 };
@@ -139,6 +153,7 @@ class Mbma {
   void Classify( const UnicodeString& );
   void filterTag( const std::string&, const std::vector<std::string>& );
   std::vector<std::vector<std::string> > getResult() const;
+  void setDaring( bool b ){ doDaring = b; };
  private:
   void cleanUp();
   bool readsettings( const std::string&, const std::string& );
@@ -158,6 +173,11 @@ class Mbma {
 		 const std::vector<std::string>& ) const;
   void addMorph( folia::Word *, const std::vector<std::string>& ) const;
   void addAltMorph( folia::Word *, const std::vector<std::string>& ) const;
+  void addBracketMorph( folia::Word *,
+			const std::string&,
+			const std::string& ) const;
+  void addBracketMorph( folia::Word *, const Rule& ) const;
+  void addAltBracketMorph( folia::Word *, const Rule& ) const;
   std::string MTreeFilename;
   Timbl::TimblAPI *MTree;
   std::map<std::string,std::string> TAGconv;
@@ -168,13 +188,14 @@ class Mbma {
   TiCC::LogStream *mbmaLog;
   Transliterator *transliterator;
   Tokenizer::UnicodeFilter *filter;
+  bool doDaring;
 };
 
 class MBMAana {
   friend std::ostream& operator<< ( std::ostream& , const MBMAana& );
   friend std::ostream& operator<< ( std::ostream& , const MBMAana* );
   public:
-  MBMAana(const Rule& );
+  MBMAana(const Rule&, bool );
 
   ~MBMAana() {};
 
