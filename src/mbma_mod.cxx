@@ -360,6 +360,7 @@ void Mbma::cleanUp(){
   // *Log(mbmaLog) << "cleaning up MBMA stuff " << endl;
   delete MTree;
   MTree = 0;
+  clearAnalysis();
 }
 
 vector<string> Mbma::make_instances( const UnicodeString& word ){
@@ -547,7 +548,6 @@ RulePart::RulePart( const string& rs, const UChar kar ):
 }
 
 Rule::Rule( const vector<string>& parts, const UnicodeString& s ){
-  brackets = 0;
   for ( size_t k=0; k < parts.size(); ++k ) {
     string this_class = parts[k];
     RulePart cur( this_class, s[k] );
@@ -707,6 +707,13 @@ BracketLeaf::BracketLeaf( const RulePart& p ):
   }
 }
 
+BracketNest::~BracketNest(){
+  for ( list<BaseBracket*>::const_iterator it = parts.begin();
+	it != parts.end();
+	++it ){
+    delete *it;
+  }
+}
 
 UnicodeString BaseBracket::put() const {
   UnicodeString result = "[err?]";
@@ -987,12 +994,12 @@ CLEX::Type BracketNest::getFinalTag() {
   return cls;
 }
 
-CLEX::Type Rule::resolveBrackets( bool daring ) {
+BracketNest *Rule::resolveBrackets( bool daring, CLEX::Type& tag  ) {
 #ifdef DEBUG_BRACKETS
   cerr << "check rule for bracketing: " << this << endl;
 #endif
 
-  brackets = new BracketNest( CLEX::UNASS );
+  BracketNest *brackets = new BracketNest( CLEX::UNASS );
   for ( size_t k=0; k < rules.size(); ++k ) {
     // fill a flat result;
     BracketLeaf *tmp = new BracketLeaf( rules[k] );
@@ -1022,11 +1029,11 @@ CLEX::Type Rule::resolveBrackets( bool daring ) {
 
     brackets->resolveMiddle();
   }
-  CLEX::Type finalTag = brackets->getFinalTag();
+  tag = brackets->getFinalTag();
 #ifdef DEBUG_BRACKETS
   cerr << "Final Bracketing:" << brackets << endl;
 #endif
-  return finalTag;
+  return brackets;
 }
 
 void Mbma::performEdits( Rule& rule ){
@@ -1101,7 +1108,8 @@ void Mbma::performEdits( Rule& rule ){
 }
 
 MBMAana::MBMAana( const Rule& r, bool daring ): rule(r) {
-  CLEX::Type Tag = rule.resolveBrackets( daring );
+  CLEX::Type Tag;
+  brackets = rule.resolveBrackets( daring, Tag );
   infl = rule.getCleanInflect();
   map<CLEX::Type,string>::const_iterator tit = tagNames.find( Tag );
   if ( tit == tagNames.end() ){
@@ -1254,10 +1262,16 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
 }
 #endif
 
+void Mbma::clearAnalysis(){
+  for ( size_t i=0; i < analysis.size(); ++i ){
+    delete analysis[i];
+  }
+  analysis.clear();
+}
+
 void Mbma::execute( const UnicodeString& word,
 		    const vector<string>& classes ){
-  analysis.clear();
-
+  clearAnalysis();
   vector<vector<string> > allParts = generate_all_perms( classes );
   if ( debugFlag ){
     string out = "alternatives: word=" + UnicodeToUTF8(word) + ", classes=<";
@@ -1274,7 +1288,7 @@ void Mbma::execute( const UnicodeString& word,
     performEdits( rule );
     rule.reduceZeroNodes();
     resolve_inflections( rule );
-    MBMAana tmp = MBMAana( rule, doDaring );
+    MBMAana *tmp = new MBMAana( rule, doDaring );
     if ( debugFlag ){
       *Log(mbmaLog) << "1 added Inflection: " << tmp << endl;
     }
@@ -1336,7 +1350,7 @@ void Mbma::addBracketMorph( Word *word,
 }
 
 void Mbma::addBracketMorph( Word *word,
-			    const Rule& rule ) const {
+			    const BracketNest *brackets ) const {
   MorphologyLayer *ml = new MorphologyLayer();
 #pragma omp critical(foliaupdate)
   {
@@ -1344,8 +1358,8 @@ void Mbma::addBracketMorph( Word *word,
   }
 #ifdef NOT_NESTED
   int offset = 0;
-  list<BaseBracket*>::const_iterator it = rule.brackets->parts.begin();
-  while ( it != rule.brackets->parts.end() ){
+  list<BaseBracket*>::const_iterator it = brackets->parts.begin();
+  while ( it != brackets->parts.end() ){
     Morpheme *m = (*it)->createMorpheme( word->doc(), clex_tagset, offset );
     if ( m ){
 #pragma omp critical(foliaupdate)
@@ -1357,7 +1371,7 @@ void Mbma::addBracketMorph( Word *word,
   }
 #else
   int offset = 0;
-  Morpheme *m = rule.brackets->createMorpheme( word->doc(), clex_tagset, offset );
+  Morpheme *m = brackets->createMorpheme( word->doc(), clex_tagset, offset );
   if ( m ){
 #pragma omp critical(foliaupdate)
     {
@@ -1368,7 +1382,7 @@ void Mbma::addBracketMorph( Word *word,
 }
 
 void Mbma::addAltBracketMorph( Word *word,
-			       const Rule& rule ) const {
+			       const BracketNest *brackets ) const {
   Alternative *alt = new Alternative();
   MorphologyLayer *ml = new MorphologyLayer();
 #pragma omp critical(foliaupdate)
@@ -1378,8 +1392,8 @@ void Mbma::addAltBracketMorph( Word *word,
   }
 #ifdef NOT_NESTED
   int offset = 0;
-  list<BaseBracket*>::const_iterator it = rule.brackets->parts.begin();
-  while ( it != rule.brackets->parts.end() ){
+  list<BaseBracket*>::const_iterator it = brackets->parts.begin();
+  while ( it != brackets->parts.end() ){
     Morpheme *m = (*it)->createMorpheme( word->doc(), clex_tagset, offset );
     if ( m ){
 #pragma omp critical(foliaupdate)
@@ -1391,7 +1405,7 @@ void Mbma::addAltBracketMorph( Word *word,
   }
 #else
   int offset = 0;
-  Morpheme *m = rule.brackets->createMorpheme( word->doc(), clex_tagset, offset );
+  Morpheme *m = brackets->createMorpheme( word->doc(), clex_tagset, offset );
   if ( m ){
 #pragma omp critical(foliaupdate)
     {
@@ -1403,7 +1417,7 @@ void Mbma::addAltBracketMorph( Word *word,
 
 Morpheme *BracketLeaf::createMorpheme( Document *doc,
 				       const string& tagset,
-				       int& offset ){
+				       int& offset ) const {
   Morpheme *result = 0;;
   if ( status == STEM || status == FAILED ){
     KWargs args;
@@ -1471,7 +1485,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
 
 Morpheme *BracketNest::createMorpheme( Document *doc,
 				       const string& tagset,
-				       int& offset ){
+				       int& offset ) const {
   KWargs args;
   args["class"] = "complex";
   Morpheme *result = new Morpheme( doc, args );
@@ -1539,7 +1553,7 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
 		  << " feats: " << feats << endl;
     *Log(mbmaLog) << "filter:start, analysis is:" << endl;
     int i=1;
-    for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
+    for(vector<MBMAana*>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
       *Log(mbmaLog) << i++ << " - " << *it << endl;
   }
   map<string,string>::const_iterator tagIt = TAGconv.find( head );
@@ -1550,9 +1564,9 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   if (debugFlag){
     *Log(mbmaLog) << "#matches: " << tagIt->first << " " << tagIt->second << endl;
   }
-  vector<MBMAana>::iterator ait = analysis.begin();
+  vector<MBMAana*>::iterator ait = analysis.begin();
   while ( ait != analysis.end() ){
-    string tagI = ait->getTag();
+    string tagI = (*ait)->getTag();
     if ( tagIt->second == tagI || ( tagIt->second == "N" && tagI == "PN" ) ){
       if (debugFlag)
 	*Log(mbmaLog) << "comparing " << tagIt->second << " with "
@@ -1563,13 +1577,14 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
       if (debugFlag)
 	*Log(mbmaLog) << "comparing " << tagIt->second << " with "
 		      << tagI << " (rejected)" << endl;
+      delete *ait;
       ait = analysis.erase( ait );
     }
   }
   if (debugFlag){
     *Log(mbmaLog) << "filter: analysis after first step" << endl;
     int i=1;
-    for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
+    for(vector<MBMAana*>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
       *Log(mbmaLog) << i++ << " - " << *it << endl;
   }
 
@@ -1586,11 +1601,11 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   // find best match
   // loop through all subfeatures of the tag
   // and match with inflections from each m
-  set<const MBMAana *> bestMatches;
+  set<MBMAana *> bestMatches;
   int max_count = 0;
   for ( size_t q=0; q < analysis.size(); ++q ) {
     int match_count = 0;
-    string inflection = analysis[q].getInflection();
+    string inflection = analysis[q]->getInflection();
     if (debugFlag){
       *Log(mbmaLog) << "matching " << inflection << " with " << feats << endl;
     }
@@ -1616,13 +1631,13 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
 	max_count = match_count;
 	bestMatches.clear();
       }
-      bestMatches.insert(&analysis[q]);
+      bestMatches.insert(analysis[q]);
     }
   }
   // so now we have "the" best matches.
   // Weed the rest
-  vector<const MBMAana*> res;
-  set<const MBMAana*>::const_iterator bit = bestMatches.begin();
+  vector<MBMAana*> res;
+  set<MBMAana*>::const_iterator bit = bestMatches.begin();
   while ( bit != bestMatches.end() ){
     res.push_back( *bit );
     ++bit;
@@ -1630,15 +1645,15 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   if (debugFlag){
     *Log(mbmaLog) << "filter: analysis after second step" << endl;
     int i=1;
-    for(vector<const MBMAana*>::const_iterator it=res.begin(); it != res.end(); it++)
+    for(vector<MBMAana*>::const_iterator it=res.begin(); it != res.end(); it++)
       *Log(mbmaLog) << i++ << " - " <<  *it << endl;
     *Log(mbmaLog) << "start looking for doubles" << endl;
   }
   //
   // but now we still might have doubles
   //
-  map<string, const MBMAana*> unique;
-  vector<const MBMAana*>::iterator it=res.begin();
+  map<string, MBMAana*> unique;
+  vector<MBMAana*>::iterator it=res.begin();
   while (  it != res.end() ){
     vector<string> v = (*it)->getMorph();
     string tmp;
@@ -1649,18 +1664,18 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
     unique[tmp] = *it;
     ++it;
   }
-  vector<MBMAana> result;
-  map<string, const MBMAana*>::const_iterator uit=unique.begin();
+  vector<MBMAana*> result;
+  map<string, MBMAana*>::const_iterator uit=unique.begin();
   while ( uit != unique.end() ){
-    result.push_back( *(uit->second) );
-    cerr << "Final Bracketing: " << uit->second->getRule().brackets << endl;
+    result.push_back( uit->second );
+    cerr << "Final Bracketing: " << uit->second->getBrackets() << endl;
     ++uit;
   }
   analysis = result;
   if (debugFlag){
     *Log(mbmaLog) << "filter: definitive analysis:" << endl;
     int i=1;
-    for(vector<MBMAana>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
+    for(vector<MBMAana*>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
       *Log(mbmaLog) << i++ << " - " << *it << endl;
     *Log(mbmaLog) << "done filtering" << endl;
   }
@@ -1684,19 +1699,19 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
     }
   }
   else {
-    vector<MBMAana>::const_iterator sit = analysis.begin();
+    vector<MBMAana*>::const_iterator sit = analysis.begin();
     while( sit != analysis.end() ){
       if ( sit == analysis.begin() ){
 	if ( doDaring )
-	  addBracketMorph( fword, sit->getRule() );
+	  addBracketMorph( fword, (*sit)->getBrackets() );
 	else
-	  addMorph( fword, sit->getMorph() );
+	  addMorph( fword, (*sit)->getMorph() );
       }
       else {
 	if ( doDaring )
-	  addAltBracketMorph( fword, sit->getRule() );
+	  addAltBracketMorph( fword, (*sit)->getBrackets() );
 	else
-	  addAltMorph( fword, sit->getMorph() );
+	  addAltMorph( fword, (*sit)->getMorph() );
       }
       ++sit;
     }
@@ -1794,10 +1809,10 @@ void Mbma::Classify( const UnicodeString& word ){
 
 vector<vector<string> > Mbma::getResult() const {
   vector<vector<string> > result;
-  for (vector<MBMAana>::const_iterator it=analysis.begin();
+  for (vector<MBMAana*>::const_iterator it=analysis.begin();
        it != analysis.end();
        it++ ){
-    vector<string> mors = it->getMorph();
+    vector<string> mors = (*it)->getMorph();
     if ( debugFlag ){
       *Log(mbmaLog) << "Morphs " << mors << endl;
     }
