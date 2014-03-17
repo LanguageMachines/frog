@@ -761,7 +761,7 @@ ostream& operator<< ( ostream& os, const BaseBracket *c ){
   return os;
 }
 
-#define DEBUG_BRACKETS
+//#define DEBUG_BRACKETS
 
 void prettyP( ostream& os, const list<BaseBracket*>& v ){
   os << "[";
