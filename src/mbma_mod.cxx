@@ -683,7 +683,7 @@ BracketLeaf::BracketLeaf( const RulePart& p ):
 {
   ifpos = -1;
   if ( !p.inflect.empty() ){
-    orig = inflect = p.inflect;
+    inflect = p.inflect;
     if ( p.ResultClass == CLEX::UNASS ){
       status = INFLECTION;
     }
@@ -726,7 +726,10 @@ UnicodeString BracketLeaf::put() const {
   UnicodeString result = "[";
   result += morph;
   result += "]";
-  result += UTF8ToUnicode(orig);
+  if ( orig.empty() )
+    result += UTF8ToUnicode(inflect);
+  else
+    result += UTF8ToUnicode(orig);
   return result;
 }
 
@@ -758,7 +761,7 @@ ostream& operator<< ( ostream& os, const BaseBracket *c ){
   return os;
 }
 
-//#define DEBUG_BRACKETS
+#define DEBUG_BRACKETS
 
 void prettyP( ostream& os, const list<BaseBracket*>& v ){
   os << "[";
@@ -838,20 +841,28 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
     cerr << "OK een match" << endl;
 #endif
     size_t len = (*rpos)->RightHand.size();
-    list<BaseBracket*>::iterator it = bit--;
-    BaseBracket *tmp = new BracketNest( (*rpos)->tag() );
-    for ( size_t j = 0; j < len; ++j ){
-      tmp->append( *it );
-#ifdef DEBUG_BRACKETS
-      cerr << "erase " << *it << endl;
-#endif
-      it = result.erase(it);
+    if ( len == result.size() ){
+      // the rule matches exact what we have.
+      // leave it
+      list<BaseBracket*>::iterator it = rpos;
+      return ++it;
     }
+    else {
+      list<BaseBracket*>::iterator it = bit--;
+      BaseBracket *tmp = new BracketNest( (*rpos)->tag() );
+      for ( size_t j = 0; j < len; ++j ){
+	tmp->append( *it );
 #ifdef DEBUG_BRACKETS
-    cerr << "new node:" << tmp << endl;
+	cerr << "erase " << *it << endl;
 #endif
-    result.insert( ++bit, tmp );
-    return bit;
+	it = result.erase(it);
+      }
+#ifdef DEBUG_BRACKETS
+      cerr << "new node:" << tmp << endl;
+#endif
+      result.insert( ++bit, tmp );
+      return bit;
+    }
   }
   else {
     if ( (*rpos)->RightHand.size() > 0 ){
@@ -872,7 +883,7 @@ void BracketNest::resolveNouns( ){
       tmp->append( *prev );
       tmp->append( *it );
 #ifdef DEBUG_BRACKETS
-      cerr << "current result:" << brackets << endl;
+      cerr << "current result:" << parts << endl;
       cerr << "new node:" << tmp << endl;
 #endif
 #ifdef DEBUG_BRACKETS
@@ -885,7 +896,7 @@ void BracketNest::resolveNouns( ){
       prev = parts.erase(prev);
       parts.insert( prev, tmp );
 #ifdef DEBUG_BRACKETS
-      cerr << "current result:" << brackets << endl;
+      cerr << "current result:" << parts << endl;
 #endif
       it = prev;
       ++it;
@@ -1356,29 +1367,13 @@ void Mbma::addBracketMorph( Word *word,
   {
     word->append( ml );
   }
-#ifdef NOT_NESTED
-  int offset = 0;
-  list<BaseBracket*>::const_iterator it = brackets->parts.begin();
-  while ( it != brackets->parts.end() ){
-    Morpheme *m = (*it)->createMorpheme( word->doc(), clex_tagset, offset );
-    if ( m ){
-#pragma omp critical(foliaupdate)
-      {
-	ml->append( m );
-      }
-    }
-    ++it;
-  }
-#else
-  int offset = 0;
-  Morpheme *m = brackets->createMorpheme( word->doc(), clex_tagset, offset );
+  Morpheme *m = brackets->createMorpheme( word->doc(), clex_tagset );
   if ( m ){
 #pragma omp critical(foliaupdate)
     {
       ml->append( m );
     }
   }
-#endif
 }
 
 void Mbma::addAltBracketMorph( Word *word,
@@ -1390,35 +1385,28 @@ void Mbma::addAltBracketMorph( Word *word,
     alt->append( ml );
     word->append( alt );
   }
-#ifdef NOT_NESTED
-  int offset = 0;
-  list<BaseBracket*>::const_iterator it = brackets->parts.begin();
-  while ( it != brackets->parts.end() ){
-    Morpheme *m = (*it)->createMorpheme( word->doc(), clex_tagset, offset );
-    if ( m ){
-#pragma omp critical(foliaupdate)
-      {
-	ml->append( m );
-      }
-    }
-    ++it;
-  }
-#else
-  int offset = 0;
-  Morpheme *m = brackets->createMorpheme( word->doc(), clex_tagset, offset );
+  Morpheme *m = brackets->createMorpheme( word->doc(), clex_tagset );
   if ( m ){
 #pragma omp critical(foliaupdate)
     {
       ml->append( m );
     }
   }
-#endif
+}
+
+Morpheme *BracketLeaf::createMorpheme( Document *doc,
+				       const string& tagset ) const {
+  string desc;
+  int offset = 0;
+  return createMorpheme( doc, tagset, offset, desc );
 }
 
 Morpheme *BracketLeaf::createMorpheme( Document *doc,
 				       const string& tagset,
-				       int& offset ) const {
-  Morpheme *result = 0;;
+				       int& offset,
+				       string& desc ) const {
+  Morpheme *result = 0;
+  desc.clear();
   if ( status == STEM || status == FAILED ){
     KWargs args;
     args["class"] = "stem";
@@ -1427,11 +1415,19 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     string out = UnicodeToUTF8(morph);
     args["value"] = out;
     args["offset"] = toString(offset);
-    TextContent *t = new TextContent( args );
     offset += out.length();
+    TextContent *t = new TextContent( args );
 #pragma omp critical(foliaupdate)
     {
       result->append( t );
+    }
+    args.clear();
+    desc = "[" + out + "]";
+    args["value"] = desc;
+    Description *d = new Description( args );
+#pragma omp critical(foliaupdate)
+    {
+      result->append( d );
     }
     args.clear();
     args["set"]  = tagset;
@@ -1446,9 +1442,11 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     args["class"] = "inflection";
     result = new Morpheme( doc, args );
     args.clear();
-    string out =  UnicodeToUTF8(morph);
+    string out = UnicodeToUTF8(morph);
     if ( out.empty() )
-      out = orig;
+      out = inflect;
+    else
+      desc = "[" + out + "]";
     args["value"] = out;
     args["offset"] = toString(offset);
     TextContent *t = new TextContent( args );
@@ -1456,6 +1454,21 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
 #pragma omp critical(foliaupdate)
     {
       result->append( t );
+    }
+    args.clear();
+    string inf_desc;
+    for ( size_t i=0; i < inflect.size(); ++i ){
+      string d = iNames[inflect[i]];
+      if ( i > 0 )
+	inf_desc += ", ";
+      inf_desc += d;
+    }
+    args.clear();
+    args["value"] = inf_desc;
+    Description *d = new Description( args );
+#pragma omp critical(foliaupdate)
+    {
+      result->append( d );
     }
   }
   else if ( status == DERIVATIONAL ){
@@ -1473,6 +1486,14 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
       result->append( t );
     }
     args.clear();
+    desc = "[" + out + "]";
+    args["value"] = desc;
+    Description *d = new Description( args );
+#pragma omp critical(foliaupdate)
+    {
+      result->append( d );
+    }
+    args.clear();
     args["set"]  = tagset;
     args["cls"]  = orig;
 #pragma omp critical(foliaupdate)
@@ -1480,15 +1501,85 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
       result->addPosAnnotation( args );
     }
   }
+  else {
+    KWargs args;
+    args["class"] = "inflection";
+    result = new Morpheme( doc, args );
+    string inf_desc;
+    for ( size_t i=0; i < inflect.size(); ++i ){
+      string d = iNames[inflect[i]];
+      if ( i > 0 )
+	inf_desc += ", ";
+      inf_desc += d;
+    }
+    args.clear();
+    args["value"] = inf_desc;
+    Description *d = new Description( args );
+#pragma omp critical(foliaupdate)
+    {
+      result->append( d );
+    }
+  }
   return result;
 }
 
 Morpheme *BracketNest::createMorpheme( Document *doc,
+				       const string& tagset ) const {
+  string desc;
+  int offset = 0;
+  return createMorpheme( doc, tagset, offset, desc );
+}
+
+Morpheme *BracketNest::createMorpheme( Document *doc,
 				       const string& tagset,
-				       int& offset ) const {
+				       int& of,
+				       string& desc ) const {
   KWargs args;
   args["class"] = "complex";
   Morpheme *result = new Morpheme( doc, args );
+  list<BaseBracket*>::const_iterator it = parts.begin();
+  string mor;
+  int cnt = 0;
+  desc.clear();
+  vector<Morpheme*> stack;
+  int offset = 0;
+  while ( it != parts.end() ){
+    string deeper_desc;
+    Morpheme *m = (*it)->createMorpheme( doc, tagset, offset, deeper_desc );
+    if ( m ){
+      string tmp;
+      try {
+	tmp = m->str();
+      }
+      catch (...){
+      };
+      if ( !tmp.empty() ){
+	mor += tmp;
+	desc += deeper_desc;
+	++cnt;
+      }
+      stack.push_back( m );
+    }
+    ++it;
+  }
+  args.clear();
+  args["value"] = mor;
+  args["offset"] = toString(of);
+  of += offset;
+  TextContent *t = new TextContent( args );
+#pragma omp critical(foliaupdate)
+  {
+    result->append( t );
+  }
+  args.clear();
+  if ( cnt > 1 )
+    desc = "[" + desc + "]";
+  args["value"] = desc;
+  Description *d = new Description( args );
+#pragma omp critical(foliaupdate)
+  {
+    result->append( d );
+  }
   args.clear();
   args["set"]  = tagset;
   args["cls"]  = toString( tag() );
@@ -1496,31 +1587,9 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
   {
     result->addPosAnnotation( args );
   }
-  list<BaseBracket*>::const_iterator it = parts.begin();
-  string mor;
-  while ( it != parts.end() ){
-    Morpheme *m = (*it)->createMorpheme( doc, tagset, offset );
-    if ( m ){
-      string tmp = m->str();
-      if ( mor.empty() ){
-	mor = tmp;
-      }
-      else {
-	mor += "|" + tmp;
-      }
 #pragma omp critical(foliaupdate)
-      {
-	result->append( m );
-      }
-    }
-    ++it;
-  }
-  args.clear();
-  args["value"] = mor;
-  TextContent *t = new TextContent( args );
-#pragma omp critical(foliaupdate)
-  {
-    result->append( t );
+  for ( size_t i=0; i < stack.size(); ++i ){
+    result->append( stack[i] );
   }
   return result;
 }

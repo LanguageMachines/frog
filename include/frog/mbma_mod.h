@@ -63,8 +63,11 @@ public:
   virtual void resolveTail(){ abort(); };
   virtual void resolveMiddle(){ abort(); };
   virtual folia::Morpheme *createMorpheme( folia::Document *,
+					   const std::string& ) const = 0;
+  virtual folia::Morpheme *createMorpheme( folia::Document *,
 					   const std::string&,
-					   int& ) const = 0;
+					   int&,
+					   std::string& ) const = 0;
   CLEX::Type tag() const { return cls; };
   void setFail(){ status = FAILED; };
   std::vector<CLEX::Type> RightHand;
@@ -82,8 +85,11 @@ public:
   std::string original() const { return orig; };
   size_t infixpos() const { return ifpos; };
   folia::Morpheme *createMorpheme( folia::Document *,
+				   const std::string& ) const;
+  folia::Morpheme *createMorpheme( folia::Document *,
 				   const std::string&,
-				   int& ) const;
+				   int&,
+				   std::string& ) const;
 private:
   size_t ifpos;
   UnicodeString morph;
@@ -107,8 +113,11 @@ class BracketNest: public BaseBracket {
   void resolveMiddle();
   CLEX::Type getFinalTag();
   folia::Morpheme *createMorpheme( folia::Document *,
+				   const std::string& ) const;
+  folia::Morpheme *createMorpheme( folia::Document *,
 				   const std::string&,
-				   int& ) const;
+				   int&,
+				   std::string& ) const;
   std::list<BaseBracket *> parts;
 };
 
