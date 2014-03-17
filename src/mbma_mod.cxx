@@ -299,10 +299,13 @@ Transliterator *Mbma::init_trans( ){
 bool Mbma::init( const Configuration& config ) {
   *Log(mbmaLog) << "Initiating morphological analyzer..." << endl;
   debugFlag = tpDebug;
-  string db = config.lookUp( "debug", "mbma" );
-  if ( !db.empty() )
-    debugFlag = TiCC::stringTo<int>( db );
-  string val = config.lookUp( "version", "mbma" );
+  string val = config.lookUp( "debug", "mbma" );
+  if ( !val.empty() )
+    debugFlag = TiCC::stringTo<int>( val );
+  val = config.lookUp( "daring", "mbma" );
+  if ( !val.empty() )
+    doDaring = TiCC::stringTo<bool>( val );
+  val = config.lookUp( "version", "mbma" );
   if ( val.empty() ){
     version = "1.0";
   }
@@ -322,7 +325,7 @@ bool Mbma::init( const Configuration& config ) {
   else
     cgn_tagset = val;
 
-  val = config.lookUp( "set", "clex" );
+  val = config.lookUp( "clex_set", "mbma" );
   if ( val.empty() ){
     clex_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-clex";
   }
@@ -344,8 +347,11 @@ bool Mbma::init( const Configuration& config ) {
   fillMaps();
   init_cgn( config.configDir() );
   string dof = config.lookUp( "filter_diacritics", "mbma" );
-  if ( dof == "true" || dof == "TRUE" || dof =="yes" || dof == "YES" ){
-    transliterator = init_trans();
+  if ( !dof.empty() ){
+    bool b = stringTo<bool>( dof );
+    if ( b ){
+      transliterator = init_trans();
+    }
   }
   //Read in (igtree) data
   string opts = config.lookUp( "timblOpts", "mbma" );

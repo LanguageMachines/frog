@@ -237,13 +237,11 @@ bool parse_args( TimblOpts& Opts ) {
   };
 
   if ( Opts.Find( "daring", value, mood) ) {
-    value = lowercase( value );
-    if ( value == "1" || value == "yes" || value == "true" ){
-      doDaringMorph = true;
+    if ( value.empty() )
+      value = "1";
+    doDaringMorph = stringTo<bool>( value );
+    if ( doDaringMorph ){
       doMorph = true;
-    }
-    else {
-      doDaringMorph = false;
     }
   }
   if ( Opts.Find( "e", value, mood)) {
@@ -289,9 +287,10 @@ bool parse_args( TimblOpts& Opts ) {
 
   if ( Opts.Find( "keep-parser-files", value, mood ) ){
     if ( value.empty() ||
-	 value == "true" || value == "TRUE" || value =="yes" || value == "YES" )
+	 stringTo<bool>( value ) ){
       configuration.setatt( "keepIntermediateFiles", "true", "parser" );
-    Opts.Delete("keep-parser-files");
+      Opts.Delete("keep-parser-files");
+    }
   }
   tmpDirName = configuration.lookUp( "tmpdir", "global" );
   if ( Opts.Find ( "tmpdir", value, mood )) {
@@ -829,15 +828,10 @@ void displayMWU( ostream& os, size_t index,
       try {
 	vector<MorphologyLayer*> ml = word->annotations<MorphologyLayer>();
 	for ( size_t q=0; q < ml.size(); ++q ){
-	  vector<Morpheme*> m = ml[q]->select<Morpheme>();
-	  for ( size_t t=0; t < m.size(); ++t ){
-	    if ( m[t]->cls() == "stem"
-		 || m[t]->cls() == "derivational"
-		 || m[t]->cls() == "inflection" ){
-	      string txt = UnicodeToUTF8( m[t]->text() );
-	      morph += "[" + txt + "]";
-	    }
-	  }
+	  vector<Morpheme*> m = ml[q]->select<Morpheme>( false );
+	  assert( m.size() == 1 ); // top complex layer
+	  string desc = m[0]->description();
+	  morph = desc;
 	  if ( q < ml.size()-1 )
 	    morph += "/";
 	}
@@ -853,13 +847,6 @@ void displayMWU( ostream& os, size_t index,
     }
     else if ( doMorph ){
       try {
-	// vector<Morpheme*> mv = word->morphemes();
-	// cerr << mv << endl;
-	// for ( size_t q=0; q < mv.size(); ++q ){
-	//   if ( mv[q]->cls() == "stem"
-	//        || mv[q]->cls() == "inflection" )
-	//     cerr << mv[q]->text() << endl;
-	// }
 	vector<MorphologyLayer*> ml = word->annotations<MorphologyLayer>();
 	for ( size_t q=0; q < ml.size(); ++q ){
 	  vector<Morpheme*> m = ml[q]->select<Morpheme>();
