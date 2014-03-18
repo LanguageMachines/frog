@@ -56,7 +56,7 @@ public:
   virtual std::string inflection() const { return ""; };
   virtual std::string original() const { return ""; };
   virtual size_t infixpos() const { return -1; };
-  virtual UnicodeString put() const;
+  virtual UnicodeString put( bool = false ) const;
   virtual BaseBracket *append( BaseBracket * ){ abort(); };
   virtual bool isNested() { return false; };
   virtual void resolveLead(){ abort(); };
@@ -79,7 +79,7 @@ public:
 class BracketLeaf: public BaseBracket {
 public:
   BracketLeaf( const RulePart& );
-  UnicodeString put() const;
+  UnicodeString put( bool = false ) const;
   UnicodeString morpheme() const { return morph; };
   std::string inflection() const { return inflect; };
   std::string original() const { return orig; };
@@ -106,7 +106,7 @@ class BracketNest: public BaseBracket {
   };
   ~BracketNest();
   bool isNested() { return true; };
-  UnicodeString put() const;
+  UnicodeString put( bool = false ) const;
   void resolveNouns();
   void resolveLead();
   void resolveTail();

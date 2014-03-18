@@ -71,6 +71,7 @@ void usage( ) {
        << "\t============= OTHER OPTIONS ============================================\n"
        << "\t -h. give some help.\n"
        << "\t -V or --version .   Show version info.\n"
+       << "\t --daring=<true|false>. Default false\n"
        << "\t -d <debug level>    (for more verbosity)\n";
 }
 
@@ -126,6 +127,12 @@ bool parse_args( TimblOpts& Opts ) {
   if ( Opts.Find( 'a', value, mood )) {
     doAll = true;
     Opts.Delete('a');
+  };
+  if ( Opts.Find( "daring", value, mood )) {
+    if ( value.empty() )
+      value = "1";
+    configuration.setatt( "daring", value, "mbma" );
+    Opts.Delete("daring");
   };
   return true;
 }

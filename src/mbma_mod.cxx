@@ -31,6 +31,7 @@
 #include <set>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <timbl/TimblAPI.h>
 
 #include "ucto/unicode.h"
@@ -721,34 +722,40 @@ BracketNest::~BracketNest(){
   }
 }
 
-UnicodeString BaseBracket::put() const {
+UnicodeString BaseBracket::put( bool noclass ) const {
   UnicodeString result = "[err?]";
-  UnicodeString s = UTF8ToUnicode(toString(cls));
-  result += s;
+  if ( !noclass ){
+    UnicodeString s = UTF8ToUnicode(toString(cls));
+    result += s;
+  }
   return result;
 }
 
-UnicodeString BracketLeaf::put() const {
+UnicodeString BracketLeaf::put( bool noclass ) const {
   UnicodeString result = "[";
   result += morph;
   result += "]";
-  if ( orig.empty() )
-    result += UTF8ToUnicode(inflect);
-  else
-    result += UTF8ToUnicode(orig);
+  if ( !noclass ){
+    if ( orig.empty() )
+      result += UTF8ToUnicode(inflect);
+    else
+      result += UTF8ToUnicode(orig);
+  }
   return result;
 }
 
-UnicodeString BracketNest::put() const {
+UnicodeString BracketNest::put( bool noclass ) const {
   UnicodeString result = "[ ";
   for ( list<BaseBracket*>::const_iterator it = parts.begin();
 	it != parts.end();
 	++it ){
-    result +=(*it)->put() + " ";
+    result +=(*it)->put(noclass) + " ";
   }
   result += "]";
-  if ( cls != CLEX::UNASS )
-    result += UTF8ToUnicode(toString(cls));
+  if ( !noclass ){
+    if ( cls != CLEX::UNASS )
+      result += UTF8ToUnicode(toString(cls));
+  }
   return result;
 }
 
@@ -1887,11 +1894,20 @@ vector<vector<string> > Mbma::getResult() const {
   for (vector<MBMAana*>::const_iterator it=analysis.begin();
        it != analysis.end();
        it++ ){
-    vector<string> mors = (*it)->getMorph();
-    if ( debugFlag ){
-      *Log(mbmaLog) << "Morphs " << mors << endl;
+    if ( doDaring ){
+      stringstream ss;
+      ss << (*it)->getBrackets()->put( true ) << endl;
+      vector<string> mors;
+      mors.push_back( ss.str() );
+      result.push_back( mors );
     }
-    result.push_back( mors );
+    else {
+      vector<string> mors = (*it)->getMorph();
+      if ( debugFlag ){
+	*Log(mbmaLog) << "Morphs " << mors << endl;
+      }
+      result.push_back( mors );
+    }
   }
   if ( debugFlag ){
     *Log(mbmaLog) << "result of morph analyses: " << result << endl;
