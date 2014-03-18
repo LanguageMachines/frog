@@ -1072,13 +1072,15 @@ void Mbma::performEdits( Rule& rule ){
     if ( debugFlag){
       *Log(mbmaLog) << "edit::act=" << cur << endl;
     }
-    if ( !cur->del.isEmpty() ){
+    if ( !cur->del.isEmpty() && cur->ins != "eer" ){
       // sanity check
       for ( int j=0; j < cur->del.length(); ++j ){
 	if ( rule.rules[k+j].uchar != cur->del[j] ){
+	  UnicodeString tmp(cur->del[j]);
 	  *Log(mbmaLog) << "Hmm: deleting " << cur->del << " is impossible. ("
-			<< rule.rules[k+j].uchar << " != " << cur->del[j]
+			<< rule.rules[k+j].uchar << " != " << tmp
 			<< ") just skipping the deletion." << endl;
+	  *Log(mbmaLog) << "Executing rule: " << rule << endl;
 	  cur->del = "";
 	}
       }
@@ -1123,7 +1125,7 @@ void Mbma::performEdits( Rule& rule ){
       // fix exception
       last->morpheme += "e";
     }
-    last->morpheme += cur->uchar; // mighe be empty because of deletion
+    last->morpheme += cur->uchar; // might be empty because of deletion
   }
   if ( debugFlag ){
     *Log(mbmaLog) << "edited rule " << rule << endl;

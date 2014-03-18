@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: frog
+Version: @VERSION@
+Description: Frog stuff
+Requires.private: libxml-2.0
+Libs: -L${libdir} -lfrog
+Libs.private: @LIBS@
+Cflags: -I${includedir}

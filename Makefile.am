@@ -7,5 +7,8 @@ SUBDIRS = src include scripts m4 docs tests
 
 EXTRA_DIST = bootstrap AUTHORS TODO NEWS
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = frog.pc
+
 ChangeLog: $(top_srcdir)/NEWS
 	svn update; svn2cl --include-rev
