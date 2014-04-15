@@ -509,7 +509,7 @@ RulePart::RulePart( const string& rs, const UChar kar ):
       for ( size_t i = 0; i < rhs.size(); ++i ){
 	CLEX::Type tag = CLEX::toCLEX( rhs[i] );
 	if ( tag == CLEX::UNASS ){
-	  cerr << "Unhandles class in rhs=" << rhs << endl;
+	  cerr << "Unhandled class in rhs=" << rhs << endl;
 	  continue;
 	}
 	else {
@@ -1357,10 +1357,18 @@ void Mbma::addBracketMorph( Word *word,
   Morpheme *result = new Morpheme( word->doc(), args );
   args.clear();
   args["value"] = wrd;
+  args["offset"] = "0";
   TextContent *t = new TextContent( args );
 #pragma omp critical(foliaupdate)
   {
     result->append( t );
+  }
+  args.clear();
+  args["value"] =  "[" + wrd + "]";
+  Description *d = new Description( args );
+#pragma omp critical(foliaupdate)
+  {
+    result->append( d );
   }
   args.clear();
   args["set"] = clex_tagset;
