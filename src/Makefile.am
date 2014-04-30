@@ -19,7 +19,6 @@ libfrog_la_SOURCES = mbma_mod.cxx mblem_mod.cxx \
 	ucto_tokenizer_mod.cxx
 
 
-TESTS_ENVIRONMENT = $(SHELL) -x
 TESTS = tst.sh
 
 EXTRA_DIST = tst.sh
