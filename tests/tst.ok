@@ -8,5 +8,5 @@
 8	de	de	[de]	LID(bep,stan,rest)	0.999964	O	B-NP		
 9	datum	datum	[datum]	N(soort,ev,basis,zijd,stan)	0.997691	O	I-NP		
 10	09-01-2012	09-01-2012	[09-01-2012]	TW(hoofd,vrij)	0.533224	O	B-NP		
-11	!	!	[!]	LET()	0.995005	O	O		
+11	!	!	[!]	LET()	1.000000	O	O		
 
