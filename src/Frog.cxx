@@ -42,7 +42,6 @@
 #include <omp.h>
 
 #include "timbl/TimblAPI.h"
-#include "mbt/MbtAPI.h"
 #include "timblserver/FdStream.h"
 #include "timblserver/ServerBase.h"
 
@@ -52,6 +51,7 @@
 #include "frog/Frog.h"
 #include "ticcutils/Configuration.h"
 #include "ticcutils/StringOps.h"
+#include "ticcutils/CommandLine.h"
 #include "frog/ucto_tokenizer_mod.h"
 #include "frog/mbma_mod.h"
 #include "frog/mblem_mod.h"
@@ -172,22 +172,22 @@ static NERTagger myNERTagger;
 static UctoTokenizer tokenizer;
 
 
-bool parse_args( TimblOpts& Opts ) {
+bool parse_args( TiCC::CL_Options& Opts ) {
   string value;
   bool mood;
-  if ( Opts.Find('V', value, mood ) ||
-       Opts.Find("version", value, mood ) ){
+  if ( Opts.find('V', value, mood ) ||
+       Opts.find("version", value ) ){
     // we already did show what we wanted.
     exit( EXIT_SUCCESS );
   }
-  if ( Opts.Find ('h', value, mood)) {
+  if ( Opts.find ('h', value, mood)) {
     usage();
     exit( EXIT_SUCCESS );
   };
   // is a config file specified?
-  if ( Opts.Find( 'c',  value, mood ) ) {
+  if ( Opts.find( 'c',  value, mood ) ) {
     configFileName = value;
-    Opts.Delete( 'c' );
+    Opts.remove( 'c' );
   };
 
   if ( configuration.fill( configFileName ) ){
@@ -200,20 +200,20 @@ bool parse_args( TimblOpts& Opts ) {
   }
 
   // debug opts
-  if ( Opts.Find ('d', value, mood)) {
+  if ( Opts.find ('d', value, mood)) {
     if ( !stringTo<int>( value, tpDebug ) ){
       *Log(theErrLog) << "-d value should be an integer" << endl;
       return false;
     }
-    Opts.Delete('d');
+    Opts.remove('d');
   };
-  if ( Opts.Find ('n', value, mood)) {
+  if ( Opts.find ('n', value, mood)) {
     doSentencePerLine = true;
   };
-  if ( Opts.Find ('Q', value, mood)) {
+  if ( Opts.find ('Q', value, mood)) {
     doQuoteDetection = true;
   };
-  if ( Opts.Find( "skip", value, mood)) {
+  if ( Opts.find( "skip", value )) {
     if ( value.empty() ){
       *Log(theErrLog) << "missing a value for --skip (did you forget the '='?)" << endl;
       return false;
@@ -233,10 +233,10 @@ bool parse_args( TimblOpts& Opts ) {
       doNER = false;
     if ( skip.find_first_of("pP") != string::npos )
       doParse = false;
-    Opts.Delete("skip");
+    Opts.remove("skip");
   };
 
-  if ( Opts.Find( "daring", value, mood) ) {
+  if ( Opts.find( "daring", value ) ) {
     if ( value.empty() )
       value = "1";
     doDaringMorph = stringTo<bool>( value );
@@ -244,11 +244,11 @@ bool parse_args( TimblOpts& Opts ) {
       doMorph = true;
     }
   }
-  if ( Opts.Find( "e", value, mood)) {
+  if ( Opts.find( 'e', value, mood)) {
     encoding = value;
   }
 
-  if ( Opts.Find( "max-parser-tokens", value, mood ) ){
+  if ( Opts.find( "max-parser-tokens", value ) ){
     if ( value.empty() ){
       *Log(theErrLog) << "max-parser-tokens option without value " << endl;
       return false;
@@ -259,10 +259,10 @@ bool parse_args( TimblOpts& Opts ) {
 	return false;
       }
     }
-    Opts.Delete("max-parser-tokens");
+    Opts.remove("max-parser-tokens");
   }
 
-  if ( Opts.Find ('S', value, mood)) {
+  if ( Opts.find ('S', value, mood)) {
     doServer = true;
     listenport= value;
   }
@@ -271,7 +271,7 @@ bool parse_args( TimblOpts& Opts ) {
     // run in one thread in server mode, forking is too expensive for lots of small snippets
     omp_set_num_threads( 1 );
   }
-  else if ( Opts.Find( "threads", value, mood ) ){
+  else if ( Opts.find( "threads", value ) ){
     if ( value.empty() ){
       *Log(theErrLog) << "missing a value for --threads (did you forget the '='?)" << endl;
       return false;
@@ -285,21 +285,21 @@ bool parse_args( TimblOpts& Opts ) {
   }
 #endif
 
-  if ( Opts.Find( "keep-parser-files", value, mood ) ){
+  if ( Opts.find( "keep-parser-files", value ) ){
     if ( value.empty() ||
 	 stringTo<bool>( value ) ){
       configuration.setatt( "keepIntermediateFiles", "true", "parser" );
-      Opts.Delete("keep-parser-files");
+      Opts.remove("keep-parser-files");
     }
   }
   tmpDirName = configuration.lookUp( "tmpdir", "global" );
-  if ( Opts.Find ( "tmpdir", value, mood )) {
+  if ( Opts.find ( "tmpdir", value )) {
     if ( value.empty() ){
       *Log(theErrLog) << "missing a value for --tmpdir (did you forget the '='?)" << endl;
       return false;
     }
     tmpDirName = value;
-    Opts.Delete("tmpdir");
+    Opts.remove("tmpdir");
   }
   if ( tmpDirName.empty() ){
     tmpDirName = "/tmp/";
@@ -316,7 +316,7 @@ bool parse_args( TimblOpts& Opts ) {
     *Log(theErrLog) << "checking tmpdir: " << tmpDirName << " OK" << endl;
   }
 #endif
-  if ( Opts.Find ( "testdir", value, mood)) {
+  if ( Opts.find ( "testdir", value )) {
 #ifdef HAVE_DIRENT_H
     doDirTest = true;
     testDirName = value;
@@ -333,19 +333,19 @@ bool parse_args( TimblOpts& Opts ) {
 #else
       *Log(theErrLog) << "--testdir option not supported!" << endl;
 #endif
-    Opts.Delete("testdir");
+    Opts.remove("testdir");
   }
-  else if ( Opts.Find( 't', value, mood )) {
+  else if ( Opts.find( 't', value, mood )) {
     TestFileName = value;
     ifstream is( value.c_str() );
     if ( !is ){
       *Log(theErrLog) << "input stream " << value << " is not readable" << endl;
       return false;
     }
-    Opts.Delete('t');
+    Opts.remove('t');
   };
   wantOUT = false;
-  if ( Opts.Find( "outputdir", value, mood)) {
+  if ( Opts.find( "outputdir", value )) {
     outputDirName = value;
 #ifdef HAVE_DIRENT_H
     if ( !outputDirName.empty() ){
@@ -360,23 +360,23 @@ bool parse_args( TimblOpts& Opts ) {
     }
 #endif
     wantOUT = true;
-    Opts.Delete( "outputdir");
+    Opts.remove( "outputdir");
   }
-  else if ( Opts.Find ('o', value, mood)) {
+  else if ( Opts.find ('o', value, mood)) {
     wantOUT = true;
     outputFileName = value;
-    Opts.Delete('o');
+    Opts.remove('o');
   };
   doXMLout = false;
-  if ( Opts.Find ( "id", value, mood)) {
+  if ( Opts.find ( "id", value )) {
     if ( value.empty() ){
       *Log(theErrLog) << "missing a value for --id (did you forget the '='?)" << endl;
       return false;
     }
     docid = value;
-    Opts.Delete( "id");
+    Opts.remove( "id");
   }
-  if ( Opts.Find( "xmldir", value, mood)) {
+  if ( Opts.find( "xmldir", value )) {
     xmlDirName = value;
 #ifdef HAVE_DIRENT_H
     if ( !xmlDirName.empty() ){
@@ -391,19 +391,19 @@ bool parse_args( TimblOpts& Opts ) {
     }
 #endif
     doXMLout = true;
-    Opts.Delete( "xmldir");
+    Opts.remove( "xmldir");
   }
-  else if ( Opts.Find ('X', value, mood)) {
+  else if ( Opts.find ('X', value, mood)) {
     doXMLout = true;
     XMLoutFileName = value;
-    Opts.Delete('X');
+    Opts.remove('X');
   }
-  if ( Opts.Find ("KANON", value, mood) ){
+  if ( Opts.find ("KANON", value ) ){
     doKanon = true;
-    Opts.Delete( "KANON" );
+    Opts.remove( "KANON" );
   }
   doXMLin = false;
-  if ( Opts.Find ('x', value, mood)) {
+  if ( Opts.find ('x', value, mood)) {
     doXMLin = true;
     if ( !value.empty() ){
       if ( ! (xmlDirName.empty() &&
@@ -419,9 +419,9 @@ bool parse_args( TimblOpts& Opts ) {
 	return false;
       }
     }
-    Opts.Delete('x');
+    Opts.remove('x');
   }
-  if ( Opts.Find ( "textclass", value, mood)) {
+  if ( Opts.find ( "textclass", value )) {
     if ( !doXMLin ){
       *Log(theErrLog) << "--textclass is only valid when -x is also present" << endl;
       return false;
@@ -431,7 +431,7 @@ bool parse_args( TimblOpts& Opts ) {
       return false;
     }
     textclass = value;
-    Opts.Delete( "textclass");
+    Opts.remove( "textclass");
   }
 
   if ( !outputFileName.empty() && !testDirName.empty() ){
@@ -443,7 +443,7 @@ bool parse_args( TimblOpts& Opts ) {
     return false;
   }
 
-  if ( Opts.Find ("uttmarker", value, mood)) {
+  if ( Opts.find ("uttmarker", value )) {
     if ( value.empty() ){
       *Log(theErrLog) << "missing a value for --uttmarker (did you forget the '='?)" << endl;
       return false;
@@ -1259,7 +1259,7 @@ int main(int argc, char *argv[]) {
   //  cout << "configdir: " << configDir << endl;
   std::ios_base::sync_with_stdio(false);
   try {
-    TimblOpts Opts(argc, argv);
+    TiCC::CL_Options Opts(argc, argv);
 
     if ( parse_args(Opts) ){
       if (  !froginit() ){
