@@ -304,7 +304,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   if ( tmpDirName.empty() ){
     tmpDirName = "/tmp/";
   }
-  else {
+  else if ( tmpDirName[tmpDirName.size()-1] != '/' ){
     tmpDirName += "/";
   }
 #ifdef HAVE_DIRENT_H
@@ -320,6 +320,9 @@ bool parse_args( TiCC::CL_Options& Opts ) {
 #ifdef HAVE_DIRENT_H
     doDirTest = true;
     testDirName = value;
+    if ( testDirName[testDirName.size()-1] != '/' ){
+      testDirName += "/";
+    }
     if ( !testDirName.empty() ){
       if ( !existsDir( testDirName ) ){
 	*Log(theErrLog) << "input dir " << testDirName << " not readable" << endl;
@@ -347,6 +350,9 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   wantOUT = false;
   if ( Opts.find( "outputdir", value )) {
     outputDirName = value;
+    if ( outputDirName[outputDirName.size()-1] != '/' ){
+      outputDirName += "/";
+    }
 #ifdef HAVE_DIRENT_H
     if ( !outputDirName.empty() ){
       if ( !existsDir( outputDirName ) ){
@@ -378,6 +384,9 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   }
   if ( Opts.find( "xmldir", value )) {
     xmlDirName = value;
+    if ( xmlDirName[xmlDirName.size()-1] != '/' ){
+      xmlDirName += "/";
+    }
 #ifdef HAVE_DIRENT_H
     if ( !xmlDirName.empty() ){
       if ( !existsDir( xmlDirName ) ){
@@ -465,7 +474,32 @@ bool parse_args( TiCC::CL_Options& Opts ) {
       return false;
     }
   }
-  if ( !doServer && TestFileName.empty() && fileNames.empty() ){
+  if ( fileNames.empty() ){
+    if ( !TestFileName.empty() ){
+      fileNames.insert( TestFileName );
+      TestFileName = "";
+    }
+    else {
+      vector<string> mass = Opts.getMassOpts();
+      for (size_t i=0; i < mass.size(); ++i ){
+	fileNames.insert( mass[i] );
+      }
+    }
+  }
+  if ( fileNames.size() > 1 ){
+    if ( !outputFileName.empty() ){
+      *Log(theErrLog) << "'-o " << outputFileName
+		      << "' is invalid for multiple inputfiles." << endl;
+      return false;
+    }
+    if ( !XMLoutFileName.empty() ){
+      *Log(theErrLog) << "'-X " << XMLoutFileName
+		      << "' is invalid for multiple inputfiles." << endl;
+      return false;
+    }
+  }
+
+  if ( !doServer && fileNames.empty() ){
     *Log(theErrLog) << "no frogging without input!" << endl;
     return false;
   }
@@ -1266,31 +1300,33 @@ int main(int argc, char *argv[]) {
 	throw runtime_error( "init failed" );
       }
       if ( !fileNames.empty() ) {
-	string outPath;
-	string xmlPath;
-	if ( !outputDirName.empty() )
-	  outPath = outputDirName + "/";
-	if ( !xmlDirName.empty() )
-	  xmlPath = xmlDirName + "/";
+	string outPath = outputDirName;
+	string xmlPath = xmlDirName;
 	set<string>::const_iterator it = fileNames.begin();
 	while ( it != fileNames.end() ){
-	  string testName = testDirName +"/" + *it;
-	  string outName;
-	  if ( doXMLin ){
-	    if ( !outPath.empty() )
+	  string testName = testDirName;
+	  testName += *it;
+	  string outName = outputFileName;
+	  if ( wantOUT && outName.empty() ){
+	    if ( doXMLin ){
+	      if ( !outPath.empty() )
+		outName = outPath + *it + ".out";
+	    }
+	    else
 	      outName = outPath + *it + ".out";
 	  }
-	  else
-	    outName = outPath + *it + ".out";
-	  string xmlName;
-	  if ( !xmlDirName.empty() ){
-	    if ( it->rfind(".xml") == string::npos )
-	      xmlName = xmlPath + *it + ".xml";
-	    else
-	      xmlName = xmlPath + *it;
+	  string xmlName = XMLoutFileName;
+	  if ( xmlName.empty() ){
+	    if ( !xmlDirName.empty() ){
+	      if ( it->rfind(".xml") == string::npos )
+		xmlName = xmlPath + *it + ".xml";
+	      else
+		xmlName = xmlPath + *it;
+	    }
+	    else if ( doXMLout )
+	      xmlName = *it + ".xml"; // do not clobber the inputdir!
+	    cerr << "Test(" << testName << "," << outName << "," << xmlName << ")" << endl;
 	  }
-	  else if ( doXMLout )
-	    xmlName = *it + ".xml"; // do not clobber the inputdir!
 	  Test( testName, outName, xmlName );
 	  ++it;
 	}
@@ -1343,13 +1379,6 @@ int main(int argc, char *argv[]) {
 	    *Log(theErrLog) << "Server error:" << e.what() << " Exiting." << endl;
 	    throw;
 	  }
-
-      } else {
-	if ( doXMLout && XMLoutFileName.empty() )
-	  XMLoutFileName = TestFileName + ".xml";
-	if ( wantOUT && outputFileName.empty() )
-	  outputFileName = TestFileName + ".out";
-	Test( TestFileName, outputFileName, XMLoutFileName );
       }
     }
     else {
