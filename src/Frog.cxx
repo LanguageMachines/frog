@@ -1137,8 +1137,8 @@ void Test( Document& doc,
       *Log(theErrLog) << "Parsing (csi)     took: " << timers.csiTimer << endl;
       *Log(theErrLog) << "Parsing (total)   took: " << timers.parseTimer << endl;
     }
-    *Log(theErrLog) << "Frogging in total took: " << timers.frogTimer << endl;
   }
+  *Log(theErrLog) << "Frogging in total took: " << timers.frogTimer << endl;
   return;
 }
 

@@ -1432,7 +1432,12 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
   desc.clear();
   if ( status == STEM || status == FAILED ){
     KWargs args;
-    args["class"] = "stem";
+    if ( status == STEM ){
+      args["class"] = "stem";
+    }
+    else {
+      args["class"] = "failed-derivation";
+    }
     result = new Morpheme( doc, args );
     args.clear();
     string out = UnicodeToUTF8(morph);
