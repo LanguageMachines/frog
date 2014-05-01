@@ -489,10 +489,6 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     }
   }
 
-  if ( !doServer && fileNames.empty() ){
-    *Log(theErrLog) << "no frogging without input!" << endl;
-    return false;
-  }
   return true;
 }
 
@@ -1061,6 +1057,7 @@ bool TestSentence( Sentence* sent,
 
 void Test( Document& doc,
 	   ostream& outStream,
+	   bool interactive = false,
 	   const string& xmlOutFile = "" ) {
   TimerBlock timers;
   timers.frogTimer.start();
@@ -1119,28 +1116,29 @@ void Test( Document& doc,
   }
 
   timers.frogTimer.stop();
-
-  *Log(theErrLog) << "tokenisation took:  " << timers.tokTimer << endl;
-  *Log(theErrLog) << "CGN tagging took:   " << timers.tagTimer << endl;
-  if ( doIOB)
-    *Log(theErrLog) << "IOB chunking took:  " << timers.iobTimer << endl;
-  if ( doNER)
-    *Log(theErrLog) << "NER took:           " << timers.nerTimer << endl;
-  if ( doMorph )
-    *Log(theErrLog) << "MBA took:           " << timers.mbmaTimer << endl;
-  if ( doLemma )
-    *Log(theErrLog) << "Mblem took:         " << timers.mblemTimer << endl;
-  if ( doMwu )
-    *Log(theErrLog) << "MWU resolving took: " << timers.mwuTimer << endl;
-  if ( doParse ){
-    *Log(theErrLog) << "Parsing (prepare) took: " << timers.prepareTimer << endl;
-    *Log(theErrLog) << "Parsing (pairs)   took: " << timers.pairsTimer << endl;
-    *Log(theErrLog) << "Parsing (rels)    took: " << timers.relsTimer << endl;
-    *Log(theErrLog) << "Parsing (dir)     took: " << timers.dirTimer << endl;
-    *Log(theErrLog) << "Parsing (csi)     took: " << timers.csiTimer << endl;
-    *Log(theErrLog) << "Parsing (total)   took: " << timers.parseTimer << endl;
+  if ( !interactive ){
+    *Log(theErrLog) << "tokenisation took:  " << timers.tokTimer << endl;
+    *Log(theErrLog) << "CGN tagging took:   " << timers.tagTimer << endl;
+    if ( doIOB)
+      *Log(theErrLog) << "IOB chunking took:  " << timers.iobTimer << endl;
+    if ( doNER)
+      *Log(theErrLog) << "NER took:           " << timers.nerTimer << endl;
+    if ( doMorph )
+      *Log(theErrLog) << "MBA took:           " << timers.mbmaTimer << endl;
+    if ( doLemma )
+      *Log(theErrLog) << "Mblem took:         " << timers.mblemTimer << endl;
+    if ( doMwu )
+      *Log(theErrLog) << "MWU resolving took: " << timers.mwuTimer << endl;
+    if ( doParse ){
+      *Log(theErrLog) << "Parsing (prepare) took: " << timers.prepareTimer << endl;
+      *Log(theErrLog) << "Parsing (pairs)   took: " << timers.pairsTimer << endl;
+      *Log(theErrLog) << "Parsing (rels)    took: " << timers.relsTimer << endl;
+      *Log(theErrLog) << "Parsing (dir)     took: " << timers.dirTimer << endl;
+      *Log(theErrLog) << "Parsing (csi)     took: " << timers.csiTimer << endl;
+      *Log(theErrLog) << "Parsing (total)   took: " << timers.parseTimer << endl;
+    }
+    *Log(theErrLog) << "Frogging in total took: " << timers.frogTimer << endl;
   }
-  *Log(theErrLog) << "Frogging in total took: " << timers.frogTimer << endl;
   return;
 }
 
@@ -1161,7 +1159,6 @@ void Test( const string& infilename,
 	xmlOutFile += ".bz2";
     }
   }
-  *Log(theErrLog) << "Frogging " << infilename << endl;
   if ( doXMLin ){
     Document doc;
     try {
@@ -1173,12 +1170,12 @@ void Test( const string& infilename,
       return;
     }
     tokenizer.tokenize( doc );
-    Test( doc, os, xmlOutFile );
+    Test( doc, os, false, xmlOutFile );
   }
   else {
     ifstream IN( infilename.c_str() );
     Document doc = tokenizer.tokenize( IN );
-    Test( doc, os, xmlOutFile );
+    Test( doc, os, false, xmlOutFile );
   }
 }
 
@@ -1252,6 +1249,45 @@ void TestServer( Sockets::ServerSocket &conn) {
   *Log(theErrLog) << "Connection closed.\n";
 }
 
+void TestInteractive(){
+  cout << "frog>"; cout.flush();
+  string line;
+  string data;
+  while ( getline( cin, line ) ){
+    string data = line;
+    if ( doSentencePerLine ){
+      if ( line.empty() ){
+	cout << "frog>"; cout.flush();
+	continue;
+      }
+    }
+    else {
+      if ( !line.empty() ){
+	data += "\n";
+      }
+      cout << "frog>"; cout.flush();
+      string line2;
+      while( getline( cin, line2 ) ){
+	if ( line2.empty() )
+	  break;
+	data += line2 + "\n";
+	cout << "frog>"; cout.flush();
+      }
+    }
+    if ( data.empty() ){
+      cout << "ignoring empty input" << endl;
+      cout << "frog>"; cout.flush();
+      continue;
+    }
+    cout << "Processing... " << endl;
+    istringstream inputstream(data,istringstream::in);
+    Document doc = tokenizer.tokenize( inputstream );
+    Test( doc, cout, true );
+    cout << "frog>"; cout.flush();
+  }
+  cout << "Done.\n";
+}
+
 
 int main(int argc, char *argv[]) {
   cerr << "frog " << VERSION << " (c) ILK 1998 - 2014" << endl;
@@ -1308,6 +1344,7 @@ int main(int argc, char *argv[]) {
 	    else if ( doXMLout )
 	      xmlName = *it + ".xml"; // do not clobber the inputdir!
 	  }
+	  *Log(theErrLog) << "Frogging " << testName << endl;
 	  Test( testName, *outS, xmlName );
 	  if ( !outName.empty() ){
 	    *Log(theErrLog) << "results stored in " << outName << endl;
@@ -1369,6 +1406,10 @@ int main(int argc, char *argv[]) {
 	    *Log(theErrLog) << "Server error:" << e.what() << " Exiting." << endl;
 	    throw;
 	  }
+      }
+      else {
+	// interactive mode
+	TestInteractive( );
       }
     }
     else {
