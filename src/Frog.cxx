@@ -68,7 +68,6 @@ using namespace TiCC;
 LogStream my_default_log( cerr, "frog-", StampMessage ); // fall-back
 LogStream *theErrLog = &my_default_log;  // fill the externals
 
-string TestFileName;
 string testDirName;
 string tmpDirName;
 string outputFileName;
@@ -316,6 +315,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     *Log(theErrLog) << "checking tmpdir: " << tmpDirName << " OK" << endl;
   }
 #endif
+  string TestFileName;
   if ( Opts.find ( "testdir", value )) {
 #ifdef HAVE_DIRENT_H
     doDirTest = true;
@@ -443,10 +443,6 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     Opts.remove( "textclass");
   }
 
-  if ( !outputFileName.empty() && !testDirName.empty() ){
-    *Log(theErrLog) << "useless -o value" << endl;
-    return false;
-  }
   if ( !XMLoutFileName.empty() && !testDirName.empty() ){
     *Log(theErrLog) << "useless -X value" << endl;
     return false;
@@ -477,7 +473,6 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   if ( fileNames.empty() ){
     if ( !TestFileName.empty() ){
       fileNames.insert( TestFileName );
-      TestFileName = "";
     }
     else {
       vector<string> mass = Opts.getMassOpts();
@@ -487,11 +482,6 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     }
   }
   if ( fileNames.size() > 1 ){
-    if ( !outputFileName.empty() ){
-      *Log(theErrLog) << "'-o " << outputFileName
-		      << "' is invalid for multiple inputfiles." << endl;
-      return false;
-    }
     if ( !XMLoutFileName.empty() ){
       *Log(theErrLog) << "'-X " << XMLoutFileName
 		      << "' is invalid for multiple inputfiles." << endl;
@@ -1155,7 +1145,7 @@ void Test( Document& doc,
 }
 
 void Test( const string& infilename,
-	   const string& outName,
+	   ostream &os,
 	   const string& xmlOutF ) {
   // stuff the whole input into one FoLiA document.
   // This is not a good idea on the long term, I think (agreed [proycon] )
@@ -1171,17 +1161,6 @@ void Test( const string& infilename,
 	xmlOutFile += ".bz2";
     }
   }
-  ostream *os;
-  if ( outName.empty() ){
-    os = &cout;
-  }
-  else {
-    os = new ofstream( outName.c_str() );
-    if ( os->bad() ){
-      *Log(theErrLog) << "unable to open outputfile: " << outName << endl;
-      exit( EXIT_FAILURE );
-    }
-  }
   *Log(theErrLog) << "Frogging " << infilename << endl;
   if ( doXMLin ){
     Document doc;
@@ -1191,22 +1170,15 @@ void Test( const string& infilename,
     catch ( exception &e ){
       *Log(theErrLog) << "retrieving FoLiA from '" << infilename << "' failed with exception:" << endl;
       cerr << e.what() << endl;
-      if ( !outName.empty() ){
-	delete os;
-      }
       return;
     }
     tokenizer.tokenize( doc );
-    Test( doc, *os, xmlOutFile );
+    Test( doc, os, xmlOutFile );
   }
   else {
     ifstream IN( infilename.c_str() );
     Document doc = tokenizer.tokenize( IN );
-    Test( doc, *os, xmlOutFile );
-  }
-  if ( !outName.empty() ){
-    *Log(theErrLog) << "results stored in " << outName << endl;
-    delete os;
+    Test( doc, os, xmlOutFile );
   }
 }
 
@@ -1303,17 +1275,27 @@ int main(int argc, char *argv[]) {
 	string outPath = outputDirName;
 	string xmlPath = xmlDirName;
 	set<string>::const_iterator it = fileNames.begin();
+	ostream *outS = 0;
+	if ( !outputFileName.empty() ){
+	  outS = new ofstream( outputFileName.c_str() );
+	}
 	while ( it != fileNames.end() ){
 	  string testName = testDirName;
 	  testName += *it;
-	  string outName = outputFileName;
-	  if ( wantOUT && outName.empty() ){
-	    if ( doXMLin ){
-	      if ( !outPath.empty() )
+	  string outName;
+	  if ( outS == 0 ){
+	    if ( wantOUT ){
+	      if ( doXMLin ){
+		if ( !outPath.empty() )
+		  outName = outPath + *it + ".out";
+	      }
+	      else
 		outName = outPath + *it + ".out";
+	      outS = new ofstream( outName.c_str() );
 	    }
-	    else
-	      outName = outPath + *it + ".out";
+	    else {
+	      outS = &cout;
+	    }
 	  }
 	  string xmlName = XMLoutFileName;
 	  if ( xmlName.empty() ){
@@ -1325,10 +1307,18 @@ int main(int argc, char *argv[]) {
 	    }
 	    else if ( doXMLout )
 	      xmlName = *it + ".xml"; // do not clobber the inputdir!
-	    cerr << "Test(" << testName << "," << outName << "," << xmlName << ")" << endl;
 	  }
-	  Test( testName, outName, xmlName );
+	  Test( testName, *outS, xmlName );
+	  if ( !outName.empty() ){
+	    *Log(theErrLog) << "results stored in " << outName << endl;
+	    delete outS;
+	    outS = 0;
+	  }
 	  ++it;
+	}
+	if ( !outputFileName.empty() ){
+	  *Log(theErrLog) << "results stored in " << outputFileName << endl;
+	  delete outS;
 	}
       }
       else if ( doServer ) {
