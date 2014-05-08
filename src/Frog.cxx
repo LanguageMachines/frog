@@ -172,6 +172,7 @@ static UctoTokenizer tokenizer;
 
 
 bool parse_args( TiCC::CL_Options& Opts ) {
+  cerr << "parse args: " << Opts << endl;
   string value;
   bool mood;
   if ( Opts.find('V', value, mood ) ||
@@ -1301,7 +1302,12 @@ int main(int argc, char *argv[]) {
   //  cout << "configdir: " << configDir << endl;
   std::ios_base::sync_with_stdio(false);
   try {
-    TiCC::CL_Options Opts(argc, argv);
+    TiCC::CL_Options Opts("c:e:o:t:x:X:nQhVd:S:",
+			  "textclass:,testdir:,uttmarker:,max-parser-tokens:,"
+			  "skip:,id:,outputdir:,xmldir:,tmpdir:,"
+			  "keep-parser-files:,version,threads:,KANON");
+
+    Opts.init(argc, argv);
 
     if ( parse_args(Opts) ){
       if (  !froginit() ){
