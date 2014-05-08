@@ -172,7 +172,6 @@ static UctoTokenizer tokenizer;
 
 
 bool parse_args( TiCC::CL_Options& Opts ) {
-  cerr << "parse args: " << Opts << endl;
   string value;
   bool mood;
   if ( Opts.find('V', value, mood ) ||
