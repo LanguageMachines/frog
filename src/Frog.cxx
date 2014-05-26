@@ -1303,7 +1303,7 @@ int main(int argc, char *argv[]) {
   try {
     TiCC::CL_Options Opts("c:e:o:t:x:X:nQhVd:S:",
 			  "textclass:,testdir:,uttmarker:,max-parser-tokens:,"
-			  "skip:,id:,outputdir:,xmldir:,tmpdir:,"
+			  "skip:,id:,outputdir:,xmldir:,tmpdir:,daring,"
 			  "keep-parser-files:,version,threads:,KANON");
 
     Opts.init(argc, argv);
