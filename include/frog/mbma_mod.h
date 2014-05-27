@@ -69,6 +69,7 @@ public:
 					   int&,
 					   std::string& ) const = 0;
   CLEX::Type tag() const { return cls; };
+  void setTag( CLEX::Type t ) { cls = t; };
   void setFail(){ status = FAILED; };
   std::vector<CLEX::Type> RightHand;
  protected:
@@ -79,6 +80,7 @@ public:
 class BracketLeaf: public BaseBracket {
 public:
   BracketLeaf( const RulePart& );
+  BracketLeaf( CLEX::Type, const UnicodeString& );
   UnicodeString put( bool = false ) const;
   UnicodeString morpheme() const { return morph; };
   std::string inflection() const { return inflect; };

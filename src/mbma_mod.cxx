@@ -714,6 +714,15 @@ BracketLeaf::BracketLeaf( const RulePart& p ):
   }
 }
 
+BracketLeaf::BracketLeaf( CLEX::Type t, const UnicodeString& us ):
+  BaseBracket( t, vector<CLEX::Type>() ),
+  morph( us )
+{
+  ifpos = -1;
+  orig = toString( t );
+  status = STEM;
+}
+
 BracketNest::~BracketNest(){
   for ( list<BaseBracket*>::const_iterator it = parts.begin();
 	it != parts.end();
@@ -824,7 +833,8 @@ bool testMatch( list<BaseBracket*>& result,
       cerr << "test MATCH FAIL (" << (*rpos)->RightHand[j]
 	   << " != " << (*it)->tag() << ")" << endl;
 #endif
-      bpos = result.end();
+      bpos = it; //result.end();
+      ++bpos;
       return false;
     }
   }
@@ -832,7 +842,8 @@ bool testMatch( list<BaseBracket*>& result,
 #ifdef DEBUG_BRACKETS
     cerr << "test MATCH FAIL (j < len)" << endl;
 #endif
-      bpos = result.end();
+    bpos = it; // result.end();
+    ++bpos;
     return false;
   }
 #ifdef DEBUG_BRACKETS
@@ -878,11 +889,31 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
     }
   }
   else {
-    if ( (*rpos)->RightHand.size() > 0 ){
-      (*rpos)->setFail();
-    }
     list<BaseBracket*>::iterator it = rpos;
-    return ++it;
+    UnicodeString mor;
+    CLEX::Type tag = (*it)->tag();
+    while ( it != bit ){
+      if ( (*it)->inflection() != "" )
+	break;
+#ifdef DEBUG_BRACKETS
+      cerr << "append:" << *it << endl;
+#endif
+      mor += (*it)->morpheme();
+      tag = (*it)->tag();
+#ifdef DEBUG_BRACKETS
+      cerr << "erase " << *it << endl;
+#endif
+      it = result.erase(it);
+    }
+      BaseBracket *tmp = new BracketLeaf( tag, mor );
+#ifdef DEBUG_BRACKETS
+      cerr << "new node: " << tmp << endl;
+#endif
+      result.insert( it, tmp );
+#ifdef DEBUG_BRACKETS
+      cerr << "result = " << result << endl;
+#endif
+      return ++it;
   }
 }
 
@@ -1459,7 +1490,12 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
     args.clear();
     args["set"]  = tagset;
-    args["cls"]  = toString( tag() );
+    if ( status == STEM ){
+      args["cls"] = toString( tag() );
+    }
+    else {
+      args["cls"] = orig;
+    }
 #pragma omp critical(foliaupdate)
     {
       result->addPosAnnotation( args );
@@ -1752,7 +1788,10 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   map<string, MBMAana*> unique;
   vector<MBMAana*>::iterator it=res.begin();
   while (  it != res.end() ){
+    // stringstream ss;
+    // ss << (*it)->getBrackets() << endl;
     vector<string> v = (*it)->getMorph();
+    //string tmp = ss.str();
     string tmp;
     // create an unique key
     for ( size_t p=0; p < v.size(); ++p ) {
@@ -1765,7 +1804,7 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   map<string, MBMAana*>::const_iterator uit=unique.begin();
   while ( uit != unique.end() ){
     result.push_back( uit->second );
-    cerr << "Final Bracketing: " << uit->second->getBrackets() << endl;
+    *Log(mbmaLog) << "Final Bracketing: " << uit->second->getBrackets() << endl;
     ++uit;
   }
   analysis = result;
@@ -1943,5 +1982,3 @@ ostream& operator<< ( ostream& os, const MBMAana *a ){
     os << "no-mbma";
   return os;
 }
-
-
