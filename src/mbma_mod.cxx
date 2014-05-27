@@ -1788,14 +1788,18 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   map<string, MBMAana*> unique;
   vector<MBMAana*>::iterator it=res.begin();
   while (  it != res.end() ){
-    // stringstream ss;
-    // ss << (*it)->getBrackets() << endl;
-    vector<string> v = (*it)->getMorph();
-    //string tmp = ss.str();
     string tmp;
-    // create an unique key
-    for ( size_t p=0; p < v.size(); ++p ) {
-      tmp += v[p] + "+";
+    if ( doDaring ){
+      stringstream ss;
+      ss << (*it)->getBrackets() << endl;
+      tmp = ss.str();
+    }
+    else {
+      vector<string> v = (*it)->getMorph();
+      // create an unique key
+      for ( size_t p=0; p < v.size(); ++p ) {
+	tmp += v[p] + "+";
+      }
     }
     unique[tmp] = *it;
     ++it;
