@@ -50,12 +50,13 @@ public:
   cls(t)
   {};
   virtual ~BaseBracket() {};
-  enum Status { INFO, STEM, COMPLEX, INFLECTION, DERIVATIONAL, FAILED };
+  enum Status { INFO, STEM, COMPLEX, INFLECTION, DERIVATIONAL };
 
   virtual UnicodeString morpheme() const { return "";};
+  virtual UnicodeString deepmorphemes() const { return "";};
   virtual std::string inflection() const { return ""; };
   virtual std::string original() const { return ""; };
-  virtual size_t infixpos() const { return -1; };
+  virtual int infixpos() const { return -1; };
   virtual UnicodeString put( bool = false ) const;
   virtual BaseBracket *append( BaseBracket * ){ abort(); };
   virtual bool isNested() { return false; };
@@ -70,7 +71,6 @@ public:
 					   std::string& ) const = 0;
   CLEX::Type tag() const { return cls; };
   void setTag( CLEX::Type t ) { cls = t; };
-  void setFail(){ status = FAILED; };
   std::vector<CLEX::Type> RightHand;
  protected:
   CLEX::Type cls;
@@ -83,9 +83,10 @@ public:
   BracketLeaf( CLEX::Type, const UnicodeString& );
   UnicodeString put( bool = false ) const;
   UnicodeString morpheme() const { return morph; };
+  UnicodeString deepmorphemes() const { return morph; };
   std::string inflection() const { return inflect; };
   std::string original() const { return orig; };
-  size_t infixpos() const { return ifpos; };
+  int infixpos() const { return ifpos; };
   folia::Morpheme *createMorpheme( folia::Document *,
 				   const std::string& ) const;
   folia::Morpheme *createMorpheme( folia::Document *,
@@ -93,7 +94,7 @@ public:
 				   int&,
 				   std::string& ) const;
 private:
-  size_t ifpos;
+  int ifpos;
   UnicodeString morph;
   std::string orig;
   std::string inflect;
@@ -113,6 +114,7 @@ class BracketNest: public BaseBracket {
   void resolveLead();
   void resolveTail();
   void resolveMiddle();
+  UnicodeString deepmorphemes() const;
   CLEX::Type getFinalTag();
   folia::Morpheme *createMorpheme( folia::Document *,
 				   const std::string& ) const;

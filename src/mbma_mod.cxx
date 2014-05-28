@@ -783,6 +783,16 @@ ostream& operator<< ( ostream& os, const BaseBracket *c ){
   return os;
 }
 
+UnicodeString BracketNest::deepmorphemes() const{
+  UnicodeString res;
+  for ( list<BaseBracket*>::const_iterator it = parts.begin();
+	it != parts.end();
+	++it ){
+    res += (*it)->deepmorphemes();
+  }
+  return res;
+}
+
 //#define DEBUG_BRACKETS
 
 void prettyP( ostream& os, const list<BaseBracket*>& v ){
@@ -833,8 +843,7 @@ bool testMatch( list<BaseBracket*>& result,
       cerr << "test MATCH FAIL (" << (*rpos)->RightHand[j]
 	   << " != " << (*it)->tag() << ")" << endl;
 #endif
-      bpos = it; //result.end();
-      ++bpos;
+      bpos = it;
       return false;
     }
   }
@@ -842,8 +851,7 @@ bool testMatch( list<BaseBracket*>& result,
 #ifdef DEBUG_BRACKETS
     cerr << "test MATCH FAIL (j < len)" << endl;
 #endif
-    bpos = it; // result.end();
-    ++bpos;
+    bpos = it;
     return false;
   }
 #ifdef DEBUG_BRACKETS
@@ -889,22 +897,31 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
     }
   }
   else {
+    // the affix derivation failed.
     list<BaseBracket*>::iterator it = rpos;
-    UnicodeString mor;
-    CLEX::Type tag = (*it)->tag();
-    while ( it != bit ){
-      if ( (*it)->inflection() != "" )
-	break;
 #ifdef DEBUG_BRACKETS
-      cerr << "append:" << *it << endl;
+    cerr << "it = " << *it << endl;
+    cerr << "bit = " << *bit << endl;
 #endif
-      mor += (*it)->morpheme();
-      tag = (*it)->tag();
+    if ( (*bit)->RightHand.size() > 1 ){
+      // We 'undo' the splitup and construct a leaf with the combined morphemes
+      UnicodeString mor;
+      CLEX::Type tag = (*it)->tag();
+      while ( it != result.end() ){
+	if ( (*it)->inflection() != "" ){
+	  // probably a bit harsh. Need to find example of failure yet
+	  break;
+	}
 #ifdef DEBUG_BRACKETS
-      cerr << "erase " << *it << endl;
+	cerr << "append:" << *it << endl;
 #endif
-      it = result.erase(it);
-    }
+	mor += (*it)->morpheme();
+	tag = (*it)->tag(); // remember the 'last' tag
+#ifdef DEBUG_BRACKETS
+	cerr << "erase " << *it << endl;
+#endif
+	it = result.erase(it);
+      }
       BaseBracket *tmp = new BracketLeaf( tag, mor );
 #ifdef DEBUG_BRACKETS
       cerr << "new node: " << tmp << endl;
@@ -914,6 +931,37 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
       cerr << "result = " << result << endl;
 #endif
       return ++it;
+    }
+    else {
+      // We 'undo' the splitup and construct a leaf with the combined morphemes
+      UnicodeString mor;
+      CLEX::Type tag = (*bit)->tag();
+      ++it;
+      while ( bit != it ){
+	if ( (*bit)->inflection() != "" ){
+	  // probably a bit harsh. Need to find example of failure yet
+	  break;
+	}
+#ifdef DEBUG_BRACKETS
+	cerr << "append:" << *bit << " morpheme=" <<  (*bit)->deepmorphemes() << endl;
+#endif
+	mor += (*bit)->deepmorphemes();
+	tag = (*bit)->tag(); // remember the 'last' tag
+#ifdef DEBUG_BRACKETS
+	cerr << "erase " << *bit << endl;
+#endif
+	bit = result.erase(bit);
+      }
+      BaseBracket *tmp = new BracketLeaf( tag, mor );
+#ifdef DEBUG_BRACKETS
+      cerr << "new node: " << tmp << endl;
+#endif
+      result.insert( it, tmp );
+#ifdef DEBUG_BRACKETS
+      cerr << "result = " << result << endl;
+#endif
+      return ++bit;
+    }
   }
 }
 
@@ -994,6 +1042,11 @@ void BracketNest::resolveTail(){
       size_t len = (*it)->RightHand.size();
       if ( (*it)->infixpos() > 0
 	   && (*it)->infixpos() == len-1 ){
+#ifdef DEBUG_BRACKETS
+      cerr << "found trailing * " << *it << endl;
+      cerr << "infixpos=" << (*it)->infixpos() << endl;
+      cerr << "len=" << len << endl;
+#endif
 	it = resolveAffix( parts, it );
       }
       else {
@@ -1344,7 +1397,13 @@ void Mbma::execute( const UnicodeString& word,
     Rule rule( allParts[step], word );
     performEdits( rule );
     rule.reduceZeroNodes();
+    if ( debugFlag ){
+      *Log(mbmaLog) << "after reduction: " << rule << endl;
+    }
     resolve_inflections( rule );
+    if ( debugFlag ){
+      *Log(mbmaLog) << "after resolving: " << rule << endl;
+    }
     MBMAana *tmp = new MBMAana( rule, doDaring );
     if ( debugFlag ){
       *Log(mbmaLog) << "1 added Inflection: " << tmp << endl;
@@ -1378,6 +1437,7 @@ void Mbma::addMorph( Word *word,
 void Mbma::addBracketMorph( Word *word,
 			    const string& wrd,
 			    const string& tag ) const {
+  //  *Log(mbmaLog) << "addBracketMorph(" << wrd << "," << tag << ")" << endl;
   MorphologyLayer *ml = new MorphologyLayer();
 #pragma omp critical(foliaupdate)
   {
@@ -1461,14 +1521,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
 				       string& desc ) const {
   Morpheme *result = 0;
   desc.clear();
-  if ( status == STEM || status == FAILED ){
+  if ( status == STEM ){
     KWargs args;
-    if ( status == STEM ){
-      args["class"] = "stem";
-    }
-    else {
-      args["class"] = "failed-derivation";
-    }
+    args["class"] = "stem";
     result = new Morpheme( doc, args );
     args.clear();
     string out = UnicodeToUTF8(morph);
@@ -1490,12 +1545,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
     args.clear();
     args["set"]  = tagset;
-    if ( status == STEM ){
-      args["cls"] = toString( tag() );
-    }
-    else {
-      args["cls"] = orig;
-    }
+    args["cls"] = toString( tag() );
 #pragma omp critical(foliaupdate)
     {
       result->addPosAnnotation( args );
