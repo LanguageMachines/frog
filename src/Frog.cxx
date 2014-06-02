@@ -41,13 +41,31 @@
 #include <vector>
 #include <omp.h>
 
+#include "config.h"
+
+
+#ifdef HAVE_LIBREADLINE
+#  if defined(HAVE_READLINE_READLINE_H)
+#    include <readline/readline.h>
+#  elif defined(HAVE_READLINE_H)
+#    include <readline.h>
+#  endif /* !defined(HAVE_READLINE_H) */
+#endif /* HAVE_LIBREADLINE */
+
+#ifdef HAVE_READLINE_HISTORY
+#  if defined(HAVE_READLINE_HISTORY_H)
+#    include <readline/history.h>
+#  elif defined(HAVE_HISTORY_H)
+#    include <history.h>
+#  endif /* defined(HAVE_READLINE_HISTORY_H) */
+#endif /* HAVE_READLINE_HISTORY */
+
 #include "timbl/TimblAPI.h"
 #include "timblserver/FdStream.h"
 #include "timblserver/ServerBase.h"
 
 // individual module headers
 
-#include "config.h"
 #include "frog/Frog.h"
 #include "ticcutils/Configuration.h"
 #include "ticcutils/StringOps.h"
@@ -1249,6 +1267,55 @@ void TestServer( Sockets::ServerSocket &conn) {
   *Log(theErrLog) << "Connection closed.\n";
 }
 
+#ifdef HAVE_LIBREADLINE
+void TestInteractive(){
+  const char *prompt = "frog> ";
+  string line;
+  string data;
+  while ( true ){
+    char *input = readline( prompt );
+    if ( !input )
+      break;
+    line = input;
+    if ( doSentencePerLine ){
+      if ( line.empty() ){
+	continue;
+      }
+      else {
+	data += line + "\n";
+	add_history( input );
+      }
+    }
+    else {
+      if ( !line.empty() ){
+	add_history( input );
+	data = line + "\n";
+      }
+      while ( true ){
+	char *input = readline( prompt );
+	line = input;
+	if ( line.empty() ){
+	  break;
+	}
+	if ( !input )
+	  break;
+	add_history( input );
+	data += line + "\n";
+      }
+    }
+    if ( data.empty() ){
+      cout << "ignoring empty input" << endl;
+      continue;
+    }
+    cout << "Processing... '" << data << "'" << endl;
+    istringstream inputstream(data,istringstream::in);
+    Document doc = tokenizer.tokenize( inputstream );
+    Test( doc, cout, true );
+  }
+  cout << "Done.\n";
+}
+
+#else
 void TestInteractive(){
   cout << "frog>"; cout.flush();
   string line;
@@ -1287,7 +1354,7 @@ void TestInteractive(){
   }
   cout << "Done.\n";
 }
-
+#endif
 
 int main(int argc, char *argv[]) {
   cerr << "frog " << VERSION << " (c) ILK 1998 - 2014" << endl;

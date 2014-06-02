@@ -72,6 +72,9 @@ if test "$pkgconfigpath" != "NONE"; then
   fi
 fi
 
+AX_LIB_READLINE
+
+
 #check for needed dependencies
 useICU=1;
 # inspired by feh-1.3.4/configure.ac.  Tnx Tom Gilbert and feh hackers.
