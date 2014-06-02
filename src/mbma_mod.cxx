@@ -937,6 +937,13 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
       UnicodeString mor;
       CLEX::Type tag = (*bit)->tag();
       ++it;
+      if (  bit == it ){
+#ifdef DEBUG_BRACKETS
+	cerr << "escape with result = " << result << endl;
+
+#endif
+	return ++bit;
+      }
       while ( bit != it ){
 	if ( (*bit)->inflection() != "" ){
 	  // probably a bit harsh. Need to find example of failure yet
