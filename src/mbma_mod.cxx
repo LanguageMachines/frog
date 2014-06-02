@@ -793,7 +793,7 @@ UnicodeString BracketNest::deepmorphemes() const{
   return res;
 }
 
-//#define DEBUG_BRACKETS
+#define DEBUG_BRACKETS
 
 void prettyP( ostream& os, const list<BaseBracket*>& v ){
   os << "[";
@@ -851,7 +851,7 @@ bool testMatch( list<BaseBracket*>& result,
 #ifdef DEBUG_BRACKETS
     cerr << "test MATCH FAIL (j < len)" << endl;
 #endif
-    bpos = it;
+    bpos = result.end();
     return false;
   }
 #ifdef DEBUG_BRACKETS
@@ -898,6 +898,11 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
   }
   else {
     // the affix derivation failed.
+    if ( bit == result.end() ){
+      // no hacks yet
+      bit = rpos;
+      return ++bit;
+    }
     list<BaseBracket*>::iterator it = rpos;
 #ifdef DEBUG_BRACKETS
     cerr << "it = " << *it << endl;
