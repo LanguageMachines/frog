@@ -793,7 +793,7 @@ UnicodeString BracketNest::deepmorphemes() const{
   return res;
 }
 
-#define DEBUG_BRACKETS
+//#define DEBUG_BRACKETS
 
 void prettyP( ostream& os, const list<BaseBracket*>& v ){
   os << "[";
