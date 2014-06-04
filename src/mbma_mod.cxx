@@ -642,7 +642,7 @@ void Mbma::resolve_inflections( Rule& rule ){
   // When applicable, we replace the class from the rule
   for ( size_t i = 1; i < rule.rules.size(); ++i ){
     string inf = rule.rules[i].inflect;
-    if ( !inf.empty() ){
+    if ( !inf.empty() && !rule.rules[i].participle ){
       // it is an inflection tag
       if (debugFlag){
 	*Log(mbmaLog) << " inflection: >" << inf << "<" << endl;
