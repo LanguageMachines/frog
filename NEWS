@@ -1,6 +1,13 @@
+0.12.18 - 2014-06
+ * a lot of changes in the MBMA module. It now can produce nested morphemes
+     using the --daring option of frog. Still experimental!
+ * Frog can now run interactive with readline support too.
+ * -t option is optional, multiple inputfiles are supported
+ * -o works for multiple files
+
 0.12.17 - 2013-04-03
  * the servermode now kan handle multiline input (non XML only).
-   Can be switched of with the -n option. 
+   Can be switched of with the -n option.
  * A lot of refactoring regarding FoLiA stuff
  * start using ticcutils
  * the -Q option now works
@@ -79,7 +86,7 @@
 
 0.12.6 - 2011-12-22
   * merged with the foliabased branch. So now we use the folia based Tokenizer.
-    folia XML is now the main interface between the modules in Frog. 
+    folia XML is now the main interface between the modules in Frog.
 
 0.12.5 - 2011-10-10
   * is released
@@ -106,7 +113,7 @@
 
 0.12.0 - 2011-03-21
 { Ko vd Sloot ]
-* decapped progs and man 
+* decapped progs and man
 
 0.11.1 - 2011-03-20
 

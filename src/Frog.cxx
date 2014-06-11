@@ -1271,11 +1271,14 @@ void TestServer( Sockets::ServerSocket &conn) {
 void TestInteractive(){
   const char *prompt = "frog> ";
   string line;
-  string data;
-  while ( true ){
+  bool eof = false;
+  while ( !eof ){
+    string data;
     char *input = readline( prompt );
-    if ( !input )
+    if ( !input ){
+      eof = true;
       break;
+    }
     line = input;
     if ( doSentencePerLine ){
       if ( line.empty() ){
@@ -1291,26 +1294,26 @@ void TestInteractive(){
 	add_history( input );
 	data = line + "\n";
       }
-      while ( true ){
+      while ( !eof ){
 	char *input = readline( prompt );
+	if ( !input ){
+	  eof = true;
+	  break;
+	}
 	line = input;
 	if ( line.empty() ){
 	  break;
 	}
-	if ( !input )
-	  break;
 	add_history( input );
 	data += line + "\n";
       }
     }
-    if ( data.empty() ){
-      cout << "ignoring empty input" << endl;
-      continue;
+    if ( !data.empty() ){
+      cout << "Processing... '" << data << "'" << endl;
+      istringstream inputstream(data,istringstream::in);
+      Document doc = tokenizer.tokenize( inputstream );
+      Test( doc, cout, true );
     }
-    cout << "Processing... '" << data << "'" << endl;
-    istringstream inputstream(data,istringstream::in);
-    Document doc = tokenizer.tokenize( inputstream );
-    Test( doc, cout, true );
   }
   cout << "Done.\n";
 }
