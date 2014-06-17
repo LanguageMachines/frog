@@ -6,7 +6,7 @@
   Tilburg University
 
   A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
- 
+
   This file is part of frog
 
   frog is free software; you can redistribute it and/or modify
@@ -44,9 +44,9 @@ IOBTagger::~IOBTagger(){
   delete tagger;
   delete iobLog;
 }
- 
+
 bool IOBTagger::init( const Configuration& conf ){
-  debug = tpDebug;
+  debug = 6;//tpDebug;
   string db = conf.lookUp( "debug", "IOB" );
   if ( !db.empty() )
     debug = TiCC::stringTo<int>( db );
@@ -67,13 +67,13 @@ bool IOBTagger::init( const Configuration& conf ){
     break;
   default:
     iobLog->setlevel(LogExtreme);
-  }    
-  if (debug) 
+  }
+  if (debug)
     *Log(iobLog) << "IOB Chunker Init" << endl;
   if ( tagger != 0 ){
     *Log(iobLog) << "IOBTagger is already initialized!" << endl;
     return false;
-  }  
+  }
   string val = conf.lookUp( "settings", "IOB" );
   if ( val.empty() ){
     *Log(iobLog) << "Unable to find settings for IOB" << endl;
@@ -103,7 +103,7 @@ bool IOBTagger::init( const Configuration& conf ){
   return tagger->isInit();
 }
 
-void IOBTagger::addChunk( ChunkingLayer *chunks, 
+void IOBTagger::addChunk( ChunkingLayer *chunks,
 			  const vector<Word*>& words,
 			  const vector<double>& confs,
 			  const string& IOB ){
@@ -157,7 +157,7 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
   vector<double> dstack;
   string curIOB;
   for ( size_t i=0; i < tags.size(); ++i ){
-    if (debug) 
+    if (debug)
       *Log(iobLog) << "tag = " << tags[i] << endl;
     vector<string> tagwords;
     size_t num_words = TiCC::split_at( tags[i], tagwords, "_" );
@@ -166,14 +166,14 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
       exit( EXIT_FAILURE );
     }
     vector<string> iob;
-    if (debug) 
+    if (debug)
       *Log(iobLog) << "IOB = " << tagwords[1] << endl;
     if ( tagwords[1] == "O" ){
       if ( !stack.empty() ){
 	if (debug) {
 	  *Log(iobLog) << "O spit out " << curIOB << endl;
 	  using TiCC::operator<<;
-	  *Log(iobLog) << "spit out " << stack << endl;	
+	  *Log(iobLog) << "spit out " << stack << endl;
 	}
 	addChunk( el, stack, dstack, curIOB );
 	dstack.clear();
@@ -197,7 +197,7 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
 	if ( debug ){
 	  *Log(iobLog) << "B spit out " << curIOB << endl;
 	  using TiCC::operator<<;
-	  *Log(iobLog) << "spit out " << stack << endl;	
+	  *Log(iobLog) << "spit out " << stack << endl;
 	}
 	addChunk( el, stack, dstack, curIOB );
 	dstack.clear();
@@ -212,14 +212,14 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
     if ( debug ){
       *Log(iobLog) << "END spit out " << curIOB << endl;
       using TiCC::operator<<;
-      *Log(iobLog) << "spit out " << stack << endl;	
+      *Log(iobLog) << "spit out " << stack << endl;
     }
     addChunk( el, stack, dstack, curIOB );
   }
 }
 
 void IOBTagger::addDeclaration( Document& doc ) const {
-  doc.declare( AnnotationType::CHUNKING, 
+  doc.declare( AnnotationType::CHUNKING,
 	       tagset,
 	       "annotator='frog-chunker-" + version
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
@@ -235,7 +235,7 @@ void IOBTagger::Classify( const vector<Word *>& swords ){
       if ( w < swords.size()-1 )
 	sentence += " ";
     }
-    if (debug) 
+    if (debug)
       *Log(iobLog) << "IOB in: " << sentence << endl;
     vector<TagResult> tagv = tagger->TagLine(sentence);
     if ( tagv.size() != swords.size() ){
@@ -244,13 +244,13 @@ void IOBTagger::Classify( const vector<Word *>& swords ){
     if ( debug ){
       *Log(iobLog) << "IOB tagger out: " << endl;
       for ( size_t i=0; i < tagv.size(); ++i ){
-	*Log(iobLog) << "[" << i << "] : word=" << tagv[i].word() 
-		     << " tag=" << tagv[i].assignedTag() 
+	*Log(iobLog) << "[" << i << "] : word=" << tagv[i].word()
+		     << " tag=" << tagv[i].assignedTag()
 		     << " confidence=" << tagv[i].confidence() << endl;
       }
     }
     vector<double> conf;
-    vector<string> tags;    
+    vector<string> tags;
     for ( size_t i=0; i < tagv.size(); ++i ){
       tags.push_back( tagv[i].assignedTag() );
       conf.push_back( tagv[i].confidence() );
@@ -258,5 +258,3 @@ void IOBTagger::Classify( const vector<Word *>& swords ){
     addIOBTags( swords, tags, conf );
   }
 }
-
-

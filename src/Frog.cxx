@@ -1121,16 +1121,16 @@ void Test( Document& doc,
       if ( !(doServer && doXMLout) )
 	showResults( outStream, topsentences[i], doParse );
     }
-    if ( doServer && doXMLout )
-      outStream << doc << endl;
-    if ( !xmlOutFile.empty() ){
-      doc.save( xmlOutFile, doKanon );
-      *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
-    }
   }
   else {
     if  (tpDebug > 0)
       *Log(theErrLog) << "No sentences found in document. " << endl;
+  }
+  if ( doServer && doXMLout )
+    outStream << doc << endl;
+  if ( !xmlOutFile.empty() ){
+    doc.save( xmlOutFile, doKanon );
+    *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
   }
 
   timers.frogTimer.stop();
