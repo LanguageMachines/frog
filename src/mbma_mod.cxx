@@ -1053,7 +1053,7 @@ void BracketNest::resolveTail(){
     else {
       size_t len = (*it)->RightHand.size();
       if ( (*it)->infixpos() > 0
-	   && (*it)->infixpos() == len-1 ){
+	   && (*it)->infixpos() == signed(len)-1 ){
 #ifdef DEBUG_BRACKETS
       cerr << "found trailing * " << *it << endl;
       cerr << "infixpos=" << (*it)->infixpos() << endl;
@@ -1085,7 +1085,7 @@ void BracketNest::resolveMiddle(){
     else {
       size_t len = (*it)->RightHand.size();
       if ( (*it)->infixpos() > 0
-	   && (*it)->infixpos() < len-1 ){
+	   && (*it)->infixpos() < signed(len)-1 ){
 	it = resolveAffix( parts, it );
       }
       else {
