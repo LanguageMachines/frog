@@ -28,7 +28,6 @@
       timbl@uvt.nl
 */
 
-#include "Python.h"
 #include <cstdlib>
 #include <cstdio>
 #include <sys/wait.h>
@@ -42,7 +41,6 @@
 #include <omp.h>
 
 #include "config.h"
-
 
 #ifdef HAVE_LIBREADLINE
 #  if defined(HAVE_READLINE_READLINE_H)
@@ -59,6 +57,9 @@
 #    include <history.h>
 #  endif /* defined(HAVE_READLINE_HISTORY_H) */
 #endif /* HAVE_READLINE_HISTORY */
+
+// Python.h seems to set HAVE_LIBREADLINE so we include this late...
+#include "Python.h"
 
 #include "timbl/TimblAPI.h"
 #include "timblserver/FdStream.h"

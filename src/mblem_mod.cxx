@@ -8,23 +8,23 @@
   This file is part of frog.
 
   frog is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by  
-  the Free Software Foundation; either version 3 of the License, or  
-  (at your option) any later version.  
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
   frog is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of  
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
-  GNU General Public License for more details.  
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-  You should have received a copy of the GNU General Public License  
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   For questions and suggestions, see:
       http://ilk.uvt.nl/software.html
   or send mail to:
       timbl@uvt.nl
-*/                                                                   
+*/
 
 #include <cstdlib>
 #include <string>
@@ -41,7 +41,7 @@ using namespace std;
 using namespace TiCC;
 using namespace folia;
 
-Mblem::Mblem(): myLex(0),punctuation( "?...,:;\\'`(){}[]%#+-_=/!" ), 
+Mblem::Mblem(): myLex(0),punctuation( "?...,:;\\'`(){}[]%#+-_=/!" ),
 		history(20), debug(0) {
   mblemLog = new LogStream( theErrLog, "mblem" );
 }
@@ -49,7 +49,7 @@ Mblem::Mblem(): myLex(0),punctuation( "?...,:;\\'`(){}[]%#+-_=/!" ),
 void Mblem::read_transtable( const string& tableName ) {
   ifstream bron( tableName.c_str() );
   if ( !bron ) {
-    *Log(mblemLog) << "translation table file '" << tableName 
+    *Log(mblemLog) << "translation table file '" << tableName
 		    << "' appears to be missing." << endl;
     exit(1);
   }
@@ -65,7 +65,7 @@ void Mblem::read_transtable( const string& tableName ) {
       classMap[classCode] = className;
     }
     // else {
-    //   *Log(mblemLog) << "multiple entry " << className << " " << classCode << " in translation table file: " << tableName  << " (Ignored) " << endl;      
+    //   *Log(mblemLog) << "multiple entry " << className << " " << classCode << " in translation table file: " << tableName  << " (Ignored) " << endl;
     // }
     bron >> ws;
   }
@@ -97,7 +97,7 @@ bool Mblem::init( const Configuration& config ) {
   }
   else
     cgn_tagset = val;
-  
+
   string transName = config.lookUp( "transFile", "mblem" );
   if ( !transName.empty() ){
     transName = prefix( config.configDir(), transName );
@@ -121,7 +121,7 @@ bool Mblem::init( const Configuration& config ) {
   if ( opts.empty() )
     opts = "-a1";
   //make it silent
-  opts += " +vs -vf";	    
+  opts += " +vs -vf";
   //Read in (igtree) data
   myLex = new Timbl::TimblAPI(opts);
   return myLex->GetInstanceBase(treeName);
@@ -153,7 +153,7 @@ string Mblem::make_instance( const UnicodeString& in ) {
   string result = UnicodeToUTF8(instance);
   if (debug)
     *Log(mblemLog) << "inst: " << instance << endl;
-  
+
   return result;
 }
 
@@ -165,7 +165,7 @@ bool similar( const string& tag, const string& lookuptag,
 
 bool isSimilar( const string& tag, const string& cgnTag ){
   // Dutch CGN constraints
-  return 
+  return
     tag == cgnTag ||
     similar( tag, cgnTag, "hulpofkopp" ) ||
     similar( tag, cgnTag, "neut,zelfst" ) ||
@@ -199,7 +199,7 @@ void Mblem::addLemma( FoliaElement *word, const string& cls ){
     word->addLemmaAnnotation( args );
   }
 }
-  
+
 void Mblem::addAltLemma( Word *word, const string& cls ){
   Alternative *alt = new Alternative();
 #pragma omp critical(foliaupdate)
@@ -208,19 +208,19 @@ void Mblem::addAltLemma( Word *word, const string& cls ){
   }
   addLemma( alt, cls );
 }
-  
+
 void Mblem::filterTag( const string& postag ){
   vector<mblemData>::iterator it = mblemResult.begin();
   while( it != mblemResult.end() ){
     if ( isSimilar( postag, it->getTag() ) ){
       if ( debug )
-	*Log(mblemLog) << "compare cgn-tag " << postag << " with " 
+	*Log(mblemLog) << "compare cgn-tag " << postag << " with "
 		       << it->getTag() << " similar! " << endl;
       ++it;
     }
     else {
       if ( debug )
-	*Log(mblemLog) << "compare cgn-tag " << postag << " with " 
+	*Log(mblemLog) << "compare cgn-tag " << postag << " with "
 		       << it->getTag() << " NOT similar! " << endl;
       it = mblemResult.erase(it);
     }
@@ -244,11 +244,18 @@ void Mblem::makeUnique( ){
       }
       else {
 	if ( debug )
-	  *Log(mblemLog) << "NOT equal! " << endl;	
+	  *Log(mblemLog) << "NOT equal! " << endl;
 	++it2;
       }
     }
     ++it;
+  }
+  if (debug){
+    *Log(mblemLog) << "final result after filter and unique" << endl;
+    for( size_t index=0; index < mblemResult.size(); ++index ){
+      *Log(mblemLog) << "lemma alt: " << mblemResult[index].getLemma()
+		     << "\ttag alt: " << mblemResult[index].getTag() << endl;
+    }
   }
 }
 
@@ -274,11 +281,11 @@ void Mblem::getFoLiAResult( Word *word, const UnicodeString& uWord ){
       ++it;
     }
   }
-} 
+}
 
 
 void Mblem::addDeclaration( Document& doc ) const {
-  doc.declare( AnnotationType::LEMMA, 
+  doc.declare( AnnotationType::LEMMA,
 	       tagset,
 	       "annotator='frog-mblem-" + version
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
@@ -292,14 +299,14 @@ void Mblem::Classify( Word *sword ){
   string pos;
   string token_class;
 #pragma omp critical(foliaupdate)
-  {  
+  {
     word = sword->text();
     pos = sword->pos();
     token_class = sword->cls();
     tag = sword->annotation<PosAnnotation>( cgn_tagset )->feat("head");
   }
   if (debug)
-    *Log(mblemLog) << "Classify " << word << "(" << pos << ") [" 
+    *Log(mblemLog) << "Classify " << word << "(" << pos << ") ["
 		   << token_class << "]" << endl;
   if ( filter )
     word = filter->filter( word );
@@ -307,7 +314,7 @@ void Mblem::Classify( Word *sword ){
     addLemma( sword, UnicodeToUTF8(word) );
     return;
   }
-  else if ( tag == "SPEC" ){ 
+  else if ( tag == "SPEC" ){
     if ( pos.find("eigen") != string::npos ){
       // SPEC(deeleigen) might contain suffixes
       if ( token_class == "QUOTE-SUFFIX" ){
@@ -327,14 +334,14 @@ void Mblem::Classify( Word *sword ){
   if ( tag != "SPEC")
     word.toLower();
   Classify( word );
-  filterTag( pos ); 
-  makeUnique(); 
-  getFoLiAResult( sword, word ); 
+  filterTag( pos );
+  makeUnique();
+  getFoLiAResult( sword, word );
 }
 
 void Mblem::Classify( const UnicodeString& uWord ){
   mblemResult.clear();
-  string inst = make_instance(uWord);  
+  string inst = make_instance(uWord);
   string classString;
   myLex->Classify( inst, classString );
   if (debug)
@@ -347,11 +354,11 @@ void Mblem::Classify( const UnicodeString& uWord ){
   }
   int index = 0;
   while ( index < numParts ) {
-    string partS = parts[index++]; 
+    string partS = parts[index++];
     UnicodeString lemma;
     string restag;
     string::size_type pos = partS.find("+");
-    if ( pos == string::npos ){ 
+    if ( pos == string::npos ){
       // nothing to edit
       restag = partS;
       lemma = uWord;
@@ -385,10 +392,10 @@ void Mblem::Classify( const UnicodeString& uWord ){
       if (debug){
 	*Log(mblemLog) << "pre-prefix word: '" << uWord << "' prefix: '"
 		       << prefix << "'" << endl;
-      }	
+      }
       int prefixpos = 0;
       if ( !prefix.isEmpty() ) {
-	// Whenever Toads makemblem is improved, (the infamous 
+	// Whenever Toads makemblem is improved, (the infamous
 	// 'tegemoetgekomen' example), this should probably
 	// become prefixpos = uWord.lastIndexOf(prefix);
 	prefixpos = uWord.indexOf(prefix);
@@ -400,7 +407,7 @@ void Mblem::Classify( const UnicodeString& uWord ){
 	  prefix.remove();
 	}
       }
-      
+
       if (debug)
 	*Log(mblemLog) << "prefixpos = " << prefixpos << endl;
       if (prefixpos >= 0) {
@@ -408,13 +415,13 @@ void Mblem::Classify( const UnicodeString& uWord ){
 	prefixpos = prefixpos + prefix.length();
       }
       if (debug)
-	*Log(mblemLog) << "post word: "<< uWord 
+	*Log(mblemLog) << "post word: "<< uWord
 		       << " lemma: " << lemma
 		       << " prefix: " << prefix
 		       << " delstr: " << delstr
 		       << " insstr: " << insstr
 		       << endl;
-      
+
       if ( uWord.endsWith( delstr ) ){
 	if ( uWord.length() > delstr.length() ){
 	  // chop delstr from the back, but do not delete the whole word
@@ -451,7 +458,7 @@ void Mblem::Classify( const UnicodeString& uWord ){
 	  *Log(mblemLog) << "found " << restag << endl;
       }
       else
-	*Log(mblemLog) << "problem: found no translation for " 
+	*Log(mblemLog) << "problem: found no translation for "
 		       << restag << " using it 'as-is'" << endl;
     }
     if ( debug )
