@@ -223,8 +223,13 @@ bool parse_args( TiCC::CL_Options& Opts ) {
       *Log(theErrLog) << "-d value should be an integer" << endl;
       return false;
     }
+    configuration.setatt( "debug", value );
     Opts.remove('d');
-  };
+  }
+  else {
+    configuration.setatt( "debug", "0" );
+  }
+
   if ( Opts.find ('n', value, mood)) {
     doSentencePerLine = true;
   };
@@ -1378,7 +1383,6 @@ int main(int argc, char *argv[]) {
 			  "keep-parser-files:,version,threads:,KANON");
 
     Opts.init(argc, argv);
-
     if ( parse_args(Opts) ){
       if (  !froginit() ){
 	throw runtime_error( "init failed" );
