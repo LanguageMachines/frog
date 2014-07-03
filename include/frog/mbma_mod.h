@@ -40,6 +40,8 @@ namespace CLEX {
   std::string toString( const Type& t );
 }
 
+enum Status { INFO, STEM, COMPLEX, INFLECTION, DERIVATIONAL };
+
 class BaseBracket {
 public:
  BaseBracket( CLEX::Type t, const std::vector<CLEX::Type>& R ):
@@ -50,8 +52,8 @@ public:
   cls(t)
   {};
   virtual ~BaseBracket() {};
-  enum Status { INFO, STEM, COMPLEX, INFLECTION, DERIVATIONAL };
 
+  Status stat() const { return status; };
   virtual UnicodeString morpheme() const { return "";};
   virtual UnicodeString deepmorphemes() const { return "";};
   virtual std::string inflection() const { return ""; };

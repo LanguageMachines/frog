@@ -793,7 +793,7 @@ UnicodeString BracketNest::deepmorphemes() const{
   return res;
 }
 
-//#define DEBUG_BRACKETS
+#define DEBUG_BRACKETS
 
 void prettyP( ostream& os, const list<BaseBracket*>& v ){
   os << "[";
@@ -1123,7 +1123,12 @@ BracketNest *Rule::resolveBrackets( bool daring, CLEX::Type& tag  ) {
   for ( size_t k=0; k < rules.size(); ++k ) {
     // fill a flat result;
     BracketLeaf *tmp = new BracketLeaf( rules[k] );
-    brackets->append( tmp );
+    if ( tmp->stat() == STEM && tmp->morpheme().isEmpty() ){
+      delete tmp;
+    }
+    else {
+      brackets->append( tmp );
+    }
   }
 #ifdef DEBUG_BRACKETS
   cerr << "STEP 1:" << brackets << endl;
