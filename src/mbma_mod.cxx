@@ -793,7 +793,8 @@ UnicodeString BracketNest::deepmorphemes() const{
   return res;
 }
 
-#define DEBUG_BRACKETS
+
+//#define DEBUG_BRACKETS
 
 void prettyP( ostream& os, const list<BaseBracket*>& v ){
   os << "[";
@@ -909,6 +910,9 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
     cerr << "bit = " << *bit << endl;
 #endif
     if ( (*bit)->RightHand.size() > 1 ){
+#ifdef DEBUG_BRACKETS
+      cerr << "undo splitup case 1" << endl;
+#endif
       // We 'undo' the splitup and construct a leaf with the combined morphemes
       UnicodeString mor;
       CLEX::Type tag = (*it)->tag();
@@ -939,6 +943,9 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
       return ++it;
     }
     else {
+#ifdef DEBUG_BRACKETS
+      cerr << "undo splitup case 2" << endl;
+#endif
       // We 'undo' the splitup and construct a leaf with the combined morphemes
       UnicodeString mor;
       CLEX::Type tag = (*bit)->tag();
@@ -951,7 +958,10 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
 	return ++bit;
       }
       while ( bit != it ){
-	if ( (*it)->inflection() != "" && tag != CLEX::UNASS ){
+#ifdef DEBUG_BRACKETS
+      cerr << "loop :" << *bit << endl;
+#endif
+	if ( (*bit)->inflection() != "" && tag != CLEX::UNASS ){
 	  // so we DO continue when there is inflection and NO tag (like 'pt')
 	  // in : N,0,0,0,pt,0,Q_Q*,0,0,0,0,0/m
 	  break;
@@ -980,6 +990,9 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
 }
 
 void BracketNest::resolveNouns( ){
+#ifdef DEBUG_BRACKETS
+  cerr << "resolve NOUNS in:" << this << endl;
+#endif
   list<BaseBracket*>::iterator it = parts.begin();
   list<BaseBracket*>::iterator prev = it++;
   while ( it != parts.end() ){
@@ -1000,7 +1013,7 @@ void BracketNest::resolveNouns( ){
       cerr << "erase " << *prev << endl;
 #endif
       prev = parts.erase(prev);
-      parts.insert( prev, tmp );
+      prev = parts.insert( prev, tmp );
 #ifdef DEBUG_BRACKETS
       cerr << "current result:" << parts << endl;
 #endif
@@ -1011,6 +1024,9 @@ void BracketNest::resolveNouns( ){
       prev = it++;
     }
   }
+#ifdef DEBUG_BRACKETS
+  cerr << "resolve NOUNS result:" << this << endl;
+#endif
 }
 
 void BracketNest::resolveLead( ){
