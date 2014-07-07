@@ -793,7 +793,7 @@ UnicodeString BracketNest::deepmorphemes() const{
   return res;
 }
 
-//#define DEBUG_BRACKETS
+#define DEBUG_BRACKETS
 
 void prettyP( ostream& os, const list<BaseBracket*>& v ){
   os << "[";
@@ -913,8 +913,9 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
       UnicodeString mor;
       CLEX::Type tag = (*it)->tag();
       while ( it != result.end() ){
-	if ( (*it)->inflection() != "" ){
-	  // probably a bit harsh. Need to find example of failure yet
+	if ( (*it)->inflection() != "" && tag != CLEX::UNASS ){
+	  // so we DO continue when there is inflection and NO tag (like 'pt')
+	  // in : N,0,0,0,pt,0,Q_Q*,0,0,0,0,0/m
 	  break;
 	}
 #ifdef DEBUG_BRACKETS
@@ -950,8 +951,9 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
 	return ++bit;
       }
       while ( bit != it ){
-	if ( (*bit)->inflection() != "" ){
-	  // probably a bit harsh. Need to find example of failure yet
+	if ( (*it)->inflection() != "" && tag != CLEX::UNASS ){
+	  // so we DO continue when there is inflection and NO tag (like 'pt')
+	  // in : N,0,0,0,pt,0,Q_Q*,0,0,0,0,0/m
 	  break;
 	}
 #ifdef DEBUG_BRACKETS
