@@ -809,10 +809,9 @@ void prettyP( ostream& os, const list<BaseBracket*>& v ){
   os << "]";
 }
 
-bool testMatch( list<BaseBracket*>& result,
-		const list<BaseBracket*>::iterator& rpos,
-		list<BaseBracket*>::iterator& bpos,
-		int debugFlag ){
+bool BracketNest::testMatch( list<BaseBracket*>& result,
+			     const list<BaseBracket*>::iterator& rpos,
+			     list<BaseBracket*>::iterator& bpos ){
   if ( debugFlag > 5 ){
     cerr << "test MATCH " << endl;
   }
@@ -865,14 +864,14 @@ bool testMatch( list<BaseBracket*>& result,
   return true;
 }
 
-list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
-					   const list<BaseBracket*>::iterator & rpos,
-					   int debugFlag ){
+
+list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& result,
+							const list<BaseBracket*>::iterator& rpos ){
   if ( debugFlag > 5 ){
     cerr << "resolve affix" << endl;
   }
   list<BaseBracket*>::iterator bit;
-  bool matched = testMatch( result, rpos, bit, debugFlag );
+  bool matched = testMatch( result, rpos, bit );
   if ( matched ){
     if ( debugFlag > 5 ){
       cerr << "OK een match" << endl;
@@ -1046,7 +1045,7 @@ void BracketNest::resolveLead( ){
     }
     else {
       if ( (*it)->infixpos() == 0 ){
-	it = resolveAffix( parts, it, debugFlag );
+	it = resolveAffix( parts, it );
       }
       else {
 	++it;
@@ -1078,7 +1077,7 @@ void BracketNest::resolveTail(){
 	  cerr << "infixpos=" << (*it)->infixpos() << endl;
 	  cerr << "len=" << len << endl;
 	}
-	it = resolveAffix( parts, it, debugFlag );
+	it = resolveAffix( parts, it );
       }
       else {
 	++it;
@@ -1105,7 +1104,7 @@ void BracketNest::resolveMiddle(){
       size_t len = (*it)->RightHand.size();
       if ( (*it)->infixpos() > 0
 	   && (*it)->infixpos() < signed(len)-1 ){
-	it = resolveAffix( parts, it, debugFlag );
+	it = resolveAffix( parts, it );
       }
       else {
 	++it;
@@ -1887,7 +1886,9 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   map<string, MBMAana*>::const_iterator uit=unique.begin();
   while ( uit != unique.end() ){
     result.push_back( uit->second );
-    *Log(mbmaLog) << "Final Bracketing: " << uit->second->getBrackets() << endl;
+    if (debugFlag){
+      *Log(mbmaLog) << "Final Bracketing: " << uit->second->getBrackets() << endl;
+    }
     ++uit;
   }
   analysis = result;

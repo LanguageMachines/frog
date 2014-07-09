@@ -116,6 +116,11 @@ class BracketNest: public BaseBracket {
   ~BracketNest();
   bool isNested() { return true; };
   UnicodeString put( bool = false ) const;
+  bool testMatch( std::list<BaseBracket*>& result,
+		  const std::list<BaseBracket*>::iterator& rpos,
+		  std::list<BaseBracket*>::iterator& bpos );
+  std::list<BaseBracket*>::iterator resolveAffix( std::list<BaseBracket*>&,
+						  const std::list<BaseBracket*>::iterator& );
   void resolveNouns();
   void resolveLead();
   void resolveTail();
