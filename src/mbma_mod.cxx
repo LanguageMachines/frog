@@ -558,7 +558,9 @@ RulePart::RulePart( const string& rs, const UChar kar ):
   }
 }
 
-Rule::Rule( const vector<string>& parts, const UnicodeString& s ){
+Rule::Rule( const vector<string>& parts,
+	    const UnicodeString& s,
+	    int flag ): debugFlag( flag ){
   for ( size_t k=0; k < parts.size(); ++k ) {
     string this_class = parts[k];
     RulePart cur( this_class, s[k] );
@@ -688,8 +690,8 @@ void Mbma::resolve_inflections( Rule& rule ){
   }
 }
 
-BracketLeaf::BracketLeaf( const RulePart& p ):
-  BaseBracket(p.ResultClass, p.RightHand),
+BracketLeaf::BracketLeaf( const RulePart& p, int flag ):
+  BaseBracket(p.ResultClass, p.RightHand, flag),
   morph(p.morpheme )
 {
   ifpos = -1;
@@ -718,8 +720,8 @@ BracketLeaf::BracketLeaf( const RulePart& p ):
   }
 }
 
-BracketLeaf::BracketLeaf( CLEX::Type t, const UnicodeString& us ):
-  BaseBracket( t, vector<CLEX::Type>() ),
+BracketLeaf::BracketLeaf( CLEX::Type t, const UnicodeString& us, int flag ):
+  BaseBracket( t, vector<CLEX::Type>(), flag ),
   morph( us )
 {
   ifpos = -1;
@@ -797,9 +799,6 @@ UnicodeString BracketNest::deepmorphemes() const{
   return res;
 }
 
-
-//#define DEBUG_BRACKETS
-
 void prettyP( ostream& os, const list<BaseBracket*>& v ){
   os << "[";
   for ( list<BaseBracket*>::const_iterator it = v.begin();
@@ -812,22 +811,23 @@ void prettyP( ostream& os, const list<BaseBracket*>& v ){
 
 bool testMatch( list<BaseBracket*>& result,
 		const list<BaseBracket*>::iterator& rpos,
-		list<BaseBracket*>::iterator& bpos ){
-#ifdef DEBUG_BRACKETS
-  cerr << "test MATCH " << endl;
-#endif
+		list<BaseBracket*>::iterator& bpos,
+		int debugFlag ){
+  if ( debugFlag > 5 ){
+    cerr << "test MATCH " << endl;
+  }
   bpos = result.end();
   size_t len = (*rpos)->RightHand.size();
   if ( len == 0 || len > result.size() ){
-#ifdef DEBUG_BRACKETS
-    cerr << "test MATCH FAIL (no RHS or RHS > result)" << endl;
-#endif
+    if ( debugFlag > 5 ){
+      cerr << "test MATCH FAIL (no RHS or RHS > result)" << endl;
+    }
     return false;
   }
   size_t fpos = (*rpos)->infixpos();
-#ifdef DEBUG_BRACKETS
-  cerr << "test MATCH, fpos=" << fpos << " en len=" << len << endl;
-#endif
+  if ( debugFlag > 5 ){
+    cerr << "test MATCH, fpos=" << fpos << " en len=" << len << endl;
+  }
   list<BaseBracket*>::iterator it = rpos;
   while ( fpos > 0 ){
     --fpos;
@@ -836,47 +836,47 @@ bool testMatch( list<BaseBracket*>& result,
   size_t j = 0;
   bpos = it;
   for (; j < len && it != result.end(); ++j, ++it ){
-#ifdef DEBUG_BRACKETS
-    cerr << "test MATCH vergelijk " << *it << " met " << (*rpos)->RightHand[j] << endl;
-#endif
+    if ( debugFlag > 5 ){
+      cerr << "test MATCH vergelijk " << *it << " met " << (*rpos)->RightHand[j] << endl;
+    }
     if ( (*rpos)->RightHand[j] == CLEX::XAFFIX)
       continue;
     else if ( (*rpos)->RightHand[j] == CLEX::AFFIX)
       continue;
     else if ( (*rpos)->RightHand[j] != (*it)->tag() ){
-#ifdef DEBUG_BRACKETS
-      cerr << "test MATCH FAIL (" << (*rpos)->RightHand[j]
-	   << " != " << (*it)->tag() << ")" << endl;
-#endif
+      if ( debugFlag > 5 ){
+	cerr << "test MATCH FAIL (" << (*rpos)->RightHand[j]
+	     << " != " << (*it)->tag() << ")" << endl;
+      }
       bpos = it;
       return false;
     }
   }
   if ( j < len ){
-#ifdef DEBUG_BRACKETS
-    cerr << "test MATCH FAIL (j < len)" << endl;
-#endif
+    if ( debugFlag > 5 ){
+      cerr << "test MATCH FAIL (j < len)" << endl;
+    }
     bpos = result.end();
     return false;
   }
-#ifdef DEBUG_BRACKETS
+  if ( debugFlag > 5 ){
     cerr << "test MATCH OK" << endl;
-#endif
+  }
   return true;
 }
 
-
 list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
-					   const list<BaseBracket*>::iterator & rpos ){
-#ifdef DEBUG_BRACKETS
-  cerr << "resolve affix" << endl;
-#endif
+					   const list<BaseBracket*>::iterator & rpos,
+					   int debugFlag ){
+  if ( debugFlag > 5 ){
+    cerr << "resolve affix" << endl;
+  }
   list<BaseBracket*>::iterator bit;
-  bool matched = testMatch( result, rpos, bit );
+  bool matched = testMatch( result, rpos, bit, debugFlag );
   if ( matched ){
-#ifdef DEBUG_BRACKETS
-    cerr << "OK een match" << endl;
-#endif
+    if ( debugFlag > 5 ){
+      cerr << "OK een match" << endl;
+    }
     size_t len = (*rpos)->RightHand.size();
     if ( len == result.size() ){
       // the rule matches exact what we have.
@@ -886,17 +886,17 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
     }
     else {
       list<BaseBracket*>::iterator it = bit--;
-      BaseBracket *tmp = new BracketNest( (*rpos)->tag() );
+      BaseBracket *tmp = new BracketNest( (*rpos)->tag(), debugFlag );
       for ( size_t j = 0; j < len; ++j ){
 	tmp->append( *it );
-#ifdef DEBUG_BRACKETS
-	cerr << "erase " << *it << endl;
-#endif
+	if ( debugFlag > 5 ){
+	  cerr << "erase " << *it << endl;
+	}
 	it = result.erase(it);
       }
-#ifdef DEBUG_BRACKETS
-      cerr << "new node:" << tmp << endl;
-#endif
+      if ( debugFlag > 5 ){
+	cerr << "new node:" << tmp << endl;
+      }
       result.insert( ++bit, tmp );
       return bit;
     }
@@ -909,14 +909,14 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
       return ++bit;
     }
     list<BaseBracket*>::iterator it = rpos;
-#ifdef DEBUG_BRACKETS
-    cerr << "it = " << *it << endl;
-    cerr << "bit = " << *bit << endl;
-#endif
+    if ( debugFlag > 5 ){
+      cerr << "it = " << *it << endl;
+      cerr << "bit = " << *bit << endl;
+    }
     if ( (*bit)->RightHand.size() > 1 ){
-#ifdef DEBUG_BRACKETS
-      cerr << "undo splitup case 1" << endl;
-#endif
+      if ( debugFlag > 5 ){
+	cerr << "undo splitup case 1" << endl;
+      }
       // We 'undo' the splitup and construct a leaf with the combined morphemes
       UnicodeString mor;
       CLEX::Type tag = (*it)->tag();
@@ -926,101 +926,98 @@ list<BaseBracket*>::iterator resolveAffix( list<BaseBracket*>& result,
 	  // in : N,0,0,0,pt,0,Q_Q*,0,0,0,0,0/m
 	  break;
 	}
-#ifdef DEBUG_BRACKETS
-	cerr << "append:" << *it << endl;
-#endif
+	if ( debugFlag > 5 ){
+	  cerr << "append:" << *it << endl;
+	}
 	mor += (*it)->morpheme();
 	tag = (*it)->tag(); // remember the 'last' tag
-#ifdef DEBUG_BRACKETS
-	cerr << "erase " << *it << endl;
-#endif
+	if ( debugFlag > 5 ){
+	  cerr << "erase " << *it << endl;
+	}
 	it = result.erase(it);
       }
-      BaseBracket *tmp = new BracketLeaf( tag, mor );
-#ifdef DEBUG_BRACKETS
-      cerr << "new node: " << tmp << endl;
-#endif
+      BaseBracket *tmp = new BracketLeaf( tag, mor, debugFlag );
+      if ( debugFlag > 5 ){
+	cerr << "new node: " << tmp << endl;
+      }
       result.insert( it, tmp );
-#ifdef DEBUG_BRACKETS
-      cerr << "result = " << result << endl;
-#endif
+      if ( debugFlag > 5 ){
+	cerr << "result = " << result << endl;
+      }
       return ++it;
     }
     else {
-#ifdef DEBUG_BRACKETS
-      cerr << "undo splitup case 2" << endl;
-#endif
+      if ( debugFlag > 5 ){
+	cerr << "undo splitup case 2" << endl;
+      }
       // We 'undo' the splitup and construct a leaf with the combined morphemes
       UnicodeString mor;
       CLEX::Type tag = (*bit)->tag();
       ++it;
       if (  bit == it ){
-#ifdef DEBUG_BRACKETS
-	cerr << "escape with result = " << result << endl;
-
-#endif
+	if ( debugFlag > 5 ){
+	  cerr << "escape with result = " << result << endl;
+	}
 	return ++bit;
       }
       while ( bit != it ){
-#ifdef DEBUG_BRACKETS
-      cerr << "loop :" << *bit << endl;
-#endif
+	if ( debugFlag > 5 ){
+	  cerr << "loop :" << *bit << endl;
+	}
 	if ( (*bit)->inflection() != "" && tag != CLEX::UNASS ){
 	  // so we DO continue when there is inflection and NO tag (like 'pt')
 	  // in : N,0,0,0,pt,0,Q_Q*,0,0,0,0,0/m
 	  break;
 	}
-#ifdef DEBUG_BRACKETS
-	cerr << "append:" << *bit << " morpheme=" <<  (*bit)->deepmorphemes() << endl;
-#endif
+	if ( debugFlag > 5 ){
+	  cerr << "append:" << *bit << " morpheme=" <<  (*bit)->deepmorphemes() << endl;
+	}
 	mor += (*bit)->deepmorphemes();
 	tag = (*bit)->tag(); // remember the 'last' tag
-#ifdef DEBUG_BRACKETS
-	cerr << "erase " << *bit << endl;
-#endif
+	if ( debugFlag > 5 ){
+	  cerr << "erase " << *bit << endl;
+	}
 	bit = result.erase(bit);
       }
-      BaseBracket *tmp = new BracketLeaf( tag, mor );
-#ifdef DEBUG_BRACKETS
-      cerr << "new node: " << tmp << endl;
-#endif
+      BaseBracket *tmp = new BracketLeaf( tag, mor, debugFlag );
+      if ( debugFlag > 5 ){
+	cerr << "new node: " << tmp << endl;
+      }
       result.insert( it, tmp );
-#ifdef DEBUG_BRACKETS
-      cerr << "result = " << result << endl;
-#endif
+      if ( debugFlag > 5 ){
+	cerr << "result = " << result << endl;
+      }
       return ++bit;
     }
   }
 }
 
 void BracketNest::resolveNouns( ){
-#ifdef DEBUG_BRACKETS
-  cerr << "resolve NOUNS in:" << this << endl;
-#endif
+  if ( debugFlag > 5 ){
+    cerr << "resolve NOUNS in:" << this << endl;
+  }
   list<BaseBracket*>::iterator it = parts.begin();
   list<BaseBracket*>::iterator prev = it++;
   while ( it != parts.end() ){
     if ( (*prev)->tag() == CLEX::N && (*prev)->RightHand.size() == 0
 	 && (*it)->tag() == CLEX::N && (*it)->RightHand.size() == 0 ){
-      BaseBracket *tmp = new BracketNest( CLEX::N );
+      BaseBracket *tmp = new BracketNest( CLEX::N, debugFlag );
       tmp->append( *prev );
       tmp->append( *it );
-#ifdef DEBUG_BRACKETS
-      cerr << "current result:" << parts << endl;
-      cerr << "new node:" << tmp << endl;
-#endif
-#ifdef DEBUG_BRACKETS
-      cerr << "erase " << *prev << endl;
-#endif
+      if ( debugFlag > 5 ){
+	cerr << "current result:" << parts << endl;
+	cerr << "new node:" << tmp << endl;
+	cerr << "erase " << *prev << endl;
+      }
       prev = parts.erase(prev);
-#ifdef DEBUG_BRACKETS
-      cerr << "erase " << *prev << endl;
-#endif
+      if ( debugFlag > 5 ){
+	cerr << "erase " << *prev << endl;
+      }
       prev = parts.erase(prev);
       prev = parts.insert( prev, tmp );
-#ifdef DEBUG_BRACKETS
-      cerr << "current result:" << parts << endl;
-#endif
+      if ( debugFlag > 5 ){
+	cerr << "current result:" << parts << endl;
+      }
       it = prev;
       ++it;
     }
@@ -1028,28 +1025,28 @@ void BracketNest::resolveNouns( ){
       prev = it++;
     }
   }
-#ifdef DEBUG_BRACKETS
-  cerr << "resolve NOUNS result:" << this << endl;
-#endif
+  if ( debugFlag > 5 ){
+    cerr << "resolve NOUNS result:" << this << endl;
+  }
 }
 
 void BracketNest::resolveLead( ){
   list<BaseBracket*>::iterator it = parts.begin();
   while ( it != parts.end() ){
     // search for rules with a * at the begin
-#ifdef DEBUG_BRACKETS
-    cerr << "search leading *: bekijk: " << *it << endl;
-#endif
+    if ( debugFlag > 5 ){
+      cerr << "search leading *: bekijk: " << *it << endl;
+    }
     if ( (*it)->isNested() ){
-#ifdef DEBUG_BRACKETS
-      cerr << "nested! " << endl;
-#endif
+      if ( debugFlag > 5 ){
+	cerr << "nested! " << endl;
+      }
       (*it)->resolveLead();
       ++it;
     }
     else {
       if ( (*it)->infixpos() == 0 ){
-	it = resolveAffix( parts, it );
+	it = resolveAffix( parts, it, debugFlag );
       }
       else {
 	++it;
@@ -1062,13 +1059,13 @@ void BracketNest::resolveTail(){
   list<BaseBracket *>::iterator it = parts.begin();
   while ( it != parts.end() ){
     // search for rules with a * at the end
-#ifdef DEBUG_BRACKETS
-    cerr << "search trailing *: bekijk: " << *it << endl;
-#endif
+    if ( debugFlag > 5 ){
+      cerr << "search trailing *: bekijk: " << *it << endl;
+    }
     if ( (*it)->isNested() ){
-#ifdef DEBUG_BRACKETS
-      cerr << "nested! " << endl;
-#endif
+      if ( debugFlag > 5 ){
+	cerr << "nested! " << endl;
+      }
       (*it)->resolveTail();
       ++it;
     }
@@ -1076,12 +1073,12 @@ void BracketNest::resolveTail(){
       size_t len = (*it)->RightHand.size();
       if ( (*it)->infixpos() > 0
 	   && (*it)->infixpos() == signed(len)-1 ){
-#ifdef DEBUG_BRACKETS
-      cerr << "found trailing * " << *it << endl;
-      cerr << "infixpos=" << (*it)->infixpos() << endl;
-      cerr << "len=" << len << endl;
-#endif
-	it = resolveAffix( parts, it );
+	if ( debugFlag > 5 ){
+	  cerr << "found trailing * " << *it << endl;
+	  cerr << "infixpos=" << (*it)->infixpos() << endl;
+	  cerr << "len=" << len << endl;
+	}
+	it = resolveAffix( parts, it, debugFlag );
       }
       else {
 	++it;
@@ -1094,13 +1091,13 @@ void BracketNest::resolveMiddle(){
   list<BaseBracket*>::iterator it = parts.begin();
   while ( it != parts.end() ){
     // now search for other rules with a * in the middle
-#ifdef DEBUG_BRACKETS
-    cerr << "hoofd infix loop bekijk: " << *it << endl;
-#endif
+    if ( debugFlag > 5 ){
+      cerr << "hoofd infix loop bekijk: " << *it << endl;
+    }
     if ( (*it)->isNested() ){
-#ifdef DEBUG_BRACKETS
-      cerr << "nested! " << endl;
-#endif
+      if ( debugFlag > 5 ){
+	cerr << "nested! " << endl;
+      }
       (*it)->resolveMiddle( );
       ++it;
     }
@@ -1108,7 +1105,7 @@ void BracketNest::resolveMiddle(){
       size_t len = (*it)->RightHand.size();
       if ( (*it)->infixpos() > 0
 	   && (*it)->infixpos() < signed(len)-1 ){
-	it = resolveAffix( parts, it );
+	it = resolveAffix( parts, it, debugFlag );
       }
       else {
 	++it;
@@ -1137,14 +1134,13 @@ CLEX::Type BracketNest::getFinalTag() {
 }
 
 BracketNest *Rule::resolveBrackets( bool daring, CLEX::Type& tag  ) {
-#ifdef DEBUG_BRACKETS
-  cerr << "check rule for bracketing: " << this << endl;
-#endif
-
-  BracketNest *brackets = new BracketNest( CLEX::UNASS );
+  if ( debugFlag > 5 ){
+    cerr << "check rule for bracketing: " << this << endl;
+  }
+  BracketNest *brackets = new BracketNest( CLEX::UNASS, debugFlag );
   for ( size_t k=0; k < rules.size(); ++k ) {
     // fill a flat result;
-    BracketLeaf *tmp = new BracketLeaf( rules[k] );
+    BracketLeaf *tmp = new BracketLeaf( rules[k], debugFlag );
     if ( tmp->stat() == STEM && tmp->morpheme().isEmpty() ){
       delete tmp;
     }
@@ -1152,34 +1148,28 @@ BracketNest *Rule::resolveBrackets( bool daring, CLEX::Type& tag  ) {
       brackets->append( tmp );
     }
   }
-#ifdef DEBUG_BRACKETS
-  cerr << "STEP 1:" << brackets << endl;
-#endif
+  if ( debugFlag > 5 ){
+    cerr << "STEP 1:" << brackets << endl;
+  }
   if ( daring ){
     brackets->resolveNouns( );
-
-#ifdef DEBUG_BRACKETS
-    cerr << "STEP 2:" << brackets << endl;
-#endif
-
+    if ( debugFlag > 5 ){
+      cerr << "STEP 2:" << brackets << endl;
+    }
     brackets->resolveLead( );
-
-#ifdef DEBUG_BRACKETS
-    cerr << "STEP 3:" << brackets << endl;
-#endif
-
+    if ( debugFlag > 5 ){
+      cerr << "STEP 3:" << brackets << endl;
+    }
     brackets->resolveTail( );
-
-#ifdef DEBUG_BRACKETS
-    cerr << "STEP 4:" << brackets << endl;
-#endif
-
+    if ( debugFlag > 5 ){
+      cerr << "STEP 4:" << brackets << endl;
+    }
     brackets->resolveMiddle();
   }
   tag = brackets->getFinalTag();
-#ifdef DEBUG_BRACKETS
-  cerr << "Final Bracketing:" << brackets << endl;
-#endif
+  if ( debugFlag > 5 ){
+    cerr << "Final Bracketing:" << brackets << endl;
+  }
   return brackets;
 }
 
@@ -1433,7 +1423,7 @@ void Mbma::execute( const UnicodeString& word,
 
   // now loop over all the analysis
   for ( unsigned int step=0; step < allParts.size(); ++step ) {
-    Rule rule( allParts[step], word );
+    Rule rule( allParts[step], word, debugFlag );
     performEdits( rule );
     rule.reduceZeroNodes();
     if ( debugFlag ){

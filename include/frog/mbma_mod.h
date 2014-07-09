@@ -44,12 +44,14 @@ enum Status { INFO, STEM, COMPLEX, INFLECTION, DERIVATIONAL };
 
 class BaseBracket {
 public:
- BaseBracket( CLEX::Type t, const std::vector<CLEX::Type>& R ):
+ BaseBracket( CLEX::Type t, const std::vector<CLEX::Type>& R, int flag ):
   RightHand(R),
-  cls(t)
+    cls(t),
+    debugFlag(flag)
+
    {};
-  BaseBracket( CLEX::Type t ):
-  cls(t)
+ BaseBracket( CLEX::Type t, int flag ):
+  cls(t), debugFlag(flag)
   {};
   virtual ~BaseBracket() {};
 
@@ -77,12 +79,13 @@ public:
  protected:
   CLEX::Type cls;
   Status status;
+  int debugFlag;
 };
 
 class BracketLeaf: public BaseBracket {
 public:
-  BracketLeaf( const RulePart& );
-  BracketLeaf( CLEX::Type, const UnicodeString& );
+  BracketLeaf( const RulePart&, int );
+  BracketLeaf( CLEX::Type, const UnicodeString&, int );
   UnicodeString put( bool = false ) const;
   UnicodeString morpheme() const { return morph; };
   UnicodeString deepmorphemes() const { return morph; };
@@ -104,7 +107,8 @@ private:
 
 class BracketNest: public BaseBracket {
  public:
- BracketNest( CLEX::Type t ): BaseBracket( t ){ status = COMPLEX; };
+ BracketNest( CLEX::Type t, int flag ): BaseBracket( t, flag ){
+    status = COMPLEX; };
   BaseBracket *append( BaseBracket *t ){
     parts.push_back( t );
     return this;
@@ -148,12 +152,13 @@ public:
 
 class Rule {
 public:
-  Rule( const std::vector<std::string>&, const UnicodeString& );
+  Rule( const std::vector<std::string>&, const UnicodeString&, int flag );
   std::vector<std::string> extract_morphemes() const;
   std::string getCleanInflect() const;
   void reduceZeroNodes();
   BracketNest *resolveBrackets( bool, CLEX::Type& );
   std::vector<RulePart> rules;
+  int debugFlag;
 };
 
 static std::map<CLEX::Type,std::string> tagNames;
