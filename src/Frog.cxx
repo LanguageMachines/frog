@@ -101,7 +101,7 @@ string outputDirName;
 string xmlDirName;
 set<string> fileNames;
 string ProgName;
-int tpDebug = 0; //0 for none, more for more output
+int debugFlag = 0; //0 for none, more for more output
 unsigned int maxParserTokens = 0; // 0 for unlimited
 bool doTok = true;
 bool doLemma = true;
@@ -171,6 +171,8 @@ void usage( ) {
        << "\t -h. give some help.\n"
        << "\t -V or --version .   Show version info.\n"
        << "\t -d <debug level>    (for more verbosity)\n"
+       << "\t --debug=<module><level>,<module><level>... (eg --debug=l5,n3) \n"
+       << "\t\t Set debug value for Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"
        << "\t -S <port>              Run as server instead of reading from testfile\n"
 #ifdef HAVE_OPENMP
        << "\t --threads=<n>       Use a maximun of 'n' threads. Default: all we can get. \n"
@@ -219,12 +221,60 @@ bool parse_args( TiCC::CL_Options& Opts ) {
 
   // debug opts
   if ( Opts.find ('d', value, mood)) {
-    if ( !stringTo<int>( value, tpDebug ) ){
+    if ( !stringTo<int>( value, debugFlag ) ){
       *Log(theErrLog) << "-d value should be an integer" << endl;
       return false;
     }
     configuration.setatt( "debug", value );
     Opts.remove('d');
+  }
+  else {
+    configuration.setatt( "debug", "0" );
+  }
+  if ( Opts.find( "debug", value ) ) {
+    if ( value.empty() ){
+      *Log(theErrLog) << "missing a value for --debug (did you forget the '='?)" << endl;
+      return false;
+    }
+    value = TiCC::lowercase( value );
+    vector<string> vec;
+    TiCC::split_at( value, vec, "," );
+    for ( size_t i=0; i < vec.size(); ++i ){
+      char mod = vec[i][0];
+      string value = vec[i].substr(1);
+      int dbval = 0;
+      if ( !stringTo<int>( value, dbval ) ){
+	cerr << "expected integer value for --debug=" << mod << value << endl;
+	return false;
+      }
+      switch ( mod ){
+      case 't':
+	configuration.setatt( "debug", value, "tokenizer" );
+	break;
+      case 'l':
+	configuration.setatt( "debug", value, "mblem" );
+	break;
+      case 'a':
+	configuration.setatt( "debug", value, "mbma" );
+	break;
+      case 'm':
+	configuration.setatt( "debug", value, "mwu" );
+	break;
+      case 'c':
+	configuration.setatt( "debug", value, "IOB" );
+	break;
+      case 'n':
+	configuration.setatt( "debug", value, "NER" );
+	break;
+      case 'p':
+	configuration.setatt( "debug", value, "parser" );
+	break;
+      default:
+	cerr << "unknown module '" << mod << "'" << endl;
+	return false;
+      }
+    }
+    Opts.remove("debug");
   }
   else {
     configuration.setatt( "debug", "0" );
@@ -595,6 +645,7 @@ bool froginit(){
     bool tagStat = true;
     bool iobStat = true;
     bool nerStat = true;
+
 #pragma omp parallel sections
     {
 #pragma omp section
@@ -705,12 +756,12 @@ vector<Word*> lookup( Word *word, const vector<Entity*>& entities ){
 
 Dependency *lookupDep( const Word *word,
 		       const vector<Dependency*>&dependencies ){
-  if ( tpDebug ){
+  if ( debugFlag ){
     using TiCC::operator<<;
     *Log( theErrLog ) << "lookup "<< word << " in " << dependencies << endl;
   }
   for ( size_t i=0; i < dependencies.size(); ++i ){
-    if ( tpDebug ){
+    if ( debugFlag ){
       *Log( theErrLog ) << "probeer " << dependencies[i] << endl;
     }
     try {
@@ -719,7 +770,7 @@ Dependency *lookupDep( const Word *word,
 	vector<Word*> v = dv[0]->select<Word>();
 	for ( size_t j=0; j < v.size(); ++j ){
 	  if ( v[j] == word ){
-	    if ( tpDebug ){
+	    if ( debugFlag ){
 	      *Log(theErrLog) << "\nfound word " << v[j] << endl;
 	    }
 	    return dependencies[i];
@@ -728,7 +779,7 @@ Dependency *lookupDep( const Word *word,
       }
     }
     catch ( exception& e ){
-      if  (tpDebug > 0)
+      if  (debugFlag > 0)
 	*Log(theErrLog) << "get Dependency results failed: "
 			<< e.what() << endl;
     }
@@ -740,13 +791,13 @@ string lookupNEREntity( const vector<Word *>& mwu,
 			const vector<Entity*>& entities ){
   string endresult;
   for ( size_t j=0; j < mwu.size(); ++j ){
-    if ( tpDebug ){
+    if ( debugFlag ){
       using TiCC::operator<<;
       *Log(theErrLog) << "lookup "<< mwu[j] << " in " << entities << endl;
     }
     string result;
     for ( size_t i=0; i < entities.size(); ++i ){
-      if ( tpDebug ){
+      if ( debugFlag ){
 	*Log(theErrLog) << "probeer " << entities[i] << endl;
       }
       try {
@@ -754,7 +805,7 @@ string lookupNEREntity( const vector<Word *>& mwu,
 	bool first = true;
 	for ( size_t k=0; k < v.size(); ++k ){
 	  if ( v[k] == mwu[j] ){
-	    if (tpDebug){
+	    if (debugFlag){
 	      *Log(theErrLog) << "found word " << v[k] << endl;
 	    }
 	    if ( first )
@@ -768,7 +819,7 @@ string lookupNEREntity( const vector<Word *>& mwu,
 	}
       }
       catch ( exception& e ){
-	if  (tpDebug > 0)
+	if  (debugFlag > 0)
 	  *Log(theErrLog) << "get NER results failed: "
 			  << e.what() << endl;
       }
@@ -788,13 +839,13 @@ string lookupIOBChunk( const vector<Word *>& mwu,
 		       const vector<Chunk*>& chunks ){
   string endresult;
   for ( size_t j=0; j < mwu.size(); ++j ){
-    if ( tpDebug ){
+    if ( debugFlag ){
       using TiCC::operator<<;
       *Log(theErrLog) << "lookup "<< mwu[j] << " in " << chunks << endl;
     }
     string result;
     for ( size_t i=0; i < chunks.size(); ++i ){
-      if ( tpDebug ){
+      if ( debugFlag ){
 	*Log(theErrLog) << "probeer " << chunks[i] << endl;
       }
       try {
@@ -802,7 +853,7 @@ string lookupIOBChunk( const vector<Word *>& mwu,
 	bool first = true;
 	for ( size_t k=0; k < v.size(); ++k ){
 	  if ( v[k] == mwu[j] ){
-	    if (tpDebug){
+	    if (debugFlag){
 	      *Log(theErrLog) << "found word " << v[k] << endl;
 	    }
 	    if ( first )
@@ -816,7 +867,7 @@ string lookupIOBChunk( const vector<Word *>& mwu,
 	}
       }
       catch ( exception& e ){
-	if  (tpDebug > 0)
+	if  (debugFlag > 0)
 	  *Log(theErrLog) << "get Chunks results failed: "
 			  << e.what() << endl;
       }
@@ -851,7 +902,7 @@ void displayMWU( ostream& os, size_t index,
       conf *= postag->confidence();
     }
     catch ( exception& e ){
-      if  (tpDebug > 0)
+      if  (debugFlag > 0)
 	*Log(theErrLog) << "get Postag results failed: "
 			<< e.what() << endl;
     }
@@ -863,7 +914,7 @@ void displayMWU( ostream& os, size_t index,
 	}
       }
       catch ( exception& e ){
-	if  (tpDebug > 0)
+	if  (debugFlag > 0)
 	  *Log(theErrLog) << "get Lemma results failed: "
 			  << e.what() << endl;
       }
@@ -884,7 +935,7 @@ void displayMWU( ostream& os, size_t index,
 	}
       }
       catch ( exception& e ){
-	if  (tpDebug > 0)
+	if  (debugFlag > 0)
 	  *Log(theErrLog) << "get Morph results failed: "
 			  << e.what() << endl;
       }
@@ -906,7 +957,7 @@ void displayMWU( ostream& os, size_t index,
 	}
       }
       catch ( exception& e ){
-	if  (tpDebug > 0)
+	if  (debugFlag > 0)
 	  *Log(theErrLog) << "get Morph results failed: "
 			  << e.what() << endl;
       }
@@ -1041,7 +1092,7 @@ bool TestSentence( Sentence* sent,
 	{
 	  if ( doMorph ){
 	    timers.mbmaTimer.start();
-	    if (tpDebug)
+	    if (debugFlag)
 	      *Log(theErrLog) << "Calling mbma..." << endl;
 	    myMbma.Classify( swords[i] );
 	    timers.mbmaTimer.stop();
@@ -1051,7 +1102,7 @@ bool TestSentence( Sentence* sent,
 	{
 	  if ( doLemma ){
 	    timers.mblemTimer.start();
-	    if (tpDebug)
+	    if (debugFlag)
 	      *Log(theErrLog) << "Calling mblem..." << endl;
 	    myMblem.Classify( swords[i] );
 	    timers.mblemTimer.stop();
@@ -1101,7 +1152,7 @@ void Test( Document& doc,
   if (doParse)
     myParser.addDeclaration( doc );
 
-  if ( tpDebug > 5 )
+  if ( debugFlag > 5 )
     *Log(theErrLog) << "Testing document :" << doc << endl;
 
   vector<Sentence*> topsentences = doc.sentences();
@@ -1112,7 +1163,7 @@ void Test( Document& doc,
     sentences = topsentences;
   size_t numS = sentences.size();
   if ( numS > 0 ) { //process sentences
-    if  (tpDebug > 0)
+    if  (debugFlag > 0)
       *Log(theErrLog) << "found " << numS << " sentence(s) in document." << endl;
     for ( size_t i = 0; i < numS; i++) {
       /* ******* Begin process sentence  ********** */
@@ -1129,7 +1180,7 @@ void Test( Document& doc,
     }
   }
   else {
-    if  (tpDebug > 0)
+    if  (debugFlag > 0)
       *Log(theErrLog) << "No sentences found in document. " << endl;
   }
   if ( doServer && doXMLout )
@@ -1222,7 +1273,7 @@ void TestServer( Sockets::ServerSocket &conn) {
 	  // so this is wrong. Just bail out
 	  throw( runtime_error( "read garbage" ) );
 	}
-	if ( tpDebug )
+	if ( debugFlag )
 	  *Log(theErrLog) << "received data [" << result << "]" << endl;
 	Document doc;
 	try {
@@ -1251,7 +1302,7 @@ void TestServer( Sockets::ServerSocket &conn) {
 	    data += line + "\n";
 	  }
 	}
-	if (tpDebug)
+	if (debugFlag)
 	  *Log(theErrLog) << "Received: [" << data << "]" << endl;
 	*Log(theErrLog) << "Processing... " << endl;
 	istringstream inputstream(data,istringstream::in);
@@ -1259,7 +1310,7 @@ void TestServer( Sockets::ServerSocket &conn) {
 	Test( doc, outputstream );
       }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
-	if (tpDebug)
+	if (debugFlag)
 	  *Log(theErrLog) << "socket " << conn.getMessage() << endl;
 	throw( runtime_error( "write to client failed" ) );
       }
@@ -1267,7 +1318,7 @@ void TestServer( Sockets::ServerSocket &conn) {
     }
   }
   catch ( std::exception& e ) {
-    if (tpDebug)
+    if (debugFlag)
       *Log(theErrLog) << "connection lost: " << e.what() << endl;
   }
   *Log(theErrLog) << "Connection closed.\n";
@@ -1379,7 +1430,7 @@ int main(int argc, char *argv[]) {
   try {
     TiCC::CL_Options Opts("c:e:o:t:x:X:nQhVd:S:",
 			  "textclass:,testdir:,uttmarker:,max-parser-tokens:,"
-			  "skip:,id:,outputdir:,xmldir:,tmpdir:,daring,"
+			  "skip:,id:,outputdir:,xmldir:,tmpdir:,daring,debug:,"
 			  "keep-parser-files:,version,threads:,KANON");
 
     Opts.init(argc, argv);
