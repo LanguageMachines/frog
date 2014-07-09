@@ -299,10 +299,14 @@ Transliterator *Mbma::init_trans( ){
 
 bool Mbma::init( const Configuration& config ) {
   *Log(mbmaLog) << "Initiating morphological analyzer..." << endl;
-  debugFlag = tpDebug;
+  debugFlag = 0;
   string val = config.lookUp( "debug", "mbma" );
-  if ( !val.empty() )
+  if ( val.empty() ){
+    val = config.lookUp( "debug" );
+  }
+  if ( !val.empty() ){
     debugFlag = TiCC::stringTo<int>( val );
+  }
   val = config.lookUp( "daring", "mbma" );
   if ( !val.empty() )
     doDaring = TiCC::stringTo<bool>( val );

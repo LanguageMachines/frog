@@ -45,11 +45,15 @@ IOBTagger::~IOBTagger(){
   delete iobLog;
 }
 
-bool IOBTagger::init( const Configuration& conf ){
-  debug = 6;//tpDebug;
-  string db = conf.lookUp( "debug", "IOB" );
-  if ( !db.empty() )
-    debug = TiCC::stringTo<int>( db );
+bool IOBTagger::init( const Configuration& config ){
+  debug = 0;
+  string val = config.lookUp( "debug", "IOB" );
+  if ( val.empty() ){
+    val = config.lookUp( "debug" );
+  }
+  if ( !val.empty() ){
+    debug = TiCC::stringTo<int>( val );
+  }
   switch ( debug ){
   case 0:
   case 1:
@@ -74,7 +78,7 @@ bool IOBTagger::init( const Configuration& conf ){
     *Log(iobLog) << "IOBTagger is already initialized!" << endl;
     return false;
   }
-  string val = conf.lookUp( "settings", "IOB" );
+  val = config.lookUp( "settings", "IOB" );
   if ( val.empty() ){
     *Log(iobLog) << "Unable to find settings for IOB" << endl;
     return false;
@@ -83,15 +87,15 @@ bool IOBTagger::init( const Configuration& conf ){
   if ( val[0] == '/' ) // an absolute path
     settings = val;
   else
-    settings =  configuration.configDir() + val;
+    settings = config.configDir() + val;
 
-  val = conf.lookUp( "version", "IOB" );
+  val = config.lookUp( "version", "IOB" );
   if ( val.empty() ){
     version = "1.0";
   }
   else
     version = val;
-  val = conf.lookUp( "set", "IOB" );
+  val = config.lookUp( "set", "IOB" );
   if ( val.empty() ){
     tagset = "http://ilk.uvt.nl/folia/sets/frog-chunker-nl";
   }

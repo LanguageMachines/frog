@@ -6,7 +6,7 @@
   Tilburg University
 
   A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
- 
+
   This file is part of frog
 
   frog is free software; you can redistribute it and/or modify
@@ -44,12 +44,15 @@ NERTagger::~NERTagger(){
   delete tagger;
   delete nerLog;
 }
- 
-bool NERTagger::init( const Configuration& conf ){
-  debug = tpDebug;
-  string db = conf.lookUp( "debug", "NER" );
-  if ( !db.empty() )
-    debug = TiCC::stringTo<int>( db );
+
+bool NERTagger::init( const Configuration& config ){
+  string val = config.lookUp( "debug", "NER" );
+  if ( val.empty() ){
+    val = config.lookUp( "debug" );
+  }
+  if ( !val.empty() ){
+    debug = TiCC::stringTo<int>( val );
+  }
   switch ( debug ){
   case 0:
   case 1:
@@ -67,14 +70,14 @@ bool NERTagger::init( const Configuration& conf ){
     break;
   default:
     nerLog->setlevel(LogExtreme);
-  }    
-  if (debug) 
+  }
+  if (debug)
     *Log(nerLog) << "NER Tagger Init" << endl;
   if ( tagger != 0 ){
     *Log(nerLog) << "NER Tagger is already initialized!" << endl;
     return false;
-  }  
-  string val = conf.lookUp( "settings", "NER" );
+  }
+  val = config.lookUp( "settings", "NER" );
   if ( val.empty() ){
     *Log(nerLog) << "Unable to find settings for NER" << endl;
     return false;
@@ -83,15 +86,15 @@ bool NERTagger::init( const Configuration& conf ){
   if ( val[0] == '/' ) // an absolute path
     settings = val;
   else
-    settings =  configuration.configDir() + val;
+    settings = config.configDir() + val;
 
-  val = conf.lookUp( "version", "NER" );
+  val = config.lookUp( "version", "NER" );
   if ( val.empty() ){
     version = "1.0";
   }
   else
     version = val;
-  val = conf.lookUp( "set", "NER" );
+  val = config.lookUp( "set", "NER" );
   if ( val.empty() ){
     tagset = "http://ilk.uvt.nl/folia/sets/frog-ner-nl";
   }
@@ -103,7 +106,7 @@ bool NERTagger::init( const Configuration& conf ){
   return tagger->isInit();
 }
 
-static void addEntity( EntitiesLayer *entities, 
+static void addEntity( EntitiesLayer *entities,
 		       const string& tagset,
 		       const vector<Word*>& words,
 		       const vector<double>& confs,
@@ -150,7 +153,7 @@ void NERTagger::addNERTags( const vector<Word*>& words,
   vector<double> dstack;
   string curNER;
   for ( size_t i=0; i < tags.size(); ++i ){
-    if (debug) 
+    if (debug)
       *Log(nerLog) << "NER = " << tags[i] << endl;
     vector<string> ner;
     if ( tags[i] == "O" ){
@@ -158,7 +161,7 @@ void NERTagger::addNERTags( const vector<Word*>& words,
 	if (debug) {
 	  *Log(nerLog) << "O spit out " << curNER << endl;
 	  using TiCC::operator<<;
-	  *Log(nerLog) << "spit out " << stack << endl;	
+	  *Log(nerLog) << "spit out " << stack << endl;
 	}
 	addEntity( el, tagset, stack, dstack, curNER );
 	dstack.clear();
@@ -182,7 +185,7 @@ void NERTagger::addNERTags( const vector<Word*>& words,
 	if ( debug ){
 	  *Log(nerLog) << "B spit out " << curNER << endl;
 	  using TiCC::operator<<;
-	  *Log(nerLog) << "spit out " << stack << endl;	
+	  *Log(nerLog) << "spit out " << stack << endl;
 	}
 	addEntity( el, tagset, stack, dstack, curNER );
 	dstack.clear();
@@ -197,14 +200,14 @@ void NERTagger::addNERTags( const vector<Word*>& words,
     if ( debug ){
       *Log(nerLog) << "END spit out " << curNER << endl;
       using TiCC::operator<<;
-      *Log(nerLog) << "spit out " << stack << endl;	
+      *Log(nerLog) << "spit out " << stack << endl;
     }
     addEntity( el, tagset, stack, dstack, curNER );
   }
 }
 
 void NERTagger::addDeclaration( Document& doc ) const {
-  doc.declare( AnnotationType::ENTITY, 
+  doc.declare( AnnotationType::ENTITY,
 	       tagset,
 	       "annotator='frog-ner-" + version
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
@@ -220,7 +223,7 @@ void NERTagger::Classify( const vector<Word *>& swords ){
       if ( w < swords.size()-1 )
 	sentence += " ";
     }
-    if (debug) 
+    if (debug)
       *Log(nerLog) << "NER in: " << sentence << endl;
     vector<TagResult> tagv = tagger->TagLine(sentence);
     if ( tagv.size() != swords.size() ){
@@ -229,13 +232,13 @@ void NERTagger::Classify( const vector<Word *>& swords ){
     if ( debug ){
       *Log(nerLog) << "NER tagger out: " << endl;
       for ( size_t i=0; i < tagv.size(); ++i ){
-	*Log(nerLog) << "[" << i << "] : word=" << tagv[i].word() 
-		     << " tag=" << tagv[i].assignedTag() 
+	*Log(nerLog) << "[" << i << "] : word=" << tagv[i].word()
+		     << " tag=" << tagv[i].assignedTag()
 		     << " confidence=" << tagv[i].confidence() << endl;
       }
     }
     vector<double> conf;
-    vector<string> tags;    
+    vector<string> tags;
     for ( size_t i=0; i < tagv.size(); ++i ){
       tags.push_back( tagv[i].assignedTag() );
       conf.push_back( tagv[i].confidence() );
@@ -243,5 +246,3 @@ void NERTagger::Classify( const vector<Word *>& swords ){
     addNERTags( swords, tags, conf );
   }
 }
-
-

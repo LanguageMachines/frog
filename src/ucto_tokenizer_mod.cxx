@@ -43,27 +43,26 @@ UctoTokenizer::UctoTokenizer() {
   uctoLog = new LogStream( theErrLog, "tok-" );
 }
 
-bool UctoTokenizer::init( const Configuration& conf, const string & docid, bool pass ){
+bool UctoTokenizer::init( const Configuration& config, const string & docid, bool pass ){
   if ( tokenizer )
     throw runtime_error( "ucto tokenizer is already initalized" );
   tokenizer = new Tokenizer::TokenizerClass();
   tokenizer->setErrorLog( uctoLog );
-  string debug = conf.lookUp( "debug", "tokenizer" );
-  if ( debug.empty() ){
-    debug = conf.lookUp( "debug" );
+  int debug = 0;
+  string val = config.lookUp( "debug", "tokenizer" );
+  if ( val.empty() ){
+    val = config.lookUp( "debug" );
   }
-  if ( debug.empty() ){
-    tokenizer->setDebug( tpDebug );
-  }
-  else
-    tokenizer->setDebug( TiCC::stringTo<int>(debug) );
+  if ( !val.empty() )
+    debug = TiCC::stringTo<int>( val );
+  tokenizer->setDebug( debug );
   if ( pass ){
     // when passthru, we don't further initialize the tokenizer
     // it wil run in minimal mode then.
     tokenizer->setPassThru( true );
   }
   else {
-    string rulesName = conf.lookUp( "rulesFile", "tokenizer" );
+    string rulesName = config.lookUp( "rulesFile", "tokenizer" );
     if ( rulesName.empty() ){
       *Log(uctoLog) << "no rulesFile found in configuration" << endl;
       return false;
@@ -160,4 +159,3 @@ bool UctoTokenizer::tokenize( folia::Document& doc ){
     throw runtime_error( "ucto tokenizer not initalized" );
 
 }
-

@@ -14,12 +14,12 @@
 
   frog is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
   For questions and suggestions, see:
       http://ilk.uvt.nl/software.html
   or send mail to:
@@ -59,7 +59,7 @@ mwuAna::mwuAna( Word *fwrd ){
     }
   }
   fwords.push_back( fwrd );
-}  
+}
 
 void mwuAna::merge( const mwuAna *add ){
   fwords.push_back( add->fwords[0] );
@@ -98,7 +98,7 @@ Mwu::Mwu(){
   mwuLog = new LogStream( theErrLog, "mwu-" );
 }
 
-Mwu::~Mwu(){ 
+Mwu::~Mwu(){
   reset();
   delete mwuLog;
 }
@@ -137,14 +137,18 @@ bool Mwu::read_mwus( const string& fname) {
   }
   return true;
 }
-  
+
 bool Mwu::init( const Configuration& config ) {
   *Log(mwuLog) << "initiating mwuChunker..." << endl;
-  debug = tpDebug;
+  debug = 0;
   string val = config.lookUp( "debug", "mwu" );
-  if ( !val.empty() )
+  if ( val.empty() ){
+    val = config.lookUp( "debug" );
+  }
+  if ( !val.empty() ){
     debug = TiCC::stringTo<int>( val );
-  val = config.lookUp( "t", "mwu" );  
+  }
+  val = config.lookUp( "t", "mwu" );
   if ( val.empty() ){
     *Log(mwuLog) << "cannot find attribute 't' in configfile" << endl;
     return false;
@@ -178,7 +182,7 @@ ostream &operator <<( ostream& os,
 }
 
 void Mwu::addDeclaration( Document& doc ) const {
-  doc.declare( AnnotationType::ENTITY, 
+  doc.declare( AnnotationType::ENTITY,
 	       tagset,
 	       "annotator='frog-mwu-" + version
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
@@ -209,7 +213,7 @@ void Mwu::Classify(){
   mymap2::iterator best_match;
   size_t matchLength = 0;
   size_t max = mWords.size();
-  
+
   // add all current sequences of SPEC(deeleigen) words to MWUs
   for( size_t i=0; i < max-1; ++i ) {
     if ( mWords[i]->isSpec() && mWords[i+1]->isSpec() ) {
@@ -223,7 +227,7 @@ void Mwu::Classify(){
       MWUs.insert( make_pair(key, newmwu) );
     }
   }
-  size_t i; 
+  size_t i;
   for( i = 0; i < max; i++) {
     string word = mWords[i]->getWord();
     if ( debug )
@@ -244,7 +248,7 @@ void Mwu::Classify(){
 	for(; i + j + 1 < max && j < max_match; j++) {
 	  if ( match[j] != mWords[i+j+1]->getWord() ) {
 	    if ( debug )
-	      *Log(mwuLog) << "match " << j <<" (" << match[j] 
+	      *Log(mwuLog) << "match " << j <<" (" << match[j]
 		   << ") doesn't match with word " << i+ j + 1
 			   << " (" << mWords[i+j + 1]->getWord() <<")" << endl;
 	    // mismatch in jth word of current mwu
@@ -252,7 +256,7 @@ void Mwu::Classify(){
 	  }
 	  else if ( debug )
 	    *Log(mwuLog) << " matched " <<  mWords[i+j+1]->getWord() << " j=" << j << endl;
-	  
+
 	}
 	if (j == max_match && j > matchLength ){
 	  // a match. remember this!
@@ -268,12 +272,12 @@ void Mwu::Classify(){
 	  *Log(mwuLog) <<"MWU: no match" << endl;
 	}
       }
-      // we found a matching mwu, break out of loop thru sentence, 
+      // we found a matching mwu, break out of loop thru sentence,
       // do useful stuff, and recurse to find more mwus
       if (matchLength > 0 )
 	break;
     } //match found
-    else { 
+    else {
       if( debug )
 	*Log(mwuLog) <<"MWU:check: no match" << endl;
     }
@@ -293,7 +297,7 @@ void Mwu::Classify(){
     if ( debug ){
       *Log(mwuLog) << "tussenstand:" << endl;
       *Log(mwuLog) << *this << endl;
-    }      
+    }
     Classify( );
   } //if (matchLength)
   return;

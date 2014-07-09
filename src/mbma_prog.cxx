@@ -50,7 +50,6 @@ using namespace Timbl;
 
 LogStream my_default_log( cerr, "", StampMessage ); // fall-back
 LogStream *theErrLog = &my_default_log;  // fill the externals
-int tpDebug = 0; //0 for none, more for more output
 
 string TestFileName;
 string ProgName;

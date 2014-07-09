@@ -6,7 +6,7 @@
   Tilburg University
 
   A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
- 
+
   This file is part of frog
 
   frog is free software; you can redistribute it and/or modify
@@ -55,24 +55,24 @@ void fillSubSetTable(){
   // should become a config file!
   cgnSubSets.insert( make_pair("soort", "ntype" ));
   cgnSubSets.insert( make_pair("eigen", "ntype" ));
-  
+
   cgnSubSets.insert( make_pair("ev", "getal" ));
   cgnSubSets.insert( make_pair("mv", "getal" ));
   cgnSubSets.insert( make_pair("getal", "getal" ));
-  
+
   cgnSubSets.insert( make_pair("zijd", "genus" ));
   cgnSubSets.insert( make_pair("onz", "genus" ));
   cgnSubSets.insert( make_pair("masc", "genus" ));
   cgnSubSets.insert( make_pair("fem", "genus" ));
   cgnSubSets.insert( make_pair("genus", "genus" ) );
-  
+
   cgnSubSets.insert( make_pair("stan", "naamval" ));
   cgnSubSets.insert( make_pair("gen", "naamval" ));
   cgnSubSets.insert( make_pair("dat", "naamval" ));
   cgnSubSets.insert( make_pair("nomin", "naamval" ));
   cgnSubSets.insert( make_pair("obl", "naamval" ));
   cgnSubSets.insert( make_pair("bijz", "naamval" ));
-    
+
   cgnSubSets.insert( make_pair("afgebr", "spectype" ));
   cgnSubSets.insert( make_pair("afk", "spectype" ));
   cgnSubSets.insert( make_pair("deeleigen", "spectype" ));
@@ -83,14 +83,14 @@ void fillSubSetTable(){
   cgnSubSets.insert( make_pair("achter", "spectype" ));
   cgnSubSets.insert( make_pair("comment", "spectype" ));
   cgnSubSets.insert( make_pair("onverst", "spectype" ));
-  
+
   cgnSubSets.insert( make_pair("neven", "conjtype" ));
   cgnSubSets.insert( make_pair("onder", "conjtype" ));
-    
+
   cgnSubSets.insert( make_pair("init", "vztype" ));
   cgnSubSets.insert( make_pair("versm", "vztype" ));
   cgnSubSets.insert( make_pair("fin", "vztype" ));
-    
+
   cgnSubSets.insert( make_pair("agr", "npagr" ));
   cgnSubSets.insert( make_pair("evon", "npagr" ));
   cgnSubSets.insert( make_pair("rest", "npagr" ));
@@ -99,10 +99,10 @@ void fillSubSetTable(){
   cgnSubSets.insert( make_pair( "evmo", "npagr" ));
   cgnSubSets.insert( make_pair( "rest3", "npagr" ));
   cgnSubSets.insert( make_pair("evf", "npagr" ));
-  
+
   cgnSubSets.insert( make_pair("bep", "lwtype" ));
   cgnSubSets.insert( make_pair("onbep", "lwtype" ));
-  
+
   cgnSubSets.insert( make_pair("pers", "vwtype" ));
   cgnSubSets.insert( make_pair("pr", "vwtype" ));
   cgnSubSets.insert( make_pair("refl", "vwtype" ));
@@ -114,16 +114,16 @@ void fillSubSetTable(){
   cgnSubSets.insert( make_pair("excl", "vwtype" ));
   cgnSubSets.insert( make_pair("aanw", "vwtype" ));
   cgnSubSets.insert( make_pair("onbep", "vwtype" ));
-    
+
   cgnSubSets.insert( make_pair("adv-pron", "pdtype" ));
   cgnSubSets.insert( make_pair("pron", "pdtype" ));
   cgnSubSets.insert( make_pair("det", "pdtype" ));
   cgnSubSets.insert( make_pair("grad", "pdtype" ));
-  
+
   cgnSubSets.insert( make_pair("vol", "status" ));
   cgnSubSets.insert( make_pair("red", "status" ));
   cgnSubSets.insert( make_pair("nadr", "status" ));
-  
+
   cgnSubSets.insert( make_pair("1", "persoon" ));
   cgnSubSets.insert( make_pair("2", "persoon" ));
   cgnSubSets.insert( make_pair("2v", "persoon" ));
@@ -134,41 +134,41 @@ void fillSubSetTable(){
   cgnSubSets.insert( make_pair("3v", "persoon" ));
   cgnSubSets.insert( make_pair("3o", "persoon" ));
   cgnSubSets.insert( make_pair("persoon", "persoon" ));
-  
+
   cgnSubSets.insert( make_pair("prenom", "positie" ));
   cgnSubSets.insert( make_pair("postnom", "positie" ));
   cgnSubSets.insert( make_pair("nom", "positie" ));
   cgnSubSets.insert( make_pair("vrij", "positie" ));
-  
+
   cgnSubSets.insert( make_pair("zonder", "buiging" ));
   cgnSubSets.insert( make_pair("met-e", "buiging" ));
   cgnSubSets.insert( make_pair("met-s", "buiging" ));
-    
+
   cgnSubSets.insert( make_pair("zonder-v", "getal-n" ));
   cgnSubSets.insert( make_pair("mv-n", "getal-n" ));
   cgnSubSets.insert( make_pair("zonder-n", "getal-n" ));
-    
+
   cgnSubSets.insert( make_pair("basis", "graad" ));
   cgnSubSets.insert( make_pair("comp", "graad" ));
   cgnSubSets.insert( make_pair("sup", "graad" ));
   cgnSubSets.insert( make_pair("dim", "graad" ));
-  
+
   cgnSubSets.insert( make_pair("pv", "wvorm" ));
   cgnSubSets.insert( make_pair("inf", "wvorm" ));
   cgnSubSets.insert( make_pair("vd", "wvorm" ));
   cgnSubSets.insert( make_pair("od", "wvorm" ));
-    
+
   cgnSubSets.insert( make_pair("tgw", "pvtijd" ));
   cgnSubSets.insert( make_pair("verl", "pvtijd" ));
   cgnSubSets.insert( make_pair("conj", "pvtijd" ));
-  
+
   cgnSubSets.insert( make_pair("ev", "pvagr" ));
   cgnSubSets.insert( make_pair("mv", "pvagr" ));
   cgnSubSets.insert( make_pair( "met-t", "pvagr" ));
-    
+
   cgnSubSets.insert( make_pair("hoofd", "numtype" ));
   cgnSubSets.insert( make_pair("rang", "numtype" ));
-  
+
   cgnSubSets.insert( make_pair("dial", "dial" ));
 
   cgnConstraints.insert( make_pair( "getal", "N" ) );
@@ -176,12 +176,15 @@ void fillSubSetTable(){
   cgnConstraints.insert( make_pair( "pvagr", "WW" ) );
 }
 
- 
-bool CGNTagger::init( const Configuration& conf ){
-  debug = tpDebug;
-  string db = conf.lookUp( "debug", "tagger" );
-  if ( !db.empty() )
-    debug = TiCC::stringTo<int>( db );
+
+bool CGNTagger::init( const Configuration& config ){
+  string val = config.lookUp( "debug", "tagger" );
+  if ( val.empty() ){
+    val = config.lookUp( "debug" );
+  }
+  if ( !val.empty() ){
+    debug = TiCC::stringTo<int>( val );
+  }
   switch ( debug ){
   case 0:
   case 1:
@@ -198,12 +201,12 @@ bool CGNTagger::init( const Configuration& conf ){
     break;
   default:
     cgnLog->setlevel(LogExtreme);
-  }    
+  }
   if ( tagger != 0 ){
     *Log(cgnLog) << "CGNTagger is already initialized!" << endl;
     return false;
-  }  
-  string val = conf.lookUp( "settings", "tagger" );
+  }
+  val = config.lookUp( "settings", "tagger" );
   if ( val.empty() ){
     *Log(cgnLog) << "Unable to find settings for Tagger" << endl;
     return false;
@@ -212,26 +215,26 @@ bool CGNTagger::init( const Configuration& conf ){
   if ( val[0] == '/' ) // an absolute path
     settings = val;
   else
-    settings =  configuration.configDir() + val;
+    settings =  config.configDir() + val;
 
-  val = conf.lookUp( "version", "tagger" );
+  val = config.lookUp( "version", "tagger" );
   if ( val.empty() ){
     version = "1.0";
   }
   else
     version = val;
-  val = conf.lookUp( "set", "tagger" );
+  val = config.lookUp( "set", "tagger" );
   if ( val.empty() ){
     tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
   }
   else
     tagset = val;
   fillSubSetTable();
-  string charFile = conf.lookUp( "char_filter_file", "tagger" );
+  string charFile = config.lookUp( "char_filter_file", "tagger" );
   if ( charFile.empty() )
-    charFile = conf.lookUp( "char_filter_file" );
+    charFile = config.lookUp( "char_filter_file" );
   if ( !charFile.empty() ){
-    charFile = prefix( conf.configDir(), charFile );
+    charFile = prefix( config.configDir(), charFile );
     filter = new Tokenizer::UnicodeFilter();
     filter->fill( charFile );
   }
@@ -264,7 +267,7 @@ string getSubSet( const string& val, const string& head ){
     }
     ++it;
   }
-  throw folia::ValueError( "unable to find cgn subset for class: '" + val + 
+  throw folia::ValueError( "unable to find cgn subset for class: '" + val +
 			   "' whithin the constraints for '" + head + "'" );
 }
 
@@ -275,8 +278,8 @@ void CGNTagger::addTag( Word *word, const string& inputTag, double confidence ){
   string ucto_class = word->cls();
   if ( debug )
     *Log(cgnLog) << "ucto class= " << ucto_class << " cgnTag=" << cgnTag << endl;
-  if ( ucto_class == "PUNCTUATION" 
-       && ( cgnTag.find("SPEC(") != string::npos 
+  if ( ucto_class == "PUNCTUATION"
+       && ( cgnTag.find("SPEC(") != string::npos
 	    || cgnTag.find("LET") != string::npos ) ){
     mainTag = "LET";
     tagPartS = "";
@@ -359,7 +362,7 @@ void CGNTagger::Classify( const vector<Word*>& swords ){
       if ( w < swords.size()-1 )
 	sentence += " ";
     }
-    if (debug) 
+    if (debug)
       *Log(cgnLog) << "CGN tagger in: " << sentence << endl;
     vector<TagResult> tagv = tagger->TagLine(sentence);
     if ( tagv.size() != swords.size() ){
@@ -368,7 +371,7 @@ void CGNTagger::Classify( const vector<Word*>& swords ){
       for ( size_t w = 0; w < swords.size(); ++w ) {
 	*Log(cgnLog) << "w[" << w << "]= " << swords[w]->str() << endl;
       }
-      *Log(cgnLog) << "words according to CGN tagger: " << endl;    
+      *Log(cgnLog) << "words according to CGN tagger: " << endl;
       for ( size_t i=0; i < tagv.size(); ++i ){
 	*Log(cgnLog) << "word[" << i << "]=" << tagv[i].word() << endl;
       }
@@ -377,8 +380,8 @@ void CGNTagger::Classify( const vector<Word*>& swords ){
     if ( debug ){
       *Log(cgnLog) << "CGN tagger out: " << endl;
       for ( size_t i=0; i < tagv.size(); ++i ){
-	*Log(cgnLog) << "[" << i << "] : word=" << tagv[i].word() 
-		     << " tag=" << tagv[i].assignedTag() 
+	*Log(cgnLog) << "[" << i << "] : word=" << tagv[i].word()
+		     << " tag=" << tagv[i].assignedTag()
 		     << " confidence=" << tagv[i].confidence() << endl;
       }
     }

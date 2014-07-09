@@ -74,11 +74,15 @@ void Mblem::read_transtable( const string& tableName ) {
 
 bool Mblem::init( const Configuration& config ) {
   *Log(mblemLog) << "Initiating lemmatizer..." << endl;
-  debug = tpDebug;
-  string db = config.lookUp( "debug", "mblem" );
-  if ( !db.empty() )
-    debug = TiCC::stringTo<int>( db );
-  string val = config.lookUp( "version", "mblem" );
+  debug = 0;
+  string val = config.lookUp( "debug", "mblem" );
+  if ( val.empty() ){
+    val = config.lookUp( "debug" );
+  }
+  if ( !val.empty() ){
+    debug = TiCC::stringTo<int>( val );
+  }
+  val = config.lookUp( "version", "mblem" );
   if ( val.empty() ){
     version = "1.0";
   }
