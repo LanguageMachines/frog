@@ -190,7 +190,7 @@ class Mbma {
   UnicodeString filterDiacritics( const UnicodeString& ) const;
   void getFoLiAResult( folia::Word *, const UnicodeString& ) const;
   std::vector<std::string> make_instances( const UnicodeString& word );
-  void performEdits( Rule& );
+  bool performEdits( Rule& );
   void resolve_inflections( Rule& );
   CLEX::Type getFinalTag( const std::list<BaseBracket*>& );
   void execute( const UnicodeString& word,

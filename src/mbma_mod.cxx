@@ -1172,7 +1172,7 @@ BracketNest *Rule::resolveBrackets( bool daring, CLEX::Type& tag  ) {
   return brackets;
 }
 
-void Mbma::performEdits( Rule& rule ){
+bool Mbma::performEdits( Rule& rule ){
   if ( debugFlag){
     *Log(mbmaLog) << "FOUND rule " << rule << endl;
   }
@@ -1191,8 +1191,9 @@ void Mbma::performEdits( Rule& rule ){
 	  UnicodeString tmp(cur->del[j]);
 	  *Log(mbmaLog) << "Hmm: deleting " << cur->del << " is impossible. ("
 			<< rule.rules[k+j].uchar << " != " << tmp
-			<< ") just skipping the deletion." << endl;
-	  *Log(mbmaLog) << "Executing rule: " << rule << endl;
+			<< ")." << endl;
+	  *Log(mbmaLog) << "Reject rule: " << rule << endl;
+	  return false;
 	  cur->del = "";
 	}
       }
@@ -1242,7 +1243,7 @@ void Mbma::performEdits( Rule& rule ){
   if ( debugFlag ){
     *Log(mbmaLog) << "edited rule " << rule << endl;
   }
-
+  return true;
 }
 
 MBMAana::MBMAana( const Rule& r, bool daring ): rule(r) {
@@ -1423,20 +1424,24 @@ void Mbma::execute( const UnicodeString& word,
   // now loop over all the analysis
   for ( unsigned int step=0; step < allParts.size(); ++step ) {
     Rule rule( allParts[step], word, debugFlag );
-    performEdits( rule );
-    rule.reduceZeroNodes();
-    if ( debugFlag ){
-      *Log(mbmaLog) << "after reduction: " << rule << endl;
+    if ( performEdits( rule ) ){
+      rule.reduceZeroNodes();
+      if ( debugFlag ){
+	*Log(mbmaLog) << "after reduction: " << rule << endl;
+      }
+      resolve_inflections( rule );
+      if ( debugFlag ){
+	*Log(mbmaLog) << "after resolving: " << rule << endl;
+      }
+      MBMAana *tmp = new MBMAana( rule, doDaring );
+      if ( debugFlag ){
+	*Log(mbmaLog) << "1 added Inflection: " << tmp << endl;
+      }
+      analysis.push_back( tmp );
     }
-    resolve_inflections( rule );
-    if ( debugFlag ){
-      *Log(mbmaLog) << "after resolving: " << rule << endl;
+    else if ( debugFlag ){
+      *Log(mbmaLog) << "rejected rule: " << rule << endl;
     }
-    MBMAana *tmp = new MBMAana( rule, doDaring );
-    if ( debugFlag ){
-      *Log(mbmaLog) << "1 added Inflection: " << tmp << endl;
-    }
-    analysis.push_back( tmp );
   }
 }
 
