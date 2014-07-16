@@ -1194,7 +1194,6 @@ bool Mbma::performEdits( Rule& rule ){
 			<< ")." << endl;
 	  *Log(mbmaLog) << "Reject rule: " << rule << endl;
 	  return false;
-	  cur->del = "";
 	}
       }
     }
@@ -1208,13 +1207,23 @@ bool Mbma::performEdits( Rule& rule ){
     bool e_except = false;
     if ( cur->isBasic() ){
       // encountering real POS tag
-      // start a new morpheme, BUT: inserts are appended to the previous on
+      // start a new morpheme, BUT: inserts are appended to the previous one
       // except for Replace edits, exception on that again: "eer" inserts
       if ( debugFlag ){
 	*Log(mbmaLog) << "FOUND a basic tag " << cur->ResultClass << endl;
       }
       if ( cur->del.isEmpty() || cur->ins == "eer" ){
+	if ( !cur->del.isEmpty() && cur->ins == "eer" ){
+	  if ( debugFlag > 5 ){
+	    *Log(mbmaLog) << "special 'eer' exception." << endl;
+	    *Log(mbmaLog) << rule << endl;
+	  }
+	}
 	if ( cur->ins == "ere" ){
+	  if ( debugFlag > 5 ){
+	    *Log(mbmaLog) << "special 'ere' exception." << endl;
+	    *Log(mbmaLog) << rule << endl;
+	  }
 	  // strange exception
 	  last->morpheme += "er";
 	  e_except = true;
