@@ -276,9 +276,6 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     }
     Opts.remove("debug");
   }
-  else {
-    configuration.setatt( "debug", "0" );
-  }
 
   if ( Opts.find ('n', value, mood)) {
     doSentencePerLine = true;
@@ -756,13 +753,17 @@ vector<Word*> lookup( Word *word, const vector<Entity*>& entities ){
 
 Dependency *lookupDep( const Word *word,
 		       const vector<Dependency*>&dependencies ){
-  if ( debugFlag ){
+  if (dependencies.size() == 0 ){
+    return 0;
+  }
+  int dbFlag = stringTo<int>( configuration.lookUp( "debug", "parser" ) );
+  if ( dbFlag ){
     using TiCC::operator<<;
-    *Log( theErrLog ) << "lookup "<< word << " in " << dependencies << endl;
+    *Log( theErrLog ) << "\nDependency-lookup "<< word << " in " << dependencies << endl;
   }
   for ( size_t i=0; i < dependencies.size(); ++i ){
-    if ( debugFlag ){
-      *Log( theErrLog ) << "probeer " << dependencies[i] << endl;
+    if ( dbFlag ){
+      *Log( theErrLog ) << "Dependency try: " << dependencies[i] << endl;
     }
     try {
       vector<DependencyDependent*> dv = dependencies[i]->select<DependencyDependent>();
@@ -770,8 +771,8 @@ Dependency *lookupDep( const Word *word,
 	vector<Word*> v = dv[0]->select<Word>();
 	for ( size_t j=0; j < v.size(); ++j ){
 	  if ( v[j] == word ){
-	    if ( debugFlag ){
-	      *Log(theErrLog) << "\nfound word " << v[j] << endl;
+	    if ( dbFlag ){
+	      *Log(theErrLog) << "\nDependency found word " << v[j] << endl;
 	    }
 	    return dependencies[i];
 	  }
@@ -779,7 +780,7 @@ Dependency *lookupDep( const Word *word,
       }
     }
     catch ( exception& e ){
-      if  (debugFlag > 0)
+      if (dbFlag > 0)
 	*Log(theErrLog) << "get Dependency results failed: "
 			<< e.what() << endl;
     }
@@ -790,23 +791,24 @@ Dependency *lookupDep( const Word *word,
 string lookupNEREntity( const vector<Word *>& mwu,
 			const vector<Entity*>& entities ){
   string endresult;
+  int dbFlag = stringTo<int>( configuration.lookUp( "debug", "NER" ) );
   for ( size_t j=0; j < mwu.size(); ++j ){
-    if ( debugFlag ){
+    if ( dbFlag ){
       using TiCC::operator<<;
-      *Log(theErrLog) << "lookup "<< mwu[j] << " in " << entities << endl;
+      *Log(theErrLog) << "\nNER: lookup "<< mwu[j] << " in " << entities << endl;
     }
     string result;
     for ( size_t i=0; i < entities.size(); ++i ){
-      if ( debugFlag ){
-	*Log(theErrLog) << "probeer " << entities[i] << endl;
+      if ( dbFlag ){
+	*Log(theErrLog) << "NER try: " << entities[i] << endl;
       }
       try {
 	vector<Word*> v = entities[i]->select<Word>();
 	bool first = true;
 	for ( size_t k=0; k < v.size(); ++k ){
 	  if ( v[k] == mwu[j] ){
-	    if (debugFlag){
-	      *Log(theErrLog) << "found word " << v[k] << endl;
+	    if (dbFlag){
+	      *Log(theErrLog) << "NER found word " << v[k] << endl;
 	    }
 	    if ( first )
 	      result += "B-" + uppercase(entities[i]->cls());
@@ -819,7 +821,7 @@ string lookupNEREntity( const vector<Word *>& mwu,
 	}
       }
       catch ( exception& e ){
-	if  (debugFlag > 0)
+	if  (dbFlag > 0)
 	  *Log(theErrLog) << "get NER results failed: "
 			  << e.what() << endl;
       }
@@ -838,23 +840,24 @@ string lookupNEREntity( const vector<Word *>& mwu,
 string lookupIOBChunk( const vector<Word *>& mwu,
 		       const vector<Chunk*>& chunks ){
   string endresult;
+  int dbFlag = stringTo<int>( configuration.lookUp( "debug", "IOB" ) );
   for ( size_t j=0; j < mwu.size(); ++j ){
-    if ( debugFlag ){
+    if ( dbFlag ){
       using TiCC::operator<<;
-      *Log(theErrLog) << "lookup "<< mwu[j] << " in " << chunks << endl;
+      *Log(theErrLog) << "IOB lookup "<< mwu[j] << " in " << chunks << endl;
     }
     string result;
     for ( size_t i=0; i < chunks.size(); ++i ){
-      if ( debugFlag ){
-	*Log(theErrLog) << "probeer " << chunks[i] << endl;
+      if ( dbFlag ){
+	*Log(theErrLog) << "IOB try: " << chunks[i] << endl;
       }
       try {
 	vector<Word*> v = chunks[i]->select<Word>();
 	bool first = true;
 	for ( size_t k=0; k < v.size(); ++k ){
 	  if ( v[k] == mwu[j] ){
-	    if (debugFlag){
-	      *Log(theErrLog) << "found word " << v[k] << endl;
+	    if (dbFlag){
+	      *Log(theErrLog) << "IOB found word " << v[k] << endl;
 	    }
 	    if ( first )
 	      result += "B-" + chunks[i]->cls();
@@ -867,7 +870,7 @@ string lookupIOBChunk( const vector<Word *>& mwu,
 	}
       }
       catch ( exception& e ){
-	if  (debugFlag > 0)
+	if  (dbFlag > 0)
 	  *Log(theErrLog) << "get Chunks results failed: "
 			  << e.what() << endl;
       }
@@ -1366,6 +1369,9 @@ void TestInteractive(){
       }
     }
     if ( !data.empty() ){
+      if ( data[data.size()-1] == '\n' ){
+	data = data.substr( 0, data.size()-1 );
+      }
       cout << "Processing... '" << data << "'" << endl;
       istringstream inputstream(data,istringstream::in);
       Document doc = tokenizer.tokenize( inputstream );
