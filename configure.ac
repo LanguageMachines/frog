@@ -71,6 +71,9 @@ if test "$pkgconfigpath" != "NONE"; then
      export PKG_CONFIG_PATH=""
   fi
 fi
+PKG_CHECK_MODULES([XML2], [libxml-2.0 >= 2.6.16] )
+CXXFLAGS="$CXXFLAGS $XML2_CFLAGS"
+LIBS="$XML2_LIBS $LIBS"
 
 AX_LIB_READLINE
 
