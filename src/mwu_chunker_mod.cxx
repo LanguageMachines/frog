@@ -72,12 +72,15 @@ EntitiesLayer *mwuAna::addEntity( const std::string& tagset,
     if ( el == 0 ){
 #pragma omp critical(foliaupdate)
       {
-	el = new EntitiesLayer();
+	KWargs args;
+	args["generate_id"] = sent->id();
+	el = new EntitiesLayer(sent->doc(),args);
 	sent->append( el );
       }
     }
     KWargs args;
     args["set"] = tagset;
+    args["generate_id"] = el->id();
     Entity *e=0;
 #pragma omp critical(foliaupdate)
     {

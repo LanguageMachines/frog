@@ -118,6 +118,7 @@ static void addEntity( EntitiesLayer *entities,
   args["class"] = NER;
   args["confidence"] =  toString(c);
   args["set"] = tagset;
+  args["generate_id"] = entities->id();
   Entity *e = 0;
 #pragma omp critical(foliaupdate)
   {
@@ -145,7 +146,9 @@ void NERTagger::addNERTags( const vector<Word*>& words,
       el = sent->annotation<EntitiesLayer>();
     }
     catch(...){
-      el = new EntitiesLayer();
+      KWargs args;
+      args["generate_id"] = sent->id();
+      el = new EntitiesLayer(sent->doc(),args);
       sent->append( el );
     }
   }
