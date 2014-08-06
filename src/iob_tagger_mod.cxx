@@ -118,6 +118,7 @@ void IOBTagger::addChunk( ChunkingLayer *chunks,
   args["class"] = IOB;
   args["set"] = tagset;
   args["confidence"] = toString(conf);
+  args["generate_id"] = chunks->id();
   Chunk *chunk = 0;
 #pragma omp critical(foliaupdate)
   {
@@ -153,7 +154,9 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
       el = sent->annotation<ChunkingLayer>();
     }
     catch(...){
-      el = new ChunkingLayer();
+      KWargs args;
+      args["generate_id"] = sent->id();
+      el = new ChunkingLayer(sent->doc(),args);
       sent->append( el );
     }
   }
