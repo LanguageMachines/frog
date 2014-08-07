@@ -7,7 +7,7 @@
 
   A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
   Version 0.04
- 
+
   This file is part of frog.
 
   frog is free software; you can redistribute it and/or modify
@@ -104,7 +104,7 @@ void PythonInterface::parse( const string& depFile,
 			     const string& maxDist,
 			     const string& inputFile,
 			     const string& outputFile ) {
-  
+
   PyObjectRef tmp = PyObject_CallFunction(mainFunction,
 					  (char *)"[s, s, s, s, s, s, s, s, s, s, s]",
 					  "--dep", depFile.c_str(),
@@ -141,7 +141,7 @@ ostream& operator<<( ostream& os, const parseData& pd ){
   }
   return os;
 }
-  
+
 void Parser::createParserFile( const parseData& pd ){
   const vector<string>& words = pd.words;
   const vector<string>& heads = pd.heads;
@@ -150,8 +150,8 @@ void Parser::createParserFile( const parseData& pd ){
   ofstream anaFile( fileName.c_str() );
   if ( anaFile ){
     for( size_t i = 0; i < words.size(); ++i ){
-      anaFile << i+1 << "\t" << words[i] << "\t" << "*" << "\t" << heads[i] 
-	      << "\t" << heads[i] << "\t" << mods[i] << "\t"<< "0" 
+      anaFile << i+1 << "\t" << words[i] << "\t" << "*" << "\t" << heads[i]
+	      << "\t" << heads[i] << "\t" << mods[i] << "\t"<< "0"
 	      << "\t" << "_" << "\t" << "_" << "\t" << "_" << endl;
     }
   }
@@ -261,7 +261,7 @@ bool Parser::init( const Configuration& configuration ){
   }
   if ( problem )
     return false;
-  
+
   bool happy = true;
   pairs = new Timbl::TimblAPI( pairsOptions );
   if ( pairs->Valid() ){
@@ -299,7 +299,7 @@ Parser::~Parser(){
   delete PI;
 }
 
-static vector<Word *> lookup( Word *word, 
+static vector<Word *> lookup( Word *word,
 			      const vector<Entity*>& entities ){
   vector<Word*> vec;
   for ( size_t p=0; p < entities.size(); ++p ){
@@ -327,7 +327,7 @@ void Parser::createPairs( const parseData& pd ){
       ps << "__ " << words[0] << " __"
 	 << " ROOT ROOT ROOT __ " << heads[0]
 	 << " __ ROOT ROOT ROOT "
-	 << words[0] << "^ROOT ROOT ROOT ROOT^" 
+	 << words[0] << "^ROOT ROOT ROOT ROOT^"
 	 << heads[0]
 	 << " _" << endl;
     }
@@ -357,12 +357,12 @@ void Parser::createPairs( const parseData& pd ){
 	}
 	ps << word_1 << " " << word0 << " " << word1
 	   << " ROOT ROOT ROOT "
-	   << tag_1 << " " << tag0 << " " << tag1 
+	   << tag_1 << " " << tag0 << " " << tag1
 	   << " ROOT ROOT ROOT "
 	   << tag0 << "^ROOT ROOT ROOT ROOT^" << mods0
 	   << " _" << endl;
       }
-      // 
+      //
       for ( size_t wPos=0; wPos < words.size(); ++wPos ){
 	string w_word_1, w_word0, w_word1;
 	string w_tag_1, w_tag0, w_tag1;
@@ -394,11 +394,11 @@ void Parser::createPairs( const parseData& pd ){
 	    continue;
 	  if ( wPos > maxDepSpan + pos )
 	    continue;
-	  
+
 	  ps << w_word_1;
 	  ps << " " << w_word0;
 	  ps << " " << w_word1;
-	  
+
 	  if ( pos == 0 )
 	    ps << " __";
 	  else
@@ -426,13 +426,13 @@ void Parser::createPairs( const parseData& pd ){
 	    ps << " " << heads[pos+1];
 	  else
 	    ps << " __";
-	  
+
 	  ps << " " << w_tag0 << "^";
 	  if ( pos < words.size() )
 	    ps << heads[pos];
 	  else
 	    ps << "__";
-	  
+
 	  if ( wPos > pos )
 	    ps << " LEFT " << wPos - pos;
 	  else
@@ -831,7 +831,7 @@ void Parser::prepareParse( const vector<Word *>& fwords,
       pd.mwus.push_back( vec );
     }
   }
-  
+
   createParserFile( pd );
 
 #pragma omp parallel sections
@@ -867,17 +867,18 @@ void appendParseResult( const vector<Word *>& words,
     }
     ++cnt;
   }
-  DependenciesLayer *dl = new DependenciesLayer();
-  Sentence *sent;
+  Sentence *sent = words[0]->sentence();
+  KWargs args;
+  args["generate_id"] = sent->id();
+  DependenciesLayer *dl = new DependenciesLayer(sent->doc(),args);
 #pragma omp critical(foliaupdate)
   {
-    sent = words[0]->sentence();
     sent->append( dl );
   }
   for ( size_t i=0; i < nums.size(); ++i ){
     if ( nums[i] != 0 ){
       KWargs args;
-      args["generate-id"] = sent->id();
+      args["generate_id"] = dl->id();
       args["class"] = roles[i];
 #pragma omp critical(foliaupdate)
       {
@@ -913,7 +914,7 @@ void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
     *Log(parseLog) << "unable to parse an analisis without words" << endl;
     return;
   }
-  string resFileName = fileName + ".result"; 
+  string resFileName = fileName + ".result";
   string pairsInName = fileName +".pairs.inst";
   string pairsOutName = fileName +".pairs.out";
   string dirInName = fileName + ".dir.inst";
@@ -922,7 +923,7 @@ void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
   string relsOutName = fileName + ".rels.out";
   remove( resFileName.c_str() );
   timers.prepareTimer.start();
-  parseData pd;  
+  parseData pd;
   prepareParse( words, mwuSet, pd );
   timers.prepareTimer.stop();
 #pragma omp parallel sections
