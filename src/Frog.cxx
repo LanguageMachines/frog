@@ -50,6 +50,8 @@
 #  else
 #    define NO_READLINE
 #  endif /* !defined(HAVE_READLINE_H) */
+#else
+#  define NO_READLINE
 #endif /* HAVE_LIBREADLINE */
 
 #ifdef HAVE_READLINE_HISTORY
