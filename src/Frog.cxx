@@ -47,6 +47,8 @@
 #    include <readline/readline.h>
 #  elif defined(HAVE_READLINE_H)
 #    include <readline.h>
+#  else
+#    define NO_READLINE
 #  endif /* !defined(HAVE_READLINE_H) */
 #endif /* HAVE_LIBREADLINE */
 
@@ -1327,7 +1329,46 @@ void TestServer( Sockets::ServerSocket &conn) {
   *Log(theErrLog) << "Connection closed.\n";
 }
 
-#ifdef HAVE_LIBREADLINE
+#ifdef NO_READLINE
+void TestInteractive(){
+  cout << "frog>"; cout.flush();
+  string line;
+  string data;
+  while ( getline( cin, line ) ){
+    string data = line;
+    if ( doSentencePerLine ){
+      if ( line.empty() ){
+	cout << "frog>"; cout.flush();
+	continue;
+      }
+    }
+    else {
+      if ( !line.empty() ){
+	data += "\n";
+      }
+      cout << "frog>"; cout.flush();
+      string line2;
+      while( getline( cin, line2 ) ){
+	if ( line2.empty() )
+	  break;
+	data += line2 + "\n";
+	cout << "frog>"; cout.flush();
+      }
+    }
+    if ( data.empty() ){
+      cout << "ignoring empty input" << endl;
+      cout << "frog>"; cout.flush();
+      continue;
+    }
+    cout << "Processing... " << endl;
+    istringstream inputstream(data,istringstream::in);
+    Document doc = tokenizer.tokenize( inputstream );
+    Test( doc, cout, true );
+    cout << "frog>"; cout.flush();
+  }
+  cout << "Done.\n";
+}
+#else
 void TestInteractive(){
   const char *prompt = "frog> ";
   string line;
@@ -1377,46 +1418,6 @@ void TestInteractive(){
       Document doc = tokenizer.tokenize( inputstream );
       Test( doc, cout, true );
     }
-  }
-  cout << "Done.\n";
-}
-
-#else
-void TestInteractive(){
-  cout << "frog>"; cout.flush();
-  string line;
-  string data;
-  while ( getline( cin, line ) ){
-    string data = line;
-    if ( doSentencePerLine ){
-      if ( line.empty() ){
-	cout << "frog>"; cout.flush();
-	continue;
-      }
-    }
-    else {
-      if ( !line.empty() ){
-	data += "\n";
-      }
-      cout << "frog>"; cout.flush();
-      string line2;
-      while( getline( cin, line2 ) ){
-	if ( line2.empty() )
-	  break;
-	data += line2 + "\n";
-	cout << "frog>"; cout.flush();
-      }
-    }
-    if ( data.empty() ){
-      cout << "ignoring empty input" << endl;
-      cout << "frog>"; cout.flush();
-      continue;
-    }
-    cout << "Processing... " << endl;
-    istringstream inputstream(data,istringstream::in);
-    Document doc = tokenizer.tokenize( inputstream );
-    Test( doc, cout, true );
-    cout << "frog>"; cout.flush();
   }
   cout << "Done.\n";
 }
