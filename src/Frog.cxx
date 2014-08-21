@@ -1439,7 +1439,7 @@ int main(int argc, char *argv[]) {
   //  cout << "configdir: " << configDir << endl;
   std::ios_base::sync_with_stdio(false);
   try {
-    TiCC::CL_Options Opts("c:e:o:t:x:X:nQhVd:S:",
+    TiCC::CL_Options Opts("c:e:o:t:x::X::nQhVd:S:",
 			  "textclass:,testdir:,uttmarker:,max-parser-tokens:,"
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,daring,debug:,"
 			  "keep-parser-files:,version,threads:,KANON");
