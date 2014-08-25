@@ -201,17 +201,17 @@ static UctoTokenizer tokenizer;
 bool parse_args( TiCC::CL_Options& Opts ) {
   string value;
   bool mood;
-  if ( Opts.find('V', value, mood ) ||
-       Opts.find("version", value ) ){
+  if ( Opts.is_present('V', value, mood ) ||
+       Opts.is_present("version", value ) ){
     // we already did show what we wanted.
     exit( EXIT_SUCCESS );
   }
-  if ( Opts.find ('h', value, mood)) {
+  if ( Opts.is_present ('h', value, mood)) {
     usage();
     exit( EXIT_SUCCESS );
   };
   // is a config file specified?
-  if ( Opts.find( 'c',  value, mood ) ) {
+  if ( Opts.is_present( 'c',  value, mood ) ) {
     configFileName = value;
     Opts.remove( 'c' );
   };
@@ -226,7 +226,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   }
 
   // debug opts
-  if ( Opts.find ('d', value, mood)) {
+  if ( Opts.is_present ('d', value, mood)) {
     if ( !stringTo<int>( value, debugFlag ) ){
       *Log(theErrLog) << "-d value should be an integer" << endl;
       return false;
@@ -237,7 +237,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   else {
     configuration.setatt( "debug", "0" );
   }
-  if ( Opts.find( "debug", value ) ) {
+  if ( Opts.is_present( "debug", value ) ) {
     if ( value.empty() ){
       *Log(theErrLog) << "missing a value for --debug (did you forget the '='?)" << endl;
       return false;
@@ -283,13 +283,13 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     Opts.remove("debug");
   }
 
-  if ( Opts.find ('n', value, mood)) {
+  if ( Opts.is_present ('n', value, mood)) {
     doSentencePerLine = true;
   };
-  if ( Opts.find ('Q', value, mood)) {
+  if ( Opts.is_present ('Q', value, mood)) {
     doQuoteDetection = true;
   };
-  if ( Opts.find( "skip", value )) {
+  if ( Opts.is_present( "skip", value )) {
     if ( value.empty() ){
       *Log(theErrLog) << "missing a value for --skip (did you forget the '='?)" << endl;
       return false;
@@ -312,7 +312,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     Opts.remove("skip");
   };
 
-  if ( Opts.find( "daring", value ) ) {
+  if ( Opts.is_present( "daring", value ) ) {
     if ( value.empty() )
       value = "1";
     doDaringMorph = stringTo<bool>( value );
@@ -320,11 +320,11 @@ bool parse_args( TiCC::CL_Options& Opts ) {
       doMorph = true;
     }
   }
-  if ( Opts.find( 'e', value, mood)) {
+  if ( Opts.is_present( 'e', value, mood)) {
     encoding = value;
   }
 
-  if ( Opts.find( "max-parser-tokens", value ) ){
+  if ( Opts.is_present( "max-parser-tokens", value ) ){
     if ( value.empty() ){
       *Log(theErrLog) << "max-parser-tokens option without value " << endl;
       return false;
@@ -338,7 +338,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     Opts.remove("max-parser-tokens");
   }
 
-  if ( Opts.find ('S', value, mood)) {
+  if ( Opts.is_present ('S', value, mood)) {
     doServer = true;
     listenport= value;
   }
@@ -347,7 +347,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     // run in one thread in server mode, forking is too expensive for lots of small snippets
     omp_set_num_threads( 1 );
   }
-  else if ( Opts.find( "threads", value ) ){
+  else if ( Opts.is_present( "threads", value ) ){
     if ( value.empty() ){
       *Log(theErrLog) << "missing a value for --threads (did you forget the '='?)" << endl;
       return false;
@@ -361,7 +361,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   }
 #endif
 
-  if ( Opts.find( "keep-parser-files", value ) ){
+  if ( Opts.is_present( "keep-parser-files", value ) ){
     if ( value.empty() ||
 	 stringTo<bool>( value ) ){
       configuration.setatt( "keepIntermediateFiles", "true", "parser" );
@@ -369,7 +369,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     }
   }
   tmpDirName = configuration.lookUp( "tmpdir", "global" );
-  if ( Opts.find ( "tmpdir", value )) {
+  if ( Opts.is_present ( "tmpdir", value )) {
     if ( value.empty() ){
       *Log(theErrLog) << "missing a value for --tmpdir (did you forget the '='?)" << endl;
       return false;
@@ -393,7 +393,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   }
 #endif
   string TestFileName;
-  if ( Opts.find ( "testdir", value )) {
+  if ( Opts.is_present ( "testdir", value )) {
 #ifdef HAVE_DIRENT_H
     doDirTest = true;
     testDirName = value;
@@ -415,7 +415,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
 #endif
     Opts.remove("testdir");
   }
-  else if ( Opts.find( 't', value, mood )) {
+  else if ( Opts.is_present( 't', value, mood )) {
     TestFileName = value;
     ifstream is( value.c_str() );
     if ( !is ){
@@ -425,7 +425,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     Opts.remove('t');
   };
   wantOUT = false;
-  if ( Opts.find( "outputdir", value )) {
+  if ( Opts.is_present( "outputdir", value )) {
     outputDirName = value;
     if ( outputDirName[outputDirName.size()-1] != '/' ){
       outputDirName += "/";
@@ -445,13 +445,13 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     wantOUT = true;
     Opts.remove( "outputdir");
   }
-  else if ( Opts.find ('o', value, mood)) {
+  else if ( Opts.is_present ('o', value, mood)) {
     wantOUT = true;
     outputFileName = value;
     Opts.remove('o');
   };
   doXMLout = false;
-  if ( Opts.find ( "id", value )) {
+  if ( Opts.is_present ( "id", value )) {
     if ( value.empty() ){
       *Log(theErrLog) << "missing a value for --id (did you forget the '='?)" << endl;
       return false;
@@ -459,7 +459,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     docid = value;
     Opts.remove( "id");
   }
-  if ( Opts.find( "xmldir", value )) {
+  if ( Opts.is_present( "xmldir", value )) {
     xmlDirName = value;
     if ( xmlDirName[xmlDirName.size()-1] != '/' ){
       xmlDirName += "/";
@@ -479,17 +479,17 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     doXMLout = true;
     Opts.remove( "xmldir");
   }
-  else if ( Opts.find ('X', value, mood)) {
+  else if ( Opts.is_present ('X', value, mood)) {
     doXMLout = true;
     XMLoutFileName = value;
     Opts.remove('X');
   }
-  if ( Opts.find ("KANON", value ) ){
+  if ( Opts.is_present ("KANON", value ) ){
     doKanon = true;
     Opts.remove( "KANON" );
   }
   doXMLin = false;
-  if ( Opts.find ('x', value, mood)) {
+  if ( Opts.is_present ('x', value, mood)) {
     doXMLin = true;
     if ( !value.empty() ){
       if ( ! (xmlDirName.empty() &&
@@ -507,7 +507,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     }
     Opts.remove('x');
   }
-  if ( Opts.find ( "textclass", value )) {
+  if ( Opts.is_present ( "textclass", value )) {
     if ( !doXMLin ){
       *Log(theErrLog) << "--textclass is only valid when -x is also present" << endl;
       return false;
@@ -525,7 +525,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     return false;
   }
 
-  if ( Opts.find ("uttmarker", value )) {
+  if ( Opts.is_present ("uttmarker", value )) {
     if ( value.empty() ){
       *Log(theErrLog) << "missing a value for --uttmarker (did you forget the '='?)" << endl;
       return false;
