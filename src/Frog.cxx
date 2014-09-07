@@ -1,3 +1,4 @@
+/* ex: set tabstop=8 expandtab: */
 /*
   $Id$
   $URL$
@@ -96,34 +97,16 @@ LogStream *theErrLog = &my_default_log;  // fill the externals
 string testDirName;
 string tmpDirName;
 string outputFileName;
-string docid = "untitled";
-string textclass;
 bool wantOUT;
 string XMLoutFileName;
-bool doXMLin;
-bool doXMLout;
-bool doKanon;
 string outputDirName;
 string xmlDirName;
 set<string> fileNames;
 string ProgName;
 int debugFlag = 0; //0 for none, more for more output
 unsigned int maxParserTokens = 0; // 0 for unlimited
-bool doTok = true;
-bool doLemma = true;
-bool doMorph = true;
-bool doDaringMorph = false;
-bool doMwu = true;
-bool doIOB = true;
-bool doNER = true;
-bool doParse = true;
-bool doDirTest = false;
-bool doServer = false;
-bool doSentencePerLine = false;
-bool doQuoteDetection = false;
-string listenport = "void";
-string encoding;
-string uttmark = "";
+
+FrogOptions options;
 
 /* assumptions:
    each components gets its own configfile per cmdline options
@@ -284,10 +267,10 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   }
 
   if ( Opts.is_present ('n', value, mood)) {
-    doSentencePerLine = true;
+    options.doSentencePerLine = true;
   };
   if ( Opts.is_present ('Q', value, mood)) {
-    doQuoteDetection = true;
+    options.doQuoteDetection = true;
   };
   if ( Opts.is_present( "skip", value )) {
     if ( value.empty() ){
@@ -296,32 +279,32 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     }
     string skip = value;
     if ( skip.find_first_of("tT") != string::npos )
-      doTok = false;
+      options.doTok = false;
     if ( skip.find_first_of("lL") != string::npos )
-      doLemma = false;
+      options.doLemma = false;
     if ( skip.find_first_of("aA") != string::npos )
-      doMorph = false;
+      options.doMorph = false;
     if ( skip.find_first_of("mM") != string::npos )
-      doMwu = false;
+      options.doMwu = false;
     if ( skip.find_first_of("cC") != string::npos )
-      doIOB = false;
+      options.doIOB = false;
     if ( skip.find_first_of("nN") != string::npos )
-      doNER = false;
+      options.doNER = false;
     if ( skip.find_first_of("pP") != string::npos )
-      doParse = false;
+      options.doParse = false;
     Opts.remove("skip");
   };
 
   if ( Opts.is_present( "daring", value ) ) {
     if ( value.empty() )
       value = "1";
-    doDaringMorph = stringTo<bool>( value );
-    if ( doDaringMorph ){
-      doMorph = true;
+    options.doDaringMorph = stringTo<bool>( value );
+    if ( options.doDaringMorph ){
+      options.doMorph = true;
     }
   }
   if ( Opts.is_present( 'e', value, mood)) {
-    encoding = value;
+    options.encoding = value;
   }
 
   if ( Opts.is_present( "max-parser-tokens", value ) ){
@@ -339,11 +322,11 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   }
 
   if ( Opts.is_present ('S', value, mood)) {
-    doServer = true;
-    listenport= value;
+    options.doServer = true;
+    options.listenport= value;
   }
 #ifdef HAVE_OPENMP
-  if ( doServer ) {
+  if ( options.doServer ) {
     // run in one thread in server mode, forking is too expensive for lots of small snippets
     omp_set_num_threads( 1 );
   }
@@ -395,7 +378,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   string TestFileName;
   if ( Opts.is_present ( "testdir", value )) {
 #ifdef HAVE_DIRENT_H
-    doDirTest = true;
+    options.doDirTest = true;
     testDirName = value;
     if ( testDirName[testDirName.size()-1] != '/' ){
       testDirName += "/";
@@ -450,13 +433,13 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     outputFileName = value;
     Opts.remove('o');
   };
-  doXMLout = false;
+  options.doXMLout = false;
   if ( Opts.is_present ( "id", value )) {
     if ( value.empty() ){
       *Log(theErrLog) << "missing a value for --id (did you forget the '='?)" << endl;
       return false;
     }
-    docid = value;
+    options.docid = value;
     Opts.remove( "id");
   }
   if ( Opts.is_present( "xmldir", value )) {
@@ -476,21 +459,21 @@ bool parse_args( TiCC::CL_Options& Opts ) {
       return false;
     }
 #endif
-    doXMLout = true;
+    options.doXMLout = true;
     Opts.remove( "xmldir");
   }
   else if ( Opts.is_present ('X', value, mood)) {
-    doXMLout = true;
+    options.doXMLout = true;
     XMLoutFileName = value;
     Opts.remove('X');
   }
   if ( Opts.is_present ("KANON", value ) ){
-    doKanon = true;
+    options.doKanon = true;
     Opts.remove( "KANON" );
   }
-  doXMLin = false;
+  options.doXMLin = false;
   if ( Opts.is_present ('x', value, mood)) {
-    doXMLin = true;
+    options.doXMLin = true;
     if ( !value.empty() ){
       if ( ! (xmlDirName.empty() &&
 	      testDirName.empty() &&
@@ -508,7 +491,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     Opts.remove('x');
   }
   if ( Opts.is_present ( "textclass", value )) {
-    if ( !doXMLin ){
+    if ( !options.doXMLin ){
       *Log(theErrLog) << "--textclass is only valid when -x is also present" << endl;
       return false;
     }
@@ -516,7 +499,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
       *Log(theErrLog) << "missing a value for --textclass (did you forget the '='?)" << endl;
       return false;
     }
-    textclass = value;
+    options.textclass = value;
     Opts.remove( "textclass");
   }
 
@@ -530,14 +513,14 @@ bool parse_args( TiCC::CL_Options& Opts ) {
       *Log(theErrLog) << "missing a value for --uttmarker (did you forget the '='?)" << endl;
       return false;
     }
-    uttmark = value;
+    options.uttmark = value;
   }
   if ( !outputDirName.empty() && testDirName.empty() ){
     *Log(theErrLog) << "useless -outputdir option" << endl;
     return false;
   }
   if ( !testDirName.empty() ){
-    if ( doXMLin )
+    if ( options.doXMLin )
       getFileNames( testDirName, ".xml", fileNames );
     else
       getFileNames( testDirName, "", fileNames );
@@ -569,64 +552,64 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   return true;
 }
 
-bool froginit(){
+bool froginit(FrogOptions & options, Configuration & configuration){
   // for some modules init can take a long time
   // so first make sure it will not fail on some trivialities
   //
-  if ( doTok && !configuration.hasSection("tokenizer") ){
+  if ( options.doTok && !configuration.hasSection("tokenizer") ){
     *Log(theErrLog) << "Missing [[tokenizer]] section in config file." << endl;
     return false;
   }
-  if ( doIOB && !configuration.hasSection("IOB") ){
+  if ( options.doIOB && !configuration.hasSection("IOB") ){
     *Log(theErrLog) << "Missing [[IOB]] section in config file." << endl;
     return false;
   }
-  if ( doNER && !configuration.hasSection("NER") ){
+  if ( options.doNER && !configuration.hasSection("NER") ){
     *Log(theErrLog) << "Missing [[NER]] section in config file." << endl;
     return false;
   }
-  if ( doMwu ){
+  if ( options.doMwu ){
     if ( !configuration.hasSection("mwu") ){
       *Log(theErrLog) << "Missing [[mwu]] section in config file." << endl;
       return false;
     }
   }
-  else if ( doParse ){
+  else if ( options.doParse ){
     *Log(theErrLog) << " Parser disabled, because MWU is deselected" << endl;
-    doParse = false;
+    options.doParse = false;
   }
 
-  if ( doServer ){
+  if ( options.doServer ){
     // we use fork(). omp (GCC version) doesn't do well when omp is used
     // before the fork!
     // see: http://bisqwit.iki.fi/story/howto/openmp/#OpenmpAndFork
-    bool stat = tokenizer.init( configuration, docid, !doTok );
+    bool stat = tokenizer.init( configuration, options.docid, !options.doTok );
     if ( stat ){
-      tokenizer.setSentencePerLineInput( doSentencePerLine );
-      tokenizer.setQuoteDetection( doQuoteDetection );
-      tokenizer.setInputEncoding( encoding );
-      tokenizer.setInputXml( doXMLin );
-      tokenizer.setUttMarker( uttmark );
-      tokenizer.setTextClass( textclass );
+      tokenizer.setSentencePerLineInput( options.doSentencePerLine );
+      tokenizer.setQuoteDetection( options.doQuoteDetection );
+      tokenizer.setInputEncoding( options.encoding );
+      tokenizer.setInputXml( options.doXMLin );
+      tokenizer.setUttMarker( options.uttmark );
+      tokenizer.setTextClass( options.textclass );
       stat = myCGNTagger.init( configuration );
       if ( stat ){
-	if ( doIOB ){
+	if ( options.doIOB ){
 	  stat = myIOBTagger.init( configuration );
 	}
-	if ( stat && doNER ){
+	if ( stat && options.doNER ){
 	  stat = myNERTagger.init( configuration );
 	}
-	if ( stat && doLemma ){
+	if ( stat && options.doLemma ){
 	  stat = myMblem.init( configuration );
 	}
-	if ( stat && doMorph ){
+	if ( stat && options.doMorph ){
 	  stat = myMbma.init( configuration );
 	  if ( stat ) {
-	    if ( doDaringMorph )
+	    if ( options.doDaringMorph )
 	      myMbma.setDaring(true);
-	    if ( doMwu ){
+	    if ( options.doMwu ){
 	      stat = myMwu.init( configuration );
-	      if ( stat && doParse ){
+	      if ( stat && options.doParse ){
 		stat = myParser.init( configuration );
 	      }
 	    }
@@ -653,27 +636,27 @@ bool froginit(){
     {
 #pragma omp section
       {
-	tokStat = tokenizer.init( configuration, docid, !doTok );
+	tokStat = tokenizer.init( configuration, options.docid, !options.doTok );
 	if ( tokStat ){
-	  tokenizer.setSentencePerLineInput( doSentencePerLine );
-	  tokenizer.setQuoteDetection( doQuoteDetection );
-	  tokenizer.setInputEncoding( encoding );
-	  tokenizer.setInputXml( doXMLin );
-	  tokenizer.setUttMarker( uttmark );
-	  tokenizer.setTextClass( textclass );
+	  tokenizer.setSentencePerLineInput( options.doSentencePerLine );
+	  tokenizer.setQuoteDetection( options.doQuoteDetection );
+	  tokenizer.setInputEncoding( options.encoding );
+	  tokenizer.setInputXml( options.doXMLin );
+	  tokenizer.setUttMarker( options.uttmark );
+	  tokenizer.setTextClass( options.textclass );
 	}
       }
 #pragma omp section
       {
-	if ( doLemma ){
+	if ( options.doLemma ){
 	  lemStat = myMblem.init( configuration );
 	}
       }
 #pragma omp section
       {
-	if ( doMorph ){
+	if ( options.doMorph ){
 	  mbaStat = myMbma.init( configuration );
-	  if ( doDaringMorph )
+	  if ( options.doDaringMorph )
 	    myMbma.setDaring(true);
 	}
       }
@@ -683,21 +666,21 @@ bool froginit(){
       }
 #pragma omp section
       {
-	if ( doIOB ){
+	if ( options.doIOB ){
 	  iobStat = myIOBTagger.init( configuration );
 	}
       }
 #pragma omp section
       {
-	if ( doNER ){
+	if ( options.doNER ){
 	  nerStat = myNERTagger.init( configuration );
 	}
       }
 #pragma omp section
       {
-	if ( doMwu ){
+	if ( options.doMwu ){
 	  mwuStat = myMwu.init( configuration );
-	  if ( mwuStat && doParse ){
+	  if ( mwuStat && options.doParse ){
 	    Timer initTimer;
 	    initTimer.start();
 	    parStat = myParser.init( configuration );
@@ -915,7 +898,7 @@ void displayMWU( ostream& os, size_t index,
 	*Log(theErrLog) << "get Postag results failed: "
 			<< e.what() << endl;
     }
-    if ( doLemma ){
+    if ( options.doLemma ){
       try {
 	lemma += word->lemma();
 	if ( p < mwu.size() -1 ){
@@ -928,14 +911,13 @@ void displayMWU( ostream& os, size_t index,
 			  << e.what() << endl;
       }
     }
-    if ( doDaringMorph ){
+    if ( options.doDaringMorph ){
       try {
 	vector<MorphologyLayer*> ml = word->annotations<MorphologyLayer>();
 	for ( size_t q=0; q < ml.size(); ++q ){
 	  vector<Morpheme*> m = ml[q]->select<Morpheme>( false );
 	  assert( m.size() == 1 ); // top complex layer
 	  string desc = m[0]->description();
-	  morph = desc;
 	  if ( q < ml.size()-1 )
 	    morph += "/";
 	}
@@ -949,7 +931,7 @@ void displayMWU( ostream& os, size_t index,
 			  << e.what() << endl;
       }
     }
-    else if ( doMorph ){
+    else if ( options.doMorph ){
       try {
 	vector<MorphologyLayer*> ml = word->annotations<MorphologyLayer>();
 	for ( size_t q=0; q < ml.size(); ++q ){
@@ -985,7 +967,7 @@ ostream &showResults( ostream& os,
   vector<Entity*> ner_entities = sentence->select<Entity>( myNERTagger.getTagset() );
   static set<ElementType> excludeSet;
   vector<Sentence*> parts = sentence->select<Sentence>( excludeSet );
-  if ( !doQuoteDetection )
+  if ( !options.doQuoteDetection )
     assert( parts.size() == 0 );
   for ( size_t i=0; i < parts.size(); ++i ){
     vector<Entity*> ents = parts[i]->select<Entity>( myMwu.getTagset() );
@@ -1013,7 +995,7 @@ ostream &showResults( ostream& os,
   }
   for( size_t i=0; i < mwus.size(); ++i ){
     displayMWU( os, i+1, mwus[i] );
-    if ( doNER ){
+    if ( options.doNER ){
       string cls;
       string s = lookupNEREntity( mwus[i], ner_entities );
       os << "\t" << s;
@@ -1021,7 +1003,7 @@ ostream &showResults( ostream& os,
     else {
       os << "\t\t";
     }
-    if ( doIOB ){
+    if ( options.doIOB ){
       string cls;
       string s = lookupIOBChunk( mwus[i], iob_chunking );
       os << "\t" << s;
@@ -1060,14 +1042,13 @@ ostream &showResults( ostream& os,
   return os;
 }
 
-bool TestSentence( Sentence* sent,
-		   TimerBlock& timers ){
+bool TestSentence( Sentence* sent, FrogOptions & options, TimerBlock& timers){
   vector<Word*> swords;
-  if ( doQuoteDetection )
+  if ( options.doQuoteDetection )
     swords = sent->wordParts();
   else
     swords = sent->words();
-  bool showParse = doParse;
+  bool showParse = options.doParse;
   if ( !swords.empty() ) {
 #pragma omp parallel sections
     {
@@ -1079,7 +1060,7 @@ bool TestSentence( Sentence* sent,
       }
 #pragma omp section
       {
-	if ( doIOB ){
+	if ( options.doIOB ){
 	  timers.iobTimer.start();
 	  myIOBTagger.Classify( swords );
 	  timers.iobTimer.stop();
@@ -1087,7 +1068,7 @@ bool TestSentence( Sentence* sent,
       }
 #pragma omp section
       {
-	if ( doNER ){
+	if ( options.doNER ){
 	  timers.nerTimer.start();
 	  myNERTagger.Classify( swords );
 	  timers.nerTimer.stop();
@@ -1099,7 +1080,7 @@ bool TestSentence( Sentence* sent,
       {
 #pragma omp section
 	{
-	  if ( doMorph ){
+	  if ( options.doMorph ){
 	    timers.mbmaTimer.start();
 	    if (debugFlag)
 	      *Log(theErrLog) << "Calling mbma..." << endl;
@@ -1109,7 +1090,7 @@ bool TestSentence( Sentence* sent,
 	}
 #pragma omp section
 	{
-	  if ( doLemma ){
+	  if ( options.doLemma ){
 	    timers.mblemTimer.start();
 	    if (debugFlag)
 	      *Log(theErrLog) << "Calling mblem..." << endl;
@@ -1120,14 +1101,14 @@ bool TestSentence( Sentence* sent,
       } // omp parallel sections
     } //for int i = 0 to num_words
 
-    if ( doMwu ){
+    if ( options.doMwu ){
       if ( swords.size() > 0 ){
 	timers.mwuTimer.start();
 	myMwu.Classify( swords );
 	timers.mwuTimer.stop();
       }
     }
-    if ( doParse ){
+    if ( options.doParse ){
       if ( maxParserTokens != 0 && swords.size() > maxParserTokens ){
 	showParse = false;
       }
@@ -1141,24 +1122,25 @@ bool TestSentence( Sentence* sent,
 
 void Test( Document& doc,
 	   ostream& outStream,
-	   bool interactive = false,
-	   const string& xmlOutFile = "" ) {
+       FrogOptions & options, 
+	   bool interactive,
+	   const string& xmlOutFile) {
   TimerBlock timers;
   timers.frogTimer.start();
   // first we make sure that the doc will accept our annotations, by
   // declaring them in the doc
   myCGNTagger.addDeclaration( doc );
-  if ( doLemma )
+  if ( options.doLemma )
     myMblem.addDeclaration( doc );
-  if ( doMorph )
+  if ( options.doMorph )
     myMbma.addDeclaration( doc );
-  if (doIOB)
+  if (options.doIOB)
     myIOBTagger.addDeclaration( doc );
-  if (doNER)
+  if (options.doNER)
     myNERTagger.addDeclaration( doc );
-  if (doMwu)
+  if (options.doMwu)
     myMwu.addDeclaration( doc );
-  if (doParse)
+  if (options.doParse)
     myParser.addDeclaration( doc );
 
   if ( debugFlag > 5 )
@@ -1166,7 +1148,7 @@ void Test( Document& doc,
 
   vector<Sentence*> topsentences = doc.sentences();
   vector<Sentence*> sentences;
-  if ( doQuoteDetection )
+  if ( options.doQuoteDetection )
     sentences = doc.sentenceParts();
   else
     sentences = topsentences;
@@ -1177,25 +1159,25 @@ void Test( Document& doc,
     for ( size_t i = 0; i < numS; i++) {
       /* ******* Begin process sentence  ********** */
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)
-      bool showParse = TestSentence( sentences[i], timers );
-      if ( doParse && !showParse ){
+      bool showParse = TestSentence( sentences[i], options, timers );
+      if ( options.doParse && !showParse ){
 	*Log(theErrLog) << "WARNING!" << endl;
 	*Log(theErrLog) << "Sentence " << i+1 << " isn't parsed because it contains more tokens then set with the --max-parser-tokens=" << maxParserTokens << " option." << endl;
       }
     }
     for ( size_t i = 0; i < topsentences.size(); ++i ) {
-      if ( !(doServer && doXMLout) )
-	showResults( outStream, topsentences[i], doParse );
+      if ( !(options.doServer && options.doXMLout) )
+	showResults( outStream, topsentences[i], options.doParse );
     }
   }
   else {
     if  (debugFlag > 0)
       *Log(theErrLog) << "No sentences found in document. " << endl;
   }
-  if ( doServer && doXMLout )
+  if ( options.doServer && options.doXMLout )
     outStream << doc << endl;
   if ( !xmlOutFile.empty() ){
-    doc.save( xmlOutFile, doKanon );
+    doc.save( xmlOutFile, options.doKanon );
     *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
   }
 
@@ -1203,17 +1185,17 @@ void Test( Document& doc,
   if ( !interactive ){
     *Log(theErrLog) << "tokenisation took:  " << timers.tokTimer << endl;
     *Log(theErrLog) << "CGN tagging took:   " << timers.tagTimer << endl;
-    if ( doIOB)
+    if ( options.doIOB)
       *Log(theErrLog) << "IOB chunking took:  " << timers.iobTimer << endl;
-    if ( doNER)
+    if ( options.doNER)
       *Log(theErrLog) << "NER took:           " << timers.nerTimer << endl;
-    if ( doMorph )
+    if ( options.doMorph )
       *Log(theErrLog) << "MBA took:           " << timers.mbmaTimer << endl;
-    if ( doLemma )
+    if ( options.doLemma )
       *Log(theErrLog) << "Mblem took:         " << timers.mblemTimer << endl;
-    if ( doMwu )
+    if ( options.doMwu )
       *Log(theErrLog) << "MWU resolving took: " << timers.mwuTimer << endl;
-    if ( doParse ){
+    if ( options.doParse ){
       *Log(theErrLog) << "Parsing (prepare) took: " << timers.prepareTimer << endl;
       *Log(theErrLog) << "Parsing (pairs)   took: " << timers.pairsTimer << endl;
       *Log(theErrLog) << "Parsing (rels)    took: " << timers.relsTimer << endl;
@@ -1226,14 +1208,12 @@ void Test( Document& doc,
   return;
 }
 
-void Test( const string& infilename,
-	   ostream &os,
-	   const string& xmlOutF ) {
+void Test( const string& infilename, ostream &os, FrogOptions & options, const string& xmlOutF ) {
   // stuff the whole input into one FoLiA document.
   // This is not a good idea on the long term, I think (agreed [proycon] )
 
   string xmlOutFile = xmlOutF;
-  if ( doXMLin && !xmlOutFile.empty() ){
+  if ( options.doXMLin && !xmlOutFile.empty() ){
     if ( match_back( infilename, ".gz" ) ){
       if ( !match_back( xmlOutFile, ".gz" ) )
 	xmlOutFile += ".gz";
@@ -1243,7 +1223,7 @@ void Test( const string& infilename,
 	xmlOutFile += ".bz2";
     }
   }
-  if ( doXMLin ){
+  if ( options.doXMLin ){
     Document doc;
     try {
       doc.readFromFile( infilename );
@@ -1254,22 +1234,21 @@ void Test( const string& infilename,
       return;
     }
     tokenizer.tokenize( doc );
-    Test( doc, os, false, xmlOutFile );
+    Test( doc, os, options, false, xmlOutFile );
   }
   else {
     ifstream IN( infilename.c_str() );
     Document doc = tokenizer.tokenize( IN );
-    Test( doc, os, false, xmlOutFile );
+    Test( doc, os, options, false, xmlOutFile );
   }
 }
 
-void TestServer( Sockets::ServerSocket &conn) {
-  //by Maarten van Gompel
+void TestServer( Sockets::ServerSocket &conn, FrogOptions & options) {
 
   try {
     while (true) {
       ostringstream outputstream;
-      if ( doXMLin ){
+      if ( options.doXMLin ){
 	string result;
 	string s;
 	while ( conn.read(s) ){
@@ -1295,11 +1274,11 @@ void TestServer( Sockets::ServerSocket &conn) {
 	}
 	*Log(theErrLog) << "Processing... " << endl;
 	tokenizer.tokenize( doc );
-	Test( doc, outputstream );
+	Test( doc, outputstream, options);
       }
       else {
 	string data = "";
-	if ( doSentencePerLine ){
+	if ( options.doSentencePerLine ){
 	  if ( !conn.read( data ) )	 //read data from client
 	    throw( runtime_error( "read failed" ) );
 	}
@@ -1316,7 +1295,7 @@ void TestServer( Sockets::ServerSocket &conn) {
 	*Log(theErrLog) << "Processing... " << endl;
 	istringstream inputstream(data,istringstream::in);
 	Document doc = tokenizer.tokenize( inputstream );
-	Test( doc, outputstream );
+	Test( doc, outputstream , options);
       }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
 	if (debugFlag)
@@ -1334,13 +1313,13 @@ void TestServer( Sockets::ServerSocket &conn) {
 }
 
 #ifdef NO_READLINE
-void TestInteractive(){
+void TestInteractive(FrogOptions & options) {
   cout << "frog>"; cout.flush();
   string line;
   string data;
   while ( getline( cin, line ) ){
     string data = line;
-    if ( doSentencePerLine ){
+    if ( options.doSentencePerLine ){
       if ( line.empty() ){
 	cout << "frog>"; cout.flush();
 	continue;
@@ -1367,13 +1346,13 @@ void TestInteractive(){
     cout << "Processing... " << endl;
     istringstream inputstream(data,istringstream::in);
     Document doc = tokenizer.tokenize( inputstream );
-    Test( doc, cout, true );
+    Test( doc, cout, options, true );
     cout << "frog>"; cout.flush();
   }
   cout << "Done.\n";
 }
 #else
-void TestInteractive(){
+void TestInteractive(FrogOptions & options){
   const char *prompt = "frog> ";
   string line;
   bool eof = false;
@@ -1385,7 +1364,7 @@ void TestInteractive(){
       break;
     }
     line = input;
-    if ( doSentencePerLine ){
+    if ( options.doSentencePerLine ){
       if ( line.empty() ){
 	continue;
       }
@@ -1446,7 +1425,7 @@ int main(int argc, char *argv[]) {
 
     Opts.init(argc, argv);
     if ( parse_args(Opts) ){
-      if (  !froginit() ){
+      if (  !froginit(options, configuration) ){
 	throw runtime_error( "init failed" );
       }
       if ( !fileNames.empty() ) {
@@ -1463,7 +1442,7 @@ int main(int argc, char *argv[]) {
 	  string outName;
 	  if ( outS == 0 ){
 	    if ( wantOUT ){
-	      if ( doXMLin ){
+	      if ( options.doXMLin ){
 		if ( !outPath.empty() )
 		  outName = outPath + *it + ".out";
 	      }
@@ -1483,11 +1462,11 @@ int main(int argc, char *argv[]) {
 	      else
 		xmlName = xmlPath + *it;
 	    }
-	    else if ( doXMLout )
+	    else if ( options.doXMLout )
 	      xmlName = *it + ".xml"; // do not clobber the inputdir!
 	  }
 	  *Log(theErrLog) << "Frogging " << testName << endl;
-	  Test( testName, *outS, xmlName );
+	  Test( testName, *outS, options, xmlName );
 	  if ( !outName.empty() ){
 	    *Log(theErrLog) << "results stored in " << outName << endl;
 	    delete outS;
@@ -1500,7 +1479,7 @@ int main(int argc, char *argv[]) {
 	  delete outS;
 	}
       }
-      else if ( doServer ) {
+      else if ( options.doServer ) {
 	//first set up some things to deal with zombies
 	struct sigaction action;
 	action.sa_handler = SIG_IGN;
@@ -1512,14 +1491,14 @@ int main(int argc, char *argv[]) {
 
 	srand((unsigned)time(0));
 
-	*Log(theErrLog) << "Listening on port " << listenport << "\n";
+	*Log(theErrLog) << "Listening on port " << options.listenport << "\n";
 
 	try
 	  {
 	    // Create the socket
 	    Sockets::ServerSocket server;
-	    if ( !server.connect( listenport ) )
-	      throw( runtime_error( "starting server on port " + listenport + " failed" ) );
+	    if ( !server.connect( options.listenport ) )
+	      throw( runtime_error( "starting server on port " + options.listenport + " failed" ) );
 	    if ( !server.listen( 5 ) ) {
 	      // maximum of 5 pending requests
 	      throw( runtime_error( "listen(5) failed" ) );
@@ -1535,7 +1514,7 @@ int main(int argc, char *argv[]) {
 		  throw runtime_error( "FORK failed" );
 		} else if (pid == 0)  {
 		  //		  server = NULL;
-		  TestServer(conn );
+		  TestServer(conn, options );
 		  exit(EXIT_SUCCESS);
 		}
 	      }
@@ -1551,7 +1530,7 @@ int main(int argc, char *argv[]) {
       }
       else {
 	// interactive mode
-	TestInteractive( );
+	TestInteractive( options );
       }
     }
     else {
