@@ -41,9 +41,9 @@ using namespace std;
 using namespace TiCC;
 using namespace folia;
 
-Mblem::Mblem(): myLex(0),punctuation( "?...,:;\\'`(){}[]%#+-_=/!" ),
+Mblem::Mblem(LogStream * logstream): myLex(0),punctuation( "?...,:;\\'`(){}[]%#+-_=/!" ),
 		history(20), debug(0) {
-  mblemLog = new LogStream( theErrLog, "mblem" );
+  mblemLog = new LogStream( logstream, "mblem" );
 }
 
 void Mblem::read_transtable( const string& tableName ) {

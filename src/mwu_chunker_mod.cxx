@@ -97,8 +97,8 @@ EntitiesLayer *mwuAna::addEntity( const std::string& tagset,
   return el;
 }
 
-Mwu::Mwu(){
-  mwuLog = new LogStream( theErrLog, "mwu-" );
+Mwu::Mwu(LogStream * logstream){
+  mwuLog = new LogStream( logstream, "mwu-" );
 }
 
 Mwu::~Mwu(){

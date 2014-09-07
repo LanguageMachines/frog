@@ -29,6 +29,7 @@
 #ifndef __MBLEM_MOD__
 #define __MBLEM_MOD__
 
+
 class mblemData {
  public:
   mblemData( const std::string& l, const std::string& t ){
@@ -44,7 +45,7 @@ class mblemData {
 
 class Mblem {
  public:
-  Mblem();
+  Mblem(TiCC::LogStream *);
   ~Mblem();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;

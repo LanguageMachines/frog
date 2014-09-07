@@ -78,7 +78,9 @@ struct parseData;
 
 class Parser {
  public:
- Parser():pairs(0),dir(0),rels(0),PI(0),isInit(false),keepIntermediate(false){};
+  Parser(TiCC::LogStream* logstream):pairs(0),dir(0),rels(0),PI(0),isInit(false),keepIntermediate(false) {
+    parseLog = new TiCC::LogStream(logstream, "parser-");
+  };
   ~Parser();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;

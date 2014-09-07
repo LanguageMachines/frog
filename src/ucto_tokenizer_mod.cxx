@@ -38,9 +38,9 @@
 using namespace std;
 using namespace TiCC;
 
-UctoTokenizer::UctoTokenizer() {
+UctoTokenizer::UctoTokenizer(LogStream * logstream) {
   tokenizer = 0;
-  uctoLog = new LogStream( theErrLog, "tok-" );
+  uctoLog = new LogStream( logstream, "tok-" );
 }
 
 bool UctoTokenizer::init( const Configuration& config, const string & docid, bool pass ){

@@ -37,81 +37,6 @@
 #include "ticcutils/Timer.h"
 #include "libfolia/document.h"
 
-class FrogOptions {
-    public:
-    bool doTok;
-    bool doLemma;
-    bool doMorph;
-    bool doDaringMorph;
-    bool doMwu;
-    bool doIOB;
-    bool doNER;
-    bool doParse;
-    bool doSentencePerLine;
-    bool doQuoteDetection;
-    bool doDirTest;
-    bool doServer;
-    
-    bool doXMLin;
-    bool doXMLout;
-    bool doKanon;
-    
-
-    bool interactive;
-
-    std::string encoding;
-    std::string uttmark;
-    std::string listenport;
-    std::string docid;
-    std::string textclass;
-    
-
-    FrogOptions() {
-        doTok = doLemma = doMorph = doMwu = doIOB = doNER = doParse = true;
-        doDaringMorph = false;
-        doSentencePerLine = false;
-        doQuoteDetection = false;
-        doDirTest = false;
-        doServer = false;
-        doXMLin =  false;
-        doXMLout =  false;
-        doKanon =  false;
-
-        interactive = false;
-
-        encoding = "";
-        uttmark = "";
-        listenport = "void";
-        docid = "untitled";
-        textclass = "";
-    }
-
-    FrogOptions(const FrogOptions & ref) {
-        doTok = ref.doTok;
-        doLemma = ref.doLemma;
-        doMorph = ref.doMorph;
-        doMwu = ref.doMwu;
-        doIOB = ref.doIOB;
-        doNER = ref. doNER;
-        doParse = ref.doParse;
-        doDaringMorph = ref.doDaringMorph;
-        doSentencePerLine = ref.doSentencePerLine;
-        doQuoteDetection = ref.doQuoteDetection;
-        doDirTest = ref.doDirTest;
-        doServer = ref.doServer;
-        doXMLin = ref.doXMLin;
-        doXMLout = ref.doXMLout;
-        doKanon = ref.doKanon;
-        interactive = ref.interactive;
-        encoding = ref.encoding;
-        uttmark = ref.uttmark;
-        listenport = ref.listenport;
-        docid = ref.docid;
-        textclass = ref.textclass;
-
-    }
-
-};
 
 //declared here but not defined in Frog.cxx (bit messy)
 std::string prefix( const std::string&, const std::string& );
@@ -120,7 +45,7 @@ bool existsDir( const std::string& );
 void getFileNames( const std::string&, const std::string&, std::set<std::string>& );
 
 
-extern TiCC::LogStream *theErrLog;
+//extern TiCC::LogStream *theErrLog;
 
 class TimerBlock{
 public:
@@ -140,9 +65,5 @@ public:
   TiCC::Timer frogTimer;
 };
 
-bool froginit(FrogOptions & options, TiCC::Configuration & configuration);
-void Test( const std::string& infilename, std::ostream &os, FrogOptions & options, const std::string& xmlOutF );
-void Test( folia::Document& doc, std::ostream& outStream, FrogOptions & options,  bool interactive = false, const std::string& xmlOutFile = "" );
-bool TestSentence( folia::Sentence* sent, FrogOptions & options, TimerBlock& timers);
 
 #endif

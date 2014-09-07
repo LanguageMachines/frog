@@ -36,10 +36,10 @@
 using namespace std;
 using namespace folia;
 
-CGNTagger::CGNTagger(){
+CGNTagger::CGNTagger(TiCC::LogStream * logstream){
   tagger = 0;
   filter = 0;
-  cgnLog = new LogStream( theErrLog, "cgn-tagger-" );
+  cgnLog = new LogStream( logstream, "cgn-tagger-" );
 }
 
 CGNTagger::~CGNTagger(){
@@ -306,7 +306,7 @@ void CGNTagger::addTag( Word *word, const string& inputTag, double confidence ){
     string::size_type openH = cgnTag.find( '(' );
     string::size_type closeH = cgnTag.find( ')' );
     if ( openH == string::npos || closeH == string::npos ){
-      *Log(theErrLog) << "tagger_mod: main tag without subparts: impossible: " << cgnTag << endl;
+      *Log(cgnLog) << "tagger_mod: main tag without subparts: impossible: " << cgnTag << endl;
       exit(-1);
     }
     mainTag = cgnTag.substr( 0, openH );

@@ -171,7 +171,7 @@ static std::map<char,std::string> iNames;
 
 class Mbma {
  public:
-  Mbma();
+  Mbma(TiCC::LogStream *);
   ~Mbma();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;

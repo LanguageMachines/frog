@@ -169,8 +169,6 @@ bool Parser::init( const Configuration& configuration ){
   string relsFileName;
   string relsOptions = "-a1 +D +vdb+di";
   PI = new PythonInterface();
-  parseLog = new LogStream( theErrLog );
-  parseLog->addmessage("parser-");
   maxDepSpanS = "20";
   maxDepSpan = 20;
   bool problem = false;
@@ -859,8 +857,9 @@ void appendParseResult( const vector<Word *>& words,
     int num = TiCC::split_at( line, parts, " " );
     if ( num > 7 ){
       if ( TiCC::stringTo<int>( parts[0] ) != cnt+1 ){
-	*Log(theErrLog) << "confused! " << endl;
-	*Log(theErrLog) << "got line '" << line << "'" << endl;
+        //WARNING: commented out because theErrLog no longer available publicly
+        //*Log(theErrLog) << "confused! " << endl;
+        //*Log(theErrLog) << "got line '" << line << "'" << endl;
       }
       nums.push_back( TiCC::stringTo<int>(parts[6]) );
       roles.push_back( parts[7] );

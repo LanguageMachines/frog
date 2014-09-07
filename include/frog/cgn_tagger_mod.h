@@ -33,7 +33,7 @@
 
 class CGNTagger {
  public:
-  CGNTagger();
+  CGNTagger(TiCC::LogStream*);
   ~CGNTagger();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;

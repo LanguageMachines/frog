@@ -46,9 +46,9 @@ using namespace TiCC;
 const long int LEFT =  6; // left context
 const long int RIGHT = 6; // right context
 
-Mbma::Mbma(): MTreeFilename( "dm.igtree" ), MTree(0),
+Mbma::Mbma(LogStream * logstream): MTreeFilename( "dm.igtree" ), MTree(0),
 	      transliterator(0), filter(0), doDaring(false) {
-  mbmaLog = new LogStream( theErrLog, "mbma-" );
+  mbmaLog = new LogStream( logstream, "mbma-" );
 }
 
 Mbma::~Mbma() {

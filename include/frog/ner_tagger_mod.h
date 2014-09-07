@@ -31,7 +31,7 @@
 
 class NERTagger {
  public:
-  NERTagger();
+  NERTagger(LogStream *);
   ~NERTagger();
   bool init( const TiCC::Configuration& );
   void Classify( const std::vector<folia::Word *>& );

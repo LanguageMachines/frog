@@ -59,8 +59,8 @@ Configuration configuration;
 static string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
 static string configFileName = configDir + "frog.cfg";
 
-static UctoTokenizer tokenizer;
-static CGNTagger tagger;
+static UctoTokenizer tokenizer(theErrLog);
+static CGNTagger tagger(theErrLog);
 
 void usage( ) {
   cout << endl << "Options:\n";
@@ -74,7 +74,7 @@ void usage( ) {
        << "\t -d <debug level>    (for more verbosity)\n";
 }
 
-static Mbma myMbma;
+static Mbma myMbma(theErrLog);
 
 bool parse_args( TimblOpts& Opts ) {
   string value;

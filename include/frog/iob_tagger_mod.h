@@ -31,7 +31,7 @@
 
 class IOBTagger {
  public:
-  IOBTagger();
+  IOBTagger(TiCC::LogStream *);
   ~IOBTagger();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;

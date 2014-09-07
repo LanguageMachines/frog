@@ -35,9 +35,9 @@
 using namespace std;
 using namespace folia;
 
-NERTagger::NERTagger(){
+NERTagger::NERTagger(TiCC::LogStream * logstream){
   tagger = 0;
-  nerLog = new LogStream( theErrLog, "ner-" );
+  nerLog = new LogStream( logstream, "ner-" );
 }
 
 NERTagger::~NERTagger(){

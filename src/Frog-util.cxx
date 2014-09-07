@@ -46,7 +46,7 @@ using namespace std;
 string prefix( const string& path, const string& fn ){
   if ( fn.find( "/" ) == string::npos ){
     // only append prefix when NO path is specified
-    return path + fn;
+    return path + "/" + fn;
   }
   return fn;
 }

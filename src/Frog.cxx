@@ -74,18 +74,10 @@
 
 // individual module headers
 
-#include "frog/Frog.h"
-#include "ticcutils/Configuration.h"
+#include "frog/Frog.h" //internal interface, included by all modules
+#include "frog/FrogAPI.h" //public API interface
 #include "ticcutils/StringOps.h"
 #include "ticcutils/CommandLine.h"
-#include "frog/ucto_tokenizer_mod.h"
-#include "frog/mbma_mod.h"
-#include "frog/mblem_mod.h"
-#include "frog/mwu_chunker_mod.h"
-#include "frog/cgn_tagger_mod.h"
-#include "frog/iob_tagger_mod.h"
-#include "frog/ner_tagger_mod.h"
-#include "frog/Parser.h"
 
 using namespace std;
 using namespace folia;
@@ -95,7 +87,6 @@ LogStream my_default_log( cerr, "frog-", StampMessage ); // fall-back
 LogStream *theErrLog = &my_default_log;  // fill the externals
 
 string testDirName;
-string tmpDirName;
 string outputFileName;
 bool wantOUT;
 string XMLoutFileName;
@@ -104,7 +95,6 @@ string xmlDirName;
 set<string> fileNames;
 string ProgName;
 int debugFlag = 0; //0 for none, more for more output
-unsigned int maxParserTokens = 0; // 0 for unlimited
 
 FrogOptions options;
 
@@ -171,14 +161,6 @@ void usage( ) {
 
 //**** stuff to process commandline options *********************************
 
-static Mbma myMbma;
-static Mblem myMblem;
-static Mwu myMwu;
-static Parser myParser;
-static CGNTagger myCGNTagger;
-static IOBTagger myIOBTagger;
-static NERTagger myNERTagger;
-static UctoTokenizer tokenizer;
 
 
 bool parse_args( TiCC::CL_Options& Opts ) {
@@ -203,8 +185,8 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     *Log(theErrLog) << "config read from: " << configFileName << endl;
   }
   else {
-    cerr << "failed te read configuration from! '" << configFileName << "'" << endl;
-    cerr << "did you correctly install the frogdata package?" << endl;
+    cerr << "failed to read configuration from '" << configFileName << "' !!" << endl;
+    cerr << "Did you correctly install the frogdata package?" << endl;
     return false;
   }
 
@@ -313,7 +295,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
       return false;
     }
     else {
-      if ( !stringTo<unsigned int>( value, maxParserTokens ) ){
+      if ( !stringTo<unsigned int>( value, options.maxParserTokens ) ){
 	*Log(theErrLog) << "max-parser-tokens value should be an integer" << endl;
 	return false;
       }
@@ -351,28 +333,28 @@ bool parse_args( TiCC::CL_Options& Opts ) {
       Opts.remove("keep-parser-files");
     }
   }
-  tmpDirName = configuration.lookUp( "tmpdir", "global" );
+  options.tmpDirName = configuration.lookUp( "tmpdir", "global" );
   if ( Opts.is_present ( "tmpdir", value )) {
     if ( value.empty() ){
       *Log(theErrLog) << "missing a value for --tmpdir (did you forget the '='?)" << endl;
       return false;
     }
-    tmpDirName = value;
+    options.tmpDirName = value;
     Opts.remove("tmpdir");
   }
-  if ( tmpDirName.empty() ){
-    tmpDirName = "/tmp/";
+  if ( options.tmpDirName.empty() ){
+    options.tmpDirName = "/tmp/";
   }
-  else if ( tmpDirName[tmpDirName.size()-1] != '/' ){
-    tmpDirName += "/";
+  else if ( options.tmpDirName[options.tmpDirName.size()-1] != '/' ){
+    options.tmpDirName += "/";
   }
 #ifdef HAVE_DIRENT_H
-  if ( !tmpDirName.empty() ){
-    if ( !existsDir( tmpDirName ) ){
-      *Log(theErrLog) << "temporary dir " << tmpDirName << " not readable" << endl;
+  if ( !options.tmpDirName.empty() ){
+    if ( !existsDir( options.tmpDirName ) ){
+      *Log(theErrLog) << "temporary dir " << options.tmpDirName << " not readable" << endl;
       return false;
     }
-    *Log(theErrLog) << "checking tmpdir: " << tmpDirName << " OK" << endl;
+    *Log(theErrLog) << "checking tmpdir: " << options.tmpDirName << " OK" << endl;
   }
 #endif
   string TestFileName;
@@ -552,755 +534,64 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   return true;
 }
 
-bool froginit(FrogOptions & options, Configuration & configuration){
-  // for some modules init can take a long time
-  // so first make sure it will not fail on some trivialities
-  //
-  if ( options.doTok && !configuration.hasSection("tokenizer") ){
-    *Log(theErrLog) << "Missing [[tokenizer]] section in config file." << endl;
-    return false;
-  }
-  if ( options.doIOB && !configuration.hasSection("IOB") ){
-    *Log(theErrLog) << "Missing [[IOB]] section in config file." << endl;
-    return false;
-  }
-  if ( options.doNER && !configuration.hasSection("NER") ){
-    *Log(theErrLog) << "Missing [[NER]] section in config file." << endl;
-    return false;
-  }
-  if ( options.doMwu ){
-    if ( !configuration.hasSection("mwu") ){
-      *Log(theErrLog) << "Missing [[mwu]] section in config file." << endl;
-      return false;
-    }
-  }
-  else if ( options.doParse ){
-    *Log(theErrLog) << " Parser disabled, because MWU is deselected" << endl;
-    options.doParse = false;
-  }
-
-  if ( options.doServer ){
-    // we use fork(). omp (GCC version) doesn't do well when omp is used
-    // before the fork!
-    // see: http://bisqwit.iki.fi/story/howto/openmp/#OpenmpAndFork
-    bool stat = tokenizer.init( configuration, options.docid, !options.doTok );
-    if ( stat ){
-      tokenizer.setSentencePerLineInput( options.doSentencePerLine );
-      tokenizer.setQuoteDetection( options.doQuoteDetection );
-      tokenizer.setInputEncoding( options.encoding );
-      tokenizer.setInputXml( options.doXMLin );
-      tokenizer.setUttMarker( options.uttmark );
-      tokenizer.setTextClass( options.textclass );
-      stat = myCGNTagger.init( configuration );
-      if ( stat ){
-	if ( options.doIOB ){
-	  stat = myIOBTagger.init( configuration );
-	}
-	if ( stat && options.doNER ){
-	  stat = myNERTagger.init( configuration );
-	}
-	if ( stat && options.doLemma ){
-	  stat = myMblem.init( configuration );
-	}
-	if ( stat && options.doMorph ){
-	  stat = myMbma.init( configuration );
-	  if ( stat ) {
-	    if ( options.doDaringMorph )
-	      myMbma.setDaring(true);
-	    if ( options.doMwu ){
-	      stat = myMwu.init( configuration );
-	      if ( stat && options.doParse ){
-		stat = myParser.init( configuration );
-	      }
-	    }
-	  }
-	}
-      }
-    }
-    if ( !stat ){
-      *Log(theErrLog) << "Initialization failed." << endl;
-      return false;
-    }
-  }
-  else {
-    bool tokStat = true;
-    bool lemStat = true;
-    bool mwuStat = true;
-    bool mbaStat = true;
-    bool parStat = true;
-    bool tagStat = true;
-    bool iobStat = true;
-    bool nerStat = true;
-
-#pragma omp parallel sections
-    {
-#pragma omp section
-      {
-	tokStat = tokenizer.init( configuration, options.docid, !options.doTok );
-	if ( tokStat ){
-	  tokenizer.setSentencePerLineInput( options.doSentencePerLine );
-	  tokenizer.setQuoteDetection( options.doQuoteDetection );
-	  tokenizer.setInputEncoding( options.encoding );
-	  tokenizer.setInputXml( options.doXMLin );
-	  tokenizer.setUttMarker( options.uttmark );
-	  tokenizer.setTextClass( options.textclass );
-	}
-      }
-#pragma omp section
-      {
-	if ( options.doLemma ){
-	  lemStat = myMblem.init( configuration );
-	}
-      }
-#pragma omp section
-      {
-	if ( options.doMorph ){
-	  mbaStat = myMbma.init( configuration );
-	  if ( options.doDaringMorph )
-	    myMbma.setDaring(true);
-	}
-      }
-#pragma omp section
-      {
-	tagStat = myCGNTagger.init( configuration );
-      }
-#pragma omp section
-      {
-	if ( options.doIOB ){
-	  iobStat = myIOBTagger.init( configuration );
-	}
-      }
-#pragma omp section
-      {
-	if ( options.doNER ){
-	  nerStat = myNERTagger.init( configuration );
-	}
-      }
-#pragma omp section
-      {
-	if ( options.doMwu ){
-	  mwuStat = myMwu.init( configuration );
-	  if ( mwuStat && options.doParse ){
-	    Timer initTimer;
-	    initTimer.start();
-	    parStat = myParser.init( configuration );
-	    initTimer.stop();
-	    *Log(theErrLog) << "init Parse took: " << initTimer << endl;
-	  }
-	}
-      }
-    }   // end omp parallel sections
-    if ( ! ( tokStat && iobStat && nerStat && tagStat && lemStat
-	     && mbaStat && mwuStat && parStat ) ){
-      *Log(theErrLog) << "Initialization failed for: ";
-      if ( ! ( tokStat ) ){
-	*Log(theErrLog) << "[tokenizer] ";
-      }
-      if ( ! ( tagStat ) ){
-	*Log(theErrLog) << "[tagger] ";
-      }
-      if ( ! ( iobStat ) ){
-	*Log(theErrLog) << "[IOB] ";
-      }
-      if ( ! ( nerStat ) ){
-	*Log(theErrLog) << "[NER] ";
-      }
-      if ( ! ( lemStat ) ){
-	*Log(theErrLog) << "[lemmatizer] ";
-      }
-      if ( ! ( mbaStat ) ){
-	*Log(theErrLog) << "[morphology] ";
-      }
-      if ( ! ( mwuStat ) ){
-	*Log(theErrLog) << "[multiword unit] ";
-      }
-      if ( ! ( parStat ) ){
-	*Log(theErrLog) << "[parser] ";
-      }
-      *Log(theErrLog) << endl;
-      return false;
-    }
-  }
-  *Log(theErrLog) << "Initialization done." << endl;
-  return true;
-}
-
-vector<Word*> lookup( Word *word, const vector<Entity*>& entities ){
-  vector<Word*> vec;
-  for ( size_t p=0; p < entities.size(); ++p ){
-    vec = entities[p]->select<Word>();
-    if ( !vec.empty() ){
-      if ( vec[0]->id() == word->id() ) {
-	return vec;
-      }
-    }
-  }
-  vec.clear();
-  vec.push_back( word ); // single unit
-  return vec;
-}
-
-Dependency *lookupDep( const Word *word,
-		       const vector<Dependency*>&dependencies ){
-  if (dependencies.size() == 0 ){
-    return 0;
-  }
-  int dbFlag = stringTo<int>( configuration.lookUp( "debug", "parser" ) );
-  if ( dbFlag ){
-    using TiCC::operator<<;
-    *Log( theErrLog ) << "\nDependency-lookup "<< word << " in " << dependencies << endl;
-  }
-  for ( size_t i=0; i < dependencies.size(); ++i ){
-    if ( dbFlag ){
-      *Log( theErrLog ) << "Dependency try: " << dependencies[i] << endl;
-    }
-    try {
-      vector<DependencyDependent*> dv = dependencies[i]->select<DependencyDependent>();
-      if ( !dv.empty() ){
-	vector<Word*> v = dv[0]->select<Word>();
-	for ( size_t j=0; j < v.size(); ++j ){
-	  if ( v[j] == word ){
-	    if ( dbFlag ){
-	      *Log(theErrLog) << "\nDependency found word " << v[j] << endl;
-	    }
-	    return dependencies[i];
-	  }
-	}
-      }
-    }
-    catch ( exception& e ){
-      if (dbFlag > 0)
-	*Log(theErrLog) << "get Dependency results failed: "
-			<< e.what() << endl;
-    }
-  }
-  return 0;
-}
-
-string lookupNEREntity( const vector<Word *>& mwu,
-			const vector<Entity*>& entities ){
-  string endresult;
-  int dbFlag = stringTo<int>( configuration.lookUp( "debug", "NER" ) );
-  for ( size_t j=0; j < mwu.size(); ++j ){
-    if ( dbFlag ){
-      using TiCC::operator<<;
-      *Log(theErrLog) << "\nNER: lookup "<< mwu[j] << " in " << entities << endl;
-    }
-    string result;
-    for ( size_t i=0; i < entities.size(); ++i ){
-      if ( dbFlag ){
-	*Log(theErrLog) << "NER try: " << entities[i] << endl;
-      }
-      try {
-	vector<Word*> v = entities[i]->select<Word>();
-	bool first = true;
-	for ( size_t k=0; k < v.size(); ++k ){
-	  if ( v[k] == mwu[j] ){
-	    if (dbFlag){
-	      *Log(theErrLog) << "NER found word " << v[k] << endl;
-	    }
-	    if ( first )
-	      result += "B-" + uppercase(entities[i]->cls());
-	    else
-	      result += "I-" + uppercase(entities[i]->cls());
-	    break;
-	  }
-	  else
-	    first = false;
-	}
-      }
-      catch ( exception& e ){
-	if  (dbFlag > 0)
-	  *Log(theErrLog) << "get NER results failed: "
-			  << e.what() << endl;
-      }
-    }
-    if ( result.empty() )
-      endresult += "O";
-    else
-      endresult += result;
-    if ( j < mwu.size()-1 )
-      endresult += "_";
-  }
-  return endresult;
-}
 
 
-string lookupIOBChunk( const vector<Word *>& mwu,
-		       const vector<Chunk*>& chunks ){
-  string endresult;
-  int dbFlag = stringTo<int>( configuration.lookUp( "debug", "IOB" ) );
-  for ( size_t j=0; j < mwu.size(); ++j ){
-    if ( dbFlag ){
-      using TiCC::operator<<;
-      *Log(theErrLog) << "IOB lookup "<< mwu[j] << " in " << chunks << endl;
-    }
-    string result;
-    for ( size_t i=0; i < chunks.size(); ++i ){
-      if ( dbFlag ){
-	*Log(theErrLog) << "IOB try: " << chunks[i] << endl;
-      }
-      try {
-	vector<Word*> v = chunks[i]->select<Word>();
-	bool first = true;
-	for ( size_t k=0; k < v.size(); ++k ){
-	  if ( v[k] == mwu[j] ){
-	    if (dbFlag){
-	      *Log(theErrLog) << "IOB found word " << v[k] << endl;
-	    }
-	    if ( first )
-	      result += "B-" + chunks[i]->cls();
-	    else
-	      result += "I-" + chunks[i]->cls();
-	    break;
-	  }
-	  else
-	    first = false;
-	}
-      }
-      catch ( exception& e ){
-	if  (dbFlag > 0)
-	  *Log(theErrLog) << "get Chunks results failed: "
-			  << e.what() << endl;
-      }
-    }
-    if ( result.empty() )
-      endresult += "O";
-    else
-      endresult += result;
-    if ( j < mwu.size()-1 )
-      endresult += "_";
-  }
-  return endresult;
-}
 
-void displayMWU( ostream& os, size_t index,
-		 const vector<Word*> mwu ){
-  string wrd;
-  string pos;
-  string lemma;
-  string morph;
-  double conf = 1;
-  for ( size_t p=0; p < mwu.size(); ++p ){
-    Word *word = mwu[p];
-    try {
-      wrd += word->str();
-      PosAnnotation *postag = word->annotation<PosAnnotation>( );
-      pos += postag->cls();
-      if ( p < mwu.size() -1 ){
-	wrd += "_";
-	pos += "_";
-      }
-      conf *= postag->confidence();
-    }
-    catch ( exception& e ){
-      if  (debugFlag > 0)
-	*Log(theErrLog) << "get Postag results failed: "
-			<< e.what() << endl;
-    }
-    if ( options.doLemma ){
-      try {
-	lemma += word->lemma();
-	if ( p < mwu.size() -1 ){
-	  lemma += "_";
-	}
-      }
-      catch ( exception& e ){
-	if  (debugFlag > 0)
-	  *Log(theErrLog) << "get Lemma results failed: "
-			  << e.what() << endl;
-      }
-    }
-    if ( options.doDaringMorph ){
-      try {
-	vector<MorphologyLayer*> ml = word->annotations<MorphologyLayer>();
-	for ( size_t q=0; q < ml.size(); ++q ){
-	  vector<Morpheme*> m = ml[q]->select<Morpheme>( false );
-	  assert( m.size() == 1 ); // top complex layer
-	  string desc = m[0]->description();
-	  if ( q < ml.size()-1 )
-	    morph += "/";
-	}
-	if ( p < mwu.size() -1 ){
-	  morph += "_";
-	}
-      }
-      catch ( exception& e ){
-	if  (debugFlag > 0)
-	  *Log(theErrLog) << "get Morph results failed: "
-			  << e.what() << endl;
-      }
-    }
-    else if ( options.doMorph ){
-      try {
-	vector<MorphologyLayer*> ml = word->annotations<MorphologyLayer>();
-	for ( size_t q=0; q < ml.size(); ++q ){
-	  vector<Morpheme*> m = ml[q]->select<Morpheme>();
-	  for ( size_t t=0; t < m.size(); ++t ){
-	    string txt = UnicodeToUTF8( m[t]->text() );
-	    morph += "[" + txt + "]";
-	  }
-	  if ( q < ml.size()-1 )
-	    morph += "/";
-	}
-	if ( p < mwu.size() -1 ){
-	  morph += "_";
-	}
-      }
-      catch ( exception& e ){
-	if  (debugFlag > 0)
-	  *Log(theErrLog) << "get Morph results failed: "
-			  << e.what() << endl;
-      }
-    }
-  }
-  os << index << "\t" << wrd << "\t" << lemma << "\t" << morph << "\t" << pos << "\t" << std::fixed << conf;
-}
-
-ostream &showResults( ostream& os,
-		      const Sentence* sentence,
-		      bool showParse ){
-  vector<Word*> words = sentence->words();
-  vector<Entity*> mwu_entities = sentence->select<Entity>( myMwu.getTagset() );
-  vector<Dependency*> dependencies = sentence->select<Dependency>();
-  vector<Chunk*> iob_chunking = sentence->select<Chunk>();
-  vector<Entity*> ner_entities = sentence->select<Entity>( myNERTagger.getTagset() );
-  static set<ElementType> excludeSet;
-  vector<Sentence*> parts = sentence->select<Sentence>( excludeSet );
-  if ( !options.doQuoteDetection )
-    assert( parts.size() == 0 );
-  for ( size_t i=0; i < parts.size(); ++i ){
-    vector<Entity*> ents = parts[i]->select<Entity>( myMwu.getTagset() );
-    mwu_entities.insert( mwu_entities.end(), ents.begin(), ents.end() );
-    vector<Dependency*> deps = parts[i]->select<Dependency>();
-    dependencies.insert( dependencies.end(), deps.begin(), deps.end() );
-    vector<Chunk*> chunks = parts[i]->select<Chunk>();
-    iob_chunking.insert( iob_chunking.end(), chunks.begin(), chunks.end() );
-    vector<Entity*> ners = parts[i]->select<Entity>( myNERTagger.getTagset() );
-    ner_entities.insert( ner_entities.end(), ners.begin(), ners.end() );
-  }
-
-  size_t index = 1;
-  map<FoliaElement*, int> enumeration;
-  vector<vector<Word*> > mwus;
-  for( size_t i=0; i < words.size(); ++i ){
-    Word *word = words[i];
-    vector<Word*> mwu = lookup( word, mwu_entities );
-    for ( size_t j=0; j < mwu.size(); ++j ){
-      enumeration[mwu[j]] = index;
-    }
-    mwus.push_back( mwu );
-    i += mwu.size()-1;
-    ++index;
-  }
-  for( size_t i=0; i < mwus.size(); ++i ){
-    displayMWU( os, i+1, mwus[i] );
-    if ( options.doNER ){
-      string cls;
-      string s = lookupNEREntity( mwus[i], ner_entities );
-      os << "\t" << s;
-    }
-    else {
-      os << "\t\t";
-    }
-    if ( options.doIOB ){
-      string cls;
-      string s = lookupIOBChunk( mwus[i], iob_chunking );
-      os << "\t" << s;
-    }
-    else {
-      os << "\t\t";
-    }
-    if ( showParse ){
-      string cls;
-      Dependency *dep = lookupDep( mwus[i][0], dependencies );
-      if ( dep ){
-	vector<Headwords*> w = dep->select<Headwords>();
-	size_t num;
-	if ( w[0]->index(0)->isinstance( PlaceHolder_t ) ){
-	  string indexS = w[0]->index(0)->str();
-	  FoliaElement *pnt = w[0]->index(0)->doc()->index(indexS);
-	  num = enumeration.find(pnt->index(0))->second;
-	}
-	else {
-	  num = enumeration.find(w[0]->index(0))->second;
-	}
-	os << "\t" << num << "\t" << dep->cls();
-      }
-      else {
-	os << "\t"<< 0 << "\tROOT";
-      }
-    }
-    else {
-      os << "\t\t";
-    }
-    os << endl;
-    ++index;
-  }
-  if ( words.size() )
-    os << endl;
-  return os;
-}
-
-bool TestSentence( Sentence* sent, FrogOptions & options, TimerBlock& timers){
-  vector<Word*> swords;
-  if ( options.doQuoteDetection )
-    swords = sent->wordParts();
-  else
-    swords = sent->words();
-  bool showParse = options.doParse;
-  if ( !swords.empty() ) {
-#pragma omp parallel sections
-    {
-#pragma omp section
-      {
-	timers.tagTimer.start();
-	myCGNTagger.Classify( swords );
-	timers.tagTimer.stop();
-      }
-#pragma omp section
-      {
-	if ( options.doIOB ){
-	  timers.iobTimer.start();
-	  myIOBTagger.Classify( swords );
-	  timers.iobTimer.stop();
-	}
-      }
-#pragma omp section
-      {
-	if ( options.doNER ){
-	  timers.nerTimer.start();
-	  myNERTagger.Classify( swords );
-	  timers.nerTimer.stop();
-	}
-      }
-    } // parallel sections
-    for ( size_t i = 0; i < swords.size(); ++i ) {
-#pragma omp parallel sections
-      {
-#pragma omp section
-	{
-	  if ( options.doMorph ){
-	    timers.mbmaTimer.start();
-	    if (debugFlag)
-	      *Log(theErrLog) << "Calling mbma..." << endl;
-	    myMbma.Classify( swords[i] );
-	    timers.mbmaTimer.stop();
-	  }
-	}
-#pragma omp section
-	{
-	  if ( options.doLemma ){
-	    timers.mblemTimer.start();
-	    if (debugFlag)
-	      *Log(theErrLog) << "Calling mblem..." << endl;
-	    myMblem.Classify( swords[i] );
-	    timers.mblemTimer.stop();
-	  }
-	}
-      } // omp parallel sections
-    } //for int i = 0 to num_words
-
-    if ( options.doMwu ){
-      if ( swords.size() > 0 ){
-	timers.mwuTimer.start();
-	myMwu.Classify( swords );
-	timers.mwuTimer.stop();
-      }
-    }
-    if ( options.doParse ){
-      if ( maxParserTokens != 0 && swords.size() > maxParserTokens ){
-	showParse = false;
-      }
-      else {
-	myParser.Parse( swords, myMwu.getTagset(), tmpDirName, timers );
-      }
-    }
-  }
-  return showParse;
-}
-
-void Test( Document& doc,
-	   ostream& outStream,
-       FrogOptions & options, 
-	   bool interactive,
-	   const string& xmlOutFile) {
-  TimerBlock timers;
-  timers.frogTimer.start();
-  // first we make sure that the doc will accept our annotations, by
-  // declaring them in the doc
-  myCGNTagger.addDeclaration( doc );
-  if ( options.doLemma )
-    myMblem.addDeclaration( doc );
-  if ( options.doMorph )
-    myMbma.addDeclaration( doc );
-  if (options.doIOB)
-    myIOBTagger.addDeclaration( doc );
-  if (options.doNER)
-    myNERTagger.addDeclaration( doc );
-  if (options.doMwu)
-    myMwu.addDeclaration( doc );
-  if (options.doParse)
-    myParser.addDeclaration( doc );
-
-  if ( debugFlag > 5 )
-    *Log(theErrLog) << "Testing document :" << doc << endl;
-
-  vector<Sentence*> topsentences = doc.sentences();
-  vector<Sentence*> sentences;
-  if ( options.doQuoteDetection )
-    sentences = doc.sentenceParts();
-  else
-    sentences = topsentences;
-  size_t numS = sentences.size();
-  if ( numS > 0 ) { //process sentences
-    if  (debugFlag > 0)
-      *Log(theErrLog) << "found " << numS << " sentence(s) in document." << endl;
-    for ( size_t i = 0; i < numS; i++) {
-      /* ******* Begin process sentence  ********** */
-      //NOTE- full sentences are passed (which may span multiple lines) (MvG)
-      bool showParse = TestSentence( sentences[i], options, timers );
-      if ( options.doParse && !showParse ){
-	*Log(theErrLog) << "WARNING!" << endl;
-	*Log(theErrLog) << "Sentence " << i+1 << " isn't parsed because it contains more tokens then set with the --max-parser-tokens=" << maxParserTokens << " option." << endl;
-      }
-    }
-    for ( size_t i = 0; i < topsentences.size(); ++i ) {
-      if ( !(options.doServer && options.doXMLout) )
-	showResults( outStream, topsentences[i], options.doParse );
-    }
-  }
-  else {
-    if  (debugFlag > 0)
-      *Log(theErrLog) << "No sentences found in document. " << endl;
-  }
-  if ( options.doServer && options.doXMLout )
-    outStream << doc << endl;
-  if ( !xmlOutFile.empty() ){
-    doc.save( xmlOutFile, options.doKanon );
-    *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
-  }
-
-  timers.frogTimer.stop();
-  if ( !interactive ){
-    *Log(theErrLog) << "tokenisation took:  " << timers.tokTimer << endl;
-    *Log(theErrLog) << "CGN tagging took:   " << timers.tagTimer << endl;
-    if ( options.doIOB)
-      *Log(theErrLog) << "IOB chunking took:  " << timers.iobTimer << endl;
-    if ( options.doNER)
-      *Log(theErrLog) << "NER took:           " << timers.nerTimer << endl;
-    if ( options.doMorph )
-      *Log(theErrLog) << "MBA took:           " << timers.mbmaTimer << endl;
-    if ( options.doLemma )
-      *Log(theErrLog) << "Mblem took:         " << timers.mblemTimer << endl;
-    if ( options.doMwu )
-      *Log(theErrLog) << "MWU resolving took: " << timers.mwuTimer << endl;
-    if ( options.doParse ){
-      *Log(theErrLog) << "Parsing (prepare) took: " << timers.prepareTimer << endl;
-      *Log(theErrLog) << "Parsing (pairs)   took: " << timers.pairsTimer << endl;
-      *Log(theErrLog) << "Parsing (rels)    took: " << timers.relsTimer << endl;
-      *Log(theErrLog) << "Parsing (dir)     took: " << timers.dirTimer << endl;
-      *Log(theErrLog) << "Parsing (csi)     took: " << timers.csiTimer << endl;
-      *Log(theErrLog) << "Parsing (total)   took: " << timers.parseTimer << endl;
-    }
-  }
-  *Log(theErrLog) << "Frogging in total took: " << timers.frogTimer << endl;
-  return;
-}
-
-void Test( const string& infilename, ostream &os, FrogOptions & options, const string& xmlOutF ) {
-  // stuff the whole input into one FoLiA document.
-  // This is not a good idea on the long term, I think (agreed [proycon] )
-
-  string xmlOutFile = xmlOutF;
-  if ( options.doXMLin && !xmlOutFile.empty() ){
-    if ( match_back( infilename, ".gz" ) ){
-      if ( !match_back( xmlOutFile, ".gz" ) )
-	xmlOutFile += ".gz";
-    }
-    else if ( match_back( infilename, ".bz2" ) ){
-      if ( !match_back( xmlOutFile, ".bz2" ) )
-	xmlOutFile += ".bz2";
-    }
-  }
-  if ( options.doXMLin ){
-    Document doc;
-    try {
-      doc.readFromFile( infilename );
-    }
-    catch ( exception &e ){
-      *Log(theErrLog) << "retrieving FoLiA from '" << infilename << "' failed with exception:" << endl;
-      cerr << e.what() << endl;
-      return;
-    }
-    tokenizer.tokenize( doc );
-    Test( doc, os, options, false, xmlOutFile );
-  }
-  else {
-    ifstream IN( infilename.c_str() );
-    Document doc = tokenizer.tokenize( IN );
-    Test( doc, os, options, false, xmlOutFile );
-  }
-}
-
-void TestServer( Sockets::ServerSocket &conn, FrogOptions & options) {
+void TestServer( FrogAPI & frog, Sockets::ServerSocket &conn, FrogOptions & options) {
 
   try {
     while (true) {
       ostringstream outputstream;
       if ( options.doXMLin ){
-	string result;
-	string s;
-	while ( conn.read(s) ){
-	  result += s + "\n";
-	  if ( s.empty() )
-	    break;
-	}
-	if ( result.size() < 50 ){
-	  // a FoLia doc must be at least a few 100 bytes
-	  // so this is wrong. Just bail out
-	  throw( runtime_error( "read garbage" ) );
-	}
-	if ( debugFlag )
-	  *Log(theErrLog) << "received data [" << result << "]" << endl;
-	Document doc;
-	try {
-	  doc.readFromString( result );
-	}
-	catch ( std::exception& e ){
-	  *Log(theErrLog) << "FoLiaParsing failed:" << endl
-			  << e.what() << endl;
-	  throw;
-	}
-	*Log(theErrLog) << "Processing... " << endl;
-	tokenizer.tokenize( doc );
-	Test( doc, outputstream, options);
-      }
-      else {
-	string data = "";
-	if ( options.doSentencePerLine ){
-	  if ( !conn.read( data ) )	 //read data from client
-	    throw( runtime_error( "read failed" ) );
-	}
-	else {
-	  string line;
-	  while( conn.read(line) ){
-	    if ( line == "EOT" )
-	      break;
-	    data += line + "\n";
-	  }
-	}
-	if (debugFlag)
-	  *Log(theErrLog) << "Received: [" << data << "]" << endl;
-	*Log(theErrLog) << "Processing... " << endl;
-	istringstream inputstream(data,istringstream::in);
-	Document doc = tokenizer.tokenize( inputstream );
-	Test( doc, outputstream , options);
+        string result;
+        string s;
+        while ( conn.read(s) ){
+            result += s + "\n";
+            if ( s.empty() )
+                break;
+        }
+        if ( result.size() < 50 ){
+            // a FoLia doc must be at least a few 100 bytes
+            // so this is wrong. Just bail out
+            throw( runtime_error( "read garbage" ) );
+        }
+        if ( debugFlag )
+            *Log(theErrLog) << "received data [" << result << "]" << endl;
+        Document doc;
+        try {
+            doc.readFromString( result );
+        } catch ( std::exception& e ){
+            *Log(theErrLog) << "FoLiaParsing failed:" << endl << e.what() << endl;
+            throw;
+        }
+        *Log(theErrLog) << "Processing... " << endl;
+        frog.tokenizer->tokenize( doc );
+        frog.Test( doc, outputstream);
+      } else {
+        string data = "";
+        if ( options.doSentencePerLine ){
+            if ( !conn.read( data ) )	 //read data from client
+                throw( runtime_error( "read failed" ) );
+        }
+        else {
+            string line;
+            while( conn.read(line) ){
+                if ( line == "EOT" )
+                    break;
+                data += line + "\n";
+            }
+        }
+        if (debugFlag)
+            *Log(theErrLog) << "Received: [" << data << "]" << endl;
+        *Log(theErrLog) << "Processing... " << endl;
+        istringstream inputstream(data,istringstream::in);
+        Document doc = frog.tokenizer->tokenize( inputstream );
+        frog.Test( doc, outputstream );
       }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
-	if (debugFlag)
-	  *Log(theErrLog) << "socket " << conn.getMessage() << endl;
-	throw( runtime_error( "write to client failed" ) );
+            if (debugFlag)
+                *Log(theErrLog) << "socket " << conn.getMessage() << endl;
+            throw( runtime_error( "write to client failed" ) );
       }
 
     }
@@ -1313,7 +604,7 @@ void TestServer( Sockets::ServerSocket &conn, FrogOptions & options) {
 }
 
 #ifdef NO_READLINE
-void TestInteractive(FrogOptions & options) {
+void TestInteractive(FrogAPI & frog, FrogOptions & options) {
   cout << "frog>"; cout.flush();
   string line;
   string data;
@@ -1345,14 +636,14 @@ void TestInteractive(FrogOptions & options) {
     }
     cout << "Processing... " << endl;
     istringstream inputstream(data,istringstream::in);
-    Document doc = tokenizer.tokenize( inputstream );
-    Test( doc, cout, options, true );
+    Document doc = frog.tokenizer->tokenize( inputstream );
+    frog.Test( doc, cout, true );
     cout << "frog>"; cout.flush();
   }
   cout << "Done.\n";
 }
 #else
-void TestInteractive(FrogOptions & options){
+void TestInteractive(FrogAPI & frog, FrogOptions & options){
   const char *prompt = "frog> ";
   string line;
   bool eof = false;
@@ -1394,12 +685,12 @@ void TestInteractive(FrogOptions & options){
     }
     if ( !data.empty() ){
       if ( data[data.size()-1] == '\n' ){
-	data = data.substr( 0, data.size()-1 );
+        data = data.substr( 0, data.size()-1 );
       }
       cout << "Processing... '" << data << "'" << endl;
       istringstream inputstream(data,istringstream::in);
-      Document doc = tokenizer.tokenize( inputstream );
-      Test( doc, cout, options, true );
+      Document doc = frog.tokenizer->tokenize( inputstream );
+      frog.Test( doc, cout, true );
     }
   }
   cout << "Done.\n";
@@ -1424,120 +715,108 @@ int main(int argc, char *argv[]) {
 			  "keep-parser-files:,version,threads:,KANON");
 
     Opts.init(argc, argv);
-    if ( parse_args(Opts) ){
-      if (  !froginit(options, configuration) ){
-	throw runtime_error( "init failed" );
-      }
-      if ( !fileNames.empty() ) {
-	string outPath = outputDirName;
-	string xmlPath = xmlDirName;
-	set<string>::const_iterator it = fileNames.begin();
-	ostream *outS = 0;
-	if ( !outputFileName.empty() ){
-	  outS = new ofstream( outputFileName.c_str() );
-	}
-	while ( it != fileNames.end() ){
-	  string testName = testDirName;
-	  testName += *it;
-	  string outName;
-	  if ( outS == 0 ){
-	    if ( wantOUT ){
-	      if ( options.doXMLin ){
-		if ( !outPath.empty() )
-		  outName = outPath + *it + ".out";
-	      }
-	      else
-		outName = outPath + *it + ".out";
-	      outS = new ofstream( outName.c_str() );
-	    }
-	    else {
-	      outS = &cout;
-	    }
-	  }
-	  string xmlName = XMLoutFileName;
-	  if ( xmlName.empty() ){
-	    if ( !xmlDirName.empty() ){
-	      if ( it->rfind(".xml") == string::npos )
-		xmlName = xmlPath + *it + ".xml";
-	      else
-		xmlName = xmlPath + *it;
-	    }
-	    else if ( options.doXMLout )
-	      xmlName = *it + ".xml"; // do not clobber the inputdir!
-	  }
-	  *Log(theErrLog) << "Frogging " << testName << endl;
-	  Test( testName, *outS, options, xmlName );
-	  if ( !outName.empty() ){
-	    *Log(theErrLog) << "results stored in " << outName << endl;
-	    delete outS;
-	    outS = 0;
-	  }
-	  ++it;
-	}
-	if ( !outputFileName.empty() ){
-	  *Log(theErrLog) << "results stored in " << outputFileName << endl;
-	  delete outS;
-	}
-      }
-      else if ( options.doServer ) {
-	//first set up some things to deal with zombies
-	struct sigaction action;
-	action.sa_handler = SIG_IGN;
-	sigemptyset(&action.sa_mask);
+    bool parsed = parse_args(Opts);
+    if (!parsed) {
+        throw runtime_error( "init failed" );
+    }
+    FrogAPI frog = FrogAPI(&options, &configuration, theErrLog);
+
+    if ( !fileNames.empty() ) {
+        string outPath = outputDirName;
+        string xmlPath = xmlDirName;
+        set<string>::const_iterator it = fileNames.begin();
+        ostream *outS = 0;
+        if ( !outputFileName.empty() ){
+        outS = new ofstream( outputFileName.c_str() );
+        }
+        while ( it != fileNames.end() ){
+            string testName = testDirName;
+            testName += *it;
+            string outName;
+            if ( outS == 0 ){
+                if ( wantOUT ){
+                    if ( options.doXMLin ){
+                        if ( !outPath.empty() )
+                        outName = outPath + *it + ".out";
+                    } else
+                        outName = outPath + *it + ".out";
+                    outS = new ofstream( outName.c_str() );
+                } else {
+                    outS = &cout;
+                }
+            }
+            string xmlName = XMLoutFileName;
+            if ( xmlName.empty() ){
+                if ( !xmlDirName.empty() ){
+                    if ( it->rfind(".xml") == string::npos )
+                    xmlName = xmlPath + *it + ".xml";
+                    else
+                    xmlName = xmlPath + *it;
+                } else if ( options.doXMLout )
+                    xmlName = *it + ".xml"; // do not clobber the inputdir!
+            }
+            *Log(theErrLog) << "Frogging " << testName << endl;
+            frog.Test( testName, *outS, xmlName );
+            if ( !outName.empty() ){
+                *Log(theErrLog) << "results stored in " << outName << endl;
+                delete outS;
+                outS = 0;
+            }
+            ++it;
+        }
+        if ( !outputFileName.empty() ){
+            *Log(theErrLog) << "results stored in " << outputFileName << endl;
+            delete outS;
+        }
+      } else if ( options.doServer ) {
+        //first set up some things to deal with zombies
+        struct sigaction action;
+        action.sa_handler = SIG_IGN;
+        sigemptyset(&action.sa_mask);
 #ifdef SA_NOCLDWAIT
-	action.sa_flags = SA_NOCLDWAIT;
+        action.sa_flags = SA_NOCLDWAIT;
 #endif
-	sigaction(SIGCHLD, &action, NULL);
+        sigaction(SIGCHLD, &action, NULL);
 
-	srand((unsigned)time(0));
+        srand((unsigned)time(0));
 
-	*Log(theErrLog) << "Listening on port " << options.listenport << "\n";
+        *Log(theErrLog) << "Listening on port " << options.listenport << "\n";
 
-	try
-	  {
-	    // Create the socket
-	    Sockets::ServerSocket server;
-	    if ( !server.connect( options.listenport ) )
-	      throw( runtime_error( "starting server on port " + options.listenport + " failed" ) );
-	    if ( !server.listen( 5 ) ) {
-	      // maximum of 5 pending requests
-	      throw( runtime_error( "listen(5) failed" ) );
-	    }
-	    while ( true ) {
-
-	      Sockets::ServerSocket conn;
-	      if ( server.accept( conn ) ){
-		*Log(theErrLog) << "New connection..." << endl;
-		int pid = fork();
-		if (pid < 0) {
-		  *Log(theErrLog) << "ERROR on fork" << endl;
-		  throw runtime_error( "FORK failed" );
-		} else if (pid == 0)  {
-		  //		  server = NULL;
-		  TestServer(conn, options );
-		  exit(EXIT_SUCCESS);
-		}
-	      }
-	      else {
-		throw( runtime_error( "Accept failed" ) );
-	      }
-	    }
-	  } catch ( std::exception& e )
-	  {
-	    *Log(theErrLog) << "Server error:" << e.what() << " Exiting." << endl;
-	    throw;
-	  }
+        try {
+            // Create the socket
+            Sockets::ServerSocket server;
+            if ( !server.connect( options.listenport ) )
+                throw( runtime_error( "starting server on port " + options.listenport + " failed" ) );
+            if ( !server.listen( 5 ) ) {
+                // maximum of 5 pending requests
+                throw( runtime_error( "listen(5) failed" ) );
+            }
+            while ( true ) {
+                Sockets::ServerSocket conn;
+                if ( server.accept( conn ) ){
+                    *Log(theErrLog) << "New connection..." << endl;
+                    int pid = fork();
+                    if (pid < 0) {
+                        *Log(theErrLog) << "ERROR on fork" << endl;
+                        throw runtime_error( "FORK failed" );
+                    } else if (pid == 0)  {
+                        //		  server = NULL;
+                        TestServer(frog, conn, options );
+                        exit(EXIT_SUCCESS);
+                    }
+                } else {
+                    throw( runtime_error( "Accept failed" ) );
+                }
+            }
+        } catch ( std::exception& e ) {
+            *Log(theErrLog) << "Server error:" << e.what() << " Exiting." << endl;
+            throw;
+        }
+      } else {
+        // interactive mode
+        TestInteractive( frog, options );
       }
-      else {
-	// interactive mode
-	TestInteractive( options );
-      }
-    }
-    else {
-      throw runtime_error( "invalid arguments" );
-    }
-  }
-  catch ( const exception& e ){
+  } catch ( const exception& e ){
     *Log(theErrLog) << "fatal error: " << e.what() << endl;
     return EXIT_FAILURE;
   }
