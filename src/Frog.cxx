@@ -1399,7 +1399,7 @@ void TestInteractive(FrogOptions & options){
       cout << "Processing... '" << data << "'" << endl;
       istringstream inputstream(data,istringstream::in);
       Document doc = tokenizer.tokenize( inputstream );
-      Test( doc, cout, true );
+      Test( doc, cout, options, true );
     }
   }
   cout << "Done.\n";
