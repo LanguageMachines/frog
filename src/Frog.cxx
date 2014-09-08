@@ -93,10 +93,6 @@ string XMLoutFileName;
 string outputDirName;
 string xmlDirName;
 set<string> fileNames;
-string ProgName;
-int debugFlag = 0; //0 for none, more for more output
-
-FrogOptions options;
 
 /* assumptions:
    each components gets its own configfile per cmdline options
@@ -163,7 +159,7 @@ void usage( ) {
 
 
 
-bool parse_args( TiCC::CL_Options& Opts ) {
+bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options ) {
   string value;
   bool mood;
   if ( Opts.is_present('V', value, mood ) ||
@@ -192,7 +188,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
 
   // debug opts
   if ( Opts.is_present ('d', value, mood)) {
-    if ( !stringTo<int>( value, debugFlag ) ){
+    if ( !stringTo<int>( value, options.debugFlag ) ){
       *Log(theErrLog) << "-d value should be an integer" << endl;
       return false;
     }
@@ -274,6 +270,10 @@ bool parse_args( TiCC::CL_Options& Opts ) {
       options.doNER = false;
     if ( skip.find_first_of("pP") != string::npos )
       options.doParse = false;
+    else if ( !options.doMwu ){
+      *Log(theErrLog) << " Parser disabled, because MWU is deselected" << endl;
+      options.doParse = false;
+    }
     Opts.remove("skip");
   };
 
@@ -530,14 +530,15 @@ bool parse_args( TiCC::CL_Options& Opts ) {
       return false;
     }
   }
-
   return true;
 }
 
 
 
 
-void TestServer( FrogAPI & frog, Sockets::ServerSocket &conn, FrogOptions & options) {
+void TestServer( FrogAPI &frog,
+		 Sockets::ServerSocket &conn,
+		 const FrogOptions &options) {
 
   try {
     while (true) {
@@ -555,7 +556,7 @@ void TestServer( FrogAPI & frog, Sockets::ServerSocket &conn, FrogOptions & opti
             // so this is wrong. Just bail out
             throw( runtime_error( "read garbage" ) );
         }
-        if ( debugFlag )
+        if ( options.debugFlag )
             *Log(theErrLog) << "received data [" << result << "]" << endl;
         Document doc;
         try {
@@ -581,7 +582,7 @@ void TestServer( FrogAPI & frog, Sockets::ServerSocket &conn, FrogOptions & opti
                 data += line + "\n";
             }
         }
-        if (debugFlag)
+        if ( options.debugFlag )
             *Log(theErrLog) << "Received: [" << data << "]" << endl;
         *Log(theErrLog) << "Processing... " << endl;
         istringstream inputstream(data,istringstream::in);
@@ -589,7 +590,7 @@ void TestServer( FrogAPI & frog, Sockets::ServerSocket &conn, FrogOptions & opti
         frog.Test( doc, outputstream );
       }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
-            if (debugFlag)
+            if (options.debugFlag)
                 *Log(theErrLog) << "socket " << conn.getMessage() << endl;
             throw( runtime_error( "write to client failed" ) );
       }
@@ -597,14 +598,14 @@ void TestServer( FrogAPI & frog, Sockets::ServerSocket &conn, FrogOptions & opti
     }
   }
   catch ( std::exception& e ) {
-    if (debugFlag)
+    if (options.debugFlag)
       *Log(theErrLog) << "connection lost: " << e.what() << endl;
   }
   *Log(theErrLog) << "Connection closed.\n";
 }
 
 #ifdef NO_READLINE
-void TestInteractive(FrogAPI & frog, FrogOptions & options) {
+void TestInteractive(FrogAPI& frog, const FrogOptions& options) {
   cout << "frog>"; cout.flush();
   string line;
   string data;
@@ -643,7 +644,7 @@ void TestInteractive(FrogAPI & frog, FrogOptions & options) {
   cout << "Done.\n";
 }
 #else
-void TestInteractive(FrogAPI & frog, FrogOptions & options){
+void TestInteractive(FrogAPI& frog, const FrogOptions& options){
   const char *prompt = "frog> ";
   string line;
   bool eof = false;
@@ -700,7 +701,6 @@ void TestInteractive(FrogAPI & frog, FrogOptions & options){
 int main(int argc, char *argv[]) {
   cerr << "frog " << VERSION << " (c) ILK 1998 - 2014" << endl;
   cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
-  ProgName = argv[0];
   cerr << "based on [" << Tokenizer::VersionName() << ", "
        << folia::VersionName() << ", "
        << Timbl::VersionName() << ", "
@@ -708,6 +708,8 @@ int main(int argc, char *argv[]) {
        << Tagger::VersionName() << "]" << endl;
   //  cout << "configdir: " << configDir << endl;
   std::ios_base::sync_with_stdio(false);
+  FrogOptions options;
+
   try {
     TiCC::CL_Options Opts("c:e:o:t:x::X::nQhVd:S:",
 			  "textclass:,testdir:,uttmarker:,max-parser-tokens:,"
@@ -715,11 +717,11 @@ int main(int argc, char *argv[]) {
 			  "keep-parser-files:,version,threads:,KANON");
 
     Opts.init(argc, argv);
-    bool parsed = parse_args(Opts);
+    bool parsed = parse_args(Opts, options );
     if (!parsed) {
         throw runtime_error( "init failed" );
     }
-    FrogAPI frog = FrogAPI(&options, &configuration, theErrLog);
+    FrogAPI frog = FrogAPI( options, configuration, theErrLog);
 
     if ( !fileNames.empty() ) {
         string outPath = outputDirName;
