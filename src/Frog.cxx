@@ -84,7 +84,7 @@ using namespace folia;
 using namespace TiCC;
 
 LogStream my_default_log( cerr, "frog-", StampMessage ); // fall-back
-LogStream *theErrLog = &my_default_log;  // fill the externals
+LogStream *theErrLog = &my_default_log;
 
 string testDirName;
 string outputFileName;

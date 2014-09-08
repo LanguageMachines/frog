@@ -133,6 +133,7 @@ bool Mblem::init( const Configuration& config ) {
 
 Mblem::~Mblem(){
   //    *Log(mblemLog) << "cleaning up MBLEM stuff" << endl;
+  delete filter;
   delete myLex;
   myLex = 0;
   delete mblemLog;

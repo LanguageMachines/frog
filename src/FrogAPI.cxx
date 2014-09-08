@@ -36,46 +36,15 @@ FrogOptions::FrogOptions() {
   doXMLin =  false;
   doXMLout =  false;
   doKanon =  false;
-
   interactive = false;
 
   maxParserTokens =  0; // 0 for unlimited
 
-  encoding = "";
-  uttmark = "";
   listenport = "void";
   docid = "untitled";
-  textclass = "";
   tmpDirName = "/tmp/";
 
   debugFlag = 0;
-}
-
-FrogOptions::FrogOptions(const FrogOptions & ref ) {
-  doTok = ref.doTok;
-  doLemma = ref.doLemma;
-  doMorph = ref.doMorph;
-  doMwu = ref.doMwu;
-  doIOB = ref.doIOB;
-  doNER = ref. doNER;
-  doParse = ref.doParse;
-  doDaringMorph = ref.doDaringMorph;
-  doSentencePerLine = ref.doSentencePerLine;
-  doQuoteDetection = ref.doQuoteDetection;
-  doDirTest = ref.doDirTest;
-  doServer = ref.doServer;
-  doXMLin = ref.doXMLin;
-  doXMLout = ref.doXMLout;
-  doKanon = ref.doKanon;
-  interactive = ref.interactive;
-  encoding = ref.encoding;
-  uttmark = ref.uttmark;
-  listenport = ref.listenport;
-  docid = ref.docid;
-  textclass = ref.textclass;
-  debugFlag = ref.debugFlag;
-  tmpDirName = ref.tmpDirName;
-  maxParserTokens = ref.maxParserTokens;
 }
 
 FrogAPI::FrogAPI( const FrogOptions &opt,
@@ -109,11 +78,13 @@ FrogAPI::FrogAPI( const FrogOptions &opt,
     *Log(theErrLog) << "Missing [[NER]] section in config file." << endl;
     exit(2);
   }
-  if ( options.doMwu ){
-    if ( !configuration.hasSection("mwu") ){
-      *Log(theErrLog) << "Missing [[mwu]] section in config file." << endl;
-      exit(2);
-    }
+  if ( options.doMwu && !configuration.hasSection("mwu") ){
+    *Log(theErrLog) << "Missing [[mwu]] section in config file." << endl;
+    exit(2);
+  }
+  if ( options.doParse && !configuration.hasSection("parser") ){
+    *Log(theErrLog) << "Missing [[parser]] section in config file." << endl;
+    exit(2);
   }
 
   if ( options.doServer ){

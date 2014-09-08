@@ -49,8 +49,6 @@
 #include <string>
 #include <iostream>
 
-extern TiCC::LogStream *theErrLog;
-
 class FrogOptions {
  public:
   bool doTok;
@@ -85,6 +83,7 @@ class FrogOptions {
   unsigned int maxParserTokens;
 
   FrogOptions();
+ private:
   FrogOptions(const FrogOptions & );
 };
 
@@ -98,27 +97,27 @@ class FrogAPI {
   void displayMWU( std::ostream& os, size_t index, const std::vector<folia::Word*> mwu);
   std::ostream & showResults( std::ostream& os, const folia::Sentence* sentence, bool showParse);
  public:
-  Mbma * myMbma;
-  Mblem * myMblem;
-  Mwu * myMwu;
-  Parser * myParser;
-  CGNTagger * myCGNTagger;
-  IOBTagger * myIOBTagger;
-  NERTagger * myNERTagger;
-  UctoTokenizer * tokenizer;
+  Mbma *myMbma;
+  Mblem *myMblem;
+  Mwu *myMwu;
+  Parser *myParser;
+  CGNTagger *myCGNTagger;
+  IOBTagger *myIOBTagger;
+  NERTagger *myNERTagger;
+  UctoTokenizer *tokenizer;
 
-  TiCC::LogStream * theErrLog;
-  const TiCC::Configuration &configuration;
-  const FrogOptions &options;
+  TiCC::LogStream *theErrLog;
+  const TiCC::Configuration& configuration;
+  const FrogOptions& options;
 
-  FrogAPI( const FrogOptions &options,
-	   const TiCC::Configuration &configuration,
-	   TiCC::LogStream *);
+  FrogAPI( const FrogOptions&,
+	   const TiCC::Configuration&,
+	   TiCC::LogStream * );
   ~FrogAPI();
-  void Test( const std::string& infilename, std::ostream &os, const std::string& xmlOutF);
-  void Test( folia::Document& doc, std::ostream& outStream,  bool hidetimers = false, const std::string& xmlOutFile = "");
-  std::string Test( folia::Document& doc, bool hidetimers = true); //returns results as string
-  bool TestSentence( folia::Sentence* sent, TimerBlock& timers);
+  void Test( const std::string&, std::ostream&,const std::string& );
+  void Test( folia::Document&, std::ostream&, bool=false, const std::string& ="");
+  std::string Test( folia::Document&, bool=true); //returns results as string
+  bool TestSentence( folia::Sentence*, TimerBlock&);
 
 };
 
