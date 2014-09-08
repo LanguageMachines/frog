@@ -167,6 +167,7 @@ class FrogAPI {
         ~FrogAPI();
         void Test( const std::string& infilename, std::ostream &os, const std::string& xmlOutF);
         void Test( folia::Document& doc, std::ostream& outStream,  bool hidetimers = false, const std::string& xmlOutFile = "");
+        std::string Test( folia::Document& doc, bool hidetimers = true); //returns results as string
         bool TestSentence( folia::Sentence* sent, TimerBlock& timers);
     
 };

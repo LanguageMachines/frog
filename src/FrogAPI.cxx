@@ -17,6 +17,7 @@
 
 
 
+
 // individual module headers
 
 #include "frog/FrogAPI.h" //will also include Frog.h (internals), FrogAPI.h is for public  interface
@@ -631,6 +632,13 @@ ostream & FrogAPI::showResults( ostream& os, const Sentence* sentence, bool show
   if ( words.size() )
     os << endl;
   return os;
+}
+
+string FrogAPI::Test( folia::Document& doc, bool hidetimers) {
+    //converts results to string (useful for external bindings)
+    stringstream ss;
+    Test(doc, ss, hidetimers);
+    return ss.str();
 }
 
 void FrogAPI::Test( Document& doc, ostream& outStream,  bool hidetimers, const string& xmlOutFile) {
