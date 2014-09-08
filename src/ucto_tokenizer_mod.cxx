@@ -152,6 +152,14 @@ folia::Document UctoTokenizer::tokenize( istream& is ){
     throw runtime_error( "ucto tokenizer not initalized" );
 }
 
+folia::Document UctoTokenizer::tokenizestring( const string& s ){
+  if ( tokenizer) {
+    istringstream is(s);
+    return tokenizer->tokenize( is );
+  } else
+    throw runtime_error( "ucto tokenizer not initalized" );
+}
+
 bool UctoTokenizer::tokenize( folia::Document& doc ){
   if ( tokenizer )
     return tokenizer->tokenize( doc );
