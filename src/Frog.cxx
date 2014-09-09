@@ -141,7 +141,7 @@ void usage( ) {
        << "\t --outputdir=<dir>     Output to dir, instead of default stdout\n"
        << "\t --xmldir=<dir>        Use 'dir' to output FoliA XML to.\n"
        << "\t --tmpdir=<directory>  (location to store intermediate files. Default /tmp )\n"
-       << "\t --keep-parser-files=[yes|no] keep intermediate parser files. (last sentence only).\n"
+       << "\t --keep-parser-files keep intermediate parser files. (last sentence only).\n"
        << "\t============= OTHER OPTIONS ============================================\n"
        << "\t -h. give some help.\n"
        << "\t -V or --version .   Show version info.\n"
@@ -161,22 +161,16 @@ void usage( ) {
 
 bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options ) {
   string value;
-  bool mood;
-  if ( Opts.is_present('V', value, mood ) ||
-       Opts.is_present("version", value ) ){
+  if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
     // we already did show what we wanted.
     exit( EXIT_SUCCESS );
   }
-  if ( Opts.is_present ('h', value, mood)) {
+  if ( Opts.is_present( 'h' ) ) {
     usage();
     exit( EXIT_SUCCESS );
   };
   // is a config file specified?
-  if ( Opts.is_present( 'c',  value, mood ) ) {
-    configFileName = value;
-    Opts.remove( 'c' );
-  };
-
+  Opts.extract( 'c',  configFileName );
   if ( configuration.fill( configFileName ) ){
     *Log(theErrLog) << "config read from: " << configFileName << endl;
   }
@@ -187,22 +181,17 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options ) {
   }
 
   // debug opts
-  if ( Opts.is_present ('d', value, mood)) {
+  if ( Opts.extract ('d', value) ) {
     if ( !stringTo<int>( value, options.debugFlag ) ){
       *Log(theErrLog) << "-d value should be an integer" << endl;
       return false;
     }
     configuration.setatt( "debug", value );
-    Opts.remove('d');
   }
   else {
     configuration.setatt( "debug", "0" );
   }
-  if ( Opts.is_present( "debug", value ) ) {
-    if ( value.empty() ){
-      *Log(theErrLog) << "missing a value for --debug (did you forget the '='?)" << endl;
-      return false;
-    }
+  if ( Opts.extract( "debug", value ) ) {
     value = TiCC::lowercase( value );
     vector<string> vec;
     TiCC::split_at( value, vec, "," );
@@ -241,20 +230,11 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options ) {
 	return false;
       }
     }
-    Opts.remove("debug");
   }
 
-  if ( Opts.is_present ('n', value, mood)) {
-    options.doSentencePerLine = true;
-  };
-  if ( Opts.is_present ('Q', value, mood)) {
-    options.doQuoteDetection = true;
-  };
-  if ( Opts.is_present( "skip", value )) {
-    if ( value.empty() ){
-      *Log(theErrLog) << "missing a value for --skip (did you forget the '='?)" << endl;
-      return false;
-    }
+  options.doSentencePerLine = Opts.extract( 'n' );
+  options.doQuoteDetection = Opts.extract( 'Q' );
+  if ( Opts.extract( "skip", value )) {
     string skip = value;
     if ( skip.find_first_of("tT") != string::npos )
       options.doTok = false;
@@ -277,46 +257,27 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options ) {
     Opts.remove("skip");
   };
 
-  if ( Opts.is_present( "daring", value ) ) {
-    if ( value.empty() )
-      value = "1";
-    options.doDaringMorph = stringTo<bool>( value );
-    if ( options.doDaringMorph ){
-      options.doMorph = true;
-    }
+  if ( Opts.extract( "daring" ) ) {
+    options.doDaringMorph = true;
+    options.doMorph = true;
   }
-  if ( Opts.is_present( 'e', value, mood)) {
-    options.encoding = value;
-  }
+  Opts.extract( 'e', options.encoding );
 
-  if ( Opts.is_present( "max-parser-tokens", value ) ){
-    if ( value.empty() ){
-      *Log(theErrLog) << "max-parser-tokens option without value " << endl;
+  if ( Opts.extract( "max-parser-tokens", value ) ){
+    if ( !stringTo<unsigned int>( value, options.maxParserTokens ) ){
+      *Log(theErrLog) << "max-parser-tokens value should be an integer" << endl;
       return false;
     }
-    else {
-      if ( !stringTo<unsigned int>( value, options.maxParserTokens ) ){
-	*Log(theErrLog) << "max-parser-tokens value should be an integer" << endl;
-	return false;
-      }
-    }
-    Opts.remove("max-parser-tokens");
   }
 
-  if ( Opts.is_present ('S', value, mood)) {
-    options.doServer = true;
-    options.listenport= value;
-  }
+  options.doServer = Opts.extract('S', options.listenport );
+
 #ifdef HAVE_OPENMP
   if ( options.doServer ) {
     // run in one thread in server mode, forking is too expensive for lots of small snippets
     omp_set_num_threads( 1 );
   }
-  else if ( Opts.is_present( "threads", value ) ){
-    if ( value.empty() ){
-      *Log(theErrLog) << "missing a value for --threads (did you forget the '='?)" << endl;
-      return false;
-    }
+  else if ( Opts.extract( "threads", value ) ){
     int num;
     if ( !stringTo<int>( value, num ) || num < 1 ){
       *Log(theErrLog) << "threads value should be a positive integer" << endl;
@@ -326,22 +287,11 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options ) {
   }
 #endif
 
-  if ( Opts.is_present( "keep-parser-files", value ) ){
-    if ( value.empty() ||
-	 stringTo<bool>( value ) ){
-      configuration.setatt( "keepIntermediateFiles", "true", "parser" );
-      Opts.remove("keep-parser-files");
-    }
+  if ( Opts.extract( "keep-parser-files" ) ){
+    configuration.setatt( "keepIntermediateFiles", "true", "parser" );
   }
   options.tmpDirName = configuration.lookUp( "tmpdir", "global" );
-  if ( Opts.is_present ( "tmpdir", value )) {
-    if ( value.empty() ){
-      *Log(theErrLog) << "missing a value for --tmpdir (did you forget the '='?)" << endl;
-      return false;
-    }
-    options.tmpDirName = value;
-    Opts.remove("tmpdir");
-  }
+  Opts.extract( "tmpdir", options.tmpDirName ); // so might be overridden
   if ( options.tmpDirName.empty() ){
     options.tmpDirName = "/tmp/";
   }
@@ -358,103 +308,66 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options ) {
   }
 #endif
   string TestFileName;
-  if ( Opts.is_present ( "testdir", value )) {
+  if ( Opts.extract( "testdir", TestFileName ) ) {
 #ifdef HAVE_DIRENT_H
     options.doDirTest = true;
-    testDirName = value;
+    testDirName = TestFileName;
     if ( testDirName[testDirName.size()-1] != '/' ){
       testDirName += "/";
     }
-    if ( !testDirName.empty() ){
-      if ( !existsDir( testDirName ) ){
-	*Log(theErrLog) << "input dir " << testDirName << " not readable" << endl;
-	return false;
-      }
-    }
-    else {
-      *Log(theErrLog) << "missing a value for --testdir (did you forget the '='?)" << endl;
+    if ( !existsDir( testDirName ) ){
+      *Log(theErrLog) << "input dir " << testDirName << " not readable" << endl;
       return false;
     }
 #else
       *Log(theErrLog) << "--testdir option not supported!" << endl;
 #endif
-    Opts.remove("testdir");
   }
-  else if ( Opts.is_present( 't', value, mood )) {
-    TestFileName = value;
-    ifstream is( value.c_str() );
+  else if ( Opts.extract( 't', TestFileName ) ) {
+    ifstream is( TestFileName );
     if ( !is ){
       *Log(theErrLog) << "input stream " << value << " is not readable" << endl;
       return false;
     }
-    Opts.remove('t');
   };
   wantOUT = false;
-  if ( Opts.is_present( "outputdir", value )) {
-    outputDirName = value;
+  if ( Opts.extract( "outputdir", outputDirName )) {
     if ( outputDirName[outputDirName.size()-1] != '/' ){
       outputDirName += "/";
     }
 #ifdef HAVE_DIRENT_H
-    if ( !outputDirName.empty() ){
-      if ( !existsDir( outputDirName ) ){
-	*Log(theErrLog) << "output dir " << outputDirName << " not readable" << endl;
-	return false;
-      }
-    }
-    else {
-      *Log(theErrLog) << "missing a value for --outputdir (did you forget the '='?)" << endl;
+    if ( !existsDir( outputDirName ) ){
+      *Log(theErrLog) << "output dir " << outputDirName << " not readable" << endl;
       return false;
     }
 #endif
     wantOUT = true;
-    Opts.remove( "outputdir");
   }
-  else if ( Opts.is_present ('o', value, mood)) {
+  else if ( Opts.extract( 'o', outputFileName ) ){
     wantOUT = true;
-    outputFileName = value;
-    Opts.remove('o');
   };
   options.doXMLout = false;
-  if ( Opts.is_present ( "id", value )) {
-    if ( value.empty() ){
-      *Log(theErrLog) << "missing a value for --id (did you forget the '='?)" << endl;
-      return false;
-    }
-    options.docid = value;
-    Opts.remove( "id");
-  }
-  if ( Opts.is_present( "xmldir", value )) {
-    xmlDirName = value;
+  Opts.extract( "id", options.docid );
+  if ( Opts.extract( "xmldir", xmlDirName ) ){
     if ( xmlDirName[xmlDirName.size()-1] != '/' ){
       xmlDirName += "/";
     }
 #ifdef HAVE_DIRENT_H
-    if ( !xmlDirName.empty() ){
-      if ( !existsDir( xmlDirName ) ){
-	*Log(theErrLog) << "XML output dir " << xmlDirName << " not readable" << endl;
-	return false;
-      }
-    }
-    else {
-      *Log(theErrLog) << "missing a value for --xmldir (did you forget the '='?)" << endl;
+    if ( !existsDir( xmlDirName ) ){
+      *Log(theErrLog) << "XML output dir " << xmlDirName << " not readable" << endl;
       return false;
     }
 #endif
     options.doXMLout = true;
-    Opts.remove( "xmldir");
   }
-  else if ( Opts.is_present ('X', value, mood)) {
+  else if ( Opts.extract('X', XMLoutFileName ) ){
     options.doXMLout = true;
-    XMLoutFileName = value;
-    Opts.remove('X');
   }
-  if ( Opts.is_present ("KANON", value ) ){
-    options.doKanon = true;
-    Opts.remove( "KANON" );
-  }
+
+  options.doKanon = Opts.extract("KANON");
+
   options.doXMLin = false;
-  if ( Opts.is_present ('x', value, mood)) {
+  if ( Opts.extract ('x', value ) ){
     options.doXMLin = true;
     if ( !value.empty() ){
       if ( ! (xmlDirName.empty() &&
@@ -470,19 +383,12 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options ) {
 	return false;
       }
     }
-    Opts.remove('x');
   }
-  if ( Opts.is_present ( "textclass", value )) {
+  if ( Opts.extract( "textclass", options.textclass ) ){
     if ( !options.doXMLin ){
       *Log(theErrLog) << "--textclass is only valid when -x is also present" << endl;
       return false;
     }
-    if ( value.empty() ){
-      *Log(theErrLog) << "missing a value for --textclass (did you forget the '='?)" << endl;
-      return false;
-    }
-    options.textclass = value;
-    Opts.remove( "textclass");
   }
 
   if ( !XMLoutFileName.empty() && !testDirName.empty() ){
@@ -490,13 +396,7 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options ) {
     return false;
   }
 
-  if ( Opts.is_present ("uttmarker", value )) {
-    if ( value.empty() ){
-      *Log(theErrLog) << "missing a value for --uttmarker (did you forget the '='?)" << endl;
-      return false;
-    }
-    options.uttmark = value;
-  }
+  Opts.extract ("uttmarker", options.uttmark );
   if ( !outputDirName.empty() && testDirName.empty() ){
     *Log(theErrLog) << "useless -outputdir option" << endl;
     return false;
@@ -507,7 +407,7 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options ) {
     else
       getFileNames( testDirName, "", fileNames );
     if ( fileNames.empty() ){
-      *Log(theErrLog) << "error: couln't find any files in directory: "
+      *Log(theErrLog) << "error: couldn't find any files in directory: "
 		      << testDirName << endl;
       return false;
     }
@@ -529,6 +429,11 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options ) {
 		      << "' is invalid for multiple inputfiles." << endl;
       return false;
     }
+  }
+  if ( !Opts.empty() ){
+    *Log(theErrLog) << "unhandled commandline options: " << Opts.toString() << endl;
+
+    return false;
   }
   return true;
 }
@@ -561,13 +466,14 @@ void TestServer( FrogAPI &frog,
         Document doc;
         try {
             doc.readFromString( result );
-        } catch ( std::exception& e ){
-            *Log(theErrLog) << "FoLiaParsing failed:" << endl << e.what() << endl;
-            throw;
+        }
+	catch ( std::exception& e ){
+	  *Log(theErrLog) << "FoLiaParsing failed:" << endl << e.what() << endl;
+	  throw;
         }
         *Log(theErrLog) << "Processing... " << endl;
         frog.tokenizer->tokenize( doc );
-        frog.Test( doc, outputstream);
+        frog.Test( doc, outputstream );
       } else {
         string data = "";
         if ( options.doSentencePerLine ){
@@ -713,112 +619,116 @@ int main(int argc, char *argv[]) {
   try {
     TiCC::CL_Options Opts("c:e:o:t:x::X::nQhVd:S:",
 			  "textclass:,testdir:,uttmarker:,max-parser-tokens:,"
-			  "skip:,id:,outputdir:,xmldir:,tmpdir:,daring,debug:,"
-			  "keep-parser-files:,version,threads:,KANON");
+			  "skip:,id:,outputdir:,xmldir:,tmpdir:,daring,"
+			  "debug:,keep-parser-files,version,threads:,KANON");
 
     Opts.init(argc, argv);
     bool parsed = parse_args(Opts, options );
     if (!parsed) {
-        throw runtime_error( "init failed" );
+      throw runtime_error( "init failed" );
     }
-    FrogAPI frog = FrogAPI( options, configuration, theErrLog);
+    FrogAPI frog( options, configuration, theErrLog);
 
     if ( !fileNames.empty() ) {
-        string outPath = outputDirName;
-        string xmlPath = xmlDirName;
-        set<string>::const_iterator it = fileNames.begin();
-        ostream *outS = 0;
-        if ( !outputFileName.empty() ){
+      string outPath = outputDirName;
+      string xmlPath = xmlDirName;
+      set<string>::const_iterator it = fileNames.begin();
+      ostream *outS = 0;
+      if ( !outputFileName.empty() ){
         outS = new ofstream( outputFileName.c_str() );
-        }
-        while ( it != fileNames.end() ){
-            string testName = testDirName;
-            testName += *it;
-            string outName;
-            if ( outS == 0 ){
-                if ( wantOUT ){
-                    if ( options.doXMLin ){
-                        if ( !outPath.empty() )
-                        outName = outPath + *it + ".out";
-                    } else
-                        outName = outPath + *it + ".out";
-                    outS = new ofstream( outName.c_str() );
-                } else {
-                    outS = &cout;
-                }
-            }
-            string xmlName = XMLoutFileName;
-            if ( xmlName.empty() ){
-                if ( !xmlDirName.empty() ){
-                    if ( it->rfind(".xml") == string::npos )
-                    xmlName = xmlPath + *it + ".xml";
-                    else
-                    xmlName = xmlPath + *it;
-                } else if ( options.doXMLout )
-                    xmlName = *it + ".xml"; // do not clobber the inputdir!
-            }
-            *Log(theErrLog) << "Frogging " << testName << endl;
-            frog.Test( testName, *outS, xmlName );
-            if ( !outName.empty() ){
-                *Log(theErrLog) << "results stored in " << outName << endl;
-                delete outS;
-                outS = 0;
-            }
-            ++it;
-        }
-        if ( !outputFileName.empty() ){
-            *Log(theErrLog) << "results stored in " << outputFileName << endl;
-            delete outS;
-        }
-      } else if ( options.doServer ) {
-        //first set up some things to deal with zombies
-        struct sigaction action;
-        action.sa_handler = SIG_IGN;
-        sigemptyset(&action.sa_mask);
-#ifdef SA_NOCLDWAIT
-        action.sa_flags = SA_NOCLDWAIT;
-#endif
-        sigaction(SIGCHLD, &action, NULL);
-
-        srand((unsigned)time(0));
-
-        *Log(theErrLog) << "Listening on port " << options.listenport << "\n";
-
-        try {
-            // Create the socket
-            Sockets::ServerSocket server;
-            if ( !server.connect( options.listenport ) )
-                throw( runtime_error( "starting server on port " + options.listenport + " failed" ) );
-            if ( !server.listen( 5 ) ) {
-                // maximum of 5 pending requests
-                throw( runtime_error( "listen(5) failed" ) );
-            }
-            while ( true ) {
-                Sockets::ServerSocket conn;
-                if ( server.accept( conn ) ){
-                    *Log(theErrLog) << "New connection..." << endl;
-                    int pid = fork();
-                    if (pid < 0) {
-                        *Log(theErrLog) << "ERROR on fork" << endl;
-                        throw runtime_error( "FORK failed" );
-                    } else if (pid == 0)  {
-                        //		  server = NULL;
-                        TestServer(frog, conn, options );
-                        exit(EXIT_SUCCESS);
-                    }
-                } else {
-                    throw( runtime_error( "Accept failed" ) );
-                }
-            }
-        } catch ( std::exception& e ) {
-            *Log(theErrLog) << "Server error:" << e.what() << " Exiting." << endl;
-            throw;
-        }
-      } else {
-        // interactive mode
-        TestInteractive( frog, options );
       }
-  } catch ( const exception& e ){
+      while ( it != fileNames.end() ){
+	string testName = testDirName;
+	testName += *it;
+	string outName;
+	if ( outS == 0 ){
+	  if ( wantOUT ){
+	    if ( options.doXMLin ){
+	      if ( !outPath.empty() )
+		outName = outPath + *it + ".out";
+	    } else
+	      outName = outPath + *it + ".out";
+	    outS = new ofstream( outName.c_str() );
+	  } else {
+	    outS = &cout;
+	  }
+	}
+	string xmlName = XMLoutFileName;
+	if ( xmlName.empty() ){
+	  if ( !xmlDirName.empty() ){
+	    if ( it->rfind(".xml") == string::npos )
+	      xmlName = xmlPath + *it + ".xml";
+	    else
+	      xmlName = xmlPath + *it;
+	  } else if ( options.doXMLout )
+	    xmlName = *it + ".xml"; // do not clobber the inputdir!
+	}
+	*Log(theErrLog) << "Frogging " << testName << endl;
+	frog.Test( testName, *outS, xmlName );
+	if ( !outName.empty() ){
+	  *Log(theErrLog) << "results stored in " << outName << endl;
+	  delete outS;
+	  outS = 0;
+	}
+	++it;
+      }
+      if ( !outputFileName.empty() ){
+	*Log(theErrLog) << "results stored in " << outputFileName << endl;
+	delete outS;
+      }
+    } else if ( options.doServer ) {
+      //first set up some things to deal with zombies
+      struct sigaction action;
+      action.sa_handler = SIG_IGN;
+      sigemptyset(&action.sa_mask);
+#ifdef SA_NOCLDWAIT
+      action.sa_flags = SA_NOCLDWAIT;
+#endif
+      sigaction(SIGCHLD, &action, NULL);
+
+      srand((unsigned)time(0));
+
+      *Log(theErrLog) << "Listening on port " << options.listenport << "\n";
+
+      try {
+	// Create the socket
+	Sockets::ServerSocket server;
+	if ( !server.connect( options.listenport ) )
+	  throw( runtime_error( "starting server on port " + options.listenport + " failed" ) );
+	if ( !server.listen( 5 ) ) {
+	  // maximum of 5 pending requests
+	  throw( runtime_error( "listen(5) failed" ) );
+	}
+	while ( true ) {
+	  Sockets::ServerSocket conn;
+	  if ( server.accept( conn ) ){
+	    *Log(theErrLog) << "New connection..." << endl;
+	    int pid = fork();
+	    if (pid < 0) {
+	      *Log(theErrLog) << "ERROR on fork" << endl;
+	      throw runtime_error( "FORK failed" );
+	    } else if (pid == 0)  {
+	      //		  server = NULL;
+	      TestServer(frog, conn, options );
+	      exit(EXIT_SUCCESS);
+	    }
+	  }
+	  else {
+	    throw( runtime_error( "Accept failed" ) );
+	  }
+	}
+      }
+      catch ( std::exception& e ) {
+	*Log(theErrLog) << "Server error:" << e.what() << " Exiting." << endl;
+	throw;
+      }
+    }
+    else {
+      // interactive mode
+      TestInteractive( frog, options );
+    }
+  }
+  catch ( const exception& e ){
     *Log(theErrLog) << "fatal error: " << e.what() << endl;
     return EXIT_FAILURE;
   }
