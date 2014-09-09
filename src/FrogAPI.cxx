@@ -532,6 +532,7 @@ void FrogAPI::displayMWU( ostream& os,
 	  vector<Morpheme*> m = ml[q]->select<Morpheme>( false );
 	  assert( m.size() == 1 ); // top complex layer
 	  string desc = m[0]->description();
+	  morph = desc;
 	  if ( q < ml.size()-1 )
 	    morph += "/";
 	}
@@ -571,9 +572,9 @@ void FrogAPI::displayMWU( ostream& os,
   os << index << "\t" << wrd << "\t" << lemma << "\t" << morph << "\t" << pos << "\t" << std::fixed << conf;
 }
 
-ostream & FrogAPI::showResults( ostream& os,
-				const Sentence* sentence,
-				bool showParse ){
+ostream& FrogAPI::showResults( ostream& os,
+			       const Sentence* sentence,
+			       bool showParse ){
   vector<Word*> words = sentence->words();
   vector<Entity*> mwu_entities;
   if (myMwu) mwu_entities = sentence->select<Entity>( myMwu->getTagset() );
