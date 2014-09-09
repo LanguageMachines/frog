@@ -247,9 +247,12 @@ class MBMAana {
     return rule.extract_morphemes();
   };
 
+  UnicodeString getKey( bool );
+
  private:
   std::string tag;
   std::string infl;
+  UnicodeString sortkey;
   std::string description;
   Rule rule;
   BracketNest *brackets;

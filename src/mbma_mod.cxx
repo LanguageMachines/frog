@@ -30,6 +30,7 @@
 #include <string>
 #include <set>
 #include <iostream>
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <timbl/TimblAPI.h>
@@ -1271,6 +1272,26 @@ MBMAana::MBMAana( const Rule& r, bool daring ): rule(r) {
   }
 }
 
+UnicodeString MBMAana::getKey( bool daring ){
+  if ( sortkey.isEmpty() ){
+    UnicodeString tmp;
+    if ( daring ){
+      stringstream ss;
+      ss << getBrackets() << endl;
+      tmp = UTF8ToUnicode(ss.str());
+    }
+    else {
+      vector<string> v = getMorph();
+      // create an unique string
+      for ( size_t p=0; p < v.size(); ++p ) {
+	tmp += UTF8ToUnicode(v[p]) + "+";
+      }
+    }
+    sortkey = tmp;
+  }
+  return sortkey;
+}
+
 string Rule::getCleanInflect() const {
   // get the FIRST inflection and clean it up by extracting only
   //  known inflection names
@@ -1771,6 +1792,10 @@ void Mbma::addMorph( MorphologyLayer *ml,
   }
 }
 
+bool mbmacmp( MBMAana *m1, MBMAana *m2 ){
+  return m1->getKey(false).length() > m2->getKey(false).length();
+}
+
 void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   // first we select only the matching heads
   if (debugFlag){
@@ -1815,8 +1840,7 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
 
   if ( analysis.size() < 1 ){
     if (debugFlag ){
-      *Log(mbmaLog) << "analysis has size: " << analysis.size()
-		    << " so skip next filter" << endl;
+      *Log(mbmaLog) << "analysis is empty so skip next filter" << endl;
     }
     return;
   }
@@ -1861,52 +1885,68 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   }
   // so now we have "the" best matches.
   // Weed the rest
-  vector<MBMAana*> res;
-  set<MBMAana*>::const_iterator bit = bestMatches.begin();
-  while ( bit != bestMatches.end() ){
-    res.push_back( *bit );
-    ++bit;
+  ait = analysis.begin();
+  while ( ait != analysis.end() ){
+    if ( bestMatches.find( *ait ) != bestMatches.end() ){
+      ++ait;
+    }
+    else {
+      delete *ait;
+      ait = analysis.erase( ait );
+    }
   }
   if (debugFlag){
     *Log(mbmaLog) << "filter: analysis after second step" << endl;
     int i=1;
-    for(vector<MBMAana*>::const_iterator it=res.begin(); it != res.end(); it++)
-      *Log(mbmaLog) << i++ << " - " <<  *it << endl;
-    *Log(mbmaLog) << "start looking for doubles" << endl;
+    for( vector<MBMAana*>::const_iterator it=analysis.begin();
+	 it != analysis.end();
+	 ++it )
+      *Log(mbmaLog) << i++ << " - " << *it << endl;
   }
   //
   // but now we still might have doubles
   //
-  map<string, MBMAana*> unique;
-  vector<MBMAana*>::iterator it=res.begin();
-  while (  it != res.end() ){
-    string tmp;
-    if ( doDaring ){
-      stringstream ss;
-      ss << (*it)->getBrackets() << endl;
-      tmp = ss.str();
-    }
-    else {
-      vector<string> v = (*it)->getMorph();
-      // create an unique key
-      for ( size_t p=0; p < v.size(); ++p ) {
-	tmp += v[p] + "+";
-      }
-    }
-    unique[tmp] = *it;
-    ++it;
+  map<UnicodeString, MBMAana*> unique;
+  ait=analysis.begin();
+  while ( ait != analysis.end() ){
+    UnicodeString tmp = (*ait)->getKey( doDaring );
+    unique[tmp] = *ait;
+    ++ait;
   }
-  vector<MBMAana*> result;
-  map<string, MBMAana*>::const_iterator uit=unique.begin();
+  // so we have map of 'equal' analysis
+  set<MBMAana*> uniqueAna;
+  map<UnicodeString, MBMAana*>::const_iterator uit=unique.begin();
   while ( uit != unique.end() ){
-    result.push_back( uit->second );
-    if (debugFlag){
-      *Log(mbmaLog) << "Final Bracketing: " << uit->second->getBrackets() << endl;
-    }
+    uniqueAna.insert( uit->second );
     ++uit;
   }
-  analysis = result;
-  if (debugFlag){
+  // and now a set of all MBMAana's that are really different.
+  // remove all analysis that aren't in that set.
+  ait=analysis.begin();
+  while ( ait != analysis.end() ){
+    if ( uniqueAna.find( *ait ) != uniqueAna.end() ){
+      ++ait;
+    }
+    else {
+      delete *ait;
+      ait = analysis.erase( ait );
+    }
+  }
+  if ( debugFlag ){
+    *Log(mbmaLog) << "filter: analysis before sort on length:" << endl;
+    int i=1;
+    for(vector<MBMAana*>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
+      *Log(mbmaLog) << i++ << " - " << *it << " " << (*it)->getKey(false)
+		    << " (" << (*it)->getKey(false).length() << ")" << endl;
+    *Log(mbmaLog) << "" << endl;
+  }
+  // Now we have a small list of unique and differtent analysis.
+  // We assume the 'longest' analysis to be the best.
+  // So we prefer '[ge][maak][t]' over '[gemaak][t]'
+  // Therefor we sort on (unicode) string length
+  sort( analysis.begin(), analysis.end(), mbmacmp );
+
+  if ( debugFlag){
     *Log(mbmaLog) << "filter: definitive analysis:" << endl;
     int i=1;
     for(vector<MBMAana*>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
