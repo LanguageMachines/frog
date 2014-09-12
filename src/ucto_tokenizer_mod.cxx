@@ -45,7 +45,7 @@ UctoTokenizer::UctoTokenizer(LogStream * logstream) {
 
 bool UctoTokenizer::init( const Configuration& config, const string & docid, bool pass ){
   if ( tokenizer )
-    throw runtime_error( "ucto tokenizer is already initalized" );
+    throw runtime_error( "ucto tokenizer is already initialized" );
   tokenizer = new Tokenizer::TokenizerClass();
   tokenizer->setErrorLog( uctoLog );
   int debug = 0;
@@ -86,21 +86,21 @@ void UctoTokenizer::setUttMarker( const string& u ) {
       tokenizer->setEosMarker( u );
   }
   else
-    throw runtime_error( "ucto tokenizer not initalized" );
+    throw runtime_error( "ucto tokenizer not initialized" );
 }
 
 void UctoTokenizer::setSentencePerLineInput( bool b ) {
   if ( tokenizer )
     tokenizer->setSentencePerLineInput( b );
   else
-    throw runtime_error( "ucto tokenizer not initalized" );
+    throw runtime_error( "ucto tokenizer not initialized" );
 }
 
 void UctoTokenizer::setQuoteDetection( bool b ) {
   if ( tokenizer )
     tokenizer->setQuoteDetection( b );
   else
-    throw runtime_error( "ucto tokenizer not initalized" );
+    throw runtime_error( "ucto tokenizer not initialized" );
 }
 
 void UctoTokenizer::setInputEncoding( const std::string & enc ){
@@ -109,7 +109,7 @@ void UctoTokenizer::setInputEncoding( const std::string & enc ){
       tokenizer->setInputEncoding( enc );
   }
   else
-    throw runtime_error( "ucto tokenizer not initalized" );
+    throw runtime_error( "ucto tokenizer not initialized" );
 }
 
 void UctoTokenizer::setTextClass( const std::string& cls ){
@@ -118,7 +118,7 @@ void UctoTokenizer::setTextClass( const std::string& cls ){
       tokenizer->setTextClass( cls );
   }
   else
-    throw runtime_error( "ucto tokenizer not initalized" );
+    throw runtime_error( "ucto tokenizer not initialized" );
 }
 
 void UctoTokenizer::setInputXml( bool b ){
@@ -126,7 +126,7 @@ void UctoTokenizer::setInputXml( bool b ){
     tokenizer->setXMLInput( b );
   }
   else
-    throw runtime_error( "ucto tokenizer not initalized" );
+    throw runtime_error( "ucto tokenizer not initialized" );
 }
 
 vector<string> UctoTokenizer::tokenize( const string& line ){
@@ -142,14 +142,14 @@ vector<string> UctoTokenizer::tokenize( const string& line ){
     return tokenizer->getSentences();
   }
   else
-    throw runtime_error( "ucto tokenizer not initalized" );
+    throw runtime_error( "ucto tokenizer not initialized" );
 }
 
 folia::Document UctoTokenizer::tokenize( istream& is ){
   if ( tokenizer )
     return tokenizer->tokenize( is );
   else
-    throw runtime_error( "ucto tokenizer not initalized" );
+    throw runtime_error( "ucto tokenizer not initialized" );
 }
 
 folia::Document UctoTokenizer::tokenizestring( const string& s ){
@@ -157,13 +157,13 @@ folia::Document UctoTokenizer::tokenizestring( const string& s ){
     istringstream is(s);
     return tokenizer->tokenize( is );
   } else
-    throw runtime_error( "ucto tokenizer not initalized" );
+    throw runtime_error( "ucto tokenizer not initialized" );
 }
 
 bool UctoTokenizer::tokenize( folia::Document& doc ){
   if ( tokenizer )
     return tokenizer->tokenize( doc );
   else
-    throw runtime_error( "ucto tokenizer not initalized" );
+    throw runtime_error( "ucto tokenizer not initialized" );
 
 }
