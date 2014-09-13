@@ -675,10 +675,10 @@ ostream& FrogAPI::showResults( ostream& os,
   return os;
 }
 
-string FrogAPI::Test( folia::Document * doc, bool hidetimers ) { //don't change pointer to reference, needed for cython binding
+string FrogAPI::Testtostring( folia::Document * doc) { //don't change pointer to reference, needed for cython binding
   //converts results to string (useful for external bindings) 
   stringstream ss;
-  Test(*doc, ss, hidetimers);
+  Test(*doc, ss, true);
   return ss.str();
 }
 
@@ -765,8 +765,8 @@ void FrogAPI::Test( Document& doc,
       *Log(theErrLog) << "Parsing (csi)     took: " << timers.csiTimer << endl;
       *Log(theErrLog) << "Parsing (total)   took: " << timers.parseTimer << endl;
     }
+   *Log(theErrLog) << "Frogging in total took: " << timers.frogTimer << endl;
   }
-  *Log(theErrLog) << "Frogging in total took: " << timers.frogTimer << endl;
   return;
 }
 
