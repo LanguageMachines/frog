@@ -152,10 +152,12 @@ folia::Document UctoTokenizer::tokenize( istream& is ){
     throw runtime_error( "ucto tokenizer not initialized" );
 }
 
-folia::Document UctoTokenizer::tokenizestring( const string& s ){
+folia::Document * UctoTokenizer::tokenizehelper( const string& s){
+  /* this helper function is only here for the frog-python binding, we have to cheat a
+   * pointer in for it to work properly */
   if ( tokenizer) {
     istringstream is(s);
-    return tokenizer->tokenize( is );
+    return tokenizer->tokenizenew( is);
   } else
     throw runtime_error( "ucto tokenizer not initialized" );
 }

@@ -116,7 +116,8 @@ class FrogAPI {
   ~FrogAPI();
   void Test( const std::string&, std::ostream&,const std::string& );
   void Test( folia::Document&, std::ostream&, bool=false, const std::string& ="");
-  std::string Test( folia::Document&, bool=true); //returns results as string
+
+  std::string Test( folia::Document*, bool=true); //hack for cython, returns results as string
   bool TestSentence( folia::Sentence*, TimerBlock&);
 
 };

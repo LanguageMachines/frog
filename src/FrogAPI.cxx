@@ -358,7 +358,11 @@ Dependency * FrogAPI::lookupDep( const Word *word,
   if (dependencies.size() == 0 ){
     return 0;
   }
-  int dbFlag = stringTo<int>( configuration.lookUp( "debug", "parser" ) );
+  int dbFlag = 0;
+  try{
+    dbFlag = stringTo<int>( configuration.lookUp( "debug", "parser" ) );
+  } catch (exception & e) {
+  }
   if ( dbFlag ){
     using TiCC::operator<<;
     *Log( theErrLog ) << "\nDependency-lookup "<< word << " in " << dependencies << endl;
@@ -393,7 +397,12 @@ Dependency * FrogAPI::lookupDep( const Word *word,
 string FrogAPI::lookupNEREntity( const vector<Word *>& mwu,
 				 const vector<Entity*>& entities){
   string endresult;
-  int dbFlag = stringTo<int>( configuration.lookUp( "debug", "NER" ) );
+  int dbFlag = 0;
+  try{ 
+    dbFlag = stringTo<int>( configuration.lookUp( "debug", "NER" ) );
+  } catch (exception & e) {
+  }
+
   for ( size_t j=0; j < mwu.size(); ++j ){
     if ( dbFlag ){
       using TiCC::operator<<;
@@ -442,7 +451,11 @@ string FrogAPI::lookupNEREntity( const vector<Word *>& mwu,
 string FrogAPI::lookupIOBChunk( const vector<Word *>& mwu,
 				const vector<Chunk*>& chunks ){
   string endresult;
-  int dbFlag = stringTo<int>( configuration.lookUp( "debug", "IOB" ) );
+  int dbFlag = 0;
+  try {
+   dbFlag = stringTo<int>( configuration.lookUp( "debug", "IOB" ) );
+  } catch (exception & e) {
+    }
   for ( size_t j=0; j < mwu.size(); ++j ){
     if ( dbFlag ){
       using TiCC::operator<<;
@@ -662,10 +675,10 @@ ostream& FrogAPI::showResults( ostream& os,
   return os;
 }
 
-string FrogAPI::Test( folia::Document& doc, bool hidetimers ) {
-  //converts results to string (useful for external bindings)
+string FrogAPI::Test( folia::Document * doc, bool hidetimers ) { //don't change pointer to reference, needed for cython binding
+  //converts results to string (useful for external bindings) 
   stringstream ss;
-  Test(doc, ss, hidetimers);
+  Test(*doc, ss, hidetimers);
   return ss.str();
 }
 
