@@ -362,6 +362,7 @@ Dependency * FrogAPI::lookupDep( const Word *word,
   try{
     dbFlag = stringTo<int>( configuration.lookUp( "debug", "parser" ) );
   } catch (exception & e) {
+    dbFlag = 0;
   }
   if ( dbFlag ){
     using TiCC::operator<<;
@@ -401,6 +402,7 @@ string FrogAPI::lookupNEREntity( const vector<Word *>& mwu,
   try{ 
     dbFlag = stringTo<int>( configuration.lookUp( "debug", "NER" ) );
   } catch (exception & e) {
+    dbFlag = 0;
   }
 
   for ( size_t j=0; j < mwu.size(); ++j ){
@@ -455,6 +457,7 @@ string FrogAPI::lookupIOBChunk( const vector<Word *>& mwu,
   try {
    dbFlag = stringTo<int>( configuration.lookUp( "debug", "IOB" ) );
   } catch (exception & e) {
+    dbFlag = 0;
     }
   for ( size_t j=0; j < mwu.size(); ++j ){
     if ( dbFlag ){

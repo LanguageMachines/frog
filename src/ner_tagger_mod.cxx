@@ -46,6 +46,7 @@ NERTagger::~NERTagger(){
 }
 
 bool NERTagger::init( const Configuration& config ){
+  debug = 0;
   string val = config.lookUp( "debug", "NER" );
   if ( val.empty() ){
     val = config.lookUp( "debug" );

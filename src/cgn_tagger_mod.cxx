@@ -178,6 +178,7 @@ void fillSubSetTable(){
 
 
 bool CGNTagger::init( const Configuration& config ){
+  debug = 0;
   string val = config.lookUp( "debug", "tagger" );
   if ( val.empty() ){
     val = config.lookUp( "debug" );
