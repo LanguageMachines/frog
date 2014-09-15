@@ -37,10 +37,9 @@
 #include <map>
 
 #include "config.h"
-#include "timbl/TimblAPI.h"
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Configuration.h"
-#include "libfolia/folia.h"
+#include "ticcutils/CommandLine.h"
 #include "frog/ucto_tokenizer_mod.h"
 #include "frog/cgn_tagger_mod.h"
 #include "frog/mbma_mod.h"
@@ -51,8 +50,7 @@ using namespace Timbl;
 LogStream my_default_log( cerr, "", StampMessage ); // fall-back
 LogStream *theErrLog = &my_default_log;  // fill the externals
 
-string TestFileName;
-string ProgName;
+vector<string> fileNames;
 bool doAll = false;
 
 Configuration configuration;
@@ -76,24 +74,17 @@ void usage( ) {
 
 static Mbma myMbma(theErrLog);
 
-bool parse_args( TimblOpts& Opts ) {
-  string value;
-  bool mood;
-  if ( Opts.Find('V', value, mood ) ||
-       Opts.Find("version", value, mood ) ){
+bool parse_args( TiCC::CL_Options& Opts ) {
+  if ( Opts.is_present( 'V' ) || Opts.is_present("version") ){
     // we already did show what we wanted.
     exit( EXIT_SUCCESS );
   }
-  if ( Opts.Find ('h', value, mood)) {
+  if ( Opts.is_present('h') ){
     usage();
     exit( EXIT_SUCCESS );
   };
   // is a config file specified?
-  if ( Opts.Find( 'c',  value, mood ) ) {
-    configFileName = value;
-    Opts.Delete( 'c' );
-  };
-
+  Opts.extract( 'c', configFileName );
   if ( configuration.fill( configFileName ) ){
     cerr << "config read from: " << configFileName << endl;
   }
@@ -102,36 +93,31 @@ bool parse_args( TimblOpts& Opts ) {
     cerr << "did you correctly install the frogdata package?" << endl;
     return false;
   }
-
+  string value;
   // debug opts
-  if ( Opts.Find ('d', value, mood)) {
+  if ( Opts.extract('d', value ) ){
     int debug = 0;
     if ( !TiCC::stringTo<int>( value, debug ) ){
       cerr << "-d value should be an integer" << endl;
       return false;
     }
     configuration.setatt( "debug", value, "mbma" );
-    Opts.Delete('d');
   };
 
-  if ( Opts.Find( 't', value, mood )) {
-    TestFileName = value;
+  if ( Opts.extract( 't', value ) ){
     ifstream is( value.c_str() );
     if ( !is ){
       cerr << "input stream " << value << " is not readable" << endl;
       return false;
     }
-    Opts.Delete('t');
-  };
-  if ( Opts.Find( 'a', value, mood )) {
-    doAll = true;
-    Opts.Delete('a');
-  };
-  if ( Opts.Find( "daring", value, mood )) {
-    if ( value.empty() )
-      value = "1";
-    configuration.setatt( "daring", value, "mbma" );
-    Opts.Delete("daring");
+    fileNames.push_back( value );
+  }
+  else {
+    fileNames = Opts.getMassOpts();
+  }
+  doAll = Opts.extract( 'a' );
+  if ( Opts.extract( "daring" ) ){
+    configuration.setatt( "daring", "1", "mbma" );
   };
   return true;
 }
@@ -208,16 +194,23 @@ int main(int argc, char *argv[]) {
   std::ios_base::sync_with_stdio(false);
   cerr << "mbma " << VERSION << " (c) ILK 1998 - 2014" << endl;
   cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
-  ProgName = argv[0];
+  TiCC::CL_Options Opts("aVt:d:hc:","daring,version");
+  try {
+    Opts.init(argc, argv);
+  }
+  catch ( const exception& e ){
+    cerr << "fatal error: " << e.what() << endl;
+    return EXIT_FAILURE;
+  }
   cerr << "based on [" << Timbl::VersionName() << "]" << endl;
   cerr << "configdir: " << configDir << endl;
-  try {
-    TimblOpts Opts(argc, argv);
-    if ( parse_args(Opts) ){
-      if (  !init() ){
-	cerr << "terminated." << endl;
-	return EXIT_FAILURE;
-      }
+  if ( parse_args(Opts) ){
+    if (  !init() ){
+      cerr << "terminated." << endl;
+      return EXIT_FAILURE;
+    }
+    for ( size_t i=0; i < fileNames.size(); ++i ){
+      string TestFileName = fileNames[i];
       ifstream in(TestFileName.c_str() );
       if ( in.good() ){
 	cerr << "Processing: " << TestFileName << endl;
@@ -228,12 +221,8 @@ int main(int argc, char *argv[]) {
 	return EXIT_FAILURE;
       }
     }
-    else {
-      return EXIT_FAILURE;
-    }
   }
-  catch ( const exception& e ){
-    cerr << "fatal error: " << e.what() << endl;
+  else {
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

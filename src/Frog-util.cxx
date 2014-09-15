@@ -8,31 +8,27 @@
   This file is part of frog
 
   frog is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by  
-  the Free Software Foundation; either version 3 of the License, or  
-  (at your option) any later version.  
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
   frog is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of  
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
-  GNU General Public License for more details.  
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-  You should have received a copy of the GNU General Public License  
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   For questions and suggestions, see:
       http://ilk.uvt.nl/software.html
   or send mail to:
       timbl@uvt.nl
-*/                                                                   
+*/
 
-#include <iostream>
-#include <fstream>
+#include <set>
 #include <string>
-#include <vector>
-#include <cstdlib>
 #include "config.h"
-#include "timbl/TimblAPI.h"
 #include "frog/Frog.h"
 
 #include <sys/types.h>
@@ -62,7 +58,7 @@ bool existsDir( const string& dirName ){
 }
 
 void getFileNames( const string& dirName,
-		   const string& ext, 
+		   const string& ext,
 		   set<string>& fileNames ){
   DIR *dir = opendir( dirName.c_str() );
   if ( !dir )
