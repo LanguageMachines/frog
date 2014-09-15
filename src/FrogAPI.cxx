@@ -874,6 +874,7 @@ string FrogAPI::Testtostring( const string& s ){
   Document *doc = tokenizer->tokenizehelper( s );
   stringstream ss;
   Test(*doc, ss, true);
+  delete doc;
   return ss.str();
 }
 
