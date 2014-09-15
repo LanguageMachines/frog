@@ -43,7 +43,7 @@ UctoTokenizer::UctoTokenizer(LogStream * logstream) {
   uctoLog = new LogStream( logstream, "tok-" );
 }
 
-bool UctoTokenizer::init( const Configuration& config, const string & docid, bool pass ){
+bool UctoTokenizer::init( const Configuration& config ){
   if ( tokenizer )
     throw runtime_error( "ucto tokenizer is already initialized" );
   tokenizer = new Tokenizer::TokenizerClass();
@@ -56,10 +56,9 @@ bool UctoTokenizer::init( const Configuration& config, const string & docid, boo
   if ( !val.empty() )
     debug = TiCC::stringTo<int>( val );
   tokenizer->setDebug( debug );
-  if ( pass ){
+  if ( tokenizer->getPassThru() ){
     // when passthru, we don't further initialize the tokenizer
     // it wil run in minimal mode then.
-    tokenizer->setPassThru( true );
   }
   else {
     string rulesName = config.lookUp( "rulesFile", "tokenizer" );
@@ -76,7 +75,7 @@ bool UctoTokenizer::init( const Configuration& config, const string & docid, boo
   tokenizer->setVerbose( false );
   tokenizer->setSentenceDetection( true ); //detection of sentences
   tokenizer->setParagraphDetection( false ); //detection of paragraphs
-  tokenizer->setXMLOutput( true, docid );
+  tokenizer->setXMLOutput( true );
   return true;
 }
 
@@ -121,9 +120,34 @@ void UctoTokenizer::setTextClass( const std::string& cls ){
     throw runtime_error( "ucto tokenizer not initialized" );
 }
 
+void UctoTokenizer::setDocID( const std::string& id ){
+  if ( tokenizer ){
+    if ( !id.empty() )
+      tokenizer->setDocID( id );
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initialized" );
+}
+
 void UctoTokenizer::setInputXml( bool b ){
   if ( tokenizer ){
     tokenizer->setXMLInput( b );
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initialized" );
+}
+
+void UctoTokenizer::setPassThru( const bool b ) {
+  if ( tokenizer ){
+    tokenizer->setPassThru( b );
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initialized" );
+}
+
+bool UctoTokenizer::getPassThru() const {
+  if ( tokenizer ){
+    return tokenizer->getPassThru();
   }
   else
     throw runtime_error( "ucto tokenizer not initialized" );

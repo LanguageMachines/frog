@@ -91,14 +91,39 @@ class FrogOptions {
 
 
 class FrogAPI {
- protected:
-  std::vector<folia::Word*> lookup( folia::Word *word, const std::vector<folia::Entity*>& entities );
-  folia::Dependency * lookupDep( const folia::Word *word, const std::vector<folia::Dependency*>&dependencies );
-  std::string lookupNEREntity( const std::vector<folia::Word *>& mwu, const std::vector<folia::Entity*>& entities);
-  std::string lookupIOBChunk( const std::vector<folia::Word *>& mwu, const std::vector<folia::Chunk*>& chunks );
-  void displayMWU( std::ostream& os, size_t index, const std::vector<folia::Word*> mwu);
-  std::ostream & showResults( std::ostream& os, const folia::Sentence* sentence, bool showParse);
  public:
+  FrogAPI( const FrogOptions&,
+	   const TiCC::Configuration&,
+	   TiCC::LogStream * );
+  ~FrogAPI();
+
+  void Test( const std::string&, std::ostream&, const std::string& );
+  void Test( folia::Document&, std::ostream&,
+	     bool=false, const std::string& ="");
+  bool TestSentence( folia::Sentence*, TimerBlock&);
+  void TestServer( Sockets::ServerSocket &conn );
+  void TestInteractive();
+  std::string Testtostring( folia::Document*); //hack for cython, returns results as string
+
+ private:
+  // functions
+  std::vector<folia::Word*> lookup( folia::Word *,
+				    const std::vector<folia::Entity*>& );
+  folia::Dependency *lookupDep( const folia::Word *,
+				const std::vector<folia::Dependency*>& );
+  std::string lookupNEREntity( const std::vector<folia::Word *>&,
+			       const std::vector<folia::Entity*>& );
+  std::string lookupIOBChunk( const std::vector<folia::Word *>&,
+			      const std::vector<folia::Chunk*>& );
+  void displayMWU( std::ostream&, size_t, const std::vector<folia::Word*>& );
+  std::ostream & showResults( std::ostream&, const folia::Sentence*, bool );
+
+  // data
+  const TiCC::Configuration& configuration;
+  const FrogOptions& options;
+  TiCC::LogStream *theErrLog;
+
+  // pointers to all the modules
   Mbma *myMbma;
   Mblem *myMblem;
   Mwu *myMwu;
@@ -107,23 +132,6 @@ class FrogAPI {
   IOBTagger *myIOBTagger;
   NERTagger *myNERTagger;
   UctoTokenizer *tokenizer;
-
-  void TestServer( Sockets::ServerSocket &conn );
-  void TestInteractive();
-  TiCC::LogStream *theErrLog;
-  const TiCC::Configuration& configuration;
-  const FrogOptions& options;
-
-  FrogAPI( const FrogOptions&,
-	   const TiCC::Configuration&,
-	   TiCC::LogStream * );
-  ~FrogAPI();
-  void Test( const std::string&, std::ostream&,const std::string& );
-  void Test( folia::Document&, std::ostream&, bool=false, const std::string& ="");
-
-  std::string Testtostring( folia::Document*); //hack for cython, returns results as string
-  bool TestSentence( folia::Sentence*, TimerBlock&);
-
 };
 
 #endif

@@ -131,12 +131,11 @@ void usage( ) {
        << "\t                     (but always 1 for server mode)\n";
 }
 
-//**** stuff to process commandline options *********************************
-
-
-
 bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
 		 LogStream* theErrLog ) {
+  // process the command line and fill FrogOptions to initialize the API
+  // also fill some globals we use for our own main.
+
   string value;
   if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
     // we already did show what we wanted.
@@ -439,7 +438,7 @@ int main(int argc, char *argv[]) {
     if (!parsed) {
       throw runtime_error( "init failed" );
     }
-    FrogAPI frog( options, configuration, theErrLog);
+    FrogAPI frog( options, configuration, theErrLog );
 
     if ( !fileNames.empty() ) {
       string outPath = outputDirName;
@@ -458,8 +457,10 @@ int main(int argc, char *argv[]) {
 	    if ( options.doXMLin ){
 	      if ( !outPath.empty() )
 		outName = outPath + *it + ".out";
-	    } else
+	    }
+	    else {
 	      outName = outPath + *it + ".out";
+	    }
 	    outS = new ofstream( outName.c_str() );
 	  } else {
 	    outS = &cout;
@@ -472,7 +473,8 @@ int main(int argc, char *argv[]) {
 	      xmlName = xmlPath + *it + ".xml";
 	    else
 	      xmlName = xmlPath + *it;
-	  } else if ( options.doXMLout )
+	  }
+	  else if ( options.doXMLout )
 	    xmlName = *it + ".xml"; // do not clobber the inputdir!
 	}
 	*Log(theErrLog) << "Frogging " << testName << endl;
@@ -488,7 +490,8 @@ int main(int argc, char *argv[]) {
 	*Log(theErrLog) << "results stored in " << outputFileName << endl;
 	delete outS;
       }
-    } else if ( options.doServer ) {
+    }
+    else if ( options.doServer ) {
       //first set up some things to deal with zombies
       struct sigaction action;
       action.sa_handler = SIG_IGN;
@@ -519,8 +522,8 @@ int main(int argc, char *argv[]) {
 	    if (pid < 0) {
 	      *Log(theErrLog) << "ERROR on fork" << endl;
 	      throw runtime_error( "FORK failed" );
-	    } else if (pid == 0)  {
-	      //		  server = NULL;
+	    }
+	    else if (pid == 0)  {
 	      frog.TestServer( conn );
 	      exit(EXIT_SUCCESS);
 	    }

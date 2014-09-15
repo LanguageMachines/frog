@@ -149,7 +149,7 @@ bool init(){
     cerr << "MBLEM Initialization failed." << endl;
     return false;
   }
-  if ( !tokenizer.init( configuration, "", false ) ){
+  if ( !tokenizer.init( configuration ) ){
     cerr << "UCTO Initialization failed." << endl;
     return false;
   }

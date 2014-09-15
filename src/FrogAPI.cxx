@@ -74,18 +74,18 @@ FrogOptions::FrogOptions() {
 FrogAPI::FrogAPI( const FrogOptions &opt,
 		  const Configuration &conf,
 		  LogStream *log ):
-  theErrLog(log),
   configuration(conf),
-  options(opt)
+  options(opt),
+  theErrLog(log),
+  myMbma(0),
+  myMblem(0),
+  myMwu(0),
+  myParser(0),
+  myCGNTagger(0),
+  myIOBTagger(0),
+  myNERTagger(0),
+  tokenizer(0)
 {
-  myMbma = NULL;
-  myMblem = NULL;
-  myMwu = NULL;
-  myParser = NULL;
-  myCGNTagger = NULL;
-  myIOBTagger = NULL;
-  myNERTagger = NULL;
-  tokenizer = NULL;
 
   // for some modules init can take a long time
   // so first make sure it will not fail on some trivialities
@@ -116,8 +116,10 @@ FrogAPI::FrogAPI( const FrogOptions &opt,
     // before the fork!
     // see: http://bisqwit.iki.fi/story/howto/openmp/#OpenmpAndFork
     tokenizer = new UctoTokenizer(theErrLog);
-    bool stat = tokenizer->init( configuration, options.docid, !options.doTok );
+    bool stat = tokenizer->init( configuration );
     if ( stat ){
+      tokenizer->setPassThru( !options.doTok );
+      tokenizer->setDocID( options.docid );
       tokenizer->setSentencePerLineInput( options.doSentencePerLine );
       tokenizer->setQuoteDetection( options.doQuoteDetection );
       tokenizer->setInputEncoding( options.encoding );
@@ -181,8 +183,10 @@ FrogAPI::FrogAPI( const FrogOptions &opt,
 #pragma omp section
       {
 	tokenizer = new UctoTokenizer(theErrLog);
-	tokStat = tokenizer->init( configuration, options.docid, !options.doTok );
+	tokStat = tokenizer->init( configuration );
 	if ( tokStat ){
+	  tokenizer->setPassThru( !options.doTok );
+	  tokenizer->setDocID( options.docid );
 	  tokenizer->setSentencePerLineInput( options.doSentencePerLine );
 	  tokenizer->setQuoteDetection( options.doQuoteDetection );
 	  tokenizer->setInputEncoding( options.encoding );
@@ -277,14 +281,14 @@ FrogAPI::FrogAPI( const FrogOptions &opt,
 }
 
 FrogAPI::~FrogAPI() {
-  if (myMbma != NULL) delete myMbma;
-  if (myMblem != NULL) delete myMblem;
-  if (myMwu != NULL) delete myMwu;
-  if (myCGNTagger != NULL) delete myCGNTagger;
-  if (myIOBTagger != NULL) delete myIOBTagger;
-  if (myNERTagger != NULL) delete myNERTagger;
-  if (myParser != NULL) delete myParser;
-  if (tokenizer != NULL) delete tokenizer;
+  delete myMbma;
+  delete myMblem;
+  delete myMwu;
+  delete myCGNTagger;
+  delete myIOBTagger;
+  delete myNERTagger;
+  delete myParser;
+  delete tokenizer;
 }
 
 bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
@@ -692,7 +696,7 @@ string FrogAPI::lookupIOBChunk( const vector<Word *>& mwu,
 
 void FrogAPI::displayMWU( ostream& os,
 			  size_t index,
-			  const vector<Word*> mwu ){
+			  const vector<Word*>& mwu ){
   string wrd;
   string pos;
   string lemma;
