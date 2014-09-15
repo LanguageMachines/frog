@@ -47,27 +47,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_LIBREADLINE
-#  if defined(HAVE_READLINE_READLINE_H)
-#    include <readline/readline.h>
-#  elif defined(HAVE_READLINE_H)
-#    include <readline.h>
-#  else
-#    define NO_READLINE
-#  endif /* !defined(HAVE_READLINE_H) */
-#else
-#  define NO_READLINE
-#endif /* HAVE_LIBREADLINE */
-
-#ifdef HAVE_READLINE_HISTORY
-#  if defined(HAVE_READLINE_HISTORY_H)
-#    include <readline/history.h>
-#  elif defined(HAVE_HISTORY_H)
-#    include <history.h>
-#  endif /* defined(HAVE_READLINE_HISTORY_H) */
-#endif /* HAVE_READLINE_HISTORY */
-
-
 #include "timbl/TimblAPI.h"
 #include "timblserver/FdStream.h"
 #include "timblserver/ServerBase.h"
@@ -82,9 +61,6 @@
 using namespace std;
 using namespace folia;
 using namespace TiCC;
-
-LogStream my_default_log( cerr, "frog-", StampMessage ); // fall-back
-LogStream *theErrLog = &my_default_log;
 
 string testDirName;
 string outputFileName;
@@ -159,7 +135,8 @@ void usage( ) {
 
 
 
-bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options ) {
+bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
+		 LogStream* theErrLog ) {
   string value;
   if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
     // we already did show what we wanted.
@@ -275,7 +252,7 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options ) {
 #ifdef HAVE_OPENMP
   if ( options.doServer ) {
     // run in one thread in server mode, forking is too expensive for lots of small snippets
-    omp_set_num_threads( 1 );
+    options.numThreads =  1;
   }
   else if ( Opts.extract( "threads", value ) ){
     int num;
@@ -283,7 +260,10 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options ) {
       *Log(theErrLog) << "threads value should be a positive integer" << endl;
       return false;
     }
-    omp_set_num_threads( num );
+    options.numThreads = num;
+  }
+  else {
+    options.numThreads = omp_get_max_threads();
   }
 #endif
 
@@ -439,171 +419,6 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options ) {
 }
 
 
-
-
-void TestServer( FrogAPI &frog,
-		 Sockets::ServerSocket &conn,
-		 const FrogOptions &options) {
-
-  try {
-    while (true) {
-      ostringstream outputstream;
-      if ( options.doXMLin ){
-        string result;
-        string s;
-        while ( conn.read(s) ){
-            result += s + "\n";
-            if ( s.empty() )
-                break;
-        }
-        if ( result.size() < 50 ){
-            // a FoLia doc must be at least a few 100 bytes
-            // so this is wrong. Just bail out
-            throw( runtime_error( "read garbage" ) );
-        }
-        if ( options.debugFlag )
-            *Log(theErrLog) << "received data [" << result << "]" << endl;
-        Document doc;
-        try {
-            doc.readFromString( result );
-        }
-	catch ( std::exception& e ){
-	  *Log(theErrLog) << "FoLiaParsing failed:" << endl << e.what() << endl;
-	  throw;
-        }
-        *Log(theErrLog) << "Processing... " << endl;
-        frog.tokenizer->tokenize( doc );
-        frog.Test( doc, outputstream );
-      } else {
-        string data = "";
-        if ( options.doSentencePerLine ){
-            if ( !conn.read( data ) )	 //read data from client
-                throw( runtime_error( "read failed" ) );
-        }
-        else {
-            string line;
-            while( conn.read(line) ){
-                if ( line == "EOT" )
-                    break;
-                data += line + "\n";
-            }
-        }
-        if ( options.debugFlag )
-            *Log(theErrLog) << "Received: [" << data << "]" << endl;
-        *Log(theErrLog) << "Processing... " << endl;
-        istringstream inputstream(data,istringstream::in);
-        Document doc = frog.tokenizer->tokenize( inputstream );
-        frog.Test( doc, outputstream );
-      }
-      if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
-            if (options.debugFlag)
-                *Log(theErrLog) << "socket " << conn.getMessage() << endl;
-            throw( runtime_error( "write to client failed" ) );
-      }
-
-    }
-  }
-  catch ( std::exception& e ) {
-    if (options.debugFlag)
-      *Log(theErrLog) << "connection lost: " << e.what() << endl;
-  }
-  *Log(theErrLog) << "Connection closed.\n";
-}
-
-#ifdef NO_READLINE
-void TestInteractive(FrogAPI& frog, const FrogOptions& options) {
-  cout << "frog>"; cout.flush();
-  string line;
-  string data;
-  while ( getline( cin, line ) ){
-    string data = line;
-    if ( options.doSentencePerLine ){
-      if ( line.empty() ){
-	cout << "frog>"; cout.flush();
-	continue;
-      }
-    }
-    else {
-      if ( !line.empty() ){
-	data += "\n";
-      }
-      cout << "frog>"; cout.flush();
-      string line2;
-      while( getline( cin, line2 ) ){
-	if ( line2.empty() )
-	  break;
-	data += line2 + "\n";
-	cout << "frog>"; cout.flush();
-      }
-    }
-    if ( data.empty() ){
-      cout << "ignoring empty input" << endl;
-      cout << "frog>"; cout.flush();
-      continue;
-    }
-    cout << "Processing... " << endl;
-    istringstream inputstream(data,istringstream::in);
-    Document doc = frog.tokenizer->tokenize( inputstream );
-    frog.Test( doc, cout, true );
-    cout << "frog>"; cout.flush();
-  }
-  cout << "Done.\n";
-}
-#else
-void TestInteractive(FrogAPI& frog, const FrogOptions& options){
-  const char *prompt = "frog> ";
-  string line;
-  bool eof = false;
-  while ( !eof ){
-    string data;
-    char *input = readline( prompt );
-    if ( !input ){
-      eof = true;
-      break;
-    }
-    line = input;
-    if ( options.doSentencePerLine ){
-      if ( line.empty() ){
-	continue;
-      }
-      else {
-	data += line + "\n";
-	add_history( input );
-      }
-    }
-    else {
-      if ( !line.empty() ){
-	add_history( input );
-	data = line + "\n";
-      }
-      while ( !eof ){
-	char *input = readline( prompt );
-	if ( !input ){
-	  eof = true;
-	  break;
-	}
-	line = input;
-	if ( line.empty() ){
-	  break;
-	}
-	add_history( input );
-	data += line + "\n";
-      }
-    }
-    if ( !data.empty() ){
-      if ( data[data.size()-1] == '\n' ){
-        data = data.substr( 0, data.size()-1 );
-      }
-      cout << "Processing... '" << data << "'" << endl;
-      istringstream inputstream(data,istringstream::in);
-      Document doc = frog.tokenizer->tokenize( inputstream );
-      frog.Test( doc, cout, true );
-    }
-  }
-  cout << "Done.\n";
-}
-#endif
-
 int main(int argc, char *argv[]) {
   cerr << "frog " << VERSION << " (c) ILK 1998 - 2014" << endl;
   cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
@@ -612,7 +427,7 @@ int main(int argc, char *argv[]) {
        << Timbl::VersionName() << ", "
        << TimblServer::VersionName() << ", "
        << Tagger::VersionName() << "]" << endl;
-  //  cout << "configdir: " << configDir << endl;
+  LogStream *theErrLog = new LogStream( cerr, "frog-", StampMessage );
   std::ios_base::sync_with_stdio(false);
   FrogOptions options;
 
@@ -623,7 +438,7 @@ int main(int argc, char *argv[]) {
 			  "debug:,keep-parser-files,version,threads:,KANON");
 
     Opts.init(argc, argv);
-    bool parsed = parse_args(Opts, options );
+    bool parsed = parse_args( Opts, options, theErrLog );
     if (!parsed) {
       throw runtime_error( "init failed" );
     }
@@ -709,7 +524,7 @@ int main(int argc, char *argv[]) {
 	      throw runtime_error( "FORK failed" );
 	    } else if (pid == 0)  {
 	      //		  server = NULL;
-	      TestServer(frog, conn, options );
+	      frog.TestServer( conn );
 	      exit(EXIT_SUCCESS);
 	    }
 	  }
@@ -725,7 +540,7 @@ int main(int argc, char *argv[]) {
     }
     else {
       // interactive mode
-      TestInteractive( frog, options );
+      frog.TestInteractive();
     }
   }
   catch ( const exception& e ){

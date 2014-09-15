@@ -15,7 +15,27 @@
 #include <vector>
 #include <omp.h>
 
+#include "config.h"
 
+#ifdef HAVE_LIBREADLINE
+#  if defined(HAVE_READLINE_READLINE_H)
+#    include <readline/readline.h>
+#  elif defined(HAVE_READLINE_H)
+#    include <readline.h>
+#  else
+#    define NO_READLINE
+#  endif /* !defined(HAVE_READLINE_H) */
+#else
+#  define NO_READLINE
+#endif /* HAVE_LIBREADLINE */
+
+#ifdef HAVE_READLINE_HISTORY
+#  if defined(HAVE_READLINE_HISTORY_H)
+#    include <readline/history.h>
+#  elif defined(HAVE_HISTORY_H)
+#    include <history.h>
+#  endif /* defined(HAVE_READLINE_HISTORY_H) */
+#endif /* HAVE_READLINE_HISTORY */
 
 
 // individual module headers
@@ -39,7 +59,7 @@ FrogOptions::FrogOptions() {
   interactive = false;
 
   maxParserTokens =  0; // 0 for unlimited
-
+  numThreads = 1;
   listenport = "void";
   docid = "untitled";
   tmpDirName = "/tmp/";
@@ -139,6 +159,10 @@ FrogAPI::FrogAPI( const FrogOptions &opt,
     }
   }
   else {
+#ifdef HAVE_OPENMP
+    omp_set_num_threads( options.numThreads );
+#endif
+
     bool tokStat = true;
     bool lemStat = true;
     bool mwuStat = true;
@@ -337,6 +361,165 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
   return showParse;
 }
 
+void FrogAPI::TestServer( Sockets::ServerSocket &conn ){
+  try {
+    while (true) {
+      ostringstream outputstream;
+      if ( options.doXMLin ){
+        string result;
+        string s;
+        while ( conn.read(s) ){
+            result += s + "\n";
+            if ( s.empty() )
+                break;
+        }
+        if ( result.size() < 50 ){
+            // a FoLia doc must be at least a few 100 bytes
+            // so this is wrong. Just bail out
+            throw( runtime_error( "read garbage" ) );
+        }
+        if ( options.debugFlag )
+            *Log(theErrLog) << "received data [" << result << "]" << endl;
+        Document doc;
+        try {
+            doc.readFromString( result );
+        }
+	catch ( std::exception& e ){
+	  *Log(theErrLog) << "FoLiaParsing failed:" << endl << e.what() << endl;
+	  throw;
+        }
+        *Log(theErrLog) << "Processing... " << endl;
+        tokenizer->tokenize( doc );
+        Test( doc, outputstream );
+      } else {
+        string data = "";
+        if ( options.doSentencePerLine ){
+            if ( !conn.read( data ) )	 //read data from client
+                throw( runtime_error( "read failed" ) );
+        }
+        else {
+            string line;
+            while( conn.read(line) ){
+                if ( line == "EOT" )
+                    break;
+                data += line + "\n";
+            }
+        }
+        if ( options.debugFlag )
+            *Log(theErrLog) << "Received: [" << data << "]" << endl;
+        *Log(theErrLog) << "Processing... " << endl;
+        istringstream inputstream(data,istringstream::in);
+        Document doc = tokenizer->tokenize( inputstream );
+        Test( doc, outputstream );
+      }
+      if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
+            if (options.debugFlag)
+                *Log(theErrLog) << "socket " << conn.getMessage() << endl;
+            throw( runtime_error( "write to client failed" ) );
+      }
+
+    }
+  }
+  catch ( std::exception& e ) {
+    if (options.debugFlag)
+      *Log(theErrLog) << "connection lost: " << e.what() << endl;
+  }
+  *Log(theErrLog) << "Connection closed.\n";
+}
+
+#ifdef NO_READLINE
+void FrogAPI::TestInteractive() {
+  cout << "frog>"; cout.flush();
+  string line;
+  string data;
+  while ( getline( cin, line ) ){
+    string data = line;
+    if ( options.doSentencePerLine ){
+      if ( line.empty() ){
+	cout << "frog>"; cout.flush();
+	continue;
+      }
+    }
+    else {
+      if ( !line.empty() ){
+	data += "\n";
+      }
+      cout << "frog>"; cout.flush();
+      string line2;
+      while( getline( cin, line2 ) ){
+	if ( line2.empty() )
+	  break;
+	data += line2 + "\n";
+	cout << "frog>"; cout.flush();
+      }
+    }
+    if ( data.empty() ){
+      cout << "ignoring empty input" << endl;
+      cout << "frog>"; cout.flush();
+      continue;
+    }
+    cout << "Processing... " << endl;
+    istringstream inputstream(data,istringstream::in);
+    Document doc = tokenizer->tokenize( inputstream );
+    Test( doc, cout, true );
+    cout << "frog>"; cout.flush();
+  }
+  cout << "Done.\n";
+}
+#else
+void FrogAPI::TestInteractive(){
+  const char *prompt = "frog> ";
+  string line;
+  bool eof = false;
+  while ( !eof ){
+    string data;
+    char *input = readline( prompt );
+    if ( !input ){
+      eof = true;
+      break;
+    }
+    line = input;
+    if ( options.doSentencePerLine ){
+      if ( line.empty() ){
+	continue;
+      }
+      else {
+	data += line + "\n";
+	add_history( input );
+      }
+    }
+    else {
+      if ( !line.empty() ){
+	add_history( input );
+	data = line + "\n";
+      }
+      while ( !eof ){
+	char *input = readline( prompt );
+	if ( !input ){
+	  eof = true;
+	  break;
+	}
+	line = input;
+	if ( line.empty() ){
+	  break;
+	}
+	add_history( input );
+	data += line + "\n";
+      }
+    }
+    if ( !data.empty() ){
+      if ( data[data.size()-1] == '\n' ){
+        data = data.substr( 0, data.size()-1 );
+      }
+      cout << "Processing... '" << data << "'" << endl;
+      istringstream inputstream(data,istringstream::in);
+      Document doc = tokenizer->tokenize( inputstream );
+      Test( doc, cout, true );
+    }
+  }
+  cout << "Done.\n";
+}
+#endif
 
 vector<Word*> FrogAPI::lookup( Word *word, const vector<Entity*>& entities ){
   vector<Word*> vec;
@@ -399,7 +582,7 @@ string FrogAPI::lookupNEREntity( const vector<Word *>& mwu,
 				 const vector<Entity*>& entities){
   string endresult;
   int dbFlag = 0;
-  try{ 
+  try{
     dbFlag = stringTo<int>( configuration.lookUp( "debug", "NER" ) );
   } catch (exception & e) {
     dbFlag = 0;
@@ -679,7 +862,7 @@ ostream& FrogAPI::showResults( ostream& os,
 }
 
 string FrogAPI::Testtostring( folia::Document * doc) { //don't change pointer to reference, needed for cython binding
-  //converts results to string (useful for external bindings) 
+  //converts results to string (useful for external bindings)
   stringstream ss;
   Test(*doc, ss, true);
   return ss.str();

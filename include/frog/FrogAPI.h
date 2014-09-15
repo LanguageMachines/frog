@@ -35,6 +35,8 @@
 
 #include "frog/Frog.h" //internals
 #include "ticcutils/Configuration.h"
+#include "timblserver/FdStream.h"
+#include "timblserver/ServerBase.h"
 
 #include "frog/ucto_tokenizer_mod.h"
 #include "frog/mbma_mod.h"
@@ -69,8 +71,8 @@ class FrogOptions {
   bool doKanon;
 
   int debugFlag;
-
   bool interactive;
+  int numThreads;
 
   std::string encoding;
   std::string uttmark;
@@ -106,6 +108,8 @@ class FrogAPI {
   NERTagger *myNERTagger;
   UctoTokenizer *tokenizer;
 
+  void TestServer( Sockets::ServerSocket &conn );
+  void TestInteractive();
   TiCC::LogStream *theErrLog;
   const TiCC::Configuration& configuration;
   const FrogOptions& options;
