@@ -103,7 +103,9 @@ class FrogAPI {
   bool TestSentence( folia::Sentence*, TimerBlock&);
   void TestServer( Sockets::ServerSocket &conn );
   void TestInteractive();
+
   std::string Testtostring( folia::Document*); //hack for cython, returns results as string
+  std::string Testtostring( const std::string&  );
 
  private:
   // functions

@@ -869,6 +869,14 @@ ostream& FrogAPI::showResults( ostream& os,
   return os;
 }
 
+string FrogAPI::Testtostring( const string& s ){
+  //converts input string to string (useful for external bindings)
+  Document *doc = tokenizer->tokenizehelper( s );
+  stringstream ss;
+  Test(*doc, ss, true);
+  return ss.str();
+}
+
 string FrogAPI::Testtostring( folia::Document * doc) { //don't change pointer to reference, needed for cython binding
   //converts results to string (useful for external bindings)
   stringstream ss;
@@ -921,9 +929,10 @@ void FrogAPI::Test( Document& doc,
 	*Log(theErrLog) << "Sentence " << i+1 << " isn't parsed because it contains more tokens then set with the --max-parser-tokens=" << options.maxParserTokens << " option." << endl;
       }
     }
-    for ( size_t i = 0; i < topsentences.size(); ++i ) {
-      if ( !(options.doServer && options.doXMLout) )
+    if ( !(options.doServer && options.doXMLout) ){
+      for ( size_t i = 0; i < topsentences.size(); ++i ) {
         showResults( outStream, topsentences[i], options.doParse);
+      }
     }
   }
   else {
