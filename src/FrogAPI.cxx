@@ -1,7 +1,7 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  $Id: Frog.cxx 17655 2014-09-15 13:03:20Z sloot $
-  $URL: https://ilk.uvt.nl/svn/sources/Frog/trunk/src/Frog.cxx $
+  $Id$
+  $URL$
 
   Copyright (c) 2006 - 2014
   Tilburg University

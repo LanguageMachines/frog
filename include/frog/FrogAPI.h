@@ -1,7 +1,7 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  $Id: Frog.h 17614 2014-09-07 12:49:43Z mvgompel $
-  $URL: https://ilk.uvt.nl/svn/sources/Frog/trunk/include/frog/Frog.h $
+  $Id$
+  $URL$
 
   Copyright (c) 2006 - 2014
   Tilburg University
