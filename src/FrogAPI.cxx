@@ -59,7 +59,11 @@ FrogOptions::FrogOptions() {
   interactive = false;
 
   maxParserTokens =  0; // 0 for unlimited
+#ifdef HAVE_OPENMP
+  numThreads = omp_get_max_threads();
+#else
   numThreads = 1;
+#endif
   listenport = "void";
   docid = "untitled";
   tmpDirName = "/tmp/";

@@ -262,9 +262,6 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
     }
     options.numThreads = num;
   }
-  else {
-    options.numThreads = omp_get_max_threads();
-  }
 #endif
 
   if ( Opts.extract( "keep-parser-files" ) ){
