@@ -45,7 +45,7 @@ class UctoTokenizer {
   void setInputXml( bool );
   void setTextClass( const std::string& );
   void setDocID( const std::string& );
-  folia::Document *tokenizehelper( const std::string&); //for python-frog binding
+  folia::Document tokenizestring( const std::string& );
   folia::Document tokenize( std::istream& );
   bool tokenize( folia::Document& );
   std::vector<std::string> tokenize( const std::string&  );

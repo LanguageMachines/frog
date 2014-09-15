@@ -871,10 +871,9 @@ ostream& FrogAPI::showResults( ostream& os,
 
 string FrogAPI::Testtostring( const string& s ){
   //converts input string to string (useful for external bindings)
-  Document *doc = tokenizer->tokenizehelper( s );
+  Document doc = tokenizer->tokenizestring( s );
   stringstream ss;
-  Test(*doc, ss, true);
-  delete doc;
+  Test( doc, ss, true);
   return ss.str();
 }
 
