@@ -40,6 +40,7 @@
 #include "timbl/TimblAPI.h"
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Configuration.h"
+#include "ticcutils/CommandLine.h"
 #include "libfolia/folia.h"
 #include "frog/ucto_tokenizer_mod.h"
 #include "frog/cgn_tagger_mod.h"
@@ -51,8 +52,7 @@ using namespace Timbl;
 LogStream my_default_log( cerr, "", StampMessage ); // fall-back
 LogStream *theErrLog = &my_default_log;  // fill the externals
 
-string TestFileName;
-string ProgName;
+vector<string> fileNames;
 bool doAll = false;
 
 Configuration configuration;
@@ -77,24 +77,18 @@ void usage( ) {
 
 static Mblem myMblem(theErrLog);
 
-bool parse_args( TimblOpts& Opts ) {
+bool parse_args( TiCC::CL_Options& Opts ) {
   cerr << "start " << Opts << endl;
-  string value;
-  bool mood;
-  if ( Opts.Find('V', value, mood ) ||
-       Opts.Find("version", value, mood ) ){
+  if ( Opts.is_present('V') || Opts.is_present("version" ) ){
     // we already did show what we wanted.
     exit( EXIT_SUCCESS );
   }
-  if ( Opts.Find ('h', value, mood)) {
+  if ( Opts.is_present ('h') ) {
     usage();
     exit( EXIT_SUCCESS );
   };
   // is a config file specified?
-  if ( Opts.Find( 'c',  value, mood ) ) {
-    configFileName = value;
-    Opts.Delete( 'c' );
-  };
+  Opts.extract( 'c', configFileName );
 
   if ( configuration.fill( configFileName ) ){
     cerr << "config read from: " << configFileName << endl;
@@ -106,38 +100,28 @@ bool parse_args( TimblOpts& Opts ) {
   }
 
   // debug opts
-  if ( Opts.Find ('d', value, mood)) {
+  string value;
+  if ( Opts.extract( 'd', value ) ) {
     int debug = 0;
     if ( !TiCC::stringTo<int>( value, debug ) ){
       cerr << "-d value should be an integer" << endl;
       return false;
     }
     configuration.setatt( "debug", value, "mblem" );
-    Opts.Delete('d');
   };
 
-  if ( Opts.Find( 't', value, mood )) {
-    TestFileName = value;
+  if ( Opts.extract( 't', value ) ){
     ifstream is( value.c_str() );
     if ( !is ){
       cerr << "input stream " << value << " is not readable" << endl;
       return false;
     }
-    Opts.Delete('t');
+    fileNames.push_back( value );
   }
-  else if ( Opts.Find( '?', value, mood )) {
-    TestFileName = value;
-    ifstream is( value.c_str() );
-    if ( !is ){
-      cerr << "input stream " << value << " is not readable" << endl;
-      return false;
-    }
-    Opts.Delete('?');
+  else {
+    fileNames = Opts.getMassOpts();
   };
-  if ( Opts.Find( 'a', value, mood )) {
-    doAll = true;
-    Opts.Delete('t');
-  };
+  doAll = Opts.is_present( 'a' );
   return true;
 }
 
@@ -193,31 +177,34 @@ int main(int argc, char *argv[]) {
   std::ios_base::sync_with_stdio(false);
   cerr << "mblem " << VERSION << " (c) ILK 1998 - 2014" << endl;
   cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
-  ProgName = argv[0];
+  TiCC::CL_Options Opts("c:t:hVd:a", "version");
+  try {
+    Opts.init(argc, argv);
+  }
+  catch ( const exception& e ){
+    cerr << "fatal error: " << e.what() << endl;
+    return EXIT_FAILURE;
+  }
   cerr << "based on [" << Timbl::VersionName() << "]" << endl;
   cerr << "configdir: " << configDir << endl;
-  try {
-    TimblOpts Opts(argc, argv);
-    if ( parse_args(Opts) ){
-      if (  !init() ){
-	cerr << "terminated." << endl;
-	return EXIT_FAILURE;
-      }
+  if ( parse_args(Opts) ){
+    if (  !init() ){
+      cerr << "terminated." << endl;
+      return EXIT_FAILURE;
+    }
+    for ( size_t i=0; i < fileNames.size(); ++i ){
+      string TestFileName = fileNames[i];
       ifstream in(TestFileName.c_str() );
       if ( in.good() ){
 	Test( in );
       }
       else {
 	cerr << "unable to open: " << TestFileName << endl;
-	return EXIT_FAILURE;
+	continue;
       }
     }
-    else {
-      return EXIT_FAILURE;
-    }
   }
-  catch ( const exception& e ){
-    cerr << "fatal error: " << e.what() << endl;
+  else {
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;
