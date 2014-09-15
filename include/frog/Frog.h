@@ -38,14 +38,12 @@
 #include "libfolia/document.h"
 
 
-//declared here but not defined in Frog.cxx (bit messy)
+//declared here and defined in Frog-util.cxx (bit messy)
 std::string prefix( const std::string&, const std::string& );
 std::string getTime();
 bool existsDir( const std::string& );
 void getFileNames( const std::string&, const std::string&, std::set<std::string>& );
 
-
-//extern TiCC::LogStream *theErrLog;
 
 class TimerBlock{
 public:
