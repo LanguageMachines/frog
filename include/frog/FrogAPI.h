@@ -98,8 +98,7 @@ class FrogAPI {
   ~FrogAPI();
 
   void Test( const std::string&, std::ostream&, const std::string& );
-  void Test( folia::Document&, std::ostream&,
-	     bool=false, const std::string& ="");
+  void Test( folia::Document&, bool=false );
   bool TestSentence( folia::Sentence*, TimerBlock&);
   void TestServer( Sockets::ServerSocket &conn );
   void TestInteractive();
@@ -110,15 +109,15 @@ class FrogAPI {
  private:
   // functions
   std::vector<folia::Word*> lookup( folia::Word *,
-				    const std::vector<folia::Entity*>& );
+				    const std::vector<folia::Entity*>& ) const;
   folia::Dependency *lookupDep( const folia::Word *,
-				const std::vector<folia::Dependency*>& );
+				const std::vector<folia::Dependency*>& ) const;
   std::string lookupNEREntity( const std::vector<folia::Word *>&,
-			       const std::vector<folia::Entity*>& );
+			       const std::vector<folia::Entity*>& ) const;
   std::string lookupIOBChunk( const std::vector<folia::Word *>&,
-			      const std::vector<folia::Chunk*>& );
-  void displayMWU( std::ostream&, size_t, const std::vector<folia::Word*>& );
-  std::ostream & showResults( std::ostream&, const folia::Sentence*, bool );
+			      const std::vector<folia::Chunk*>& ) const;
+  void displayMWU( std::ostream&, size_t, const std::vector<folia::Word*>& ) const;
+  std::ostream& showResults( std::ostream&, folia::Document& ) const;
 
   // data
   const TiCC::Configuration& configuration;

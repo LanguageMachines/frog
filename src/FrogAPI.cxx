@@ -428,34 +428,36 @@ void FrogAPI::TestServer( Sockets::ServerSocket &conn ){
         }
         *Log(theErrLog) << "Processing... " << endl;
         tokenizer->tokenize( doc );
-        Test( doc, outputstream );
-      } else {
+        Test( doc );
+	showResults( outputstream, doc );
+      }
+      else {
         string data = "";
         if ( options.doSentencePerLine ){
-            if ( !conn.read( data ) )	 //read data from client
-                throw( runtime_error( "read failed" ) );
+	  if ( !conn.read( data ) )	 //read data from client
+	    throw( runtime_error( "read failed" ) );
         }
         else {
-            string line;
-            while( conn.read(line) ){
-                if ( line == "EOT" )
-                    break;
-                data += line + "\n";
-            }
+	  string line;
+	  while( conn.read(line) ){
+	    if ( line == "EOT" )
+	      break;
+	    data += line + "\n";
+	  }
         }
         if ( options.debugFlag )
             *Log(theErrLog) << "Received: [" << data << "]" << endl;
         *Log(theErrLog) << "Processing... " << endl;
         istringstream inputstream(data,istringstream::in);
         Document doc = tokenizer->tokenize( inputstream );
-        Test( doc, outputstream );
+        Test( doc );
+	showResults( outputstream, doc );
       }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
-            if (options.debugFlag)
-                *Log(theErrLog) << "socket " << conn.getMessage() << endl;
-            throw( runtime_error( "write to client failed" ) );
+	if (options.debugFlag)
+	  *Log(theErrLog) << "socket " << conn.getMessage() << endl;
+	throw( runtime_error( "write to client failed" ) );
       }
-
     }
   }
   catch ( std::exception& e ) {
@@ -499,7 +501,8 @@ void FrogAPI::TestInteractive() {
     cout << "Processing... " << endl;
     istringstream inputstream(data,istringstream::in);
     Document doc = tokenizer->tokenize( inputstream );
-    Test( doc, cout, true );
+    Test( doc, true );
+    showResults( cout, doc );
     cout << "frog>"; cout.flush();
   }
   cout << "Done.\n";
@@ -552,14 +555,16 @@ void FrogAPI::TestInteractive(){
       cout << "Processing... '" << data << "'" << endl;
       istringstream inputstream(data,istringstream::in);
       Document doc = tokenizer->tokenize( inputstream );
-      Test( doc, cout, true );
+      Test( doc, true );
+      showResults( cout, doc );
     }
   }
   cout << "Done.\n";
 }
 #endif
 
-vector<Word*> FrogAPI::lookup( Word *word, const vector<Entity*>& entities ){
+vector<Word*> FrogAPI::lookup( Word *word,
+			       const vector<Entity*>& entities ) const {
   vector<Word*> vec;
   for ( size_t p=0; p < entities.size(); ++p ){
     vec = entities[p]->select<Word>();
@@ -575,7 +580,7 @@ vector<Word*> FrogAPI::lookup( Word *word, const vector<Entity*>& entities ){
 }
 
 Dependency * FrogAPI::lookupDep( const Word *word,
-				 const vector<Dependency*>&dependencies ){
+				 const vector<Dependency*>&dependencies ) const{
   if (dependencies.size() == 0 ){
     return 0;
   }
@@ -617,7 +622,7 @@ Dependency * FrogAPI::lookupDep( const Word *word,
 }
 
 string FrogAPI::lookupNEREntity( const vector<Word *>& mwu,
-				 const vector<Entity*>& entities){
+				 const vector<Entity*>& entities ) const {
   string endresult;
   int dbFlag = 0;
   try{
@@ -672,7 +677,7 @@ string FrogAPI::lookupNEREntity( const vector<Word *>& mwu,
 
 
 string FrogAPI::lookupIOBChunk( const vector<Word *>& mwu,
-				const vector<Chunk*>& chunks ){
+				const vector<Chunk*>& chunks ) const{
   string endresult;
   int dbFlag = 0;
   try {
@@ -726,7 +731,7 @@ string FrogAPI::lookupIOBChunk( const vector<Word *>& mwu,
 
 void FrogAPI::displayMWU( ostream& os,
 			  size_t index,
-			  const vector<Word*>& mwu ){
+			  const vector<Word*>& mwu ) const {
   string wrd;
   string pos;
   string lemma;
@@ -810,99 +815,107 @@ void FrogAPI::displayMWU( ostream& os,
 }
 
 ostream& FrogAPI::showResults( ostream& os,
-			       const Sentence* sentence,
-			       bool showParse ){
-  vector<Word*> words = sentence->words();
-  vector<Entity*> mwu_entities;
-  if (myMwu) mwu_entities = sentence->select<Entity>( myMwu->getTagset() );
-  vector<Dependency*> dependencies;
-  if (myParser) dependencies = sentence->select<Dependency>();
-  vector<Chunk*> iob_chunking = sentence->select<Chunk>();
-  vector<Entity*> ner_entities;
-  if (myNERTagger)ner_entities =  sentence->select<Entity>( myNERTagger->getTagset() );
-  static set<ElementType> excludeSet;
-  vector<Sentence*> parts = sentence->select<Sentence>( excludeSet );
-  if ( !options.doQuoteDetection )
-    assert( parts.size() == 0 );
-  for ( size_t i=0; i < parts.size(); ++i ){
-    vector<Entity*> ents;
-    if (myMwu) ents = parts[i]->select<Entity>( myMwu->getTagset() );
-    mwu_entities.insert( mwu_entities.end(), ents.begin(), ents.end() );
-    vector<Dependency*> deps = parts[i]->select<Dependency>();
-    dependencies.insert( dependencies.end(), deps.begin(), deps.end() );
-    vector<Chunk*> chunks = parts[i]->select<Chunk>();
-    iob_chunking.insert( iob_chunking.end(), chunks.begin(), chunks.end() );
-    vector<Entity*> ners ;
-    if (myNERTagger) ners = parts[i]->select<Entity>( myNERTagger->getTagset() );
-    ner_entities.insert( ner_entities.end(), ners.begin(), ners.end() );
-  }
+			       Document& doc ) const {
+  if ( options.doServer && options.doXMLout )
+    doc.save( os, options.doKanon );
+  else {
+    vector<Sentence*> sentences = doc.sentences();
+    for ( size_t i=0; i < sentences.size(); ++i ){
+      Sentence *sentence = sentences[i];
+      vector<Word*> words = sentence->words();
+      vector<Entity*> mwu_entities;
+      if (myMwu) mwu_entities = sentence->select<Entity>( myMwu->getTagset() );
+      vector<Dependency*> dependencies;
+      if (myParser) dependencies = sentence->select<Dependency>();
+      vector<Chunk*> iob_chunking = sentence->select<Chunk>();
+      vector<Entity*> ner_entities;
+      if (myNERTagger)ner_entities =  sentence->select<Entity>( myNERTagger->getTagset() );
+      static set<ElementType> excludeSet;
+      vector<Sentence*> parts = sentence->select<Sentence>( excludeSet );
+      if ( !options.doQuoteDetection )
+	assert( parts.size() == 0 );
+      for ( size_t i=0; i < parts.size(); ++i ){
+	vector<Entity*> ents;
+	if (myMwu) ents = parts[i]->select<Entity>( myMwu->getTagset() );
+	mwu_entities.insert( mwu_entities.end(), ents.begin(), ents.end() );
+	vector<Dependency*> deps = parts[i]->select<Dependency>();
+	dependencies.insert( dependencies.end(), deps.begin(), deps.end() );
+	vector<Chunk*> chunks = parts[i]->select<Chunk>();
+	iob_chunking.insert( iob_chunking.end(), chunks.begin(), chunks.end() );
+	vector<Entity*> ners ;
+	if (myNERTagger) ners = parts[i]->select<Entity>( myNERTagger->getTagset() );
+	ner_entities.insert( ner_entities.end(), ners.begin(), ners.end() );
+      }
 
-  size_t index = 1;
-  map<FoliaElement*, int> enumeration;
-  vector<vector<Word*> > mwus;
-  for( size_t i=0; i < words.size(); ++i ){
-    Word *word = words[i];
-    vector<Word*> mwu = lookup( word, mwu_entities );
-    for ( size_t j=0; j < mwu.size(); ++j ){
-      enumeration[mwu[j]] = index;
-    }
-    mwus.push_back( mwu );
-    i += mwu.size()-1;
-    ++index;
-  }
-  for( size_t i=0; i < mwus.size(); ++i ){
-    displayMWU( os, i+1, mwus[i] );
-    if ( options.doNER ){
-      string cls;
-      string s = lookupNEREntity( mwus[i], ner_entities );
-      os << "\t" << s;
-    }
-    else {
-      os << "\t\t";
-    }
-    if ( options.doIOB ){
-      string cls;
-      string s = lookupIOBChunk( mwus[i], iob_chunking);
-      os << "\t" << s;
-    }
-    else {
-      os << "\t\t";
-    }
-    if ( showParse ){
-      string cls;
-      Dependency *dep = lookupDep( mwus[i][0], dependencies);
-      if ( dep ){
-	vector<Headwords*> w = dep->select<Headwords>();
-	size_t num;
-	if ( w[0]->index(0)->isinstance( PlaceHolder_t ) ){
-	  string indexS = w[0]->index(0)->str();
-	  FoliaElement *pnt = w[0]->index(0)->doc()->index(indexS);
-	  num = enumeration.find(pnt->index(0))->second;
+      size_t index = 1;
+      map<FoliaElement*, int> enumeration;
+      vector<vector<Word*> > mwus;
+      for( size_t i=0; i < words.size(); ++i ){
+	Word *word = words[i];
+	vector<Word*> mwu = lookup( word, mwu_entities );
+	for ( size_t j=0; j < mwu.size(); ++j ){
+	  enumeration[mwu[j]] = index;
+	}
+	mwus.push_back( mwu );
+	i += mwu.size()-1;
+	++index;
+      }
+      for( size_t i=0; i < mwus.size(); ++i ){
+	displayMWU( os, i+1, mwus[i] );
+	if ( options.doNER ){
+	  string cls;
+	  string s = lookupNEREntity( mwus[i], ner_entities );
+	  os << "\t" << s;
 	}
 	else {
-	  num = enumeration.find(w[0]->index(0))->second;
+	  os << "\t\t";
 	}
-	os << "\t" << num << "\t" << dep->cls();
+	if ( options.doIOB ){
+	  string cls;
+	  string s = lookupIOBChunk( mwus[i], iob_chunking);
+	  os << "\t" << s;
+	}
+	else {
+	  os << "\t\t";
+	}
+	if ( options.doParse ){
+	  string cls;
+	  Dependency *dep = lookupDep( mwus[i][0], dependencies);
+	  if ( dep ){
+	    vector<Headwords*> w = dep->select<Headwords>();
+	    size_t num;
+	    if ( w[0]->index(0)->isinstance( PlaceHolder_t ) ){
+	      string indexS = w[0]->index(0)->str();
+	      FoliaElement *pnt = w[0]->index(0)->doc()->index(indexS);
+	      num = enumeration.find(pnt->index(0))->second;
+	    }
+	    else {
+	      num = enumeration.find(w[0]->index(0))->second;
+	    }
+	    os << "\t" << num << "\t" << dep->cls();
+	  }
+	  else {
+	    os << "\t"<< 0 << "\tROOT";
+	  }
+	}
+	else {
+	  os << "\t\t";
+	}
+	os << endl;
+	++index;
       }
-      else {
-	os << "\t"<< 0 << "\tROOT";
-      }
+      if ( words.size() )
+	os << endl;
     }
-    else {
-      os << "\t\t";
-    }
-    os << endl;
-    ++index;
   }
-  if ( words.size() )
-    os << endl;
   return os;
 }
 
 string FrogAPI::Testtostring( const string& s ){
   Document doc = tokenizer->tokenizestring( s );
   stringstream ss;
-  Test( doc, ss, true);
+  Test( doc, true );
+  showResults( ss, doc );
   return ss.str();
 }
 
@@ -913,9 +926,7 @@ string FrogAPI::Testtostringfromfile( const string& name ){
 }
 
 void FrogAPI::Test( Document& doc,
-		    ostream& outStream,
-		    bool hidetimers,
-		    const string& xmlOutFile) {
+		    bool hidetimers ){
   TimerBlock timers;
   timers.frogTimer.start();
   // first we make sure that the doc will accept our annotations, by
@@ -938,18 +949,16 @@ void FrogAPI::Test( Document& doc,
   if ( options.debugFlag > 5 )
     *Log(theErrLog) << "Testing document :" << doc << endl;
 
-  vector<Sentence*> topsentences = doc.sentences();
   vector<Sentence*> sentences;
   if ( options.doQuoteDetection )
     sentences = doc.sentenceParts();
   else
-    sentences = topsentences;
+    sentences = doc.sentences();
   size_t numS = sentences.size();
   if ( numS > 0 ) { //process sentences
     if  (options.debugFlag > 0)
       *Log(theErrLog) << "found " << numS << " sentence(s) in document." << endl;
-    for ( size_t i = 0; i < numS; i++) {
-      /* ******* Begin process sentence  ********** */
+    for ( size_t i = 0; i < numS; ++i ) {
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)
       bool showParse = TestSentence( sentences[i], timers );
       if ( options.doParse && !showParse ){
@@ -961,17 +970,6 @@ void FrogAPI::Test( Document& doc,
   else {
     if  (options.debugFlag > 0)
       *Log(theErrLog) << "No sentences found in document. " << endl;
-  }
-  if ( options.doServer && options.doXMLout )
-    doc.save( outStream, options.doKanon );
-  else {
-    for ( size_t i = 0; i < topsentences.size(); ++i ) {
-      showResults( outStream, topsentences[i], options.doParse);
-    }
-  }
-  if ( !xmlOutFile.empty() ){
-    doc.save( xmlOutFile, options.doKanon );
-    *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
   }
 
   timers.frogTimer.stop();
@@ -1029,11 +1027,21 @@ void FrogAPI::Test( const string& infilename,
       return;
     }
     tokenizer->tokenize( doc );
-    Test( doc, os,  false, xmlOutFile );
+    Test( doc, false );
+    if ( !xmlOutFile.empty() ){
+      doc.save( xmlOutFile, options.doKanon );
+      *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
+    }
+    showResults( os, doc );
   }
   else {
     ifstream IN( infilename.c_str() );
     Document doc = tokenizer->tokenize( IN );
-    Test( doc, os,  false, xmlOutFile );
+    Test( doc, false );
+    if ( !xmlOutFile.empty() ){
+      doc.save( xmlOutFile, options.doKanon );
+      *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
+    }
+    showResults( os, doc );
   }
 }
