@@ -957,18 +957,18 @@ void FrogAPI::Test( Document& doc,
 	*Log(theErrLog) << "Sentence " << i+1 << " isn't parsed because it contains more tokens then set with the --max-parser-tokens=" << options.maxParserTokens << " option." << endl;
       }
     }
-    if ( !(options.doServer && options.doXMLout) ){
-      for ( size_t i = 0; i < topsentences.size(); ++i ) {
-        showResults( outStream, topsentences[i], options.doParse);
-      }
-    }
   }
   else {
     if  (options.debugFlag > 0)
       *Log(theErrLog) << "No sentences found in document. " << endl;
   }
   if ( options.doServer && options.doXMLout )
-    outStream << doc << endl;
+    doc.save( outStream, options.doKanon );
+  else {
+    for ( size_t i = 0; i < topsentences.size(); ++i ) {
+      showResults( outStream, topsentences[i], options.doParse);
+    }
+  }
   if ( !xmlOutFile.empty() ){
     doc.save( xmlOutFile, options.doKanon );
     *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
