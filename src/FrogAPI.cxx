@@ -399,7 +399,7 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
   return showParse;
 }
 
-void FrogAPI::TestServer( Sockets::ServerSocket &conn ){
+void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
   try {
     while (true) {
       ostringstream outputstream;
@@ -428,7 +428,7 @@ void FrogAPI::TestServer( Sockets::ServerSocket &conn ){
         }
         *Log(theErrLog) << "Processing... " << endl;
         tokenizer->tokenize( doc );
-        Test( doc );
+        FrogDoc( doc );
 	showResults( outputstream, doc );
       }
       else {
@@ -450,7 +450,7 @@ void FrogAPI::TestServer( Sockets::ServerSocket &conn ){
         *Log(theErrLog) << "Processing... " << endl;
         istringstream inputstream(data,istringstream::in);
         Document doc = tokenizer->tokenize( inputstream );
-        Test( doc );
+        FrogDoc( doc );
 	showResults( outputstream, doc );
       }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
@@ -468,7 +468,7 @@ void FrogAPI::TestServer( Sockets::ServerSocket &conn ){
 }
 
 #ifdef NO_READLINE
-void FrogAPI::TestInteractive() {
+void FrogAPI::FrogInteractive() {
   cout << "frog>"; cout.flush();
   string line;
   string data;
@@ -501,14 +501,14 @@ void FrogAPI::TestInteractive() {
     cout << "Processing... " << endl;
     istringstream inputstream(data,istringstream::in);
     Document doc = tokenizer->tokenize( inputstream );
-    Test( doc, true );
+    FrogDoc( doc, true );
     showResults( cout, doc );
     cout << "frog>"; cout.flush();
   }
   cout << "Done.\n";
 }
 #else
-void FrogAPI::TestInteractive(){
+void FrogAPI::FrogInteractive(){
   const char *prompt = "frog> ";
   string line;
   bool eof = false;
@@ -555,7 +555,7 @@ void FrogAPI::TestInteractive(){
       cout << "Processing... '" << data << "'" << endl;
       istringstream inputstream(data,istringstream::in);
       Document doc = tokenizer->tokenize( inputstream );
-      Test( doc, true );
+      FrogDoc( doc, true );
       showResults( cout, doc );
     }
   }
@@ -911,22 +911,22 @@ ostream& FrogAPI::showResults( ostream& os,
   return os;
 }
 
-string FrogAPI::Testtostring( const string& s ){
+string FrogAPI::Frogtostring( const string& s ){
   Document doc = tokenizer->tokenizestring( s );
   stringstream ss;
-  Test( doc, true );
+  FrogDoc( doc, true );
   showResults( ss, doc );
   return ss.str();
 }
 
-string FrogAPI::Testtostringfromfile( const string& name ){
+string FrogAPI::Frogtostringfromfile( const string& name ){
   stringstream ss;
-  Test( name, ss, "" );
+  FrogFile( name, ss, "" );
   return ss.str();
 }
 
-void FrogAPI::Test( Document& doc,
-		    bool hidetimers ){
+void FrogAPI::FrogDoc( Document& doc,
+		       bool hidetimers ){
   TimerBlock timers;
   timers.frogTimer.start();
   // first we make sure that the doc will accept our annotations, by
@@ -999,9 +999,9 @@ void FrogAPI::Test( Document& doc,
   return;
 }
 
-void FrogAPI::Test( const string& infilename,
-		    ostream &os,
-		    const string& xmlOutF ) {
+void FrogAPI::FrogFile( const string& infilename,
+			ostream &os,
+			const string& xmlOutF ) {
   // stuff the whole input into one FoLiA document.
   // This is not a good idea on the long term, I think (agreed [proycon] )
 
@@ -1027,7 +1027,7 @@ void FrogAPI::Test( const string& infilename,
       return;
     }
     tokenizer->tokenize( doc );
-    Test( doc, false );
+    FrogDoc( doc, false );
     if ( !xmlOutFile.empty() ){
       doc.save( xmlOutFile, options.doKanon );
       *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
@@ -1037,7 +1037,7 @@ void FrogAPI::Test( const string& infilename,
   else {
     ifstream IN( infilename.c_str() );
     Document doc = tokenizer->tokenize( IN );
-    Test( doc, false );
+    FrogDoc( doc, false );
     if ( !xmlOutFile.empty() ){
       doc.save( xmlOutFile, options.doKanon );
       *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;

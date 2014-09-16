@@ -478,7 +478,7 @@ int main(int argc, char *argv[]) {
 	    xmlName = *it + ".xml"; // do not clobber the inputdir!
 	}
 	*Log(theErrLog) << "Frogging " << testName << endl;
-	frog.Test( testName, *outS, xmlName );
+	frog.FrogFile( testName, *outS, xmlName );
 	if ( !outName.empty() ){
 	  *Log(theErrLog) << "results stored in " << outName << endl;
 	  delete outS;
@@ -524,7 +524,7 @@ int main(int argc, char *argv[]) {
 	      throw runtime_error( "FORK failed" );
 	    }
 	    else if (pid == 0)  {
-	      frog.TestServer( conn );
+	      frog.FrogServer( conn );
 	      exit(EXIT_SUCCESS);
 	    }
 	  }
@@ -540,7 +540,7 @@ int main(int argc, char *argv[]) {
     }
     else {
       // interactive mode
-      frog.TestInteractive();
+      frog.FrogInteractive();
     }
   }
   catch ( const exception& e ){

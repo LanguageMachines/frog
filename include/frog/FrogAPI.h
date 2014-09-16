@@ -97,16 +97,15 @@ class FrogAPI {
 	   TiCC::LogStream * );
   ~FrogAPI();
 
-  void Test( const std::string&, std::ostream&, const std::string& );
-  void Test( folia::Document&, bool=false );
-  bool TestSentence( folia::Sentence*, TimerBlock&);
-  void TestServer( Sockets::ServerSocket &conn );
-  void TestInteractive();
-
-  std::string Testtostring( const std::string& );
-  std::string Testtostringfromfile( const std::string& );
+  void FrogFile( const std::string&, std::ostream&, const std::string& );
+  void FrogDoc( folia::Document&, bool=false );
+  void FrogServer( Sockets::ServerSocket &conn );
+  void FrogInteractive();
+  std::string Frogtostring( const std::string& );
+  std::string Frogtostringfromfile( const std::string& );
 
  private:
+  bool TestSentence( folia::Sentence*, TimerBlock&);
   // functions
   std::vector<folia::Word*> lookup( folia::Word *,
 				    const std::vector<folia::Entity*>& ) const;
