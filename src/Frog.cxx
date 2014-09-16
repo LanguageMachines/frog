@@ -90,8 +90,6 @@ set<string> fileNames;
 */
 
 Configuration configuration;
-static string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
-static string configFileName = configDir + "frog.cfg";
 
 void usage( ) {
   cout << endl << "Options:\n";
@@ -109,7 +107,8 @@ void usage( ) {
        << "\t============= MODULE SELECTION ==========================================\n"
        << "\t --skip=[mptncla]    Skip Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"
        << "\t============= CONFIGURATION OPTIONS =====================================\n"
-       << "\t -c <filename>    Set configuration file (default " << configFileName << ")\n"
+       << "\t -c <filename>    Set configuration file (default "
+       << FrogAPI::defaultConfigFile() << ")\n"
        << "\t============= OUTPUT OPTIONS ============================================\n"
        << "\t -o <outputfile>	    Output columned output to file, instead of default stdout\n"
        << "\t -X <xmlfile>          Output also to an XML file in FoLiA format\n"
@@ -146,6 +145,7 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
     exit( EXIT_SUCCESS );
   };
   // is a config file specified?
+  string configFileName = FrogAPI::defaultConfigFile();
   Opts.extract( 'c',  configFileName );
   if ( configuration.fill( configFileName ) ){
     *Log(theErrLog) << "config read from: " << configFileName << endl;

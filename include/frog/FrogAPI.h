@@ -96,7 +96,8 @@ class FrogAPI {
 	   const TiCC::Configuration&,
 	   TiCC::LogStream * );
   ~FrogAPI();
-
+  static std::string defaultConfigDir();
+  static std::string defaultConfigFile();
   void FrogFile( const std::string&, std::ostream&, const std::string& );
   void FrogDoc( folia::Document&, bool=false );
   void FrogServer( Sockets::ServerSocket &conn );
@@ -105,8 +106,8 @@ class FrogAPI {
   std::string Frogtostringfromfile( const std::string& );
 
  private:
-  bool TestSentence( folia::Sentence*, TimerBlock&);
   // functions
+  bool TestSentence( folia::Sentence*, TimerBlock&);
   std::vector<folia::Word*> lookup( folia::Word *,
 				    const std::vector<folia::Entity*>& ) const;
   folia::Dependency *lookupDep( const folia::Word *,

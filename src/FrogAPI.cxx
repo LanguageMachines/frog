@@ -76,6 +76,12 @@ using namespace std;
 using namespace folia;
 using namespace TiCC;
 
+string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
+string configFileName = configDir + "frog.cfg";
+
+string FrogAPI::defaultConfigDir(){ return configDir; }
+string FrogAPI::defaultConfigFile(){ return configFileName; }
+
 FrogOptions::FrogOptions() {
   doTok = doLemma = doMorph = doMwu = doIOB = doNER = doParse = true;
   doDaringMorph = false;
@@ -116,7 +122,6 @@ FrogAPI::FrogAPI( const FrogOptions &opt,
   myNERTagger(0),
   tokenizer(0)
 {
-
   // for some modules init can take a long time
   // so first make sure it will not fail on some trivialities
   //

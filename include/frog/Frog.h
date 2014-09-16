@@ -44,7 +44,6 @@ std::string getTime();
 bool existsDir( const std::string& );
 void getFileNames( const std::string&, const std::string&, std::set<std::string>& );
 
-
 class TimerBlock{
 public:
   TiCC::Timer parseTimer;
