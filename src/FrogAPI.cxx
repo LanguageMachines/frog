@@ -202,6 +202,17 @@ FrogAPI::FrogAPI( const FrogOptions &opt,
   else {
 #ifdef HAVE_OPENMP
     omp_set_num_threads( options.numThreads );
+    int curt = omp_get_num_threads();
+    if ( curt != options.numThreads ){
+      *Log(theErrLog) << "attempt to set to " << options.numThreads
+		      << " threads FAILED, running on " << curt
+		      << " threads instead" << endl;
+    }
+    else if ( options.debugFlag ){
+      *Log(theErrLog) << "running on " << curt
+		      << " threads" << endl;
+    }
+
 #endif
 
     bool tokStat = true;
