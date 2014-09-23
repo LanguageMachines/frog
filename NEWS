@@ -1,3 +1,7 @@
+0.12.19 - 2014-09-23
+[Ko van der Sloot]
+ * release
+
 0.12.18 - 2014-09-16
  * A true FrogAPI is added
  * depends on ticcutils 0.6 or above (for CommandLine mostly)
