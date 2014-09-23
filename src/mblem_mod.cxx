@@ -41,8 +41,12 @@ using namespace std;
 using namespace TiCC;
 using namespace folia;
 
-Mblem::Mblem(LogStream * logstream): myLex(0),punctuation( "?...,:;\\'`(){}[]%#+-_=/!" ),
-		history(20), debug(0) {
+Mblem::Mblem( LogStream *logstream ):
+  myLex(0),
+  punctuation( "?...,:;\\'`(){}[]%#+-_=/!" ),
+  history(20),
+  debug(0)
+{
   mblemLog = new LogStream( logstream, "mblem" );
 }
 
