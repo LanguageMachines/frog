@@ -151,11 +151,12 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
   {
     Sentence *sent = words[0]->sentence();
     try {
-      el = sent->annotation<ChunkingLayer>();
+      el = sent->annotation<ChunkingLayer>(tagset);
     }
     catch(...){
       KWargs args;
       args["generate_id"] = sent->id();
+      args["set"] = tagset;
       el = new ChunkingLayer(sent->doc(),args);
       sent->append( el );
     }

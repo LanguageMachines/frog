@@ -89,6 +89,7 @@ class Parser {
   void prepareParse( const std::vector<folia::Word *>&,
 		     const std::string&, parseData& );
   void createParserFile( const parseData& );
+  std::string getTagset() const { return tagset; };
  private:
   void createRelDir( const parseData& );
   void createPairs( const parseData& );

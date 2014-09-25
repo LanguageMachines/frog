@@ -847,6 +847,7 @@ void Parser::prepareParse( const vector<Word *>& fwords,
 
 void appendParseResult( const vector<Word *>& words,
 			parseData& pd,
+			const string& tagset,
 			istream& is ){
   string line;
   int cnt=0;
@@ -869,6 +870,7 @@ void appendParseResult( const vector<Word *>& words,
   Sentence *sent = words[0]->sentence();
   KWargs args;
   args["generate_id"] = sent->id();
+  args["set"] = tagset;
   DependenciesLayer *dl = new DependenciesLayer(sent->doc(),args);
 #pragma omp critical(foliaupdate)
   {
@@ -879,6 +881,7 @@ void appendParseResult( const vector<Word *>& words,
       KWargs args;
       args["generate_id"] = dl->id();
       args["class"] = roles[i];
+      args["set"] = tagset;
 #pragma omp critical(foliaupdate)
       {
 	Dependency *d = new Dependency( sent->doc(), args );
@@ -966,7 +969,7 @@ void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
   timers.csiTimer.stop();
   ifstream resFile( resFileName.c_str() );
   if ( resFile ){
-    appendParseResult( words, pd, resFile );
+    appendParseResult( words, pd, tagset, resFile );
   }
   else
     *Log(parseLog) << "couldn't open results file: " << resFileName << endl;
