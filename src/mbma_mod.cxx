@@ -324,10 +324,10 @@ bool Mbma::init( const Configuration& config ) {
     version = val;
   val = config.lookUp( "set", "mbma" );
   if ( val.empty() ){
-    tagset = "http://ilk.uvt.nl/folia/sets/frog-mbma-nl";
+    mbma_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbma-nl";
   }
   else
-    tagset = val;
+    mbma_tagset = val;
 
   val = config.lookUp( "set", "tagger" );
   if ( val.empty() ){
@@ -1483,21 +1483,37 @@ void Mbma::execute( const UnicodeString& word,
 void Mbma::addAltMorph( Word *word,
 			const vector<string>& morphs ) const {
   Alternative *alt = new Alternative();
-  MorphologyLayer *ml = new MorphologyLayer();
+  KWargs args;
+  args["set"] = mbma_tagset;
+  MorphologyLayer *ml = new MorphologyLayer( word->doc(), args );
 #pragma omp critical(foliaupdate)
   {
     alt->append( ml );
-    word->append( alt );
+    try {
+      word->append( alt );
+    }
+    catch( const exception& e ){
+      *Log(mbmaLog) << e.what() << " addAltMorph failed." << endl;
+      exit(EXIT_FAILURE);
+    }
   }
   addMorph( ml, morphs );
 }
 
 void Mbma::addMorph( Word *word,
 		     const vector<string>& morphs ) const {
-  MorphologyLayer *ml = new MorphologyLayer();
+  KWargs args;
+  args["set"] = mbma_tagset;
+  MorphologyLayer *ml = new MorphologyLayer( word->doc(), args );
 #pragma omp critical(foliaupdate)
   {
-    word->append( ml );
+    try {
+      word->append( ml );
+    }
+    catch( const exception& e ){
+      *Log(mbmaLog) << e.what() << " addMorph failed." << endl;
+      exit(EXIT_FAILURE);
+    }
   }
   addMorph( ml, morphs );
 }
@@ -1506,12 +1522,13 @@ void Mbma::addBracketMorph( Word *word,
 			    const string& wrd,
 			    const string& tag ) const {
   //  *Log(mbmaLog) << "addBracketMorph(" << wrd << "," << tag << ")" << endl;
-  MorphologyLayer *ml = new MorphologyLayer();
+  KWargs args;
+  args["set"] = mbma_tagset;
+  MorphologyLayer *ml = new MorphologyLayer( word->doc(), args );
 #pragma omp critical(foliaupdate)
   {
     word->append( ml );
   }
-  KWargs args;
   args["class"] = "stem";
   Morpheme *result = new Morpheme( word->doc(), args );
   args.clear();
@@ -1544,12 +1561,16 @@ void Mbma::addBracketMorph( Word *word,
 
 void Mbma::addBracketMorph( Word *word,
 			    const BracketNest *brackets ) const {
-  MorphologyLayer *ml = new MorphologyLayer();
+  KWargs args;
+  args["set"] = mbma_tagset;
+  MorphologyLayer *ml = new MorphologyLayer( word->doc(), args );
 #pragma omp critical(foliaupdate)
   {
     word->append( ml );
   }
-  Morpheme *m = brackets->createMorpheme( word->doc(), clex_tagset );
+  Morpheme *m = brackets->createMorpheme( word->doc(),
+					  mbma_tagset,
+					  clex_tagset );
   if ( m ){
 #pragma omp critical(foliaupdate)
     {
@@ -1561,13 +1582,17 @@ void Mbma::addBracketMorph( Word *word,
 void Mbma::addAltBracketMorph( Word *word,
 			       const BracketNest *brackets ) const {
   Alternative *alt = new Alternative();
-  MorphologyLayer *ml = new MorphologyLayer();
+  KWargs args;
+  args["set"] = mbma_tagset;
+  MorphologyLayer *ml = new MorphologyLayer( word->doc(), args );
 #pragma omp critical(foliaupdate)
   {
     alt->append( ml );
     word->append( alt );
   }
-  Morpheme *m = brackets->createMorpheme( word->doc(), clex_tagset );
+  Morpheme *m = brackets->createMorpheme( word->doc(),
+					  mbma_tagset,
+					  clex_tagset );
   if ( m ){
 #pragma omp critical(foliaupdate)
     {
@@ -1577,20 +1602,23 @@ void Mbma::addAltBracketMorph( Word *word,
 }
 
 Morpheme *BracketLeaf::createMorpheme( Document *doc,
-				       const string& tagset ) const {
+				       const string& mbma_tagset,
+				       const string& clex_tagset ) const {
   string desc;
   int offset = 0;
-  return createMorpheme( doc, tagset, offset, desc );
+  return createMorpheme( doc, mbma_tagset, clex_tagset, offset, desc );
 }
 
 Morpheme *BracketLeaf::createMorpheme( Document *doc,
-				       const string& tagset,
+				       const string& mbma_tagset,
+				       const string& clex_tagset,
 				       int& offset,
 				       string& desc ) const {
   Morpheme *result = 0;
   desc.clear();
   if ( status == STEM ){
     KWargs args;
+    args["set"] = mbma_tagset;
     args["class"] = "stem";
     result = new Morpheme( doc, args );
     args.clear();
@@ -1612,7 +1640,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
       result->append( d );
     }
     args.clear();
-    args["set"]  = tagset;
+    args["set"] = clex_tagset;
     args["cls"] = toString( tag() );
 #pragma omp critical(foliaupdate)
     {
@@ -1622,6 +1650,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
   else if ( status == INFLECTION ){
     KWargs args;
     args["class"] = "inflection";
+    args["set"] = mbma_tagset;
     result = new Morpheme( doc, args );
     args.clear();
     string out = UnicodeToUTF8(morph);
@@ -1656,6 +1685,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
   else if ( status == DERIVATIONAL ){
     KWargs args;
     args["class"] = "derivational";
+    args["set"] = mbma_tagset;
     result = new Morpheme( doc, args );
     args.clear();
     string out = UnicodeToUTF8(morph);
@@ -1676,8 +1706,8 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
       result->append( d );
     }
     args.clear();
-    args["set"]  = tagset;
-    args["cls"]  = orig;
+    args["set"] = clex_tagset;
+    args["cls"] = orig;
 #pragma omp critical(foliaupdate)
     {
       result->addPosAnnotation( args );
@@ -1686,7 +1716,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
   else {
     KWargs args;
     args["class"] = "inflection";
+    args["set"] = mbma_tagset;
     result = new Morpheme( doc, args );
+    args.clear();
     string inf_desc;
     for ( size_t i=0; i < inflect.size(); ++i ){
       string d = iNames[inflect[i]];
@@ -1694,7 +1726,6 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
 	inf_desc += ", ";
       inf_desc += d;
     }
-    args.clear();
     args["value"] = inf_desc;
     Description *d = new Description( args );
 #pragma omp critical(foliaupdate)
@@ -1706,18 +1737,21 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
 }
 
 Morpheme *BracketNest::createMorpheme( Document *doc,
-				       const string& tagset ) const {
+				       const string& mbma_tagset,
+				       const string& clex_tagset ) const {
   string desc;
   int offset = 0;
-  return createMorpheme( doc, tagset, offset, desc );
+  return createMorpheme( doc, mbma_tagset, clex_tagset, offset, desc );
 }
 
 Morpheme *BracketNest::createMorpheme( Document *doc,
-				       const string& tagset,
+				       const string& mbma_tagset,
+				       const string& clex_tagset,
 				       int& of,
 				       string& desc ) const {
   KWargs args;
   args["class"] = "complex";
+  args["set"] = mbma_tagset;
   Morpheme *result = new Morpheme( doc, args );
   list<BaseBracket*>::const_iterator it = parts.begin();
   string mor;
@@ -1727,7 +1761,11 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
   int offset = 0;
   while ( it != parts.end() ){
     string deeper_desc;
-    Morpheme *m = (*it)->createMorpheme( doc, tagset, offset, deeper_desc );
+    Morpheme *m = (*it)->createMorpheme( doc,
+					 mbma_tagset,
+					 clex_tagset,
+					 offset,
+					 deeper_desc );
     if ( m ){
       string tmp;
       try {
@@ -1763,8 +1801,8 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
     result->append( d );
   }
   args.clear();
-  args["set"]  = tagset;
-  args["cls"]  = toString( tag() );
+  args["set"] = clex_tagset;
+  args["cls"] = toString( tag() );
 #pragma omp critical(foliaupdate)
   {
     result->addPosAnnotation( args );
@@ -1780,12 +1818,14 @@ void Mbma::addMorph( MorphologyLayer *ml,
 		     const vector<string>& morphs ) const {
   int offset = 0;
   for ( size_t p=0; p < morphs.size(); ++p ){
-    Morpheme *m = new Morpheme();
+    KWargs args;
+    args["set"] = mbma_tagset;
+    Morpheme *m = new Morpheme( ml->doc(), args );
 #pragma omp critical(foliaupdate)
     {
       ml->append( m );
     }
-    KWargs args;
+    args.clear();
     args["value"] = morphs[p];
     args["offset"] = toString(offset);
     TextContent *t = new TextContent( args );
@@ -1998,7 +2038,7 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
 }
 
 void Mbma::addDeclaration( Document& doc ) const {
-  doc.declare( AnnotationType::MORPHOLOGICAL, tagset,
+  doc.declare( AnnotationType::MORPHOLOGICAL, mbma_tagset,
 	       "annotator='frog-mbma-" +  version +
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
   if ( doDaring ){

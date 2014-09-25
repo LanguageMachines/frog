@@ -68,8 +68,10 @@ public:
   virtual void resolveTail(){ abort(); };
   virtual void resolveMiddle(){ abort(); };
   virtual folia::Morpheme *createMorpheme( folia::Document *,
+					   const std::string&,
 					   const std::string& ) const = 0;
   virtual folia::Morpheme *createMorpheme( folia::Document *,
+					   const std::string&,
 					   const std::string&,
 					   int&,
 					   std::string& ) const = 0;
@@ -93,8 +95,10 @@ public:
   std::string original() const { return orig; };
   int infixpos() const { return ifpos; };
   folia::Morpheme *createMorpheme( folia::Document *,
+				   const std::string&,
 				   const std::string& ) const;
   folia::Morpheme *createMorpheme( folia::Document *,
+				   const std::string&,
 				   const std::string&,
 				   int&,
 				   std::string& ) const;
@@ -128,8 +132,10 @@ class BracketNest: public BaseBracket {
   UnicodeString deepmorphemes() const;
   CLEX::Type getFinalTag();
   folia::Morpheme *createMorpheme( folia::Document *,
+				   const std::string&,
 				   const std::string& ) const;
   folia::Morpheme *createMorpheme( folia::Document *,
+				   const std::string&,
 				   const std::string&,
 				   int&,
 				   std::string& ) const;
@@ -181,6 +187,7 @@ class Mbma {
   std::vector<std::vector<std::string> > getResult() const;
   void setDaring( bool b ){ doDaring = b; };
   void clearAnalysis();
+  std::string getTagset() const { return mbma_tagset; };
  private:
   void cleanUp();
   bool readsettings( const std::string&, const std::string& );
@@ -210,7 +217,7 @@ class Mbma {
   std::map<std::string,std::string> TAGconv;
   std::vector<MBMAana*> analysis;
   std::string version;
-  std::string tagset;
+  std::string mbma_tagset;
   std::string cgn_tagset;
   std::string clex_tagset;
   TiCC::LogStream *mbmaLog;

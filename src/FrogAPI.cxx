@@ -772,7 +772,7 @@ void FrogAPI::displayMWU( ostream& os,
     }
     if ( options.doLemma ){
       try {
-	lemma += word->lemma();
+	lemma += word->lemma(myMblem->getTagset());
 	if ( p < mwu.size() -1 ){
 	  lemma += "_";
 	}
@@ -785,12 +785,14 @@ void FrogAPI::displayMWU( ostream& os,
     }
     if ( options.doDaringMorph ){
       try {
-	vector<MorphologyLayer*> ml = word->annotations<MorphologyLayer>();
+	vector<MorphologyLayer*> ml
+	  = word->annotations<MorphologyLayer>( myMbma->getTagset() );
 	for ( size_t q=0; q < ml.size(); ++q ){
-	  vector<Morpheme*> m = ml[q]->select<Morpheme>( false );
+	  vector<Morpheme*> m =
+	    ml[q]->select<Morpheme>( myMbma->getTagset(), false );
 	  assert( m.size() == 1 ); // top complex layer
 	  string desc = m[0]->description();
-	  morph = desc;
+	  morph += desc;
 	  if ( q < ml.size()-1 )
 	    morph += "/";
 	}
@@ -806,9 +808,10 @@ void FrogAPI::displayMWU( ostream& os,
     }
     else if ( options.doMorph ){
       try {
-	vector<MorphologyLayer*> ml = word->annotations<MorphologyLayer>();
+	vector<MorphologyLayer*> ml =
+	  word->annotations<MorphologyLayer>(myMbma->getTagset());
 	for ( size_t q=0; q < ml.size(); ++q ){
-	  vector<Morpheme*> m = ml[q]->select<Morpheme>();
+	  vector<Morpheme*> m = ml[q]->select<Morpheme>(myMbma->getTagset());
 	  for ( size_t t=0; t < m.size(); ++t ){
 	    string txt = UnicodeToUTF8( m[t]->text() );
 	    morph += "[" + txt + "]";
