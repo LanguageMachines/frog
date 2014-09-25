@@ -848,7 +848,9 @@ ostream& FrogAPI::showResults( ostream& os,
       vector<Dependency*> dependencies;
       if (myParser)
 	dependencies = sentence->select<Dependency>( myParser->getTagset() );
-      vector<Chunk*> iob_chunking = sentence->select<Chunk>( myIOBTagger->getTagset() );
+      vector<Chunk*> iob_chunking;
+      if ( myIOBTagger )
+	iob_chunking = sentence->select<Chunk>( myIOBTagger->getTagset() );
       vector<Entity*> ner_entities;
       if (myNERTagger)
 	ner_entities =  sentence->select<Entity>( myNERTagger->getTagset() );
@@ -858,7 +860,8 @@ ostream& FrogAPI::showResults( ostream& os,
 	assert( parts.size() == 0 );
       for ( size_t i=0; i < parts.size(); ++i ){
 	vector<Entity*> ents;
-	if (myMwu) ents = parts[i]->select<Entity>( myMwu->getTagset() );
+	if (myMwu)
+	  ents = parts[i]->select<Entity>( myMwu->getTagset() );
 	mwu_entities.insert( mwu_entities.end(), ents.begin(), ents.end() );
 	vector<Dependency*> deps = parts[i]->select<Dependency>();
 	dependencies.insert( dependencies.end(), deps.begin(), deps.end() );
