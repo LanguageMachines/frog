@@ -205,7 +205,13 @@ void Mblem::addLemma( FoliaElement *word, const string& cls ){
   args["cls"]=cls;
 #pragma omp critical(foliaupdate)
   {
-    word->addLemmaAnnotation( args );
+    try {
+      word->addLemmaAnnotation( args );
+    }
+    catch( const exception& e ){
+      *Log(mblemLog) << e.what() << " addLemma failed." << endl;
+      exit(EXIT_FAILURE);
+    }
   }
 }
 
@@ -213,7 +219,13 @@ void Mblem::addAltLemma( Word *word, const string& cls ){
   Alternative *alt = new Alternative();
 #pragma omp critical(foliaupdate)
   {
-    word->append( alt );
+    try {
+      word->append( alt );
+    }
+    catch( const exception& e ){
+      *Log(mblemLog) << e.what() << " addAltLemma failed." << endl;
+      exit(EXIT_FAILURE);
+    }
   }
   addLemma( alt, cls );
 }
