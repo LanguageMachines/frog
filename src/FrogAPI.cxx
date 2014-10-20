@@ -43,9 +43,10 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
-#include <omp.h>
-
 #include "config.h"
+#ifdef HAVE_OPENMP
+#include <omp.h>
+#endif
 
 #ifdef HAVE_LIBREADLINE
 #  if defined(HAVE_READLINE_READLINE_H)
