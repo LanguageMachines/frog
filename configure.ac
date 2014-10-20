@@ -18,7 +18,7 @@ else
 fi
 
 # Checks for programs.
-AC_PROG_CXX( g++ c++ )
+AC_PROG_CXX( [g++ c++] )
 
 if $cxx_flags_were_set; then
   CXXFLAGS=$CXXFLAGS
