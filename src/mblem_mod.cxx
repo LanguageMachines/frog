@@ -199,7 +199,7 @@ bool isSimilar( const string& tag, const string& cgnTag ){
     similar( tag, cgnTag, "ovt,1,ev" );
 }
 
-void Mblem::addLemma( FoliaElement *word, const string& cls ){
+void Mblem::addLemma( Word *word, const string& cls ){
   KWargs args;
   args["set"]=tagset;
   args["cls"]=cls;
@@ -213,21 +213,6 @@ void Mblem::addLemma( FoliaElement *word, const string& cls ){
       exit(EXIT_FAILURE);
     }
   }
-}
-
-void Mblem::addAltLemma( Word *word, const string& cls ){
-  Alternative *alt = new Alternative();
-#pragma omp critical(foliaupdate)
-  {
-    try {
-      word->append( alt );
-    }
-    catch( const exception& e ){
-      *Log(mblemLog) << e.what() << " addAltLemma failed." << endl;
-      exit(EXIT_FAILURE);
-    }
-  }
-  addLemma( alt, cls );
 }
 
 void Mblem::filterTag( const string& postag ){
@@ -287,18 +272,10 @@ void Mblem::getFoLiAResult( Word *word, const UnicodeString& uWord ){
     addLemma( word, result );
   }
   else {
-    bool first = true;
     vector<mblemData>::iterator it = mblemResult.begin();
     while( it != mblemResult.end() ){
       string result = it->getLemma();
-      if ( first ){
-	addLemma( word, result );
-	first = false;
-      }
-      else {
-	// there are more matching lemmas. add them as alternatives
-	addAltLemma( word, result );
-      }
+      addLemma( word, result );
       ++it;
     }
   }
