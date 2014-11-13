@@ -206,12 +206,10 @@ class Mbma {
   void addMorph( folia::MorphologyLayer *,
 		 const std::vector<std::string>& ) const;
   void addMorph( folia::Word *, const std::vector<std::string>& ) const;
-  void addAltMorph( folia::Word *, const std::vector<std::string>& ) const;
   void addBracketMorph( folia::Word *,
 			const std::string&,
 			const std::string& ) const;
   void addBracketMorph( folia::Word *, const BracketNest * ) const;
-  void addAltBracketMorph( folia::Word *, const BracketNest * ) const;
   std::string MTreeFilename;
   Timbl::TimblAPI *MTree;
   std::map<std::string,std::string> TAGconv;

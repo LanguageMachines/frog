@@ -1480,35 +1480,15 @@ void Mbma::execute( const UnicodeString& word,
   }
 }
 
-void Mbma::addAltMorph( Word *word,
-			const vector<string>& morphs ) const {
-  Alternative *alt = new Alternative();
-  KWargs args;
-  args["set"] = mbma_tagset;
-  MorphologyLayer *ml = new MorphologyLayer( word->doc(), args );
-#pragma omp critical(foliaupdate)
-  {
-    alt->append( ml );
-    try {
-      word->append( alt );
-    }
-    catch( const exception& e ){
-      *Log(mbmaLog) << e.what() << " addAltMorph failed." << endl;
-      exit(EXIT_FAILURE);
-    }
-  }
-  addMorph( ml, morphs );
-}
-
 void Mbma::addMorph( Word *word,
 		     const vector<string>& morphs ) const {
   KWargs args;
   args["set"] = mbma_tagset;
-  MorphologyLayer *ml = new MorphologyLayer( word->doc(), args );
+  MorphologyLayer *ml;
 #pragma omp critical(foliaupdate)
   {
     try {
-      word->append( ml );
+      ml = word->addMorphologyLayer( args );
     }
     catch( const exception& e ){
       *Log(mbmaLog) << e.what() << " addMorph failed." << endl;
@@ -1524,10 +1504,16 @@ void Mbma::addBracketMorph( Word *word,
   //  *Log(mbmaLog) << "addBracketMorph(" << wrd << "," << tag << ")" << endl;
   KWargs args;
   args["set"] = mbma_tagset;
-  MorphologyLayer *ml = new MorphologyLayer( word->doc(), args );
+  MorphologyLayer *ml;
 #pragma omp critical(foliaupdate)
   {
-    word->append( ml );
+    try {
+      ml = word->addMorphologyLayer( args );
+    }
+    catch( const exception& e ){
+      *Log(mbmaLog) << e.what() << " addBracketMorph failed." << endl;
+      exit(EXIT_FAILURE);
+    }
   }
   args["class"] = "stem";
   Morpheme *result = new Morpheme( word->doc(), args );
@@ -1563,32 +1549,16 @@ void Mbma::addBracketMorph( Word *word,
 			    const BracketNest *brackets ) const {
   KWargs args;
   args["set"] = mbma_tagset;
-  MorphologyLayer *ml = new MorphologyLayer( word->doc(), args );
+  MorphologyLayer *ml;
 #pragma omp critical(foliaupdate)
   {
-    word->append( ml );
-  }
-  Morpheme *m = brackets->createMorpheme( word->doc(),
-					  mbma_tagset,
-					  clex_tagset );
-  if ( m ){
-#pragma omp critical(foliaupdate)
-    {
-      ml->append( m );
+    try {
+      ml = word->addMorphologyLayer( args );
     }
-  }
-}
-
-void Mbma::addAltBracketMorph( Word *word,
-			       const BracketNest *brackets ) const {
-  Alternative *alt = new Alternative();
-  KWargs args;
-  args["set"] = mbma_tagset;
-  MorphologyLayer *ml = new MorphologyLayer( word->doc(), args );
-#pragma omp critical(foliaupdate)
-  {
-    alt->append( ml );
-    word->append( alt );
+    catch( const exception& e ){
+      *Log(mbmaLog) << e.what() << " addBracketMorph failed." << endl;
+      exit(EXIT_FAILURE);
+    }
   }
   Morpheme *m = brackets->createMorpheme( word->doc(),
 					  mbma_tagset,
@@ -2020,17 +1990,11 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
   else {
     vector<MBMAana*>::const_iterator sit = analysis.begin();
     while( sit != analysis.end() ){
-      if ( sit == analysis.begin() ){
-	if ( doDaring )
-	  addBracketMorph( fword, (*sit)->getBrackets() );
-	else
-	  addMorph( fword, (*sit)->getMorph() );
+      if ( doDaring ){
+	addBracketMorph( fword, (*sit)->getBrackets() );
       }
       else {
-	if ( doDaring )
-	  addAltBracketMorph( fword, (*sit)->getBrackets() );
-	else
-	  addAltMorph( fword, (*sit)->getMorph() );
+	addMorph( fword, (*sit)->getMorph() );
       }
       ++sit;
     }
