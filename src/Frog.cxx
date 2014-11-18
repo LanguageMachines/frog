@@ -436,7 +436,6 @@ int main(int argc, char *argv[]) {
 			  "debug:,keep-parser-files,version,threads:,KANON");
 
     Opts.init(argc, argv);
-    cerr << "read options: " << Opts << endl;
     bool parsed = parse_args( Opts, options, theErrLog );
     if (!parsed) {
       throw runtime_error( "init failed" );
