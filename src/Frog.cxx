@@ -58,6 +58,7 @@
 #include "frog/FrogAPI.h" //public API interface
 #include "ticcutils/StringOps.h"
 #include "ticcutils/CommandLine.h"
+#include "ticcutils/FileUtils.h"
 
 using namespace std;
 using namespace folia;
@@ -303,7 +304,7 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
   else if ( Opts.extract( 't', TestFileName ) ) {
     ifstream is( TestFileName );
     if ( !is ){
-      *Log(theErrLog) << "input stream " << value << " is not readable" << endl;
+      *Log(theErrLog) << "input stream " << TestFileName << " is not readable" << endl;
       return false;
     }
   };
@@ -435,6 +436,7 @@ int main(int argc, char *argv[]) {
 			  "debug:,keep-parser-files,version,threads:,KANON");
 
     Opts.init(argc, argv);
+    cerr << "read options: " << Opts << endl;
     bool parsed = parse_args( Opts, options, theErrLog );
     if (!parsed) {
       throw runtime_error( "init failed" );
@@ -452,6 +454,12 @@ int main(int argc, char *argv[]) {
       while ( it != fileNames.end() ){
 	string testName = testDirName;
 	testName += *it;
+	if ( !TiCC::isFile( testName ) ){
+	  *Log(theErrLog) << "skip " << testName << " (file not found )"
+			  << endl;
+	  ++it;
+	  continue;
+	}
 	string outName;
 	if ( outS == 0 ){
 	  if ( wantOUT ){
