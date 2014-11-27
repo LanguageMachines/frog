@@ -75,10 +75,30 @@ PKG_CHECK_MODULES([XML2], [libxml-2.0 >= 2.6.16] )
 CXXFLAGS="$CXXFLAGS $XML2_CFLAGS"
 LIBS="$XML2_LIBS $LIBS"
 
-PKG_CHECK_MODULES([ICU], [icu-uc, icu-io])
-CXXFLAGS="$CXXFLAGS $ICU_CXXFLAGS"
-LIBS="$ICU_LIBS $LIBS"
 AX_LIB_READLINE
+
+
+#check for needed dependencies
+useICU=1;
+# inspired by feh-1.3.4/configure.ac. Tnx Tom Gilbert and feh hackers.
+AC_ARG_WITH(icu,
+ [ --with-icu=DIR use ICU installed in <DIR>],
+ [if test "$with_icu" = "no"; then
+ useICU=0
+ else
+ CXXFLAGS="$CXXFLAGS -I$withval/include"
+ LIBS="-L$withval/lib $LIBS"
+ fi] )
+
+if test "$useICU" = "1"; then
+ AX_ICU_CHECK( [3.6],
+ [CXXFLAGS="$CXXFLAGS $ICU_CPPSEARCHPATH"
+ LIBS="$ICU_LIBPATH $ICU_LIBS $ICU_IOLIBS $LIBS"],
+ [AC_MSG_FAILURE( "No ICU development environment found. Please check if libicu-ev or the like is installed" )] )
+ AC_DEFINE(HAVE_ICU, 1, we want to use ICU )
+else
+ AC_MSG_ERROR("ICU support is required")
+fi
 
 AC_ARG_WITH(timbl,
        [  --with-timbl=DIR       use timbl installed in <DIR>],
