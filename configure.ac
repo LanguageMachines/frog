@@ -155,8 +155,8 @@ save_LIBS="$LIBS"
 save_FLAGS="$CXXFLAGS"
 
 AC_ARG_WITH(python,
-       [  --with-python=DIR       use python executable installed in <DIR>],
-       [PYTHON="$withval/python"],
+       [  --with-python=FILE       use python executable <FILE>],
+       [PYTHON="$withval"],
        [PYTHON="python"])
 
 #we need Python > 2.5.x
