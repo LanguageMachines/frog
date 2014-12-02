@@ -1,129 +1,144 @@
-.TH frog 1 "2012 January 31"
+.TH frog 1 "2014 december 2"
 
 .SH NAME
-frog - Dutch morpho-syntactic analyzer, IOB chunker and dependency parser
+frog \- Dutch morpho-syntactic analyzer, IOB chunker and dependency parser
 .SH SYNOPSYS
 frog [options]
 
-frog -t test-file
+frog \-t test\-file
 
 .SH DESCRIPTION
-frog is an integration of memory-based natural language processing (NLP) modules developed for Dutch.
+frog is an integration of memory\(hy-based natural language processing (NLP) modules developed for Dutch.
 frog's current version will tokenize, tag, lemmatize, and morphologically segment word tokens in Dutch text files, add IOB chunks and will assign a dependency graph to each sentence.
 
 .SH OPTIONS
 
-.BR -c " <configfile>"
+.BR \-c " <configfile>"
 .RS
 set the configuration using 'file'
 .RE
 
-.BR -d " <level>"
+.BR \-\-debug =<modele><level>,...
 .RS
-set debug level.
+set debug level per module.
+Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi\(hyWord Units (m), Named Entity Recognition (n), or Parser (p).
+
+(e.g. \-\-debug=l5,n3 sets the level for the Lemmatizer to 5 and for the NER
+to 3 )
+
 .RE
 
-.BR -e " <encoding>"
+.BR \-d " <level>"
+.RS
+set global debug level. (for all modules)
+.RE
+
+.BR \-e " <encoding>"
 .RS
 set input encoding. (default UTF8)
 .RE
 
-.BR -h
+.BR \-h
 .RS
 give some help
 .RE
 
-.BR --keep-parser-files =[yes|no]
+.BR \-\-keep\-parser\-files =[yes|no]
 .RS
 keep the intermediate files from the parser. Last sentence only!
 .RE
 
-.BR -n
+.BR \-n
 .RS
-assume inputfile to hold one sentence per line
+assume inputfile to hold one sentence per line.
+
+Very useful when running interactive, otherwise an empty line is needed to
+signal end of input.
 .RE
 
-.BR -o " <file>"
+.BR \-o " <file>"
 .RS
 send output to 'file' instead of stdout. Defaults to the name of the inputfile with '.out' appended.
 .RE
 
-.BR --outputdir " <dir>"
+.BR \-\-outputdir " <dir>"
 .RS
 send all output to 'dir' instead of stdout. Creates filenames from the inputfilename(s) with '.out' appended.
 .RE
 
-.BR --skip =[aclmnpt]
+.BR \-\-skip =[aclmnpt]
 .RS
-skip parts of the proces: Tokenizer (t), Chunker (c), Lemmatizer (l), Morphological Analyzer (a), Multi-Word unit (m), Named-Entity recognizer (n) or Parser (p)
+skip parts of the proces: Tokenizer (t), Chunker (c), Lemmatizer (l), Morphological Analyzer (a), Multi\(hy-Word unit (m), Named\(hyEntity recognizer (n) or Parser (p)
 .RE
 
-.BR -Q
+.BR \-Q
 .RS
 Enable quotedetection in the tokenizer. May run havock!
 .RE
 
-.BR -S " <port>"
+.BR \-S " <port>"
 .RS
 Run a server on 'port'
 .RE
 
-.BR -t " <file>"
+.BR \-t " <file>"
 .RS
-process 'file'
+process 'file'.
+
+When \-t is omitted, Frog will run in interactive mode.
 .RE
 
-.BR -x " <xmlfile>"
+.BR \-x " <xmlfile>"
 .RS
-process 'xmlfile', which is supposed to be in FoLiA format! If 'xmlfile' is empty, and 
-.BR --testdir =<dir> 
+process 'xmlfile', which is supposed to be in FoLiA format! If 'xmlfile' is empty, and
+.BR \-\-testdir =<dir>
 is provided, all '.xml' files in 'dir' will be processed as FoLia XML.
 .RE
 
-.BR --textclass "=<cls>"
+.BR \-\-textclass "=<cls>"
 .RS
-When 
-.BR -x
+When
+.BR \-x
 is given, use 'cls' to find text in the FoLiA document(s).
 .RE
 
 
-.BR --testdir =<dir>
+.BR \-\-testdir =<dir>
 .RS
-process all files in 'dir'. When the input mode is XML, only '.xml' files are teken from 'dir'. see also 
-.B --outputdir
+process all files in 'dir'. When the input mode is XML, only '.xml' files are teken from 'dir'. see also
+.B \-\-outputdir
 .RE
 
-.BR --tmpdir =<dir>
+.BR \-\-tmpdir =<dir>
 .RS
 location to store intermediate files. Default /tmp.
 .RE
 
-.BR --threads =<n>
+.BR \-\-threads =<n>
 .RS
 use a maximum of 'n' threads. The default is to take whatever is needed.
 In servermode we always run on 1 thread.
 .RE
 
-.BR -V " or " --version
+.BR \-V " or " \-\-version
 .RS
 show version info
 .RE
 
-.BR --xmldir =<dir>
+.BR \-\-xmldir =<dir>
 .RS
 generate FoLiA XML output and send it to 'dir'. Creates filenames from the inputfilename with '.xml' appended. (Except when it already ends with '.xml')
 .RE
 
-.BR -X " <file>"
+.BR \-X " <file>"
 .RS
 generate FoLiA XML output and send it to 'file'. Defaults to the name of the inputfile(s) with '.xml' appended. (Except when it already ends with '.xml')
 .RE
 
-.BR --id "=<id>"
+.BR \-\-id "=<id>"
 .RS
-When 
-.BR -X
+When
+.BR \-X
 for FoLia is given, use 'id' to give the doc an ID.
 .RE
 
