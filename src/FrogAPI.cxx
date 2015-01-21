@@ -3,7 +3,7 @@
   $Id$
   $URL$
 
-  Copyright (c) 2006 - 2014
+  Copyright (c) 2006 - 2015
   Tilburg University
 
   A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch

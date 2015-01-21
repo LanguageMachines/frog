@@ -2,7 +2,7 @@
   $Id$
   $URL$
 
-  Copyright (c) 2006 - 2014
+  Copyright (c) 2006 - 2015
   Tilburg University
 
   A Morphological-Analyzer for Dutch
@@ -173,7 +173,7 @@ void Test( istream& in ){
 
 int main(int argc, char *argv[]) {
   std::ios_base::sync_with_stdio(false);
-  cerr << "mblem " << VERSION << " (c) ILK 1998 - 2014" << endl;
+  cerr << "mblem " << VERSION << " (c) ILK 1998 - 2015" << endl;
   cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
   TiCC::CL_Options Opts("c:t:hVd:a", "version");
   try {

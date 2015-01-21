@@ -3,7 +3,7 @@
   $Id$
   $URL$
 
-  Copyright (c) 2006 - 2014
+  Copyright (c) 2006 - 2015
   Tilburg University
 
   A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
@@ -418,7 +418,7 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
 
 
 int main(int argc, char *argv[]) {
-  cerr << "frog " << VERSION << " (c) ILK 1998 - 2014" << endl;
+  cerr << "frog " << VERSION << " (c) ILK 1998 - 2015" << endl;
   cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
   cerr << "based on [" << Tokenizer::VersionName() << ", "
        << folia::VersionName() << ", "
