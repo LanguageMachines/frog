@@ -1,6 +1,12 @@
-0.12.19 - 2014-09-23
+0.12.20 - 2015-01-29
 [Ko van der Sloot]
  * release
+ * fixed terrible bug in FrogServer (unitialized MWU could happen)
+
+0.12.19 - 2014-12-01
+[Ko van der Sloot]
+ * release
+ * some bug fixes for FoliA support
 
 0.12.18 - 2014-09-16
  * A true FrogAPI is added
