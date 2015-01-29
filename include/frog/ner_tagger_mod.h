@@ -14,12 +14,12 @@
 
   frog is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
+
   For questions and suggestions, see:
       http://ilk.uvt.nl/software.html
   or send mail to:
@@ -40,6 +40,7 @@ class NERTagger {
 		   const std::vector<std::string>&,
 		   const std::vector<double>& );
   std::string getTagset() const { return tagset; };
+  std::vector<TagResult> tagLine( const std::string& );
  private:
   MbtAPI *tagger;
   LogStream *nerLog;

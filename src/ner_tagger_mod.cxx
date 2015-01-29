@@ -250,3 +250,10 @@ void NERTagger::Classify( const vector<Word *>& swords ){
     addNERTags( swords, tags, conf );
   }
 }
+
+vector<TagResult> NERTagger::tagLine( const string& line ){
+  if ( tagger )
+    return tagger->TagLine(line);
+  else
+    throw runtime_error( "NERTagger is not initialized" );
+}
