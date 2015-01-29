@@ -49,6 +49,7 @@ class UctoTokenizer {
   folia::Document tokenize( std::istream& );
   bool tokenize( folia::Document& );
   std::vector<std::string> tokenize( const std::string&  );
+  std::vector<std::string> tokenizeStream( std::istream& );
  private:
   Tokenizer::TokenizerClass *tokenizer;
   TiCC::LogStream *uctoLog;

@@ -169,6 +169,14 @@ vector<string> UctoTokenizer::tokenize( const string& line ){
     throw runtime_error( "ucto tokenizer not initialized" );
 }
 
+vector<string> UctoTokenizer::tokenizeStream( istream& is ){
+  if ( tokenizer ){
+    return tokenizer->tokenizeStreamSentences( is );
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initialized" );
+}
+
 folia::Document UctoTokenizer::tokenize( istream& is ){
   if ( tokenizer )
     return tokenizer->tokenize( is );
