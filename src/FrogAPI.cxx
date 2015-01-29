@@ -183,14 +183,14 @@ FrogAPI::FrogAPI( const FrogOptions &opt,
 	  if ( stat ) {
 	    if ( options.doDaringMorph )
 	      myMbma->setDaring(true);
-	    if ( options.doMwu ){
-	      myMwu = new Mwu(theErrLog);
-	      stat = myMwu->init( configuration );
-	      if ( stat && options.doParse ){
-		myParser = new Parser(theErrLog);
-		stat = myParser->init( configuration );
-	      }
-	    }
+	  }
+	}
+	if ( stat && options.doMwu ){
+	  myMwu = new Mwu(theErrLog);
+	  stat = myMwu->init( configuration );
+	  if ( stat && options.doParse ){
+	    myParser = new Parser(theErrLog);
+	    stat = myParser->init( configuration );
 	  }
 	}
       }
