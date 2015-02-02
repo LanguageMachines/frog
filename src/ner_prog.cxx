@@ -134,15 +134,15 @@ bool init(){
 void Test( istream& in ){
   string line;
   while ( in.good() ){
-    vector<string> sentences = tokenizer.tokenizeStream( in );
-    for ( size_t s=0; s < sentences.size(); ++s ){
-      cout << "processing: " << sentences[s] << endl;
-      vector<TagResult> tagv = tagger.tagLine(sentences[s]);
-      for ( size_t w=0; w < tagv.size(); ++w ){
-	cout << tagv[w].word() << "\t" << tagv[w].assignedTag() << endl;
-      }
-      cout << "<utt>" << endl << endl;
+    string sentence = tokenizer.tokenizeStream( in );
+    if ( sentence.empty() )
+      break;
+    cout << "processing: " << sentence << endl;
+    vector<TagResult> tagv = tagger.tagLine(sentence);
+    for ( size_t w=0; w < tagv.size(); ++w ){
+      cout << tagv[w].word() << "\t" << tagv[w].assignedTag() << endl;
     }
+    cout << "<utt>" << endl << endl;
   }
 }
 

@@ -169,9 +169,9 @@ vector<string> UctoTokenizer::tokenize( const string& line ){
     throw runtime_error( "ucto tokenizer not initialized" );
 }
 
-vector<string> UctoTokenizer::tokenizeStream( istream& is ){
+string UctoTokenizer::tokenizeStream( istream& is ){
   if ( tokenizer ){
-    return tokenizer->tokenizeStreamSentences( is );
+    return tokenizer->tokenizeSentenceStream( is );
   }
   else
     throw runtime_error( "ucto tokenizer not initialized" );
