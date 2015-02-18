@@ -263,7 +263,7 @@ void Mbma::fillMaps() {
 void Mbma::init_cgn( const string& dir ) {
   string line;
   string fn = dir + "cgntags.main";
-  ifstream tc( fn.c_str() );
+  ifstream tc( fn );
   if ( tc ){
     while( getline( tc, line) ) {
       vector<string> tmp;
@@ -278,7 +278,7 @@ void Mbma::init_cgn( const string& dir ) {
   else
     throw ( runtime_error( "unable to open:" + fn ) );
   fn = dir + "cgntags.sub";
-  ifstream tc1( fn.c_str() );
+  ifstream tc1( fn );
   if ( tc1 ){
     while( getline(tc1, line) ) {
       vector<string> tmp;

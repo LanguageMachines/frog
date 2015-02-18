@@ -1061,7 +1061,7 @@ void FrogAPI::FrogFile( const string& infilename,
     showResults( os, doc );
   }
   else {
-    ifstream IN( infilename.c_str() );
+    ifstream IN( infilename );
     Document doc = tokenizer->tokenize( IN );
     FrogDoc( doc, false );
     if ( !xmlOutFile.empty() ){

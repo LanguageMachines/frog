@@ -109,7 +109,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   };
 
   if ( Opts.extract( 't', value ) ){
-    ifstream is( value.c_str() );
+    ifstream is( value );
     if ( !is ){
       cerr << "input stream " << value << " is not readable" << endl;
       return false;
@@ -192,7 +192,7 @@ int main(int argc, char *argv[]) {
     }
     for ( size_t i=0; i < fileNames.size(); ++i ){
       string TestFileName = fileNames[i];
-      ifstream in(TestFileName.c_str() );
+      ifstream in(TestFileName);
       if ( in.good() ){
 	Test( in );
       }

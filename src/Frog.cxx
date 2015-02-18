@@ -355,7 +355,7 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
 	return false;
       }
       TestFileName = value;
-      ifstream is( value.c_str() );
+      ifstream is( value );
       if ( !is ){
 	*Log(theErrLog) << "input stream " << value << " is not readable" << endl;
 	return false;
@@ -448,7 +448,7 @@ int main(int argc, char *argv[]) {
       set<string>::const_iterator it = fileNames.begin();
       ostream *outS = 0;
       if ( !outputFileName.empty() ){
-        outS = new ofstream( outputFileName.c_str() );
+        outS = new ofstream( outputFileName );
       }
       while ( it != fileNames.end() ){
 	string testName = testDirName;
@@ -469,7 +469,7 @@ int main(int argc, char *argv[]) {
 	    else {
 	      outName = outPath + *it + ".out";
 	    }
-	    outS = new ofstream( outName.c_str() );
+	    outS = new ofstream( outName );
 	  } else {
 	    outS = &cout;
 	  }

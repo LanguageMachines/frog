@@ -120,7 +120,7 @@ void Mwu::add( Word *word ){
 
 bool Mwu::read_mwus( const string& fname) {
   *Log(mwuLog) << "read mwus " + fname << endl;
-  ifstream mwufile(fname.c_str(), ios::in);
+  ifstream mwufile(fname, ios::in);
   if(mwufile.bad()){
     return false;
   }

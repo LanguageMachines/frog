@@ -147,7 +147,7 @@ void Parser::createParserFile( const parseData& pd ){
   const vector<string>& heads = pd.heads;
   const vector<string>& mods = pd.mods;
 
-  ofstream anaFile( fileName.c_str() );
+  ofstream anaFile( fileName );
   if ( anaFile ){
     for( size_t i = 0; i < words.size(); ++i ){
       anaFile << i+1 << "\t" << words[i] << "\t" << "*" << "\t" << heads[i]
@@ -319,7 +319,7 @@ void Parser::createPairs( const parseData& pd ){
   const vector<string>& mods = pd.mods;
   string pFile = fileName + ".pairs.inst";
   remove( pFile.c_str() );
-  ofstream ps( pFile.c_str() );
+  ofstream ps( pFile );
   if ( ps ){
     if ( words.size() == 1 ){
       ps << "__ " << words[0] << " __"
@@ -457,10 +457,10 @@ void Parser::createRelDir( const parseData& pd ){
   string mod_2, mod_1, mod0, mod1, mod2;
   string dFile = fileName + ".dir.inst";
   remove( dFile.c_str() );
-  ofstream ds( dFile.c_str() );
+  ofstream ds( dFile );
   string rFile = fileName + ".rels.inst";
   remove( rFile.c_str() );
-  ofstream rs( rFile.c_str() );
+  ofstream rs( rFile );
   if ( ds && rs ){
     if ( words.size() == 1 ){
       word0 = words[0];
@@ -967,7 +967,7 @@ void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
     PyErr_Print();
   }
   timers.csiTimer.stop();
-  ifstream resFile( resFileName.c_str() );
+  ifstream resFile( resFileName );
   if ( resFile ){
     appendParseResult( words, pd, tagset, resFile );
   }

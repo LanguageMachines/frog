@@ -51,7 +51,7 @@ Mblem::Mblem( LogStream *logstream ):
 }
 
 void Mblem::read_transtable( const string& tableName ) {
-  ifstream bron( tableName.c_str() );
+  ifstream bron( tableName );
   if ( !bron ) {
     *Log(mblemLog) << "translation table file '" << tableName
 		    << "' appears to be missing." << endl;

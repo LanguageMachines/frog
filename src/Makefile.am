@@ -2,7 +2,7 @@
 # $URL$
 
 AM_CPPFLAGS = -I@top_srcdir@/include
-AM_CXXFLAGS = -DSYSCONF_PATH=\"$(SYSCONFDIR)\" -DPYTHONDIR=\"$(PYTHONDIR)\" -std=c++0x
+AM_CXXFLAGS = -DSYSCONF_PATH=\"$(SYSCONFDIR)\" -DPYTHONDIR=\"$(PYTHONDIR)\" -std=c++11
 bin_PROGRAMS = frog mbma mblem ner
 
 frog_SOURCES = Frog.cxx
