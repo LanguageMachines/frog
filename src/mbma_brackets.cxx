@@ -1,6 +1,6 @@
 /*
-  $Id: mbma_mod.cxx 18070 2015-02-18 15:05:05Z sloot $
-  $URL: https://ilk.uvt.nl/svn/sources/Frog/trunk/src/mbma_mod.cxx $
+  $Id$
+  $URL$
 
   Copyright (c) 2006 - 2015
   Tilburg University

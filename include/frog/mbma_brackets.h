@@ -1,6 +1,6 @@
 /*
-  $Id: $
-  $URL: $
+  $Id$
+  $URL$
 
   Copyright (c) 2006 - 2015
   Tilburg University
