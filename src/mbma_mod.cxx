@@ -64,157 +64,6 @@ Mbma::~Mbma() {
   delete mbmaLog;
 }
 
-namespace CLEX {
-
-  Type toCLEX( const string& s ){
-    if ( s == "N" )
-      return N;
-    else if ( s == "A" )
-      return A;
-    else if ( s == "Q" )
-      return Q;
-    else if ( s == "V" )
-      return V;
-    else if ( s == "D" )
-      return D;
-    else if ( s == "O" )
-      return O;
-    else if ( s == "B" )
-      return B;
-    else if ( s == "P" )
-      return P;
-    else if ( s == "Y" )
-      return Y;
-    else if ( s == "I" )
-      return I;
-    else if ( s == "X" )
-      return X;
-    else if ( s == "Z" )
-      return Z;
-    else if ( s == "PN" )
-      return PN;
-    else if ( s == "*" )
-      return AFFIX;
-    else if ( s == "x" )
-      return XAFFIX;
-    else if ( s == "0" )
-      return NEUTRAL;
-    else
-      return UNASS;
-  }
-
-  Type toCLEX( const char c ){
-    string s;
-    s += c;
-    return toCLEX(s);
-  }
-
-  string toLongString( const Type& t ){
-    switch ( t ){
-    case N:
-      return "noun";
-    case A:
-      return "adjective";
-    case Q:
-      return "quantifier/numeral";
-    case V:
-      return "verb";
-    case D:
-      return "article";
-    case O:
-      return "pronoun";
-    case B:
-      return "adverb";
-    case P:
-      return "preposition";
-    case Y:
-      return "conjunction";
-    case I:
-      return "interjection";
-    case X:
-      return "unanalysed";
-    case Z:
-      return "expression part";
-    case PN:
-      return "proper noun";
-    case AFFIX:
-      return "affix";
-    case XAFFIX:
-      return "x affix";
-    case NEUTRAL:
-      return "0";
-    default:
-      return "UNASS";
-    }
-  }
-
-  string toString( const Type& t ){
-    switch ( t ){
-    case N:
-      return "N";
-    case A:
-      return "A";
-    case Q:
-      return "Q";
-    case V:
-      return "V";
-    case D:
-      return "D";
-    case O:
-      return "O";
-    case B:
-      return "B";
-    case P:
-      return "P";
-    case Y:
-      return "Y";
-    case I:
-      return "I";
-    case X:
-      return "X";
-    case Z:
-      return "Z";
-    case PN:
-      return "PN";
-    case AFFIX:
-      return "*";
-    case XAFFIX:
-      return "x";
-    case NEUTRAL:
-      return "0";
-    default:
-      return "/";
-    }
-  }
-
-  bool isBasicClass( const Type& t ){
-    const string basictags = "NAQVDOBPYIXZ";
-    switch ( t ){
-    case N:
-    case A:
-    case Q:
-    case V:
-    case D:
-    case O:
-    case B:
-    case P:
-    case Y:
-    case I:
-    case X:
-    case Z:
-      return true;
-    default:
-      return false;
-    }
-  }
-
-}
-
-ostream& operator<<( ostream& os, const CLEX::Type t ){
-  os << toString( t );
-  return os;
-}
-
 void Mbma::fillMaps() {
   //
   // this could be done from a configfile
@@ -408,215 +257,6 @@ vector<string> Mbma::make_instances( const UnicodeString& word ){
   return insts;
 }
 
-bool RulePart::isBasic() const {
-  return isBasicClass( ResultClass );
-}
-
-ostream& operator<<( ostream& os, const RulePart& r ){
-  if ( r.ResultClass == CLEX::UNASS &&
-       r.inflect.empty() ){
-    os << "INVALID! No result node, AND no inflection" << endl;
-  }
-  else {
-    os << r.uchar << " - ";
-    for ( size_t i = 0; i < r.RightHand.size(); ++i ){
-      os << r.RightHand[i];
-      if ( i < r.RightHand.size()-1 ){
-	os << "+";
-      }
-    }
-    if ( !r.RightHand.empty() ){
-      os << " ==> ";
-    }
-    os << r.ResultClass << " ";
-    if ( !r.inflect.empty() ){
-      os << " INFLECTION: " << r.inflect;
-    }
-  }
-  if ( r.fixpos >= 0 )
-    os << " affix at pos: " << r.fixpos;
-  if ( r.xfixpos >= 0 )
-    os << " x-affix at pos: " << r.xfixpos;
-  if ( !r.ins.isEmpty() )
-    os << " insert='" << r.ins << "'";
-  if ( !r.del.isEmpty() )
-    os << " delete='" << r.del << "'";
-  if ( !r.morpheme.isEmpty() )
-    os << " morpheme ='" << r.morpheme << "'";
-  return os;
-}
-
-ostream& operator<<( ostream& os, const RulePart *r ){
-  return os << *r;
-}
-
-void RulePart::get_ins_del( const string& edit ){
-  if (edit[0]=='D') { // delete operation
-    string s = edit.substr(1);
-    ins = UTF8ToUnicode( s );
-  }
-  else if ( edit[0]=='I') {  //insert operation
-    string s = edit.substr(1);
-    del = UTF8ToUnicode( s );
-  }
-  else if ( edit[0]=='R') { // replace operation
-    string::size_type pos = edit.find( ">" );
-    string s = edit.substr( 1, pos-1 );
-    ins = UTF8ToUnicode( s );
-    s = edit.substr( pos+1 );
-    del = UTF8ToUnicode( s );
-  }
-}
-
-RulePart::RulePart( const string& rs, const UChar kar ):
-  ResultClass(CLEX::UNASS),
-  uchar(kar),
-  fixpos(-1),
-  xfixpos(-1),
-  participle(false)
-{
-  //  cerr << "extract RulePart:" << rs << endl;
-  string edit;
-  string s = rs;
-  string::size_type ppos = rs.find("+");
-  if ( ppos != string::npos ){
-    // some edit info is available
-    string::size_type spos = rs.find("/");
-    if ( spos != string::npos ){
-      // inflection too
-      inflect = rs.substr( spos+1 );
-      //    cerr << "inflect = " << inflect << endl;
-      edit = rs.substr( ppos+1, spos-ppos-1 );
-    }
-    else {
-      edit = rs.substr( ppos+1 );
-    }
-    //    cerr << "EDIT = " << edit << endl;
-    get_ins_del( edit );
-    s = rs.substr(0, ppos );
-    participle = ( s.find( 'p' ) != string::npos ) &&
-      ( del == "ge" || del == "be" );
-  }
-  string::size_type pos = s.find("_");
-  if ( pos != string::npos ){
-    ResultClass = CLEX::toCLEX( s[0] );
-    // a rewrite RulePart
-    if ( pos != 1 ){
-      cerr << "Surprise! _ on a strange position:" << pos << " in " << s << endl;
-    }
-    else {
-      string rhs = s.substr( pos+1 );
-      //      cerr << "RHS = " << rhs << endl;
-      string::size_type spos = rhs.find("/");
-      if ( spos != string::npos ){
-	// inflection too
-	inflect = rhs.substr( spos+1 );
-	// cerr << "inflect = " << inflect << endl;
-	rhs = rhs.substr( 0, spos );
-      }
-      //      cerr << "RHS = " << rhs << endl;
-      RightHand.resize( rhs.size() );
-      for ( size_t i = 0; i < rhs.size(); ++i ){
-	CLEX::Type tag = CLEX::toCLEX( rhs[i] );
-	if ( tag == CLEX::UNASS ){
-	  cerr << "Unhandled class in rhs=" << rhs << endl;
-	  continue;
-	}
-	else {
-	  //	  cerr << "found tag '" << tag << "' in " << rhs << endl;
-	  RightHand[i] = tag;
-	  if ( tag == CLEX::AFFIX ){
-	    fixpos = i;
-	  }
-	  if ( tag == CLEX::XAFFIX ){
-	    xfixpos = i;
-	  }
-	}
-      }
-    }
-  }
-  else {
-    //    cerr << "normal RulePart " << s << endl;
-    CLEX::Type tag = CLEX::toCLEX( s[0] );
-    string::size_type pos = s.find("/");
-    if ( pos != string::npos ){
-      // some inflextion
-      if ( tag != CLEX::UNASS ){
-	// cases like 0/e 0/te2I
-	ResultClass = tag;
-	inflect = s.substr(pos+1);
-      }
-      else {
-	//  E/P
-	inflect = s;
-      }
-      //      cerr << "inflect =" << inflect << endl;
-    }
-    else if ( tag != CLEX::UNASS ){
-      // dull case
-      ResultClass = tag;
-    }
-    else {
-      // m
-      inflect = s;
-      //	cerr << "inflect =" << inflect << endl;
-    }
-  }
-}
-
-Rule::Rule( const vector<string>& parts,
-	    const UnicodeString& s,
-	    int flag ): debugFlag( flag ){
-  for ( size_t k=0; k < parts.size(); ++k ) {
-    string this_class = parts[k];
-    RulePart cur( this_class, s[k] );
-    rules.push_back( cur );
-  }
-}
-
-ostream& operator<<( ostream& os, const Rule& r ){
-  os << "MBMA rule:" << endl;
-  for ( size_t k=0; k < r.rules.size(); ++k ) {
-    os << "\t" << r.rules[k] << endl;
-  }
-  return os;
-}
-
-ostream& operator<<( ostream& os, const Rule *r ){
-  if ( r )
-    os << *r << endl;
-  else
-    os << "Empty MBMA rule" << endl;
-  return os;
-}
-
-void Rule::reduceZeroNodes(){
-  vector<RulePart> out;
-  for ( size_t k=0; k < rules.size(); ++k ) {
-    if ( rules[k].ResultClass == CLEX::NEUTRAL
-	 && rules[k].morpheme.isEmpty()
-	 && rules[k].inflect.empty() ){
-    }
-    else {
-      out.push_back(rules[k]);
-    }
-  }
-  rules.swap( out );
-}
-
-vector<string> Rule::extract_morphemes() const {
-  vector<string> morphemes;
-  vector<RulePart>::const_iterator it = rules.begin();
-  while ( it != rules.end() ) {
-    UnicodeString morpheme = it->morpheme;
-    if ( !morpheme.isEmpty() ){
-      morphemes.push_back( UnicodeToUTF8(morpheme) );
-    }
-    ++it;
-  }
-  return morphemes;
-}
-
 CLEX::Type select_tag( const char ch ){
   CLEX::Type result = CLEX::UNASS;
   switch( ch ){
@@ -694,571 +334,6 @@ void Mbma::resolve_inflections( Rule& rule ){
       }
     }
   }
-}
-
-BracketLeaf::BracketLeaf( const RulePart& p, int flag ):
-  BaseBracket(p.ResultClass, p.RightHand, flag),
-  morph(p.morpheme )
-{
-  ifpos = -1;
-  if ( !p.inflect.empty() ){
-    inflect = p.inflect;
-    if ( p.ResultClass == CLEX::UNASS ){
-      status = INFLECTION;
-    }
-    else {
-      status = INFO;
-    }
-  }
-  else if ( RightHand.size() == 0 ){
-    orig = toString( cls );
-    status = STEM;
-  }
-  else {
-    orig = toString( cls );
-    orig += "_";
-    for ( size_t i = 0; i < RightHand.size(); ++i ){
-      orig += toString(RightHand[i]);
-      if ( RightHand[i] == CLEX::AFFIX )
-	ifpos = i;
-    }
-    status = DERIVATIONAL;
-  }
-}
-
-BracketLeaf::BracketLeaf( CLEX::Type t, const UnicodeString& us, int flag ):
-  BaseBracket( t, vector<CLEX::Type>(), flag ),
-  morph( us )
-{
-  ifpos = -1;
-  orig = toString( t );
-  status = STEM;
-}
-
-BracketNest::~BracketNest(){
-  for ( list<BaseBracket*>::const_iterator it = parts.begin();
-	it != parts.end();
-	++it ){
-    delete *it;
-  }
-}
-
-UnicodeString BaseBracket::put( bool noclass ) const {
-  UnicodeString result = "[err?]";
-  if ( !noclass ){
-    UnicodeString s = UTF8ToUnicode(toString(cls));
-    result += s;
-  }
-  return result;
-}
-
-UnicodeString BracketLeaf::put( bool noclass ) const {
-  UnicodeString result = "[";
-  result += morph;
-  result += "]";
-  if ( !noclass ){
-    if ( orig.empty() )
-      result += UTF8ToUnicode(inflect);
-    else
-      result += UTF8ToUnicode(orig);
-  }
-  return result;
-}
-
-UnicodeString BracketNest::put( bool noclass ) const {
-  UnicodeString result = "[ ";
-  for ( list<BaseBracket*>::const_iterator it = parts.begin();
-	it != parts.end();
-	++it ){
-    result +=(*it)->put(noclass) + " ";
-  }
-  result += "]";
-  if ( !noclass ){
-    if ( cls != CLEX::UNASS )
-      result += UTF8ToUnicode(toString(cls));
-  }
-  return result;
-}
-
-ostream& operator<< ( ostream& os, const BaseBracket& c ){
-  os << c.put();
-  return os;
-}
-
-ostream& operator<< ( ostream& os, const BaseBracket *c ){
-  if ( c ){
-    os << c->put();
-  }
-  else {
-    os << "[EMPTY]";
-  }
-  return os;
-}
-
-UnicodeString BracketNest::deepmorphemes() const{
-  UnicodeString res;
-  for ( list<BaseBracket*>::const_iterator it = parts.begin();
-	it != parts.end();
-	++it ){
-    res += (*it)->deepmorphemes();
-  }
-  return res;
-}
-
-void prettyP( ostream& os, const list<BaseBracket*>& v ){
-  os << "[";
-  for ( list<BaseBracket*>::const_iterator it = v.begin();
-	it != v.end();
-	++it ){
-    os << *it << " ";
-  }
-  os << "]";
-}
-
-bool BracketNest::testMatch( list<BaseBracket*>& result,
-			     const list<BaseBracket*>::iterator& rpos,
-			     list<BaseBracket*>::iterator& bpos ){
-  if ( debugFlag > 5 ){
-    cerr << "test MATCH " << endl;
-  }
-  bpos = result.end();
-  size_t len = (*rpos)->RightHand.size();
-  if ( len == 0 || len > result.size() ){
-    if ( debugFlag > 5 ){
-      cerr << "test MATCH FAIL (no RHS or RHS > result)" << endl;
-    }
-    return false;
-  }
-  size_t fpos = (*rpos)->infixpos();
-  if ( debugFlag > 5 ){
-    cerr << "test MATCH, fpos=" << fpos << " en len=" << len << endl;
-  }
-  list<BaseBracket*>::iterator it = rpos;
-  while ( fpos > 0 ){
-    --fpos;
-    --it;
-  }
-  size_t j = 0;
-  bpos = it;
-  for (; j < len && it != result.end(); ++j, ++it ){
-    if ( debugFlag > 5 ){
-      cerr << "test MATCH vergelijk " << *it << " met " << (*rpos)->RightHand[j] << endl;
-    }
-    if ( (*rpos)->RightHand[j] == CLEX::XAFFIX)
-      continue;
-    else if ( (*rpos)->RightHand[j] == CLEX::AFFIX)
-      continue;
-    else if ( (*rpos)->RightHand[j] != (*it)->tag() ){
-      if ( debugFlag > 5 ){
-	cerr << "test MATCH FAIL (" << (*rpos)->RightHand[j]
-	     << " != " << (*it)->tag() << ")" << endl;
-      }
-      bpos = it;
-      return false;
-    }
-  }
-  if ( j < len ){
-    if ( debugFlag > 5 ){
-      cerr << "test MATCH FAIL (j < len)" << endl;
-    }
-    bpos = result.end();
-    return false;
-  }
-  if ( debugFlag > 5 ){
-    cerr << "test MATCH OK" << endl;
-  }
-  return true;
-}
-
-
-list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& result,
-							const list<BaseBracket*>::iterator& rpos ){
-  if ( debugFlag > 5 ){
-    cerr << "resolve affix" << endl;
-  }
-  list<BaseBracket*>::iterator bit;
-  bool matched = testMatch( result, rpos, bit );
-  if ( matched ){
-    if ( debugFlag > 5 ){
-      cerr << "OK een match" << endl;
-    }
-    size_t len = (*rpos)->RightHand.size();
-    if ( len == result.size() ){
-      // the rule matches exact what we have.
-      // leave it
-      list<BaseBracket*>::iterator it = rpos;
-      return ++it;
-    }
-    else {
-      list<BaseBracket*>::iterator it = bit--;
-      BaseBracket *tmp = new BracketNest( (*rpos)->tag(), debugFlag );
-      for ( size_t j = 0; j < len; ++j ){
-	tmp->append( *it );
-	if ( debugFlag > 5 ){
-	  cerr << "erase " << *it << endl;
-	}
-	it = result.erase(it);
-      }
-      if ( debugFlag > 5 ){
-	cerr << "new node:" << tmp << endl;
-      }
-      result.insert( ++bit, tmp );
-      return bit;
-    }
-  }
-  else {
-    // the affix derivation failed.
-    if ( bit == result.end() ){
-      // no hacks yet
-      bit = rpos;
-      return ++bit;
-    }
-    list<BaseBracket*>::iterator it = rpos;
-    if ( debugFlag > 5 ){
-      cerr << "it = " << *it << endl;
-      cerr << "bit = " << *bit << endl;
-    }
-    if ( (*bit)->RightHand.size() > 1 ){
-      if ( debugFlag > 5 ){
-	cerr << "undo splitup case 1" << endl;
-      }
-      // We 'undo' the splitup and construct a leaf with the combined morphemes
-      UnicodeString mor;
-      CLEX::Type tag = (*it)->tag();
-      while ( it != result.end() ){
-	if ( (*it)->inflection() != "" && tag != CLEX::UNASS ){
-	  // so we DO continue when there is inflection and NO tag (like 'pt')
-	  // in : N,0,0,0,pt,0,Q_Q*,0,0,0,0,0/m
-	  break;
-	}
-	if ( debugFlag > 5 ){
-	  cerr << "append:" << *it << endl;
-	}
-	mor += (*it)->morpheme();
-	tag = (*it)->tag(); // remember the 'last' tag
-	if ( debugFlag > 5 ){
-	  cerr << "erase " << *it << endl;
-	}
-	it = result.erase(it);
-      }
-      BaseBracket *tmp = new BracketLeaf( tag, mor, debugFlag );
-      if ( debugFlag > 5 ){
-	cerr << "new node: " << tmp << endl;
-      }
-      result.insert( it, tmp );
-      if ( debugFlag > 5 ){
-	cerr << "result = " << result << endl;
-      }
-      return ++it;
-    }
-    else {
-      if ( debugFlag > 5 ){
-	cerr << "undo splitup case 2" << endl;
-      }
-      // We 'undo' the splitup and construct a leaf with the combined morphemes
-      UnicodeString mor;
-      CLEX::Type tag = (*bit)->tag();
-      ++it;
-      if (  bit == it ){
-	if ( debugFlag > 5 ){
-	  cerr << "escape with result = " << result << endl;
-	}
-	return ++bit;
-      }
-      while ( bit != it ){
-	if ( debugFlag > 5 ){
-	  cerr << "loop :" << *bit << endl;
-	}
-	if ( (*bit)->inflection() != "" && tag != CLEX::UNASS ){
-	  // so we DO continue when there is inflection and NO tag (like 'pt')
-	  // in : N,0,0,0,pt,0,Q_Q*,0,0,0,0,0/m
-	  break;
-	}
-	if ( debugFlag > 5 ){
-	  cerr << "append:" << *bit << " morpheme=" <<  (*bit)->deepmorphemes() << endl;
-	}
-	mor += (*bit)->deepmorphemes();
-	tag = (*bit)->tag(); // remember the 'last' tag
-	if ( debugFlag > 5 ){
-	  cerr << "erase " << *bit << endl;
-	}
-	bit = result.erase(bit);
-      }
-      BaseBracket *tmp = new BracketLeaf( tag, mor, debugFlag );
-      if ( debugFlag > 5 ){
-	cerr << "new node: " << tmp << endl;
-      }
-      result.insert( it, tmp );
-      if ( debugFlag > 5 ){
-	cerr << "result = " << result << endl;
-      }
-      return ++bit;
-    }
-  }
-}
-
-void BracketNest::resolveNouns( ){
-  if ( debugFlag > 5 ){
-    cerr << "resolve NOUNS in:" << this << endl;
-  }
-  list<BaseBracket*>::iterator it = parts.begin();
-  list<BaseBracket*>::iterator prev = it++;
-  while ( it != parts.end() ){
-    if ( (*prev)->tag() == CLEX::N && (*prev)->RightHand.size() == 0
-	 && (*it)->tag() == CLEX::N && (*it)->RightHand.size() == 0 ){
-      BaseBracket *tmp = new BracketNest( CLEX::N, debugFlag );
-      tmp->append( *prev );
-      tmp->append( *it );
-      if ( debugFlag > 5 ){
-	cerr << "current result:" << parts << endl;
-	cerr << "new node:" << tmp << endl;
-	cerr << "erase " << *prev << endl;
-      }
-      prev = parts.erase(prev);
-      if ( debugFlag > 5 ){
-	cerr << "erase " << *prev << endl;
-      }
-      prev = parts.erase(prev);
-      prev = parts.insert( prev, tmp );
-      if ( debugFlag > 5 ){
-	cerr << "current result:" << parts << endl;
-      }
-      it = prev;
-      ++it;
-    }
-    else {
-      prev = it++;
-    }
-  }
-  if ( debugFlag > 5 ){
-    cerr << "resolve NOUNS result:" << this << endl;
-  }
-}
-
-void BracketNest::resolveLead( ){
-  list<BaseBracket*>::iterator it = parts.begin();
-  while ( it != parts.end() ){
-    // search for rules with a * at the begin
-    if ( debugFlag > 5 ){
-      cerr << "search leading *: bekijk: " << *it << endl;
-    }
-    if ( (*it)->isNested() ){
-      if ( debugFlag > 5 ){
-	cerr << "nested! " << endl;
-      }
-      (*it)->resolveLead();
-      ++it;
-    }
-    else {
-      if ( (*it)->infixpos() == 0 ){
-	it = resolveAffix( parts, it );
-      }
-      else {
-	++it;
-      }
-    }
-  }
-}
-
-void BracketNest::resolveTail(){
-  list<BaseBracket *>::iterator it = parts.begin();
-  while ( it != parts.end() ){
-    // search for rules with a * at the end
-    if ( debugFlag > 5 ){
-      cerr << "search trailing *: bekijk: " << *it << endl;
-    }
-    if ( (*it)->isNested() ){
-      if ( debugFlag > 5 ){
-	cerr << "nested! " << endl;
-      }
-      (*it)->resolveTail();
-      ++it;
-    }
-    else {
-      size_t len = (*it)->RightHand.size();
-      if ( (*it)->infixpos() > 0
-	   && (*it)->infixpos() == signed(len)-1 ){
-	if ( debugFlag > 5 ){
-	  cerr << "found trailing * " << *it << endl;
-	  cerr << "infixpos=" << (*it)->infixpos() << endl;
-	  cerr << "len=" << len << endl;
-	}
-	it = resolveAffix( parts, it );
-      }
-      else {
-	++it;
-      }
-    }
-  }
-}
-
-void BracketNest::resolveMiddle(){
-  list<BaseBracket*>::iterator it = parts.begin();
-  while ( it != parts.end() ){
-    // now search for other rules with a * in the middle
-    if ( debugFlag > 5 ){
-      cerr << "hoofd infix loop bekijk: " << *it << endl;
-    }
-    if ( (*it)->isNested() ){
-      if ( debugFlag > 5 ){
-	cerr << "nested! " << endl;
-      }
-      (*it)->resolveMiddle( );
-      ++it;
-    }
-    else {
-      size_t len = (*it)->RightHand.size();
-      if ( (*it)->infixpos() > 0
-	   && (*it)->infixpos() < signed(len)-1 ){
-	it = resolveAffix( parts, it );
-      }
-      else {
-	++it;
-      }
-    }
-  }
-}
-
-CLEX::Type BracketNest::getFinalTag() {
-  // cerr << "get Final Tag from: " << this << endl;
-  cls = CLEX::X;
-  list<BaseBracket*>::const_reverse_iterator it = parts.rbegin();
-  while ( it != parts.rend() ){
-    // cerr << "bekijk: " << *it << endl;
-    if ( (*it)->isNested()
-	 || ( (*it)->inflection().empty()
-	      && !(*it)->morpheme().isEmpty() ) ){
-      cls = (*it)->tag();
-      // cerr << "final tag = " << cls << endl;
-      break;
-    }
-    ++it;
-  }
-  //  cerr << "final tag = X " << endl;
-  return cls;
-}
-
-BracketNest *Rule::resolveBrackets( bool daring, CLEX::Type& tag  ) {
-  if ( debugFlag > 5 ){
-    cerr << "check rule for bracketing: " << this << endl;
-  }
-  BracketNest *brackets = new BracketNest( CLEX::UNASS, debugFlag );
-  for ( size_t k=0; k < rules.size(); ++k ) {
-    // fill a flat result;
-    BracketLeaf *tmp = new BracketLeaf( rules[k], debugFlag );
-    if ( tmp->stat() == STEM && tmp->morpheme().isEmpty() ){
-      delete tmp;
-    }
-    else {
-      brackets->append( tmp );
-    }
-  }
-  if ( debugFlag > 5 ){
-    cerr << "STEP 1:" << brackets << endl;
-  }
-  if ( daring ){
-    brackets->resolveNouns( );
-    if ( debugFlag > 5 ){
-      cerr << "STEP 2:" << brackets << endl;
-    }
-    brackets->resolveLead( );
-    if ( debugFlag > 5 ){
-      cerr << "STEP 3:" << brackets << endl;
-    }
-    brackets->resolveTail( );
-    if ( debugFlag > 5 ){
-      cerr << "STEP 4:" << brackets << endl;
-    }
-    brackets->resolveMiddle();
-  }
-  tag = brackets->getFinalTag();
-  if ( debugFlag > 5 ){
-    cerr << "Final Bracketing:" << brackets << endl;
-  }
-  return brackets;
-}
-
-bool Mbma::performEdits( Rule& rule ){
-  if ( debugFlag){
-    *Log(mbmaLog) << "FOUND rule " << rule << endl;
-  }
-  RulePart *last = 0;
-  for ( size_t k=0; k < rule.rules.size(); ++k ) {
-    RulePart *cur = &rule.rules[k];
-    if ( last == 0 )
-      last = cur;
-    if ( debugFlag){
-      *Log(mbmaLog) << "edit::act=" << cur << endl;
-    }
-    if ( !cur->del.isEmpty() && cur->ins != "eer" ){
-      // sanity check
-      for ( int j=0; j < cur->del.length(); ++j ){
-	if ( rule.rules[k+j].uchar != cur->del[j] ){
-	  UnicodeString tmp(cur->del[j]);
-	  *Log(mbmaLog) << "Hmm: deleting " << cur->del << " is impossible. ("
-			<< rule.rules[k+j].uchar << " != " << tmp
-			<< ")." << endl;
-	  *Log(mbmaLog) << "Reject rule: " << rule << endl;
-	  return false;
-	}
-      }
-    }
-    if ( !cur->participle ){
-      for ( int j=0; j < cur->del.length(); ++j ){
-	rule.rules[k+j].uchar = "";
-      }
-    }
-
-    bool inserted = false;
-    bool e_except = false;
-    if ( cur->isBasic() ){
-      // encountering real POS tag
-      // start a new morpheme, BUT: inserts are appended to the previous one
-      // except for Replace edits, exception on that again: "eer" inserts
-      if ( debugFlag ){
-	*Log(mbmaLog) << "FOUND a basic tag " << cur->ResultClass << endl;
-      }
-      if ( cur->del.isEmpty() || cur->ins == "eer" ){
-	if ( !cur->del.isEmpty() && cur->ins == "eer" ){
-	  if ( debugFlag > 5 ){
-	    *Log(mbmaLog) << "special 'eer' exception." << endl;
-	    *Log(mbmaLog) << rule << endl;
-	  }
-	}
-	if ( cur->ins == "ere" ){
-	  if ( debugFlag > 5 ){
-	    *Log(mbmaLog) << "special 'ere' exception." << endl;
-	    *Log(mbmaLog) << rule << endl;
-	  }
-	  // strange exception
-	  last->morpheme += "er";
-	  e_except = true;
-	}
-	else {
-	  last->morpheme += cur->ins;
-	}
-	inserted = true;
-      }
-      last = cur;
-    }
-    else if ( cur->ResultClass != CLEX::NEUTRAL && !cur->inflect.empty() ){
-      // non 0 inflection starts a new morheme
-      last = cur;
-    }
-    if ( !inserted ){
-      // insert the deletestring :-)
-      last->morpheme += cur->ins;
-    }
-    if ( e_except ) {
-      // fix exception
-      last->morpheme += "e";
-    }
-    last->morpheme += cur->uchar; // might be empty because of deletion
-  }
-  if ( debugFlag ){
-    *Log(mbmaLog) << "edited rule " << rule << endl;
-  }
-  return true;
 }
 
 MBMAana::MBMAana( const Rule& r, bool daring ): rule(r) {
@@ -1441,6 +516,89 @@ void Mbma::clearAnalysis(){
     delete analysis[i];
   }
   analysis.clear();
+}
+
+bool Mbma::performEdits( Rule& rule ){
+  if ( debugFlag){
+    *Log(mbmaLog) << "FOUND rule " << rule << endl;
+  }
+  RulePart *last = 0;
+  for ( size_t k=0; k < rule.rules.size(); ++k ) {
+    RulePart *cur = &rule.rules[k];
+    if ( last == 0 )
+      last = cur;
+    if ( debugFlag){
+      *Log(mbmaLog) << "edit::act=" << cur << endl;
+    }
+    if ( !cur->del.isEmpty() && cur->ins != "eer" ){
+      // sanity check
+      for ( int j=0; j < cur->del.length(); ++j ){
+	if ( rule.rules[k+j].uchar != cur->del[j] ){
+	  UnicodeString tmp(cur->del[j]);
+	  *Log(mbmaLog) << "Hmm: deleting " << cur->del << " is impossible. ("
+			<< rule.rules[k+j].uchar << " != " << tmp
+			<< ")." << endl;
+	  *Log(mbmaLog) << "Reject rule: " << rule << endl;
+	  return false;
+	}
+      }
+    }
+    if ( !cur->participle ){
+      for ( int j=0; j < cur->del.length(); ++j ){
+	rule.rules[k+j].uchar = "";
+      }
+    }
+
+    bool inserted = false;
+    bool e_except = false;
+    if ( cur->isBasic() ){
+      // encountering real POS tag
+      // start a new morpheme, BUT: inserts are appended to the previous one
+      // except for Replace edits, exception on that again: "eer" inserts
+      if ( debugFlag ){
+	*Log(mbmaLog) << "FOUND a basic tag " << cur->ResultClass << endl;
+      }
+      if ( cur->del.isEmpty() || cur->ins == "eer" ){
+	if ( !cur->del.isEmpty() && cur->ins == "eer" ){
+	  if ( debugFlag > 5 ){
+	    *Log(mbmaLog) << "special 'eer' exception." << endl;
+	    *Log(mbmaLog) << rule << endl;
+	  }
+	}
+	if ( cur->ins == "ere" ){
+	  if ( debugFlag > 5 ){
+	    *Log(mbmaLog) << "special 'ere' exception." << endl;
+	    *Log(mbmaLog) << rule << endl;
+	  }
+	  // strange exception
+	  last->morpheme += "er";
+	  e_except = true;
+	}
+	else {
+	  last->morpheme += cur->ins;
+	}
+	inserted = true;
+      }
+      last = cur;
+    }
+    else if ( cur->ResultClass != CLEX::NEUTRAL && !cur->inflect.empty() ){
+      // non 0 inflection starts a new morheme
+      last = cur;
+    }
+    if ( !inserted ){
+      // insert the deletestring :-)
+      last->morpheme += cur->ins;
+    }
+    if ( e_except ) {
+      // fix exception
+      last->morpheme += "e";
+    }
+    last->morpheme += cur->uchar; // might be empty because of deletion
+  }
+  if ( debugFlag ){
+    *Log(mbmaLog) << "edited rule " << rule << endl;
+  }
+  return true;
 }
 
 void Mbma::execute( const UnicodeString& word,
