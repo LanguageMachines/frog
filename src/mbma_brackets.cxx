@@ -42,7 +42,17 @@ using namespace std;
 using namespace TiCC;
 using namespace folia;
 
-enum class CompoundType { NONE, NN, PN, PV };
+ostream& operator<<( ostream& os, const CompoundType ct ){
+  if ( ct == CompoundType::NN )
+    os << "NN";
+  else if ( ct == CompoundType::PN )
+    os << "PN";
+  else if ( ct == CompoundType::PV )
+    os << "PV";
+  else
+    os << "none";
+  return os;
+}
 
 BracketLeaf::BracketLeaf( const RulePart& p, int flag ):
   BaseBracket(p.ResultClass, p.RightHand, flag),
@@ -52,15 +62,15 @@ BracketLeaf::BracketLeaf( const RulePart& p, int flag ):
   if ( !p.inflect.empty() ){
     inflect = p.inflect;
     if ( p.ResultClass == CLEX::UNASS ){
-      status = INFLECTION;
+      status = Status::INFLECTION;
     }
     else {
-      status = INFO;
+      status = Status::INFO;
     }
   }
   else if ( RightHand.size() == 0 ){
     orig = toString( cls );
-    status = STEM;
+    status = Status::STEM;
   }
   else {
     orig = toString( cls );
@@ -70,7 +80,7 @@ BracketLeaf::BracketLeaf( const RulePart& p, int flag ):
       if ( RightHand[i] == CLEX::AFFIX )
 	ifpos = i;
     }
-    status = DERIVATIONAL;
+    status = Status::DERIVATIONAL;
   }
 }
 
@@ -80,11 +90,14 @@ BracketLeaf::BracketLeaf( CLEX::Type t, const UnicodeString& us, int flag ):
 {
   ifpos = -1;
   orig = toString( t );
-  status = STEM;
+  status = Status::STEM;
 }
 
-BracketNest::BracketNest( CLEX::Type t, int flag ): BaseBracket( t, flag ){
-  status = COMPLEX; compound = CompoundType::NONE;
+BracketNest::BracketNest( CLEX::Type t,
+			  CompoundType c,
+			  int flag ): BaseBracket( t, flag ){
+  status = Status::COMPLEX;
+  _compound = c;
 }
 
 BaseBracket *BracketNest::append( BaseBracket *t ){
@@ -133,6 +146,15 @@ UnicodeString BracketNest::put( bool noclass ) const {
   if ( !noclass ){
     if ( cls != CLEX::UNASS )
       result += UTF8ToUnicode(toString(cls));
+  }
+  if ( _compound == CompoundType::NN ){
+    result += " NN-compound";
+  }
+  else if ( _compound == CompoundType::PN ){
+    result += " PN-compound";
+  }
+  if ( _compound == CompoundType::PV ){
+    result += " PV-compound";
   }
   return result;
 }
@@ -227,6 +249,56 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
   return true;
 }
 
+void BracketNest::setCompoundType(){
+  if ( parts.size() == 1 ){
+    auto part = *parts.begin();
+    part->setCompoundType();
+    _compound = part->compound();
+  }
+  else if ( parts.size() == 2
+	    || parts.size() == 3 ){
+    auto it = parts.begin();
+    CLEX::Type tag1 = (*it)->tag();
+    CompoundType cp1 = (*it)->compound();
+    CLEX::Type tag2 = (*++it)->tag();
+    if ( debugFlag > 5 ){
+      cerr << "tag1 :" << tag1 << endl;
+      cerr << "tag2 :" << tag2 << endl;
+    }
+    CLEX::Type tag3 = CLEX::NEUTRAL;
+    if ( ++it != parts.end() ){
+      tag3 = (*it)->tag();
+      if ( debugFlag > 5 ){
+	cerr << "extra tag :" << tag3 << endl;
+      }
+    }
+    if ( tag3 != CLEX::NEUTRAL && tag3 != CLEX::UNASS ){
+      return;
+    }
+    if ( tag1 == CLEX::N ){
+      if ( tag2 ==CLEX::N ){
+	_compound = CompoundType::NN;
+      }
+      else if ( tag2 == CLEX::NEUTRAL || tag2 == CLEX::UNASS ){
+	_compound = cp1;
+      }
+    }
+    else if ( tag1 == CLEX::P ){
+      if ( tag2 == CLEX::N ){
+	_compound = CompoundType::PN;
+      }
+      else if ( tag2 == CLEX::V ){
+	_compound = CompoundType::PV;
+      }
+      else if ( tag2 == CLEX::NEUTRAL || tag2 == CLEX::UNASS ){
+	_compound = cp1;
+      }
+    }
+  }
+  else {
+    return;
+  }
+}
 
 list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& result,
 							const list<BaseBracket*>::iterator& rpos ){
@@ -248,7 +320,8 @@ list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& resu
     }
     else {
       list<BaseBracket*>::iterator it = bit--;
-      BaseBracket *tmp = new BracketNest( (*rpos)->tag(), debugFlag );
+      BracketNest *tmp
+	= new BracketNest( (*rpos)->tag(), CompoundType::NONE, debugFlag );
       for ( size_t j = 0; j < len; ++j ){
 	tmp->append( *it );
 	if ( debugFlag > 5 ){
@@ -259,6 +332,7 @@ list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& resu
       if ( debugFlag > 5 ){
 	cerr << "new node:" << tmp << endl;
       }
+      tmp->setCompoundType();
       result.insert( ++bit, tmp );
       return bit;
     }
@@ -363,7 +437,8 @@ void BracketNest::resolveNouns( ){
   while ( it != parts.end() ){
     if ( (*prev)->tag() == CLEX::N && (*prev)->RightHand.size() == 0
 	 && (*it)->tag() == CLEX::N && (*it)->RightHand.size() == 0 ){
-      BaseBracket *tmp = new BracketNest( CLEX::N, debugFlag );
+      BaseBracket *tmp
+	= new BracketNest( CLEX::N, CompoundType::NN, debugFlag );
       tmp->append( *prev );
       tmp->append( *it );
       if ( debugFlag > 5 ){
@@ -499,11 +574,12 @@ BracketNest *Rule::resolveBrackets( bool daring, CLEX::Type& tag  ) {
   if ( debugFlag > 5 ){
     cerr << "check rule for bracketing: " << this << endl;
   }
-  BracketNest *brackets = new BracketNest( CLEX::UNASS, debugFlag );
+  BracketNest *brackets
+    = new BracketNest( CLEX::UNASS, CompoundType::NONE, debugFlag );
   for ( size_t k=0; k < rules.size(); ++k ) {
     // fill a flat result;
     BracketLeaf *tmp = new BracketLeaf( rules[k], debugFlag );
-    if ( tmp->stat() == STEM && tmp->morpheme().isEmpty() ){
+    if ( tmp->stat() == Status::STEM && tmp->morpheme().isEmpty() ){
       delete tmp;
     }
     else {
@@ -528,8 +604,9 @@ BracketNest *Rule::resolveBrackets( bool daring, CLEX::Type& tag  ) {
     }
     brackets->resolveMiddle();
   }
+  brackets->setCompoundType();
   tag = brackets->getFinalTag();
-  if ( debugFlag > 5 ){
+  if ( debugFlag > 4 ){
     cerr << "Final Bracketing:" << brackets << endl;
   }
   return brackets;

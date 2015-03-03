@@ -29,9 +29,10 @@
 #ifndef MBMA_BRACKETS_H
 #define MBMA_BRACKETS_H
 
-enum Status { INFO, STEM, COMPLEX, INFLECTION, DERIVATIONAL };
+enum class Status { INFO, STEM, COMPLEX, INFLECTION, DERIVATIONAL };
 
-enum class CompoundType;
+enum class CompoundType { NONE, NN, PN, PV };
+
 
 class RulePart;
 
@@ -68,6 +69,8 @@ public:
 					   const std::string&,
 					   int&,
 					   std::string& ) const = 0;
+  virtual CompoundType compound() const { return CompoundType::NONE; };
+  virtual void setCompoundType() { return; };
   CLEX::Type tag() const { return cls; };
   void setTag( CLEX::Type t ) { cls = t; };
   std::vector<CLEX::Type> RightHand;
@@ -104,7 +107,7 @@ private:
 
 class BracketNest: public BaseBracket {
  public:
-  BracketNest( CLEX::Type t, int flag );
+  BracketNest( CLEX::Type, CompoundType, int );
   BaseBracket *append( BaseBracket * );
   ~BracketNest();
   bool isNested() { return true; };
@@ -118,6 +121,7 @@ class BracketNest: public BaseBracket {
   void resolveLead();
   void resolveTail();
   void resolveMiddle();
+  void setCompoundType();
   UnicodeString deepmorphemes() const;
   CLEX::Type getFinalTag();
   folia::Morpheme *createMorpheme( folia::Document *,
@@ -129,7 +133,11 @@ class BracketNest: public BaseBracket {
 				   int&,
 				   std::string& ) const;
   std::list<BaseBracket *> parts;
-  CompoundType compound;
+  CompoundType compound() const { return _compound; };
+ private:
+  CompoundType _compound;
 };
+
+std::ostream& operator<<( std::ostream&, const CompoundType );
 
 #endif // MBMA_BRACKETS_H

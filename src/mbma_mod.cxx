@@ -744,7 +744,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
 				       string& desc ) const {
   Morpheme *result = 0;
   desc.clear();
-  if ( status == STEM ){
+  if ( status == Status::STEM ){
     KWargs args;
     args["set"] = mbma_tagset;
     args["class"] = "stem";
@@ -775,7 +775,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
       result->addPosAnnotation( args );
     }
   }
-  else if ( status == INFLECTION ){
+  else if ( status == Status::INFLECTION ){
     KWargs args;
     args["class"] = "inflection";
     args["set"] = mbma_tagset;
@@ -810,7 +810,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
       result->append( d );
     }
   }
-  else if ( status == DERIVATIONAL ){
+  else if ( status == Status::DERIVATIONAL ){
     KWargs args;
     args["class"] = "derivational";
     args["set"] = mbma_tagset;

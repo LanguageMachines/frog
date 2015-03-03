@@ -38,4 +38,6 @@ namespace CLEX {
   Type toCLEX( const char );
 }
 
+std::ostream& operator<<( std::ostream&, const CLEX::Type );
+
 #endif // CLEX_H
