@@ -339,92 +339,9 @@ list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& resu
   }
   else {
     // the affix derivation failed.
-    if ( bit == result.end() ){
-      // no hacks yet
-      bit = rpos;
-      return ++bit;
-    }
-    list<BaseBracket*>::iterator it = rpos;
-    if ( debugFlag > 5 ){
-      cerr << "it = " << *it << endl;
-      cerr << "bit = " << *bit << endl;
-    }
-    if ( (*bit)->RightHand.size() > 1 ){
-      if ( debugFlag > 5 ){
-	cerr << "undo splitup case 1" << endl;
-      }
-      // We 'undo' the splitup and construct a leaf with the combined morphemes
-      UnicodeString mor;
-      CLEX::Type tag = (*it)->tag();
-      while ( it != result.end() ){
-	if ( (*bit)->status() == Status::INFLECTION ){
-	  // so we DO continue when there is inflection and NO tag (like 'pt')
-	  // in : N,0,0,0,pt,0,Q_Q*,0,0,0,0,0/m
-	  break;
-	}
-	if ( debugFlag > 5 ){
-	  cerr << "append:" << *it << endl;
-	}
-	mor += (*it)->morpheme();
-	tag = (*it)->tag(); // remember the 'last' tag
-	if ( debugFlag > 5 ){
-	  cerr << "erase " << *it << endl;
-	}
-	it = result.erase(it);
-      }
-      BaseBracket *tmp = new BracketLeaf( tag, mor, debugFlag );
-      if ( debugFlag > 5 ){
-	cerr << "new node: " << tmp << endl;
-      }
-      result.insert( it, tmp );
-      if ( debugFlag > 5 ){
-	cerr << "result = " << result << endl;
-      }
-      return ++it;
-    }
-    else {
-      if ( debugFlag > 5 ){
-	cerr << "undo splitup case 2" << endl;
-      }
-      // We 'undo' the splitup and construct a leaf with the combined morphemes
-      UnicodeString mor;
-      CLEX::Type tag = (*bit)->tag();
-      ++it;
-      if (  bit == it ){
-	if ( debugFlag > 5 ){
-	  cerr << "escape with result = " << result << endl;
-	}
-	return ++bit;
-      }
-      while ( bit != it ){
-	if ( debugFlag > 5 ){
-	  cerr << "loop :" << *bit << endl;
-	}
-	if ( (*bit)->status() == Status::INFLECTION ){
-	  // so we DO continue when there is inflection and NO tag (like 'pt')
-	  // in : N,0,0,0,pt,0,Q_Q*,0,0,0,0,0/m
-	  break;
-	}
-	if ( debugFlag > 5 ){
-	  cerr << "append:" << *bit << " morpheme=" <<  (*bit)->deepmorphemes() << endl;
-	}
-	mor += (*bit)->deepmorphemes();
-	tag = (*bit)->tag(); // remember the 'last' tag
-	if ( debugFlag > 5 ){
-	  cerr << "erase " << *bit << endl;
-	}
-	bit = result.erase(bit);
-      }
-      BaseBracket *tmp = new BracketLeaf( tag, mor, debugFlag );
-      if ( debugFlag > 5 ){
-	cerr << "new node: " << tmp << endl;
-      }
-      result.insert( it, tmp );
-      if ( debugFlag > 5 ){
-	cerr << "result = " << result << endl;
-      }
-      return ++bit;
-    }
+    // we should try to start at the next node
+    bit = rpos;
+    return ++bit;
   }
 }
 
