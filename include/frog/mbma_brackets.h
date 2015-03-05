@@ -49,7 +49,7 @@ public:
   {};
   virtual ~BaseBracket() {};
 
-  Status stat() const { return status; };
+  Status status() const { return _status; };
   virtual UnicodeString morpheme() const { return "";};
   virtual UnicodeString deepmorphemes() const { return "";};
   virtual std::string inflection() const { return ""; };
@@ -76,7 +76,7 @@ public:
   std::vector<CLEX::Type> RightHand;
  protected:
   CLEX::Type cls;
-  Status status;
+  Status _status;
   int debugFlag;
 };
 

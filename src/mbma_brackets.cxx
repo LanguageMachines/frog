@@ -62,15 +62,15 @@ BracketLeaf::BracketLeaf( const RulePart& p, int flag ):
   if ( !p.inflect.empty() ){
     inflect = p.inflect;
     if ( p.ResultClass == CLEX::UNASS ){
-      status = Status::INFLECTION;
+      _status = Status::INFLECTION;
     }
     else {
-      status = Status::INFO;
+      _status = Status::INFO;
     }
   }
   else if ( RightHand.size() == 0 ){
     orig = toString( cls );
-    status = Status::STEM;
+    _status = Status::STEM;
   }
   else {
     orig = toString( cls );
@@ -80,7 +80,7 @@ BracketLeaf::BracketLeaf( const RulePart& p, int flag ):
       if ( RightHand[i] == CLEX::AFFIX )
 	ifpos = i;
     }
-    status = Status::DERIVATIONAL;
+    _status = Status::DERIVATIONAL;
   }
 }
 
@@ -90,13 +90,13 @@ BracketLeaf::BracketLeaf( CLEX::Type t, const UnicodeString& us, int flag ):
 {
   ifpos = -1;
   orig = toString( t );
-  status = Status::STEM;
+  _status = Status::STEM;
 }
 
 BracketNest::BracketNest( CLEX::Type t,
 			  CompoundType c,
 			  int flag ): BaseBracket( t, flag ){
-  status = Status::COMPLEX;
+  _status = Status::COMPLEX;
   _compound = c;
 }
 
@@ -357,7 +357,7 @@ list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& resu
       UnicodeString mor;
       CLEX::Type tag = (*it)->tag();
       while ( it != result.end() ){
-	if ( (*it)->inflection() != "" && tag != CLEX::UNASS ){
+	if ( (*bit)->status() == Status::INFLECTION ){
 	  // so we DO continue when there is inflection and NO tag (like 'pt')
 	  // in : N,0,0,0,pt,0,Q_Q*,0,0,0,0,0/m
 	  break;
@@ -400,7 +400,7 @@ list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& resu
 	if ( debugFlag > 5 ){
 	  cerr << "loop :" << *bit << endl;
 	}
-	if ( (*bit)->inflection() != "" && tag != CLEX::UNASS ){
+	if ( (*bit)->status() == Status::INFLECTION ){
 	  // so we DO continue when there is inflection and NO tag (like 'pt')
 	  // in : N,0,0,0,pt,0,Q_Q*,0,0,0,0,0/m
 	  break;
@@ -579,7 +579,7 @@ BracketNest *Rule::resolveBrackets( bool daring, CLEX::Type& tag  ) {
   for ( size_t k=0; k < rules.size(); ++k ) {
     // fill a flat result;
     BracketLeaf *tmp = new BracketLeaf( rules[k], debugFlag );
-    if ( tmp->stat() == Status::STEM && tmp->morpheme().isEmpty() ){
+    if ( tmp->status() == Status::STEM && tmp->morpheme().isEmpty() ){
       delete tmp;
     }
     else {
