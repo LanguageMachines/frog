@@ -107,11 +107,24 @@ bool NERTagger::init( const Configuration& config ){
   return tagger->isInit();
 }
 
-static void addEntity( EntitiesLayer *entities,
+static void addEntity( Sentence *sent,
 		       const string& tagset,
 		       const vector<Word*>& words,
 		       const vector<double>& confs,
 		       const string& NER ){
+  EntitiesLayer *el = 0;
+#pragma omp critical(foliaupdate)
+  {
+    try {
+      el = sent->annotation<EntitiesLayer>();
+    }
+    catch(...){
+      KWargs args;
+      args["generate_id"] = sent->id();
+      el = new EntitiesLayer(sent->doc(),args);
+      sent->append( el );
+    }
+  }
   double c = 1;
   for ( size_t i=0; i < confs.size(); ++i )
     c *= confs[i];
@@ -119,12 +132,12 @@ static void addEntity( EntitiesLayer *entities,
   args["class"] = NER;
   args["confidence"] =  toString(c);
   args["set"] = tagset;
-  args["generate_id"] = entities->id();
+  args["generate_id"] = el->id();
   Entity *e = 0;
 #pragma omp critical(foliaupdate)
   {
-    e = new Entity(entities->doc(), args);
-    entities->append( e );
+    e = new Entity( el->doc(), args);
+    el->append( e );
   }
   for ( size_t i=0; i < words.size(); ++i ){
 #pragma omp critical(foliaupdate)
@@ -139,20 +152,7 @@ void NERTagger::addNERTags( const vector<Word*>& words,
 			    const vector<double>& confs ){
   if ( words.empty() )
     return;
-  EntitiesLayer *el = 0;
-#pragma omp critical(foliaupdate)
-  {
-    Sentence *sent = words[0]->sentence();
-    try {
-      el = sent->annotation<EntitiesLayer>();
-    }
-    catch(...){
-      KWargs args;
-      args["generate_id"] = sent->id();
-      el = new EntitiesLayer(sent->doc(),args);
-      sent->append( el );
-    }
-  }
+  Sentence *sent = words[0]->sentence();
   vector<Word*> stack;
   vector<double> dstack;
   string curNER;
@@ -167,7 +167,7 @@ void NERTagger::addNERTags( const vector<Word*>& words,
 	  using TiCC::operator<<;
 	  *Log(nerLog) << "spit out " << stack << endl;
 	}
-	addEntity( el, tagset, stack, dstack, curNER );
+	addEntity( sent, tagset, stack, dstack, curNER );
 	dstack.clear();
 	stack.clear();
       }
@@ -191,7 +191,7 @@ void NERTagger::addNERTags( const vector<Word*>& words,
 	  using TiCC::operator<<;
 	  *Log(nerLog) << "spit out " << stack << endl;
 	}
-	addEntity( el, tagset, stack, dstack, curNER );
+	addEntity( sent, tagset, stack, dstack, curNER );
 	dstack.clear();
 	stack.clear();
       }
@@ -206,7 +206,7 @@ void NERTagger::addNERTags( const vector<Word*>& words,
       using TiCC::operator<<;
       *Log(nerLog) << "spit out " << stack << endl;
     }
-    addEntity( el, tagset, stack, dstack, curNER );
+    addEntity( sent, tagset, stack, dstack, curNER );
   }
 }
 
