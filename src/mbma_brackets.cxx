@@ -260,7 +260,12 @@ void BracketNest::setCompoundType(){
     auto it = parts.begin();
     CLEX::Type tag1 = (*it)->tag();
     CompoundType cp1 = (*it)->compound();
+    Status st1 = (*it)->status();
     CLEX::Type tag2 = (*++it)->tag();
+    Status st2 = (*it)->status();
+    if ( ( st1 != Status::STEM && st1 != Status::COMPLEX )
+	 || ( st2 != Status::STEM && st2 != Status::COMPLEX ) )
+      return;
     if ( debugFlag > 5 ){
       cerr << "tag1 :" << tag1 << endl;
       cerr << "tag2 :" << tag2 << endl;

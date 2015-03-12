@@ -774,20 +774,11 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     args.clear();
     args["set"] = clex_tagset;
     args["cls"] = toString( tag() );
-    PosAnnotation *pos = 0;
 #pragma omp critical(foliaupdate)
     {
-      pos = result->addPosAnnotation( args );
+      result->addPosAnnotation( args );
     }
     desc = "[" + out + "]"; // spread the word upwards!
-//     args.clear();
-//     args["subset"] = "structure";
-//     args["class"]  = desc;
-// #pragma omp critical(foliaupdate)
-//     {
-//       folia::Feature *feat = new folia::Feature( args );
-//       pos->append( feat );
-//     }
   }
   else if ( _status == Status::INFLECTION ){
     KWargs args;
@@ -937,15 +928,8 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
   {
     result->append( t );
   }
-//  args.clear();
   if ( cnt > 1 )
     desc = "[" + desc + "]";
-//   args["value"] = desc;
-//   Description *d = new Description( args );
-// #pragma omp critical(foliaupdate)
-//   {
-//     result->append( d );
-//   }
   args.clear();
   args["set"] = clex_tagset;
   args["cls"] = toString( tag() );
@@ -961,6 +945,17 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
   {
     folia::Feature *feat = new folia::Feature( args );
     pos->append( feat );
+  }
+  CompoundType ct = compound();
+  if ( ct != CompoundType::NONE ){
+    args.clear();
+    args["subset"] = "compound";
+    args["class"]  = toString(ct);
+#pragma omp critical(foliaupdate)
+    {
+      folia::Feature *feat = new folia::Feature( args );
+      pos->append( feat );
+    }
   }
 #pragma omp critical(foliaupdate)
   for ( size_t i=0; i < stack.size(); ++i ){
