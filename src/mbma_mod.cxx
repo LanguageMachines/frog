@@ -683,19 +683,28 @@ void Mbma::addBracketMorph( Word *word,
   {
     result->append( t );
   }
-  args.clear();
-  args["value"] =  "[" + wrd + "]";
-  Description *d = new Description( args );
-#pragma omp critical(foliaupdate)
-  {
-    result->append( d );
-  }
+//   args.clear();
+//   args["value"] = "[" + wrd + "]";
+//   Description *d = new Description( args );
+// #pragma omp critical(foliaupdate)
+//   {
+//     result->append( d );
+//   }
   args.clear();
   args["set"] = clex_tagset;
   args["cls"] = tag;
+  PosAnnotation *pos = 0;
 #pragma omp critical(foliaupdate)
   {
-    result->addPosAnnotation( args );
+    pos = result->addPosAnnotation( args );
+  }
+  args.clear();
+  args["subset"] = "structure";
+  args["class"]  = "[" + wrd + "]";
+#pragma omp critical(foliaupdate)
+  {
+    folia::Feature *feat = new folia::Feature( args );
+    pos->append( feat );
   }
 #pragma omp critical(foliaupdate)
   {
@@ -744,6 +753,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
 				       string& desc ) const {
   Morpheme *result = 0;
   desc.clear();
+  if ( _status == Status::COMPLEX ){
+    abort();
+  }
   if ( _status == Status::STEM ){
     KWargs args;
     args["set"] = mbma_tagset;
@@ -760,20 +772,22 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
       result->append( t );
     }
     args.clear();
-    desc = "[" + out + "]";
-    args["value"] = desc;
-    Description *d = new Description( args );
-#pragma omp critical(foliaupdate)
-    {
-      result->append( d );
-    }
-    args.clear();
     args["set"] = clex_tagset;
     args["cls"] = toString( tag() );
+    PosAnnotation *pos = 0;
 #pragma omp critical(foliaupdate)
     {
-      result->addPosAnnotation( args );
+      pos = result->addPosAnnotation( args );
     }
+    desc = "[" + out + "]"; // spread the word upwards!
+//     args.clear();
+//     args["subset"] = "structure";
+//     args["class"]  = desc;
+// #pragma omp critical(foliaupdate)
+//     {
+//       folia::Feature *feat = new folia::Feature( args );
+//       pos->append( feat );
+//     }
   }
   else if ( _status == Status::INFLECTION ){
     KWargs args;
@@ -803,11 +817,12 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
       inf_desc += d;
     }
     args.clear();
-    args["value"] = inf_desc;
-    Description *d = new Description( args );
+    args["subset"] = "inflection";
+    args["class"] = inf_desc;
+    folia::Feature *feat = new folia::Feature( args );
 #pragma omp critical(foliaupdate)
     {
-      result->append( d );
+      result->append( feat );
     }
   }
   else if ( _status == Status::DERIVATIONAL ){
@@ -825,25 +840,27 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     {
       result->append( t );
     }
-    args.clear();
-    desc = "[" + out + "]";
-    args["value"] = desc;
-    Description *d = new Description( args );
-#pragma omp critical(foliaupdate)
-    {
-      result->append( d );
-    }
+    desc = "[" + out + "]"; // pass it up!
     args.clear();
     args["set"] = clex_tagset;
     args["cls"] = orig;
+    PosAnnotation *pos = 0;
 #pragma omp critical(foliaupdate)
     {
-      result->addPosAnnotation( args );
+      pos =  result->addPosAnnotation( args );
+    }
+    args.clear();
+    args["subset"] = "structure";
+    args["class"]  = desc;
+#pragma omp critical(foliaupdate)
+    {
+      folia::Feature *feat = new folia::Feature( args );
+      pos->append( feat );
     }
   }
-  else {
+  else if ( _status == Status::INFO ){
     KWargs args;
-    args["class"] = "inflection";
+    args["class"] = "additional";
     args["set"] = mbma_tagset;
     result = new Morpheme( doc, args );
     args.clear();
@@ -854,11 +871,12 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
 	inf_desc += ", ";
       inf_desc += d;
     }
-    args["value"] = inf_desc;
-    Description *d = new Description( args );
+    args["subset"] = "inflection";
+    args["class"] = inf_desc;
+    folia::Feature *feat = new folia::Feature( args );
 #pragma omp critical(foliaupdate)
     {
-      result->append( d );
+      result->append( feat );
     }
   }
   return result;
@@ -919,21 +937,30 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
   {
     result->append( t );
   }
-  args.clear();
+//  args.clear();
   if ( cnt > 1 )
     desc = "[" + desc + "]";
-  args["value"] = desc;
-  Description *d = new Description( args );
-#pragma omp critical(foliaupdate)
-  {
-    result->append( d );
-  }
+//   args["value"] = desc;
+//   Description *d = new Description( args );
+// #pragma omp critical(foliaupdate)
+//   {
+//     result->append( d );
+//   }
   args.clear();
   args["set"] = clex_tagset;
   args["cls"] = toString( tag() );
+  PosAnnotation *pos = 0;
 #pragma omp critical(foliaupdate)
   {
-    result->addPosAnnotation( args );
+    pos = result->addPosAnnotation( args );
+  }
+  args.clear();
+  args["subset"] = "structure";
+  args["class"]  = desc;
+#pragma omp critical(foliaupdate)
+  {
+    folia::Feature *feat = new folia::Feature( args );
+    pos->append( feat );
   }
 #pragma omp critical(foliaupdate)
   for ( size_t i=0; i < stack.size(); ++i ){
