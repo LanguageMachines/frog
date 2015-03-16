@@ -41,14 +41,14 @@ namespace CLEX {
 
 std::ostream& operator<<( std::ostream&, const CLEX::Type );
 
-static std::map<CLEX::Type,std::string> tagNames;
-static std::map<char,std::string> iNames;
+extern std::map<CLEX::Type,std::string> tagNames;
+extern std::map<char,std::string> iNames;
 
 inline std::string get_iName( char c ){
   return iNames[c];
 }
 
-inline std::string get_CLEXname( CLEX::Type t ){
+inline std::string get_tagDescr( CLEX::Type t ){
   return tagNames[t];
 }
 

@@ -340,15 +340,14 @@ MBMAana::MBMAana( const Rule& r, bool daring ): rule(r) {
   CLEX::Type Tag;
   brackets = rule.resolveBrackets( daring, Tag );
   infl = rule.getCleanInflect();
-  map<CLEX::Type,string>::const_iterator tit = tagNames.find( Tag );
-  if ( tit == tagNames.end() ){
+  description = get_tagDescr( Tag );
+  if ( description.empty() ){
     // unknown tag
     tag = toString(CLEX::X);
     description = "unknown";
   }
   else {
     tag = toString(Tag);
-    description = tit->second;
   }
 }
 
@@ -383,15 +382,15 @@ string Rule::getCleanInflect() const {
       for ( size_t i=0; i< it->inflect.length(); ++i ) {
 	if ( it->inflect[i] != '/' ){
 	  // check if it is a known inflection
-	  //	    cerr << "x bekijk [" << it->inflect[i] << "]" << endl;
-	  map<char,string>::const_iterator csIt = iNames.find(it->inflect[i]);
-	  if ( csIt == iNames.end() ){
-	    // cerr << "added unknown inflection X" << endl;
+	  //	  cerr << "x bekijk [" << it->inflect[i] << "]" << endl;
+	  string inf = get_iName(it->inflect[i]);
+	  if ( inf.empty() ){
+	    //	    cerr << "added unknown inflection X" << endl;
 	    inflect += "X";
 	  }
 	  else {
-	    // cerr << "added known inflection " << csIt->first
-	    // 	 << " (" << csIt->second << ")" << endl;
+	    //	    cerr << "added known inflection " << it->inflect[i]
+	    //	     	 << " (" << inf << ")" << endl;
 	    inflect += it->inflect[i];
 	  }
 	}

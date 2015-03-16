@@ -420,12 +420,14 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     args.clear();
     args["subset"] = "inflection";
     for ( size_t i=0; i < inflect.size(); ++i ){
-      string d = get_iName(inflect[i]);
-      args["class"] = d;
-      folia::Feature *feat = new folia::Feature( args );
+      if ( inflect[i] != '/' ){
+	string d = get_iName(inflect[i]);
+	args["class"] = d;
+	folia::Feature *feat = new folia::Feature( args );
 #pragma omp critical(foliaupdate)
-      {
-	result->append( feat );
+	{
+	  result->append( feat );
+	}
       }
     }
   }

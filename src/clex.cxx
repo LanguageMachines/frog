@@ -32,6 +32,9 @@
 
 using namespace std;
 
+map<CLEX::Type,string> tagNames;
+map<char,string> iNames;
+
 namespace CLEX {
 
   Type toCLEX( const string& s ){
