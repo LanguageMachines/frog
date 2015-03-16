@@ -81,8 +81,8 @@ void Mbma::fillMaps() {
   tagNames[CLEX::Y] = "conjunction";
   tagNames[CLEX::I] = "interjection";
   tagNames[CLEX::X] = "unanalysed";
-  tagNames[CLEX::Z] = "expression part";
-  tagNames[CLEX::PN] = "proper noun";
+  tagNames[CLEX::Z] = "expression_part";
+  tagNames[CLEX::PN] = "proper_noun";
   //
   // now the inflections
   iNames['X'] = "";
@@ -98,11 +98,11 @@ void Mbma::fillMaps() {
   iNames['E'] = "suffix-e";
   iNames['i'] = "infinitive";
   iNames['p'] = "participle";
-  iNames['t'] = "present tense";
-  iNames['v'] = "past tense";
-  iNames['1'] = "1st person";
-  iNames['2'] = "2nd person";
-  iNames['3'] = "3rd person";
+  iNames['t'] = "present_tense";
+  iNames['v'] = "past_tense";
+  iNames['1'] = "1st_person_verb";
+  iNames['2'] = "2nd_person_verb";
+  iNames['3'] = "3rd_person_verb";
   iNames['I'] = "inversed";
   iNames['g'] = "imperative";
   iNames['a'] = "subjunctive";
