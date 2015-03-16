@@ -792,13 +792,11 @@ void FrogAPI::displayMWU( ostream& os,
 	  vector<Morpheme*> m =
 	    ml[q]->select<Morpheme>( myMbma->getTagset(), false );
 	  assert( m.size() == 1 ); // top complex layer
-	  vector<PosAnnotation*> alts;
-	  string desc = "?";
-	  PosAnnotation *pos = m[0]->getPosAnnotations( "", alts );
-	  if ( pos ){
-	    desc = pos->feat("structure");
+	  string str  = m[0]->feat( "structure" );
+	  if ( str.empty() ){
+	    str = "?";
 	  }
-	  morph += desc;
+	  morph += str;
 	  if ( q < ml.size()-1 ){
 	    morph += "/";
 	  }
