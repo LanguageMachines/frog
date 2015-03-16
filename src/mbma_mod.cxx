@@ -683,28 +683,20 @@ void Mbma::addBracketMorph( Word *word,
   {
     result->append( t );
   }
-//   args.clear();
-//   args["value"] = "[" + wrd + "]";
-//   Description *d = new Description( args );
-// #pragma omp critical(foliaupdate)
-//   {
-//     result->append( d );
-//   }
-  args.clear();
-  args["set"] = clex_tagset;
-  args["cls"] = tag;
-  PosAnnotation *pos = 0;
-#pragma omp critical(foliaupdate)
-  {
-    pos = result->addPosAnnotation( args );
-  }
   args.clear();
   args["subset"] = "structure";
   args["class"]  = "[" + wrd + "]";
 #pragma omp critical(foliaupdate)
   {
     folia::Feature *feat = new folia::Feature( args );
-    pos->append( feat );
+    result->append( feat );
+  }
+  args.clear();
+  args["set"] = clex_tagset;
+  args["cls"] = tag;
+#pragma omp critical(foliaupdate)
+  {
+    result->addPosAnnotation( args );
   }
 #pragma omp critical(foliaupdate)
   {
@@ -736,232 +728,6 @@ void Mbma::addBracketMorph( Word *word,
       ml->append( m );
     }
   }
-}
-
-Morpheme *BracketLeaf::createMorpheme( Document *doc,
-				       const string& mbma_tagset,
-				       const string& clex_tagset ) const {
-  string desc;
-  int offset = 0;
-  return createMorpheme( doc, mbma_tagset, clex_tagset, offset, desc );
-}
-
-Morpheme *BracketLeaf::createMorpheme( Document *doc,
-				       const string& mbma_tagset,
-				       const string& clex_tagset,
-				       int& offset,
-				       string& desc ) const {
-  Morpheme *result = 0;
-  desc.clear();
-  if ( _status == Status::COMPLEX ){
-    abort();
-  }
-  if ( _status == Status::STEM ){
-    KWargs args;
-    args["set"] = mbma_tagset;
-    args["class"] = "stem";
-    result = new Morpheme( doc, args );
-    args.clear();
-    string out = UnicodeToUTF8(morph);
-    args["value"] = out;
-    args["offset"] = toString(offset);
-    offset += out.length();
-    TextContent *t = new TextContent( args );
-#pragma omp critical(foliaupdate)
-    {
-      result->append( t );
-    }
-    args.clear();
-    args["set"] = clex_tagset;
-    args["cls"] = toString( tag() );
-#pragma omp critical(foliaupdate)
-    {
-      result->addPosAnnotation( args );
-    }
-    desc = "[" + out + "]"; // spread the word upwards!
-  }
-  else if ( _status == Status::INFLECTION ){
-    KWargs args;
-    args["class"] = "inflection";
-    args["set"] = mbma_tagset;
-    result = new Morpheme( doc, args );
-    args.clear();
-    string out = UnicodeToUTF8(morph);
-    if ( out.empty() )
-      out = inflect;
-    else
-      desc = "[" + out + "]";
-    args["value"] = out;
-    args["offset"] = toString(offset);
-    TextContent *t = new TextContent( args );
-    offset += out.length();
-#pragma omp critical(foliaupdate)
-    {
-      result->append( t );
-    }
-    args.clear();
-    string inf_desc;
-    for ( size_t i=0; i < inflect.size(); ++i ){
-      string d = iNames[inflect[i]];
-      if ( i > 0 )
-	inf_desc += ", ";
-      inf_desc += d;
-    }
-    args.clear();
-    args["subset"] = "inflection";
-    args["class"] = inf_desc;
-    folia::Feature *feat = new folia::Feature( args );
-#pragma omp critical(foliaupdate)
-    {
-      result->append( feat );
-    }
-  }
-  else if ( _status == Status::DERIVATIONAL ){
-    KWargs args;
-    args["class"] = "derivational";
-    args["set"] = mbma_tagset;
-    result = new Morpheme( doc, args );
-    args.clear();
-    string out = UnicodeToUTF8(morph);
-    args["value"] = out;
-    args["offset"] = toString(offset);
-    TextContent *t = new TextContent( args );
-    offset += out.length();
-#pragma omp critical(foliaupdate)
-    {
-      result->append( t );
-    }
-    desc = "[" + out + "]"; // pass it up!
-    args.clear();
-    args["set"] = clex_tagset;
-    args["cls"] = orig;
-    PosAnnotation *pos = 0;
-#pragma omp critical(foliaupdate)
-    {
-      pos =  result->addPosAnnotation( args );
-    }
-    args.clear();
-    args["subset"] = "structure";
-    args["class"]  = desc;
-#pragma omp critical(foliaupdate)
-    {
-      folia::Feature *feat = new folia::Feature( args );
-      pos->append( feat );
-    }
-  }
-  else if ( _status == Status::INFO ){
-    KWargs args;
-    args["class"] = "additional";
-    args["set"] = mbma_tagset;
-    result = new Morpheme( doc, args );
-    args.clear();
-    string inf_desc;
-    for ( size_t i=0; i < inflect.size(); ++i ){
-      string d = iNames[inflect[i]];
-      if ( i > 0 )
-	inf_desc += ", ";
-      inf_desc += d;
-    }
-    args["subset"] = "inflection";
-    args["class"] = inf_desc;
-    folia::Feature *feat = new folia::Feature( args );
-#pragma omp critical(foliaupdate)
-    {
-      result->append( feat );
-    }
-  }
-  return result;
-}
-
-Morpheme *BracketNest::createMorpheme( Document *doc,
-				       const string& mbma_tagset,
-				       const string& clex_tagset ) const {
-  string desc;
-  int offset = 0;
-  return createMorpheme( doc, mbma_tagset, clex_tagset, offset, desc );
-}
-
-Morpheme *BracketNest::createMorpheme( Document *doc,
-				       const string& mbma_tagset,
-				       const string& clex_tagset,
-				       int& of,
-				       string& desc ) const {
-  KWargs args;
-  args["class"] = "complex";
-  args["set"] = mbma_tagset;
-  Morpheme *result = new Morpheme( doc, args );
-  list<BaseBracket*>::const_iterator it = parts.begin();
-  string mor;
-  int cnt = 0;
-  desc.clear();
-  vector<Morpheme*> stack;
-  int offset = 0;
-  while ( it != parts.end() ){
-    string deeper_desc;
-    Morpheme *m = (*it)->createMorpheme( doc,
-					 mbma_tagset,
-					 clex_tagset,
-					 offset,
-					 deeper_desc );
-    if ( m ){
-      string tmp;
-      try {
-	tmp = m->str();
-      }
-      catch (...){
-      };
-      if ( !tmp.empty() ){
-	mor += tmp;
-	desc += deeper_desc;
-	++cnt;
-      }
-      stack.push_back( m );
-    }
-    ++it;
-  }
-  args.clear();
-  args["value"] = mor;
-  args["offset"] = toString(of);
-  of += offset;
-  TextContent *t = new TextContent( args );
-#pragma omp critical(foliaupdate)
-  {
-    result->append( t );
-  }
-  if ( cnt > 1 )
-    desc = "[" + desc + "]";
-  args.clear();
-  args["set"] = clex_tagset;
-  args["cls"] = toString( tag() );
-  PosAnnotation *pos = 0;
-#pragma omp critical(foliaupdate)
-  {
-    pos = result->addPosAnnotation( args );
-  }
-  args.clear();
-  args["subset"] = "structure";
-  args["class"]  = desc;
-#pragma omp critical(foliaupdate)
-  {
-    folia::Feature *feat = new folia::Feature( args );
-    pos->append( feat );
-  }
-  CompoundType ct = compound();
-  if ( ct != CompoundType::NONE ){
-    args.clear();
-    args["subset"] = "compound";
-    args["class"]  = toString(ct);
-#pragma omp critical(foliaupdate)
-    {
-      folia::Feature *feat = new folia::Feature( args );
-      pos->append( feat );
-    }
-  }
-#pragma omp critical(foliaupdate)
-  for ( size_t i=0; i < stack.size(); ++i ){
-    result->append( stack[i] );
-  }
-  return result;
 }
 
 void Mbma::addMorph( MorphologyLayer *ml,

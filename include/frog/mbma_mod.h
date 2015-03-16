@@ -37,9 +37,6 @@
 class MBMAana;
 class TimblAPI;
 
-static std::map<CLEX::Type,std::string> tagNames;
-static std::map<char,std::string> iNames;
-
 class Mbma {
  public:
   Mbma(TiCC::LogStream *);

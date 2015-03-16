@@ -29,6 +29,7 @@
 
 #ifndef CLEX_H
 #define CLEX_H
+
 namespace CLEX {
   enum Type { UNASS, N, A, Q, V, D, O, B, P, Y, I, X, Z, PN, AFFIX, XAFFIX,
 	      NEUTRAL };
@@ -39,5 +40,16 @@ namespace CLEX {
 }
 
 std::ostream& operator<<( std::ostream&, const CLEX::Type );
+
+static std::map<CLEX::Type,std::string> tagNames;
+static std::map<char,std::string> iNames;
+
+inline std::string get_iName( char c ){
+  return iNames[c];
+}
+
+inline std::string get_CLEXname( CLEX::Type t ){
+  return tagNames[t];
+}
 
 #endif // CLEX_H

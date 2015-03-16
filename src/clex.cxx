@@ -27,6 +27,7 @@
 */
 
 #include <string>
+#include <map>
 #include "frog/clex.h"
 
 using namespace std;
