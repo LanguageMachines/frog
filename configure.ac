@@ -4,7 +4,7 @@
 # $URL$
 
 AC_PREREQ(2.59)
-AC_INIT([frog], [0.12.21], [timbl@uvt.nl])
+AC_INIT([frog], [0.12.22], [timbl@uvt.nl])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_MACRO_DIR([m4])
@@ -38,8 +38,7 @@ AC_LANG([C++])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
-AC_HEADER_DIRENT
-AC_TYPE_PID_T
+AC_C_INLINE
 AC_TYPE_SIZE_T
 
 # Checks for library functions.
@@ -91,7 +90,7 @@ AC_ARG_WITH(icu,
  fi] )
 
 if test "$useICU" = "1"; then
- AX_ICU_CHECK( [3.6],
+ AX_ICU_CHECK( [4.2],
  [CXXFLAGS="$CXXFLAGS $ICU_CPPSEARCHPATH"
  LIBS="$ICU_LIBPATH $ICU_LIBS $ICU_IOLIBS $LIBS"],
  [AC_MSG_FAILURE( "No ICU development environment found. Please check if libicu-ev or the like is installed" )] )
