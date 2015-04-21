@@ -43,6 +43,7 @@ AC_TYPE_SIZE_T
 
 # Checks for library functions.
 AC_FUNC_FORK
+AC_HEADER_DIRENT
 AC_CHECK_FUNCS([localtime_r])
 
 ACX_PTHREAD([],[AC_MSG_ERROR([We need pthread support!])])
