@@ -467,7 +467,8 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
     if ( m ){
       string tmp;
       try {
-	tmp = m->str();
+	//	tmp = m->str();
+	tmp = UnicodeToUTF8(m->stricttext());
       }
       catch (...){
       };
