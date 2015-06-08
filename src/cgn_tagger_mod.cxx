@@ -245,14 +245,13 @@ bool CGNTagger::init( const Configuration& config ){
 }
 
 string getSubSet( const string& val, const string& head ){
-  typedef multimap<string,string>::const_iterator mm_iter;
-  mm_iter it = cgnSubSets.find( val );
+  auto it = cgnSubSets.find( val );
   if ( it == cgnSubSets.end() )
     throw folia::ValueError( "unknown cgn subset for class: '" + val + "'" );
   string result;
   while ( it != cgnSubSets.upper_bound(val) ){
     result = it->second;
-    mm_iter cit = cgnConstraints.find( result );
+    auto cit = cgnConstraints.find( result );
     if ( cit == cgnConstraints.end() ){
       // no constraints on this value
       return result;

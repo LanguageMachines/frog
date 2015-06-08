@@ -216,7 +216,7 @@ void Mblem::addLemma( Word *word, const string& cls ){
 }
 
 void Mblem::filterTag( const string& postag ){
-  vector<mblemData>::iterator it = mblemResult.begin();
+  auto it = mblemResult.begin();
   while( it != mblemResult.end() ){
     if ( isSimilar( postag, it->getTag() ) ){
       if ( debug )
@@ -236,10 +236,10 @@ void Mblem::filterTag( const string& postag ){
 }
 
 void Mblem::makeUnique( ){
-  vector<mblemData>::iterator it = mblemResult.begin();
+  auto it = mblemResult.begin();
   while( it != mblemResult.end() ){
     string lemma = it->getLemma();
-    vector<mblemData>::iterator it2 = it+1;
+    auto it2 = it+1;
     while( it2 != mblemResult.end() ){
       if (debug)
 	*Log(mblemLog) << "compare lemma " << lemma << " with " << it2->getLemma() << " ";
@@ -272,11 +272,9 @@ void Mblem::getFoLiAResult( Word *word, const UnicodeString& uWord ){
     addLemma( word, result );
   }
   else {
-    vector<mblemData>::iterator it = mblemResult.begin();
-    while( it != mblemResult.end() ){
-      string result = it->getLemma();
+    for ( auto const& it : mblemResult ){
+      string result = it.getLemma();
       addLemma( word, result );
-      ++it;
     }
   }
 }
@@ -447,7 +445,7 @@ void Mblem::Classify( const UnicodeString& uWord ){
     }
     if ( !classMap.empty() ){
       // translate TAG(number) stuf back to CGN things
-      map<string,string>::const_iterator it = classMap.find(restag);
+      auto const& it = classMap.find(restag);
       if ( debug )
 	*Log(mblemLog) << "looking up " << restag << endl;
       if ( it != classMap.end() ){

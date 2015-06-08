@@ -445,18 +445,16 @@ int main(int argc, char *argv[]) {
     if ( !fileNames.empty() ) {
       string outPath = outputDirName;
       string xmlPath = xmlDirName;
-      set<string>::const_iterator it = fileNames.begin();
+
       ostream *outS = 0;
       if ( !outputFileName.empty() ){
         outS = new ofstream( outputFileName );
       }
-      while ( it != fileNames.end() ){
-	string testName = testDirName;
-	testName += *it;
+      for ( auto const& name : fileNames ){
+	string testName = testDirName + name;
 	if ( !TiCC::isFile( testName ) ){
 	  *Log(theErrLog) << "skip " << testName << " (file not found )"
 			  << endl;
-	  ++it;
 	  continue;
 	}
 	string outName;
@@ -464,10 +462,10 @@ int main(int argc, char *argv[]) {
 	  if ( wantOUT ){
 	    if ( options.doXMLin ){
 	      if ( !outPath.empty() )
-		outName = outPath + *it + ".out";
+		outName = outPath + name + ".out";
 	    }
 	    else {
-	      outName = outPath + *it + ".out";
+	      outName = outPath + name + ".out";
 	    }
 	    outS = new ofstream( outName );
 	  } else {
@@ -477,13 +475,13 @@ int main(int argc, char *argv[]) {
 	string xmlName = XMLoutFileName;
 	if ( xmlName.empty() ){
 	  if ( !xmlDirName.empty() ){
-	    if ( it->rfind(".xml") == string::npos )
-	      xmlName = xmlPath + *it + ".xml";
+	    if ( name.rfind(".xml") == string::npos )
+	      xmlName = xmlPath + name + ".xml";
 	    else
-	      xmlName = xmlPath + *it;
+	      xmlName = xmlPath + name;
 	  }
 	  else if ( options.doXMLout )
-	    xmlName = *it + ".xml"; // do not clobber the inputdir!
+	    xmlName = name + ".xml"; // do not clobber the inputdir!
 	}
 	*Log(theErrLog) << "Frogging " << testName << endl;
 	frog.FrogFile( testName, *outS, xmlName );
@@ -492,7 +490,6 @@ int main(int argc, char *argv[]) {
 	  delete outS;
 	  outS = 0;
 	}
-	++it;
       }
       if ( !outputFileName.empty() ){
 	*Log(theErrLog) << "results stored in " << outputFileName << endl;
