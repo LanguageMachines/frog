@@ -106,10 +106,8 @@ BaseBracket *BracketNest::append( BaseBracket *t ){
 }
 
 BracketNest::~BracketNest(){
-  for ( list<BaseBracket*>::const_iterator it = parts.begin();
-	it != parts.end();
-	++it ){
-    delete *it;
+  for ( auto const it : parts ){
+    delete it;
   }
 }
 
@@ -137,10 +135,8 @@ UnicodeString BracketLeaf::put( bool noclass ) const {
 
 UnicodeString BracketNest::put( bool noclass ) const {
   UnicodeString result = "[ ";
-  for ( list<BaseBracket*>::const_iterator it = parts.begin();
-	it != parts.end();
-	++it ){
-    result +=(*it)->put(noclass) + " ";
+  for ( auto const& it : parts ){
+    result += it->put(noclass) + " ";
   }
   result += "]";
   if ( !noclass ){
@@ -176,20 +172,16 @@ ostream& operator<< ( ostream& os, const BaseBracket *c ){
 
 UnicodeString BracketNest::deepmorphemes() const{
   UnicodeString res;
-  for ( list<BaseBracket*>::const_iterator it = parts.begin();
-	it != parts.end();
-	++it ){
-    res += (*it)->deepmorphemes();
+  for ( auto const& it : parts ){
+    res += it->deepmorphemes();
   }
   return res;
 }
 
 void prettyP( ostream& os, const list<BaseBracket*>& v ){
   os << "[";
-  for ( list<BaseBracket*>::const_iterator it = v.begin();
-	it != v.end();
-	++it ){
-    os << *it << " ";
+  for ( auto const& it : v ){
+    os << it << " ";
   }
   os << "]";
 }
@@ -451,19 +443,18 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
   args["class"] = "complex";
   args["set"] = mbma_tagset;
   Morpheme *result = new Morpheme( doc, args );
-  list<BaseBracket*>::const_iterator it = parts.begin();
   string mor;
   int cnt = 0;
   desc.clear();
   vector<Morpheme*> stack;
   int offset = 0;
-  while ( it != parts.end() ){
+  for ( auto const& it : parts ){
     string deeper_desc;
-    Morpheme *m = (*it)->createMorpheme( doc,
-					 mbma_tagset,
-					 clex_tagset,
-					 offset,
-					 deeper_desc );
+    Morpheme *m = it->createMorpheme( doc,
+				      mbma_tagset,
+				      clex_tagset,
+				      offset,
+				      deeper_desc );
     if ( m ){
       string tmp;
       try {
@@ -479,7 +470,6 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
       }
       stack.push_back( m );
     }
-    ++it;
   }
   args.clear();
   args["value"] = mor;
@@ -697,7 +687,7 @@ void BracketNest::resolveMiddle(){
 CLEX::Type BracketNest::getFinalTag() {
   // cerr << "get Final Tag from: " << this << endl;
   cls = CLEX::X;
-  list<BaseBracket*>::const_reverse_iterator it = parts.rbegin();
+  auto it = parts.rbegin();
   while ( it != parts.rend() ){
     // cerr << "bekijk: " << *it << endl;
     if ( (*it)->isNested()
