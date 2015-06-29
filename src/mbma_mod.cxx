@@ -257,85 +257,6 @@ vector<string> Mbma::make_instances( const UnicodeString& word ){
   return insts;
 }
 
-CLEX::Type select_tag( const char ch ){
-  CLEX::Type result = CLEX::UNASS;
-  switch( ch ){
-  case 'm':
-  case 'e':
-  case 'd':
-  case 'G':
-  case 'D':
-    result = CLEX::N;
-  break;
-  case 'P':
-  case 'C':
-  case 'S':
-  case 'E':
-    result = CLEX::A;
-  break;
-  case 'i':
-  case 'p':
-  case 't':
-  case 'v':
-  case 'g':
-  case 'a':
-    result = CLEX::V;
-  break;
-  default:
-    break;
-  }
-  return result;
-}
-
-
-void Mbma::resolve_inflections( Rule& rule ){
-  // resolve all clearly resolvable implicit selections of inflectional tags
-  // We take ONLY the first 'hint' of the inflection to find a new CLEX Type
-  // When applicable, we replace the class from the rule
-  for ( size_t i = 1; i < rule.rules.size(); ++i ){
-    string inf = rule.rules[i].inflect;
-    if ( !inf.empty() && !rule.rules[i].participle ){
-      // it is an inflection tag
-      if (debugFlag){
-	*Log(mbmaLog) << " inflection: >" << inf << "<" << endl;
-      }
-      // given the specific selections of certain inflections,
-      //    select a tag!
-      CLEX::Type new_tag = select_tag( inf[0] );
-
-      // apply the change. Remember, the idea is that an inflection is
-      // far more certain of the tag of its predecessing morpheme than
-      // the morpheme itself.
-      // This is not always the case, but it works
-      if ( new_tag != CLEX::UNASS ) {
-	if ( debugFlag  ){
-	  *Log(mbmaLog) << inf[0] << " selects " << new_tag << endl;
-	}
-	// go back to the previous morpheme
-	size_t k = i-1;
-	//	  *Log(mbmaLog) << "een terug is " << rule.rules[k].ResultClass << endl;
-	if ( rule.rules[k].isBasic() ){
-	  // now see if we can replace this class for a better one
-	  if ( rule.rules[k].ResultClass == CLEX::PN &&
-	       new_tag == CLEX::N ){
-	    if ( debugFlag  ){
-	      *Log(mbmaLog) << "Don't replace PN by N" << endl;
-	    }
-	  }
-	  else {
-	    if ( debugFlag  ){
-	      *Log(mbmaLog) << " replace " << rule.rules[k].ResultClass
-			    << " by " << new_tag << endl;
-	    }
-	    rule.rules[k].ResultClass = new_tag;
-	  }
-	  return;
-	}
-      }
-    }
-  }
-}
-
 MBMAana::MBMAana( const Rule& r, bool daring ): rule(r) {
   brackets = rule.resolveBrackets( daring );
   rule.getCleanInflect();
@@ -508,89 +429,6 @@ void Mbma::clearAnalysis(){
   analysis.clear();
 }
 
-bool Mbma::performEdits( Rule& rule ){
-  if ( debugFlag){
-    *Log(mbmaLog) << "FOUND rule " << rule << endl;
-  }
-  RulePart *last = 0;
-  for ( size_t k=0; k < rule.rules.size(); ++k ) {
-    RulePart *cur = &rule.rules[k];
-    if ( last == 0 )
-      last = cur;
-    if ( debugFlag){
-      *Log(mbmaLog) << "edit::act=" << cur << endl;
-    }
-    if ( !cur->del.isEmpty() && cur->ins != "eer" ){
-      // sanity check
-      for ( int j=0; j < cur->del.length(); ++j ){
-	if ( rule.rules[k+j].uchar != cur->del[j] ){
-	  UnicodeString tmp(cur->del[j]);
-	  *Log(mbmaLog) << "Hmm: deleting " << cur->del << " is impossible. ("
-			<< rule.rules[k+j].uchar << " != " << tmp
-			<< ")." << endl;
-	  *Log(mbmaLog) << "Reject rule: " << rule << endl;
-	  return false;
-	}
-      }
-    }
-    if ( !cur->participle ){
-      for ( int j=0; j < cur->del.length(); ++j ){
-	rule.rules[k+j].uchar = "";
-      }
-    }
-
-    bool inserted = false;
-    bool e_except = false;
-    if ( cur->isBasic() ){
-      // encountering real POS tag
-      // start a new morpheme, BUT: inserts are appended to the previous one
-      // except for Replace edits, exception on that again: "eer" inserts
-      if ( debugFlag ){
-	*Log(mbmaLog) << "FOUND a basic tag " << cur->ResultClass << endl;
-      }
-      if ( cur->del.isEmpty() || cur->ins == "eer" ){
-	if ( !cur->del.isEmpty() && cur->ins == "eer" ){
-	  if ( debugFlag > 5 ){
-	    *Log(mbmaLog) << "special 'eer' exception." << endl;
-	    *Log(mbmaLog) << rule << endl;
-	  }
-	}
-	if ( cur->ins == "ere" ){
-	  if ( debugFlag > 5 ){
-	    *Log(mbmaLog) << "special 'ere' exception." << endl;
-	    *Log(mbmaLog) << rule << endl;
-	  }
-	  // strange exception
-	  last->morpheme += "er";
-	  e_except = true;
-	}
-	else {
-	  last->morpheme += cur->ins;
-	}
-	inserted = true;
-      }
-      last = cur;
-    }
-    else if ( cur->ResultClass != CLEX::NEUTRAL && !cur->inflect.empty() ){
-      // non 0 inflection starts a new morheme
-      last = cur;
-    }
-    if ( !inserted ){
-      // insert the deletestring :-)
-      last->morpheme += cur->ins;
-    }
-    if ( e_except ) {
-      // fix exception
-      last->morpheme += "e";
-    }
-    last->morpheme += cur->uchar; // might be empty because of deletion
-  }
-  if ( debugFlag ){
-    *Log(mbmaLog) << "edited rule " << rule << endl;
-  }
-  return true;
-}
-
 void Mbma::execute( const UnicodeString& word,
 		    const vector<string>& classes ){
   clearAnalysis();
@@ -606,13 +444,13 @@ void Mbma::execute( const UnicodeString& word,
 
   // now loop over all the analysis
   for ( unsigned int step=0; step < allParts.size(); ++step ) {
-    Rule rule( allParts[step], word, debugFlag );
-    if ( performEdits( rule ) ){
+    Rule rule( allParts[step], word, mbmaLog, debugFlag );
+    if ( rule.performEdits() ){
       rule.reduceZeroNodes();
       if ( debugFlag ){
 	*Log(mbmaLog) << "after reduction: " << rule << endl;
       }
-      resolve_inflections( rule );
+      rule.resolve_inflections();
       if ( debugFlag ){
 	*Log(mbmaLog) << "after resolving: " << rule << endl;
       }

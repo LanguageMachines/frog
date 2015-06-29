@@ -30,6 +30,7 @@
 #define MBMA_MOD_H
 
 #include <unicode/translit.h>
+#include "ticcutils/LogStream.h"
 #include "frog/clex.h"
 #include "frog/mbma_rule.h"
 #include "frog/mbma_brackets.h"
@@ -59,8 +60,6 @@ class Mbma {
   UnicodeString filterDiacritics( const UnicodeString& ) const;
   void getFoLiAResult( folia::Word *, const UnicodeString& ) const;
   std::vector<std::string> make_instances( const UnicodeString& word );
-  bool performEdits( Rule& );
-  void resolve_inflections( Rule& );
   CLEX::Type getFinalTag( const std::list<BaseBracket*>& );
   void execute( const UnicodeString& word,
 		const std::vector<std::string>& classes );

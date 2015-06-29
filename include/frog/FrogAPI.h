@@ -35,6 +35,7 @@
 
 #include "frog/Frog.h" //internals
 #include "ticcutils/Configuration.h"
+#include "ticcutils/LogStream.h"
 #include "timblserver/FdStream.h"
 #include "timblserver/ServerBase.h"
 

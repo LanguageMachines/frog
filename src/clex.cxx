@@ -179,6 +179,36 @@ namespace CLEX {
     }
   }
 
+  Type select_tag( const char ch ){
+    Type result = CLEX::UNASS;
+    switch( ch ){
+    case 'm':
+    case 'e':
+    case 'd':
+    case 'G':
+    case 'D':
+      result = N;
+      break;
+    case 'P':
+    case 'C':
+    case 'S':
+    case 'E':
+      result = A;
+      break;
+    case 'i':
+    case 'p':
+    case 't':
+    case 'v':
+    case 'g':
+    case 'a':
+      result = V;
+      break;
+    default:
+      break;
+    }
+    return result;
+  }
+
 }
 
 ostream& operator<<( ostream& os, const CLEX::Type t ){

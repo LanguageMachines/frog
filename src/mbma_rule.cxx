@@ -30,6 +30,7 @@
 #include <vector>
 #include <iostream>
 #include "libfolia/document.h"
+#include "ticcutils/LogStream.h"
 #include "ucto/unicode.h"
 #include "frog/clex.h"
 #include "frog/mbma_rule.h"
@@ -195,7 +196,8 @@ RulePart::RulePart( const string& rs, const UChar kar ):
 
 Rule::Rule( const vector<string>& parts,
 	    const UnicodeString& s,
-	    int flag ): debugFlag( flag ){
+	    TiCC::LogStream* ls,
+	    int flag ): debugFlag( flag ), myLog(ls) {
   for ( size_t k=0; k < parts.size(); ++k ) {
     string this_class = parts[k];
     RulePart cur( this_class, s[k] );
@@ -244,4 +246,136 @@ vector<string> Rule::extract_morphemes() const {
     ++it;
   }
   return morphemes;
+}
+
+bool Rule::performEdits(){
+  if ( debugFlag){
+    *TiCC::Log(myLog) << "FOUND rule " << this << endl;
+  }
+  RulePart *last = 0;
+  for ( size_t k=0; k < rules.size(); ++k ) {
+    RulePart *cur = &rules[k];
+    if ( last == 0 )
+      last = cur;
+    if ( debugFlag){
+      *TiCC::Log(myLog) << "edit::act=" << cur << endl;
+    }
+    if ( !cur->del.isEmpty() && cur->ins != "eer" ){
+      // sanity check
+      for ( int j=0; j < cur->del.length(); ++j ){
+	if ( rules[k+j].uchar != cur->del[j] ){
+	  UnicodeString tmp(cur->del[j]);
+	  *TiCC::Log(myLog) << "Hmm: deleting " << cur->del << " is impossible. ("
+			<< rules[k+j].uchar << " != " << tmp
+			<< ")." << endl;
+	  *TiCC::Log(myLog) << "Reject rule: " << this << endl;
+	  return false;
+	}
+      }
+    }
+    if ( !cur->participle ){
+      for ( int j=0; j < cur->del.length(); ++j ){
+	rules[k+j].uchar = "";
+      }
+    }
+
+    bool inserted = false;
+    bool e_except = false;
+    if ( cur->isBasic() ){
+      // encountering real POS tag
+      // start a new morpheme, BUT: inserts are appended to the previous one
+      // except for Replace edits, exception on that again: "eer" inserts
+      if ( debugFlag ){
+	*TiCC::Log(myLog) << "FOUND a basic tag " << cur->ResultClass << endl;
+      }
+      if ( cur->del.isEmpty() || cur->ins == "eer" ){
+	if ( !cur->del.isEmpty() && cur->ins == "eer" ){
+	  if ( debugFlag > 5 ){
+	    *TiCC::Log(myLog) << "special 'eer' exception." << endl;
+	    *TiCC::Log(myLog) << this << endl;
+	  }
+	}
+	if ( cur->ins == "ere" ){
+	  if ( debugFlag > 5 ){
+	    *TiCC::Log(myLog) << "special 'ere' exception." << endl;
+	    *TiCC::Log(myLog) << this << endl;
+	  }
+	  // strange exception
+	  last->morpheme += "er";
+	  e_except = true;
+	}
+	else {
+	  last->morpheme += cur->ins;
+	}
+	inserted = true;
+      }
+      last = cur;
+    }
+    else if ( cur->ResultClass != CLEX::NEUTRAL && !cur->inflect.empty() ){
+      // non 0 inflection starts a new morheme
+      last = cur;
+    }
+    if ( !inserted ){
+      // insert the deletestring :-)
+      last->morpheme += cur->ins;
+    }
+    if ( e_except ) {
+      // fix exception
+      last->morpheme += "e";
+    }
+    last->morpheme += cur->uchar; // might be empty because of deletion
+  }
+  if ( debugFlag ){
+    *TiCC::Log(myLog) << "edited rule " << this << endl;
+  }
+  return true;
+}
+
+
+void Rule::resolve_inflections(){
+  // resolve all clearly resolvable implicit selections of inflectional tags
+  // We take ONLY the first 'hint' of the inflection to find a new CLEX Type
+  // When applicable, we replace the class from the rule
+  for ( size_t i = 1; i < rules.size(); ++i ){
+    string inf = rules[i].inflect;
+    if ( !inf.empty() && !rules[i].participle ){
+      // it is an inflection tag
+      if (debugFlag){
+	*TiCC::Log(myLog) << " inflection: >" << inf << "<" << endl;
+      }
+      // given the specific selections of certain inflections,
+      //    select a tag!
+      CLEX::Type new_tag = CLEX::select_tag( inf[0] );
+
+      // apply the change. Remember, the idea is that an inflection is
+      // far more certain of the tag of its predecessing morpheme than
+      // the morpheme itself.
+      // This is not always the case, but it works
+      if ( new_tag != CLEX::UNASS ) {
+	if ( debugFlag  ){
+	  *TiCC::Log(myLog) << inf[0] << " selects " << new_tag << endl;
+	}
+	// go back to the previous morpheme
+	size_t k = i-1;
+	//	  *TiCC::Log(myLog) << "een terug is " << rule.rules[k].ResultClass << endl;
+	if ( rules[k].isBasic() ){
+	  // now see if we can replace this class for a better one
+	  if ( rules[k].ResultClass == CLEX::PN &&
+	       new_tag == CLEX::N ){
+	    if ( debugFlag  ){
+	      *TiCC::Log(myLog) << "Don't replace PN by N" << endl;
+	    }
+	  }
+	  else {
+	    if ( debugFlag  ){
+	      *TiCC::Log(myLog) << " replace " << rules[k].ResultClass
+				<< " by " << new_tag << endl;
+	    }
+	    rules[k].ResultClass = new_tag;
+	  }
+	  return;
+	}
+      }
+    }
+  }
 }

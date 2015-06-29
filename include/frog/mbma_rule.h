@@ -53,16 +53,22 @@ class BracketNest;
 
 class Rule {
 public:
-  Rule( const std::vector<std::string>&, const UnicodeString&, int flag );
+  Rule( const std::vector<std::string>&,
+	const UnicodeString&,
+	TiCC::LogStream *,
+	int );
   std::vector<std::string> extract_morphemes() const;
+  bool performEdits();
   void getCleanInflect();
   void reduceZeroNodes();
   BracketNest *resolveBrackets( bool );
+  void resolve_inflections();
   std::vector<RulePart> rules;
   int debugFlag;
   CLEX::Type tag;
   std::string description;
   std::string inflection;
+  TiCC::LogStream *myLog;
 };
 
 std::ostream& operator<<( std::ostream& os, const Rule& );
