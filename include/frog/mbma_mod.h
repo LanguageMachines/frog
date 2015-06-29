@@ -95,7 +95,11 @@ class MBMAana {
   ~MBMAana() { delete brackets; };
 
   std::string getTag() const {
-    return tag;
+    return CLEX::toString(rule.tag);
+  };
+
+  std::string getDescription() const {
+    return rule.description;
   };
 
   const Rule& getRule() const {
@@ -107,7 +111,7 @@ class MBMAana {
   };
 
   std::string getInflection() const {
-    return infl;
+    return rule.inflection;
   };
 
   const std::vector<std::string> getMorph() const {
@@ -117,10 +121,7 @@ class MBMAana {
   UnicodeString getKey( bool );
 
  private:
-  std::string tag;
-  std::string infl;
   UnicodeString sortkey;
-  std::string description;
   Rule rule;
   BracketNest *brackets;
 };

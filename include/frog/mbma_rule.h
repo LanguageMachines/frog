@@ -55,11 +55,14 @@ class Rule {
 public:
   Rule( const std::vector<std::string>&, const UnicodeString&, int flag );
   std::vector<std::string> extract_morphemes() const;
-  std::string getCleanInflect() const;
+  void getCleanInflect();
   void reduceZeroNodes();
-  BracketNest *resolveBrackets( bool, CLEX::Type& );
+  BracketNest *resolveBrackets( bool );
   std::vector<RulePart> rules;
   int debugFlag;
+  CLEX::Type tag;
+  std::string description;
+  std::string inflection;
 };
 
 std::ostream& operator<<( std::ostream& os, const Rule& );

@@ -703,7 +703,7 @@ CLEX::Type BracketNest::getFinalTag() {
   return cls;
 }
 
-BracketNest *Rule::resolveBrackets( bool daring, CLEX::Type& tag  ) {
+BracketNest *Rule::resolveBrackets( bool daring ) {
   if ( debugFlag > 5 ){
     cerr << "check rule for bracketing: " << this << endl;
   }
@@ -739,8 +739,14 @@ BracketNest *Rule::resolveBrackets( bool daring, CLEX::Type& tag  ) {
   }
   brackets->setCompoundType();
   tag = brackets->getFinalTag();
+  description = get_tagDescr( tag );
+  if ( description.empty() ){
+    // unknown tag
+    tag = CLEX::X;
+    description = "unknown";
+  }
   if ( debugFlag > 4 ){
-    cerr << "Final Bracketing:" << brackets << endl;
+    cerr << "Final Bracketing:" << brackets << " with tag=" << tag << endl;
   }
   return brackets;
 }

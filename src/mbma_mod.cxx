@@ -337,18 +337,8 @@ void Mbma::resolve_inflections( Rule& rule ){
 }
 
 MBMAana::MBMAana( const Rule& r, bool daring ): rule(r) {
-  CLEX::Type Tag;
-  brackets = rule.resolveBrackets( daring, Tag );
-  infl = rule.getCleanInflect();
-  description = get_tagDescr( Tag );
-  if ( description.empty() ){
-    // unknown tag
-    tag = toString(CLEX::X);
-    description = "unknown";
-  }
-  else {
-    tag = toString(Tag);
-  }
+  brackets = rule.resolveBrackets( daring );
+  rule.getCleanInflect();
 }
 
 UnicodeString MBMAana::getKey( bool daring ){
@@ -371,9 +361,10 @@ UnicodeString MBMAana::getKey( bool daring ){
   return sortkey;
 }
 
-string Rule::getCleanInflect() const {
+void Rule::getCleanInflect() {
   // get the FIRST inflection and clean it up by extracting only
   //  known inflection names
+  inflection = "";
   vector<RulePart>::const_iterator it = rules.begin();
   while ( it != rules.end() ) {
     if ( !it->inflect.empty() ){
@@ -396,11 +387,11 @@ string Rule::getCleanInflect() const {
 	}
       }
       //      cerr << "cleaned inflection " << inflect << endl;
-      return inflect;
+      inflection = inflect;
+      return;
     }
     ++it;
   }
-  return "";
 }
 
 #define OLD_STEP
@@ -1062,8 +1053,8 @@ vector<vector<string> > Mbma::getResult() const {
 }
 
 ostream& operator<< ( ostream& os, const MBMAana& a ){
-  os << "tag: " << a.tag << " infl:" << a.infl << " morhemes: "
-     << a.rule.extract_morphemes() << " description: " << a.description;
+  os << "tag: " << a.getTag() << " infl:" << a.getInflection() << " morhemes: "
+     << a.rule.extract_morphemes() << " description: " << a.getDescription();
   return os;
 }
 
