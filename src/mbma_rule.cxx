@@ -33,6 +33,7 @@
 #include "ticcutils/LogStream.h"
 #include "ucto/unicode.h"
 #include "frog/clex.h"
+#include "frog/mbma_brackets.h"
 #include "frog/mbma_rule.h"
 
 using namespace std;
@@ -377,5 +378,104 @@ void Rule::resolve_inflections(){
 	}
       }
     }
+  }
+}
+
+UnicodeString Rule::getKey( bool daring ){
+  if ( sortkey.isEmpty() ){
+    UnicodeString tmp;
+    if ( daring ){
+      stringstream ss;
+      ss << brackets << endl;
+      tmp = UTF8ToUnicode(ss.str());
+    }
+    else {
+      vector<string> v = extract_morphemes();
+      // create an unique string
+      for ( size_t p=0; p < v.size(); ++p ) {
+	tmp += UTF8ToUnicode(v[p]) + "+";
+      }
+    }
+    sortkey = tmp;
+  }
+  return sortkey;
+}
+
+void Rule::getCleanInflect() {
+  // get the FIRST inflection and clean it up by extracting only
+  //  known inflection names
+  inflection = "";
+  vector<RulePart>::const_iterator it = rules.begin();
+  while ( it != rules.end() ) {
+    if ( !it->inflect.empty() ){
+      //      cerr << "x inflect:'" << it->inflect << "'" << endl;
+      string inflect;
+      for ( size_t i=0; i< it->inflect.length(); ++i ) {
+	if ( it->inflect[i] != '/' ){
+	  // check if it is a known inflection
+	  //	  cerr << "x bekijk [" << it->inflect[i] << "]" << endl;
+	  string inf = get_iName(it->inflect[i]);
+	  if ( inf.empty() ){
+	    //	    cerr << "added unknown inflection X" << endl;
+	    inflect += "X";
+	  }
+	  else {
+	    //	    cerr << "added known inflection " << it->inflect[i]
+	    //	     	 << " (" << inf << ")" << endl;
+	    inflect += it->inflect[i];
+	  }
+	}
+      }
+      //      cerr << "cleaned inflection " << inflect << endl;
+      inflection = inflect;
+      return;
+    }
+    ++it;
+  }
+}
+
+void Rule::resolveBrackets( bool daring ) {
+  if ( debugFlag > 5 ){
+    cerr << "check rule for bracketing: " << this << endl;
+  }
+  brackets = new BracketNest( CLEX::UNASS, CompoundType::NONE, debugFlag );
+  for ( size_t k=0; k < rules.size(); ++k ) {
+    // fill a flat result;
+    BracketLeaf *tmp = new BracketLeaf( rules[k], debugFlag );
+    if ( tmp->status() == Status::STEM && tmp->morpheme().isEmpty() ){
+      delete tmp;
+    }
+    else {
+      brackets->append( tmp );
+    }
+  }
+  if ( debugFlag > 5 ){
+    cerr << "STEP 1:" << brackets << endl;
+  }
+  if ( daring ){
+    brackets->resolveNouns( );
+    if ( debugFlag > 5 ){
+      cerr << "STEP 2:" << brackets << endl;
+    }
+    brackets->resolveLead( );
+    if ( debugFlag > 5 ){
+      cerr << "STEP 3:" << brackets << endl;
+    }
+    brackets->resolveTail( );
+    if ( debugFlag > 5 ){
+      cerr << "STEP 4:" << brackets << endl;
+    }
+    brackets->resolveMiddle();
+  }
+  brackets->setCompoundType();
+  tag = brackets->getFinalTag();
+  description = get_tagDescr( tag );
+  if ( description.empty() ){
+    // unknown tag
+    tag = CLEX::X;
+    description = "unknown";
+  }
+  if ( debugFlag > 4 ){
+    cerr << "Final Bracketing:" << brackets << " with tag=" << tag << endl;
   }
 }

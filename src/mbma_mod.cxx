@@ -258,61 +258,8 @@ vector<string> Mbma::make_instances( const UnicodeString& word ){
 }
 
 MBMAana::MBMAana( const Rule& r, bool daring ): rule(r) {
-  brackets = rule.resolveBrackets( daring );
+  rule.resolveBrackets( daring );
   rule.getCleanInflect();
-}
-
-UnicodeString MBMAana::getKey( bool daring ){
-  if ( sortkey.isEmpty() ){
-    UnicodeString tmp;
-    if ( daring ){
-      stringstream ss;
-      ss << getBrackets() << endl;
-      tmp = UTF8ToUnicode(ss.str());
-    }
-    else {
-      vector<string> v = getMorph();
-      // create an unique string
-      for ( size_t p=0; p < v.size(); ++p ) {
-	tmp += UTF8ToUnicode(v[p]) + "+";
-      }
-    }
-    sortkey = tmp;
-  }
-  return sortkey;
-}
-
-void Rule::getCleanInflect() {
-  // get the FIRST inflection and clean it up by extracting only
-  //  known inflection names
-  inflection = "";
-  vector<RulePart>::const_iterator it = rules.begin();
-  while ( it != rules.end() ) {
-    if ( !it->inflect.empty() ){
-      //      cerr << "x inflect:'" << it->inflect << "'" << endl;
-      string inflect;
-      for ( size_t i=0; i< it->inflect.length(); ++i ) {
-	if ( it->inflect[i] != '/' ){
-	  // check if it is a known inflection
-	  //	  cerr << "x bekijk [" << it->inflect[i] << "]" << endl;
-	  string inf = get_iName(it->inflect[i]);
-	  if ( inf.empty() ){
-	    //	    cerr << "added unknown inflection X" << endl;
-	    inflect += "X";
-	  }
-	  else {
-	    //	    cerr << "added known inflection " << it->inflect[i]
-	    //	     	 << " (" << inf << ")" << endl;
-	    inflect += it->inflect[i];
-	  }
-	}
-      }
-      //      cerr << "cleaned inflection " << inflect << endl;
-      inflection = inflect;
-      return;
-    }
-    ++it;
-  }
 }
 
 #define OLD_STEP
@@ -765,7 +712,7 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
     vector<MBMAana*>::const_iterator sit = analysis.begin();
     while( sit != analysis.end() ){
       if ( doDaring ){
-	addBracketMorph( fword, (*sit)->getBrackets() );
+	addBracketMorph( fword, (*sit)->getRule().brackets );
       }
       else {
 	addMorph( fword, (*sit)->getMorph() );
@@ -871,7 +818,7 @@ vector<vector<string> > Mbma::getResult() const {
        it++ ){
     if ( doDaring ){
       stringstream ss;
-      ss << (*it)->getBrackets()->put( true ) << endl;
+      ss << (*it)->getRule().brackets->put( true ) << endl;
       vector<string> mors;
       mors.push_back( ss.str() );
       result.push_back( mors );

@@ -58,16 +58,19 @@ public:
 	TiCC::LogStream *,
 	int );
   std::vector<std::string> extract_morphemes() const;
+  UnicodeString getKey( bool );
   bool performEdits();
   void getCleanInflect();
   void reduceZeroNodes();
-  BracketNest *resolveBrackets( bool );
+  void resolveBrackets( bool );
   void resolve_inflections();
   std::vector<RulePart> rules;
   int debugFlag;
   CLEX::Type tag;
+  UnicodeString sortkey;
   std::string description;
   std::string inflection;
+  BracketNest *brackets;
   TiCC::LogStream *myLog;
 };
 
