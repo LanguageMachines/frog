@@ -231,6 +231,13 @@ void NERTagger::Classify( const vector<Word *>& swords ){
       *Log(nerLog) << "NER in: " << sentence << endl;
     vector<TagResult> tagv = tagger->TagLine(sentence);
     if ( tagv.size() != swords.size() ){
+      *Log(nerLog) << "NER tagger is confused" << endl;
+      *Log(nerLog) << "sentences was: '" << sentence << "'" << endl;
+      *Log(nerLog) << "but tagged:" << endl;
+      for ( const auto& val : tagv ){
+	*Log(nerLog) << val.word() << "/" << val.assignedTag() << " ";
+      }
+      *Log(nerLog) << endl;
       throw runtime_error( "NER tagger is confused" );
     }
     if ( debug ){
