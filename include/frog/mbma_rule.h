@@ -57,6 +57,7 @@ public:
 	const UnicodeString&,
 	TiCC::LogStream *,
 	int );
+  ~Rule();
   std::vector<std::string> extract_morphemes() const;
   UnicodeString getKey( bool );
   bool performEdits();

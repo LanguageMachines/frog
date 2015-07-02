@@ -207,6 +207,10 @@ Rule::Rule( const vector<string>& parts,
   }
 }
 
+Rule::~Rule(){
+  delete brackets;
+}
+
 ostream& operator<<( ostream& os, const Rule& r ){
   os << "MBMA rule:" << endl;
   for ( size_t k=0; k < r.rules.size(); ++k ) {
