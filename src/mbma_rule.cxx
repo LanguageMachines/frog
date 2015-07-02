@@ -415,25 +415,25 @@ void Rule::getCleanInflect() {
   vector<RulePart>::const_iterator it = rules.begin();
   while ( it != rules.end() ) {
     if ( !it->inflect.empty() ){
-      //      cerr << "x inflect:'" << it->inflect << "'" << endl;
+      //      *TiCC::Log(myLog) << "x inflect:'" << it->inflect << "'" << endl;
       string inflect;
       for ( size_t i=0; i< it->inflect.length(); ++i ) {
 	if ( it->inflect[i] != '/' ){
 	  // check if it is a known inflection
-	  //	  cerr << "x bekijk [" << it->inflect[i] << "]" << endl;
+	  //	  *TiCC::Log(myLog) << "x bekijk [" << it->inflect[i] << "]" << endl;
 	  string inf = get_iName(it->inflect[i]);
 	  if ( inf.empty() ){
-	    //	    cerr << "added unknown inflection X" << endl;
+	    //	    *TiCC::Log(myLog) << "added unknown inflection X" << endl;
 	    inflect += "X";
 	  }
 	  else {
-	    //	    cerr << "added known inflection " << it->inflect[i]
+	    //	    *TiCC::Log(myLog) << "added known inflection " << it->inflect[i]
 	    //	     	 << " (" << inf << ")" << endl;
 	    inflect += it->inflect[i];
 	  }
 	}
       }
-      //      cerr << "cleaned inflection " << inflect << endl;
+      //      *TiCC::Log(myLog) << "cleaned inflection " << inflect << endl;
       inflection = inflect;
       return;
     }
@@ -443,7 +443,7 @@ void Rule::getCleanInflect() {
 
 void Rule::resolveBrackets( bool daring ) {
   if ( debugFlag > 5 ){
-    cerr << "check rule for bracketing: " << this << endl;
+    *TiCC::Log(myLog) << "check rule for bracketing: " << this << endl;
   }
   brackets = new BracketNest( CLEX::UNASS, CompoundType::NONE, debugFlag );
   for ( size_t k=0; k < rules.size(); ++k ) {
@@ -457,20 +457,20 @@ void Rule::resolveBrackets( bool daring ) {
     }
   }
   if ( debugFlag > 5 ){
-    cerr << "STEP 1:" << brackets << endl;
+    *TiCC::Log(myLog) << "STEP 1:" << brackets << endl;
   }
   if ( daring ){
     brackets->resolveNouns( );
     if ( debugFlag > 5 ){
-      cerr << "STEP 2:" << brackets << endl;
+      *TiCC::Log(myLog) << "STEP 2:" << brackets << endl;
     }
     brackets->resolveLead( );
     if ( debugFlag > 5 ){
-      cerr << "STEP 3:" << brackets << endl;
+      *TiCC::Log(myLog) << "STEP 3:" << brackets << endl;
     }
     brackets->resolveTail( );
     if ( debugFlag > 5 ){
-      cerr << "STEP 4:" << brackets << endl;
+      *TiCC::Log(myLog) << "STEP 4:" << brackets << endl;
     }
     brackets->resolveMiddle();
   }
@@ -483,6 +483,6 @@ void Rule::resolveBrackets( bool daring ) {
     description = "unknown";
   }
   if ( debugFlag > 4 ){
-    cerr << "Final Bracketing:" << brackets << " with tag=" << tag << endl;
+    *TiCC::Log(myLog) << "Final Bracketing:" << brackets << " with tag=" << tag << endl;
   }
 }

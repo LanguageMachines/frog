@@ -139,5 +139,7 @@ class BracketNest: public BaseBracket {
 };
 
 std::ostream& operator<<( std::ostream&, const CompoundType );
+std::ostream& operator<<( std::ostream&, const BaseBracket& );
+std::ostream& operator<<( std::ostream&, const BaseBracket * );
 
 #endif // MBMA_BRACKETS_H
