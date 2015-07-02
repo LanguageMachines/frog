@@ -484,7 +484,14 @@ int main(int argc, char *argv[]) {
 	    xmlName = name + ".xml"; // do not clobber the inputdir!
 	}
 	*Log(theErrLog) << "Frogging " << testName << endl;
-	frog.FrogFile( testName, *outS, xmlName );
+	try {
+	  frog.FrogFile( testName, *outS, xmlName );
+	}
+	catch ( exception& e ){
+	  *Log(theErrLog) << "problem frogging: " << name << endl;
+	  *Log(theErrLog) << e.what() << endl;
+	  continue;
+	}
 	if ( !outName.empty() ){
 	  *Log(theErrLog) << "results stored in " << outName << endl;
 	  delete outS;

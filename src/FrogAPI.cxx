@@ -345,20 +345,34 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
   else
     swords = sent->words();
   bool showParse = options.doParse;
+  bool all_well = true;
+  string exs;
   if ( !swords.empty() ) {
-#pragma omp parallel sections
+#pragma omp parallel sections shared(all_well,exs)
     {
 #pragma omp section
       {
 	timers.tagTimer.start();
-	myCGNTagger->Classify( swords );
+	try {
+	  myCGNTagger->Classify( swords );
+	}
+	catch ( exception&e ){
+	  all_well = false;
+	  exs += string(e.what()) + " ";
+	}
 	timers.tagTimer.stop();
       }
 #pragma omp section
       {
 	if ( options.doIOB ){
 	  timers.iobTimer.start();
-	  myIOBTagger->Classify( swords );
+	  try {
+	    myIOBTagger->Classify( swords );
+	  }
+	  catch ( exception&e ){
+	    all_well = false;
+	    exs += string(e.what()) + " ";
+	  }
 	  timers.iobTimer.stop();
 	}
       }
@@ -366,11 +380,20 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
       {
 	if ( options.doNER ){
 	  timers.nerTimer.start();
-	  myNERTagger->Classify( swords );
+	  try {
+	    myNERTagger->Classify( swords );
+	  }
+	  catch ( exception&e ){
+	    all_well = false;
+	    exs += string(e.what()) + " ";
+	  }
 	  timers.nerTimer.stop();
 	}
       }
     } // parallel sections
+    if ( !all_well ){
+      throw runtime_error( exs );
+    }
     for ( size_t i = 0; i < swords.size(); ++i ) {
 #pragma omp parallel sections
       {
@@ -380,7 +403,13 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
 	    timers.mbmaTimer.start();
 	    if (options.debugFlag)
 	      *Log(theErrLog) << "Calling mbma..." << endl;
-	    myMbma->Classify( swords[i] );
+	    try{
+	      myMbma->Classify( swords[i] );
+	    }
+	    catch ( exception&e ){
+	      all_well = false;
+	      exs += string(e.what()) + " ";
+	    }
 	    timers.mbmaTimer.stop();
 	  }
 	}
@@ -390,12 +419,21 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
 	    timers.mblemTimer.start();
 	    if (options.debugFlag)
 	      *Log(theErrLog) << "Calling mblem..." << endl;
-	    myMblem->Classify( swords[i] );
+	    try {
+	      myMblem->Classify( swords[i] );
+	    }
+	    catch ( exception&e ){
+	      all_well = false;
+	      exs += string(e.what()) + " ";
+	    }
 	    timers.mblemTimer.stop();
 	  }
 	}
       } // omp parallel sections
     } //for int i = 0 to num_words
+    if ( !all_well ){
+      throw runtime_error( exs );
+    }
 
     if ( options.doMwu ){
       if ( swords.size() > 0 ){
@@ -1034,7 +1072,6 @@ void FrogAPI::FrogFile( const string& infilename,
 			const string& xmlOutF ) {
   // stuff the whole input into one FoLiA document.
   // This is not a good idea on the long term, I think (agreed [proycon] )
-
   string xmlOutFile = xmlOutF;
   if ( options.doXMLin && !xmlOutFile.empty() ){
     if ( match_back( infilename, ".gz" ) ){
