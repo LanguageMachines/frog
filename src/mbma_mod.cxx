@@ -257,11 +257,6 @@ vector<string> Mbma::make_instances( const UnicodeString& word ){
   return insts;
 }
 
-MBMAana::MBMAana( const Rule& r, bool daring ): rule(r) {
-  rule.resolveBrackets( daring );
-  rule.getCleanInflect();
-}
-
 #define OLD_STEP
 
 #ifdef OLD_STEP
@@ -391,24 +386,26 @@ void Mbma::execute( const UnicodeString& word,
 
   // now loop over all the analysis
   for ( unsigned int step=0; step < allParts.size(); ++step ) {
-    Rule rule( allParts[step], word, mbmaLog, debugFlag );
-    if ( rule.performEdits() ){
-      rule.reduceZeroNodes();
+    Rule *rule = new Rule( allParts[step], word, mbmaLog, debugFlag );
+    if ( rule->performEdits() ){
+      rule->reduceZeroNodes();
       if ( debugFlag ){
 	*Log(mbmaLog) << "after reduction: " << rule << endl;
       }
-      rule.resolve_inflections();
+      rule->resolve_inflections();
       if ( debugFlag ){
 	*Log(mbmaLog) << "after resolving: " << rule << endl;
       }
-      MBMAana *tmp = new MBMAana( rule, doDaring );
+      rule->resolveBrackets( doDaring );
+      rule->getCleanInflect();
       if ( debugFlag ){
-	*Log(mbmaLog) << "1 added Inflection: " << tmp << endl;
+	*Log(mbmaLog) << "1 added Inflection: " << rule << endl;
       }
-      analysis.push_back( tmp );
+      analysis.push_back( rule );
     }
     else if ( debugFlag ){
       *Log(mbmaLog) << "rejected rule: " << rule << endl;
+      delete rule;
     }
   }
 }
@@ -528,7 +525,7 @@ void Mbma::addMorph( MorphologyLayer *ml,
   }
 }
 
-bool mbmacmp( MBMAana *m1, MBMAana *m2 ){
+bool mbmacmp( Rule *m1, Rule *m2 ){
   return m1->getKey(false).length() > m2->getKey(false).length();
 }
 
@@ -539,8 +536,9 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
 		  << " feats: " << feats << endl;
     *Log(mbmaLog) << "filter:start, analysis is:" << endl;
     int i=1;
-    for(vector<MBMAana*>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      *Log(mbmaLog) << i++ << " - " << *it << endl;
+    for( const auto& it : analysis ){
+      *Log(mbmaLog) << i++ << " - " << it << endl;
+    }
   }
   map<string,string>::const_iterator tagIt = TAGconv.find( head );
   if ( tagIt == TAGconv.end() ) {
@@ -550,19 +548,21 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   if (debugFlag){
     *Log(mbmaLog) << "#matches: " << tagIt->first << " " << tagIt->second << endl;
   }
-  vector<MBMAana*>::iterator ait = analysis.begin();
+  auto ait = analysis.begin();
   while ( ait != analysis.end() ){
-    string tagI = (*ait)->getTag();
+    string tagI = CLEX::toString((*ait)->tag);
     if ( tagIt->second == tagI || ( tagIt->second == "N" && tagI == "PN" ) ){
-      if (debugFlag)
+      if (debugFlag){
 	*Log(mbmaLog) << "comparing " << tagIt->second << " with "
 		      << tagI << " (OK)" << endl;
-      ait++;
+      }
+      ++ait;
     }
     else {
-      if (debugFlag)
+      if (debugFlag){
 	*Log(mbmaLog) << "comparing " << tagIt->second << " with "
 		      << tagI << " (rejected)" << endl;
+      }
       delete *ait;
       ait = analysis.erase( ait );
     }
@@ -570,10 +570,10 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   if (debugFlag){
     *Log(mbmaLog) << "filter: analysis after first step" << endl;
     int i=1;
-    for(vector<MBMAana*>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      *Log(mbmaLog) << i++ << " - " << *it << endl;
+    for( const auto& it : analysis ){
+      *Log(mbmaLog) << ++i << " - " << it << endl;
+    }
   }
-
   if ( analysis.size() < 1 ){
     if (debugFlag ){
       *Log(mbmaLog) << "analysis is empty so skip next filter" << endl;
@@ -586,11 +586,11 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   // find best match
   // loop through all subfeatures of the tag
   // and match with inflections from each m
-  set<MBMAana *> bestMatches;
+  set<Rule *> bestMatches;
   int max_count = 0;
   for ( size_t q=0; q < analysis.size(); ++q ) {
     int match_count = 0;
-    string inflection = analysis[q]->getInflection();
+    string inflection = analysis[q]->inflection;
     if (debugFlag){
       *Log(mbmaLog) << "matching " << inflection << " with " << feats << endl;
     }
@@ -634,15 +634,14 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   if (debugFlag){
     *Log(mbmaLog) << "filter: analysis after second step" << endl;
     int i=1;
-    for( vector<MBMAana*>::const_iterator it=analysis.begin();
-	 it != analysis.end();
-	 ++it )
-      *Log(mbmaLog) << i++ << " - " << *it << endl;
+    for( const auto& it : analysis ){
+      *Log(mbmaLog) << ++i << " - " << it << endl;
+    }
   }
   //
   // but now we still might have doubles
   //
-  map<UnicodeString, MBMAana*> unique;
+  map<UnicodeString, Rule*> unique;
   ait=analysis.begin();
   while ( ait != analysis.end() ){
     UnicodeString tmp = (*ait)->getKey( doDaring );
@@ -650,11 +649,9 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
     ++ait;
   }
   // so we have map of 'equal' analysis
-  set<MBMAana*> uniqueAna;
-  map<UnicodeString, MBMAana*>::const_iterator uit=unique.begin();
-  while ( uit != unique.end() ){
-    uniqueAna.insert( uit->second );
-    ++uit;
+  set<Rule*> uniqueAna;
+  for ( auto const& uit : unique ){
+    uniqueAna.insert( uit.second );
   }
   // and now a set of all MBMAana's that are really different.
   // remove all analysis that aren't in that set.
@@ -671,9 +668,10 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   if ( debugFlag ){
     *Log(mbmaLog) << "filter: analysis before sort on length:" << endl;
     int i=1;
-    for(vector<MBMAana*>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      *Log(mbmaLog) << i++ << " - " << *it << " " << (*it)->getKey(false)
-		    << " (" << (*it)->getKey(false).length() << ")" << endl;
+    for( const auto& it : analysis ){
+      *Log(mbmaLog) << ++i << " - " << it << " " << it->getKey(false)
+		    << " (" << it->getKey(false).length() << ")" << endl;
+    }
     *Log(mbmaLog) << "" << endl;
   }
   // Now we have a small list of unique and differtent analysis.
@@ -685,8 +683,9 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   if ( debugFlag){
     *Log(mbmaLog) << "filter: definitive analysis:" << endl;
     int i=1;
-    for(vector<MBMAana*>::const_iterator it=analysis.begin(); it != analysis.end(); it++)
-      *Log(mbmaLog) << i++ << " - " << *it << endl;
+    for( auto const& it : analysis ){
+      *Log(mbmaLog) << ++i << " - " << it << endl;
+    }
     *Log(mbmaLog) << "done filtering" << endl;
   }
   return;
@@ -709,15 +708,13 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
     }
   }
   else {
-    vector<MBMAana*>::const_iterator sit = analysis.begin();
-    while( sit != analysis.end() ){
+    for( auto const& sit : analysis ){
       if ( doDaring ){
-	addBracketMorph( fword, (*sit)->getRule().brackets );
+	addBracketMorph( fword, sit->brackets );
       }
       else {
-	addMorph( fword, (*sit)->getMorph() );
+	addMorph( fword, sit->extract_morphemes() );
       }
-      ++sit;
     }
   }
 }
@@ -813,18 +810,16 @@ void Mbma::Classify( const UnicodeString& word ){
 
 vector<vector<string> > Mbma::getResult() const {
   vector<vector<string> > result;
-  for (vector<MBMAana*>::const_iterator it=analysis.begin();
-       it != analysis.end();
-       it++ ){
+  for ( const auto& it : analysis ){
     if ( doDaring ){
       stringstream ss;
-      ss << (*it)->getRule().brackets->put( true ) << endl;
+      ss << it->brackets->put( true ) << endl;
       vector<string> mors;
       mors.push_back( ss.str() );
       result.push_back( mors );
     }
     else {
-      vector<string> mors = (*it)->getMorph();
+      vector<string> mors = it->extract_morphemes();
       if ( debugFlag ){
 	*Log(mbmaLog) << "Morphs " << mors << endl;
       }
@@ -835,18 +830,4 @@ vector<vector<string> > Mbma::getResult() const {
     *Log(mbmaLog) << "result of morph analyses: " << result << endl;
   }
   return result;
-}
-
-ostream& operator<< ( ostream& os, const MBMAana& a ){
-  os << "tag: " << a.getTag() << " infl:" << a.getInflection() << " morhemes: "
-     << a.rule.extract_morphemes() << " description: " << a.getDescription();
-  return os;
-}
-
-ostream& operator<< ( ostream& os, const MBMAana *a ){
-  if ( a )
-    os << *a;
-  else
-    os << "no-mbma";
-  return os;
 }

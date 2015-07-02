@@ -74,7 +74,7 @@ class Mbma {
   std::string MTreeFilename;
   Timbl::TimblAPI *MTree;
   std::map<std::string,std::string> TAGconv;
-  std::vector<MBMAana*> analysis;
+  std::vector<Rule*> analysis;
   std::string version;
   std::string mbma_tagset;
   std::string cgn_tagset;
@@ -83,42 +83,6 @@ class Mbma {
   Transliterator *transliterator;
   Tokenizer::UnicodeFilter *filter;
   bool doDaring;
-};
-
-class MBMAana {
-  friend std::ostream& operator<< ( std::ostream& , const MBMAana& );
-  friend std::ostream& operator<< ( std::ostream& , const MBMAana* );
-  public:
-  MBMAana(const Rule&, bool );
-
-  ~MBMAana() { };
-
-  std::string getTag() const {
-    return CLEX::toString(rule.tag);
-  };
-
-  std::string getDescription() const {
-    return rule.description;
-  };
-
-  const Rule& getRule() const {
-    return rule;
-  };
-
-  std::string getInflection() const {
-    return rule.inflection;
-  };
-
-  const std::vector<std::string> getMorph() const {
-    return rule.extract_morphemes();
-  };
-
-  UnicodeString getKey( bool daring ){
-    return rule.getKey( daring );
-  }
-
- private:
-  Rule rule;
 };
 
 #endif

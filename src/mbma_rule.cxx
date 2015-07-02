@@ -38,6 +38,7 @@
 
 using namespace std;
 using namespace folia;
+using TiCC::operator<<;
 
 bool RulePart::isBasic() const {
   return isBasicClass( ResultClass );
@@ -211,6 +212,8 @@ ostream& operator<<( ostream& os, const Rule& r ){
   for ( size_t k=0; k < r.rules.size(); ++k ) {
     os << "\t" << r.rules[k] << endl;
   }
+  os << "tag: " << r.tag << " infl:" << r.inflection << " morhemes: "
+     << r.extract_morphemes() << " description: " << r.description;
   return os;
 }
 
