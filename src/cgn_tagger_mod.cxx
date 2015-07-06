@@ -359,7 +359,11 @@ void CGNTagger::Classify( const vector<Word*>& swords ){
   if ( !swords.empty() ) {
     string sentence; // the tagger needs the whole sentence
     for ( size_t w = 0; w < swords.size(); ++w ) {
-      UnicodeString word = swords[w]->text();
+      UnicodeString word;
+#pragma omp critical(foliaupdate)
+      {
+	word = swords[w]->text();
+      }
       if ( filter )
 	word = filter->filter( word );
       sentence += UnicodeToUTF8(word);

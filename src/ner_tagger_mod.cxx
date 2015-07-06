@@ -225,8 +225,13 @@ void NERTagger::Classify( const vector<Word *>& swords ){
     vector<string> words;
     string sentence; // the tagger needs the whole sentence
     for ( size_t w = 0; w < swords.size(); ++w ) {
-      sentence += swords[w]->str();
-      words.push_back( swords[w]->str() );
+      string wrd;
+#pragma omp critical(foliaupdate)
+      {
+	wrd = swords[w]->str();
+      }
+      sentence += wrd;
+      words.push_back( wrd );
       if ( w < swords.size()-1 )
 	sentence += " ";
     }
