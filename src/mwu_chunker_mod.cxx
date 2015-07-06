@@ -185,10 +185,13 @@ ostream &operator <<( ostream& os,
 }
 
 void Mwu::addDeclaration( Document& doc ) const {
-  doc.declare( AnnotationType::ENTITY,
-	       tagset,
-	       "annotator='frog-mwu-" + version
-	       + "', annotatortype='auto', datetime='" + getTime() + "'");
+#pragma omp critical(foliaupdate)
+  {
+    doc.declare( AnnotationType::ENTITY,
+		 tagset,
+		 "annotator='frog-mwu-" + version
+		 + "', annotatortype='auto', datetime='" + getTime() + "'");
+  }
 }
 
 void Mwu::Classify( const vector<Word*>& words ){

@@ -720,13 +720,16 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
 }
 
 void Mbma::addDeclaration( Document& doc ) const {
-  doc.declare( AnnotationType::MORPHOLOGICAL, mbma_tagset,
-	       "annotator='frog-mbma-" +  version +
-	       + "', annotatortype='auto', datetime='" + getTime() + "'");
-  if ( doDaring ){
-    doc.declare( AnnotationType::POS, clex_tagset,
+#pragma omp critical(foliaupdate)
+  {
+    doc.declare( AnnotationType::MORPHOLOGICAL, mbma_tagset,
 		 "annotator='frog-mbma-" +  version +
 		 + "', annotatortype='auto', datetime='" + getTime() + "'");
+    if ( doDaring ){
+      doc.declare( AnnotationType::POS, clex_tagset,
+		   "annotator='frog-mbma-" +  version +
+		   + "', annotatortype='auto', datetime='" + getTime() + "'");
+    }
   }
 }
 

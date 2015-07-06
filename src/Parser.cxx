@@ -767,17 +767,25 @@ void Parser::createRelDir( const parseData& pd ){
 }
 
 void Parser::addDeclaration( Document& doc ) const {
-  doc.declare( AnnotationType::DEPENDENCY, tagset,
-	       "annotator='frog-depparse-" + version
-	       + "', annotatortype='auto'");
+#pragma omp critical(foliaupdate)
+  {
+    doc.declare( AnnotationType::DEPENDENCY, tagset,
+		 "annotator='frog-depparse-" + version
+		 + "', annotatortype='auto'");
+  }
 }
 
 void Parser::prepareParse( const vector<Word *>& fwords,
 			   const string& setname,
 			   parseData& pd ) {
   pd.clear();
-  Sentence *sent = fwords[0]->sentence();
-  vector<Entity*> entities = sent->select<Entity>(setname);
+  Sentence *sent = 0;
+  vector<Entity*> entities;
+#pragma omp critical(foliaupdate)
+  {
+    sent = fwords[0]->sentence();
+    entities = sent->select<Entity>(setname);
+  }
   for( size_t i=0; i < fwords.size(); ++i ){
     Word *word = fwords[i];
     vector<Word*> mwu = lookup( word, entities );

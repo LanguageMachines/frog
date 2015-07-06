@@ -227,10 +227,13 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
 }
 
 void IOBTagger::addDeclaration( Document& doc ) const {
-  doc.declare( AnnotationType::CHUNKING,
-	       tagset,
-	       "annotator='frog-chunker-" + version
-	       + "', annotatortype='auto', datetime='" + getTime() + "'");
+#pragma omp critical(foliaupdate)
+  {
+    doc.declare( AnnotationType::CHUNKING,
+		 tagset,
+		 "annotator='frog-chunker-" + version
+		 + "', annotatortype='auto', datetime='" + getTime() + "'");
+  }
 }
 
 void IOBTagger::Classify( const vector<Word *>& swords ){

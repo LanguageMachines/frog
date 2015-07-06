@@ -340,9 +340,12 @@ void CGNTagger::addTag( Word *word, const string& inputTag, double confidence ){
 }
 
 void CGNTagger::addDeclaration( Document& doc ) const {
-  doc.declare( AnnotationType::POS, tagset,
-	       "annotator='frog-mbpos-" + version
-	       + "', annotatortype='auto', datetime='" + getTime() + "'");
+#pragma omp critical(foliaupdate)
+  {
+    doc.declare( AnnotationType::POS, tagset,
+		 "annotator='frog-mbpos-" + version
+		 + "', annotatortype='auto', datetime='" + getTime() + "'");
+  }
 }
 
 vector<TagResult> CGNTagger::tagLine( const string& line ){
