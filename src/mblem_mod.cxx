@@ -101,10 +101,10 @@ bool Mblem::init( const Configuration& config ) {
 
   val = config.lookUp( "set", "tagger" );
   if ( val.empty() ){
-    cgn_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
+    POS_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
   }
   else
-    cgn_tagset = val;
+    POS_tagset = val;
 
   string transName = config.lookUp( "transFile", "mblem" );
   if ( !transName.empty() ){
@@ -302,7 +302,7 @@ void Mblem::Classify( Word *sword ){
     word = sword->text();
     pos = sword->pos();
     token_class = sword->cls();
-    tag = sword->annotation<PosAnnotation>( cgn_tagset )->feat("head");
+    tag = sword->annotation<PosAnnotation>( POS_tagset )->feat("head");
   }
   if (debug)
     *Log(mblemLog) << "Classify " << word << "(" << pos << ") ["

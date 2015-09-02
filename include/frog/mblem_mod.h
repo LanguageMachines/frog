@@ -70,7 +70,7 @@ class Mblem {
   std::vector<mblemData> mblemResult;
   std::string version;
   std::string tagset;
-  std::string cgn_tagset;
+  std::string POS_tagset;
   TiCC::LogStream *mblemLog;
   Tokenizer::UnicodeFilter *filter;
 };
