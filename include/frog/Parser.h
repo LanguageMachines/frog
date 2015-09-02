@@ -89,7 +89,7 @@ class Parser {
   void prepareParse( const std::vector<folia::Word *>&,
 		     const std::string&, parseData& );
   void createParserFile( const parseData& );
-  std::string getTagset() const { return tagset; };
+  std::string getTagset() const { return dep_tagset; };
  private:
   void createRelDir( const parseData& );
   void createPairs( const parseData& );
@@ -104,8 +104,8 @@ class Parser {
   TiCC::LogStream *parseLog;
   bool keepIntermediate;
   std::string version;
-  std::string tagset;
-  std::string cgn_tagset;
+  std::string dep_tagset;
+  std::string POS_tagset;
 
 };
 

@@ -182,17 +182,17 @@ bool Parser::init( const Configuration& configuration ){
     version = val;
   val = configuration.lookUp( "set", "parser" );
   if ( val.empty() ){
-    tagset = "http://ilk.uvt.nl/folia/sets/frog-depparse-nl";
+    dep_tagset = "http://ilk.uvt.nl/folia/sets/frog-depparse-nl";
   }
   else
-    tagset = val;
+    dep_tagset = val;
 
   val = configuration.lookUp( "set", "tagger" );
   if ( val.empty() ){
-    cgn_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
+    POS_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
   }
   else
-    cgn_tagset = val;
+    POS_tagset = val;
 
   val = configuration.lookUp( "maxDepSpan", "parser" );
   if ( !val.empty() ){
@@ -769,7 +769,7 @@ void Parser::createRelDir( const parseData& pd ){
 void Parser::addDeclaration( Document& doc ) const {
 #pragma omp critical(foliaupdate)
   {
-    doc.declare( AnnotationType::DEPENDENCY, tagset,
+    doc.declare( AnnotationType::DEPENDENCY, dep_tagset,
 		 "annotator='frog-depparse-" + version
 		 + "', annotatortype='auto'");
   }
@@ -795,7 +795,7 @@ void Parser::prepareParse( const vector<Word *>& fwords,
       string mod;
       for ( size_t p=0; p < mwu.size(); ++p ){
 	multi_word += mwu[p]->str();
-	PosAnnotation *postag = mwu[p]->annotation<PosAnnotation>( cgn_tagset );
+	PosAnnotation *postag = mwu[p]->annotation<PosAnnotation>( POS_tagset );
 	head += postag->feat("head");
 	vector<folia::Feature*> feats = postag->select<folia::Feature>();
 	for ( size_t j=0; j < feats.size(); ++j ){
@@ -817,7 +817,7 @@ void Parser::prepareParse( const vector<Word *>& fwords,
     }
     else {
       pd.words.push_back( word->str() );
-      PosAnnotation *postag = word->annotation<PosAnnotation>( cgn_tagset );
+      PosAnnotation *postag = word->annotation<PosAnnotation>( POS_tagset );
       string head = postag->feat("head");
       pd.heads.push_back( head );
       string mod;
@@ -977,7 +977,7 @@ void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
   timers.csiTimer.stop();
   ifstream resFile( resFileName );
   if ( resFile ){
-    appendParseResult( words, pd, tagset, resFile );
+    appendParseResult( words, pd, dep_tagset, resFile );
   }
   else
     *Log(parseLog) << "couldn't open results file: " << resFileName << endl;
