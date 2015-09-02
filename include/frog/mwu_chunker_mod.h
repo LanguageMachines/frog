@@ -65,7 +65,7 @@ class Mwu {
   void addDeclaration( folia::Document& ) const;
   void Classify( const std::vector<folia::Word *>& );
   void add( folia::Word * );
-  std::string getTagset() const { return tagset; };
+  std::string getTagset() const { return mwu_tagset; };
   std::vector<mwuAna*>& getAna(){ return mWords; };
  private:
   bool readsettings( const std::string&, const std::string&);
@@ -77,7 +77,7 @@ class Mwu {
   mymap2 MWUs;
   TiCC::LogStream *mwuLog;
   std::string version;
-  std::string tagset;
+  std::string mwu_tagset;
 };
 
 #endif

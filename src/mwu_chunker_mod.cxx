@@ -169,10 +169,10 @@ bool Mwu::init( const Configuration& config ) {
     version = val;
   val = config.lookUp( "set", "mwu" );
   if ( val.empty() ){
-    tagset = "http://ilk.uvt.nl/folia/sets/frog-mwu-nl";
+    mwu_tagset = "http://ilk.uvt.nl/folia/sets/frog-mwu-nl";
   }
   else
-    tagset = val;
+    mwu_tagset = val;
 
   return true;
 }
@@ -188,7 +188,7 @@ void Mwu::addDeclaration( Document& doc ) const {
 #pragma omp critical(foliaupdate)
   {
     doc.declare( AnnotationType::ENTITY,
-		 tagset,
+		 mwu_tagset,
 		 "annotator='frog-mwu-" + version
 		 + "', annotatortype='auto', datetime='" + getTime() + "'");
   }
@@ -209,7 +209,7 @@ void Mwu::Classify( const vector<Word*>& words ){
     sent = words[0]->sentence();
   }
   for( size_t i = 0; i < mWords.size(); ++i ){
-    el = mWords[i]->addEntity( tagset, sent, el );
+    el = mWords[i]->addEntity( mwu_tagset, sent, el );
   }
 }
 
