@@ -130,7 +130,7 @@ class FrogAPI {
   Mblem *myMblem;
   Mwu *myMwu;
   Parser *myParser;
-  CGNTagger *myCGNTagger;
+  POSTagger *myCGNTagger;
   IOBTagger *myIOBTagger;
   NERTagger *myNERTagger;
   UctoTokenizer *tokenizer;

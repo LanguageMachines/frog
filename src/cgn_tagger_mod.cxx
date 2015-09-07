@@ -36,22 +36,7 @@
 using namespace std;
 using namespace folia;
 
-CGNTagger::CGNTagger(TiCC::LogStream * logstream){
-  tagger = 0;
-  filter = 0;
-  cgnLog = new LogStream( logstream, "cgn-tagger-" );
-}
-
-CGNTagger::~CGNTagger(){
-  delete tagger;
-  delete filter;
-  delete cgnLog;
-}
-
-static multimap<string,string> cgnSubSets;
-static multimap<string,string> cgnConstraints;
-
-void fillSubSetTable(){
+void CGNTagger::fillSubSetTable(){
   // should become a config file!
   cgnSubSets.insert( make_pair("soort", "ntype" ));
   cgnSubSets.insert( make_pair("eigen", "ntype" ));
@@ -178,73 +163,18 @@ void fillSubSetTable(){
 
 
 bool CGNTagger::init( const Configuration& config ){
-  debug = 0;
-  string val = config.lookUp( "debug", "tagger" );
-  if ( val.empty() ){
-    val = config.lookUp( "debug" );
+  if ( debug )
+    *Log(tag_log) << "INIT CGN Tagger." << endl;
+  if ( POSTagger::init( config ) ){
+    fillSubSetTable();
+    if ( debug )
+      *Log(tag_log) << "DONE CGN Tagger." << endl;
+    return true;
   }
-  if ( !val.empty() ){
-    debug = TiCC::stringTo<int>( val );
-  }
-  switch ( debug ){
-  case 0:
-  case 1:
-    break;
-  case 2:
-  case 3:
-  case 4:
-    cgnLog->setlevel(LogDebug);
-    break;
-  case 5:
-  case 6:
-  case 7:
-    cgnLog->setlevel(LogHeavy);
-    break;
-  default:
-    cgnLog->setlevel(LogExtreme);
-  }
-  if ( tagger != 0 ){
-    *Log(cgnLog) << "CGNTagger is already initialized!" << endl;
-    return false;
-  }
-  val = config.lookUp( "settings", "tagger" );
-  if ( val.empty() ){
-    *Log(cgnLog) << "Unable to find settings for Tagger" << endl;
-    return false;
-  }
-  string settings;
-  if ( val[0] == '/' ) // an absolute path
-    settings = val;
-  else
-    settings =  config.configDir() + val;
-
-  val = config.lookUp( "version", "tagger" );
-  if ( val.empty() ){
-    version = "1.0";
-  }
-  else
-    version = val;
-  val = config.lookUp( "set", "tagger" );
-  if ( val.empty() ){
-    tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
-  }
-  else
-    tagset = val;
-  fillSubSetTable();
-  string charFile = config.lookUp( "char_filter_file", "tagger" );
-  if ( charFile.empty() )
-    charFile = config.lookUp( "char_filter_file" );
-  if ( !charFile.empty() ){
-    charFile = prefix( config.configDir(), charFile );
-    filter = new Tokenizer::UnicodeFilter();
-    filter->fill( charFile );
-  }
-  string init = "-s " + settings + " -vcf";
-  tagger = new MbtAPI( init, *cgnLog );
-  return tagger->isInit();
+  return false;
 }
 
-string getSubSet( const string& val, const string& head ){
+string CGNTagger::getSubSet( const string& val, const string& head ){
   auto it = cgnSubSets.find( val );
   if ( it == cgnSubSets.end() )
     throw folia::ValueError( "unknown cgn subset for class: '" + val + "'" );
@@ -271,130 +201,43 @@ string getSubSet( const string& val, const string& head ){
 			   "' whithin the constraints for '" + head + "'" );
 }
 
-void CGNTagger::addTag( Word *word, const string& inputTag, double confidence ){
-  string cgnTag = inputTag;
-  string mainTag;
-  string tagPartS;
-  string ucto_class = word->cls();
-  if ( debug )
-    *Log(cgnLog) << "ucto class= " << ucto_class << " cgnTag=" << cgnTag << endl;
-  if ( ucto_class == "PUNCTUATION"
-       && ( cgnTag.find("SPEC(") != string::npos
-	    || cgnTag.find("LET") != string::npos ) ){
-    mainTag = "LET";
-    tagPartS = "";
-    cgnTag = "LET()";
-    confidence = 1.0;
-  }
-  else if ( ucto_class == "ABBREVIATION-KNOWN" ){
-    mainTag = "SPEC";
-    tagPartS = "afk";
-    cgnTag = "SPEC(afk)";
-    confidence = 1.0;
-  }
-  else if ( ucto_class == "SMILEY" ||
-	    ucto_class == "REVERSE-SMILEY" ||
-	    ucto_class == "EMOTICON" ||
-	    ucto_class.find("URL") == 0 ||
-	    ucto_class == "E-MAIL" ){
-    mainTag = "SPEC";
-    tagPartS = "symb";
-    cgnTag = "SPEC(symb)";
-    confidence = 1.0;
-  }
-  else {
-    string::size_type openH = cgnTag.find( '(' );
-    string::size_type closeH = cgnTag.find( ')' );
-    if ( openH == string::npos || closeH == string::npos ){
-      *Log(cgnLog) << "tagger_mod: main tag without subparts: impossible: " << cgnTag << endl;
-      exit(-1);
-    }
-    mainTag = cgnTag.substr( 0, openH );
-    if ( mainTag == "SPEC" )
-      confidence = 1.0;
-    tagPartS = cgnTag.substr( openH+1, closeH-openH-1 );
-  }
-  KWargs args;
-  args["set"]  = tagset;
-  args["head"] = mainTag;
-  args["cls"]  = cgnTag;
-  args["confidence"]= toString(confidence);
-  folia::FoliaElement *pos = 0;
-#pragma omp critical(foliaupdate)
-  {
-    pos = word->addPosAnnotation( args );
-  }
-  vector<string> tagParts;
-  size_t numParts = TiCC::split_at( tagPartS, tagParts, "," );
-  for ( size_t i=0; i < numParts; ++i ){
+void CGNTagger::post_process( const vector<Word *>& words ){
+  for ( auto const word : words ){
+    PosAnnotation *postag = word->annotation<PosAnnotation>( );
+    string cls = postag->cls();
+    vector<string> parts;
+    TiCC::split_at_first_of( cls, parts, "()" );
+    string head = parts[0];
     KWargs args;
+    args["cls"]    = head;
     args["set"]    = tagset;
-    args["subset"] = getSubSet( tagParts[i], mainTag );
-    args["cls"]    = tagParts[i];
+    folia::Feature *feat = new folia::HeadFeature( args );
+    postag->append( feat );
+    if ( head == "SPEC" ){
+      postag->confidence(1.0);
+    }
+    if ( parts.size() > 1 ){
+      vector<string> tagParts;
+      size_t numParts = TiCC::split_at( parts[1], tagParts, "," );
+      for ( size_t i=0; i < numParts; ++i ){
+	KWargs args;
+	args["set"]    = tagset;
+	args["subset"] = getSubSet( tagParts[i], head );
+	args["cls"]    = tagParts[i];
 #pragma omp critical(foliaupdate)
-    {
-      folia::Feature *feat = new folia::Feature( args );
-      pos->append( feat );
+	{
+	  folia::Feature *feat = new folia::Feature( args );
+	  postag->append( feat );
+	}
+      }
     }
   }
-}
-
-void CGNTagger::addDeclaration( Document& doc ) const {
-#pragma omp critical(foliaupdate)
-  {
-    doc.declare( AnnotationType::POS, tagset,
-		 "annotator='frog-mbpos-" + version
-		 + "', annotatortype='auto', datetime='" + getTime() + "'");
-  }
-}
-
-vector<TagResult> CGNTagger::tagLine( const string& line ){
-  if ( tagger )
-    return tagger->TagLine(line);
-  else
-    throw runtime_error( "CGNTagger is not initialized" );
 }
 
 void CGNTagger::Classify( const vector<Word*>& swords ){
-  if ( !swords.empty() ) {
-    string sentence; // the tagger needs the whole sentence
-    for ( size_t w = 0; w < swords.size(); ++w ) {
-      UnicodeString word;
-#pragma omp critical(foliaupdate)
-      {
-	word = swords[w]->text();
-      }
-      if ( filter )
-	word = filter->filter( word );
-      sentence += UnicodeToUTF8(word);
-      if ( w < swords.size()-1 )
-	sentence += " ";
-    }
-    if (debug)
-      *Log(cgnLog) << "CGN tagger in: " << sentence << endl;
-    vector<TagResult> tagv = tagger->TagLine(sentence);
-    if ( tagv.size() != swords.size() ){
-      *Log(cgnLog) << "mismatch between number of <w> tags and the tagger result." << endl;
-      *Log(cgnLog) << "words according to <w> tags: " << endl;
-      for ( size_t w = 0; w < swords.size(); ++w ) {
-	*Log(cgnLog) << "w[" << w << "]= " << swords[w]->str() << endl;
-      }
-      *Log(cgnLog) << "words according to CGN tagger: " << endl;
-      for ( size_t i=0; i < tagv.size(); ++i ){
-	*Log(cgnLog) << "word[" << i << "]=" << tagv[i].word() << endl;
-      }
-      throw runtime_error( "CGN tagger is confused" );
-    }
-    if ( debug ){
-      *Log(cgnLog) << "CGN tagger out: " << endl;
-      for ( size_t i=0; i < tagv.size(); ++i ){
-	*Log(cgnLog) << "[" << i << "] : word=" << tagv[i].word()
-		     << " tag=" << tagv[i].assignedTag()
-		     << " confidence=" << tagv[i].confidence() << endl;
-      }
-    }
-    for ( size_t i=0; i < tagv.size(); ++i ){
-      addTag( swords[i], tagv[i].assignedTag(), tagv[i].confidence() );
-    }
+  POSTagger::Classify( swords );
+  if ( debug ){
+    *Log(tag_log) << "POS Classify done:" << endl;
   }
+  post_process( swords );
 }

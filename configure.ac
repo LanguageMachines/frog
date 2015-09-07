@@ -4,7 +4,7 @@
 # $URL$
 
 AC_PREREQ(2.59)
-AC_INIT([frog], [0.12.22], [timbl@uvt.nl])
+AC_INIT([frog], [0.12.23], [timbl@uvt.nl])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_MACRO_DIR([m4])
@@ -149,6 +149,7 @@ PKG_CHECK_MODULES([ucto], [ucto >= 0.8.1] )
 CXXFLAGS="$CXXFLAGS $ucto_CFLAGS"
 LIBS="$ucto_LIBS $LIBS"
 
+PKG_CHECK_MODULES([frogdata], [frogdata >= 0.7] )
 #
 # the ac_python_devel.m4 script tramples upon $LIBS, so we save it
 save_LIBS="$LIBS"

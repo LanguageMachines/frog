@@ -29,25 +29,19 @@
 #ifndef CGN_TAGGER_MOD_H
 #define CGN_TAGGER_MOD_H
 
-#include "mbt/MbtAPI.h"
+#include "frog/pos_tagger_mod.h"
 
-class CGNTagger {
+class CGNTagger: public POSTagger {
  public:
-  CGNTagger(TiCC::LogStream*);
-  ~CGNTagger();
+ CGNTagger( TiCC::LogStream *l ): POSTagger( l ){};
   bool init( const TiCC::Configuration& );
-  void addDeclaration( folia::Document& ) const;
-  void addTag( folia::Word *, const std::string&, double );
   void Classify( const std::vector<folia::Word *>& );
-  std::vector<TagResult> tagLine( const std::string& );
-  std::string getTagset() const { return tagset; };
+  void post_process( const std::vector<folia::Word *>& words );
  private:
-  MbtAPI *tagger;  
-  LogStream *cgnLog;
-  int debug;
-  std::string tagset;
-  std::string version;
-  Tokenizer::UnicodeFilter *filter;
+  void fillSubSetTable();
+  std::string getSubSet( const std::string& , const std::string& );
+  std::multimap<std::string,std::string> cgnSubSets;
+  std::multimap<std::string,std::string> cgnConstraints;
 };
 
 #endif // CGN_TAGGER_MOD_H
