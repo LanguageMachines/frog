@@ -221,7 +221,7 @@ void Mwu::Classify(){
   size_t matchLength = 0;
   size_t max = mWords.size();
 
-  // add all current sequences of SPEC(deeleigen) words to MWUs
+  // add all current sequences of the glue_tag words to MWUs
   for( size_t i=0; i < max-1; ++i ) {
     if ( mWords[i]->isSpec() && mWords[i+1]->isSpec() ) {
       vector<string> newmwu;
