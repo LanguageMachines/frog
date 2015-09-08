@@ -76,6 +76,24 @@ void Mblem::read_transtable( const string& tableName ) {
   return;
 }
 
+bool fillMap( const string& file, map<string,map<string,int>>& ssi_map ){
+  ifstream is( file );
+  if ( !is ){
+    return false;
+  }
+  string line;
+  while ( getline( is, line ) ){
+    if ( line.empty() || line[0] == '#' )
+      continue;
+    vector<string> parts;
+    if ( TiCC::split( line, parts ) != 3 ){
+      return false;
+    }
+    ssi_map[parts[0]].insert( make_pair( parts[1], TiCC::stringTo<int>( parts[2] ) ) );
+  }
+  return true;
+}
+
 bool Mblem::init( const Configuration& config ) {
   *Log(mblemLog) << "Initiating lemmatizer..." << endl;
   debug = 0;
@@ -123,6 +141,21 @@ bool Mblem::init( const Configuration& config ) {
     charFile = prefix( config.configDir(), charFile );
     filter = new Tokenizer::UnicodeFilter();
     filter->fill( charFile );
+  }
+
+  string tokenStripFile = config.lookUp( "token_strip_file", "mblem" );
+  if ( !tokenStripFile.empty() ){
+    tokenStripFile = prefix( config.configDir(), tokenStripFile );
+    fillMap( tokenStripFile, token_strip_map );
+  }
+
+  string one_one_tagS = config.lookUp( "one_one_tags", "mblem" );
+  if ( !one_one_tagS.empty() ){
+    vector<string> tags;
+    TiCC::split_at( one_one_tagS, tags, "," );
+    for ( auto const& t : tags ){
+      one_one_tags.insert( t );
+    }
   }
 
   string opts = config.lookUp( "timblOpts", "mblem" );
@@ -293,49 +326,43 @@ void Mblem::addDeclaration( Document& doc ) const {
 void Mblem::Classify( Word *sword ){
   if ( sword->isinstance(PlaceHolder_t ) )
     return;
-  UnicodeString word;
-  string tag;
+  UnicodeString uword;
   string pos;
   string token_class;
 #pragma omp critical(foliaupdate)
   {
-    word = sword->text();
+    uword = sword->text();
     pos = sword->pos();
     token_class = sword->cls();
-    tag = sword->annotation<PosAnnotation>( POS_tagset )->feat("head");
   }
   if (debug)
-    *Log(mblemLog) << "Classify " << word << "(" << pos << ") ["
+    *Log(mblemLog) << "Classify " << uword << "(" << pos << ") ["
 		   << token_class << "]" << endl;
+
   if ( filter )
-    word = filter->filter( word );
-  if ( tag == "LET" ){
-    addLemma( sword, UnicodeToUTF8(word) );
-    return;
-  }
-  else if ( tag == "SPEC" ){
-    if ( pos.find("eigen") != string::npos ){
-      // SPEC(deeleigen) might contain suffixes
-      if ( token_class == "QUOTE-SUFFIX" ){
-	addLemma( sword, UnicodeToUTF8(UnicodeString( word, 0, word.length()-1)));
-      }
-      else if ( token_class == "WORD-WITHSUFFIX" ){
-	addLemma( sword, UnicodeToUTF8(UnicodeString( word, 0, word.length()-2)));
-      }
-      else {
-	addLemma( sword, UnicodeToUTF8(word) );      return;
-      }
+    uword = filter->filter( uword );
+
+  auto const& it1 = token_strip_map.find( pos );
+  if ( it1 != token_strip_map.end() ){
+    auto const& it2 = it1->second.find( token_class );
+    if ( it2 != it1->second.end() ){
+      uword = UnicodeString( uword, 0, uword.length() - it2->second );
+      string word = UnicodeToUTF8(uword);
+      addLemma( sword, word );
+      return;
     }
-    else
-      addLemma( sword, UnicodeToUTF8(word) );
+  }
+  if ( one_one_tags.find(pos) != one_one_tags.end() ){
+    string word = UnicodeToUTF8(uword);
+    addLemma( sword, word );
     return;
   }
-  if ( tag != "SPEC")
-    word.toLower();
-  Classify( word );
+
+  uword.toLower();
+  Classify( uword );
   filterTag( pos );
   makeUnique();
-  getFoLiAResult( sword, word );
+  getFoLiAResult( sword, uword );
 }
 
 void Mblem::Classify( const UnicodeString& uWord ){
