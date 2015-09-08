@@ -32,7 +32,7 @@
 class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );
  public:
-  mwuAna( folia::Word * );
+  mwuAna( folia::Word *, const std::string& );
   virtual ~mwuAna() {};
   
   void merge( const mwuAna * );
@@ -78,6 +78,7 @@ class Mwu {
   TiCC::LogStream *mwuLog;
   std::string version;
   std::string mwu_tagset;
+  std::string glue_tag;
 };
 
 #endif

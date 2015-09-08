@@ -43,21 +43,15 @@ using namespace std;
 using namespace TiCC;
 using namespace folia;
 
-mwuAna::mwuAna( Word *fwrd ){
+mwuAna::mwuAna( Word *fwrd, const string& glue_tag ){
   spec = false;
   word = fwrd->str();
   string tag;
 #pragma omp critical(foliaupdate)
   {
-    tag = fwrd->annotation<PosAnnotation>()->feat("head");
+    tag = fwrd->annotation<PosAnnotation>()->cls();
   }
-  if ( tag == "SPEC" ){
-#pragma omp critical(foliaupdate)
-    {
-      vector<folia::Feature*> feats = fwrd->select<folia::Feature>( );
-      spec = ( feats.size() == 1 && feats[0]->cls() == "deeleigen" );
-    }
-  }
+  spec = ( tag == glue_tag );
   fwords.push_back( fwrd );
 }
 
@@ -114,7 +108,7 @@ void Mwu::reset(){
 }
 
 void Mwu::add( Word *word ){
-  mWords.push_back( new mwuAna( word ) );
+  mWords.push_back( new mwuAna( word, glue_tag ) );
 }
 
 
@@ -173,6 +167,13 @@ bool Mwu::init( const Configuration& config ) {
   }
   else
     mwu_tagset = val;
+
+  val = config.lookUp( "gluetag", "mwu" );
+  if ( val.empty() ){
+    glue_tag = "SPEC(deeleigen)";
+  }
+  else
+    glue_tag = val;
 
   return true;
 }
