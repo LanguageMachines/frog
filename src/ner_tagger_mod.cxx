@@ -138,7 +138,7 @@ bool NERTagger::fill_known_ners( const string& file_name ){
     }
     line = parts[0];
     string ner_value = parts[1];
-    int num = TiCC::split( line, parts );
+    size_t num = TiCC::split( line, parts );
     if ( num < 1 || num > KNOWN_NERS_SIZE ){
       *Log(nerLog) << "expected 1 to " << KNOWN_NERS_SIZE
 		   << " SPACE-separated parts in line: '" << line << "'" << endl;
