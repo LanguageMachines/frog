@@ -35,9 +35,13 @@
 using namespace std;
 using namespace folia;
 
+const int KNOWN_NERS_SIZE = 10;
+
+
 NERTagger::NERTagger(TiCC::LogStream * logstream){
   tagger = 0;
   nerLog = new LogStream( logstream, "ner-" );
+  known_ners.resize( KNOWN_NERS_SIZE+1 );
 }
 
 NERTagger::~NERTagger(){
@@ -101,10 +105,146 @@ bool NERTagger::init( const Configuration& config ){
   }
   else
     tagset = val;
+  val = config.lookUp( "known_ners", "NER" );
+  if ( !val.empty() ){
+    string file_name;
+    if ( val[0] == '/' ) // an absolute path
+      file_name = val;
+    else
+      file_name = config.configDir() + val;
+    if ( !fill_known_ners( file_name ) ){
+      *Log(nerLog) << "Unable to fill known NER's from file: '" << file_name << "'" << endl;
+      return false;
+    }
+  }
 
   string init = "-s " + settings + " -vcf";
   tagger = new MbtAPI( init, *nerLog );
   return tagger->isInit();
+}
+
+bool NERTagger::fill_known_ners( const string& file_name ){
+  ifstream is( file_name );
+  if ( !is )
+    return false;
+  string line;
+  while ( getline( is, line ) ){
+    if ( line.empty() || line[0] == '#' )
+      continue;
+    vector<string> parts;
+    if ( TiCC::split_at( line, parts, "\t" ) != 2 ){
+      *Log(nerLog) << "expected 2 TAB-separated parts in line: '" << line << "'" << endl;
+      return false;
+    }
+    line = parts[0];
+    string ner_value = parts[1];
+    int num = TiCC::split( line, parts );
+    if ( num < 1 || num > KNOWN_NERS_SIZE ){
+      *Log(nerLog) << "expected 1 to " << KNOWN_NERS_SIZE
+		   << " SPACE-separated parts in line: '" << line << "'" << endl;
+      return false;
+    }
+    line = "";
+    for ( size_t i=0; i < num-1; ++i ){
+      line += parts[i] + " ";
+    }
+    line += parts[num-1];
+    known_ners[num][line] = ner_value;
+  }
+  return true;
+}
+
+size_t count_sp( const string& sentence, string::size_type pos ){
+  int sp = 0;
+  for ( string::size_type i=0; i < pos; ++i ){
+    if ( sentence[i] == ' ' ){
+      ++sp;
+    }
+  }
+  return sp;
+}
+
+void NERTagger::handle_known_ners( const vector<string>& words, 
+				   vector<string>& tags ){
+  if ( debug )
+    *Log(nerLog) << "search for known NER's" << endl;
+  string sentence = "";
+  for ( size_t i=0; i < words.size()-1; ++i ){
+    sentence += words[i] + " ";
+  }
+  sentence += words[words.size()-1];
+  if ( debug )
+    *Log(nerLog) << "Sentence = " << sentence << endl;
+  for ( size_t i = KNOWN_NERS_SIZE; i > 0; --i ){
+    auto const& mp = known_ners[i];
+    if ( mp.empty() )
+      continue;
+    for( auto const& it : mp ){
+      string::size_type pos = sentence.find( it.first );
+      while ( pos != string::npos ){
+	size_t sp = count_sp( sentence, pos );
+	if ( debug )
+	  *Log(nerLog) << "matched " << it.first << " to " 
+		       << sentence << " at position " << sp << endl;
+	bool safe = true;
+	for ( size_t j=0; j < i && safe; ++j ){
+	  safe = ( tags[sp+j] == "O" );
+	}
+	if ( safe ){
+	  // we can safely change the tag (don't trample upon hits of longer known ners!)
+	  tags[sp] = "B-" + it.second;
+	  for ( size_t j=0; j < i; ++j ){
+	    tags[sp+j] = "I-" + it.second;
+	  }
+	}
+	pos = sentence.find( it.first, pos + it.first.length() );
+      }
+    }
+  }
+}
+
+void NERTagger::merge( const vector<string>& ktags, vector<string>& tags, 
+		       vector<double>& conf ){
+  if ( debug ){
+    using TiCC::operator<<;
+    *Log(nerLog) << "merge " << ktags << endl
+		 << "with  " << tags << endl;
+  }
+  for ( size_t i=0; i < ktags.size(); ++i ){
+    if ( ktags[i] == "O" ){
+      if ( i > 0 && ktags[i-1] != "O" ){
+	// so we did some merging.  check that we aren't in the middle of some tag now
+	size_t j = i;
+	while ( j < tags.size() && tags[j][0] == 'I' ) {
+	  tags[j] = "O";
+	  ++j;
+	}
+      }
+      continue;
+    }
+    else if ( ktags[i][0] == 'B' ){
+      // maybe we landed in the middel of some tag.
+      if ( tags[i][0] == 'I' ){ 
+	//indeed, so erase it backwards
+	size_t j = i;
+	while ( tags[j][0] == 'I' ){
+	  tags[j] = "O";
+	  --j;
+	}
+	tags[j] = "O";
+      }
+      // now copy
+      tags[i] = ktags[i];
+      conf[i] = 1.0;
+    }
+    else {
+      tags[i] = ktags[i];
+      conf[i] = 1.0;
+    }
+  }
+  if ( debug ){
+    *Log(nerLog) << "Merge gave " << tags << endl;
+  }
 }
 
 static void addEntity( Sentence *sent,
@@ -265,6 +405,9 @@ void NERTagger::Classify( const vector<Word *>& swords ){
       tags.push_back( tagv[i].assignedTag() );
       conf.push_back( tagv[i].confidence() );
     }
+    vector<string> ktags( tagv.size(), "O" );
+    handle_known_ners( words, ktags );
+    merge( ktags, tags, conf );
     addNERTags( swords, tags, conf );
   }
 }
