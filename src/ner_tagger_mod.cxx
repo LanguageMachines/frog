@@ -305,7 +305,8 @@ void NERTagger::addNERTags( const vector<Word*>& words,
 	if (debug) {
 	  *Log(nerLog) << "O spit out " << curNER << endl;
 	  using TiCC::operator<<;
-	  *Log(nerLog) << "spit out " << stack << endl;
+	  *Log(nerLog) << "ners  " << stack << endl;
+	  *Log(nerLog) << "confs " << dstack << endl;
 	}
 	addEntity( sent, tagset, stack, dstack, curNER );
 	dstack.clear();
