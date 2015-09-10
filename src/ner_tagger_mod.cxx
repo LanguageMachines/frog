@@ -265,9 +265,11 @@ static void addEntity( Sentence *sent,
       sent->append( el );
     }
   }
-  double c = 1;
-  for ( size_t i=0; i < confs.size(); ++i )
-    c *= confs[i];
+  double c = 0;
+  for ( auto const& val : confs ){
+    c += val;
+  }
+  c /= confs.size();
   KWargs args;
   args["class"] = NER;
   args["confidence"] =  toString(c);
