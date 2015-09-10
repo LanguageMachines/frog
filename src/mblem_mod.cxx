@@ -76,9 +76,29 @@ void Mblem::read_transtable( const string& tableName ) {
   return;
 }
 
-bool fillMap( const string& file, map<string,map<string,int>>& ssi_map ){
+bool Mblem::fill_eq_set( const string& file ){
   ifstream is( file );
   if ( !is ){
+    *Log(mblemLog) << "Unable to open file: '" << file << "'" << endl;    
+    return false;
+  }
+  string line;
+  while ( getline( is, line ) ){
+    if ( line.empty() || line[0] == '#' )
+      continue;
+    line = TiCC::trim(line);
+    equiv_set.insert( line );
+  }
+  if ( debug ){
+    *Log(mblemLog) << "read tag-equivalents from: '" << file << "'" << endl;    
+  }
+  return true;
+}
+
+bool Mblem::fill_ts_map( const string& file ){
+  ifstream is( file );
+  if ( !is ){
+    *Log(mblemLog) << "Unable to open file: '" << file << "'" << endl;    
     return false;
   }
   string line;
@@ -87,9 +107,13 @@ bool fillMap( const string& file, map<string,map<string,int>>& ssi_map ){
       continue;
     vector<string> parts;
     if ( TiCC::split( line, parts ) != 3 ){
+      *Log(mblemLog) << "invalid line in: '" << file << "' (expected 3 parts)" << endl;
       return false;
     }
-    ssi_map[parts[0]].insert( make_pair( parts[1], TiCC::stringTo<int>( parts[2] ) ) );
+    token_strip_map[parts[0]].insert( make_pair( parts[1], TiCC::stringTo<int>( parts[2] ) ) );
+  }
+  if ( debug ){
+    *Log(mblemLog) << "read uct token strip rules from: '" << file << "'" << endl;    
   }
   return true;
 }
@@ -146,7 +170,15 @@ bool Mblem::init( const Configuration& config ) {
   string tokenStripFile = config.lookUp( "token_strip_file", "mblem" );
   if ( !tokenStripFile.empty() ){
     tokenStripFile = prefix( config.configDir(), tokenStripFile );
-    fillMap( tokenStripFile, token_strip_map );
+    if ( !fill_ts_map( tokenStripFile ) )
+      return false;
+  }
+   
+  string equiv_file = config.lookUp( "equivalents_file", "mblem" );
+  if ( !equiv_file.empty() ){
+    equiv_file = prefix( config.configDir(), equiv_file );
+    if ( !fill_eq_set( equiv_file ) )
+      return false;
   }
 
   string one_one_tagS = config.lookUp( "one_one_tags", "mblem" );
@@ -199,37 +231,19 @@ string Mblem::make_instance( const UnicodeString& in ) {
   return result;
 }
 
-bool similar( const string& tag, const string& lookuptag,
-	      const string& CGNentry ){
-  return tag.find( CGNentry ) != string::npos &&
-    lookuptag.find( CGNentry ) != string::npos ;
+bool equivalent( const string& tag, 
+		 const string& lookuptag,
+		 const string& part ){
+  return tag.find( part ) != string::npos &&
+    lookuptag.find( part ) != string::npos ;
 }
 
-bool isSimilar( const string& tag, const string& cgnTag ){
-  // Dutch CGN constraints
-  return
-    tag == cgnTag ||
-    similar( tag, cgnTag, "hulpofkopp" ) ||
-    similar( tag, cgnTag, "neut,zelfst" ) ||
-    similar( tag, cgnTag, "rang,bep,zelfst,onverv" ) ||
-    similar( tag, cgnTag, "stell,onverv" ) ||
-    similar( tag, cgnTag, "hoofd,prenom" ) ||
-    similar( tag, cgnTag, "soort,ev" ) ||
-    similar( tag, cgnTag, "ev,neut" ) ||
-    similar( tag, cgnTag, "inf" ) ||
-    similar( tag, cgnTag, "zelfst" ) ||
-    similar( tag, cgnTag, "voorinf" ) ||
-    similar( tag, cgnTag, "verldw,onverv" ) ||
-    similar( tag, cgnTag, "ott,3,ev" ) ||
-    similar( tag, cgnTag, "ott,2,ev" ) ||
-    similar( tag, cgnTag, "ott,1,ev" ) ||
-    similar( tag, cgnTag, "ott,1of2of3,mv" ) ||
-    similar( tag, cgnTag, "ott,1of2of3,ev" ) ||
-    similar( tag, cgnTag, "ovt,1of2of3,mv" ) ||
-    similar( tag, cgnTag, "ovt,1of2of3,ev" ) ||
-    similar( tag, cgnTag, "ovt,3,ev" ) ||
-    similar( tag, cgnTag, "ovt,2,ev" ) ||
-    similar( tag, cgnTag, "ovt,1,ev" );
+bool isSimilar( const string& tag, const string& cgnTag, const set<string>& eq_s ){
+  for ( auto const& part : eq_s ){
+    if ( equivalent( tag, cgnTag, part ) )
+      return true;
+  }
+  return false;
 }
 
 void Mblem::addLemma( Word *word, const string& cls ){
@@ -251,16 +265,26 @@ void Mblem::addLemma( Word *word, const string& cls ){
 void Mblem::filterTag( const string& postag ){
   auto it = mblemResult.begin();
   while( it != mblemResult.end() ){
-    if ( isSimilar( postag, it->getTag() ) ){
-      if ( debug )
-	*Log(mblemLog) << "compare cgn-tag " << postag << " with "
-		       << it->getTag() << " similar! " << endl;
+    string tag = it->getTag();
+    if ( postag == tag ){
+      if ( debug ){
+	*Log(mblemLog) << "compare cgn-tag " << postag << " with mblem-tag " << tag
+		       << "\n\t==> identical tags"  << endl;
+      }
+      ++it;
+    }
+    else if ( isSimilar( postag, tag, equiv_set ) ){
+      if ( debug ){
+	*Log(mblemLog) << "compare cgn-tag " << postag << " with mblem-tag " << tag
+		       << "\n\t==> similar tags" << endl;
+      }
       ++it;
     }
     else {
-      if ( debug )
-	*Log(mblemLog) << "compare cgn-tag " << postag << " with "
-		       << it->getTag() << " NOT similar! " << endl;
+      if ( debug ){
+	*Log(mblemLog) << "compare cgn-tag " << postag << " with mblem-tag " << tag
+		       << "\n\t==> different tags" << endl;
+      }
       it = mblemResult.erase(it);
     }
   }

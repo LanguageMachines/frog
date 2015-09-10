@@ -55,6 +55,8 @@ class Mblem {
   void filterTag( const std::string&  );
   void makeUnique();
   std::string getTagset() const { return tagset; };
+  bool fill_ts_map( const std::string& );
+  bool fill_eq_set( const std::string& );
  private:
   void read_transtable( const std::string& );
   void create_MBlem_defaults();
@@ -69,6 +71,7 @@ class Mblem {
   std::map<std::string,std::string> classMap;
   std::map<std::string, std::map<std::string, int>> token_strip_map;
   std::set<std::string> one_one_tags;
+  std::set<std::string> equiv_set;
   std::vector<mblemData> mblemResult;
   std::string version;
   std::string tagset;
