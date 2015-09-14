@@ -262,7 +262,7 @@ def main_(options, args):
 	
 	
 	for sentence in sentenceIterator(fileinput.input(args)):
-                print >> sys.stderr, "SENTENCE: ", sentence 
+#                print >> sys.stderr, "SENTENCE: ", sentence 
 		outfile = open(options.out, "w" )
 
 		domains, constraints = csiparse.formulateWCSP(sentence,

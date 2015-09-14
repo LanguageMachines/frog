@@ -38,10 +38,11 @@
 #include <fstream>
 
 #include "config.h"
+#include "ticcutils/Configuration.h"
 #include "timbl/TimblAPI.h"
 #include "frog/Frog.h"
-#include "ticcutils/Configuration.h"
 #include "frog/Parser.h"
+#include "frog/csidp.h"
 
 using namespace std;
 using namespace TiCC;
@@ -163,11 +164,11 @@ void Parser::createParserFile( const parseData& pd ){
 
 bool Parser::init( const Configuration& configuration ){
   string pairsFileName;
-  string pairsOptions = "-a1 +D +vdb+di";
+  string pairsOptions = "-a1 +D -G0 +vdb+di";
   string dirFileName;
-  string dirOptions = "-a1 +D +vdb+di";
+  string dirOptions = "-a1 +D -G0 +vdb+di";
   string relsFileName;
-  string relsOptions = "-a1 +D +vdb+di";
+  string relsOptions = "-a1 +D -G0 +vdb+di";
   PI = new PythonInterface();
   maxDepSpanS = "20";
   maxDepSpan = 20;
@@ -223,10 +224,6 @@ bool Parser::init( const Configuration& configuration ){
   val = configuration.lookUp( "pairsOptions", "parser" );
   if ( !val.empty() )
     pairsOptions = val;
-  else {
-    *Log(parseLog) << "missing pairsOptions option" << endl;
-    problem = true;
-  }
   val = configuration.lookUp( "dirFile", "parser" );
   if ( !val.empty() )
     dirFileName = prefix( cDir, val );
@@ -238,10 +235,6 @@ bool Parser::init( const Configuration& configuration ){
   if ( !val.empty() ){
     dirOptions = val;
   }
-  else {
-    *Log(parseLog) << "missing dirOptions option" << endl;
-    problem = true;
-  }
   val = configuration.lookUp( "relsFile", "parser" );
   if ( !val.empty() )
     relsFileName = prefix( cDir, val );
@@ -252,10 +245,6 @@ bool Parser::init( const Configuration& configuration ){
   val = configuration.lookUp( "relsOptions", "parser" );
   if ( !val.empty() ){
     relsOptions = val;
-  }
-  else {
-    *Log(parseLog) << "missing relsOptions option" << endl;
-    problem = true;
   }
   if ( problem )
     return false;
@@ -974,6 +963,15 @@ void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
   catch( exception const & ){
     PyErr_Print();
   }
+  //#define NEWP
+#ifdef NEWP
+  parse( pairsOutName,
+	 relsOutName,
+	 dirOutName,
+	 maxDepSpan,
+	 fileName,
+	 resFileName );
+#endif
   timers.csiTimer.stop();
   ifstream resFile( resFileName );
   if ( resFile ){
