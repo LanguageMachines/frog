@@ -43,22 +43,3 @@ def sentenceIterator(stream, delimiterTest=emptyLineDelimiterTest):
 		sentence = map(str.split, takewhile(lineTest, stream))
 
 
-def nonDelimitedSentenceIterator(stream, sentenceStartTest):
-	sentence = []
-	for line in imap(str.split, stream):
-		if sentenceStartTest(line) and sentence:
-			yield sentence
-			sentence = []
-
-		sentence.append(line)
-
-	if sentence:
-		yield sentence
-
-
-def makeWindow(tokens, focusIndex, leftSize, rightSize, labelFunction,
-			   emptySlotLabel="__"):
-	return max(0, leftSize - focusIndex) * [emptySlotLabel] + \
-		   map(labelFunction,
-			   tokens[max(0, focusIndex - leftSize):min(len(tokens), focusIndex + rightSize + 1)]) + \
-		   max(0, focusIndex + rightSize - len(tokens) + 1) * [emptySlotLabel]

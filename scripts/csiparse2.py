@@ -12,6 +12,7 @@ usage: %prog [options] [file...]
 -m: type='int', dest='maxDist'
 """
 
+import sys
 import fileinput
 
 from itertools import imap, izip
@@ -52,26 +53,31 @@ def instanceIterator(stream):
 
 
 def formulateWCSP(sentence, dirInstances,
-				  relInstances, pairInstances,
-				  options):
+                  relInstances, pairInstances,
+                  options):
 	domains = [None] + [[] for token in sentence]
 	constraints = []
-
+        print >> sys.stderr, "domains:", domains
 	for dependent in sentence:
 		dependentId = int(dependent[0])
+                print >> sys.stderr, "dependent:", dependent, " ID=",dependentId
 		headId = 0
 		instance, distribution, distance = pairInstances.next()
+                print >> sys.stderr, "instance:", instance
+                print >> sys.stderr, "distribution:", distribution
+                print >> sys.stderr, "distance:", distance
 
 		cls = instance[-1]
 		conf = distribution[cls]
-
+                print >> sys.stderr, "cls= ", cls, " met conf=", conf
 		if cls != "__":
 			constraints.append(deptree.HasDependency(dependentId,
-													 headId, cls,
-													 conf))
+								 headId, cls,
+								 conf))
 		if cls != "__":
 			domains[dependentId].append((headId, cls))
-
+                        print >> sys.stderr, "adddomain[", dependentId,"]=<",headId,",",cls,">"
+                        
 	for dependent, head in common.pairIterator(sentence, options):
 		dependentId = int(dependent[0])
 		headId = int(head[0])
@@ -80,67 +86,30 @@ def formulateWCSP(sentence, dirInstances,
 
 		cls = instance[-1]
 		conf = distribution[cls]
-		#conf = sum(distribution[x] for x in distribution if x != "__")
 
-		#if distance == 0:
-		#	conf = 1000000
-		#else:
-		#	conf = 1.0 / distance
-
-		#constraints.append(deptree.HasDependency(dependentId,
-		#										 headId, cls,
-		#										 conf))
 		if cls != "__":
 			constraints.append(deptree.HasDependency(dependentId,
-													 headId, cls,
-													 conf))
+                                                                 headId, cls,
+                                                                 conf))
 		if cls != "__":
 			domains[dependentId].append((headId, cls))
 
 
 	if dirInstances:
 		for token, (instance, distribution, distance) in izip(sentence,
-															  dirInstances):
+								  dirInstances):
 			tokenId = int(token[0])
 			cls = instance[-1]
-			if True: #cls != "__":
-				#constraints.append(deptree.DependencyDirection(
-				#	tokenId,
-				#	getattr(deptree.DependencyDirection, cls),
-				#	distribution[cls]))
-
+			if True: 
 				for cls in distribution:
 					constraints.append(deptree.DependencyDirection(
 						tokenId,
 						getattr(deptree.DependencyDirection, cls),
 						distribution[cls]))
 
-				#if "__" in distribution:
-				#	constraints.append(deptree.DependencyDirection(
-				#		tokenId, 100, distribution["__"]))
-				#if "RIGHT" in distribution:
-				#	cls = "RIGHT"
-				#	constraints.append(deptree.DependencyDirection(
-				#		tokenId,
-				#		getattr(deptree.DependencyDirection, cls),
-				#		distribution[cls]))
-				#if "LEFT" in distribution:
-				#	cls = "LEFT"
-				#	constraints.append(deptree.DependencyDirection(
-				#		tokenId,
-				#		getattr(deptree.DependencyDirection, cls),
-				#		distribution[cls]))
-			#else:
-			#	constraints.append(deptree.DependencyDirection(
-			#		tokenId, deptree.DependencyDirection.LEFT,
-			#		-distribution[cls]))
-			#	constraints.append(deptree.DependencyDirection(
-			#		tokenId, deptree.DependencyDirection.RIGHT,
-			#		-distribution[cls]))
-
 	if relInstances:
 		for token, (instance, distribution, distance) in izip(sentence,
-															  relInstances):
+                                                                      relInstances):
 			tokenId = int(token[0])
 			cls = instance[-1]
 
