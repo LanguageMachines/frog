@@ -10,6 +10,98 @@
 
 using namespace std;
 
+class Constraint {
+  friend ostream& operator<<( ostream& os, const Constraint& c );
+public:
+  Constraint( double w, int i ): weight(w),tokenIndex(i){
+    //    cerr << "ADD constraint(" << tokenIndex << "," << weight << ")" << endl; 
+  };
+  virtual ~Constraint(){};
+  virtual void put( ostream& os ) const { 
+    os << tokenIndex << " " << weight;
+  };
+protected:
+  double weight;
+  int    tokenIndex;
+};
+
+ostream& operator<<( ostream& os, const Constraint* c ){
+  if ( c ){
+    c->put( os );
+  }
+  else
+    os << "None";
+  os << endl;
+  return os;
+}
+
+ostream& operator<<( ostream& os, const Constraint& c ){
+  return os << &c;
+}
+
+class HasIncomingRel: public Constraint {
+public:
+  HasIncomingRel( int i, const string& r, double w ):
+    Constraint( w, i ), relType(r){
+    //    cerr << "\tINCOMING rel=" << relType << endl;
+  };
+  void put( ostream& ) const;
+private:
+  string relType;
+};
+
+void HasIncomingRel::put( ostream& os ) const {
+  Constraint::put( os );
+  os << " REL " << relType;
+}
+
+
+class HasDependency: public Constraint {
+public:
+  HasDependency( int i, int h, const string& r, double w ):
+    Constraint( w, i ), relType(r), headType(h) {
+    //    cerr << "\tDEPENDENCY rel=" << relType << " head=" << headType << endl;
+  };
+  void put( ostream& ) const;
+private:
+  string relType;
+  int headType;
+};
+
+void HasDependency::put( ostream& os ) const {
+  Constraint::put( os );
+  os << " rel=" << relType << " head=" << headType;
+}
+
+class DependencyDirection: public Constraint {
+  enum dirType { ROOT, LEFT, RIGHT };
+public:
+  DependencyDirection( int i, const string& d, double w ):
+    Constraint( w, i ), direction(toEnum(d)){
+    //    cerr << "\tDIRECTION=" << direction << endl;
+  }
+  void put( ostream& ) const;
+private:
+  dirType toEnum( const string& s ){
+    if ( s == "ROOT" )
+      return ROOT;
+    else if ( s == "LEFT" )
+      return LEFT;
+    else if ( s == "RIGHT" )
+      return RIGHT;
+    else {
+      cerr << "toEnum(" << s << ") failed" << endl;
+      abort();
+    }
+  }
+  dirType direction;
+};
+
+void DependencyDirection::put( ostream & os ) const {
+  Constraint::put( os );
+  os << " direct=" << " " << direction;
+}
+
 string get_class( const string& instance ){
   vector<string> classes;
   TiCC::split( instance, classes );
@@ -27,17 +119,35 @@ void split_dist( const string& distribution, map<string,double>& result ){
   }
 }
 
+void split_dist( const string& distribution, multimap<string,double>& result ){
+  result.clear();
+  vector<string> dist_parts;
+  TiCC::split_at( distribution, dist_parts, "," );
+  for( const auto& it : dist_parts ){
+    vector<string> parts;
+    TiCC::split( it, parts );
+    double d = TiCC::stringTo<double>( parts[1] );
+    vector<string> tags;
+    TiCC::split_at( parts[0], tags, "|" );
+    for( const auto& t : tags ){
+      result.insert( make_pair(t, d ) );
+    }
+  }
+}
+
 void formulateWCSP( const vector<string>& sentences,
 		    istream& dirs, istream& rels,
-		    istream& pairs ) {
-  multimap<int,pair<int,string>> domains;
-  vector<string> constraints;
+		    istream& pairs,
+		    multimap<size_t,pair<int,string>>& domains,
+		    vector<Constraint*>& constraints ){
+  domains.clear();
+  constraints.clear();
   for ( const auto& sentence : sentences ){
     vector<string> dependents;
     TiCC::split( sentence, dependents );
     int dependent_id = TiCC::stringTo<int>( dependents[0] );
     int headId = 0;
-    cerr << "sentence: " << sentence << " ID=" << dependent_id << endl;
+    //    cerr << "sentence: " << sentence << " ID=" << dependent_id << endl;
     
     string line;
     getline( pairs, line );
@@ -50,49 +160,112 @@ void formulateWCSP( const vector<string>& sentences,
     string instance = timbl_result[0];
     string distribution = timbl_result[1];
     string distance = timbl_result[2];
-    cerr << "instance: " << instance << endl;
-    cerr << "distribution: " << distribution << endl;
-    cerr << "distance: " << distance << endl;
+    // cerr << "instance: " << instance << endl;
+    // cerr << "distribution: " << distribution << endl;
+    // cerr << "distance: " << distance << endl;
     string top_class = get_class( instance );
     map<string,double> dist;
     split_dist( distribution, dist );
     double conf = dist[top_class];
-    cerr << "class=" << top_class << " met conf " << conf << endl;
+    //    cerr << "class=" << top_class << " met conf " << conf << endl;
     if ( top_class != "__" ){
-      cerr << "ADD domain[" << dependent_id << "]=<" << headId << "," << top_class << ">" << endl;
+      //      cerr << "DEP-ADD domain[" << dependent_id << "]=<" << headId << "," << top_class << ">" << endl;
       domains.insert( make_pair(dependent_id, make_pair(headId, top_class) ) );
+      constraints.push_back(new HasDependency(dependent_id,headId,top_class,conf));
     }
   }
   for ( const auto& sentence : sentences ){
     vector<string> dependents;
     TiCC::split( sentence, dependents );
     int dependent_id = TiCC::stringTo<int>( dependents[0] );
-    cerr << "pair-sentence: " << sentence << " ID=" << dependent_id << endl;
+    //    cerr << "pair-sentence: " << sentence << " ID=" << dependent_id << endl;
     
     for ( const auto& head : sentences ){
       if ( head != sentence ){
-	cerr << "pair-head: " << head << endl;
+	//	cerr << "pair-head: " << head << endl;
 	vector<string> parts;
 	TiCC::split( head, parts );
 	int headId = TiCC::stringTo<int>( parts[0] );
 	string line;
-	getline( pairs, line );
+	if ( !getline( pairs, line ) ){
+	  cerr << "OEPS pairs leeg? " << endl;
+	  break;
+	}
 	vector<string> timbl_result;
 	TiCC::split_at_first_of( line, timbl_result, "{}" );
 	string instance = timbl_result[0];
 	string distribution = timbl_result[1];
 	string distance = timbl_result[2];
-	cerr << "instance: " << instance << endl;
-	cerr << "distribution: " << distribution << endl;
-	cerr << "distance: " << distance << endl;
+	// cerr << "instance: " << instance << endl;
+	// cerr << "distribution: " << distribution << endl;
+	// cerr << "distance: " << distance << endl;
 	string top_class = get_class( instance );
 	map<string,double> dist;
 	split_dist( distribution, dist );
 	double conf = dist[top_class];
-	cerr << "class=" << top_class << " met conf " << conf << endl;
+	//	cerr << "class=" << top_class << " met conf " << conf << endl;
 	if ( top_class != "__" ){
-	  cerr << "ADD domain[" << dependent_id << "]=<" << headId << "," << top_class << ">" << endl;
+	  //	  cerr << "DEP-HEAD-ADD domain[" << dependent_id << "]=<" << headId << "," << top_class << ">" << endl;
 	  domains.insert( make_pair( dependent_id, make_pair(headId, top_class)));
+	  constraints.push_back( new HasDependency(dependent_id,headId,top_class,conf));
+	}
+      }
+    }
+  }
+  for ( const auto& head : sentences ){
+    vector<string> tokens;
+    TiCC::split( head, tokens );
+    int token_id = TiCC::stringTo<int>( tokens[0] );
+    string line;
+    if ( !getline( dirs, line ) ){
+      break;
+    }
+    vector<string> timbl_result;
+    TiCC::split_at_first_of( line, timbl_result, "{}" );
+    string instance = timbl_result[0];
+    string distribution = timbl_result[1];
+    string distance = timbl_result[2];
+    // cerr << "instance: " << instance << endl;
+    // cerr << "distribution: " << distribution << endl;
+    // cerr << "distance: " << distance << endl;
+    map<string,double> dist;
+    split_dist( distribution, dist );
+    for( const auto& d : dist ){
+      constraints.push_back( new DependencyDirection( token_id, d.first, d.second ) );
+    }
+
+    for ( const auto& token : sentences ){
+      vector<string> tokens;
+      TiCC::split( token, tokens );
+      int token_id = TiCC::stringTo<int>( tokens[0] );
+      string line;
+      if ( !getline( rels, line ) ){
+	break;
+      }
+      vector<string> timbl_result;
+      TiCC::split_at_first_of( line, timbl_result, "{}" );
+      string instance = timbl_result[0];
+      string distribution = timbl_result[1];
+      string distance = timbl_result[2];
+      // cerr << "instance: " << instance << endl;
+      // cerr << "distribution: " << distribution << endl;
+      // cerr << "distance: " << distance << endl;
+      string top_class = get_class( instance );
+      if ( top_class != "__" ){
+	multimap<string,double> mdist;
+	split_dist( distribution, mdist );
+	// using TiCC::operator<<;
+	// cerr << "Multi dist = " << mdist << endl;
+	vector<string> clss;
+	TiCC::split_at( top_class, clss, "|" );
+	for( const auto& rel : clss ){
+	  double conf = 0.0;
+	  for( const auto& d : mdist ){
+	    if ( d.first == rel ){
+	      conf += d.second;
+	    }
+	  }
+	  constraints.push_back( new HasIncomingRel( token_id, rel, conf ) );
 	}
       }
     }
@@ -103,18 +276,27 @@ void parse( const string& pair_file, const string& rel_file,
 	    const string& dir_file, int maxDist,
 	    const string& in_file, const string& out_file ){
   ifstream pairs( pair_file );
-  cerr << "opened pairs: " << pair_file << endl;
+  //  cerr << "opened pairs: " << pair_file << endl;
   ifstream rels( rel_file );
-  cerr << "opened rels: " << rel_file << endl;
+  //  cerr << "opened rels: " << rel_file << endl;
   ifstream dirs( dir_file );
-  cerr << "opened dir: " << dir_file << endl;
+  //  cerr << "opened dir: " << dir_file << endl;
   ifstream is( in_file );
-  cerr << "opened inputfile: " << in_file << endl;
+  //  cerr << "opened inputfile: " << in_file << endl;
   string line;
   vector<string> sentences;
   while( getline( is, line ) ){
     sentences.push_back( line );
   }
-  formulateWCSP( sentences, dirs, rels, pairs );
+  multimap<size_t,pair<int,string>> domains;
+  vector<Constraint*> constraints;
+  formulateWCSP( sentences, dirs, rels, pairs, domains, constraints );
+  using TiCC::operator<<;
+  cerr << "domains: ";
+  for ( const auto& d : domains ){
+    cerr << d.first << "[" << d.second.first << "," << d.second.second << "],";
+  }
+  cerr << endl;
+  cerr << "constraints: " << constraints << endl;
 }
 
