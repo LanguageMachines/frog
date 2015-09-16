@@ -10,103 +10,12 @@
 
 using namespace std;
 
-class Constraint {
-  friend ostream& operator<<( ostream& os, const Constraint& c );
-public:
-  Constraint( double w, int i ): weight(w),tokenIndex(i){
-    //    cerr << "ADD constraint(" << tokenIndex << "," << weight << ")" << endl; 
-  };
-  virtual ~Constraint(){};
-  virtual void put( ostream& os ) const { 
-    os << tokenIndex << " " << weight;
-  };
-protected:
-  double weight;
-  int    tokenIndex;
-};
-
-ostream& operator<<( ostream& os, const Constraint* c ){
-  if ( c ){
-    c->put( os );
-  }
-  else
-    os << "None";
-  os << endl;
-  return os;
-}
-
-ostream& operator<<( ostream& os, const Constraint& c ){
-  return os << &c;
-}
-
-class HasIncomingRel: public Constraint {
-public:
-  HasIncomingRel( int i, const string& r, double w ):
-    Constraint( w, i ), relType(r){
-    //    cerr << "\tINCOMING rel=" << relType << endl;
-  };
-  void put( ostream& ) const;
-private:
-  string relType;
-};
-
-void HasIncomingRel::put( ostream& os ) const {
-  Constraint::put( os );
-  os << " REL " << relType;
-}
-
-
-class HasDependency: public Constraint {
-public:
-  HasDependency( int i, int h, const string& r, double w ):
-    Constraint( w, i ), relType(r), headType(h) {
-    //    cerr << "\tDEPENDENCY rel=" << relType << " head=" << headType << endl;
-  };
-  void put( ostream& ) const;
-private:
-  string relType;
-  int headType;
-};
-
-void HasDependency::put( ostream& os ) const {
-  Constraint::put( os );
-  os << " rel=" << relType << " head=" << headType;
-}
-
-class DependencyDirection: public Constraint {
-  enum dirType { ROOT, LEFT, RIGHT };
-public:
-  DependencyDirection( int i, const string& d, double w ):
-    Constraint( w, i ), direction(toEnum(d)){
-    //    cerr << "\tDIRECTION=" << direction << endl;
-  }
-  void put( ostream& ) const;
-private:
-  dirType toEnum( const string& s ){
-    if ( s == "ROOT" )
-      return ROOT;
-    else if ( s == "LEFT" )
-      return LEFT;
-    else if ( s == "RIGHT" )
-      return RIGHT;
-    else {
-      cerr << "toEnum(" << s << ") failed" << endl;
-      abort();
-    }
-  }
-  dirType direction;
-};
-
-void DependencyDirection::put( ostream & os ) const {
-  Constraint::put( os );
-  os << " direct=" << " " << direction;
-}
-
 string get_class( const string& instance ){
   vector<string> classes;
   TiCC::split( instance, classes );
   return classes[classes.size()-1];
 }
+
 
 void split_dist( const string& distribution, map<string,double>& result ){
   result.clear();
@@ -291,12 +200,17 @@ void parse( const string& pair_file, const string& rel_file,
   multimap<size_t,pair<int,string>> domains;
   vector<Constraint*> constraints;
   formulateWCSP( sentences, dirs, rels, pairs, domains, constraints );
-  using TiCC::operator<<;
-  cerr << "domains: ";
-  for ( const auto& d : domains ){
-    cerr << d.first << "[" << d.second.first << "," << d.second.second << "],";
+  // using TiCC::operator<<;
+  // cerr << "domains: ";
+  // for ( const auto& d : domains ){
+  //   cerr << d.first << "[" << d.second.first << "," << d.second.second << "],";
+  // }
+  // cerr << endl;
+  // cerr << "constraints: " << constraints << endl;
+  CKYParser parser( sentences.size() );
+  for ( const auto& constraint : constraints ){
+    parser.addConstraint( constraint );
   }
-  cerr << endl;
-  cerr << "constraints: " << constraints << endl;
+  parser.parse();
 }
 
