@@ -73,7 +73,7 @@ def formulateWCSP(sentence, dirInstances,
 								 conf))
 		if cls != "__":
 			domains[dependentId].append((headId, cls))
-#                       print >> sys.stderr, "adddomain[", dependentId,"]=<",headId,",",cls,">"
+#                        print >> sys.stderr, "DEP-add domain[", dependentId,"]=<",headId,",",cls,">"
                         
 	for dependent, head in common.pairIterator(sentence, options):
 		dependentId = int(dependent[0])
@@ -90,9 +90,10 @@ def formulateWCSP(sentence, dirInstances,
 			constraints.append(deptree.HasDependency(dependentId,
                                                                  headId, cls,
                                                                  conf))
+
 		if cls != "__":
 			domains[dependentId].append((headId, cls))
-#                        print >> sys.stderr, "adddomain[", dependentId,"]=<",headId,",",cls,">"
+#                        print >> sys.stderr, "DEP-HEAD-add domain[", dependentId,"]=<",headId,",",cls,">"
 
 	if dirInstances:
 		for token, (instance, distribution, distance) in izip(sentence,
@@ -106,16 +107,18 @@ def formulateWCSP(sentence, dirInstances,
 						getattr(deptree.DependencyDirection, cls),
 						distribution[cls]))
 
+
 	if relInstances:
 		for token, (instance, distribution, distance) in izip(sentence,
                                                                       relInstances):
+#                        print >> sys.stderr,"token=", token
 			tokenId = int(token[0])
 			cls = instance[-1]
-
+#                        print >> sys.stderr, "distribution VOOR:", distribution
 			distribution = dict((tuple(key.split("|")), value)
 								for key, value
 								in distribution.iteritems())
-
+#                        print >> sys.stderr, "distribution NA:", distribution
 			if cls != "__":
 				for rel in cls.split("|"):
 					conf = sum(value
@@ -124,8 +127,8 @@ def formulateWCSP(sentence, dirInstances,
 							   if rel in key)
 
 					constraints.append(deptree.HasIncomingRel(tokenId,
-															  rel,
-															  conf))
+							  rel,
+							  conf))
 
 
 	return domains, constraints

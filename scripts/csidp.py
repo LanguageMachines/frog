@@ -270,7 +270,10 @@ def main_(options, args):
                                                               relsIterator,
                                                               pairsIterator,
                                                               options)
-
+#                print >> sys.stderr, "DOMAINS:",domains
+#                print >> sys.stderr, "CONSTRAINTS:"
+#		for constraint in constraints:
+#                        print >> sys.stderr,constraint
 		parser = cky.CKYParser(len(sentence))
 		for constraint in constraints:
 			parser.addConstraint(constraint)

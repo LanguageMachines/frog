@@ -1,5 +1,5 @@
 import deptree
-
+import sys
 
 class SubTree:
 
@@ -22,10 +22,14 @@ class CKYParser:
 	def addConstraint(self, c):
 		if isinstance(c, deptree.HasIncomingRel):
 			self.inDepConstraints[c.tokenIndex].append(c)
+#                        print >> sys.stderr,"added Incoming[",c.tokenIndex,"]"
 		elif isinstance(c, deptree.HasDependency):
 			self.edgeConstraints[c.tokenIndex][c.headIndex].append(c)
+#                        print >> sys.stderr,"added Dependency[",c.tokenIndex,c.headIndex,"]"
 		elif isinstance(c, deptree.DependencyDirection):
 			self.outDepConstraints[c.tokenIndex].append(c)
+#                        print >> sys.stderr,"added Direction[",c.tokenIndex,"]"
+
 
 	def bestEdge(self, leftSubTree, rightSubTree, headIndex, depIndex):
 		if headIndex == 0:
@@ -90,7 +94,7 @@ class CKYParser:
 						C[s, r, "r", True],
 						C[r + 1, t, "l", True],
 						t, s)
-
+#                                        print >> sys.stderr,"Best-edge ==>",label,"(",edgeScore,")"
 					score = C[s, r, "r", True].score + \
 							C[r + 1, t, "l", True].score + \
 							edgeScore
