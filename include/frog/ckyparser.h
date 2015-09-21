@@ -80,17 +80,24 @@ class DependencyDirection: public Constraint {
 class SubTree {
  public:
  SubTree( double score, int r, const std::string& label ):
-  _score( score ), _r( r ), edgeLabel( label ){
+  _score( score ), _r( r ), _edgeLabel( label ){
   }
  SubTree( ):
-  _score( 0.0 ), _r( -1 ), edgeLabel( "" ){
+  _score( 0.0 ), _r( -1 ), _edgeLabel( "" ){
   }
   std::set<Constraint*>  satisfiedConstraints;
   double score() const { return _score; };
+  int r() const { return _r; };
+  std::string edgeLabel() const { return _edgeLabel; };
  private:
   double _score;
   int _r;
-  std::string edgeLabel;
+  std::string _edgeLabel;
+};
+
+struct parsrel {
+  std::string deprel;
+  int head;
 };
 
 class CKYParser {
@@ -98,6 +105,11 @@ public:
   CKYParser( size_t );
   void addConstraint( Constraint * );
   void parse();
+  void leftIncomplete( int , int , std::vector<parsrel>& );
+  void rightIncomplete( int , int , std::vector<parsrel>& );
+  void leftComplete( int , int , std::vector<parsrel>& );
+  void rightComplete( int , int , std::vector<parsrel>& );
+
 private:
   std::string bestEdge( SubTree& , SubTree& , size_t , size_t,
 			std::set<Constraint*>&, double& );
@@ -105,6 +117,8 @@ private:
   std::vector< std::vector<Constraint*>> inDepConstraints;
   std::vector< std::vector<Constraint*>> outDepConstraints;
   std::vector< std::vector< std::vector<Constraint*>>> edgeConstraints;
+  std::vector< std::vector<std::map<std::string,std::map<bool,SubTree>>>> chart;
+
 };
 
 #endif
