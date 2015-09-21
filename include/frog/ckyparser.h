@@ -11,7 +11,7 @@ class Constraint {
  Constraint( double w, int i ): weight(w),tokenIndex(i){
   };
   virtual ~Constraint(){};
-  virtual void put( std::ostream& os ) const { 
+  virtual void put( std::ostream& os ) const {
     os << tokenIndex << " " << weight;
   };
   virtual ConstraintType type() const = 0;
@@ -35,6 +35,7 @@ class HasIncomingRel: public Constraint {
   };
   void put( std::ostream& ) const;
   ConstraintType type() const { return Incoming; }
+  std::string rel() const { return relType; };
  private:
   std::string relType;
 };
@@ -78,16 +79,17 @@ class DependencyDirection: public Constraint {
 
 class SubTree {
  public:
- SubTree( double _score, int _r, const std::string& label ):
-  score( _score ), r( _r ), edgeLabel( label ){
+ SubTree( double score, int r, const std::string& label ):
+  _score( score ), _r( r ), edgeLabel( label ){
   }
  SubTree( ):
-  score( 0.0 ), r( -1 ), edgeLabel( "" ){
+  _score( 0.0 ), _r( -1 ), edgeLabel( "" ){
   }
   std::set<Constraint*>  satisfiedConstraints;
+  double score() const { return _score; };
  private:
-  double score;
-  int r;
+  double _score;
+  int _r;
   std::string edgeLabel;
 };
 
@@ -97,7 +99,7 @@ public:
   void addConstraint( Constraint * );
   void parse();
 private:
-  std::string bestEdge( SubTree& , SubTree& , size_t , size_t, 
+  std::string bestEdge( SubTree& , SubTree& , size_t , size_t,
 			std::set<Constraint*>&, double& );
   size_t numTokens;
   std::vector< std::vector<Constraint*>> inDepConstraints;
@@ -106,4 +108,3 @@ private:
 };
 
 #endif
-
