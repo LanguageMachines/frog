@@ -57,7 +57,7 @@ void formulateWCSP( const vector<string>& sentences,
     int dependent_id = TiCC::stringTo<int>( dependents[0] );
     int headId = 0;
     //    cerr << "sentence: " << sentence << " ID=" << dependent_id << endl;
-    
+
     string line;
     getline( pairs, line );
     vector<string> timbl_result;
@@ -88,13 +88,13 @@ void formulateWCSP( const vector<string>& sentences,
     TiCC::split( sentence, dependents );
     int dependent_id = TiCC::stringTo<int>( dependents[0] );
     //    cerr << "pair-sentence: " << sentence << " ID=" << dependent_id << endl;
-    
+
     for ( const auto& head : sentences ){
       if ( head != sentence ){
-	//	cerr << "pair-head: " << head << endl;
 	vector<string> parts;
 	TiCC::split( head, parts );
 	int headId = TiCC::stringTo<int>( parts[0] );
+	cerr << "headId: " << headId << " depId=" << dependent_id << endl;
 	string line;
 	if ( !getline( pairs, line ) ){
 	  cerr << "OEPS pairs leeg? " << endl;
@@ -105,7 +105,7 @@ void formulateWCSP( const vector<string>& sentences,
 	string instance = timbl_result[0];
 	string distribution = timbl_result[1];
 	string distance = timbl_result[2];
-	// cerr << "instance: " << instance << endl;
+	cerr << "instance: " << instance << endl;
 	// cerr << "distribution: " << distribution << endl;
 	// cerr << "distance: " << distance << endl;
 	string top_class = get_class( instance );
@@ -212,5 +212,11 @@ void parse( const string& pair_file, const string& rel_file,
     parser.addConstraint( constraint );
   }
   parser.parse();
+  vector<parsrel> result( sentences.size() );
+  parser.rightComplete(0, sentences.size(), result );
+  size_t i = 0;
+  for ( const auto& token : sentences ){
+    cerr << token << "\t" << result[i].head << "\t" << result[i].deprel << endl;
+    ++i;
+  }
 }
-
