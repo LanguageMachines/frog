@@ -847,28 +847,11 @@ void Parser::prepareParse( const vector<Word *>& fwords,
   }
 }
 
-void appendParseResult( const vector<Word *>& words,
-			parseData& pd,
-			const string& tagset,
-			istream& is ){
-  string line;
-  int cnt=0;
-  vector<int> nums;
-  vector<string> roles;
-  while ( getline( is, line ) ){
-    vector<string> parts;
-    int num = TiCC::split_at( line, parts, " " );
-    if ( num > 7 ){
-      if ( TiCC::stringTo<int>( parts[0] ) != cnt+1 ){
-        //WARNING: commented out because theErrLog no longer available publicly
-        //*Log(theErrLog) << "confused! " << endl;
-        //*Log(theErrLog) << "got line '" << line << "'" << endl;
-      }
-      nums.push_back( TiCC::stringTo<int>(parts[6]) );
-      roles.push_back( parts[7] );
-    }
-    ++cnt;
-  }
+void appendResult( const vector<Word *>& words,
+		   parseData& pd,
+		   const string& tagset,
+		   const vector<int>& nums,
+		   const vector<string>& roles ){
   Sentence *sent = words[0]->sentence();
   KWargs args;
   args["generate_id"] = sent->id();
@@ -901,6 +884,46 @@ void appendParseResult( const vector<Word *>& words,
       }
     }
   }
+}
+
+void appendParseResult( const vector<Word *>& words,
+			parseData& pd,
+			const string& tagset,
+			const vector<parsrel>& res ){
+  string line;
+  int cnt=0;
+  vector<int> nums;
+  vector<string> roles;
+  for ( const auto& it : res ){
+    nums.push_back( it.head );
+    roles.push_back( it.deprel );
+  }
+  appendResult( words, pd, tagset, nums, roles );
+}
+
+void appendParseResult( const vector<Word *>& words,
+			parseData& pd,
+			const string& tagset,
+			istream& is ){
+  string line;
+  int cnt=0;
+  vector<int> nums;
+  vector<string> roles;
+  while ( getline( is, line ) ){
+    vector<string> parts;
+    int num = TiCC::split_at( line, parts, " " );
+    if ( num > 7 ){
+      if ( TiCC::stringTo<int>( parts[0] ) != cnt+1 ){
+        //WARNING: commented out because theErrLog no longer available publicly
+        //*Log(theErrLog) << "confused! " << endl;
+        //*Log(theErrLog) << "got line '" << line << "'" << endl;
+      }
+      nums.push_back( TiCC::stringTo<int>(parts[6]) );
+      roles.push_back( parts[7] );
+    }
+    ++cnt;
+  }
+  appendResult( words, pd, tagset, nums, roles );
 }
 
 
@@ -969,22 +992,22 @@ void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
     catch( exception const & ){
       PyErr_Print();
     }
+    timers.csiTimer.stop();
+    ifstream resFile( resFileName );
+    if ( resFile ){
+      appendParseResult( words, pd, dep_tagset, resFile );
+    }
+    else
+      *Log(parseLog) << "couldn't open results file: " << resFileName << endl;
   }
   else {
-    parse( pairsOutName,
-	   relsOutName,
-	   dirOutName,
-	   maxDepSpan,
-	   fileName,
-	   resFileName );
+    vector<parsrel> res = parse( pairsOutName,
+				 relsOutName,
+				 dirOutName,
+				 maxDepSpan,
+				 fileName );
+    appendParseResult( words, pd, dep_tagset, res );
   }
-  timers.csiTimer.stop();
-  ifstream resFile( resFileName );
-  if ( resFile ){
-    appendParseResult( words, pd, dep_tagset, resFile );
-  }
-  else
-    *Log(parseLog) << "couldn't open results file: " << resFileName << endl;
 
   if ( !keepIntermediate ){
     remove( fileName.c_str() );

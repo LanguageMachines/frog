@@ -178,9 +178,9 @@ void formulateWCSP( const vector<string>& sentences,
   }
 }
 
-void parse( const string& pair_file, const string& rel_file,
-	    const string& dir_file, int maxDist,
-	    const string& in_file, const string& out_file ){
+vector<parsrel> parse( const string& pair_file, const string& rel_file,
+		       const string& dir_file, int maxDist,
+		       const string& in_file ){
   ifstream pairs( pair_file );
   //  cerr << "opened pairs: " << pair_file << endl;
   ifstream rels( rel_file );
@@ -203,10 +203,5 @@ void parse( const string& pair_file, const string& rel_file,
   parser.parse();
   vector<parsrel> result( sentences.size() );
   parser.rightComplete(0, sentences.size(), result );
-  ofstream os( out_file );
-  size_t i = 1;
-  for ( const auto& it : result ){
-    os << i << " . . . . . " << it.head << " " << it.deprel << endl;
-    ++i;
-  }
+  return result;
 }
