@@ -47,10 +47,8 @@ void split_dist( const string& distribution, multimap<string,double>& result ){
 void formulateWCSP( const vector<string>& sentences,
 		    istream& dirs, istream& rels,
 		    istream& pairs,
-		    multimap<size_t,pair<int,string>>& domains,
 		    vector<Constraint*>& constraints,
 		    int maxDist ){
-  domains.clear();
   constraints.clear();
   for ( const auto& sentence : sentences ){
     vector<string> dependents;
@@ -79,8 +77,6 @@ void formulateWCSP( const vector<string>& sentences,
     double conf = dist[top_class];
     //    cerr << "class=" << top_class << " met conf " << conf << endl;
     if ( top_class != "__" ){
-      //      cerr << "DEP-ADD domain[" << dependent_id << "]=<" << headId << "," << top_class << ">" << endl;
-      domains.insert( make_pair(dependent_id, make_pair(headId, top_class) ) );
       constraints.push_back(new HasDependency(dependent_id,headId,top_class,conf));
     }
   }
@@ -117,8 +113,6 @@ void formulateWCSP( const vector<string>& sentences,
 	double conf = dist[top_class];
 	//	cerr << "class=" << top_class << " met conf " << conf << endl;
 	if ( top_class != "__" ){
-	  //	  cerr << "DEP-HEAD-ADD domain[" << dependent_id << "]=<" << headId << "," << top_class << ">" << endl;
-	  domains.insert( make_pair( dependent_id, make_pair(headId, top_class)));
 	  constraints.push_back( new HasDependency(dependent_id,headId,top_class,conf));
 	}
       }
@@ -200,16 +194,8 @@ void parse( const string& pair_file, const string& rel_file,
   while( getline( is, line ) ){
     sentences.push_back( line );
   }
-  multimap<size_t,pair<int,string>> domains;
   vector<Constraint*> constraints;
-  formulateWCSP( sentences, dirs, rels, pairs, domains, constraints, maxDist );
-  // using TiCC::operator<<;
-  // cerr << "domains: ";
-  // for ( const auto& d : domains ){
-  //   cerr << d.first << "[" << d.second.first << "," << d.second.second << "],";
-  // }
-  // cerr << endl;
-  // cerr << "constraints: " << constraints << endl;
+  formulateWCSP( sentences, dirs, rels, pairs, constraints, maxDist );
   CKYParser parser( sentences.size() );
   for ( const auto& constraint : constraints ){
     parser.addConstraint( constraint );
