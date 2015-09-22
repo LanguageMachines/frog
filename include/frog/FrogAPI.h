@@ -73,6 +73,7 @@ class FrogOptions {
 
   int debugFlag;
   bool interactive;
+  bool oldparser;
   int numThreads;
 
   std::string encoding;

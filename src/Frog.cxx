@@ -239,6 +239,10 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
     options.doDaringMorph = true;
     options.doMorph = true;
   }
+  if ( Opts.extract( "oldparser" ) ) {
+    configuration.setatt( "oldparser","true", "parser" );
+  }
+  cerr << "SET OLDPARSER: " << configuration.lookUp( "oldparser", "parser" ) << endl;
   Opts.extract( 'e', options.encoding );
 
   if ( Opts.extract( "max-parser-tokens", value ) ){
@@ -432,7 +436,7 @@ int main(int argc, char *argv[]) {
   try {
     TiCC::CL_Options Opts("c:e:o:t:x::X::nQhVd:S:",
 			  "textclass:,testdir:,uttmarker:,max-parser-tokens:,"
-			  "skip:,id:,outputdir:,xmldir:,tmpdir:,daring,"
+			  "skip:,id:,outputdir:,xmldir:,tmpdir:,daring,oldparser,"
 			  "debug:,keep-parser-files,version,threads:,KANON");
 
     Opts.init(argc, argv);

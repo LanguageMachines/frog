@@ -48,7 +48,8 @@ void formulateWCSP( const vector<string>& sentences,
 		    istream& dirs, istream& rels,
 		    istream& pairs,
 		    multimap<size_t,pair<int,string>>& domains,
-		    vector<Constraint*>& constraints ){
+		    vector<Constraint*>& constraints,
+		    int maxDist ){
   domains.clear();
   constraints.clear();
   for ( const auto& sentence : sentences ){
@@ -94,7 +95,9 @@ void formulateWCSP( const vector<string>& sentences,
 	vector<string> parts;
 	TiCC::split( head, parts );
 	int headId = TiCC::stringTo<int>( parts[0] );
-	cerr << "headId: " << headId << " depId=" << dependent_id << endl;
+	if ( abs(headId-dependent_id) > maxDist ){
+	  continue;
+	}
 	string line;
 	if ( !getline( pairs, line ) ){
 	  cerr << "OEPS pairs leeg? " << endl;
@@ -105,7 +108,7 @@ void formulateWCSP( const vector<string>& sentences,
 	string instance = timbl_result[0];
 	string distribution = timbl_result[1];
 	string distance = timbl_result[2];
-	cerr << "instance: " << instance << endl;
+	// cerr << "instance: " << instance << endl;
 	// cerr << "distribution: " << distribution << endl;
 	// cerr << "distance: " << distance << endl;
 	string top_class = get_class( instance );
@@ -199,7 +202,7 @@ void parse( const string& pair_file, const string& rel_file,
   }
   multimap<size_t,pair<int,string>> domains;
   vector<Constraint*> constraints;
-  formulateWCSP( sentences, dirs, rels, pairs, domains, constraints );
+  formulateWCSP( sentences, dirs, rels, pairs, domains, constraints, maxDist );
   // using TiCC::operator<<;
   // cerr << "domains: ";
   // for ( const auto& d : domains ){
@@ -214,9 +217,10 @@ void parse( const string& pair_file, const string& rel_file,
   parser.parse();
   vector<parsrel> result( sentences.size() );
   parser.rightComplete(0, sentences.size(), result );
-  size_t i = 0;
-  for ( const auto& token : sentences ){
-    cerr << token << "\t" << result[i].head << "\t" << result[i].deprel << endl;
+  ofstream os( out_file );
+  size_t i = 1;
+  for ( const auto& it : result ){
+    os << i << " . . . . . " << it.head << " " << it.deprel << endl;
     ++i;
   }
 }

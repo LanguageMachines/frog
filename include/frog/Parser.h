@@ -103,6 +103,7 @@ class Parser {
   std::string fileName;
   TiCC::LogStream *parseLog;
   bool keepIntermediate;
+  bool oldparser;
   std::string version;
   std::string dep_tagset;
   std::string POS_tagset;

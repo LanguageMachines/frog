@@ -94,6 +94,7 @@ FrogOptions::FrogOptions() {
   doXMLout =  false;
   doKanon =  false;
   interactive = false;
+  oldparser = false;
 
   maxParserTokens =  0; // 0 for unlimited
 #ifdef HAVE_OPENMP

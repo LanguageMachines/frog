@@ -32,25 +32,25 @@ class CKYParser:
 
 
 	def bestEdge(self, leftSubTree, rightSubTree, headIndex, depIndex):
-                print >> sys.stderr,"bestedge",headIndex,depIndex
+#                print >> sys.stderr,"bestedge",headIndex,depIndex
 		if headIndex == 0:
 			score = 0.0
 			constraints = set()
 			for constraint in self.outDepConstraints[depIndex]:
-                                print >> sys.stderr,"CHECK  ",constraint
+#                                print >> sys.stderr,"CHECK  ",constraint
 				if constraint.direction == constraint.ROOT:
-                                        print >> sys.stderr,"HEAD outDep matched ",constraint
+#                                        print >> sys.stderr,"HEAD outDep matched ",constraint
 
 					score = constraint.weight
 					constraints.add(constraint)
 			assert len(self.edgeConstraints[depIndex][0]) <= 1
 			label = "ROOT"
 			for constraint in self.edgeConstraints[depIndex][0]:
-                                print >> sys.stderr,"HEAD edge ",constraint
+#                                print >> sys.stderr,"HEAD edge ",constraint
 				score += constraint.weight
 				constraints.add(constraint)
 				label = constraint.relType
-                        print >> sys.stderr,"Score HEAD RETURN:",label,score,constraints
+#                        print >> sys.stderr,"Score HEAD RETURN:",label,score,constraints
 			return label, score, constraints
 
 		#headIndex -= 1
@@ -65,20 +65,20 @@ class CKYParser:
 			constraints = set([edgeConstraint])
 			for constraint in self.inDepConstraints[headIndex]:
 				if constraint.relType == label and (constraint not in leftSubTree.satisfiedConstraints and constraint not in rightSubTree.satisfiedConstraints):
-                                        print >> sys.stderr,"inDep matched:",constraint
+#                                        print >> sys.stderr,"inDep matched:",constraint
 					score += constraint.weight
 					constraints.add(constraint)
 			for constraint in self.outDepConstraints[depIndex]:
 				if ((constraint.direction == constraint.LEFT and headIndex < depIndex) or (constraint.direction == constraint.RIGHT and headIndex > depIndex)) and (constraint not in leftSubTree.satisfiedConstraints and constraint not in rightSubTree.satisfiedConstraints):
-                                        print >> sys.stderr,"outDep matched:",constraint
+#                                        print >> sys.stderr,"outDep matched:",constraint
 					score += constraint.weight
 					constraints.add(constraint)
 			if score > bestScore:
-                                print >> sys.stderr,"Update best:",label,score,constraints
+#                                print >> sys.stderr,"Update best:",label,score,constraints
 				bestScore = score
 				best = label
 				bestConstraints = constraints
-                print >> sys.stderr,"ENDSCORE:",best,bestScore,bestConstraints
+#                print >> sys.stderr,"ENDSCORE:",best,bestScore,bestConstraints
 		return best, bestScore, bestConstraints
 
 	def parse(self):
@@ -100,7 +100,7 @@ class CKYParser:
 						C[s, r, "r", True],
 						C[r + 1, t, "l", True],
 						t, s)
-                                        print >> sys.stderr,"Best-edge ==>",label,"(",edgeScore,")"
+#                                        print >> sys.stderr,"Best-edge ==>",label,"(",edgeScore,")"
 					score = C[s, r, "r", True].score + \
 							C[r + 1, t, "l", True].score + \
 							edgeScore
@@ -110,7 +110,7 @@ class CKYParser:
 						best = r, label
 						bestConstraints = constraints
 
-                                print >> sys.stderr,"Step 1 add", bestScore , best
+#                                print >> sys.stderr,"Step 1 add", bestScore , best
 				C[s, t, "l", False] = SubTree(bestScore, *best)
 				C[s, t, "l", False].satisfiedConstraints.update(
 					C[s, best[0], "r", True].satisfiedConstraints)
@@ -137,7 +137,7 @@ class CKYParser:
 						bestScore = score
 						best = r, label
 						bestConstraints = constraints
-                                print >> sys.stderr,"Step 2 add", bestScore , best
+#                                print >> sys.stderr,"Step 2 add", bestScore , best
 				C[s, t, "r", False] = SubTree(bestScore, *best)
 				C[s, t, "r", False].satisfiedConstraints.update(
 					C[s, best[0], "r", True].satisfiedConstraints)
@@ -156,7 +156,7 @@ class CKYParser:
 						bestScore = score
 						best = r
 
-                                print >> sys.stderr,"Step 3 add", bestScore , best
+#                                print >> sys.stderr,"Step 3 add", bestScore , best
 				C[s, t, "l", True] = SubTree(bestScore, best, None)
 				C[s, t, "l", True].satisfiedConstraints.update(
 					C[s, best, "l", True].satisfiedConstraints)
@@ -173,7 +173,7 @@ class CKYParser:
 						bestScore = score
 						best = r
 
-                                print >> sys.stderr,"Step 4 add", bestScore , best
+#                                print >> sys.stderr,"Step 4 add", bestScore , best
 				C[s, t, "r", True] = SubTree(bestScore, best, None)
 				C[s, t, "r", True].satisfiedConstraints.update(
 					C[s, best, "r", False].satisfiedConstraints)

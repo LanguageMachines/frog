@@ -246,6 +246,11 @@ bool Parser::init( const Configuration& configuration ){
   if ( !val.empty() ){
     relsOptions = val;
   }
+  val = configuration.lookUp( "oldparser", "parser" );
+  oldparser = false;
+  if ( val == "true" ){
+    oldparser = true;
+  }
   if ( problem )
     return false;
 
@@ -950,28 +955,29 @@ void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
     }
   }
   timers.csiTimer.start();
-  try {
-    PI->parse( pairsOutName,
-	       relsOutName,
-	       dirOutName,
-	       maxDepSpanS,
-	       fileName,
-	       resFileName );
-    if ( PyErr_Occurred() )
+  if ( oldparser ){
+    try {
+      PI->parse( pairsOutName,
+		 relsOutName,
+		 dirOutName,
+		 maxDepSpanS,
+		 fileName,
+		 resFileName );
+      if ( PyErr_Occurred() )
+	PyErr_Print();
+    }
+    catch( exception const & ){
       PyErr_Print();
+    }
   }
-  catch( exception const & ){
-    PyErr_Print();
+  else {
+    parse( pairsOutName,
+	   relsOutName,
+	   dirOutName,
+	   maxDepSpan,
+	   fileName,
+	   resFileName );
   }
-  //#define NEWP
-#ifdef NEWP
-  parse( pairsOutName,
-	 relsOutName,
-	 dirOutName,
-	 maxDepSpan,
-	 fileName,
-	 resFileName );
-#endif
   timers.csiTimer.stop();
   ifstream resFile( resFileName );
   if ( resFile ){

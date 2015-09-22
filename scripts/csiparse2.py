@@ -78,7 +78,7 @@ def formulateWCSP(sentence, dirInstances,
 	for dependent, head in common.pairIterator(sentence, options):
 		dependentId = int(dependent[0])
 		headId = int(head[0])
-
+#                print >> sys.stderr,"headId",headId,"dependentId",dependentId
 		instance, distribution, distance = pairInstances.next()
 #                print >> sys.stderr, "instance:", instance
 #                print >> sys.stderr, "distribution:", distribution
