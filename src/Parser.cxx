@@ -1,5 +1,5 @@
 /*
-  $Id$
+  $id: Parser.cxx 18644 2015-09-22 13:31:54Z sloot $
   $URL$
 
   Copyright (c) 2006 - 2015
@@ -311,17 +311,17 @@ void Parser::createPairs( const parseData& pd ){
   const vector<string>& words = pd.words;
   const vector<string>& heads = pd.heads;
   const vector<string>& mods = pd.mods;
+  vector<string> instances;
   string pFile = fileName + ".pairs.inst";
   remove( pFile.c_str() );
   ofstream ps( pFile );
   if ( ps ){
     if ( words.size() == 1 ){
-      ps << "__ " << words[0] << " __"
-	 << " ROOT ROOT ROOT __ " << heads[0]
-	 << " __ ROOT ROOT ROOT "
-	 << words[0] << "^ROOT ROOT ROOT ROOT^"
-	 << heads[0]
-	 << " _" << endl;
+      string inst = 
+	"__ " + words[0] + " __ ROOT ROOT ROOT __ " + heads[0]
+	+ " __ ROOT ROOT ROOT "+ words[0] +"^ROOT ROOT ROOT ROOT^" 
+	+ heads[0] + " _";
+      instances.push_back( inst );
     }
     else {
       for ( size_t i=0 ; i < words.size(); ++i ){
@@ -347,12 +347,11 @@ void Parser::createPairs( const parseData& pd ){
 	  word1 = words[i+1];
 	  tag1 = heads[i+1];
 	}
-	ps << word_1 << " " << word0 << " " << word1
-	   << " ROOT ROOT ROOT "
-	   << tag_1 << " " << tag0 << " " << tag1
-	   << " ROOT ROOT ROOT "
-	   << tag0 << "^ROOT ROOT ROOT ROOT^" << mods0
-	   << " _" << endl;
+	string inst = word_1 + " " + word0 + " " + word1
+	  + " ROOT ROOT ROOT " + tag_1 + " " 
+	  + tag0 + " " + tag1 + " ROOT ROOT ROOT " + tag0
+	  + "^ROOT ROOT ROOT ROOT^" + mods0 + " _";
+	instances.push_back( inst );
       }
       //
       for ( size_t wPos=0; wPos < words.size(); ++wPos ){
@@ -379,7 +378,6 @@ void Parser::createPairs( const parseData& pd ){
 	  w_tag1 = heads[wPos+1];
 	}
 	for ( size_t pos=0; pos < words.size(); ++pos ){
-	  //	  os << wPos << "-" << pos << " ";
 	  if ( pos > wPos + maxDepSpan )
 	    break;
 	  if ( wPos == pos )
@@ -387,56 +385,55 @@ void Parser::createPairs( const parseData& pd ){
 	  if ( wPos > maxDepSpan + pos )
 	    continue;
 
-	  ps << w_word_1;
-	  ps << " " << w_word0;
-	  ps << " " << w_word1;
-
+	  string inst = w_word_1 + " " + w_word0 + " " + w_word1;
+	  
 	  if ( pos == 0 )
-	    ps << " __";
+	    inst += " __";
 	  else
-	    ps << " " << words[pos-1];
+	    inst += " " + words[pos-1];
 	  if ( pos < words.size() )
-	    ps << " " << words[pos];
+	    inst += " " + words[pos];
 	  else
-	    ps << " __";
+	    inst += " __";
 	  if ( pos < words.size()-1 )
-	    ps << " " << words[pos+1];
+	    inst += " " + words[pos+1];
 	  else
-	    ps << " __";
-	  ps << " " << w_tag_1;
-	  ps << " " << w_tag0;
-	  ps << " " << w_tag1;
+	    inst += " __";
+	  inst += " " + w_tag_1 + " " + w_tag0 + " " + w_tag1;
 	  if ( pos == 0 )
-	    ps << " __";
+	    inst += " __";
 	  else
-	    ps << " " << heads[pos-1];
+	    inst += " " + heads[pos-1];
 	  if ( pos < words.size() )
-	    ps << " " << heads[pos];
+	    inst += " " + heads[pos];
 	  else
-	    ps << " __";
+	    inst += " __";
 	  if ( pos < words.size()-1 )
-	    ps << " " << heads[pos+1];
+	    inst += " " + heads[pos+1];
 	  else
-	    ps << " __";
+	    inst += " __";
 
-	  ps << " " << w_tag0 << "^";
+	  inst += " " + w_tag0 + "^";
 	  if ( pos < words.size() )
-	    ps << heads[pos];
+	    inst += heads[pos];
 	  else
-	    ps << "__";
+	    inst += "__";
 
 	  if ( wPos > pos )
-	    ps << " LEFT " << wPos - pos;
+	    inst += " LEFT " + TiCC::toString( wPos - pos );
 	  else
-	    ps << " RIGHT " << pos - wPos;
+	    inst += " RIGHT "+ TiCC::toString( pos - wPos );
 	  if ( pos >= words.size() )
-	    ps << " __";
+	    inst += " __";
 	  else
-	    ps << " " << mods[pos];
-	  ps << "^" << w_mods0;
-	  ps << " __" << endl;
+	    inst += " " + mods[pos];
+	  inst += "^" + w_mods0 + " __";
+	  instances.push_back( inst );
 	}
       }
+    }
+    for( const auto& i : instances ){
+      ps << i << endl;
     }
   }
 }
@@ -455,35 +452,32 @@ void Parser::createRelDir( const parseData& pd ){
   string rFile = fileName + ".rels.inst";
   remove( rFile.c_str() );
   ofstream rs( rFile );
+  vector<string> d_instances;
+  vector<string> r_instances;
   if ( ds && rs ){
     if ( words.size() == 1 ){
       word0 = words[0];
       tag0 = heads[0];
       mod0 = mods[0];
-      ds << "__ __";
-      ds << " " << word0;
-      ds << " __ __ __ __";
-      ds << " " << tag0;
-      ds << " __ __ __ __";
-      ds << " " << word0 << "^" << tag0;
-      ds << " __ __ __^" << tag0;
-      ds << " " << tag0 << "^__";
-      ds << " __";
-      ds << " " << mod0;
-      ds << " __ ROOT" << endl;
-      //
-      rs << "__ __";
-      rs << " " << word0;
-      rs << " __ __";
-      rs << " " << mod0;
-      rs << " __ __";
-      rs << " " << tag0;
-      rs << " __ __";
-      rs << " __^" << tag0;
-      rs << " " << tag0 << "^__";
-      rs << " __^__^" << tag0;
-      rs << " " << tag0 << "^__^__";
-      rs << " __" << endl;
+      string inst = "__ __ " + word0 + " __ __ __ __ " + tag0
+	+ " __ __ __ __ " + word0 + "^" + tag0
+	+ " __ __ __^" + tag0 + " " + tag0 +"^__ __ " + mod0
+	+ " __ ROOT";
+      d_instances.push_back( inst );
+
+      inst = string("__ __" )
+	+ " " + word0
+	+ " __ __"
+	+ " " + mod0
+	+ " __ __"
+	+ " " + tag0
+	+ " __ __"
+	+ " __^" + tag0
+	+ " " + tag0 + "^__"
+	+ " __^__^" + tag0
+	+ " " + tag0 + "^__^__"
+	+ " __";
+      r_instances.push_back( inst );
     }
     else if ( words.size() == 2 ){
       word0 = words[0];
@@ -492,66 +486,70 @@ void Parser::createRelDir( const parseData& pd ){
       word1 = words[1];
       tag1 = heads[1];
       mod1 = mods[1];
-      ds << "__ __";
-      ds << " " << word0;
-      ds << " " << word1;
-      ds << " __ __ __";
-      ds << " " << tag0;
-      ds << " " << tag1;
-      ds << " __ __ __";
-      ds << " " << word0 << "^" << tag0;
-      ds << " " << word1 << "^" << tag1;
-      ds << " __ __^" << tag0;
-      ds << " " << tag0 << "^" << tag1;
-      ds << " __";
-      ds << " " << mod0;
-      ds << " " << mod1;
-      ds << " ROOT" << endl;
-      ds << "__";
-      ds << " " << word0;
-      ds << " " << word1;
-      ds << " __ __ __";
-      ds << " " << tag0;
-      ds << " " << tag1;
-      ds << " __ __ __";
-      ds << " " << word0 << "^" << tag0;
-      ds << " " << word1 << "^" << tag1;
-      ds << " __ __";
-      ds << " " << tag0 << "^" << tag1;
-      ds << " " << tag1 << "^__";
-      ds << " " << mod0;
-      ds << " " << mod1;
-      ds << " __";
-      ds << " ROOT" << endl;
+      string inst = string("__ __")
+	= " " + word0
+	+ " " + word1
+	+ " __ __ __"
+	+ " " + tag0
+	+ " " + tag1
+	+ " __ __ __"
+	+ " " + word0 + "^" + tag0
+	+ " " + word1 + "^" + tag1
+	+ " __ __^" + tag0
+	+ " " + tag0 + "^" + tag1
+	+ " __"
+	+ " " + mod0
+	+ " " + mod1
+	+ " ROOT";
+      d_instances.push_back( inst );
+      inst = string("__")
+	+ " " + word0
+	+ " " + word1
+	+ " __ __ __"
+	+ " " + tag0
+	+ " " + tag1
+	+ " __ __ __"
+	+ " " + word0 + "^" + tag0
+	+ " " + word1 + "^" + tag1
+	+ " __ __"
+	+ " " + tag0 + "^" + tag1
+	+ " " + tag1 + "^__"
+	+ " " + mod0
+	+ " " + mod1
+	+ " __"
+	+ " ROOT";
+      d_instances.push_back( inst );      
       //
-      rs << "__ __";
-      rs << " " << word0;
-      rs << " " << word1;
-      rs << " __";
-      rs << " " << mod0;
-      rs << " __ __";
-      rs << " " << tag0;
-      rs << " " << tag1;
-      rs << " __";
-      rs << " __^" << tag0;
-      rs << " " << tag0 << "^" << tag1;
-      rs << " __^__^" << tag0;
-      rs << " " << tag0 << "^" << tag1 << "^__";
-      rs << " __" << endl;
-      rs << "__";
-      rs << " " << word0;
-      rs << " " << word1;
-      rs << " __ __";
-      rs << " " << mod1;
-      rs << " __";
-      rs << " " << tag0;
-      rs << " " << tag1;
-      rs << " __ __";
-      rs << " " << tag0 << "^" << tag1;
-      rs << " " << tag1 << "^__";
-      rs << " __^" << tag0 << "^" << tag1;
-      rs << " " << tag1 << "^__^__";
-      rs << " __" << endl;
+      inst = string("__ __")
+	+ " " + word0
+	+ " " + word1
+	+ " __"
+	+ " " + mod0
+	+ " __ __"
+	+ " " + tag0
+	+ " " + tag1
+	+ " __"
+	+ " __^" + tag0
+	+ " " + tag0 + "^" + tag1
+	+ " __^__^" + tag0
+	+ " " + tag0 + "^" + tag1 + "^__"
+	+ " __";
+      d_instances.push_back( inst );
+      inst = string("__")
+	+ " " + word0
+	+ " " + word1
+	+ " __ __"
+	+ " " + mod1
+      + " __"
+	+ " " + tag0
+	+ " " + tag1
+      + " __ __"
+	+ " " + tag0 + "^" + tag1
+	+ " " + tag1 + "^__"
+	+ " __^" + tag0 + "^" + tag1
+	+ " " + tag1 + "^__^__"
+	+ " __";
+      r_instances.push_back( inst );      
     }
     else if ( words.size() == 3 ) {
       word0 = words[0];
@@ -563,106 +561,112 @@ void Parser::createRelDir( const parseData& pd ){
       word2 = words[2];
       tag2 = heads[2];
       mod2 = mods[2];
-      ds << "__ __";
-      ds << " " << word0;
-      ds << " " << word1;
-      ds << " " << word2;
-      ds << " __ __";
-      ds << " " << tag0;
-      ds << " " << tag1;
-      ds << " " << tag2;
-      ds << " __ __";
-      ds << " " << word0 << "^" << tag0;
-      ds << " " << word1 << "^" << tag1;
-      ds << " " << word2 << "^" << tag2;
-      ds << " __^" << tag0;
-      ds << " " << tag0 << "^" << tag1;
-      ds << " __";
-      ds << " " << mod0;
-      ds << " " << mod1;
-      ds << " ROOT" << endl;
-      ds << "__";
-      ds << " " << word0;
-      ds << " " << word1;
-      ds << " " << word2;
-      ds << " __ __";
-      ds << " " << tag0;
-      ds << " " << tag1;
-      ds << " " << tag2;
-      ds << " __ __";
-      ds << " " << word0 << "^" << tag0;
-      ds << " " << word1 << "^" << tag1;
-      ds << " " << word2 << "^" << tag2;
-      ds << " __";
-      ds << " " << tag0 << "^" << tag1;
-      ds << " " << tag1 << "^" << tag2;
-      ds << " " << mod0;
-      ds << " " << mod1;
-      ds << " " << mod2;
-      ds << " ROOT" << endl;
-      ds << word0;
-      ds << " " << word1;
-      ds << " " << word2;
-      ds << " __ __";
-      ds << " " << tag0;
-      ds << " " << tag1;
-      ds << " " << tag2;
-      ds << " __ __";
-      ds << " " << word0 << "^" << tag0;
-      ds << " " << word1 << "^" << tag1;
-      ds << " " << word2 << "^" << tag2;
-      ds << " __ __";
-      ds << " " << tag1 << "^" << tag2;
-      ds << " " << tag2 << "^__";
-      ds << " " << mod1;
-      ds << " " << mod2;
-      ds << " __";
-      ds << " ROOT" << endl;
+      string inst = string("__ __")
+	+ " " + word0
+	+ " " + word1
+	+ " " + word2
+	+ " __ __"
+	+ " " + tag0
+	+ " " + tag1
+	+ " " + tag2
+	+ " __ __"
+	+ " " + word0 + "^" + tag0
+	+ " " + word1 + "^" + tag1
+	+ " " + word2 + "^" + tag2
+	+ " __^" + tag0
+	+ " " + tag0 + "^" + tag1
+	+ " __"
+	+ " " + mod0
+	+ " " + mod1
+	+ " ROOT";
+      d_instances.push_back( inst );
+      inst = string("__")
+	+ " " + word0
+	+ " " + word1
+	+ " " + word2
+	+ " __ __"
+	+ " " + tag0
+	+ " " + tag1
+	+ " " + tag2
+	+ " __ __"
+	+ " " + word0 + "^" + tag0
+	+ " " + word1 + "^" + tag1
+	+ " " + word2 + "^" + tag2
+	+ " __"
+	+ " " + tag0 + "^" + tag1
+	+ " " + tag1 + "^" + tag2
+	+ " " + mod0
+	+ " " + mod1
+	+ " " + mod2
+	+ " ROOT";
+      d_instances.push_back( inst );
+      inst = word0
+	+ " " + word1
+	+ " " + word2
+	+ " __ __"
+	+ " " + tag0
+	+ " " + tag1
+	+ " " + tag2
+	+ " __ __"
+	+ " " + word0 + "^" + tag0
+	+ " " + word1 + "^" + tag1
+	+ " " + word2 + "^" + tag2
+	+ " __ __"
+	+ " " + tag1 + "^" + tag2
+	+ " " + tag2 + "^__"
+	+ " " + mod1
+	+ " " + mod2
+	+ " __"
+	+ " ROOT";
+      d_instances.push_back( inst );      
       //
-      rs << "__ __";
-      rs << " " << word0;
-      rs << " " << word1;
-      rs << " " << word2;
-      rs << " " << mod0;
-      rs << " __ __";
-      rs << " " << tag0;
-      rs << " " << tag1;
-      rs << " " << tag2;
-      rs << " __^" << tag0;
-      rs << " " << tag0 << "^" << tag1;
-      rs << " __^__^" << tag0;
-      rs << " " << tag0 << "^" << tag1 << "^" << tag2;
-      rs << " __" << endl;
-      rs << "__";
-      rs << " " << word0;
-      rs << " " << word1;
-      rs << " " << word2;
-      rs << " __";
-      rs << " " << mod1;
-      rs << " __";
-      rs << " " << tag0;
-      rs << " " << tag1;
-      rs << " " << tag2;
-      rs << " __";
-      rs << " " << tag0 << "^" << tag1;
-      rs << " " << tag1 << "^" << tag2;
-      rs << " __^" << tag0 << "^" << tag1;
-      rs << " " << tag1 << "^" << tag2 << "^__";
-      rs << " __" << endl;
-      rs << word0;
-      rs << " " << word1;
-      rs << " " << word2;
-      rs << " __ __";
-      rs << " " << mod2;
-      rs << " " << tag0;
-      rs << " " << tag1;
-      rs << " " << tag2;
-      rs << " __ __";
-      rs << " " << tag1 << "^" << tag2;
-      rs << " " << tag2 << "^__";
-      rs << " " << tag0 << "^" << tag1 << "^" << tag2;
-      rs << " " << tag2 << "^__^__";
-      rs << " __" << endl;
+      inst = string("__ __")
+	+ " " + word0
+	+ " " + word1
+	+ " " + word2
+	+ " " + mod0
+	+ " __ __"
+	+ " " + tag0
+	+ " " + tag1
+	+ " " + tag2
+      + " __^" + tag0
+	+ " " + tag0 + "^" + tag1
+      + " __^__^" + tag0
+	+ " " + tag0 + "^" + tag1 + "^" + tag2
+      + " __";
+      r_instances.push_back( inst );      
+      inst = string("__")
+	+ " " + word0
+	+ " " + word1
+	+ " " + word2
+	+ " __"
+	+ " " + mod1
+	+ " __"
+	+ " " + tag0
+	+ " " + tag1
+	+ " " + tag2
+	+ " __"
+	+ " " + tag0 + "^" + tag1
+	+ " " + tag1 + "^" + tag2
+	+ " __^" + tag0 + "^" + tag1
+	+ " " + tag1 + "^" + tag2 + "^__"
+	+ " __";
+      r_instances.push_back( inst );      
+      inst = word0
+	+ " " + word1
+	+ " " + word2
+	+ " __ __"
+	+ " " + mod2
+	+ " " + tag0
+	+ " " + tag1
+	+ " " + tag2
+	+ " __ __"
+	+ " " + tag1 + "^" + tag2
+	+ " " + tag2 + "^__"
+	+ " " + tag0 + "^" + tag1 + "^" + tag2
+	+ " " + tag2 + "^__^__"
+	+ " __";
+      r_instances.push_back( inst );      
     }
     else {
       for ( size_t i=0 ; i < words.size(); ++i ){
@@ -717,45 +721,53 @@ void Parser::createRelDir( const parseData& pd ){
 	  tag2 = "__";
 	  mod2 = "__";
 	}
-	ds << word_2;
-	ds << " " << word_1;
-	ds << " " << word0;
-	ds << " " << word1;
-	ds << " " << word2;
-	ds << " " << tag_2;
-	ds << " " << tag_1;
-	ds << " " << tag0;
-	ds << " " << tag1;
-	ds << " " << tag2;
-	ds << " " << word_2 << "^" << tag_2;
-	ds << " " << word_1 << "^" << tag_1;
-	ds << " " << word0 << "^" << tag0;
-	ds << " " << word1 << "^" << tag1;
-	ds << " " << word2 << "^" << tag2;
-	ds << " " << tag_1 << "^" << tag0;
-	ds << " " << tag0 << "^" << tag1;
-	ds << " " << mod_1;
-	ds << " " << mod0;
-	ds << " " << mod1;
-	ds << " ROOT" << endl;
+	string inst = word_2
+	  + " " + word_1
+	  + " " + word0
+	  + " " + word1
+	  + " " + word2
+	  + " " + tag_2
+	  + " " + tag_1
+	  + " " + tag0
+	  + " " + tag1
+	  + " " + tag2
+	  + " " + word_2 + "^" + tag_2
+	  + " " + word_1 + "^" + tag_1
+	  + " " + word0 + "^" + tag0
+	  + " " + word1 + "^" + tag1
+	  + " " + word2 + "^" + tag2
+	  + " " + tag_1 + "^" + tag0
+	  + " " + tag0 + "^" + tag1
+	  + " " + mod_1
+	  + " " + mod0
+	  + " " + mod1
+	+ " ROOT";
+	d_instances.push_back( inst );      
 	//
-	rs << word_2;
-	rs << " " << word_1;
-	rs << " " << word0;
-	rs << " " << word1;
-	rs << " " << word2;
-	rs << " " << mod0;
-	rs << " " << tag_2;
-	rs << " " << tag_1;
-	rs << " " << tag0;
-	rs << " " << tag1;
-	rs << " " << tag2;
-	rs << " " << tag_1 << "^" << tag0;
-	rs << " " << tag0 << "^" << tag1;
-	rs << " " << tag_2 << "^" << tag_1 << "^" << tag0;
-	rs << " " << tag0 << "^" << tag1 << "^" << tag2;
-	rs << " __" << endl;
+	inst = word_2
+	  + " " + word_1
+	  + " " + word0
+	  + " " + word1
+	  + " " + word2
+	  + " " + mod0
+	  + " " + tag_2
+	  + " " + tag_1
+	  + " " + tag0
+	  + " " + tag1
+	  + " " + tag2
+	  + " " + tag_1 + "^" + tag0
+	  + " " + tag0 + "^" + tag1
+	  + " " + tag_2 + "^" + tag_1 + "^" + tag0
+	  + " " + tag0 + "^" + tag1 + "^" + tag2
+	  + " __";
+	r_instances.push_back( inst );      
       }
+    }
+    for( const auto& i : d_instances ){
+      ds << i << endl;
+    }
+    for( const auto& i : r_instances ){
+      rs << i << endl;
     }
   }
 }
