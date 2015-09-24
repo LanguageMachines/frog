@@ -307,470 +307,447 @@ static vector<Word *> lookup( Word *word,
   return vec;
 }
 
-void Parser::createPairs( const parseData& pd ){
+void Parser::createPairInstances( const parseData& pd,
+				  vector<string>& instances ){
   const vector<string>& words = pd.words;
   const vector<string>& heads = pd.heads;
   const vector<string>& mods = pd.mods;
-  vector<string> instances;
-  string pFile = fileName + ".pairs.inst";
-  remove( pFile.c_str() );
-  ofstream ps( pFile );
-  if ( ps ){
-    if ( words.size() == 1 ){
-      string inst = 
-	"__ " + words[0] + " __ ROOT ROOT ROOT __ " + heads[0]
-	+ " __ ROOT ROOT ROOT "+ words[0] +"^ROOT ROOT ROOT ROOT^" 
-	+ heads[0] + " _";
+  instances.clear();
+  if ( words.size() == 1 ){
+    string inst = 
+      "__ " + words[0] + " __ ROOT ROOT ROOT __ " + heads[0]
+      + " __ ROOT ROOT ROOT "+ words[0] +"^ROOT ROOT ROOT ROOT^" 
+      + heads[0] + " _";
+    instances.push_back( inst );
+  }
+  else {
+    for ( size_t i=0 ; i < words.size(); ++i ){
+      string word_1, word0, word1;
+      string tag_1, tag0, tag1;
+      string mods0;
+      if ( i == 0 ){
+	word_1 = "__";
+	tag_1 = "__";
+      }
+      else {
+	word_1 = words[i-1];
+	tag_1 = heads[i-1];
+      }
+      word0 = words[i];
+      tag0 = heads[i];
+      mods0 = mods[i];
+      if ( i == words.size() - 1 ){
+	word1 = "__";
+	tag1 = "__";
+      }
+      else {
+	word1 = words[i+1];
+	tag1 = heads[i+1];
+      }
+      string inst = word_1 + " " + word0 + " " + word1
+	+ " ROOT ROOT ROOT " + tag_1 + " " 
+	+ tag0 + " " + tag1 + " ROOT ROOT ROOT " + tag0
+	+ "^ROOT ROOT ROOT ROOT^" + mods0 + " _";
       instances.push_back( inst );
     }
-    else {
-      for ( size_t i=0 ; i < words.size(); ++i ){
-	string word_1, word0, word1;
-	string tag_1, tag0, tag1;
-	string mods0;
-	if ( i == 0 ){
-	  word_1 = "__";
-	  tag_1 = "__";
-	}
-	else {
-	  word_1 = words[i-1];
-	  tag_1 = heads[i-1];
-	}
-	word0 = words[i];
-	tag0 = heads[i];
-	mods0 = mods[i];
-	if ( i == words.size() - 1 ){
-	  word1 = "__";
-	  tag1 = "__";
-	}
-	else {
-	  word1 = words[i+1];
-	  tag1 = heads[i+1];
-	}
-	string inst = word_1 + " " + word0 + " " + word1
-	  + " ROOT ROOT ROOT " + tag_1 + " " 
-	  + tag0 + " " + tag1 + " ROOT ROOT ROOT " + tag0
-	  + "^ROOT ROOT ROOT ROOT^" + mods0 + " _";
+    //
+    for ( size_t wPos=0; wPos < words.size(); ++wPos ){
+      string w_word_1, w_word0, w_word1;
+      string w_tag_1, w_tag0, w_tag1;
+      string w_mods0;
+      if ( wPos == 0 ){
+	w_word_1 = "__";
+	w_tag_1 = "__";
+      }
+      else {
+	w_word_1 = words[wPos-1];
+	w_tag_1 = heads[wPos-1];
+      }
+      w_word0 = words[wPos];
+      w_tag0 = heads[wPos];
+      w_mods0 = mods[wPos];
+      if ( wPos == words.size()-1 ){
+	w_word1 = "__";
+	w_tag1 = "__";
+      }
+      else {
+	w_word1 = words[wPos+1];
+	w_tag1 = heads[wPos+1];
+      }
+      for ( size_t pos=0; pos < words.size(); ++pos ){
+	if ( pos > wPos + maxDepSpan )
+	  break;
+	if ( wPos == pos )
+	  continue;
+	if ( wPos > maxDepSpan + pos )
+	  continue;
+	
+	string inst = w_word_1 + " " + w_word0 + " " + w_word1;
+	
+	if ( pos == 0 )
+	  inst += " __";
+	else
+	  inst += " " + words[pos-1];
+	if ( pos < words.size() )
+	  inst += " " + words[pos];
+	else
+	  inst += " __";
+	if ( pos < words.size()-1 )
+	  inst += " " + words[pos+1];
+	else
+	  inst += " __";
+	inst += " " + w_tag_1 + " " + w_tag0 + " " + w_tag1;
+	if ( pos == 0 )
+	  inst += " __";
+	else
+	  inst += " " + heads[pos-1];
+	if ( pos < words.size() )
+	  inst += " " + heads[pos];
+	else
+	  inst += " __";
+	if ( pos < words.size()-1 )
+	  inst += " " + heads[pos+1];
+	else
+	  inst += " __";
+	
+	inst += " " + w_tag0 + "^";
+	if ( pos < words.size() )
+	  inst += heads[pos];
+	else
+	  inst += "__";
+	
+	if ( wPos > pos )
+	  inst += " LEFT " + TiCC::toString( wPos - pos );
+	else
+	  inst += " RIGHT "+ TiCC::toString( pos - wPos );
+	if ( pos >= words.size() )
+	  inst += " __";
+	else
+	  inst += " " + mods[pos];
+	inst += "^" + w_mods0 + " __";
 	instances.push_back( inst );
       }
-      //
-      for ( size_t wPos=0; wPos < words.size(); ++wPos ){
-	string w_word_1, w_word0, w_word1;
-	string w_tag_1, w_tag0, w_tag1;
-	string w_mods0;
-	if ( wPos == 0 ){
-	  w_word_1 = "__";
-	  w_tag_1 = "__";
-	}
-	else {
-	  w_word_1 = words[wPos-1];
-	  w_tag_1 = heads[wPos-1];
-	}
-	w_word0 = words[wPos];
-	w_tag0 = heads[wPos];
-	w_mods0 = mods[wPos];
-	if ( wPos == words.size()-1 ){
-	  w_word1 = "__";
-	  w_tag1 = "__";
-	}
-	else {
-	  w_word1 = words[wPos+1];
-	  w_tag1 = heads[wPos+1];
-	}
-	for ( size_t pos=0; pos < words.size(); ++pos ){
-	  if ( pos > wPos + maxDepSpan )
-	    break;
-	  if ( wPos == pos )
-	    continue;
-	  if ( wPos > maxDepSpan + pos )
-	    continue;
-
-	  string inst = w_word_1 + " " + w_word0 + " " + w_word1;
-	  
-	  if ( pos == 0 )
-	    inst += " __";
-	  else
-	    inst += " " + words[pos-1];
-	  if ( pos < words.size() )
-	    inst += " " + words[pos];
-	  else
-	    inst += " __";
-	  if ( pos < words.size()-1 )
-	    inst += " " + words[pos+1];
-	  else
-	    inst += " __";
-	  inst += " " + w_tag_1 + " " + w_tag0 + " " + w_tag1;
-	  if ( pos == 0 )
-	    inst += " __";
-	  else
-	    inst += " " + heads[pos-1];
-	  if ( pos < words.size() )
-	    inst += " " + heads[pos];
-	  else
-	    inst += " __";
-	  if ( pos < words.size()-1 )
-	    inst += " " + heads[pos+1];
-	  else
-	    inst += " __";
-
-	  inst += " " + w_tag0 + "^";
-	  if ( pos < words.size() )
-	    inst += heads[pos];
-	  else
-	    inst += "__";
-
-	  if ( wPos > pos )
-	    inst += " LEFT " + TiCC::toString( wPos - pos );
-	  else
-	    inst += " RIGHT "+ TiCC::toString( pos - wPos );
-	  if ( pos >= words.size() )
-	    inst += " __";
-	  else
-	    inst += " " + mods[pos];
-	  inst += "^" + w_mods0 + " __";
-	  instances.push_back( inst );
-	}
-      }
-    }
-    for( const auto& i : instances ){
-      ps << i << endl;
     }
   }
 }
 
-void Parser::createRelDir( const parseData& pd ){
+void Parser::createDirRelInstances( const parseData& pd, 
+				    vector<string>& d_instances,
+				    vector<string>& r_instances ){
+  d_instances.clear();
+  r_instances.clear();
   const vector<string>& words = pd.words;
   const vector<string>& heads = pd.heads;
   const vector<string>& mods = pd.mods;
 
-  string word_2, word_1, word0, word1, word2;
-  string tag_2, tag_1, tag0, tag1, tag2;
-  string mod_2, mod_1, mod0, mod1, mod2;
-  string dFile = fileName + ".dir.inst";
-  remove( dFile.c_str() );
-  ofstream ds( dFile );
-  string rFile = fileName + ".rels.inst";
-  remove( rFile.c_str() );
-  ofstream rs( rFile );
-  vector<string> d_instances;
-  vector<string> r_instances;
-  if ( ds && rs ){
-    if ( words.size() == 1 ){
-      word0 = words[0];
-      tag0 = heads[0];
-      mod0 = mods[0];
-      string inst = "__ __ " + word0 + " __ __ __ __ " + tag0
-	+ " __ __ __ __ " + word0 + "^" + tag0
-	+ " __ __ __^" + tag0 + " " + tag0 +"^__ __ " + mod0
-	+ " __ ROOT";
-      d_instances.push_back( inst );
-
-      inst = string("__ __" )
-	+ " " + word0
-	+ " __ __"
-	+ " " + mod0
-	+ " __ __"
-	+ " " + tag0
-	+ " __ __"
-	+ " __^" + tag0
-	+ " " + tag0 + "^__"
-	+ " __^__^" + tag0
-	+ " " + tag0 + "^__^__"
-	+ " __";
-      r_instances.push_back( inst );
-    }
-    else if ( words.size() == 2 ){
-      word0 = words[0];
-      tag0 = heads[0];
-      mod0 = mods[0];
-      word1 = words[1];
-      tag1 = heads[1];
-      mod1 = mods[1];
-      string inst = string("__ __")
-	= " " + word0
-	+ " " + word1
-	+ " __ __ __"
-	+ " " + tag0
-	+ " " + tag1
-	+ " __ __ __"
-	+ " " + word0 + "^" + tag0
-	+ " " + word1 + "^" + tag1
-	+ " __ __^" + tag0
-	+ " " + tag0 + "^" + tag1
-	+ " __"
-	+ " " + mod0
-	+ " " + mod1
-	+ " ROOT";
-      d_instances.push_back( inst );
-      inst = string("__")
-	+ " " + word0
-	+ " " + word1
-	+ " __ __ __"
-	+ " " + tag0
-	+ " " + tag1
-	+ " __ __ __"
-	+ " " + word0 + "^" + tag0
-	+ " " + word1 + "^" + tag1
-	+ " __ __"
-	+ " " + tag0 + "^" + tag1
-	+ " " + tag1 + "^__"
-	+ " " + mod0
-	+ " " + mod1
-	+ " __"
-	+ " ROOT";
-      d_instances.push_back( inst );      
-      //
-      inst = string("__ __")
-	+ " " + word0
-	+ " " + word1
-	+ " __"
-	+ " " + mod0
-	+ " __ __"
-	+ " " + tag0
-	+ " " + tag1
-	+ " __"
-	+ " __^" + tag0
-	+ " " + tag0 + "^" + tag1
-	+ " __^__^" + tag0
-	+ " " + tag0 + "^" + tag1 + "^__"
-	+ " __";
-      d_instances.push_back( inst );
-      inst = string("__")
-	+ " " + word0
-	+ " " + word1
-	+ " __ __"
-	+ " " + mod1
+  if ( words.size() == 1 ){
+    string word0 = words[0];
+    string tag0 = heads[0];
+    string mod0 = mods[0];
+    string inst = "__ __ " + word0 + " __ __ __ __ " + tag0
+      + " __ __ __ __ " + word0 + "^" + tag0
+      + " __ __ __^" + tag0 + " " + tag0 +"^__ __ " + mod0
+      + " __ ROOT";
+    d_instances.push_back( inst );
+    
+    inst = "__ __ " + word0 + " __ __ " + mod0
+      + " __ __ "  + tag0 + " __ __ __^" + tag0
+      + " " + tag0 + "^__ __^__^" + tag0
+      + " " + tag0 + "^__^__ __";
+    r_instances.push_back( inst );
+  }
+  else if ( words.size() == 2 ){
+    string word0 = words[0];
+    string tag0 = heads[0];
+    string mod0 = mods[0];
+    string word1 = words[1];
+    string tag1 = heads[1];
+    string mod1 = mods[1];
+    string inst = string("__ __")
+      = " " + word0
+      + " " + word1
+      + " __ __ __"
+      + " " + tag0
+      + " " + tag1
+      + " __ __ __"
+      + " " + word0 + "^" + tag0
+      + " " + word1 + "^" + tag1
+      + " __ __^" + tag0
+      + " " + tag0 + "^" + tag1
       + " __"
-	+ " " + tag0
-	+ " " + tag1
+      + " " + mod0
+      + " " + mod1
+      + " ROOT";
+    d_instances.push_back( inst );
+    inst = string("__")
+      + " " + word0
+      + " " + word1
+      + " __ __ __"
+      + " " + tag0
+      + " " + tag1
+      + " __ __ __"
+      + " " + word0 + "^" + tag0
+      + " " + word1 + "^" + tag1
       + " __ __"
-	+ " " + tag0 + "^" + tag1
-	+ " " + tag1 + "^__"
-	+ " __^" + tag0 + "^" + tag1
-	+ " " + tag1 + "^__^__"
-	+ " __";
-      r_instances.push_back( inst );      
-    }
-    else if ( words.size() == 3 ) {
-      word0 = words[0];
-      tag0 = heads[0];
-      mod0 = mods[0];
-      word1 = words[1];
-      tag1 = heads[1];
-      mod1 = mods[1];
-      word2 = words[2];
-      tag2 = heads[2];
-      mod2 = mods[2];
-      string inst = string("__ __")
+      + " " + tag0 + "^" + tag1
+      + " " + tag1 + "^__"
+      + " " + mod0
+      + " " + mod1
+      + " __"
+      + " ROOT";
+    d_instances.push_back( inst );      
+    //
+    inst = string("__ __")
+      + " " + word0
+      + " " + word1
+      + " __"
+      + " " + mod0
+      + " __ __"
+      + " " + tag0
+      + " " + tag1
+      + " __"
+      + " __^" + tag0
+      + " " + tag0 + "^" + tag1
+      + " __^__^" + tag0
+      + " " + tag0 + "^" + tag1 + "^__"
+      + " __";
+    d_instances.push_back( inst );
+    inst = string("__")
+      + " " + word0
+      + " " + word1
+      + " __ __"
+      + " " + mod1
+      + " __"
+      + " " + tag0
+      + " " + tag1
+      + " __ __"
+      + " " + tag0 + "^" + tag1
+      + " " + tag1 + "^__"
+      + " __^" + tag0 + "^" + tag1
+      + " " + tag1 + "^__^__"
+      + " __";
+    r_instances.push_back( inst );      
+  }
+  else if ( words.size() == 3 ) {
+    string word0 = words[0];
+    string tag0 = heads[0];
+    string mod0 = mods[0];
+    string word1 = words[1];
+    string tag1 = heads[1];
+    string mod1 = mods[1];
+    string word2 = words[2];
+    string tag2 = heads[2];
+    string mod2 = mods[2];
+    string inst = string("__ __")
+      + " " + word0
+      + " " + word1
+      + " " + word2
+      + " __ __"
+      + " " + tag0
+      + " " + tag1
+      + " " + tag2
+      + " __ __"
+      + " " + word0 + "^" + tag0
+      + " " + word1 + "^" + tag1
+      + " " + word2 + "^" + tag2
+      + " __^" + tag0
+      + " " + tag0 + "^" + tag1
+      + " __"
+      + " " + mod0
+      + " " + mod1
+      + " ROOT";
+    d_instances.push_back( inst );
+    inst = string("__")
+      + " " + word0
+      + " " + word1
+      + " " + word2
+      + " __ __"
+      + " " + tag0
+      + " " + tag1
+      + " " + tag2
+      + " __ __"
+      + " " + word0 + "^" + tag0
+      + " " + word1 + "^" + tag1
+      + " " + word2 + "^" + tag2
+      + " __"
+      + " " + tag0 + "^" + tag1
+      + " " + tag1 + "^" + tag2
+      + " " + mod0
+      + " " + mod1
+      + " " + mod2
+      + " ROOT";
+    d_instances.push_back( inst );
+    inst = word0
+      + " " + word1
+      + " " + word2
+      + " __ __"
+      + " " + tag0
+      + " " + tag1
+      + " " + tag2
+      + " __ __"
+      + " " + word0 + "^" + tag0
+      + " " + word1 + "^" + tag1
+      + " " + word2 + "^" + tag2
+      + " __ __"
+      + " " + tag1 + "^" + tag2
+      + " " + tag2 + "^__"
+      + " " + mod1
+      + " " + mod2
+      + " __"
+      + " ROOT";
+    d_instances.push_back( inst );      
+    //
+    inst = string("__ __")
+      + " " + word0
+      + " " + word1
+      + " " + word2
+      + " " + mod0
+      + " __ __"
+      + " " + tag0
+      + " " + tag1
+      + " " + tag2
+      + " __^" + tag0
+      + " " + tag0 + "^" + tag1
+      + " __^__^" + tag0
+      + " " + tag0 + "^" + tag1 + "^" + tag2
+      + " __";
+    r_instances.push_back( inst );      
+    inst = string("__")
+      + " " + word0
+      + " " + word1
+      + " " + word2
+      + " __"
+      + " " + mod1
+      + " __"
+      + " " + tag0
+      + " " + tag1
+      + " " + tag2
+      + " __"
+      + " " + tag0 + "^" + tag1
+      + " " + tag1 + "^" + tag2
+      + " __^" + tag0 + "^" + tag1
+      + " " + tag1 + "^" + tag2 + "^__"
+      + " __";
+    r_instances.push_back( inst );      
+    inst = word0
+      + " " + word1
+      + " " + word2
+      + " __ __"
+      + " " + mod2
+      + " " + tag0
+      + " " + tag1
+      + " " + tag2
+      + " __ __"
+      + " " + tag1 + "^" + tag2
+      + " " + tag2 + "^__"
+      + " " + tag0 + "^" + tag1 + "^" + tag2
+      + " " + tag2 + "^__^__"
+      + " __";
+    r_instances.push_back( inst );      
+  }
+  else {
+    for ( size_t i=0 ; i < words.size(); ++i ){
+      string word_0, word_1, word_2;
+      string tag_0, tag_1, tag_2;
+      string mod_0, mod_1, mod_2;
+      if ( i == 0 ){
+	word_2 = "__";
+	tag_2 = "__";
+	mod_2 = "__";
+	word_1 = "__";
+	tag_1 = "__";
+	mod_1 = "__";
+      }
+      else if ( i == 1 ){
+	word_2 = "__";
+	tag_2 = "__";
+	mod_2 = "__";
+	word_1 = words[i-1];
+	tag_1 = heads[i-1];
+	mod_1 = mods[i-1];
+      }
+      else {
+	word_2 = words[i-2];
+	tag_2 = heads[i-2];
+	mod_2 = mods[i-2];
+	word_1 = words[i-1];
+	tag_1 = heads[i-1];
+	mod_1 = mods[i-1];
+      }
+      string word0 = words[i];
+      string word1, word2;
+      string tag0 = heads[i];
+      string tag1, tag2;
+      string mod0 = mods[i];
+      string mod1, mod2;
+      if ( i < words.size() - 2 ){
+	word1 = words[i+1];
+	tag1 = heads[i+1];
+	mod1 = mods[i+1];
+	word2 = words[i+2];
+	tag2 = heads[i+2];
+	mod2 = mods[i+2];
+      }
+      else if ( i == words.size() - 2 ){
+	word1 = words[i+1];
+	tag1 = heads[i+1];
+	mod1 = mods[i+1];
+	word2 = "__";
+	tag2 = "__";
+	mod2 = "__";
+      }
+      else {
+	word1 = "__";
+	tag1 = "__";
+	mod1 = "__";
+	word2 = "__";
+	tag2 = "__";
+	mod2 = "__";
+      }
+      string inst = word_2
+	+ " " + word_1
 	+ " " + word0
 	+ " " + word1
 	+ " " + word2
-	+ " __ __"
+	+ " " + tag_2
+	+ " " + tag_1
 	+ " " + tag0
 	+ " " + tag1
 	+ " " + tag2
-	+ " __ __"
+	+ " " + word_2 + "^" + tag_2
+	+ " " + word_1 + "^" + tag_1
 	+ " " + word0 + "^" + tag0
 	+ " " + word1 + "^" + tag1
 	+ " " + word2 + "^" + tag2
-	+ " __^" + tag0
+	+ " " + tag_1 + "^" + tag0
 	+ " " + tag0 + "^" + tag1
-	+ " __"
+	+ " " + mod_1
 	+ " " + mod0
 	+ " " + mod1
-	+ " ROOT";
-      d_instances.push_back( inst );
-      inst = string("__")
-	+ " " + word0
-	+ " " + word1
-	+ " " + word2
-	+ " __ __"
-	+ " " + tag0
-	+ " " + tag1
-	+ " " + tag2
-	+ " __ __"
-	+ " " + word0 + "^" + tag0
-	+ " " + word1 + "^" + tag1
-	+ " " + word2 + "^" + tag2
-	+ " __"
-	+ " " + tag0 + "^" + tag1
-	+ " " + tag1 + "^" + tag2
-	+ " " + mod0
-	+ " " + mod1
-	+ " " + mod2
-	+ " ROOT";
-      d_instances.push_back( inst );
-      inst = word0
-	+ " " + word1
-	+ " " + word2
-	+ " __ __"
-	+ " " + tag0
-	+ " " + tag1
-	+ " " + tag2
-	+ " __ __"
-	+ " " + word0 + "^" + tag0
-	+ " " + word1 + "^" + tag1
-	+ " " + word2 + "^" + tag2
-	+ " __ __"
-	+ " " + tag1 + "^" + tag2
-	+ " " + tag2 + "^__"
-	+ " " + mod1
-	+ " " + mod2
-	+ " __"
 	+ " ROOT";
       d_instances.push_back( inst );      
       //
-      inst = string("__ __")
+      inst = word_2
+	+ " " + word_1
 	+ " " + word0
 	+ " " + word1
 	+ " " + word2
 	+ " " + mod0
-	+ " __ __"
+	+ " " + tag_2
+	+ " " + tag_1
 	+ " " + tag0
 	+ " " + tag1
 	+ " " + tag2
-      + " __^" + tag0
+	+ " " + tag_1 + "^" + tag0
 	+ " " + tag0 + "^" + tag1
-      + " __^__^" + tag0
+	+ " " + tag_2 + "^" + tag_1 + "^" + tag0
 	+ " " + tag0 + "^" + tag1 + "^" + tag2
-      + " __";
-      r_instances.push_back( inst );      
-      inst = string("__")
-	+ " " + word0
-	+ " " + word1
-	+ " " + word2
-	+ " __"
-	+ " " + mod1
-	+ " __"
-	+ " " + tag0
-	+ " " + tag1
-	+ " " + tag2
-	+ " __"
-	+ " " + tag0 + "^" + tag1
-	+ " " + tag1 + "^" + tag2
-	+ " __^" + tag0 + "^" + tag1
-	+ " " + tag1 + "^" + tag2 + "^__"
 	+ " __";
       r_instances.push_back( inst );      
-      inst = word0
-	+ " " + word1
-	+ " " + word2
-	+ " __ __"
-	+ " " + mod2
-	+ " " + tag0
-	+ " " + tag1
-	+ " " + tag2
-	+ " __ __"
-	+ " " + tag1 + "^" + tag2
-	+ " " + tag2 + "^__"
-	+ " " + tag0 + "^" + tag1 + "^" + tag2
-	+ " " + tag2 + "^__^__"
-	+ " __";
-      r_instances.push_back( inst );      
-    }
-    else {
-      for ( size_t i=0 ; i < words.size(); ++i ){
-	if ( i == 0 ){
-	  word_2 = "__";
-	  tag_2 = "__";
-	  mod_2 = "__";
-	  word_1 = "__";
-	  tag_1 = "__";
-	  mod_1 = "__";
-	}
-	else if ( i == 1 ){
-	  word_2 = "__";
-	  tag_2 = "__";
-	  mod_2 = "__";
-	  word_1 = words[i-1];
-	  tag_1 = heads[i-1];
-	  mod_1 = mods[i-1];
-	}
-	else {
-	  word_2 = words[i-2];
-	  tag_2 = heads[i-2];
-	  mod_2 = mods[i-2];
-	  word_1 = words[i-1];
-	  tag_1 = heads[i-1];
-	  mod_1 = mods[i-1];
-	}
-	word0 = words[i];
-	tag0 = heads[i];
-	mod0 = mods[i];
-	if ( i < words.size() - 2 ){
-	  word1 = words[i+1];
-	  tag1 = heads[i+1];
-	  mod1 = mods[i+1];
-	  word2 = words[i+2];
-	  tag2 = heads[i+2];
-	  mod2 = mods[i+2];
-	}
-	else if ( i == words.size() - 2 ){
-	  word1 = words[i+1];
-	  tag1 = heads[i+1];
-	  mod1 = mods[i+1];
-	  word2 = "__";
-	  tag2 = "__";
-	  mod2 = "__";
-	}
-	else {
-	  word1 = "__";
-	  tag1 = "__";
-	  mod1 = "__";
-	  word2 = "__";
-	  tag2 = "__";
-	  mod2 = "__";
-	}
-	string inst = word_2
-	  + " " + word_1
-	  + " " + word0
-	  + " " + word1
-	  + " " + word2
-	  + " " + tag_2
-	  + " " + tag_1
-	  + " " + tag0
-	  + " " + tag1
-	  + " " + tag2
-	  + " " + word_2 + "^" + tag_2
-	  + " " + word_1 + "^" + tag_1
-	  + " " + word0 + "^" + tag0
-	  + " " + word1 + "^" + tag1
-	  + " " + word2 + "^" + tag2
-	  + " " + tag_1 + "^" + tag0
-	  + " " + tag0 + "^" + tag1
-	  + " " + mod_1
-	  + " " + mod0
-	  + " " + mod1
-	+ " ROOT";
-	d_instances.push_back( inst );      
-	//
-	inst = word_2
-	  + " " + word_1
-	  + " " + word0
-	  + " " + word1
-	  + " " + word2
-	  + " " + mod0
-	  + " " + tag_2
-	  + " " + tag_1
-	  + " " + tag0
-	  + " " + tag1
-	  + " " + tag2
-	  + " " + tag_1 + "^" + tag0
-	  + " " + tag0 + "^" + tag1
-	  + " " + tag_2 + "^" + tag_1 + "^" + tag0
-	  + " " + tag0 + "^" + tag1 + "^" + tag2
-	  + " __";
-	r_instances.push_back( inst );      
-      }
-    }
-    for( const auto& i : d_instances ){
-      ds << i << endl;
-    }
-    for( const auto& i : r_instances ){
-      rs << i << endl;
     }
   }
 }
+
 
 void Parser::addDeclaration( Document& doc ) const {
 #pragma omp critical(foliaupdate)
@@ -845,18 +822,6 @@ void Parser::prepareParse( const vector<Word *>& fwords,
   }
 
   createParserFile( pd );
-
-#pragma omp parallel sections
-  {
-#pragma omp section
-    {
-      createPairs( pd );
-    }
-#pragma omp section
-    {
-      createRelDir( pd );
-    }
-  }
 }
 
 void appendResult( const vector<Word *>& words,
@@ -938,6 +903,16 @@ void appendParseResult( const vector<Word *>& words,
   appendResult( words, pd, tagset, nums, roles );
 }
 
+void timbl( Timbl::TimblAPI* tim, 
+	    const vector<string>& instances, 
+	    vector<timbl_result>& results ){
+  results.clear();
+  for( const auto& inst : instances ){
+    const Timbl::ValueDistribution *db;
+    const Timbl::TargetValue *tv = tim->Classify( inst, db );
+    results.push_back( timbl_result( tv->Name(), db->Confidence(tv), db ) );
+  }
+}
 
 void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
 		    const string& tmpDirName, TimerBlock& timers ){
@@ -964,33 +939,87 @@ void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
   timers.prepareTimer.start();
   parseData pd;
   prepareParse( words, mwuSet, pd );
-  timers.prepareTimer.stop();
-#pragma omp parallel sections
-  {
-#pragma omp section
-    {
-      remove( pairsOutName.c_str() );
-      timers.pairsTimer.start();
-      pairs->Test( pairsInName, pairsOutName );
-      timers.pairsTimer.stop();
+  ofstream ps( pairsInName );
+  ofstream ds( dirInName );
+  ofstream rs( relsInName );
+  vector<string> p_instances;
+  vector<timbl_result> p_results;
+  vector<string> d_instances;
+  vector<timbl_result> d_results;
+  vector<string> r_instances;
+  vector<timbl_result> r_results;
+  if ( ps && ds && rs ){
+    createPairInstances( pd, p_instances );
+    createDirRelInstances( pd, d_instances, r_instances );
+    for( const auto& i : p_instances ){
+      ps << i << endl;
     }
-#pragma omp section
-    {
-      remove( dirOutName.c_str() );
-      timers.dirTimer.start();
-      dir->Test( dirInName, dirOutName );
-      timers.dirTimer.stop();
+    for( const auto& i : d_instances ){
+      ds << i << endl;
     }
-#pragma omp section
-    {
-      remove( relsOutName.c_str() );
-      timers.relsTimer.start();
-      rels->Test( relsInName, relsOutName );
-      timers.relsTimer.stop();
+    for( const auto& i : r_instances ){
+      rs << i << endl;
     }
   }
-  timers.csiTimer.start();
+  timers.prepareTimer.stop();
+  if ( oldparser ){    
+#pragma omp parallel sections
+    {
+#pragma omp section
+      {
+	remove( pairsOutName.c_str() );
+	timers.pairsTimer.start();
+	pairs->Test( pairsInName, pairsOutName );
+	timers.pairsTimer.stop();
+      }
+#pragma omp section
+      {
+	remove( dirOutName.c_str() );
+	timers.dirTimer.start();
+	dir->Test( dirInName, dirOutName );
+	timers.dirTimer.stop();
+      }
+#pragma omp section
+      {
+	remove( relsOutName.c_str() );
+	timers.relsTimer.start();
+	rels->Test( relsInName, relsOutName );
+	timers.relsTimer.stop();
+      }
+    }
+  }
+  else {
+#pragma omp parallel sections
+    {
+#pragma omp section
+      {
+	remove( pairsOutName.c_str() );
+	timers.pairsTimer.start();
+	timbl( pairs, p_instances, p_results );
+	//	pairs->Test( pairsInName, pairsOutName );
+	timers.pairsTimer.stop();
+      }
+#pragma omp section
+      {
+	remove( dirOutName.c_str() );
+	timers.dirTimer.start();
+	timbl( dir, d_instances, d_results );
+	dir->Test( dirInName, dirOutName );
+	timers.dirTimer.stop();
+      }
+#pragma omp section
+      {
+	remove( relsOutName.c_str() );
+	timers.relsTimer.start();
+	timbl( rels, r_instances, r_results );
+	rels->Test( relsInName, relsOutName );
+	timers.relsTimer.stop();
+      }
+    }
+  }
+
   if ( oldparser ){
+    timers.csiTimer.start();
     try {
       PI->parse( pairsOutName,
 		 relsOutName,
@@ -1013,11 +1042,13 @@ void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
       *Log(parseLog) << "couldn't open results file: " << resFileName << endl;
   }
   else {
-    vector<parsrel> res = parse( pairsOutName,
-				 relsOutName,
-				 dirOutName,
+    timers.csiTimer.start();
+    vector<parsrel> res = parse( pairsOutName, p_results,
+				 relsOutName, r_results,
+				 dirOutName, d_results,
 				 maxDepSpan,
 				 fileName );
+    timers.csiTimer.stop();
     appendParseResult( words, pd, dep_tagset, res );
   }
 

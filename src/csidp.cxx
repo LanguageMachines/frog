@@ -45,11 +45,14 @@ void split_dist( const string& distribution, multimap<string,double>& result ){
 }
 
 void formulateWCSP( const vector<string>& sentences,
-		    istream& dirs, istream& rels,
-		    istream& pairs,
+		    const vector<timbl_result>& d_res,
+		    istream& rels,
+		    const vector<timbl_result>& r_res,
+		    const vector<timbl_result>& p_res,
 		    vector<Constraint*>& constraints,
 		    int maxDist ){
   constraints.clear();
+  vector<timbl_result>::const_iterator pit = p_res.begin();
   for ( const auto& sentence : sentences ){
     vector<string> dependents;
     TiCC::split( sentence, dependents );
@@ -57,24 +60,9 @@ void formulateWCSP( const vector<string>& sentences,
     int headId = 0;
     //    cerr << "sentence: " << sentence << " ID=" << dependent_id << endl;
 
-    string line;
-    getline( pairs, line );
-    vector<string> timbl_result;
-    TiCC::split_at_first_of( line, timbl_result, "{}" );
-    // using TiCC::operator<<;
-    // for ( const auto& hm : timbl_result ){
-    //   cerr << "timbl_resultf = " << hm << endl;
-    // }
-    string instance = timbl_result[0];
-    string distribution = timbl_result[1];
-    string distance = timbl_result[2];
-    // cerr << "instance: " << instance << endl;
-    // cerr << "distribution: " << distribution << endl;
-    // cerr << "distance: " << distance << endl;
-    string top_class = get_class( instance );
-    map<string,double> dist;
-    split_dist( distribution, dist );
-    double conf = dist[top_class];
+    string top_class = pit->cls();
+    double conf = pit->confidence();
+    ++pit;
     //    cerr << "class=" << top_class << " met conf " << conf << endl;
     if ( top_class != "__" ){
       constraints.push_back(new HasDependency(dependent_id,headId,top_class,conf));
@@ -95,22 +83,13 @@ void formulateWCSP( const vector<string>& sentences,
 	  continue;
 	}
 	string line;
-	if ( !getline( pairs, line ) ){
-	  cerr << "OEPS pairs leeg? " << endl;
+	if ( pit == p_res.end() ){
+	  cerr << "OEPS p_res leeg? " << endl;
 	  break;
 	}
-	vector<string> timbl_result;
-	TiCC::split_at_first_of( line, timbl_result, "{}" );
-	string instance = timbl_result[0];
-	string distribution = timbl_result[1];
-	string distance = timbl_result[2];
-	// cerr << "instance: " << instance << endl;
-	// cerr << "distribution: " << distribution << endl;
-	// cerr << "distance: " << distance << endl;
-	string top_class = get_class( instance );
-	map<string,double> dist;
-	split_dist( distribution, dist );
-	double conf = dist[top_class];
+	string top_class = pit->cls();
+	double conf = pit->confidence();
+	++pit;
 	//	cerr << "class=" << top_class << " met conf " << conf << endl;
 	if ( top_class != "__" ){
 	  constraints.push_back( new HasDependency(dependent_id,headId,top_class,conf));
@@ -118,27 +97,17 @@ void formulateWCSP( const vector<string>& sentences,
       }
     }
   }
+
+  vector<timbl_result>::const_iterator dit = d_res.begin();
+  vector<timbl_result>::const_iterator rit = r_res.begin();
   for ( const auto& head : sentences ){
     vector<string> tokens;
     TiCC::split( head, tokens );
     int token_id = TiCC::stringTo<int>( tokens[0] );
-    string line;
-    if ( !getline( dirs, line ) ){
-      break;
-    }
-    vector<string> timbl_result;
-    TiCC::split_at_first_of( line, timbl_result, "{}" );
-    string instance = timbl_result[0];
-    string distribution = timbl_result[1];
-    string distance = timbl_result[2];
-    // cerr << "instance: " << instance << endl;
-    // cerr << "distribution: " << distribution << endl;
-    // cerr << "distance: " << distance << endl;
-    map<string,double> dist;
-    split_dist( distribution, dist );
-    for( const auto& d : dist ){
+    for ( auto const& d : dit->dist() ){
       constraints.push_back( new DependencyDirection( token_id, d.first, d.second ) );
     }
+    ++dit;
 
     for ( const auto& token : sentences ){
       vector<string> tokens;
@@ -178,15 +147,27 @@ void formulateWCSP( const vector<string>& sentences,
   }
 }
 
-vector<parsrel> parse( const string& pair_file, const string& rel_file,
-		       const string& dir_file, int maxDist,
+timbl_result::timbl_result( const string& cls,
+			    double conf,
+			    const Timbl::ValueDistribution* vd ): 
+  _cls(cls), _confidence(conf) {
+  Timbl::ValueDistribution::dist_iterator it = vd->begin();
+  while ( it != vd->end() ){
+    _dist.push_back( make_pair(it->second->Value()->Name(),it->second->Weight()) );
+    ++it;
+  }
+}
+
+vector<parsrel> parse( const string& pair_file, 
+		       const vector<timbl_result>& p_res,
+		       const string& rel_file,
+		       const vector<timbl_result>& r_res,
+		       const string& dir_file, 
+		       const vector<timbl_result>& d_res,
+		       int maxDist,
 		       const string& in_file ){
-  ifstream pairs( pair_file );
-  //  cerr << "opened pairs: " << pair_file << endl;
   ifstream rels( rel_file );
   //  cerr << "opened rels: " << rel_file << endl;
-  ifstream dirs( dir_file );
-  //  cerr << "opened dir: " << dir_file << endl;
   ifstream is( in_file );
   //  cerr << "opened inputfile: " << in_file << endl;
   string line;
@@ -195,7 +176,7 @@ vector<parsrel> parse( const string& pair_file, const string& rel_file,
     sentences.push_back( line );
   }
   vector<Constraint*> constraints;
-  formulateWCSP( sentences, dirs, rels, pairs, constraints, maxDist );
+  formulateWCSP( sentences, d_res, rels, r_res, p_res, constraints, maxDist );
   CKYParser parser( sentences.size() );
   for ( const auto& constraint : constraints ){
     parser.addConstraint( constraint );

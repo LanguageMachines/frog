@@ -91,8 +91,11 @@ class Parser {
   void createParserFile( const parseData& );
   std::string getTagset() const { return dep_tagset; };
  private:
-  void createRelDir( const parseData& );
-  void createPairs( const parseData& );
+  void createPairInstances( const parseData&, 
+			    std::vector<std::string>& );
+  void createDirRelInstances( const parseData&, 
+			      std::vector<std::string>&,
+			      std::vector<std::string>& );
   Timbl::TimblAPI *pairs;
   Timbl::TimblAPI *dir;
   Timbl::TimblAPI *rels;
