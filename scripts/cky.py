@@ -74,7 +74,9 @@ class CKYParser:
 					score += constraint.weight
 					constraints.add(constraint)
 			if score > bestScore:
-#                                print >> sys.stderr,"Update best:",label,score,constraints
+#                                print >> sys.stderr,"Update best:",label,score
+#                                for c in constraints:
+#                                        print >> sys.stderr,c
 				bestScore = score
 				best = label
 				bestConstraints = constraints
@@ -82,6 +84,34 @@ class CKYParser:
 		return best, bestScore, bestConstraints
 
 	def parse(self):
+#                print >> sys.stderr,"inDepC:"
+#                i =0;
+#                for c in self.inDepConstraints:
+#                        print >> sys.stderr,i
+#                        i +=1
+#                        for d in c:
+#                                print >> sys.stderr,d
+  
+#                print >> sys.stderr,"outDepC:"
+#                i =0;
+#                for c in self.outDepConstraints:
+#                        print >> sys.stderr,i
+#                        i+=1
+#                        for d in c:
+#                                print >> sys.stderr,d
+  
+#               print >> sys.stderr,"edgeC:"
+#                i =0;
+#                for c in self.edgeConstraints:
+#                        print >> sys.stderr,i
+#                        i+=1
+#                       j =0;
+#                        for d in c:
+#                                print >> sys.stderr,j
+#                                j+=1
+#                                for e in d:
+#                                        print >> sys.stderr,e
+  
 		C = {}
 		for s in xrange(self.numTokens + 1):
 			for d in ["r", "l"]:

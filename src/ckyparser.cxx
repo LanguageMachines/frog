@@ -14,7 +14,6 @@ ostream& operator<<( ostream& os, const Constraint* c ){
   }
   else
     os << "None";
-  os << endl;
   return os;
 }
 
@@ -132,6 +131,34 @@ string CKYParser::bestEdge( SubTree& leftSubtree, SubTree& rightSubtree,
 }
 
 void CKYParser::parse(){
+  // cerr << "inDep:" << endl;
+  // int i = 0;
+  // for( auto const& it : inDepConstraints ){
+  //   cerr << i++ << endl;
+  //   for( auto const& it2: it )
+  //     cerr << it2 << endl;
+  // }
+  // cerr << "outDep:" << endl;
+  // i = 0;
+  // for( auto const& it : outDepConstraints ){
+  //   cerr << i++ << endl;
+  //   for( auto const& it2: it )
+  //     cerr << it2 << endl;
+  // }
+  // cerr << "edgeC:" << endl;
+  // i = 0;
+  // for( auto const& it :edgeConstraints ){
+  //   cerr << i++ << endl;
+  //   int j = 0;
+  //   for( auto const& it2 : it ){
+  //     cerr << j++ << endl;
+  //     for( auto const& it3 : it2 ){
+  // 	cerr << it3 << endl;
+  //     }
+  //   }
+  // }
+  
+
   chart.resize( numTokens +1 );
   for ( auto& it : chart ){
     it.resize( numTokens + 1 );
