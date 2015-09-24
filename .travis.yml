@@ -27,14 +27,14 @@ before_install:
     - sudo make install
     - cd ..
     - git clone https://github.com/proycon/timbl
-    - cd ucto
+    - cd timbl
     - bash bootstrap.sh
     - ./configure
     - make
     - sudo make install
     - cd ..
     - git clone https://github.com/proycon/mbt
-    - cd ucto
+    - cd mbt
     - bash bootstrap.sh
     - ./configure
     - make
