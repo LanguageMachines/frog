@@ -18,11 +18,8 @@ private:
 };
 
 
-std::vector<parsrel> parse( const std::string& dep_file, 
+std::vector<parsrel> parse( const std::vector<timbl_result>&,
 			    const std::vector<timbl_result>&,
-			    const std::string& mod_file,
-			    const std::vector<timbl_result>&,
-			    const std::string& dir_file, 
 			    const std::vector<timbl_result>&,
 			    int maxDist,
 			    const std::string& in_file );

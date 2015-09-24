@@ -996,7 +996,6 @@ void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
 	remove( pairsOutName.c_str() );
 	timers.pairsTimer.start();
 	timbl( pairs, p_instances, p_results );
-	//	pairs->Test( pairsInName, pairsOutName );
 	timers.pairsTimer.stop();
       }
 #pragma omp section
@@ -1004,7 +1003,6 @@ void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
 	remove( dirOutName.c_str() );
 	timers.dirTimer.start();
 	timbl( dir, d_instances, d_results );
-	dir->Test( dirInName, dirOutName );
 	timers.dirTimer.stop();
       }
 #pragma omp section
@@ -1012,7 +1010,6 @@ void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
 	remove( relsOutName.c_str() );
 	timers.relsTimer.start();
 	timbl( rels, r_instances, r_results );
-	rels->Test( relsInName, relsOutName );
 	timers.relsTimer.stop();
       }
     }
@@ -1043,9 +1040,9 @@ void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
   }
   else {
     timers.csiTimer.start();
-    vector<parsrel> res = parse( pairsOutName, p_results,
-				 relsOutName, r_results,
-				 dirOutName, d_results,
+    vector<parsrel> res = parse( p_results,
+				 r_results,
+				 d_results,
 				 maxDepSpan,
 				 fileName );
     timers.csiTimer.stop();

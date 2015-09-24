@@ -17,36 +17,21 @@ string get_class( const string& instance ){
 }
 
 
-void split_dist( const string& distribution, map<string,double>& result ){
+void split_dist( const vector< pair<string,double>>& dist, 
+		 map<string,double>& result ){
   result.clear();
-  vector<string> dist_parts;
-  TiCC::split_at( distribution, dist_parts, "," );
-  for( const auto& it : dist_parts ){
-    vector<string> parts;
-    TiCC::split( it, parts );
-    result[parts[0]] = TiCC::stringTo<double>( parts[1] );
-  }
-}
-
-void split_dist( const string& distribution, multimap<string,double>& result ){
-  result.clear();
-  vector<string> dist_parts;
-  TiCC::split_at( distribution, dist_parts, "," );
-  for( const auto& it : dist_parts ){
-    vector<string> parts;
-    TiCC::split( it, parts );
-    double d = TiCC::stringTo<double>( parts[1] );
+  for( const auto& it : dist ){
+    double d = it.second;
     vector<string> tags;
-    TiCC::split_at( parts[0], tags, "|" );
+    TiCC::split_at( it.first, tags, "|" );
     for( const auto& t : tags ){
-      result.insert( make_pair(t, d ) );
+      result[t] += d;
     }
   }
 }
 
 void formulateWCSP( const vector<string>& sentences,
 		    const vector<timbl_result>& d_res,
-		    istream& rels,
 		    const vector<timbl_result>& r_res,
 		    const vector<timbl_result>& p_res,
 		    vector<Constraint*>& constraints,
@@ -113,36 +98,20 @@ void formulateWCSP( const vector<string>& sentences,
       vector<string> tokens;
       TiCC::split( token, tokens );
       int token_id = TiCC::stringTo<int>( tokens[0] );
-      string line;
-      if ( !getline( rels, line ) ){
+      if ( rit == r_res.end() ){
 	break;
       }
-      vector<string> timbl_result;
-      TiCC::split_at_first_of( line, timbl_result, "{}" );
-      string instance = timbl_result[0];
-      string distribution = timbl_result[1];
-      string distance = timbl_result[2];
-      // cerr << "instance: " << instance << endl;
-      // cerr << "distribution: " << distribution << endl;
-      // cerr << "distance: " << distance << endl;
-      string top_class = get_class( instance );
+      string top_class = rit->cls();
       if ( top_class != "__" ){
-	multimap<string,double> mdist;
-	split_dist( distribution, mdist );
-	// using TiCC::operator<<;
-	// cerr << "Multi dist = " << mdist << endl;
+	map<string,double> splits;
+	split_dist( rit->dist(), splits );
 	vector<string> clss;
 	TiCC::split_at( top_class, clss, "|" );
 	for( const auto& rel : clss ){
-	  double conf = 0.0;
-	  for( const auto& d : mdist ){
-	    if ( d.first == rel ){
-	      conf += d.second;
-	    }
-	  }
-	  constraints.push_back( new HasIncomingRel( token_id, rel, conf ) );
+	  constraints.push_back( new HasIncomingRel( token_id, rel, splits[rel] ) );
 	}
       }
+      ++rit;
     }
   }
 }
@@ -158,16 +127,11 @@ timbl_result::timbl_result( const string& cls,
   }
 }
 
-vector<parsrel> parse( const string& pair_file, 
-		       const vector<timbl_result>& p_res,
-		       const string& rel_file,
+vector<parsrel> parse( const vector<timbl_result>& p_res,
 		       const vector<timbl_result>& r_res,
-		       const string& dir_file, 
 		       const vector<timbl_result>& d_res,
 		       int maxDist,
 		       const string& in_file ){
-  ifstream rels( rel_file );
-  //  cerr << "opened rels: " << rel_file << endl;
   ifstream is( in_file );
   //  cerr << "opened inputfile: " << in_file << endl;
   string line;
@@ -176,7 +140,7 @@ vector<parsrel> parse( const string& pair_file,
     sentences.push_back( line );
   }
   vector<Constraint*> constraints;
-  formulateWCSP( sentences, d_res, rels, r_res, p_res, constraints, maxDist );
+  formulateWCSP( sentences, d_res, r_res, p_res, constraints, maxDist );
   CKYParser parser( sentences.size() );
   for ( const auto& constraint : constraints ){
     parser.addConstraint( constraint );
