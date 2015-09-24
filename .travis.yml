@@ -60,12 +60,6 @@ install:
     - make
     - sudo make install
     - git clone https://github.com/proycon/frogtests.git
-    - cd frogtests
-    - bash bootstrap.sh
-    - ./configure
-    - make
-    - sudo make install
-    - cd ..
 script: 
     - cd frogtests && LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib ./testall >&2
     
