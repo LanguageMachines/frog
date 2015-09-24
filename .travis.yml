@@ -4,7 +4,7 @@ compiler:
     - clang
 before_install:
     - sudo apt-get update
-    - sudo apt-get install pkg-config autoconf-archive autotools-dev libicu-dev libxml2-dev libbz2-dev zlib1g-dev 
+    - sudo apt-get install pkg-config autoconf-archive autotools-dev libicu-dev libxml2-dev libbz2-dev zlib1g-dev python-dev
     - git clone https://github.com/proycon/ticcutils
     - cd ticcutils
     - bash bootstrap.sh
@@ -20,6 +20,20 @@ before_install:
     - sudo make install
     - cd ..
     - git clone https://github.com/proycon/ucto
+    - cd ucto
+    - bash bootstrap.sh
+    - ./configure
+    - make
+    - sudo make install
+    - cd ..
+    - git clone https://github.com/proycon/timbl
+    - cd ucto
+    - bash bootstrap.sh
+    - ./configure
+    - make
+    - sudo make install
+    - cd ..
+    - git clone https://github.com/proycon/mbt
     - cd ucto
     - bash bootstrap.sh
     - ./configure
