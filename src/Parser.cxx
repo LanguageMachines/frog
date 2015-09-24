@@ -464,7 +464,7 @@ void Parser::createDirRelInstances( const parseData& pd,
     string tag1 = heads[1];
     string mod1 = mods[1];
     string inst = string("__ __")
-      = " " + word0
+      + " " + word0
       + " " + word1
       + " __ __ __"
       + " " + tag0
@@ -511,7 +511,7 @@ void Parser::createDirRelInstances( const parseData& pd,
       + " __^__^" + tag0
       + " " + tag0 + "^" + tag1 + "^__"
       + " __";
-    d_instances.push_back( inst );
+    r_instances.push_back( inst );
     inst = string("__")
       + " " + word0
       + " " + word1
