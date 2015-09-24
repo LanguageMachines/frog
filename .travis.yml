@@ -1,0 +1,43 @@
+language: cpp
+compiler:
+    - gcc
+    - clang
+before_install:
+    - sudo apt-get update
+    - sudo apt-get install pkg-config autoconf-archive autotools-dev libicu-dev libxml2-dev libbz2-dev zlib1g-dev 
+    - git clone https://github.com/proycon/ticcutils
+    - cd ticcutils
+    - bash bootstrap.sh
+    - ./configure
+    - make
+    - sudo make install
+    - cd ..
+    - git clone https://github.com/proycon/libfolia
+    - cd libfolia
+    - bash bootstrap.sh
+    - ./configure
+    - make
+    - sudo make install
+    - cd ..
+    - git clone https://github.com/proycon/ucto
+    - cd ucto
+    - bash bootstrap.sh
+    - ./configure
+    - make
+    - sudo make install
+    - cd ..
+install: 
+    - bash bootstrap.sh
+    - ./configure
+    - make
+    - sudo make install
+    - git clone https://github.com/proycon/frogtests.git
+    - cd frogtests
+    - bash bootstrap.sh
+    - ./configure
+    - make
+    - sudo make install
+    - cd ..
+script: 
+    - cd frogtests && LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib ./testall >&2
+    
