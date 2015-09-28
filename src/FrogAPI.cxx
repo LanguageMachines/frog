@@ -441,7 +441,7 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
 	showParse = false;
       }
       else {
-        myParser->Parse( swords, myMwu->getTagset(), timers );
+        myParser->Parse( swords, timers );
       }
     }
   }

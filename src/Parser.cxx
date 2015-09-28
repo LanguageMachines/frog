@@ -121,6 +121,13 @@ bool Parser::init( const Configuration& configuration ){
   else
     POS_tagset = val;
 
+  val = configuration.lookUp( "set", "mwu" );
+  if ( val.empty() ){
+    MWU_tagset = "http://ilk.uvt.nl/folia/sets/frog-mwu-nl";
+  }
+  else
+    MWU_tagset = val;
+
   val = configuration.lookUp( "maxDepSpan", "parser" );
   if ( !val.empty() ){
     size_t gs = TiCC::stringTo<size_t>( val );
@@ -673,7 +680,6 @@ void Parser::addDeclaration( Document& doc ) const {
 }
 
 vector<string> Parser::prepareParse( const vector<Word *>& fwords,
-				     const string& setname,
 				     parseData& pd ) {
   pd.clear();
   Sentence *sent = 0;
@@ -681,7 +687,7 @@ vector<string> Parser::prepareParse( const vector<Word *>& fwords,
 #pragma omp critical(foliaupdate)
   {
     sent = fwords[0]->sentence();
-    entities = sent->select<Entity>(setname);
+    entities = sent->select<Entity>(MWU_tagset);
   }
   for( size_t i=0; i < fwords.size(); ++i ){
     Word *word = fwords[i];
@@ -828,7 +834,6 @@ void timbl( Timbl::TimblAPI* tim,
 }
 
 void Parser::Parse( const vector<Word*>& words,
-		    const string& mwuSet,
 		    TimerBlock& timers ){
   timers.parseTimer.start();
   if ( !isInit ){
@@ -841,7 +846,7 @@ void Parser::Parse( const vector<Word*>& words,
   }
   timers.prepareTimer.start();
   parseData pd;
-  vector<string> my_instances = prepareParse( words, mwuSet, pd );
+  vector<string> my_instances = prepareParse( words, pd );
   vector<string> p_instances;
   vector<timbl_result> p_results;
   vector<string> d_instances;

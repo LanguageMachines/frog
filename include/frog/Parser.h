@@ -41,10 +41,9 @@ class Parser {
   ~Parser();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;
-  void Parse( const std::vector<folia::Word *>&,
-	      const std::string&, TimerBlock& );
+  void Parse( const std::vector<folia::Word *>&, TimerBlock& );
   std::vector<std::string> prepareParse( const std::vector<folia::Word *>&,
-					 const std::string&, parseData& );
+					 parseData& );
   std::vector<std::string> createParserInstances( const parseData& );
   std::string getTagset() const { return dep_tagset; };
  private:
@@ -63,7 +62,7 @@ class Parser {
   std::string version;
   std::string dep_tagset;
   std::string POS_tagset;
-
+  std::string MWU_tagset;
 };
 
 
