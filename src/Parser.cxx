@@ -797,31 +797,6 @@ void appendParseResult( const vector<Word *>& words,
   appendResult( words, pd, tagset, nums, roles );
 }
 
-void appendParseResult( const vector<Word *>& words,
-			parseData& pd,
-			const string& tagset,
-			istream& is ){
-  string line;
-  int cnt=0;
-  vector<int> nums;
-  vector<string> roles;
-  while ( getline( is, line ) ){
-    vector<string> parts;
-    int num = TiCC::split_at( line, parts, " " );
-    if ( num > 7 ){
-      if ( TiCC::stringTo<int>( parts[0] ) != cnt+1 ){
-        //WARNING: commented out because theErrLog no longer available publicly
-        //*Log(theErrLog) << "confused! " << endl;
-        //*Log(theErrLog) << "got line '" << line << "'" << endl;
-      }
-      nums.push_back( TiCC::stringTo<int>(parts[6]) );
-      roles.push_back( parts[7] );
-    }
-    ++cnt;
-  }
-  appendResult( words, pd, tagset, nums, roles );
-}
-
 void timbl( Timbl::TimblAPI* tim,
 	    const vector<string>& instances,
 	    vector<timbl_result>& results ){
