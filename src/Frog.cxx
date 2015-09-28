@@ -264,7 +264,10 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
 #endif
 
   if ( Opts.extract( "keep-parser-files" ) ){
-    *Log(theErrLog) << "keep-parser-files not longer supported. (ignored)" << endl;
+    *Log(theErrLog) << "keep-parser-files option not longer supported. (ignored)" << endl;
+  }
+  if ( Opts.extract( "tmpdir" ) ){
+    *Log(theErrLog) << "tmpdir option not longer supported. (ignored)" << endl;
   }
   string TestFileName;
   if ( Opts.extract( "testdir", TestFileName ) ) {
