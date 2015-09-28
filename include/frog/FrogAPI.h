@@ -73,7 +73,6 @@ class FrogOptions {
 
   int debugFlag;
   bool interactive;
-  bool oldparser;
   int numThreads;
 
   std::string encoding;
@@ -81,8 +80,6 @@ class FrogOptions {
   std::string listenport;
   std::string docid;
   std::string textclass;
-
-  std::string tmpDirName;
 
   unsigned int maxParserTokens;
 

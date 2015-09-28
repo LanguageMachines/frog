@@ -99,8 +99,6 @@ FrogOptions::FrogOptions() {
 #endif
   listenport = "void";
   docid = "untitled";
-  tmpDirName = "/tmp/";
-
   debugFlag = 0;
 }
 
@@ -443,7 +441,7 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
 	showParse = false;
       }
       else {
-        myParser->Parse( swords, myMwu->getTagset(), options.tmpDirName, timers );
+        myParser->Parse( swords, myMwu->getTagset(), timers );
       }
     }
   }

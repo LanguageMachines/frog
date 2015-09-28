@@ -35,17 +35,17 @@ struct parseData;
 
 class Parser {
  public:
-  Parser(TiCC::LogStream* logstream):pairs(0),dir(0),rels(0),isInit(false),keepIntermediate(false) {
+  Parser(TiCC::LogStream* logstream):pairs(0),dir(0),rels(0),isInit(false) {
     parseLog = new TiCC::LogStream(logstream, "parser-");
   };
   ~Parser();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;
   void Parse( const std::vector<folia::Word *>&,
-	      const std::string&, const std::string&, TimerBlock& );
-  void prepareParse( const std::vector<folia::Word *>&,
-		     const std::string&, parseData& );
-  void createParserFile( const parseData& );
+	      const std::string&, TimerBlock& );
+  std::vector<std::string> prepareParse( const std::vector<folia::Word *>&,
+					 const std::string&, parseData& );
+  std::vector<std::string> createParserInstances( const parseData& );
   std::string getTagset() const { return dep_tagset; };
  private:
   void createPairInstances( const parseData&,
@@ -59,10 +59,7 @@ class Parser {
   std::string maxDepSpanS;
   size_t maxDepSpan;
   bool isInit;
-  std::string fileName;
   TiCC::LogStream *parseLog;
-  bool keepIntermediate;
-  bool oldparser;
   std::string version;
   std::string dep_tagset;
   std::string POS_tagset;

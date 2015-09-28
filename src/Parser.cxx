@@ -74,23 +74,19 @@ ostream& operator<<( ostream& os, const parseData& pd ){
   return os;
 }
 
-void Parser::createParserFile( const parseData& pd ){
+vector<string> Parser::createParserInstances( const parseData& pd ){
   const vector<string>& words = pd.words;
   const vector<string>& heads = pd.heads;
   const vector<string>& mods = pd.mods;
 
-  ofstream anaFile( fileName );
-  if ( anaFile ){
-    for( size_t i = 0; i < words.size(); ++i ){
-      anaFile << i+1 << "\t" << words[i] << "\t" << "*" << "\t" << heads[i]
-	      << "\t" << heads[i] << "\t" << mods[i] << "\t"<< "0"
-	      << "\t" << "_" << "\t" << "_" << "\t" << "_" << endl;
-    }
+  vector<string> result;
+  for( size_t i = 0; i < words.size(); ++i ){
+    string inst;
+    inst += TiCC::toString(i+1) + "\t" + words[i] + "\t*\t" + heads[i]
+      + "\t" + heads[i] + "\t" + mods[i] + "\t0\t_\t_\t_";
+    result.push_back( inst );
   }
-  else {
-    cerr << "unable to create a parser file " << fileName << endl;
-    exit( EXIT_FAILURE );
-  }
+  return result;
 }
 
 bool Parser::init( const Configuration& configuration ){
@@ -138,12 +134,6 @@ bool Parser::init( const Configuration& configuration ){
       problem = true;
     }
   }
-  val = configuration.lookUp( "keepIntermediateFiles", "parser" );
-  if ( val == "true" ){
-    keepIntermediate = true;
-  }
-  else if ( !val.empty() )
-    *Log(parseLog) << "invalid 'keepIntermediateFiles' option: " << val << endl;
   val = configuration.lookUp( "pairsFile", "parser" );
   if ( !val.empty() )
     pairsFileName = prefix( cDir, val );
@@ -682,9 +672,9 @@ void Parser::addDeclaration( Document& doc ) const {
   }
 }
 
-void Parser::prepareParse( const vector<Word *>& fwords,
-			   const string& setname,
-			   parseData& pd ) {
+vector<string> Parser::prepareParse( const vector<Word *>& fwords,
+				     const string& setname,
+				     parseData& pd ) {
   pd.clear();
   Sentence *sent = 0;
   vector<Entity*> entities;
@@ -745,7 +735,7 @@ void Parser::prepareParse( const vector<Word *>& fwords,
     }
   }
 
-  createParserFile( pd );
+  return createParserInstances( pd );
 }
 
 void appendResult( const vector<Word *>& words,
@@ -837,11 +827,9 @@ void timbl( Timbl::TimblAPI* tim,
   }
 }
 
-void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
-		    const string& tmpDirName, TimerBlock& timers ){
-  pid_t pid = getpid();
-  string pids = toString( pid );
-  fileName = tmpDirName+"csi."+pids;
+void Parser::Parse( const vector<Word*>& words,
+		    const string& mwuSet,
+		    TimerBlock& timers ){
   timers.parseTimer.start();
   if ( !isInit ){
     *Log(parseLog) << "Parser is not initialized!" << endl;
@@ -851,59 +839,34 @@ void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
     *Log(parseLog) << "unable to parse an analisis without words" << endl;
     return;
   }
-  string resFileName = fileName + ".result";
-  string pairsInName = fileName +".pairs.inst";
-  string pairsOutName = fileName +".pairs.out";
-  string dirInName = fileName + ".dir.inst";
-  string dirOutName = fileName + ".dir.out";
-  string relsInName = fileName + ".rels.inst";
-  string relsOutName = fileName + ".rels.out";
-  remove( resFileName.c_str() );
   timers.prepareTimer.start();
   parseData pd;
-  prepareParse( words, mwuSet, pd );
-  ofstream ps( pairsInName );
-  ofstream ds( dirInName );
-  ofstream rs( relsInName );
+  vector<string> my_instances = prepareParse( words, mwuSet, pd );
   vector<string> p_instances;
   vector<timbl_result> p_results;
   vector<string> d_instances;
   vector<timbl_result> d_results;
   vector<string> r_instances;
   vector<timbl_result> r_results;
-  if ( ps && ds && rs ){
-    createPairInstances( pd, p_instances );
-    createDirRelInstances( pd, d_instances, r_instances );
-    for( const auto& i : p_instances ){
-      ps << i << endl;
-    }
-    for( const auto& i : d_instances ){
-      ds << i << endl;
-    }
-    for( const auto& i : r_instances ){
-      rs << i << endl;
-    }
-  }
+  createPairInstances( pd, p_instances );
+  createDirRelInstances( pd, d_instances, r_instances );
   timers.prepareTimer.stop();
 #pragma omp parallel sections
   {
 #pragma omp section
       {
-	remove( pairsOutName.c_str() );
 	timers.pairsTimer.start();
 	timbl( pairs, p_instances, p_results );
 	timers.pairsTimer.stop();
       }
 #pragma omp section
       {
-	remove( dirOutName.c_str() );
 	timers.dirTimer.start();
 	timbl( dir, d_instances, d_results );
 	timers.dirTimer.stop();
       }
 #pragma omp section
       {
-	remove( relsOutName.c_str() );
 	timers.relsTimer.start();
 	timbl( rels, r_instances, r_results );
 	timers.relsTimer.stop();
@@ -915,19 +878,8 @@ void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
 			       r_results,
 			       d_results,
 			       maxDepSpan,
-			       fileName );
+			       my_instances );
   timers.csiTimer.stop();
   appendParseResult( words, pd, dep_tagset, res );
-
-  if ( !keepIntermediate ){
-    remove( fileName.c_str() );
-    remove( resFileName.c_str() );
-    remove( pairsOutName.c_str() );
-    remove( dirOutName.c_str() );
-    remove( relsOutName.c_str() );
-    remove( pairsInName.c_str() );
-    remove( dirInName.c_str() );
-    remove( relsInName.c_str() );
-  }
   timers.parseTimer.stop();
 }

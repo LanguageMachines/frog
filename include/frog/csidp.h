@@ -5,7 +5,7 @@
 
 class timbl_result {
  public:
-  timbl_result( const std::string& cls, 
+  timbl_result( const std::string& cls,
 		double conf,
 		const Timbl::ValueDistribution* );
   std::string cls() const { return _cls; };
@@ -21,7 +21,7 @@ private:
 std::vector<parsrel> parse( const std::vector<timbl_result>&,
 			    const std::vector<timbl_result>&,
 			    const std::vector<timbl_result>&,
-			    int maxDist,
-			    const std::string& in_file );
+			    int,
+			    const std::vector<std::string>& );
 
 #endif

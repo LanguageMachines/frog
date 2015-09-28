@@ -17,7 +17,7 @@ string get_class( const string& instance ){
 }
 
 
-void split_dist( const vector< pair<string,double>>& dist, 
+void split_dist( const vector< pair<string,double>>& dist,
 		 map<string,double>& result ){
   result.clear();
   for( const auto& it : dist ){
@@ -118,7 +118,7 @@ void formulateWCSP( const vector<string>& sentences,
 
 timbl_result::timbl_result( const string& cls,
 			    double conf,
-			    const Timbl::ValueDistribution* vd ): 
+			    const Timbl::ValueDistribution* vd ):
   _cls(cls), _confidence(conf) {
   Timbl::ValueDistribution::dist_iterator it = vd->begin();
   while ( it != vd->end() ){
@@ -131,14 +131,7 @@ vector<parsrel> parse( const vector<timbl_result>& p_res,
 		       const vector<timbl_result>& r_res,
 		       const vector<timbl_result>& d_res,
 		       int maxDist,
-		       const string& in_file ){
-  ifstream is( in_file );
-  //  cerr << "opened inputfile: " << in_file << endl;
-  string line;
-  vector<string> sentences;
-  while( getline( is, line ) ){
-    sentences.push_back( line );
-  }
+		       const vector<string>& sentences ){
   vector<Constraint*> constraints;
   formulateWCSP( sentences, d_res, r_res, p_res, constraints, maxDist );
   CKYParser parser( sentences.size() );

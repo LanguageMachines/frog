@@ -113,8 +113,6 @@ void usage( ) {
        << "\t --id=<docid>          Document ID, used in FoLiA output. (Default 'untitled')\n"
        << "\t --outputdir=<dir>     Output to dir, instead of default stdout\n"
        << "\t --xmldir=<dir>        Use 'dir' to output FoliA XML to.\n"
-       << "\t --tmpdir=<directory>  (location to store intermediate files. Default /tmp )\n"
-       << "\t --keep-parser-files keep intermediate parser files. (last sentence only).\n"
        << "\t============= OTHER OPTIONS ============================================\n"
        << "\t -h. give some help.\n"
        << "\t -V or --version .   Show version info.\n"
@@ -266,25 +264,8 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
 #endif
 
   if ( Opts.extract( "keep-parser-files" ) ){
-    configuration.setatt( "keepIntermediateFiles", "true", "parser" );
+    *Log(theErrLog) << "keep-parser-files not longer supported. (ignored)" << endl;
   }
-  options.tmpDirName = configuration.lookUp( "tmpdir", "global" );
-  Opts.extract( "tmpdir", options.tmpDirName ); // so might be overridden
-  if ( options.tmpDirName.empty() ){
-    options.tmpDirName = "/tmp/";
-  }
-  else if ( options.tmpDirName[options.tmpDirName.size()-1] != '/' ){
-    options.tmpDirName += "/";
-  }
-#ifdef HAVE_DIRENT_H
-  if ( !options.tmpDirName.empty() ){
-    if ( !existsDir( options.tmpDirName ) ){
-      *Log(theErrLog) << "temporary dir " << options.tmpDirName << " not readable" << endl;
-      return false;
-    }
-    *Log(theErrLog) << "checking tmpdir: " << options.tmpDirName << " OK" << endl;
-  }
-#endif
   string TestFileName;
   if ( Opts.extract( "testdir", TestFileName ) ) {
 #ifdef HAVE_DIRENT_H
