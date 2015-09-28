@@ -29,10 +29,6 @@
       timbl@uvt.nl
 */
 
-// Python.h seems to best included first. It tramples upon defines like:
-// _XOPEN_SOURCE, _POSIX_C_SOURCE" etc.
-#include "Python.h"
-
 #include <cstdlib>
 #include <cstdio>
 #include <sys/wait.h>
@@ -94,7 +90,6 @@ FrogOptions::FrogOptions() {
   doXMLout =  false;
   doKanon =  false;
   interactive = false;
-  oldparser = false;
 
   maxParserTokens =  0; // 0 for unlimited
 #ifdef HAVE_OPENMP

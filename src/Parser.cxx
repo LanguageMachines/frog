@@ -29,7 +29,6 @@
       timbl@uvt.nl
 */
 
-#include "Python.h"
 #include <sys/types.h>
 #include <unistd.h>
 #include <cstdlib>
@@ -47,74 +46,6 @@
 using namespace std;
 using namespace TiCC;
 using namespace folia;
-
-PythonInterface::PythonInterface( ) {
-  Py_OptimizeFlag = 1; // enable optimisation (-O) mode
-  Py_Initialize();
-
-  PyObject* ourpath = PyString_FromString( PYTHONDIR );
-  if ( ourpath != 0 ){
-    PyObject *sys_path = PySys_GetObject( (char*)("path"));
-    if (sys_path != NULL ){
-      PyList_Append(sys_path, ourpath);
-    }
-    else
-      sys_path = ourpath;
-  }
-  PyObject *im = 0;
-  try {
-    im = PyImport_ImportModule( "frog.csidp" );
-  }
-  catch( exception const & ){
-    PyErr_Print();
-    im = 0;
-  }
-  PyErr_Clear();
-  if ( !im ){
-    try {
-      im = PyImport_ImportModule( "csidp" );
-    }
-    catch( exception const & ){
-      PyErr_Print();
-      exit(1);
-    }
-  }
-  if ( im ){
-    module.assign( im );
-    PyObject *mf = PyObject_GetAttrString(module, "main");
-    if ( mf )
-      mainFunction.assign( mf );
-    else {
-      PyErr_Print();
-      exit(1);
-    }
-  }
-  else {
-    PyErr_Print();
-    exit(1);
-  }
-}
-
-PythonInterface::~PythonInterface() {
-  Py_Finalize();
-}
-
-void PythonInterface::parse( const string& depFile,
-			     const string& modFile,
-			     const string& dirFile,
-			     const string& maxDist,
-			     const string& inputFile,
-			     const string& outputFile ) {
-
-  PyObjectRef tmp = PyObject_CallFunction(mainFunction,
-					  (char *)"[s, s, s, s, s, s, s, s, s, s, s]",
-					  "--dep", depFile.c_str(),
-					  "--mod", modFile.c_str(),
-					  "--dir", dirFile.c_str(),
-					  "-m", maxDist.c_str(),
-					  "--out", outputFile.c_str(),
-					  inputFile.c_str() );
-}
 
 TiCC::Timer prepareTimer;
 TiCC::Timer relsTimer;
@@ -169,7 +100,6 @@ bool Parser::init( const Configuration& configuration ){
   string dirOptions = "-a1 +D -G0 +vdb+di";
   string relsFileName;
   string relsOptions = "-a1 +D -G0 +vdb+di";
-  PI = new PythonInterface();
   maxDepSpanS = "20";
   maxDepSpan = 20;
   bool problem = false;
@@ -246,11 +176,6 @@ bool Parser::init( const Configuration& configuration ){
   if ( !val.empty() ){
     relsOptions = val;
   }
-  val = configuration.lookUp( "oldparser", "parser" );
-  oldparser = false;
-  if ( val == "true" ){
-    oldparser = true;
-  }
   if ( problem )
     return false;
 
@@ -288,7 +213,6 @@ Parser::~Parser(){
   delete rels;
   delete dir;
   delete pairs;
-  delete PI;
 }
 
 static vector<Word *> lookup( Word *word,
@@ -314,9 +238,9 @@ void Parser::createPairInstances( const parseData& pd,
   const vector<string>& mods = pd.mods;
   instances.clear();
   if ( words.size() == 1 ){
-    string inst = 
+    string inst =
       "__ " + words[0] + " __ ROOT ROOT ROOT __ " + heads[0]
-      + " __ ROOT ROOT ROOT "+ words[0] +"^ROOT ROOT ROOT ROOT^" 
+      + " __ ROOT ROOT ROOT "+ words[0] +"^ROOT ROOT ROOT ROOT^"
       + heads[0] + " _";
     instances.push_back( inst );
   }
@@ -345,7 +269,7 @@ void Parser::createPairInstances( const parseData& pd,
 	tag1 = heads[i+1];
       }
       string inst = word_1 + " " + word0 + " " + word1
-	+ " ROOT ROOT ROOT " + tag_1 + " " 
+	+ " ROOT ROOT ROOT " + tag_1 + " "
 	+ tag0 + " " + tag1 + " ROOT ROOT ROOT " + tag0
 	+ "^ROOT ROOT ROOT ROOT^" + mods0 + " _";
       instances.push_back( inst );
@@ -381,9 +305,9 @@ void Parser::createPairInstances( const parseData& pd,
 	  continue;
 	if ( wPos > maxDepSpan + pos )
 	  continue;
-	
+
 	string inst = w_word_1 + " " + w_word0 + " " + w_word1;
-	
+
 	if ( pos == 0 )
 	  inst += " __";
 	else
@@ -409,13 +333,13 @@ void Parser::createPairInstances( const parseData& pd,
 	  inst += " " + heads[pos+1];
 	else
 	  inst += " __";
-	
+
 	inst += " " + w_tag0 + "^";
 	if ( pos < words.size() )
 	  inst += heads[pos];
 	else
 	  inst += "__";
-	
+
 	if ( wPos > pos )
 	  inst += " LEFT " + TiCC::toString( wPos - pos );
 	else
@@ -431,7 +355,7 @@ void Parser::createPairInstances( const parseData& pd,
   }
 }
 
-void Parser::createDirRelInstances( const parseData& pd, 
+void Parser::createDirRelInstances( const parseData& pd,
 				    vector<string>& d_instances,
 				    vector<string>& r_instances ){
   d_instances.clear();
@@ -449,7 +373,7 @@ void Parser::createDirRelInstances( const parseData& pd,
       + " __ __ __^" + tag0 + " " + tag0 +"^__ __ " + mod0
       + " __ ROOT";
     d_instances.push_back( inst );
-    
+
     inst = "__ __ " + word0 + " __ __ " + mod0
       + " __ __ "  + tag0 + " __ __ __^" + tag0
       + " " + tag0 + "^__ __^__^" + tag0
@@ -495,7 +419,7 @@ void Parser::createDirRelInstances( const parseData& pd,
       + " " + mod1
       + " __"
       + " ROOT";
-    d_instances.push_back( inst );      
+    d_instances.push_back( inst );
     //
     inst = string("__ __")
       + " " + word0
@@ -526,7 +450,7 @@ void Parser::createDirRelInstances( const parseData& pd,
       + " __^" + tag0 + "^" + tag1
       + " " + tag1 + "^__^__"
       + " __";
-    r_instances.push_back( inst );      
+    r_instances.push_back( inst );
   }
   else if ( words.size() == 3 ) {
     string word0 = words[0];
@@ -595,7 +519,7 @@ void Parser::createDirRelInstances( const parseData& pd,
       + " " + mod2
       + " __"
       + " ROOT";
-    d_instances.push_back( inst );      
+    d_instances.push_back( inst );
     //
     inst = string("__ __")
       + " " + word0
@@ -611,7 +535,7 @@ void Parser::createDirRelInstances( const parseData& pd,
       + " __^__^" + tag0
       + " " + tag0 + "^" + tag1 + "^" + tag2
       + " __";
-    r_instances.push_back( inst );      
+    r_instances.push_back( inst );
     inst = string("__")
       + " " + word0
       + " " + word1
@@ -628,7 +552,7 @@ void Parser::createDirRelInstances( const parseData& pd,
       + " __^" + tag0 + "^" + tag1
       + " " + tag1 + "^" + tag2 + "^__"
       + " __";
-    r_instances.push_back( inst );      
+    r_instances.push_back( inst );
     inst = word0
       + " " + word1
       + " " + word2
@@ -643,7 +567,7 @@ void Parser::createDirRelInstances( const parseData& pd,
       + " " + tag0 + "^" + tag1 + "^" + tag2
       + " " + tag2 + "^__^__"
       + " __";
-    r_instances.push_back( inst );      
+    r_instances.push_back( inst );
   }
   else {
     for ( size_t i=0 ; i < words.size(); ++i ){
@@ -725,7 +649,7 @@ void Parser::createDirRelInstances( const parseData& pd,
 	+ " " + mod0
 	+ " " + mod1
 	+ " ROOT";
-      d_instances.push_back( inst );      
+      d_instances.push_back( inst );
       //
       inst = word_2
 	+ " " + word_1
@@ -743,7 +667,7 @@ void Parser::createDirRelInstances( const parseData& pd,
 	+ " " + tag_2 + "^" + tag_1 + "^" + tag0
 	+ " " + tag0 + "^" + tag1 + "^" + tag2
 	+ " __";
-      r_instances.push_back( inst );      
+      r_instances.push_back( inst );
     }
   }
 }
@@ -868,7 +792,6 @@ void appendParseResult( const vector<Word *>& words,
 			const string& tagset,
 			const vector<parsrel>& res ){
   string line;
-  int cnt=0;
   vector<int> nums;
   vector<string> roles;
   for ( const auto& it : res ){
@@ -903,8 +826,8 @@ void appendParseResult( const vector<Word *>& words,
   appendResult( words, pd, tagset, nums, roles );
 }
 
-void timbl( Timbl::TimblAPI* tim, 
-	    const vector<string>& instances, 
+void timbl( Timbl::TimblAPI* tim,
+	    const vector<string>& instances,
 	    vector<timbl_result>& results ){
   results.clear();
   for( const auto& inst : instances ){
@@ -962,35 +885,8 @@ void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
     }
   }
   timers.prepareTimer.stop();
-  if ( oldparser ){    
 #pragma omp parallel sections
-    {
-#pragma omp section
-      {
-	remove( pairsOutName.c_str() );
-	timers.pairsTimer.start();
-	pairs->Test( pairsInName, pairsOutName );
-	timers.pairsTimer.stop();
-      }
-#pragma omp section
-      {
-	remove( dirOutName.c_str() );
-	timers.dirTimer.start();
-	dir->Test( dirInName, dirOutName );
-	timers.dirTimer.stop();
-      }
-#pragma omp section
-      {
-	remove( relsOutName.c_str() );
-	timers.relsTimer.start();
-	rels->Test( relsInName, relsOutName );
-	timers.relsTimer.stop();
-      }
-    }
-  }
-  else {
-#pragma omp parallel sections
-    {
+  {
 #pragma omp section
       {
 	remove( pairsOutName.c_str() );
@@ -1012,42 +908,16 @@ void Parser::Parse( const vector<Word*>& words, const string& mwuSet,
 	timbl( rels, r_instances, r_results );
 	timers.relsTimer.stop();
       }
-    }
   }
 
-  if ( oldparser ){
-    timers.csiTimer.start();
-    try {
-      PI->parse( pairsOutName,
-		 relsOutName,
-		 dirOutName,
-		 maxDepSpanS,
-		 fileName,
-		 resFileName );
-      if ( PyErr_Occurred() )
-	PyErr_Print();
-    }
-    catch( exception const & ){
-      PyErr_Print();
-    }
-    timers.csiTimer.stop();
-    ifstream resFile( resFileName );
-    if ( resFile ){
-      appendParseResult( words, pd, dep_tagset, resFile );
-    }
-    else
-      *Log(parseLog) << "couldn't open results file: " << resFileName << endl;
-  }
-  else {
-    timers.csiTimer.start();
-    vector<parsrel> res = parse( p_results,
-				 r_results,
-				 d_results,
-				 maxDepSpan,
-				 fileName );
-    timers.csiTimer.stop();
-    appendParseResult( words, pd, dep_tagset, res );
-  }
+  timers.csiTimer.start();
+  vector<parsrel> res = parse( p_results,
+			       r_results,
+			       d_results,
+			       maxDepSpan,
+			       fileName );
+  timers.csiTimer.stop();
+  appendParseResult( words, pd, dep_tagset, res );
 
   if ( !keepIntermediate ){
     remove( fileName.c_str() );

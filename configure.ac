@@ -4,7 +4,7 @@
 # $URL$
 
 AC_PREREQ(2.59)
-AC_INIT([frog], [0.12.23], [timbl@uvt.nl])
+AC_INIT([frog], [0.13.0], [timbl@uvt.nl])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_MACRO_DIR([m4])
@@ -151,44 +151,12 @@ LIBS="$ucto_LIBS $LIBS"
 
 PKG_CHECK_MODULES([frogdata], [frogdata >= 0.7] )
 #
-# the ac_python_devel.m4 script tramples upon $LIBS, so we save it
-save_LIBS="$LIBS"
-save_FLAGS="$CXXFLAGS"
-
-AC_ARG_WITH(python,
-       [  --with-python=FILE       use python executable <FILE>],
-       [PYTHON="$withval"],
-       [PYTHON="python"])
-
-#we need Python > 2.5.x
-AM_PATH_PYTHON([2.5],
-	[PYTHONDIR=${pkgpythondir}
-	 AC_SUBST([PYTHONDIR])],
-	[:])
-
-# set PYTHON_EXTRA_LIBS to a non-empty string
-# this fools AC_PYTHON_DEVEL into NOT setting it.
-# That fails on some systems with linking errors
-# we don't need PYTHON_EXTRA_LIBS
-PYTHON_EXTRA_LIBS=" "
-
-AC_PYTHON_DEVEL([>= '2.5'])
-if test "x$PYTHON_CPPFLAGS" != "x"; then
- CXXFLAGS="$save_FLAGS $PYTHON_CPPFLAGS"
- LIBS="$save_LIBS $PYTHON_LDFLAGS"
-else
- CXXFLAGS="$save_FLAGS"
- LIBS="$save_LIBS"
-fi
-
-AC_CHECK_HEADERS( [Python.h], , AC_MSG_FAILURE("can't find Python C API") )
 
 AC_OUTPUT([
   Makefile
   frog.pc
   m4/Makefile
   docs/Makefile
-  scripts/Makefile
   tests/Makefile
   src/Makefile
   include/Makefile

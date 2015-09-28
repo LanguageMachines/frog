@@ -29,10 +29,6 @@
       timbl@uvt.nl
 */
 
-// Python.h seems to best included first. It tramples upon defines like:
-// _XOPEN_SOURCE, _POSIX_C_SOURCE" etc.
-#include "Python.h"
-
 #include <cstdlib>
 #include <cstdio>
 #include <sys/wait.h>

@@ -31,54 +31,11 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-class PyObjectRef {
- private:
-  PyObject* ref;
-
- public:
- PyObjectRef() : ref(0) {}
-
- PyObjectRef(PyObject* obj) : ref(obj) {}
-
-  void assign(PyObject* obj) {
-    // assume ref == 0, otherwhise call Py_DECREF
-    if ( ref ){
-      Py_XDECREF(ref);
-    }
-    ref = obj;
-  }
-
-  operator PyObject* () {
-    return ref;
-  }
-
-  ~PyObjectRef() {
-    //    Py_XDECREF(ref);
-  }
-};
-
-class PythonInterface {
- private:
-  PyObjectRef module;
-  PyObjectRef mainFunction;
-
- public:
-  PythonInterface();
-  ~PythonInterface();
-
-  void parse( const std::string& depFile,
-	      const std::string& modFile,
-	      const std::string& dirFile,
-	      const std::string& maxDist,
-	      const std::string& inputFile,
-	      const std::string& outputFile);
-};
-
 struct parseData;
 
 class Parser {
  public:
-  Parser(TiCC::LogStream* logstream):pairs(0),dir(0),rels(0),PI(0),isInit(false),keepIntermediate(false) {
+  Parser(TiCC::LogStream* logstream):pairs(0),dir(0),rels(0),isInit(false),keepIntermediate(false) {
     parseLog = new TiCC::LogStream(logstream, "parser-");
   };
   ~Parser();
@@ -91,9 +48,9 @@ class Parser {
   void createParserFile( const parseData& );
   std::string getTagset() const { return dep_tagset; };
  private:
-  void createPairInstances( const parseData&, 
+  void createPairInstances( const parseData&,
 			    std::vector<std::string>& );
-  void createDirRelInstances( const parseData&, 
+  void createDirRelInstances( const parseData&,
 			      std::vector<std::string>&,
 			      std::vector<std::string>& );
   Timbl::TimblAPI *pairs;
@@ -101,7 +58,6 @@ class Parser {
   Timbl::TimblAPI *rels;
   std::string maxDepSpanS;
   size_t maxDepSpan;
-  PythonInterface *PI;
   bool isInit;
   std::string fileName;
   TiCC::LogStream *parseLog;

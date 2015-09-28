@@ -4,7 +4,6 @@
   dir: Frog all files in dir
   port: run as a server
 * rethink/arrange common datastructures
-* replace slow Python parser by C++ thing?
 * Make server also support daemonizing stuff and --pid and --log
   (server now logs to terminal)
 * Server logs incorrect timing (seems to count from the moment the client is accepted)
