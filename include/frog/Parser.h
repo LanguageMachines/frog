@@ -42,8 +42,8 @@ class Parser {
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;
   void Parse( const std::vector<folia::Word *>&, TimerBlock& );
-  std::vector<std::string> prepareParse( const std::vector<folia::Word *>&,
-					 parseData& );
+  parseData prepareParse( const std::vector<folia::Word *>& );
+
   std::vector<std::string> createParserInstances( const parseData& );
   std::string getTagset() const { return dep_tagset; };
  private:

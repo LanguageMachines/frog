@@ -74,21 +74,6 @@ ostream& operator<<( ostream& os, const parseData& pd ){
   return os;
 }
 
-vector<string> Parser::createParserInstances( const parseData& pd ){
-  const vector<string>& words = pd.words;
-  const vector<string>& heads = pd.heads;
-  const vector<string>& mods = pd.mods;
-
-  vector<string> result;
-  for( size_t i = 0; i < words.size(); ++i ){
-    string inst;
-    inst += TiCC::toString(i+1) + "\t" + words[i] + "\t*\t" + heads[i]
-      + "\t" + heads[i] + "\t" + mods[i] + "\t0\t_\t_\t_";
-    result.push_back( inst );
-  }
-  return result;
-}
-
 bool Parser::init( const Configuration& configuration ){
   string pairsFileName;
   string pairsOptions = "-a1 +D -G0 +vdb+di";
@@ -679,9 +664,8 @@ void Parser::addDeclaration( Document& doc ) const {
   }
 }
 
-vector<string> Parser::prepareParse( const vector<Word *>& fwords,
-				     parseData& pd ) {
-  pd.clear();
+parseData Parser::prepareParse( const vector<Word *>& fwords ){
+  parseData pd;
   Sentence *sent = 0;
   vector<Entity*> entities;
 #pragma omp critical(foliaupdate)
@@ -740,8 +724,7 @@ vector<string> Parser::prepareParse( const vector<Word *>& fwords,
       pd.mwus.push_back( vec );
     }
   }
-
-  return createParserInstances( pd );
+  return pd;
 }
 
 void appendResult( const vector<Word *>& words,
@@ -820,8 +803,7 @@ void Parser::Parse( const vector<Word*>& words,
     return;
   }
   timers.prepareTimer.start();
-  parseData pd;
-  vector<string> my_instances = prepareParse( words, pd );
+  parseData pd = prepareParse( words );
   vector<string> p_instances;
   vector<timbl_result> p_results;
   vector<string> d_instances;
@@ -857,8 +839,8 @@ void Parser::Parse( const vector<Word*>& words,
   vector<parsrel> res = parse( p_results,
 			       r_results,
 			       d_results,
-			       maxDepSpan,
-			       my_instances );
+			       pd.words.size(),
+			       maxDepSpan );
   timers.csiTimer.stop();
   appendParseResult( words, pd, dep_tagset, res );
   timers.parseTimer.stop();

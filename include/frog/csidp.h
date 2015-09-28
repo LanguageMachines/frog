@@ -21,7 +21,7 @@ private:
 std::vector<parsrel> parse( const std::vector<timbl_result>&,
 			    const std::vector<timbl_result>&,
 			    const std::vector<timbl_result>&,
-			    int,
-			    const std::vector<std::string>& );
+			    size_t,
+			    int );
 
 #endif
