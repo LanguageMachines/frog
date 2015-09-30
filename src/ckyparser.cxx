@@ -48,7 +48,7 @@ CKYParser::CKYParser( size_t num ): numTokens(num)
 }
 
 
-void CKYParser::addConstraint( Constraint *c ){
+void CKYParser::addConstraint( const Constraint *c ){
   if ( c->type() == Constraint::Incoming ){
     inDepConstraints[c->tIndex()].push_back( c );
     //    cerr << "added INCOMING[" << c->tIndex() << "]" << endl;
@@ -63,9 +63,10 @@ void CKYParser::addConstraint( Constraint *c ){
   }
 }
 
-string CKYParser::bestEdge( SubTree& leftSubtree, SubTree& rightSubtree,
+string CKYParser::bestEdge( const SubTree& leftSubtree, 
+			    const SubTree& rightSubtree,
 			    size_t headIndex, size_t depIndex,
-			    set<Constraint*>& bestConstraints,
+			    set<const Constraint*>& bestConstraints,
 			    double& bestScore ){
   using TiCC::operator<<;
   bestConstraints.clear();
@@ -95,7 +96,7 @@ string CKYParser::bestEdge( SubTree& leftSubtree, SubTree& rightSubtree,
   for( auto const& edgeConstraint : edgeConstraints[depIndex][headIndex] ){
     double my_score = edgeConstraint->wght();
     string my_label = edgeConstraint->rel();
-    set<Constraint *> my_constraints;
+    set<const Constraint *> my_constraints;
     my_constraints.insert( edgeConstraint );
     for( const auto& constraint : inDepConstraints[headIndex] ){
       if ( constraint->rel() == my_label &&
@@ -147,10 +148,10 @@ void CKYParser::parse(){
       double bestScore = -10E45;
       int bestI = -1;
       string bestL = "__";
-      set<Constraint*> bestConstraints;
+      set<const Constraint*> bestConstraints;
       for( size_t r = s; r < t; ++r ){
 	double edgeScore = -0.5;
-	set<Constraint*> constraints;
+	set<const Constraint*> constraints;
 	string label = bestEdge( chart[s][r].r_True,
 				 chart[r+1][t].l_True,
 				 t, s, constraints, edgeScore );
@@ -175,7 +176,7 @@ void CKYParser::parse(){
       bestConstraints.clear();
       for ( size_t r = s; r < t; ++r ){
 	double edgeScore = -0.5;
-	set<Constraint*> constraints;
+	set<const Constraint*> constraints;
 	string label = bestEdge( chart[s][r].r_True,
 				 chart[r+1][t].l_True,
 				 s, t, constraints, edgeScore );

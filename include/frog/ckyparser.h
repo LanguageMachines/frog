@@ -85,7 +85,7 @@ class SubTree {
  SubTree( ):
   _score( 0.0 ), _r( -1 ), _edgeLabel( "" ){
   }
-  std::set<Constraint*>  satisfiedConstraints;
+  std::set<const Constraint*>  satisfiedConstraints;
   double score() const { return _score; };
   int r() const { return _r; };
   std::string edgeLabel() const { return _edgeLabel; };
@@ -111,7 +111,7 @@ class chart_rec {
 class CKYParser {
 public:
   CKYParser( size_t );
-  void addConstraint( Constraint * );
+  void addConstraint( const Constraint * );
   void parse();
   void leftIncomplete( int , int , std::vector<parsrel>& );
   void rightIncomplete( int , int , std::vector<parsrel>& );
@@ -119,12 +119,12 @@ public:
   void rightComplete( int , int , std::vector<parsrel>& );
 
 private:
-  std::string bestEdge( SubTree& , SubTree& , size_t , size_t,
-			std::set<Constraint*>&, double& );
+  std::string bestEdge( const SubTree& , const SubTree& , size_t , size_t,
+			std::set<const Constraint*>&, double& );
   size_t numTokens;
-  std::vector< std::vector<Constraint*>> inDepConstraints;
-  std::vector< std::vector<Constraint*>> outDepConstraints;
-  std::vector< std::vector< std::vector<Constraint*>>> edgeConstraints;
+  std::vector< std::vector<const Constraint*>> inDepConstraints;
+  std::vector< std::vector<const Constraint*>> outDepConstraints;
+  std::vector< std::vector< std::vector<const Constraint*>>> edgeConstraints;
   std::vector< std::vector<chart_rec>> chart;
 
 };
