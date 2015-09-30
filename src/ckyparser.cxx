@@ -38,7 +38,8 @@ void DependencyDirection::put( ostream & os ) const {
 }
 
 
-CKYParser::CKYParser( size_t num ): numTokens(num)
+CKYParser::CKYParser( size_t num, const vector<const Constraint*>& constraints ):
+  numTokens(num)
 {
   inDepConstraints.resize( numTokens + 1 );
   outDepConstraints.resize( numTokens + 1 );
@@ -50,21 +51,27 @@ CKYParser::CKYParser( size_t num ): numTokens(num)
   for ( auto& it : chart ){
     it.resize( numTokens + 1 );
   }
+  for ( const auto& constraint : constraints ){
+    addConstraint( constraint );
+  }
+
 }
 
 
 void CKYParser::addConstraint( const Constraint *c ){
-  if ( c->type() == Constraint::Incoming ){
+  switch ( c->type() ){
+  case Constraint::Incoming:
     inDepConstraints[c->tIndex()].push_back( c );
-    //    cerr << "added INCOMING[" << c->tIndex() << "]" << endl;
-  }
-  else if ( c->type() ==  Constraint::Dependency ){
+    break;
+  case Constraint::Dependency:
     edgeConstraints[c->tIndex()][c->hIndex()].push_back( c );
-    //    cerr << "added DEPENDENCY[" << c->tIndex() << "," << c->hIndex() << "]" << endl;
-  }
-  else if ( c->type() == Constraint::Direction ){
+    break;
+  case Constraint::Direction:
     outDepConstraints[c->tIndex()].push_back( c );
-    //    cerr << "added DIRECTION[" << c->tIndex() << "]" << endl;
+    break;
+  default:
+    cerr << "UNSUPPORTED constraint type" << endl;
+    abort();
   }
 }
 

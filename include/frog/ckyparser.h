@@ -110,8 +110,7 @@ class chart_rec {
 
 class CKYParser {
 public:
-  CKYParser( size_t );
-  void addConstraint( const Constraint * );
+  CKYParser( size_t, const std::vector<const Constraint*>& );
   void parse();
   void leftIncomplete( int , int , std::vector<parsrel>& );
   void rightIncomplete( int , int , std::vector<parsrel>& );
@@ -119,6 +118,7 @@ public:
   void rightComplete( int , int , std::vector<parsrel>& );
 
 private:
+  void addConstraint( const Constraint * );
   std::string bestEdge( const SubTree& , const SubTree& , size_t , size_t,
 			std::set<const Constraint*>&, double& );
   size_t numTokens;

@@ -117,12 +117,9 @@ vector<parsrel> parse( const vector<timbl_result>& p_res,
 		       int maxDist ){
   vector<const Constraint*> constraints
     = formulateWCSP( d_res, r_res, p_res, parse_size, maxDist );
-  CKYParser parser( parse_size );
-  for ( const auto& constraint : constraints ){
-    parser.addConstraint( constraint );
-  }
-  vector<parsrel> result( parse_size );
+  CKYParser parser( parse_size, constraints );
   parser.parse();
+  vector<parsrel> result( parse_size );
   parser.rightComplete(0, parse_size, result );
   for ( const auto& constraint : constraints ){
     delete constraint;
