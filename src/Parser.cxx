@@ -213,12 +213,11 @@ static vector<Word *> lookup( Word *word,
   return vec;
 }
 
-void Parser::createPairInstances( const parseData& pd,
-				  vector<string>& instances ){
+vector<string> Parser::createPairInstances( const parseData& pd ){
+  vector<string> instances;
   const vector<string>& words = pd.words;
   const vector<string>& heads = pd.heads;
   const vector<string>& mods = pd.mods;
-  instances.clear();
   if ( words.size() == 1 ){
     string inst =
       "__ " + words[0] + " __ ROOT ROOT ROOT __ " + heads[0]
@@ -335,13 +334,11 @@ void Parser::createPairInstances( const parseData& pd,
       }
     }
   }
+  return instances;
 }
 
-void Parser::createDirRelInstances( const parseData& pd,
-				    vector<string>& d_instances,
-				    vector<string>& r_instances ){
-  d_instances.clear();
-  r_instances.clear();
+vector<string> Parser::createDirInstances( const parseData& pd ){
+  vector<string> d_instances;
   const vector<string>& words = pd.words;
   const vector<string>& heads = pd.heads;
   const vector<string>& mods = pd.mods;
@@ -355,12 +352,6 @@ void Parser::createDirRelInstances( const parseData& pd,
       + " __ __ __^" + tag0 + " " + tag0 +"^__ __ " + mod0
       + " __ ROOT";
     d_instances.push_back( inst );
-
-    inst = "__ __ " + word0 + " __ __ " + mod0
-      + " __ __ "  + tag0 + " __ __ __^" + tag0
-      + " " + tag0 + "^__ __^__^" + tag0
-      + " " + tag0 + "^__^__ __";
-    r_instances.push_back( inst );
   }
   else if ( words.size() == 2 ){
     string word0 = words[0];
@@ -402,37 +393,6 @@ void Parser::createDirRelInstances( const parseData& pd,
       + " __"
       + " ROOT";
     d_instances.push_back( inst );
-    //
-    inst = string("__ __")
-      + " " + word0
-      + " " + word1
-      + " __"
-      + " " + mod0
-      + " __ __"
-      + " " + tag0
-      + " " + tag1
-      + " __"
-      + " __^" + tag0
-      + " " + tag0 + "^" + tag1
-      + " __^__^" + tag0
-      + " " + tag0 + "^" + tag1 + "^__"
-      + " __";
-    r_instances.push_back( inst );
-    inst = string("__")
-      + " " + word0
-      + " " + word1
-      + " __ __"
-      + " " + mod1
-      + " __"
-      + " " + tag0
-      + " " + tag1
-      + " __ __"
-      + " " + tag0 + "^" + tag1
-      + " " + tag1 + "^__"
-      + " __^" + tag0 + "^" + tag1
-      + " " + tag1 + "^__^__"
-      + " __";
-    r_instances.push_back( inst );
   }
   else if ( words.size() == 3 ) {
     string word0 = words[0];
@@ -502,8 +462,160 @@ void Parser::createDirRelInstances( const parseData& pd,
       + " __"
       + " ROOT";
     d_instances.push_back( inst );
+  }
+  else {
+    for ( size_t i=0 ; i < words.size(); ++i ){
+      string word_0, word_1, word_2;
+      string tag_0, tag_1, tag_2;
+      string mod_0, mod_1, mod_2;
+      if ( i == 0 ){
+	word_2 = "__";
+	tag_2 = "__";
+	mod_2 = "__";
+	word_1 = "__";
+	tag_1 = "__";
+	mod_1 = "__";
+      }
+      else if ( i == 1 ){
+	word_2 = "__";
+	tag_2 = "__";
+	mod_2 = "__";
+	word_1 = words[i-1];
+	tag_1 = heads[i-1];
+	mod_1 = mods[i-1];
+      }
+      else {
+	word_2 = words[i-2];
+	tag_2 = heads[i-2];
+	mod_2 = mods[i-2];
+	word_1 = words[i-1];
+	tag_1 = heads[i-1];
+	mod_1 = mods[i-1];
+      }
+      string word0 = words[i];
+      string word1, word2;
+      string tag0 = heads[i];
+      string tag1, tag2;
+      string mod0 = mods[i];
+      string mod1, mod2;
+      if ( i < words.size() - 2 ){
+	word1 = words[i+1];
+	tag1 = heads[i+1];
+	mod1 = mods[i+1];
+	word2 = words[i+2];
+	tag2 = heads[i+2];
+	mod2 = mods[i+2];
+      }
+      else if ( i == words.size() - 2 ){
+	word1 = words[i+1];
+	tag1 = heads[i+1];
+	mod1 = mods[i+1];
+	word2 = "__";
+	tag2 = "__";
+	mod2 = "__";
+      }
+      else {
+	word1 = "__";
+	tag1 = "__";
+	mod1 = "__";
+	word2 = "__";
+	tag2 = "__";
+	mod2 = "__";
+      }
+      string inst = word_2
+	+ " " + word_1
+	+ " " + word0
+	+ " " + word1
+	+ " " + word2
+	+ " " + tag_2
+	+ " " + tag_1
+	+ " " + tag0
+	+ " " + tag1
+	+ " " + tag2
+	+ " " + word_2 + "^" + tag_2
+	+ " " + word_1 + "^" + tag_1
+	+ " " + word0 + "^" + tag0
+	+ " " + word1 + "^" + tag1
+	+ " " + word2 + "^" + tag2
+	+ " " + tag_1 + "^" + tag0
+	+ " " + tag0 + "^" + tag1
+	+ " " + mod_1
+	+ " " + mod0
+	+ " " + mod1
+	+ " ROOT";
+      d_instances.push_back( inst );
+    }
+  }
+  return d_instances;
+}
+
+vector<string> Parser::createRelInstances( const parseData& pd ){
+  vector<string> r_instances;
+  const vector<string>& words = pd.words;
+  const vector<string>& heads = pd.heads;
+  const vector<string>& mods = pd.mods;
+
+  if ( words.size() == 1 ){
+    string word0 = words[0];
+    string tag0 = heads[0];
+    string mod0 = mods[0];
+    string inst = "__ __ " + word0 + " __ __ " + mod0
+      + " __ __ "  + tag0 + " __ __ __^" + tag0
+      + " " + tag0 + "^__ __^__^" + tag0
+      + " " + tag0 + "^__^__ __";
+    r_instances.push_back( inst );
+  }
+  else if ( words.size() == 2 ){
+    string word0 = words[0];
+    string tag0 = heads[0];
+    string mod0 = mods[0];
+    string word1 = words[1];
+    string tag1 = heads[1];
+    string mod1 = mods[1];
     //
-    inst = string("__ __")
+    string inst = string("__ __")
+      + " " + word0
+      + " " + word1
+      + " __"
+      + " " + mod0
+      + " __ __"
+      + " " + tag0
+      + " " + tag1
+      + " __"
+      + " __^" + tag0
+      + " " + tag0 + "^" + tag1
+      + " __^__^" + tag0
+      + " " + tag0 + "^" + tag1 + "^__"
+      + " __";
+    r_instances.push_back( inst );
+    inst = string("__")
+      + " " + word0
+      + " " + word1
+      + " __ __"
+      + " " + mod1
+      + " __"
+      + " " + tag0
+      + " " + tag1
+      + " __ __"
+      + " " + tag0 + "^" + tag1
+      + " " + tag1 + "^__"
+      + " __^" + tag0 + "^" + tag1
+      + " " + tag1 + "^__^__"
+      + " __";
+    r_instances.push_back( inst );
+  }
+  else if ( words.size() == 3 ) {
+    string word0 = words[0];
+    string tag0 = heads[0];
+    string mod0 = mods[0];
+    string word1 = words[1];
+    string tag1 = heads[1];
+    string mod1 = mods[1];
+    string word2 = words[2];
+    string tag2 = heads[2];
+    string mod2 = mods[2];
+    //
+    string inst = string("__ __")
       + " " + word0
       + " " + word1
       + " " + word2
@@ -610,30 +722,8 @@ void Parser::createDirRelInstances( const parseData& pd,
 	tag2 = "__";
 	mod2 = "__";
       }
-      string inst = word_2
-	+ " " + word_1
-	+ " " + word0
-	+ " " + word1
-	+ " " + word2
-	+ " " + tag_2
-	+ " " + tag_1
-	+ " " + tag0
-	+ " " + tag1
-	+ " " + tag2
-	+ " " + word_2 + "^" + tag_2
-	+ " " + word_1 + "^" + tag_1
-	+ " " + word0 + "^" + tag0
-	+ " " + word1 + "^" + tag1
-	+ " " + word2 + "^" + tag2
-	+ " " + tag_1 + "^" + tag0
-	+ " " + tag0 + "^" + tag1
-	+ " " + mod_1
-	+ " " + mod0
-	+ " " + mod1
-	+ " ROOT";
-      d_instances.push_back( inst );
       //
-      inst = word_2
+      string inst = word_2
 	+ " " + word_1
 	+ " " + word0
 	+ " " + word1
@@ -652,6 +742,7 @@ void Parser::createDirRelInstances( const parseData& pd,
       r_instances.push_back( inst );
     }
   }
+  return r_instances;
 }
 
 
@@ -752,13 +843,16 @@ void appendResult( const vector<Word *>& words,
 	Dependency *d = new Dependency( sent->doc(), args );
 	dl->append( d );
 	Headwords *dh = new Headwords();
-	for ( size_t j=0; j < pd.mwus[nums[i]-1].size(); ++ j ){
-	  dh->append( pd.mwus[nums[i]-1][j] );
+	// for ( size_t j=0; j < pd.mwus[nums[i]-1].size(); ++ j ){
+	//   dh->append( pd.mwus[nums[i]-1][j] );
+	// }
+	for ( const auto& wrd : pd.mwus[nums[i]-1] ){
+	  dh->append( wrd );
 	}
 	d->append( dh );
 	DependencyDependent *dd = new DependencyDependent();
-	for ( size_t j=0; j < pd.mwus[i].size(); ++ j ){
-	  dd->append( pd.mwus[i][j] );
+	for ( const auto& it : pd.mwus[i] ){
+	  dd->append( it );
 	}
 	d->append( dd );
       }
@@ -804,33 +898,31 @@ void Parser::Parse( const vector<Word*>& words,
   }
   timers.prepareTimer.start();
   parseData pd = prepareParse( words );
-  vector<string> p_instances;
-  vector<timbl_result> p_results;
-  vector<string> d_instances;
-  vector<timbl_result> d_results;
-  vector<string> r_instances;
-  vector<timbl_result> r_results;
-  createPairInstances( pd, p_instances );
-  createDirRelInstances( pd, d_instances, r_instances );
   timers.prepareTimer.stop();
+  vector<timbl_result> p_results;
+  vector<timbl_result> d_results;
+  vector<timbl_result> r_results;
 #pragma omp parallel sections
   {
 #pragma omp section
       {
 	timers.pairsTimer.start();
-	timbl( pairs, p_instances, p_results );
+	vector<string> instances = createPairInstances( pd );
+	timbl( pairs, instances, p_results );
 	timers.pairsTimer.stop();
       }
 #pragma omp section
       {
 	timers.dirTimer.start();
-	timbl( dir, d_instances, d_results );
+	vector<string> instances = createDirInstances( pd );
+	timbl( dir, instances, d_results );
 	timers.dirTimer.stop();
       }
 #pragma omp section
       {
 	timers.relsTimer.start();
-	timbl( rels, r_instances, r_results );
+	vector<string> instances = createRelInstances( pd );
+	timbl( rels, instances, r_results );
 	timers.relsTimer.stop();
       }
   }

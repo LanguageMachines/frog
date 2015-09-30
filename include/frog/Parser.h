@@ -47,11 +47,10 @@ class Parser {
   std::vector<std::string> createParserInstances( const parseData& );
   std::string getTagset() const { return dep_tagset; };
  private:
-  void createPairInstances( const parseData&,
-			    std::vector<std::string>& );
-  void createDirRelInstances( const parseData&,
-			      std::vector<std::string>&,
-			      std::vector<std::string>& );
+  std::vector<std::string> createPairInstances( const parseData& );
+  std::vector<std::string> createDirInstances( const parseData& );
+  std::vector<std::string> createRelInstances( const parseData& );
+
   Timbl::TimblAPI *pairs;
   Timbl::TimblAPI *dir;
   Timbl::TimblAPI *rels;
