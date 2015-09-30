@@ -23,12 +23,12 @@ void split_dist( const vector< pair<string,double>>& dist,
   }
 }
 
-vector<Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
+vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
 				   const vector<timbl_result>& r_res,
 				   const vector<timbl_result>& p_res,
 				   size_t sent_len,
 				   size_t maxDist ){
-  vector<Constraint*> constraints;
+  vector<const Constraint*> constraints;
   vector<timbl_result>::const_iterator pit = p_res.begin();
   for ( size_t dependent_id = 1;
 	dependent_id <= sent_len;
@@ -115,7 +115,7 @@ vector<parsrel> parse( const vector<timbl_result>& p_res,
 		       const vector<timbl_result>& d_res,
 		       size_t parse_size,
 		       int maxDist ){
-  vector<Constraint*> constraints
+  vector<const Constraint*> constraints
     = formulateWCSP( d_res, r_res, p_res, parse_size, maxDist );
   CKYParser parser( parse_size );
   for ( const auto& constraint : constraints ){
