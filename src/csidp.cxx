@@ -124,5 +124,8 @@ vector<parsrel> parse( const vector<timbl_result>& p_res,
   vector<parsrel> result( parse_size );
   parser.parse();
   parser.rightComplete(0, parse_size, result );
+  for ( const auto& constraint : constraints ){
+    delete constraint;
+  }
   return result;
 }
