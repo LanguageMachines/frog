@@ -121,8 +121,8 @@ vector<parsrel> parse( const vector<timbl_result>& p_res,
   for ( const auto& constraint : constraints ){
     parser.addConstraint( constraint );
   }
-  parser.parse();
   vector<parsrel> result( parse_size );
+  parser.parse();
   parser.rightComplete(0, parse_size, result );
   return result;
 }

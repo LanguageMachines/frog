@@ -100,6 +100,14 @@ struct parsrel {
   int head;
 };
 
+class chart_rec {
+ public:
+  SubTree l_True;
+  SubTree l_False;
+  SubTree r_True;
+  SubTree r_False;
+};
+
 class CKYParser {
 public:
   CKYParser( size_t );
@@ -117,7 +125,7 @@ private:
   std::vector< std::vector<Constraint*>> inDepConstraints;
   std::vector< std::vector<Constraint*>> outDepConstraints;
   std::vector< std::vector< std::vector<Constraint*>>> edgeConstraints;
-  std::vector< std::vector<std::map<std::string,std::map<bool,SubTree>>>> chart;
+  std::vector< std::vector<chart_rec>> chart;
 
 };
 

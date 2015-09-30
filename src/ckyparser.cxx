@@ -131,42 +131,14 @@ string CKYParser::bestEdge( SubTree& leftSubtree, SubTree& rightSubtree,
 }
 
 void CKYParser::parse(){
-  // cerr << "inDep:" << endl;
-  // int i = 0;
-  // for( auto const& it : inDepConstraints ){
-  //   cerr << i++ << endl;
-  //   for( auto const& it2: it )
-  //     cerr << it2 << endl;
-  // }
-  // cerr << "outDep:" << endl;
-  // i = 0;
-  // for( auto const& it : outDepConstraints ){
-  //   cerr << i++ << endl;
-  //   for( auto const& it2: it )
-  //     cerr << it2 << endl;
-  // }
-  // cerr << "edgeC:" << endl;
-  // i = 0;
-  // for( auto const& it :edgeConstraints ){
-  //   cerr << i++ << endl;
-  //   int j = 0;
-  //   for( auto const& it2 : it ){
-  //     cerr << j++ << endl;
-  //     for( auto const& it3 : it2 ){
-  // 	cerr << it3 << endl;
-  //     }
-  //   }
-  // }
-  
-
   chart.resize( numTokens +1 );
   for ( auto& it : chart ){
     it.resize( numTokens + 1 );
     for ( auto& it2 : it ){
-      it2["r"][true] = SubTree(0.0, -1, "" );
-      it2["r"][false] = SubTree(0.0, -1, "" );
-      it2["l"][true] = SubTree(0.0, -1, "" );
-      it2["l"][false] = SubTree(0.0, -1, "" );
+      it2.r_True = SubTree(0.0, -1, "" );
+      it2.r_False = SubTree(0.0, -1, "" );
+      it2.l_True = SubTree(0.0, -1, "" );
+      it2.l_False = SubTree(0.0, -1, "" );
     }
   }
   for ( size_t k=1; k < numTokens + 2; ++k ){
@@ -179,11 +151,11 @@ void CKYParser::parse(){
       for( size_t r = s; r < t; ++r ){
 	double edgeScore = -0.5;
 	set<Constraint*> constraints;
-	string label = bestEdge( chart[s][r]["r"][true],
-				 chart[r+1][t]["l"][true],
+	string label = bestEdge( chart[s][r].r_True,
+				 chart[r+1][t].l_True,
 				 t, s, constraints, edgeScore );
 	//	cerr << "STEP 1 BEST EDGE==> " << label << " ( " << edgeScore << ")" << endl;
-	double score = chart[s][r]["r"][true].score() + chart[r+1][t]["l"][true].score() + edgeScore;
+	double score = chart[s][r].r_True.score() + chart[r+1][t].l_True.score() + edgeScore;
 	if ( score > bestScore ){
 	  bestScore = score;
 	  bestI = r;
@@ -192,10 +164,10 @@ void CKYParser::parse(){
 	}
       }
       //      cerr << "STEP 1 ADD: " << bestScore <<"-" << bestI << "-" << bestL << endl;
-      chart[s][t]["l"][false] = SubTree( bestScore, bestI, bestL );
-      chart[s][t]["l"][false].satisfiedConstraints.insert( chart[s][bestI]["r"][true].satisfiedConstraints.begin(), chart[s][bestI]["r"][true].satisfiedConstraints.end() );
-      chart[s][t]["l"][false].satisfiedConstraints.insert( chart[bestI+1][t]["l"][true].satisfiedConstraints.begin(), chart[bestI+1][t]["l"][true].satisfiedConstraints.end() );
-      chart[s][t]["l"][false].satisfiedConstraints.insert( bestConstraints.begin(), bestConstraints.end() );
+      chart[s][t].l_False = SubTree( bestScore, bestI, bestL );
+      chart[s][t].l_False.satisfiedConstraints.insert( chart[s][bestI].r_True.satisfiedConstraints.begin(), chart[s][bestI].r_True.satisfiedConstraints.end() );
+      chart[s][t].l_False.satisfiedConstraints.insert( chart[bestI+1][t].l_True.satisfiedConstraints.begin(), chart[bestI+1][t].l_True.satisfiedConstraints.end() );
+      chart[s][t].l_False.satisfiedConstraints.insert( bestConstraints.begin(), bestConstraints.end() );
 
       bestScore = -10E45;
       bestI = -1;
@@ -204,11 +176,11 @@ void CKYParser::parse(){
       for ( size_t r = s; r < t; ++r ){
 	double edgeScore = -0.5;
 	set<Constraint*> constraints;
-	string label = bestEdge( chart[s][r]["r"][true],
-				 chart[r+1][t]["l"][true],
+	string label = bestEdge( chart[s][r].r_True,
+				 chart[r+1][t].l_True,
 				 s, t, constraints, edgeScore );
 	//	cerr << "STEP 2 BEST EDGE==> " << label << " ( " << edgeScore << ")" << endl;
-	double score = chart[s][r]["r"][true].score() + chart[r+1][t]["l"][true].score() + edgeScore;
+	double score = chart[s][r].r_True.score() + chart[r+1][t].l_True.score() + edgeScore;
 	if ( score > bestScore ){
 	  bestScore = score;
 	  bestI = r;
@@ -218,31 +190,31 @@ void CKYParser::parse(){
       }
 
       //      cerr << "STEP 2 ADD: " << bestScore <<"-" << bestI << "-" << bestL << endl;
-      chart[s][t]["r"][false] = SubTree( bestScore, bestI, bestL );
-      chart[s][t]["r"][false].satisfiedConstraints.insert( chart[s][bestI]["r"][true].satisfiedConstraints.begin(), chart[s][bestI]["r"][true].satisfiedConstraints.end() );
-      chart[s][t]["r"][false].satisfiedConstraints.insert( chart[bestI+1][t]["l"][true].satisfiedConstraints.begin(), chart[bestI+1][t]["l"][true].satisfiedConstraints.end() );
-      chart[s][t]["r"][false].satisfiedConstraints.insert( bestConstraints.begin(), bestConstraints.end() );
+      chart[s][t].r_False = SubTree( bestScore, bestI, bestL );
+      chart[s][t].r_False.satisfiedConstraints.insert( chart[s][bestI].r_True.satisfiedConstraints.begin(), chart[s][bestI].r_True.satisfiedConstraints.end() );
+      chart[s][t].r_False.satisfiedConstraints.insert( chart[bestI+1][t].l_True.satisfiedConstraints.begin(), chart[bestI+1][t].l_True.satisfiedConstraints.end() );
+      chart[s][t].r_False.satisfiedConstraints.insert( bestConstraints.begin(), bestConstraints.end() );
 
       bestI = -1;
       bestL = "";
       bestScore = -10E45;
       for ( size_t r = s; r < t; ++r ){
-	double score = chart[s][r]["l"][true].score() + chart[r][t]["l"][false].score();
+	double score = chart[s][r].l_True.score() + chart[r][t].l_False.score();
 	if ( score > bestScore ){
 	  bestScore = score;
 	  bestI = r;
 	}
       }
       //      cerr << "STEP 3 ADD: " << bestScore <<"-" << bestI << "-" << bestL << endl;
-      chart[s][t]["l"][true] = SubTree( bestScore, bestI, bestL );
-      chart[s][t]["l"][true].satisfiedConstraints.insert( chart[s][bestI]["l"][true].satisfiedConstraints.begin(), chart[s][bestI]["l"][true].satisfiedConstraints.end() );
-      chart[s][t]["l"][true].satisfiedConstraints.insert( chart[bestI][t]["l"][false].satisfiedConstraints.begin(), chart[bestI][t]["l"][false].satisfiedConstraints.end() );
+      chart[s][t].l_True = SubTree( bestScore, bestI, bestL );
+      chart[s][t].l_True.satisfiedConstraints.insert( chart[s][bestI].l_True.satisfiedConstraints.begin(), chart[s][bestI].l_True.satisfiedConstraints.end() );
+      chart[s][t].l_True.satisfiedConstraints.insert( chart[bestI][t].l_False.satisfiedConstraints.begin(), chart[bestI][t].l_False.satisfiedConstraints.end() );
 
       bestI = -1;
       bestL = "";
       bestScore = -10E45;
       for ( size_t r = s+1; r < t+1; ++r ){
-	double score = chart[s][r]["r"][false].score() + chart[r][t]["r"][true].score();
+	double score = chart[s][r].r_False.score() + chart[r][t].r_True.score();
 	if ( score > bestScore ){
 	  bestScore = score;
 	  bestI = r;
@@ -250,10 +222,9 @@ void CKYParser::parse(){
       }
 
       //      cerr << "STEP 4 ADD: " << bestScore <<"-" << bestI << "-" << bestL << endl;
-      chart[s][t]["r"][true] = SubTree( bestScore, bestI, bestL );
-      chart[s][t]["r"][true].satisfiedConstraints.insert( chart[s][bestI]["r"][false].satisfiedConstraints.begin(), chart[s][bestI]["r"][false].satisfiedConstraints.end() );
-      chart[s][t]["r"][true].satisfiedConstraints.insert( chart[bestI][t]["r"][true].satisfiedConstraints.begin(), chart[bestI][t]["r"][true].satisfiedConstraints.end() );
-
+      chart[s][t].r_True = SubTree( bestScore, bestI, bestL );
+      chart[s][t].r_True.satisfiedConstraints.insert( chart[s][bestI].r_False.satisfiedConstraints.begin(), chart[s][bestI].r_False.satisfiedConstraints.end() );
+      chart[s][t].r_True.satisfiedConstraints.insert( chart[bestI][t].r_True.satisfiedConstraints.begin(), chart[bestI][t].r_True.satisfiedConstraints.end() );
 
     }
   }
@@ -261,8 +232,8 @@ void CKYParser::parse(){
 
 
 void CKYParser::leftIncomplete( int s, int t, vector<parsrel>& pr ){
-  int r = chart[s][t]["l"][false].r();
-  string label = chart[s][t]["l"][false].edgeLabel();
+  int r = chart[s][t].l_False.r();
+  string label = chart[s][t].l_False.edgeLabel();
   if ( r >=0 ){
     pr[s - 1].deprel = label;
     pr[s - 1].head = t;
@@ -272,8 +243,8 @@ void CKYParser::leftIncomplete( int s, int t, vector<parsrel>& pr ){
 }
 
 void CKYParser::rightIncomplete( int s, int t, vector<parsrel>& pr ){
-  int r = chart[s][t]["r"][false].r();
-  string label = chart[s][t]["r"][false].edgeLabel();
+  int r = chart[s][t].r_False.r();
+  string label = chart[s][t].r_False.edgeLabel();
   if ( r >= 0 ) {
     pr[t - 1].deprel = label;
     pr[t - 1].head = s;
@@ -284,7 +255,7 @@ void CKYParser::rightIncomplete( int s, int t, vector<parsrel>& pr ){
 
 
 void CKYParser::leftComplete( int s, int t, vector<parsrel>& pr ){
-  int r = chart[s][t]["l"][true].r();
+  int r = chart[s][t].l_True.r();
   if ( r >= 0 ){
     leftComplete( s, r, pr );
     leftIncomplete( r, t, pr );
@@ -292,7 +263,7 @@ void CKYParser::leftComplete( int s, int t, vector<parsrel>& pr ){
 }
 
 void CKYParser::rightComplete( int s, int t, vector<parsrel>& pr ){
-  int r = chart[s][t]["r"][true].r();
+  int r = chart[s][t].r_True.r();
   if ( r >= 0 ){
     rightIncomplete( s, r, pr );
     rightComplete( r, t, pr );
