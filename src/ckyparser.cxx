@@ -23,17 +23,18 @@ ostream& operator<<( ostream& os, const Constraint& c ){
 
 void HasIncomingRel::put( ostream& os ) const {
   Constraint::put( os );
-  os << " REL " << relType;
+  os << " incoming rel=" << relType;
 }
 
 
 void HasDependency::put( ostream& os ) const {
   Constraint::put( os );
-  os << " rel=" << relType << " head=" << headType;
+  os << " dependency rel=" << relType << " head=" << headType;
 }
+
 void DependencyDirection::put( ostream & os ) const {
   Constraint::put( os );
-  os << " direct=" << " " << direction;
+  os << " direction=" << " " << direction;
 }
 
 
@@ -43,6 +44,10 @@ CKYParser::CKYParser( size_t num ): numTokens(num)
   outDepConstraints.resize( numTokens + 1 );
   edgeConstraints.resize( numTokens + 1 );
   for ( auto& it : edgeConstraints ){
+    it.resize( numTokens + 1 );
+  }
+  chart.resize( numTokens +1 );
+  for ( auto& it : chart ){
     it.resize( numTokens + 1 );
   }
 }
@@ -68,7 +73,6 @@ string CKYParser::bestEdge( const SubTree& leftSubtree,
 			    size_t headIndex, size_t depIndex,
 			    set<const Constraint*>& bestConstraints,
 			    double& bestScore ){
-  using TiCC::operator<<;
   bestConstraints.clear();
   //  cerr << "BESTEDGE " << headIndex << " <> " << depIndex << endl;
   if ( headIndex == 0 ){
@@ -123,7 +127,7 @@ string CKYParser::bestEdge( const SubTree& leftSubtree,
     if ( my_score > bestScore ){
       bestScore = my_score;
       bestLabel = my_label;
-      bestConstraints = my_constraints;
+      bestConstraints = std::move(my_constraints);
       //      cerr << "UPDATE BEst " << bestLabel << " " << bestScore << " " << bestConstraints << endl;
     }
   }
@@ -132,16 +136,6 @@ string CKYParser::bestEdge( const SubTree& leftSubtree,
 }
 
 void CKYParser::parse(){
-  chart.resize( numTokens +1 );
-  for ( auto& it : chart ){
-    it.resize( numTokens + 1 );
-    for ( auto& it2 : it ){
-      it2.r_True = SubTree(0.0, -1, "" );
-      it2.r_False = SubTree(0.0, -1, "" );
-      it2.l_True = SubTree(0.0, -1, "" );
-      it2.l_False = SubTree(0.0, -1, "" );
-    }
-  }
   for ( size_t k=1; k < numTokens + 2; ++k ){
     for( size_t s=0; s < numTokens +1 - k; ++s ){
       size_t t = s + k;
@@ -161,7 +155,7 @@ void CKYParser::parse(){
 	  bestScore = score;
 	  bestI = r;
 	  bestL = label;
-	  bestConstraints = constraints;
+	  bestConstraints = std::move(constraints);
 	}
       }
       //      cerr << "STEP 1 ADD: " << bestScore <<"-" << bestI << "-" << bestL << endl;
@@ -186,7 +180,7 @@ void CKYParser::parse(){
 	  bestScore = score;
 	  bestI = r;
 	  bestL = label;
-	  bestConstraints = constraints;
+	  bestConstraints = std::move(constraints);
 	}
       }
 
