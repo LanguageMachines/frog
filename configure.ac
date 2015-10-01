@@ -53,10 +53,14 @@ if test x"$acx_pthread_ok" = xyes; then
    CXXFLAGS="$CXXFLAGS $PTHREAD_CFLAGS"
 fi
 
-# check for OpenMP
-OPENMP_CHECK( [CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
-	      AC_DEFINE(HAVE_OPENMP, 1 , Define to 1 if you have OpenMP )],
-	      [AC_MSG_NOTICE(We don't have OpenMP. Multithreaded testing is disabled)] )
+# check OpenMP support
+AC_OPENMP
+if test "x$ac_cv_prog_cxx_openmp" != "xunsupported"; then
+   CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+   AC_DEFINE(HAVE_OPENMP, 1 , Define to 1 if you have OpenMP )
+else
+   AC_MSG_NOTICE(We don't have OpenMP. Multithreaded operation is disabled)
+fi
 
 if test $prefix = "NONE"; then
    prefix="$ac_default_prefix"
