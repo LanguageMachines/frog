@@ -562,7 +562,6 @@ void Mbma::filterSubTags( const vector<string>& feats ){
 	bestMatches.clear();
       }
       bestMatches.insert(q);
-      q = 0;
     }
   }
   //
