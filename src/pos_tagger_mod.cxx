@@ -37,6 +37,7 @@ using namespace std;
 using namespace folia;
 
 POSTagger::POSTagger(TiCC::LogStream * logstream){
+  debug = 0;
   tagger = 0;
   filter = 0;
   tag_log = new LogStream( logstream, "pos-tagger-" );
