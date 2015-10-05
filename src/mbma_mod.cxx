@@ -566,20 +566,23 @@ void Mbma::filterSubTags( const vector<string>& feats ){
     }
   }
   //
-  // we still might have doubles
+  // we still might have doubles. (different Rule's yielding the same result)
+  // reduce these
   //
   map<UnicodeString, Rule*> unique;
   for ( const auto& ait : bestMatches ){
     UnicodeString tmp = ait->getKey( doDaring );
     unique[tmp] = ait;
   }
-  // so we have map of 'equal' analysis
+  // so now we have map of 'equal' analysis.
+  // create a set for revers lookup.
   set<Rule*> uniqueAna;
   for ( auto const& uit : unique ){
     uniqueAna.insert( uit.second );
   }
-  // and now a set of all MBMAana's that are really different.
-  // remove all analysis that aren't in that set.
+  // now we can remove all analysis that aren't in that set.
+  // we do these by setting the pointer to 0 for Rules from the set
+  // all other rules wil be deleted by clearAnalysis
   for( auto& it : analysis ){
     if ( uniqueAna.find( it ) != uniqueAna.end() )
       it = 0;
@@ -716,6 +719,7 @@ void Mbma::Classify( Word* sword ){
 }
 
 void Mbma::Classify( const UnicodeString& word ){
+  clearAnalysis();
   UnicodeString uWord = filterDiacritics( word );
   vector<string> insts = make_instances( uWord );
   vector<string> classes;
