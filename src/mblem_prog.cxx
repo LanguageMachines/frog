@@ -52,6 +52,7 @@ LogStream *theErrLog = &my_default_log;  // fill the externals
 
 vector<string> fileNames;
 bool doAll = false;
+bool noTagger = false;
 
 Configuration configuration;
 static string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
@@ -120,6 +121,7 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     fileNames = Opts.getMassOpts();
   };
   doAll = Opts.is_present( 'a' );
+  noTagger = Opts.is_present( "notagger" );
   return true;
 }
 
@@ -135,9 +137,11 @@ bool init(){
     cerr << "UCTO Initialization failed." << endl;
     return false;
   }
-  if ( !tagger.init( configuration ) ){
-    cerr << "CGN Initialization failed." << endl;
-    return false;
+  if ( !noTagger ){
+    if ( !tagger.init( configuration ) ){
+      cerr << "CGN Initialization failed." << endl;
+      return false;
+    }
   }
   cerr << "Initialization done." << endl;
   return true;
@@ -148,20 +152,38 @@ void Test( istream& in ){
   while ( getline( in, line ) ){
     vector<string> sentences = tokenizer.tokenize( line );
     for ( size_t s=0; s < sentences.size(); ++s ){
-      vector<TagResult> tagv = tagger.tagLine(sentences[s]);
-      for ( size_t w=0; w < tagv.size(); ++w ){
-	UnicodeString uWord = folia::UTF8ToUnicode(tagv[w].word());
-	myMblem.Classify( uWord );
-	if ( !doAll )
-	  myMblem.filterTag( tagv[w].assignedTag() );
-	vector<pair<string,string> > res = myMblem.getResult();
-	cout << tagv[w].word() << " {" << tagv[w].assignedTag() << "}\t";
-	for ( size_t i=0; i < res.size(); ++i ){
-	  cout << res[i].first << "[" << res[i].second << "]";
-	  if ( i < res.size()-1 )
+      if ( noTagger ){
+	vector<string> parts;
+	TiCC::split( sentences[s], parts );
+	for ( const auto& w : parts ){
+	  UnicodeString uWord = folia::UTF8ToUnicode(w);
+	  myMblem.Classify( uWord );
+	  vector<pair<string,string> > res = myMblem.getResult();
+	  cout << w << "\t";
+	  for ( const auto& p : res ){
+	    cout << p.first << "[" << p.second << "]";
 	    cout << "/";
+	  }
+	  cout << endl;
+
 	}
-	cout << endl;
+      }
+      else {
+	vector<TagResult> tagv = tagger.tagLine(sentences[s]);
+	for ( size_t w=0; w < tagv.size(); ++w ){
+	  UnicodeString uWord = folia::UTF8ToUnicode(tagv[w].word());
+	  myMblem.Classify( uWord );
+	  if ( !doAll )
+	    myMblem.filterTag( tagv[w].assignedTag() );
+	  vector<pair<string,string> > res = myMblem.getResult();
+	  cout << tagv[w].word() << " {" << tagv[w].assignedTag() << "}\t";
+	  for ( size_t i=0; i < res.size(); ++i ){
+	    cout << res[i].first << "[" << res[i].second << "]";
+	    if ( i < res.size()-1 )
+	      cout << "/";
+	  }
+	  cout << endl;
+	}
       }
       cout << "<utt>" << endl << endl;
     }
@@ -175,7 +197,7 @@ int main(int argc, char *argv[]) {
   std::ios_base::sync_with_stdio(false);
   cerr << "mblem " << VERSION << " (c) ILK 1998 - 2015" << endl;
   cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
-  TiCC::CL_Options Opts("c:t:hVd:a", "version");
+  TiCC::CL_Options Opts("c:t:hVd:a", "version,notagger");
   try {
     Opts.init(argc, argv);
   }
