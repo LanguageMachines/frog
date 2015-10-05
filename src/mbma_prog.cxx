@@ -166,7 +166,8 @@ void Test( istream& in ){
 	myMbma.Classify( uWord );
 	if ( !doAll ){
 	  v.erase(v.begin());
-	  myMbma.filterTag( head, v );
+	  myMbma.filterHeadTag( head );
+	  myMbma.filterSubTags( v );
 	}
 	vector<vector<string> > res = myMbma.getResult();
 	cout << tagv[w].word() << " {" << tagv[w].assignedTag() << "}\t";

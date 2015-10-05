@@ -46,7 +46,8 @@ class Mbma {
   void addDeclaration( folia::Document& doc ) const;
   void Classify( folia::Word * );
   void Classify( const UnicodeString& );
-  void filterTag( const std::string&, const std::vector<std::string>& );
+  void filterHeadTag( const std::string& );
+  void filterSubTags( const std::vector<std::string>& );
   std::vector<std::vector<std::string> > getResult() const;
   void setDaring( bool b ){ doDaring = b; };
   void clearAnalysis();
@@ -61,8 +62,8 @@ class Mbma {
   void getFoLiAResult( folia::Word *, const UnicodeString& ) const;
   std::vector<std::string> make_instances( const UnicodeString& word );
   CLEX::Type getFinalTag( const std::list<BaseBracket*>& );
-  void execute( const UnicodeString& word,
-		const std::vector<std::string>& classes );
+  std::vector<Rule*> execute( const UnicodeString& word,
+			      const std::vector<std::string>& classes );
   int debugFlag;
   void addMorph( folia::MorphologyLayer *,
 		 const std::vector<std::string>& ) const;

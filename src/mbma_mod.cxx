@@ -257,9 +257,6 @@ vector<string> Mbma::make_instances( const UnicodeString& word ){
   return insts;
 }
 
-#define OLD_STEP
-
-#ifdef OLD_STEP
 string find_class( unsigned int step,
 		   const vector<string>& classes,
 		   unsigned int nranal ){
@@ -308,61 +305,6 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
   }
   return result;
 }
-#else
-
-bool next_perm( vector< vector<string>::const_iterator >& its,
-		const vector<vector<string> >& parts ){
-  for ( size_t i=0; i < parts.size(); ++i ){
-    ++its[i];
-    if ( its[i] == parts[i].end() ){
-      if ( i == parts.size() -1 )
-	return false;
-      its[i] = parts[i].begin();
-    }
-    else
-      return true;
-  }
-  return false;
-}
-
-vector<vector<string> > generate_all_perms( const vector<string>& classes ){
-
-  // determine all alternative analyses
-  // store every part in a vector of string vectors
-  vector<vector<string> > classParts;
-  classParts.resize( classes.size() );
-  for ( unsigned int j=0; j< classes.size(); ++j ){
-    vector<string> parts;
-    int num = split_at( classes[j], parts, "|" );
-    if ( num > 0 ){
-      classParts[j] = parts;
-    }
-    else {
-      // only one, create a dummy
-      vector<string> dummy;
-      dummy.push_back( classes[j] );
-      classParts[j] = dummy;
-    }
-  }
-  //
-  // now expand
-  vector< vector<string>::const_iterator > its( classParts.size() );
-  for ( size_t i=0; i<classParts.size(); ++i ){
-    its[i] = classParts[i].begin();
-  }
-  vector<vector<string> > result;
-  bool more = true;
-  while ( more ){
-    vector<string> item(classParts.size());
-    for( size_t j=0; j< classParts.size(); ++j ){
-      item[j] = *its[j];
-    }
-    result.push_back( item );
-    more = next_perm( its, classParts );
-  }
-  return result;
-}
-#endif
 
 void Mbma::clearAnalysis(){
   for ( size_t i=0; i < analysis.size(); ++i ){
@@ -371,9 +313,9 @@ void Mbma::clearAnalysis(){
   analysis.clear();
 }
 
-void Mbma::execute( const UnicodeString& word,
-		    const vector<string>& classes ){
-  clearAnalysis();
+vector<Rule*> Mbma::execute( const UnicodeString& word,
+			     const vector<string>& classes ){
+  vector<Rule*> analysis;
   vector<vector<string> > allParts = generate_all_perms( classes );
   if ( debugFlag ){
     string out = "alternatives: word=" + UnicodeToUTF8(word) + ", classes=<";
@@ -408,6 +350,7 @@ void Mbma::execute( const UnicodeString& word,
       delete rule;
     }
   }
+  return analysis;
 }
 
 void Mbma::addMorph( Word *word,
@@ -529,12 +472,11 @@ bool mbmacmp( Rule *m1, Rule *m2 ){
   return m1->getKey(false).length() > m2->getKey(false).length();
 }
 
-void Mbma::filterTag( const string& head,  const vector<string>& feats ){
+void Mbma::filterHeadTag( const string& head ){
   // first we select only the matching heads
   if (debugFlag){
-    *Log(mbmaLog) << "filter with tag, head: " << head
-		  << " feats: " << feats << endl;
-    *Log(mbmaLog) << "filter:start, analysis is:" << endl;
+    *Log(mbmaLog) << "filter with head: " << head << endl;
+    *Log(mbmaLog) << "filter: analysis is:" << endl;
     int i=1;
     for( const auto& it : analysis ){
       *Log(mbmaLog) << i++ << " - " << it << endl;
@@ -568,12 +510,15 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
     }
   }
   if (debugFlag){
-    *Log(mbmaLog) << "filter: analysis after first step" << endl;
+    *Log(mbmaLog) << "filter: analysis after head filter:" << endl;
     int i=1;
     for( const auto& it : analysis ){
       *Log(mbmaLog) << ++i << " - " << it << endl;
     }
   }
+}
+
+void Mbma::filterSubTags( const vector<string>& feats ){
   if ( analysis.size() < 1 ){
     if (debugFlag ){
       *Log(mbmaLog) << "analysis is empty so skip next filter" << endl;
@@ -588,9 +533,9 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   // and match with inflections from each m
   set<Rule *> bestMatches;
   int max_count = 0;
-  for ( size_t q=0; q < analysis.size(); ++q ) {
+  for ( auto& q : analysis ){
     int match_count = 0;
-    string inflection = analysis[q]->inflection;
+    string inflection = q->inflection;
     if (debugFlag){
       *Log(mbmaLog) << "matching " << inflection << " with " << feats << endl;
     }
@@ -616,37 +561,17 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
 	max_count = match_count;
 	bestMatches.clear();
       }
-      bestMatches.insert(analysis[q]);
-    }
-  }
-  // so now we have "the" best matches.
-  // Weed the rest
-  ait = analysis.begin();
-  while ( ait != analysis.end() ){
-    if ( bestMatches.find( *ait ) != bestMatches.end() ){
-      ++ait;
-    }
-    else {
-      delete *ait;
-      ait = analysis.erase( ait );
-    }
-  }
-  if (debugFlag){
-    *Log(mbmaLog) << "filter: analysis after second step" << endl;
-    int i=1;
-    for( const auto& it : analysis ){
-      *Log(mbmaLog) << ++i << " - " << it << endl;
+      bestMatches.insert(q);
+      q = 0;
     }
   }
   //
-  // but now we still might have doubles
+  // we still might have doubles
   //
   map<UnicodeString, Rule*> unique;
-  ait=analysis.begin();
-  while ( ait != analysis.end() ){
-    UnicodeString tmp = (*ait)->getKey( doDaring );
-    unique[tmp] = *ait;
-    ++ait;
+  for ( const auto& ait : bestMatches ){
+    UnicodeString tmp = ait->getKey( doDaring );
+    unique[tmp] = ait;
   }
   // so we have map of 'equal' analysis
   set<Rule*> uniqueAna;
@@ -655,15 +580,13 @@ void Mbma::filterTag( const string& head,  const vector<string>& feats ){
   }
   // and now a set of all MBMAana's that are really different.
   // remove all analysis that aren't in that set.
-  ait=analysis.begin();
-  while ( ait != analysis.end() ){
-    if ( uniqueAna.find( *ait ) != uniqueAna.end() ){
-      ++ait;
-    }
-    else {
-      delete *ait;
-      ait = analysis.erase( ait );
-    }
+  for( auto& it : analysis ){
+    if ( uniqueAna.find( it ) != uniqueAna.end() )
+      it = 0;
+  }
+  clearAnalysis();
+  for( const auto& it :uniqueAna ){
+    analysis.push_back( it );
   }
   if ( debugFlag ){
     *Log(mbmaLog) << "filter: analysis before sort on length:" << endl;
@@ -786,7 +709,8 @@ void Mbma::Classify( Word* sword ){
       for ( size_t i = 0; i < feats.size(); ++i )
 	featVals.push_back( feats[i]->cls() );
     }
-    filterTag( head, featVals );
+    filterHeadTag( head );
+    filterSubTags( featVals );
     getFoLiAResult( sword, lWord );
   }
 }
@@ -808,7 +732,7 @@ void Mbma::Classify( const UnicodeString& word ){
   // fix for 1st char class ==0
   if ( classes[0] == "0" )
     classes[0] = "X";
-  execute( uWord, classes );
+  analysis = execute( uWord, classes );
 }
 
 vector<vector<string> > Mbma::getResult() const {
