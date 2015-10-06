@@ -51,7 +51,8 @@ LogStream my_default_log( cerr, "", StampMessage ); // fall-back
 LogStream *theErrLog = &my_default_log;  // fill the externals
 
 vector<string> fileNames;
-bool doAll = false;
+bool useTagger = true;
+bool useTokenizer = true;
 
 Configuration configuration;
 static string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
@@ -115,7 +116,8 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   else {
     fileNames = Opts.getMassOpts();
   }
-  doAll = Opts.extract( 'a' );
+  useTagger = !Opts.extract( "notagger" );
+  useTokenizer = !Opts.extract( "notokenizer" );
   if ( Opts.extract( "daring" ) ){
     configuration.setatt( "daring", "1", "mbma" );
   };
@@ -130,13 +132,17 @@ bool init(){
     cerr << "MBMA Initialization failed." << endl;
     return false;
   }
-  if ( !tokenizer.init( configuration ) ){
-    cerr << "UCTO Initialization failed." << endl;
-    return false;
+  if ( useTokenizer ){
+    if ( !tokenizer.init( configuration ) ){
+      cerr << "UCTO Initialization failed." << endl;
+      return false;
+    }
   }
-  if ( !tagger.init( configuration ) ){
-    cerr << "CGN Initialization failed." << endl;
-    return false;
+  if ( useTagger ){
+    if ( !tagger.init( configuration ) ){
+      cerr << "CGN Initialization failed." << endl;
+      return false;
+    }
   }
   cerr << "Initialization done." << endl;
   return true;
@@ -149,39 +155,65 @@ void Test( istream& in ){
     if ( line.empty() )
       continue;
     cerr << "processing: " << line << endl;
-    vector<string> sentences = tokenizer.tokenize( line );
-    for ( size_t s=0; s < sentences.size(); ++s ){
-      vector<TagResult> tagv = tagger.tagLine(sentences[s]);
-      for ( size_t w=0; w < tagv.size(); ++w ){
-	UnicodeString uWord = folia::UTF8ToUnicode(tagv[w].word());
-	vector<string> v;
-	size_t num = TiCC::split_at_first_of( tagv[w].assignedTag(),
-					      v, "(,)" );
-	if ( num < 1 ){
-	  throw runtime_error( "error: tag not in right format " );
-	}
-	string head = v[0];
-	if ( head != "SPEC" )
-	  uWord.toLower();
-	myMbma.Classify( uWord );
-	if ( !doAll ){
-	  v.erase(v.begin());
+    vector<string> sentences;
+    if ( useTokenizer ){
+      sentences = tokenizer.tokenize( line );
+    }
+    else {
+      sentences.push_back( line );
+    }
+    for ( auto const& s : sentences ){
+      if ( useTagger ){
+	vector<TagResult> tagv = tagger.tagLine( s );
+	for ( size_t w=0; w < tagv.size(); ++w ){
+	  UnicodeString uWord = folia::UTF8ToUnicode(tagv[w].word());
+	  vector<string> v;
+	  size_t num = TiCC::split_at_first_of( tagv[w].assignedTag(),
+						v, "(,)" );
+	  if ( num < 1 ){
+	    throw runtime_error( "error: tag not in right format " );
+	  }
+	  string head = v[0];
+	  if ( head != "SPEC" )
+	    uWord.toLower();
+	  myMbma.Classify( uWord );
 	  myMbma.filterHeadTag( head );
 	  myMbma.filterSubTags( v );
-	}
-	vector<vector<string> > res = myMbma.getResult();
-	cout << tagv[w].word() << " {" << tagv[w].assignedTag() << "}\t";
-	if ( res.size() == 0 ){
-	  cout << "[" << uWord << "]";
-	}
-	else {
-	  for ( size_t i=0; i < res.size(); ++i ){
-	    cout << res[i];
-	    if ( i < res.size()-1 )
-	      cout << "/";
+	  vector<vector<string> > res = myMbma.getResult();
+	  cout << tagv[w].word() << " {" << tagv[w].assignedTag() << "}\t";
+	  if ( res.size() == 0 ){
+	    cout << "[" << uWord << "]";
 	  }
+	  else {
+	    for ( size_t i=0; i < res.size(); ++i ){
+	      cout << res[i];
+	      if ( i < res.size()-1 )
+		cout << "/";
+	  }
+	  }
+	  cout << endl;
 	}
-	cout << endl;
+      }
+      else {
+	vector<string> parts;
+	TiCC::split( s, parts );
+	for( auto const& w : parts ){
+	  UnicodeString uWord = folia::UTF8ToUnicode(w);
+	  uWord.toLower();
+	  myMbma.Classify( uWord );	  
+	  vector<vector<string> > res = myMbma.getResult();
+	  string line = w + "\t";
+	  for ( auto const& r : res ){
+	    line += "[";
+	    for ( auto const& m: r){
+	      line += m + ",";
+	    }
+	    line.erase(line.length()-1);
+	    line += "]/";
+	  }
+	  line.erase(line.length()-1);
+	  cout << line << endl;
+	}
       }
       cout << "<utt>" << endl << endl;
     }
@@ -195,7 +227,7 @@ int main(int argc, char *argv[]) {
   std::ios_base::sync_with_stdio(false);
   cerr << "mbma " << VERSION << " (c) ILK 1998 - 2015" << endl;
   cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
-  TiCC::CL_Options Opts("aVt:d:hc:","daring,version");
+  TiCC::CL_Options Opts("Vt:d:hc:","daring,version,notagger,notokenizer");
   try {
     Opts.init(argc, argv);
   }
