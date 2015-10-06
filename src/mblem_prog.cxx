@@ -51,8 +51,8 @@ LogStream my_default_log( cerr, "", StampMessage ); // fall-back
 LogStream *theErrLog = &my_default_log;  // fill the externals
 
 vector<string> fileNames;
-bool doAll = false;
-bool noTagger = false;
+bool useTagger = true;
+bool useTokenizer = true;
 
 Configuration configuration;
 static string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
@@ -66,7 +66,8 @@ void usage( ) {
        << "Options:n" << endl;
   cout << "\t============= INPUT MODE (mandatory, choose one) ========================\n"
        << "\t -t <testfile>    Run mblem on this file\n"
-       << "\t -a               give ALL result. Not just the chosen one(s)\n"
+       << "\t --notokenizer    Don't use a tokenizer, so assume all text is tokenized already.\n"
+       << "\t --notagger       Don't use a tagger to disambiguate, so give ALL variants.\n"
        << "\t -c <filename>    Set configuration file (default " << configFileName << ")\n"
        << "\t============= OTHER OPTIONS ============================================\n"
        << "\t -h. give some help.\n"
@@ -120,8 +121,8 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   else {
     fileNames = Opts.getMassOpts();
   };
-  doAll = Opts.is_present( 'a' );
-  noTagger = Opts.is_present( "notagger" );
+  useTagger = !Opts.is_present( "notagger" );
+  useTokenizer = !Opts.is_present( "notokenizer" );
   return true;
 }
 
@@ -133,13 +134,15 @@ bool init(){
     cerr << "MBLEM Initialization failed." << endl;
     return false;
   }
-  if ( !tokenizer.init( configuration ) ){
-    cerr << "UCTO Initialization failed." << endl;
-    return false;
+  if ( useTokenizer ){
+    if ( !tokenizer.init( configuration ) ){
+      cerr << "UCTO Initialization failed." << endl;
+      return false;
+    }
   }
-  if ( !noTagger ){
+  if ( useTagger ){
     if ( !tagger.init( configuration ) ){
-      cerr << "CGN Initialization failed." << endl;
+      cerr << "Tagger Initialization failed." << endl;
       return false;
     }
   }
@@ -150,39 +153,42 @@ bool init(){
 void Test( istream& in ){
   string line;
   while ( getline( in, line ) ){
-    vector<string> sentences = tokenizer.tokenize( line );
-    for ( size_t s=0; s < sentences.size(); ++s ){
-      if ( noTagger ){
+    vector<string> sentences;
+    if ( useTokenizer ){
+      sentences = tokenizer.tokenize( line );
+    }
+    else
+      sentences.push_back( line );
+    
+    for ( auto const& s : sentences ){
+      if ( useTagger ){
+	vector<TagResult> tagv = tagger.tagLine( s );
+	for ( size_t w=0; w < tagv.size(); ++w ){
+	  UnicodeString uWord = folia::UTF8ToUnicode(tagv[w].word());
+	  myMblem.Classify( uWord );
+	  myMblem.filterTag( tagv[w].assignedTag() );
+	  vector<pair<string,string> > res = myMblem.getResult();
+	  string line = tagv[w].word() + " {" + tagv[w].assignedTag() + "}\t";
+	  for ( const auto& p : res ){
+	    line += p.first + "[" + p.second + "]/";
+	  }
+	  line.erase(line.length()-1);
+	  cout << line << endl;
+	}
+      }
+      else {
 	vector<string> parts;
-	TiCC::split( sentences[s], parts );
+	TiCC::split( s, parts );
 	for ( const auto& w : parts ){
 	  UnicodeString uWord = folia::UTF8ToUnicode(w);
 	  myMblem.Classify( uWord );
 	  vector<pair<string,string> > res = myMblem.getResult();
-	  cout << w << "\t";
+	  string line = w + "\t";
 	  for ( const auto& p : res ){
-	    cout << p.first << "[" << p.second << "]";
-	    cout << "/";
+	    line += p.first + "[" + p.second + "]/";
 	  }
-	  cout << endl;
-
-	}
-      }
-      else {
-	vector<TagResult> tagv = tagger.tagLine(sentences[s]);
-	for ( size_t w=0; w < tagv.size(); ++w ){
-	  UnicodeString uWord = folia::UTF8ToUnicode(tagv[w].word());
-	  myMblem.Classify( uWord );
-	  if ( !doAll )
-	    myMblem.filterTag( tagv[w].assignedTag() );
-	  vector<pair<string,string> > res = myMblem.getResult();
-	  cout << tagv[w].word() << " {" << tagv[w].assignedTag() << "}\t";
-	  for ( size_t i=0; i < res.size(); ++i ){
-	    cout << res[i].first << "[" << res[i].second << "]";
-	    if ( i < res.size()-1 )
-	      cout << "/";
-	  }
-	  cout << endl;
+	  line.erase(line.length()-1);
+	  cout << line << endl;
 	}
       }
       cout << "<utt>" << endl << endl;
@@ -197,7 +203,7 @@ int main(int argc, char *argv[]) {
   std::ios_base::sync_with_stdio(false);
   cerr << "mblem " << VERSION << " (c) ILK 1998 - 2015" << endl;
   cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
-  TiCC::CL_Options Opts("c:t:hVd:a", "version,notagger");
+  TiCC::CL_Options Opts("c:t:hVd:", "version,notagger,notokenizer");
   try {
     Opts.init(argc, argv);
   }

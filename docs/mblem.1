@@ -1,7 +1,7 @@
-.TH mblem 1 "2012 June 27"
+.TH mblem 1 "2015 October 06"
 
 .SH NAME
-mblem - Dutch lemmatizer
+mblem - (dutch) lemmatizer
 .SH SYNOPSYS
 mblem -t test-file
 
@@ -12,7 +12,7 @@ mblem will tokenize, tag, and lemmatize word tokens in Dutch text files.
 
 .BR -c " <configfile>"
 .RS
-set the configuration using 'file'
+set the configuration using 'file' The default is to use the Frog config file.
 .RE
 
 .BR -d " <level>"
@@ -20,9 +20,16 @@ set the configuration using 'file'
 set debug level.
 .RE
 
-.BR -a
+.BR --notagger
 .RS
-Give ALL analysis, not just the 'best' ones.
+Don't use a tagger to disambiguate. All variants are shown.
+The default is to use the Dutch CGN tagger.
+.RE
+
+.BR --notokenizer
+.RS
+Don't use a tokenizer. Assume al input to be tokenized.
+The default is to use the Ucto Tokenizer for Dutch.
 .RE
 
 .BR -h
@@ -45,4 +52,5 @@ Antal van den Bosch Timbl@uvt.nl
 
 .SH SEE ALSO
 .BR frog (1)
+.BR ucto (1)
 .BR mbma (1)
