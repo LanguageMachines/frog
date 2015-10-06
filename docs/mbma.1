@@ -1,12 +1,14 @@
 .TH mbma 1 "2012 June 27"
 
 .SH NAME
-mbma - Dutch morphological analyzer
+mbma - (Dutch) morphological analyzer
 .SH SYNOPSYS
 mbma -t test-file
 
 .SH DESCRIPTION
-mbma will tokenize, tag, and morphologically segment word tokens in Dutch text files.
+mbma will tokenize, tag, and morphologically segment word tokens in Dutch text files. The default  is  to  use  the
+ Frog config file.
+
 
 .SH OPTIONS
 
@@ -20,9 +22,16 @@ set the configuration using 'file'
 set debug level.
 .RE
 
-.BR -a
+.BR --notagger
 .RS
-Give ALL analysis, not just the 'best' ones.
+Don't use a tagger to disambiguate. All variants are shown.  The
+default is to use the Dutch CGN tagger.
+.RE
+
+.BR --notokenizer
+.RS
+Don't use a tokenizer. Assume al input  to  be  tokenized.  The
+default is to use the Ucto Tokenizer for Dutch.
 .RE
 
 .BR -h
@@ -45,4 +54,5 @@ Antal van den Bosch Timbl@uvt.nl
 
 .SH SEE ALSO
 .BR frog (1)
+.BR ucto (1)
 .BR mblem (1)
