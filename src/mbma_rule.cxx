@@ -400,7 +400,7 @@ UnicodeString Rule::getKey( bool daring ){
       vector<string> v = extract_morphemes();
       // create an unique string
       for ( size_t p=0; p < v.size(); ++p ) {
-	tmp += UTF8ToUnicode(v[p]) + "+";
+	tmp += UTF8ToUnicode(v[p]) + "++";
       }
     }
     sortkey = tmp;
