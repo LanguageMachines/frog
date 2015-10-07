@@ -580,15 +580,15 @@ void Mbma::filterSubTags( const vector<string>& feats ){
     uniqueAna.insert( uit.second );
   }
   // now we can remove all analysis that aren't in that set.
-  // we do these by setting the pointer to 0 for Rules from the set
-  // all other rules wil be deleted by clearAnalysis
-  for( auto& it : analysis ){
-    if ( uniqueAna.find( it ) != uniqueAna.end() )
-      it = 0;
-  }
-  clearAnalysis();
-  for( const auto& it :uniqueAna ){
-    analysis.push_back( it );
+  auto it = analysis.begin();
+  while ( it != analysis.end() ){
+    if ( uniqueAna.find( *it ) == uniqueAna.end() ){
+      delete *it;
+      it = analysis.erase( it );
+    }
+    else {
+      ++it;
+    }
   }
   if ( debugFlag ){
     *Log(mbmaLog) << "filter: analysis before sort on length:" << endl;
