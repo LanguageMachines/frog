@@ -76,25 +76,6 @@ void Mblem::read_transtable( const string& tableName ) {
   return;
 }
 
-bool Mblem::fill_eq_set( const string& file ){
-  ifstream is( file );
-  if ( !is ){
-    *Log(mblemLog) << "Unable to open file: '" << file << "'" << endl;
-    return false;
-  }
-  string line;
-  while ( getline( is, line ) ){
-    if ( line.empty() || line[0] == '#' )
-      continue;
-    line = TiCC::trim(line);
-    equiv_set.insert( line );
-  }
-  if ( debug ){
-    *Log(mblemLog) << "read tag-equivalents from: '" << file << "'" << endl;
-  }
-  return true;
-}
-
 bool Mblem::fill_ts_map( const string& file ){
   ifstream is( file );
   if ( !is ){
@@ -174,13 +155,6 @@ bool Mblem::init( const Configuration& config ) {
       return false;
   }
 
-  string equiv_file = config.lookUp( "equivalents_file", "mblem" );
-  if ( !equiv_file.empty() ){
-    equiv_file = prefix( config.configDir(), equiv_file );
-    if ( !fill_eq_set( equiv_file ) )
-      return false;
-  }
-
   string one_one_tagS = config.lookUp( "one_one_tags", "mblem" );
   if ( !one_one_tagS.empty() ){
     vector<string> tags;
@@ -231,22 +205,6 @@ string Mblem::make_instance( const UnicodeString& in ) {
   return result;
 }
 
-bool equivalent( const string& tag,
-		 const string& lookuptag,
-		 const string& part ){
-  return tag.find( part ) != string::npos &&
-    lookuptag.find( part ) != string::npos ;
-}
-
-bool isSimilar( const string& tag, const string& cgnTag, const set<string>& eq_s ){
-  for ( auto const& part : eq_s ){
-    if ( equivalent( tag, cgnTag, part ) ){
-      return true;
-    }
-  }
-  return false;
-}
-
 void Mblem::addLemma( Word *word, const string& cls ){
   KWargs args;
   args["set"]=tagset;
@@ -271,13 +229,6 @@ void Mblem::filterTag( const string& postag ){
       if ( debug ){
 	*Log(mblemLog) << "compare cgn-tag " << postag << " with mblem-tag " << tag
 		       << "\n\t==> identical tags"  << endl;
-      }
-      ++it;
-    }
-    else if ( isSimilar( postag, tag, equiv_set ) ){
-      if ( debug ){
-	*Log(mblemLog) << "compare cgn-tag " << postag << " with mblem-tag " << tag
-		       << "\n\t==> similar tags" << endl;
       }
       ++it;
     }
