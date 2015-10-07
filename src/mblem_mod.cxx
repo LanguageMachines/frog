@@ -79,7 +79,7 @@ void Mblem::read_transtable( const string& tableName ) {
 bool Mblem::fill_eq_set( const string& file ){
   ifstream is( file );
   if ( !is ){
-    *Log(mblemLog) << "Unable to open file: '" << file << "'" << endl;    
+    *Log(mblemLog) << "Unable to open file: '" << file << "'" << endl;
     return false;
   }
   string line;
@@ -90,7 +90,7 @@ bool Mblem::fill_eq_set( const string& file ){
     equiv_set.insert( line );
   }
   if ( debug ){
-    *Log(mblemLog) << "read tag-equivalents from: '" << file << "'" << endl;    
+    *Log(mblemLog) << "read tag-equivalents from: '" << file << "'" << endl;
   }
   return true;
 }
@@ -98,7 +98,7 @@ bool Mblem::fill_eq_set( const string& file ){
 bool Mblem::fill_ts_map( const string& file ){
   ifstream is( file );
   if ( !is ){
-    *Log(mblemLog) << "Unable to open file: '" << file << "'" << endl;    
+    *Log(mblemLog) << "Unable to open file: '" << file << "'" << endl;
     return false;
   }
   string line;
@@ -113,7 +113,7 @@ bool Mblem::fill_ts_map( const string& file ){
     token_strip_map[parts[0]].insert( make_pair( parts[1], TiCC::stringTo<int>( parts[2] ) ) );
   }
   if ( debug ){
-    *Log(mblemLog) << "read uct token strip rules from: '" << file << "'" << endl;    
+    *Log(mblemLog) << "read token strip rules from: '" << file << "'" << endl;
   }
   return true;
 }
@@ -173,7 +173,7 @@ bool Mblem::init( const Configuration& config ) {
     if ( !fill_ts_map( tokenStripFile ) )
       return false;
   }
-   
+
   string equiv_file = config.lookUp( "equivalents_file", "mblem" );
   if ( !equiv_file.empty() ){
     equiv_file = prefix( config.configDir(), equiv_file );
@@ -231,7 +231,7 @@ string Mblem::make_instance( const UnicodeString& in ) {
   return result;
 }
 
-bool equivalent( const string& tag, 
+bool equivalent( const string& tag,
 		 const string& lookuptag,
 		 const string& part ){
   return tag.find( part ) != string::npos &&
@@ -240,8 +240,9 @@ bool equivalent( const string& tag,
 
 bool isSimilar( const string& tag, const string& cgnTag, const set<string>& eq_s ){
   for ( auto const& part : eq_s ){
-    if ( equivalent( tag, cgnTag, part ) )
+    if ( equivalent( tag, cgnTag, part ) ){
       return true;
+    }
   }
   return false;
 }
