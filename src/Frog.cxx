@@ -45,8 +45,8 @@
 #endif
 
 #include "timbl/TimblAPI.h"
-#include "timblserver/FdStream.h"
-#include "timblserver/ServerBase.h"
+#include "ticcutils/FdStream.h"
+#include "ticcutils/ServerBase.h"
 
 // individual module headers
 

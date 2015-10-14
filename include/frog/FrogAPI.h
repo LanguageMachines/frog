@@ -36,8 +36,8 @@
 #include "frog/Frog.h" //internals
 #include "ticcutils/Configuration.h"
 #include "ticcutils/LogStream.h"
-#include "timblserver/FdStream.h"
-#include "timblserver/ServerBase.h"
+#include "ticcutils/FdStream.h"
+#include "ticcutils/ServerBase.h"
 
 #include "frog/ucto_tokenizer_mod.h"
 #include "frog/mbma_mod.h"
