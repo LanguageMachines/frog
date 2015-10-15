@@ -396,10 +396,10 @@ UnicodeString Rule::getKey( bool daring ){
       tmp = UTF8ToUnicode(ss.str());
     }
     else {
-      vector<string> v = extract_morphemes();
+      vector<string> morphs = extract_morphemes();
       // create an unique string
-      for ( size_t p=0; p < v.size(); ++p ) {
-	tmp += UTF8ToUnicode(v[p]) + "++";
+      for ( auto const& mor : morphs ){
+	tmp += UTF8ToUnicode(mor) + "++";
       }
     }
     sortkey = tmp;
