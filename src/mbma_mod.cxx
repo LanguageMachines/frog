@@ -108,7 +108,6 @@ void Mbma::fillMaps() {
   iNames['a'] = "subjunctive";
 }
 
-// BJ: dirty hack with fixed everything to read in tag correspondences
 void Mbma::init_cgn( const string& dir ) {
   string line;
   string fn = dir + "cgntags.main";
@@ -150,7 +149,6 @@ Transliterator *Mbma::init_trans( ){
   }
   return t;
 }
-
 
 bool Mbma::init( const Configuration& config ) {
   *Log(mbmaLog) << "Initiating morphological analyzer..." << endl;
@@ -231,6 +229,7 @@ void Mbma::cleanUp(){
 
 vector<string> Mbma::make_instances( const UnicodeString& word ){
   vector<string> insts;
+  insts.reserve( word.length() );
   for( long i=0; i < word.length(); ++i ) {
     if (debugFlag > 10)
       *Log(mbmaLog) << "itt #:" << i << endl;
@@ -252,7 +251,6 @@ vector<string> Mbma::make_instances( const UnicodeString& word ){
     }
     inst += "?";
     insts.push_back( UnicodeToUTF8(inst) );
-    // store res
   }
   return insts;
 }
@@ -277,25 +275,26 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
   // and store every part in a vector of string vectors
   int largest_anal=1;
   vector<vector<string> > classParts;
-  classParts.resize( classes.size() );
-  for ( unsigned int j=0; j< classes.size(); ++j ){
+  classParts.reserve( classes.size() );
+  for ( const auto& cl : classes ){
     vector<string> parts;
-    int num = split_at( classes[j], parts, "|" );
+    int num = split_at( cl, parts, "|" );
     if ( num > 0 ){
-      classParts[j] = parts;
+      classParts.push_back( parts );
       if ( num > largest_anal )
 	largest_anal = num;
     }
     else {
       // only one, create a dummy
       vector<string> dummy;
-      dummy.push_back( classes[j] );
-      classParts[j] = dummy;
+      dummy.push_back( cl );
+      classParts.push_back( dummy );
     }
   }
   //
   // now expand the result
   vector<vector<string> > result;
+  result.reserve( largest_anal );
   for ( int step=0; step < largest_anal; ++step ){
     vector<string> item(classParts.size());
     for ( size_t k=0; k < classParts.size(); ++k ) {
@@ -315,7 +314,6 @@ void Mbma::clearAnalysis(){
 
 vector<Rule*> Mbma::execute( const UnicodeString& word,
 			     const vector<string>& classes ){
-  vector<Rule*> analysis;
   vector<vector<string> > allParts = generate_all_perms( classes );
   if ( debugFlag ){
     string out = "alternatives: word=" + UnicodeToUTF8(word) + ", classes=<";
@@ -326,9 +324,10 @@ vector<Rule*> Mbma::execute( const UnicodeString& word,
     *Log(mbmaLog) << "allParts : " << allParts << endl;
   }
 
+  vector<Rule*> accepted;
   // now loop over all the analysis
-  for ( unsigned int step=0; step < allParts.size(); ++step ) {
-    Rule *rule = new Rule( allParts[step], word, mbmaLog, debugFlag );
+  for ( auto const& ana : allParts ){
+    Rule *rule = new Rule( ana, word, mbmaLog, debugFlag );
     if ( rule->performEdits() ){
       rule->reduceZeroNodes();
       if ( debugFlag ){
@@ -343,14 +342,14 @@ vector<Rule*> Mbma::execute( const UnicodeString& word,
       if ( debugFlag ){
 	*Log(mbmaLog) << "1 added Inflection: " << rule << endl;
       }
-      analysis.push_back( rule );
+      accepted.push_back( rule );
     }
     else if ( debugFlag ){
       *Log(mbmaLog) << "rejected rule: " << rule << endl;
       delete rule;
     }
   }
-  return analysis;
+  return accepted;
 }
 
 void Mbma::addMorph( Word *word,
@@ -722,11 +721,13 @@ void Mbma::Classify( const UnicodeString& word ){
   UnicodeString uWord = filterDiacritics( word );
   vector<string> insts = make_instances( uWord );
   vector<string> classes;
-  for( size_t i=0; i < insts.size(); ++i ) {
+  classes.reserve( insts.size() );
+  int i = 0;
+  for( auto const& inst : insts ) {
     string ans;
-    MTree->Classify( insts[i], ans );
+    MTree->Classify( inst, ans );
     if ( debugFlag ){
-      *Log(mbmaLog) << "itt #" << i << " " << insts[i] << " ==> " << ans
+      *Log(mbmaLog) << "itt #" << ++i << " " << insts << " ==> " << ans
 		    << ", depth=" << MTree->matchDepth() << endl;
     }
     classes.push_back( ans);
@@ -740,15 +741,21 @@ void Mbma::Classify( const UnicodeString& word ){
 
 vector<vector<string> > Mbma::getResult() const {
   vector<vector<string> > result;
-  for ( const auto& it : analysis ){
-    if ( doDaring ){
+  result.reserve( analysis.size() );
+  if ( doDaring ){
+    for ( const auto& it : analysis ){
       stringstream ss;
       ss << it->brackets->put( true ) << endl;
       vector<string> mors;
       mors.push_back( ss.str() );
+      if ( debugFlag ){
+	*Log(mbmaLog) << "Morphs " << mors << endl;
+      }
       result.push_back( mors );
     }
-    else {
+  }
+  else {
+    for ( const auto& it : analysis ){
       vector<string> mors = it->extract_morphemes();
       if ( debugFlag ){
 	*Log(mbmaLog) << "Morphs " << mors << endl;
