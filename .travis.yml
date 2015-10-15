@@ -33,13 +33,6 @@ before_install:
     - make
     - sudo make install
     - cd ..
-    - git clone https://github.com/proycon/timblserver
-    - cd timblserver
-    - bash bootstrap.sh
-    - ./configure
-    - make
-    - sudo make install
-    - cd ..
     - git clone https://github.com/proycon/mbt
     - cd mbt
     - bash bootstrap.sh
@@ -54,12 +47,11 @@ before_install:
     - make
     - sudo make install
     - cd ..
-install: 
+install:
     - bash bootstrap.sh
     - ./configure
     - make
     - sudo make install
     - git clone https://github.com/proycon/frogtests.git
-script: 
+script:
     - cd frogtests && LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib && frog_bin=/usr/local/bin ./testall >&2
-    
