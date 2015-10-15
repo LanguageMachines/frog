@@ -231,13 +231,13 @@ ostream& operator<<( ostream& os, const Rule *r ){
 
 void Rule::reduceZeroNodes(){
   vector<RulePart> out;
-  for ( size_t k=0; k < rules.size(); ++k ) {
-    if ( rules[k].ResultClass == CLEX::NEUTRAL
-	 && rules[k].morpheme.isEmpty()
-	 && rules[k].inflect.empty() ){
+  for ( auto const& r : rules ){
+    if ( r.ResultClass == CLEX::NEUTRAL
+	 && r.morpheme.isEmpty()
+	 && r.inflect.empty() ){
     }
     else {
-      out.push_back(rules[k]);
+      out.push_back(r);
     }
   }
   rules.swap( out );
@@ -245,13 +245,12 @@ void Rule::reduceZeroNodes(){
 
 vector<string> Rule::extract_morphemes() const {
   vector<string> morphemes;
-  vector<RulePart>::const_iterator it = rules.begin();
-  while ( it != rules.end() ) {
-    UnicodeString morpheme = it->morpheme;
+  morphemes.reserve( rules.size() );
+  for ( const auto& it : rules ){
+    UnicodeString morpheme = it.morpheme;
     if ( !morpheme.isEmpty() ){
       morphemes.push_back( UnicodeToUTF8(morpheme) );
     }
-    ++it;
   }
   return morphemes;
 }
@@ -412,24 +411,23 @@ void Rule::getCleanInflect() {
   // get the FIRST inflection and clean it up by extracting only
   //  known inflection names
   inflection = "";
-  vector<RulePart>::const_iterator it = rules.begin();
-  while ( it != rules.end() ) {
-    if ( !it->inflect.empty() ){
-      //      *TiCC::Log(myLog) << "x inflect:'" << it->inflect << "'" << endl;
+  for ( const auto& rule: rules ){
+    if ( !rule.inflect.empty() ){
+      //      *TiCC::Log(myLog) << "x inflect:'" << rule->inflect << "'" << endl;
       string inflect;
-      for ( size_t i=0; i< it->inflect.length(); ++i ) {
-	if ( it->inflect[i] != '/' ){
+      for ( auto const& i : rule.inflect ){
+	if ( i != '/' ){
 	  // check if it is a known inflection
-	  //	  *TiCC::Log(myLog) << "x bekijk [" << it->inflect[i] << "]" << endl;
-	  string inf = get_iName(it->inflect[i]);
+	  //	  *TiCC::Log(myLog) << "x bekijk [" << i << "]" << endl;
+	  string inf = get_iName(i);
 	  if ( inf.empty() ){
 	    //	    *TiCC::Log(myLog) << "added unknown inflection X" << endl;
 	    inflect += "X";
 	  }
 	  else {
-	    //	    *TiCC::Log(myLog) << "added known inflection " << it->inflect[i]
+	    //	    *TiCC::Log(myLog) << "added known inflection " << i
 	    //	     	 << " (" << inf << ")" << endl;
-	    inflect += it->inflect[i];
+	    inflect += i;
 	  }
 	}
       }
@@ -437,7 +435,6 @@ void Rule::getCleanInflect() {
       inflection = inflect;
       return;
     }
-    ++it;
   }
 }
 
@@ -446,9 +443,9 @@ void Rule::resolveBrackets( bool daring ) {
     *TiCC::Log(myLog) << "check rule for bracketing: " << this << endl;
   }
   brackets = new BracketNest( CLEX::UNASS, CompoundType::NONE, debugFlag );
-  for ( size_t k=0; k < rules.size(); ++k ) {
+  for ( auto const& rule : rules ){
     // fill a flat result;
-    BracketLeaf *tmp = new BracketLeaf( rules[k], debugFlag );
+    BracketLeaf *tmp = new BracketLeaf( rule, debugFlag );
     if ( tmp->status() == Status::STEM && tmp->morpheme().isEmpty() ){
       delete tmp;
     }
