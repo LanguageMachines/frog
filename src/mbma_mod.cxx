@@ -306,8 +306,8 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
 }
 
 void Mbma::clearAnalysis(){
-  for ( size_t i=0; i < analysis.size(); ++i ){
-    delete analysis[i];
+  for ( const auto& a: analysis ){
+    delete a;
   }
   analysis.clear();
 }
@@ -707,8 +707,9 @@ void Mbma::Classify( Word* sword ){
 #pragma omp critical(foliaupdate)
     {
       vector<folia::Feature*> feats = pos->select<folia::Feature>();
-      for ( size_t i = 0; i < feats.size(); ++i )
-	featVals.push_back( feats[i]->cls() );
+      featVals.reserve( feats.size() );
+      for ( const auto& feat : feats )
+	featVals.push_back( feat->cls() );
     }
     filterHeadTag( head );
     filterSubTags( featVals );
