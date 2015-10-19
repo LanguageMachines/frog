@@ -138,6 +138,7 @@ class BracketNest: public BaseBracket {
   CompoundType _compound;
 };
 
+std::string toString( const CompoundType& );
 std::ostream& operator<<( std::ostream&, const CompoundType );
 std::ostream& operator<<( std::ostream&, const BaseBracket& );
 std::ostream& operator<<( std::ostream&, const BaseBracket * );

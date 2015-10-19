@@ -42,15 +42,21 @@ using namespace std;
 using namespace TiCC;
 using namespace folia;
 
+string toString( const CompoundType& ct ){
+  switch ( ct ){
+  case CompoundType::NN:
+    return "NN";
+  case CompoundType::PN:
+    return "PN";
+  case CompoundType::PV:
+    return "PV";
+  default:
+    return "none";
+  }
+}
+
 ostream& operator<<( ostream& os, const CompoundType ct ){
-  if ( ct == CompoundType::NN )
-    os << "NN";
-  else if ( ct == CompoundType::PN )
-    os << "PN";
-  else if ( ct == CompoundType::PV )
-    os << "PV";
-  else
-    os << "none";
+  os << toString( ct );
   return os;
 }
 
@@ -143,15 +149,7 @@ UnicodeString BracketNest::put( bool noclass ) const {
     if ( cls != CLEX::UNASS )
       result += UTF8ToUnicode(toString(cls));
   }
-  if ( _compound == CompoundType::NN ){
-    result += " NN-compound";
-  }
-  else if ( _compound == CompoundType::PN ){
-    result += " PN-compound";
-  }
-  if ( _compound == CompoundType::PV ){
-    result += " PV-compound";
-  }
+  result += " " + UTF8ToUnicode(toString(_compound)) + "-compound";
   return result;
 }
 
