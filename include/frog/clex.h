@@ -40,7 +40,7 @@ namespace CLEX {
   Type toCLEX( const char );
 }
 
-std::ostream& operator<<( std::ostream&, const CLEX::Type );
+std::ostream& operator<<( std::ostream&, const CLEX::Type& );
 
 extern std::map<CLEX::Type,std::string> tagNames;
 extern std::map<char,std::string> iNames;

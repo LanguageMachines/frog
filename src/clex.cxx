@@ -211,7 +211,7 @@ namespace CLEX {
 
 }
 
-ostream& operator<<( ostream& os, const CLEX::Type t ){
+ostream& operator<<( ostream& os, const CLEX::Type& t ){
   os << toString( t );
   return os;
 }
