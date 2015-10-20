@@ -199,7 +199,7 @@ RulePart::RulePart( const string& rs, const UChar kar ):
 Rule::Rule( const vector<string>& parts,
 	    const UnicodeString& s,
 	    TiCC::LogStream* ls,
-	    int flag ): debugFlag( flag ), tag(CLEX::UNASS), myLog(ls) {
+	    int flag ): debugFlag( flag ), tag(CLEX::UNASS), brackets(0), myLog(ls) {
   for ( size_t k=0; k < parts.size(); ++k ) {
     string this_class = parts[k];
     RulePart cur( this_class, s[k] );
