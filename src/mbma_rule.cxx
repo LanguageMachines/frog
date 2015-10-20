@@ -199,7 +199,7 @@ RulePart::RulePart( const string& rs, const UChar kar ):
 Rule::Rule( const vector<string>& parts,
 	    const UnicodeString& s,
 	    TiCC::LogStream* ls,
-	    int flag ): debugFlag( flag ), myLog(ls) {
+	    int flag ): debugFlag( flag ), tag(CLEX::UNASS), myLog(ls) {
   for ( size_t k=0; k < parts.size(); ++k ) {
     string this_class = parts[k];
     RulePart cur( this_class, s[k] );
@@ -256,7 +256,7 @@ vector<string> Rule::extract_morphemes() const {
 }
 
 bool Rule::performEdits(){
-  if ( debugFlag){
+  if ( debugFlag ){
     *TiCC::Log(myLog) << "FOUND rule " << this << endl;
   }
   RulePart *last = 0;
