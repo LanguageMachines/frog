@@ -312,6 +312,34 @@ void Mbma::clearAnalysis(){
   analysis.clear();
 }
 
+Rule* Mbma::matchRule( const std::vector<std::string>& ana,
+		       const UnicodeString& word ){
+  Rule *rule = new Rule( ana, word, mbmaLog, debugFlag );
+  if ( rule->performEdits() ){
+    rule->reduceZeroNodes();
+    if ( debugFlag ){
+      *Log(mbmaLog) << "after reduction: " << rule << endl;
+    }
+    rule->resolve_inflections();
+    if ( debugFlag ){
+      *Log(mbmaLog) << "after resolving: " << rule << endl;
+    }
+    rule->resolveBrackets( doDaring );
+    rule->getCleanInflect();
+    if ( debugFlag ){
+      *Log(mbmaLog) << "1 added Inflection: " << rule << endl;
+    }
+    return rule;
+  }
+  else {
+    if ( debugFlag ){
+      *Log(mbmaLog) << "rejected rule: " << rule << endl;
+    }
+    delete rule;
+    return 0;
+  }
+}
+
 vector<Rule*> Mbma::execute( const UnicodeString& word,
 			     const vector<string>& classes ){
   vector<vector<string> > allParts = generate_all_perms( classes );
@@ -327,27 +355,9 @@ vector<Rule*> Mbma::execute( const UnicodeString& word,
   vector<Rule*> accepted;
   // now loop over all the analysis
   for ( auto const& ana : allParts ){
-    Rule *rule = new Rule( ana, word, mbmaLog, debugFlag );
-    if ( rule->performEdits() ){
-      rule->reduceZeroNodes();
-      if ( debugFlag ){
-	*Log(mbmaLog) << "after reduction: " << rule << endl;
-      }
-      rule->resolve_inflections();
-      if ( debugFlag ){
-	*Log(mbmaLog) << "after resolving: " << rule << endl;
-      }
-      rule->resolveBrackets( doDaring );
-      rule->getCleanInflect();
-      if ( debugFlag ){
-	*Log(mbmaLog) << "1 added Inflection: " << rule << endl;
-      }
+    Rule *rule = matchRule( ana, word );
+    if ( rule )
       accepted.push_back( rule );
-    }
-    else if ( debugFlag ){
-      *Log(mbmaLog) << "rejected rule: " << rule << endl;
-      delete rule;
-    }
   }
   return accepted;
 }

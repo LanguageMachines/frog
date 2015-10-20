@@ -52,6 +52,7 @@ class Mbma {
   void setDaring( bool b ){ doDaring = b; };
   void clearAnalysis();
   std::string getTagset() const { return mbma_tagset; };
+  Rule* matchRule( const std::vector<std::string>&, const UnicodeString& );
  private:
   void cleanUp();
   bool readsettings( const std::string&, const std::string& );
