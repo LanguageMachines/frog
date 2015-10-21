@@ -70,6 +70,8 @@ class Mbma {
   void clearAnalysis();
   std::string getTagset() const { return mbma_tagset; };
   Rule* matchRule( const std::vector<std::string>&, const UnicodeString& );
+  std::vector<Rule*> execute( const UnicodeString& ,
+			      const std::vector<std::string>& );
  private:
   void cleanUp();
   bool readsettings( const std::string&, const std::string& );
@@ -80,8 +82,6 @@ class Mbma {
   void getFoLiAResult( folia::Word *, const UnicodeString& ) const;
   std::vector<std::string> make_instances( const UnicodeString& word );
   CLEX::Type getFinalTag( const std::list<BaseBracket*>& );
-  std::vector<Rule*> execute( const UnicodeString& word,
-			      const std::vector<std::string>& classes );
   int debugFlag;
   void addMorph( folia::MorphologyLayer *,
 		 const std::vector<std::string>& ) const;
