@@ -36,7 +36,24 @@
 #include "frog/mbma_brackets.h"
 
 class MBMAana;
-class TimblAPI;
+namespace Timbl{
+  class TimblAPI;
+}
+
+namespace Tokenizer {
+  class UnicodeFilter;
+}
+
+namespace TiCC {
+  class Configuration;
+}
+
+namespace folia {
+  class Word;
+  class Document;
+  class MorphologyLayer;
+  class Morpheme;
+}
 
 class Mbma {
  public:

@@ -33,6 +33,10 @@ enum class Status { INFO, STEM, COMPLEX, INFLECTION, DERIVATIONAL };
 
 enum class CompoundType { NONE, NN, PN, PV };
 
+namespace folia {
+  class Document;
+  class Morpheme;
+}
 
 class RulePart;
 
