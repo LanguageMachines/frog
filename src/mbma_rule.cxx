@@ -287,7 +287,6 @@ bool Rule::performEdits(){
     }
 
     bool inserted = false;
-    bool e_except = false;
     if ( cur->isBasic() ){
       // encountering real POS tag
       // start a new morpheme, BUT: inserts are appended to the previous one
@@ -302,18 +301,7 @@ bool Rule::performEdits(){
 	    *TiCC::Log(myLog) << this << endl;
 	  }
 	}
-	if ( cur->ins == "ere" ){
-	  if ( debugFlag > 5 ){
-	    *TiCC::Log(myLog) << "special 'ere' exception." << endl;
-	    *TiCC::Log(myLog) << this << endl;
-	  }
-	  // strange exception
-	  last->morpheme += "er";
-	  e_except = true;
-	}
-	else {
-	  last->morpheme += cur->ins;
-	}
+	last->morpheme += cur->ins;
 	inserted = true;
       }
       last = cur;
@@ -325,10 +313,6 @@ bool Rule::performEdits(){
     if ( !inserted ){
       // insert the deletestring :-)
       last->morpheme += cur->ins;
-    }
-    if ( e_except ) {
-      // fix exception
-      last->morpheme += "e";
     }
     last->morpheme += cur->uchar; // might be empty because of deletion
   }
