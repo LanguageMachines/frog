@@ -267,7 +267,7 @@ bool Rule::performEdits(){
     if ( debugFlag){
       *TiCC::Log(myLog) << "edit::act=" << cur << endl;
     }
-    if ( !cur->del.isEmpty() && cur->ins != "eer" ){
+    if ( !cur->del.isEmpty() ){
       // sanity check
       for ( int j=0; j < cur->del.length(); ++j ){
 	if ( rules[k+j].uchar != cur->del[j] ){
@@ -282,7 +282,7 @@ bool Rule::performEdits(){
     }
     if ( !cur->participle ){
       for ( int j=0; j < cur->del.length(); ++j ){
-	rules[k+j].uchar = "";
+	rules[k+j].uchar = ""; // so perform the deletion on ancestor nodes
       }
     }
 
@@ -290,17 +290,11 @@ bool Rule::performEdits(){
     if ( cur->isBasic() ){
       // encountering real POS tag
       // start a new morpheme, BUT: inserts are appended to the previous one
-      // except for Replace edits, exception on that again: "eer" inserts
+      // except in case of Replace edits
       if ( debugFlag ){
 	*TiCC::Log(myLog) << "FOUND a basic tag " << cur->ResultClass << endl;
       }
-      if ( cur->del.isEmpty() || cur->ins == "eer" ){
-	if ( !cur->del.isEmpty() && cur->ins == "eer" ){
-	  if ( debugFlag > 5 ){
-	    *TiCC::Log(myLog) << "special 'eer' exception." << endl;
-	    *TiCC::Log(myLog) << this << endl;
-	  }
-	}
+      if ( cur->del.isEmpty() ){ // So not a replace
 	last->morpheme += cur->ins;
 	inserted = true;
       }
