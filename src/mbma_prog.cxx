@@ -69,7 +69,7 @@ void usage( ) {
        << "\t============= OTHER OPTIONS ============================================\n"
        << "\t -h. give some help.\n"
        << "\t -V or --version .   Show version info.\n"
-       << "\t --daring=<true|false>. Default false\n"
+       << "\t --daring . Deliver structured output. Default false\n"
        << "\t -d <debug level>    (for more verbosity)\n";
 }
 
@@ -179,7 +179,7 @@ void Test( istream& in ){
 	  myMbma.Classify( uWord );
 	  myMbma.filterHeadTag( head );
 	  myMbma.filterSubTags( v );
-	  vector<vector<string> > res = myMbma.getResult();
+	  vector<vector<string> > res = myMbma.getResult(true);
 	  cout << tagv[w].word() << " {" << tagv[w].assignedTag() << "}\t";
 	  if ( res.size() == 0 ){
 	    cout << "[" << uWord << "]";
@@ -200,8 +200,8 @@ void Test( istream& in ){
 	for( auto const& w : parts ){
 	  UnicodeString uWord = folia::UTF8ToUnicode(w);
 	  uWord.toLower();
-	  myMbma.Classify( uWord );	  
-	  vector<vector<string> > res = myMbma.getResult();
+	  myMbma.Classify( uWord );
+	  vector<vector<string> > res = myMbma.getResult(true);
 	  string line = w + "\t";
 	  for ( auto const& r : res ){
 	    line += "[";

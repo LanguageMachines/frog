@@ -750,13 +750,13 @@ void Mbma::Classify( const UnicodeString& word ){
   analysis = execute( uWord, classes );
 }
 
-vector<vector<string> > Mbma::getResult() const {
+vector<vector<string> > Mbma::getResult( bool show_class ) const {
   vector<vector<string> > result;
   result.reserve( analysis.size() );
   if ( doDaring ){
     for ( const auto& it : analysis ){
       stringstream ss;
-      ss << it->brackets->put( true ) << endl;
+      ss << it->brackets->put( !show_class ) << endl;
       vector<string> mors;
       mors.push_back( ss.str() );
       if ( debugFlag ){

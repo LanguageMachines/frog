@@ -65,7 +65,7 @@ class Mbma {
   void Classify( const UnicodeString& );
   void filterHeadTag( const std::string& );
   void filterSubTags( const std::vector<std::string>& );
-  std::vector<std::vector<std::string> > getResult() const;
+  std::vector<std::vector<std::string> > getResult( bool = true ) const;
   void setDaring( bool b ){ doDaring = b; };
   void clearAnalysis();
   std::string getTagset() const { return mbma_tagset; };

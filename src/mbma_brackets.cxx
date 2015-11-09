@@ -149,7 +149,9 @@ UnicodeString BracketNest::put( bool noclass ) const {
     if ( cls != CLEX::UNASS )
       result += UTF8ToUnicode(toString(cls));
   }
-  result += " " + UTF8ToUnicode(toString(_compound)) + "-compound";
+  if ( _compound != CompoundType::NONE ){
+    result += " " + UTF8ToUnicode(toString(_compound)) + "-compound";
+  }
   return result;
 }
 
@@ -335,7 +337,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     {
       result->addPosAnnotation( args );
     }
-    desc = "[" + out + "]"; // spread the word upwards!
+    desc = "[" + out + "]" + toString( tag() ); // spread the word upwards!
   }
   else if ( _status == Status::INFLECTION ){
     KWargs args;
@@ -479,7 +481,7 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
     result->append( t );
   }
   if ( cnt > 1 )
-    desc = "[" + desc + "]";
+    desc = "[" + desc + "]" + toString( tag() );
   args.clear();
   args["subset"] = "structure";
   args["class"]  = desc;
