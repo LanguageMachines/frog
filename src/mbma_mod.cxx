@@ -738,8 +738,9 @@ void Mbma::Classify( const UnicodeString& word ){
     string ans;
     MTree->Classify( inst, ans );
     if ( debugFlag ){
-      *Log(mbmaLog) << "itt #" << ++i << " " << insts << " ==> " << ans
+      *Log(mbmaLog) << "itt #" << i+1 << " " << insts[i] << " ==> " << ans
 		    << ", depth=" << MTree->matchDepth() << endl;
+      ++i;
     }
     classes.push_back( ans);
   }
