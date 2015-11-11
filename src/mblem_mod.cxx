@@ -132,7 +132,9 @@ bool Mblem::init( const Configuration& config ) {
   string transName = config.lookUp( "transFile", "mblem" );
   if ( !transName.empty() ){
     transName = prefix( config.configDir(), transName );
-    read_transtable( transName );
+    cerr << "usage of a mblem transFile is no longer needed!" << endl;
+    cerr << "skipping : " << transName << endl;
+    //    read_transtable( transName );
   }
   string treeName = config.lookUp( "treeFile", "mblem"  );
   if ( treeName.empty() )
