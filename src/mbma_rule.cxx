@@ -282,7 +282,8 @@ bool Rule::performEdits(){
     }
     if ( !cur->participle ){
       for ( int j=0; j < cur->del.length(); ++j ){
-	rules[k+j].uchar = ""; // so perform the deletion on ancestor nodes
+	rules[k+j].uchar = "";
+	// so perform the deletion on this and subsequent nodes
       }
     }
 
@@ -300,7 +301,7 @@ bool Rule::performEdits(){
       }
       last = cur;
     }
-    else if ( cur->ResultClass != CLEX::NEUTRAL && !cur->inflect.empty() ){
+    else if ( cur->ResultClass != CLEX::NEUTRAL ){
       // non 0 inflection starts a new morheme
       last = cur;
     }
