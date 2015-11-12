@@ -364,6 +364,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
       if ( inflect[i] != '/' ){
 	string d = get_iName(inflect[i]);
 	args["class"] = d;
+	desc += d + "/";
 	folia::Feature *feat = new folia::Feature( args );
 #pragma omp critical(foliaupdate)
 	{
@@ -388,6 +389,12 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
       result->append( t );
     }
     desc = "[" + out + "]"; // pass it up!
+    for ( size_t i=0; i < inflect.size(); ++i ){
+      if ( inflect[i] != '/' ){
+	string d = get_iName(inflect[i]);
+	desc += "/";
+      }
+    }
     args.clear();
     args["subset"] = "structure";
     args["class"]  = desc;
@@ -414,6 +421,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     for ( size_t i=0; i < inflect.size(); ++i ){
       if ( inflect[i] != '/' ){
 	string d = get_iName(inflect[i]);
+	desc += d + "/";
 	args["class"] = d;
 	folia::Feature *feat = new folia::Feature( args );
 #pragma omp critical(foliaupdate)
@@ -463,10 +471,17 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
       }
       catch (...){
       };
+      if ( !deeper_desc.empty()
+	   && deeper_desc[deeper_desc.length()-1] == '/' ){
+	deeper_desc.erase( deeper_desc.length()-1 );
+      }
       if ( !tmp.empty() ){
 	mor += tmp;
 	desc += deeper_desc;
 	++cnt;
+      }
+      else {
+	desc += "/" + deeper_desc;
       }
       stack.push_back( m );
     }

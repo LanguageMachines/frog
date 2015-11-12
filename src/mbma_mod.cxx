@@ -502,7 +502,9 @@ void Mbma::filterHeadTag( const string& head ){
   auto ait = analysis.begin();
   while ( ait != analysis.end() ){
     string tagI = CLEX::toString((*ait)->tag);
-    if ( tagIt->second == tagI || ( tagIt->second == "N" && tagI == "PN" ) ){
+    if ( ( tagIt->second == tagI )
+	 //	 || ( tagI == "X" )
+	 || ( tagIt->second == "N" && tagI == "PN" ) ){
       if (debugFlag){
 	*Log(mbmaLog) << "comparing " << tagIt->second << " with "
 		      << tagI << " (OK)" << endl;
@@ -520,7 +522,7 @@ void Mbma::filterHeadTag( const string& head ){
   }
   if (debugFlag){
     *Log(mbmaLog) << "filter: analysis after head filter:" << endl;
-    int i=1;
+    int i=0;
     for( const auto& it : analysis ){
       *Log(mbmaLog) << ++i << " - " << it << endl;
     }
@@ -545,6 +547,10 @@ void Mbma::filterSubTags( const vector<string>& feats ){
   for ( auto& q : analysis ){
     int match_count = 0;
     string inflection = q->inflection;
+    if ( inflection.empty() ){
+      bestMatches.insert(q);
+      continue;
+    }
     if (debugFlag){
       *Log(mbmaLog) << "matching " << inflection << " with " << feats << endl;
     }
