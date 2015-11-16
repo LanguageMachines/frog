@@ -336,6 +336,34 @@ void Mbma::addMorph( Word *word,
   addMorph( ml, morphs );
 }
 
+string CGN_to_CELEX( const string& tag ){
+  // rather clumsy and still incomplete
+  if ( tag == "VNW" ){
+    return "O";
+  }
+  else if ( tag == "VG" ){
+    return "C";
+  }
+  else if ( tag == "BW" ){
+    return "B";
+  }
+  else if ( tag == "ADJ" ){
+    return "A";
+  }
+  else if ( tag == "N" ){
+    return "N";
+  }
+  else if ( tag == "WW" ){
+    return "V";
+  }
+  else if ( tag == "VZ" ){
+    return "P";
+  }
+  else {
+    return "PANIEK-" + tag;
+  }
+}
+
 void Mbma::addBracketMorph( Word *word,
 			    const string& wrd,
 			    const string& tag ) const {
@@ -373,7 +401,17 @@ void Mbma::addBracketMorph( Word *word,
   }
   args.clear();
   args["set"] = clex_tagset;
-  args["cls"] = tag;
+  string head = tag;
+  if ( tag == "X" ) {
+    // unanalysed, so trust the TAGGER
+#pragma omp critical(foliaupdate)
+    {
+      auto pos = word->annotation<PosAnnotation>( cgn_tagset );
+      head = pos->feat("head");
+      head = CGN_to_CELEX( head );
+    }
+  }
+  args["cls"] = head;
 #pragma omp critical(foliaupdate)
   {
     result->addPosAnnotation( args );
@@ -459,7 +497,6 @@ void Mbma::filterHeadTag( const string& head ){
   while ( ait != analysis.end() ){
     string tagI = CLEX::toString((*ait)->tag);
     if ( ( tagIt->second == tagI )
-	 //	 || ( tagI == "X" )
 	 || ( tagIt->second == "N" && tagI == "PN" ) ){
       if (debugFlag){
 	*Log(mbmaLog) << "comparing " << tagIt->second << " with "
@@ -595,7 +632,7 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
 		    << uword << endl;
     }
     if ( doDaring ){
-      addBracketMorph( fword, UnicodeToUTF8(uword), "UNK" );
+      addBracketMorph( fword, UnicodeToUTF8(uword), "X" );
     }
     else {
       vector<string> tmp;

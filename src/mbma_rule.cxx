@@ -453,11 +453,6 @@ void Rule::resolveBrackets( bool daring ) {
   brackets->setCompoundType();
   tag = brackets->getFinalTag();
   description = get_tDescr( tag );
-  if ( description.empty() ){
-    // unknown tag
-    tag = CLEX::X;
-    description = "unknown";
-  }
   if ( debugFlag > 4 ){
     *TiCC::Log(myLog) << "Final Bracketing:" << brackets << " with tag=" << tag << endl;
   }

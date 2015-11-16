@@ -49,7 +49,8 @@ namespace CLEX {
     {CLEX::PN, "proper-noun"},
     {CLEX::AFFIX, "affix"},
     {CLEX::XAFFIX,"x-affix"},
-    {CLEX::NEUTRAL, "neutral"}
+    {CLEX::NEUTRAL, "neutral"},
+    {CLEX::UNASS, "unassigned"}
   };
 
   map<char,string> iNames = {

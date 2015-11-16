@@ -693,7 +693,7 @@ void BracketNest::resolveMiddle(){
 
 CLEX::Type BracketNest::getFinalTag() {
   // cerr << "get Final Tag from: " << this << endl;
-  cls = CLEX::X;
+  cls = CLEX::UNASS;
   auto it = parts.rbegin();
   while ( it != parts.rend() ){
     // cerr << "bekijk: " << *it << endl;
