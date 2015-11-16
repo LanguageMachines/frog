@@ -32,10 +32,50 @@
 
 using namespace std;
 
-map<CLEX::Type,string> tagNames;
-map<char,string> iNames;
-
 namespace CLEX {
+  map<CLEX::Type,string> tagNames = {
+    {CLEX::N, "noun" },
+    {CLEX::A, "adjective"},
+    {CLEX::Q, "quantifier/numeral"},
+    {CLEX::V, "verb"},
+    {CLEX::D, "article"},
+    {CLEX::O, "pronoun"},
+    {CLEX::B, "adverb"},
+    {CLEX::P, "preposition"},
+    {CLEX::Y, "conjunction"},
+    {CLEX::I, "interjection"},
+    {CLEX::X, "unanalysed"},
+    {CLEX::Z, "expression-part"},
+    {CLEX::PN, "proper-noun"},
+    {CLEX::AFFIX, "affix"},
+    {CLEX::XAFFIX,"x-affix"},
+    {CLEX::NEUTRAL, "neutral"}
+  };
+
+  map<char,string> iNames = {
+    // the inflection names
+    {'X', ""},
+    {'s', "separated"},
+    {'e', "singular"},
+    {'m', "plural"},
+    {'d', "diminutive"},
+    {'G', "genitive"},
+    {'D', "dative"},
+    {'P', "positive"},
+    {'C', "comparative"},
+    {'S', "superlative"},
+    {'E', "suffix-e"},
+    {'i', "infinitive"},
+    {'p', "participle"},
+    {'t', "present_tense"},
+    {'v', "past_tense"},
+    {'1', "1st_person_verb"},
+    {'2', "2nd_person_verb"},
+    {'3', "3rd_person_verb"},
+    {'I', "inversed"},
+    {'g', "imperative"},
+    {'a', "subjunctive"},
+  };
 
   Type toCLEX( const string& s ){
     if ( s == "N" )
@@ -80,45 +120,6 @@ namespace CLEX {
     return toCLEX(s);
   }
 
-  string toLongString( const Type& t ){
-    switch ( t ){
-    case N:
-      return "noun";
-    case A:
-      return "adjective";
-    case Q:
-      return "quantifier/numeral";
-    case V:
-      return "verb";
-    case D:
-      return "article";
-    case O:
-      return "pronoun";
-    case B:
-      return "adverb";
-    case P:
-      return "preposition";
-    case Y:
-      return "conjunction";
-    case I:
-      return "interjection";
-    case X:
-      return "unanalysed";
-    case Z:
-      return "expression part";
-    case PN:
-      return "proper noun";
-    case AFFIX:
-      return "affix";
-    case XAFFIX:
-      return "x affix";
-    case NEUTRAL:
-      return "0";
-    default:
-      return "UNASS";
-    }
-  }
-
   string toString( const Type& t ){
     switch ( t ){
     case N:
@@ -159,7 +160,6 @@ namespace CLEX {
   }
 
   bool isBasicClass( const Type& t ){
-    const string basictags = "NAQVDOBPYIXZ";
     switch ( t ){
     case N:
     case A:

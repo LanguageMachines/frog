@@ -337,7 +337,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     {
       result->addPosAnnotation( args );
     }
-    desc = "[" + out + "]" + toString( tag() ); // spread the word upwards!
+    desc = "[" + out + "]" + CLEX::get_tDescr( tag() ); // spread the word upwards!
   }
   else if ( _status == Status::INFLECTION ){
     KWargs args;
@@ -362,9 +362,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     args["subset"] = "inflection";
     for ( size_t i=0; i < inflect.size(); ++i ){
       if ( inflect[i] != '/' ){
-	string d = get_iName(inflect[i]);
+	string d = CLEX::get_iDescr(inflect[i]);
 	args["class"] = d;
-	desc += d + "/";
+	desc += "/" + d;
 	folia::Feature *feat = new folia::Feature( args );
 #pragma omp critical(foliaupdate)
 	{
@@ -391,8 +391,8 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     desc = "[" + out + "]"; // pass it up!
     for ( size_t i=0; i < inflect.size(); ++i ){
       if ( inflect[i] != '/' ){
-	string d = get_iName(inflect[i]);
-	desc += "/";
+	string d = CLEX::get_iDescr(inflect[i]);
+	desc += "/" + d;
       }
     }
     args.clear();
@@ -420,8 +420,8 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     args["subset"] = "inflection";
     for ( size_t i=0; i < inflect.size(); ++i ){
       if ( inflect[i] != '/' ){
-	string d = get_iName(inflect[i]);
-	desc += d + "/";
+	string d = CLEX::get_iDescr(inflect[i]);
+	desc += "/" + d;
 	args["class"] = d;
 	folia::Feature *feat = new folia::Feature( args );
 #pragma omp critical(foliaupdate)
@@ -466,23 +466,15 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
     if ( m ){
       string tmp;
       try {
-	//	tmp = m->str();
 	tmp = UnicodeToUTF8(m->stricttext());
       }
       catch (...){
       };
-      if ( !deeper_desc.empty()
-	   && deeper_desc[deeper_desc.length()-1] == '/' ){
-	deeper_desc.erase( deeper_desc.length()-1 );
-      }
       if ( !tmp.empty() ){
 	mor += tmp;
-	desc += deeper_desc;
 	++cnt;
       }
-      else {
-	desc += "/" + deeper_desc;
-      }
+      desc += deeper_desc;
       stack.push_back( m );
     }
   }
@@ -496,7 +488,7 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
     result->append( t );
   }
   if ( cnt > 1 )
-    desc = "[" + desc + "]" + toString( tag() );
+    desc = "[" + desc + "]" + CLEX::get_tDescr( tag() );
   args.clear();
   args["subset"] = "structure";
   args["class"]  = desc;

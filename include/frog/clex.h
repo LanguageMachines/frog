@@ -38,19 +38,12 @@ namespace CLEX {
   std::string toString( const Type& );
   Type toCLEX( const std::string& );
   Type toCLEX( const char );
+  extern std::map<CLEX::Type,std::string> tagNames;
+  extern std::map<char,std::string> iNames;
+  inline std::string get_iDescr( char c ) { return iNames[c]; };
+  inline std::string get_tDescr( CLEX::Type t ) {  return tagNames[t]; };
 }
 
 std::ostream& operator<<( std::ostream&, const CLEX::Type& );
-
-extern std::map<CLEX::Type,std::string> tagNames;
-extern std::map<char,std::string> iNames;
-
-inline std::string get_iName( char c ){
-  return iNames[c];
-}
-
-inline std::string get_tagDescr( CLEX::Type t ){
-  return tagNames[t];
-}
 
 #endif // CLEX_H

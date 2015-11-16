@@ -398,7 +398,7 @@ void Rule::getCleanInflect() {
 	if ( i != '/' ){
 	  // check if it is a known inflection
 	  //	  *TiCC::Log(myLog) << "x bekijk [" << i << "]" << endl;
-	  string inf = get_iName(i);
+	  string inf = CLEX::get_iDescr(i);
 	  if ( inf.empty() ){
 	    //	    *TiCC::Log(myLog) << "added unknown inflection X" << endl;
 	    inflect += "X";
@@ -452,7 +452,7 @@ void Rule::resolveBrackets( bool daring ) {
   }
   brackets->setCompoundType();
   tag = brackets->getFinalTag();
-  description = get_tagDescr( tag );
+  description = get_tDescr( tag );
   if ( description.empty() ){
     // unknown tag
     tag = CLEX::X;

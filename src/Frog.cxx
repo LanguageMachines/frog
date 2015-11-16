@@ -415,7 +415,6 @@ int main(int argc, char *argv[]) {
 			  "textclass:,testdir:,uttmarker:,max-parser-tokens:,"
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,daring,"
 			  "debug:,keep-parser-files,version,threads:,KANON");
-
     Opts.init(argc, argv);
     bool parsed = parse_args( Opts, options, theErrLog );
     if (!parsed) {

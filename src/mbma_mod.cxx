@@ -64,49 +64,6 @@ Mbma::~Mbma() {
   delete mbmaLog;
 }
 
-void Mbma::fillMaps() {
-  //
-  // this could be done from a configfile
-  //
-  // first the CELEX POS tag names
-  //
-  tagNames[CLEX::N] = "noun";
-  tagNames[CLEX::A] = "adjective";
-  tagNames[CLEX::Q] = "quantifier/numeral";
-  tagNames[CLEX::V] = "verb";
-  tagNames[CLEX::D] = "article";
-  tagNames[CLEX::O] = "pronoun";
-  tagNames[CLEX::B] = "adverb";
-  tagNames[CLEX::P] = "preposition";
-  tagNames[CLEX::Y] = "conjunction";
-  tagNames[CLEX::I] = "interjection";
-  tagNames[CLEX::X] = "unanalysed";
-  tagNames[CLEX::Z] = "expression_part";
-  tagNames[CLEX::PN] = "proper_noun";
-  //
-  // now the inflections
-  iNames['X'] = "";
-  iNames['s'] = "separated";
-  iNames['e'] = "singular";
-  iNames['m'] = "plural";
-  iNames['d'] = "diminutive";
-  iNames['G'] = "genitive";
-  iNames['D'] = "dative";
-  iNames['P'] = "positive";
-  iNames['C'] = "comparative";
-  iNames['S'] = "superlative";
-  iNames['E'] = "suffix-e";
-  iNames['i'] = "infinitive";
-  iNames['p'] = "participle";
-  iNames['t'] = "present_tense";
-  iNames['v'] = "past_tense";
-  iNames['1'] = "1st_person_verb";
-  iNames['2'] = "2nd_person_verb";
-  iNames['3'] = "3rd_person_verb";
-  iNames['I'] = "inversed";
-  iNames['g'] = "imperative";
-  iNames['a'] = "subjunctive";
-}
 
 void Mbma::init_cgn( const string& dir ) {
   string line;
@@ -202,7 +159,6 @@ bool Mbma::init( const Configuration& config ) {
   if ( tfName.empty() )
     tfName = "mbma.igtree";
   MTreeFilename = prefix( config.configDir(), tfName );
-  fillMaps();
   init_cgn( config.configDir() );
   string dof = config.lookUp( "filter_diacritics", "mbma" );
   if ( !dof.empty() ){
