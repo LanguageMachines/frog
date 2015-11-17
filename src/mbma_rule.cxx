@@ -100,7 +100,7 @@ void RulePart::get_ins_del( const string& edit ){
   }
 }
 
-RulePart::RulePart( const string& rs, const UChar kar ):
+RulePart::RulePart( const string& rs, const UChar kar, bool first ):
   ResultClass(CLEX::UNASS),
   uchar(kar),
   fixpos(-1),
@@ -170,28 +170,35 @@ RulePart::RulePart( const string& rs, const UChar kar ):
   else {
     //    cerr << "normal RulePart " << s << endl;
     CLEX::Type tag = CLEX::toCLEX( s[0] );
-    string::size_type pos = s.find("/");
-    if ( pos != string::npos ){
-      // some inflextion
-      if ( tag != CLEX::UNASS ){
-	// cases like 0/e 0/te2I
-	ResultClass = tag;
-	inflect = s.substr(pos+1);
-      }
-      else {
-	//  E/P
-	inflect = s;
-      }
-      //      cerr << "inflect =" << inflect << endl;
-    }
-    else if ( tag != CLEX::UNASS ){
-      // dull case
-      ResultClass = tag;
+    if ( !first && tag == CLEX::C ){
+      // special case: a C tag can only be at first postition
+      // otherwise it is a C inflection!
+      inflect = "C";
     }
     else {
-      // m
-      inflect = s;
-      //	cerr << "inflect =" << inflect << endl;
+      string::size_type pos = s.find("/");
+      if ( pos != string::npos ){
+	// some inflection
+	if ( tag != CLEX::UNASS ){
+	  // cases like 0/e 0/te2I
+	  ResultClass = tag;
+	  inflect = s.substr(pos+1);
+	}
+	else {
+	  //  E/P
+	  inflect = s;
+	}
+	//      cerr << "inflect =" << inflect << endl;
+      }
+      else if ( tag != CLEX::UNASS ){
+	// dull case
+	ResultClass = tag;
+      }
+      else {
+	// m
+	inflect = s;
+	//	cerr << "inflect =" << inflect << endl;
+      }
     }
   }
 }
@@ -202,7 +209,7 @@ Rule::Rule( const vector<string>& parts,
 	    int flag ): debugFlag( flag ), tag(CLEX::UNASS), brackets(0), myLog(ls) {
   for ( size_t k=0; k < parts.size(); ++k ) {
     string this_class = parts[k];
-    RulePart cur( this_class, s[k] );
+    RulePart cur( this_class, s[k], k==0 );
     rules.push_back( cur );
   }
 }

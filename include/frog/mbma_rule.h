@@ -31,7 +31,7 @@
 
 class RulePart {
 public:
-  RulePart( const std::string&, const UChar );
+  RulePart( const std::string&, const UChar, bool );
   bool isBasic() const;
   void get_ins_del( const std::string& );
   CLEX::Type ResultClass;

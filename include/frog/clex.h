@@ -31,7 +31,7 @@
 #define CLEX_H
 
 namespace CLEX {
-  enum Type { UNASS, N, A, Q, V, D, O, B, P, Y, I, X, Z, PN, AFFIX, XAFFIX,
+  enum Type { UNASS, N, A, Q, V, D, O, B, P, C, I, X, Z, PN, AFFIX, XAFFIX,
 	      NEUTRAL };
   bool isBasicClass( const Type& );
   Type select_tag( const char ch );
@@ -40,8 +40,8 @@ namespace CLEX {
   Type toCLEX( const char );
   extern std::map<CLEX::Type,std::string> tagNames;
   extern std::map<char,std::string> iNames;
-  inline std::string get_iDescr( char c ) { return iNames[c]; };
-  inline std::string get_tDescr( CLEX::Type t ) {  return tagNames[t]; };
+  inline std::string get_iDescr( char c ) { return iNames[c]; }
+  inline std::string get_tDescr( CLEX::Type t ) {  return tagNames[t]; }
 }
 
 std::ostream& operator<<( std::ostream&, const CLEX::Type& );

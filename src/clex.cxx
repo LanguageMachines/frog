@@ -42,7 +42,7 @@ namespace CLEX {
     {CLEX::O, "pronoun"},
     {CLEX::B, "adverb"},
     {CLEX::P, "preposition"},
-    {CLEX::Y, "conjunction"},
+    {CLEX::C, "conjunction"},
     {CLEX::I, "interjection"},
     {CLEX::X, "unanalysed"},
     {CLEX::Z, "expression-part"},
@@ -95,8 +95,8 @@ namespace CLEX {
       return B;
     else if ( s == "P" )
       return P;
-    else if ( s == "Y" )
-      return Y;
+    else if ( s == "C" )
+      return C;
     else if ( s == "I" )
       return I;
     else if ( s == "X" )
@@ -139,8 +139,8 @@ namespace CLEX {
       return "B";
     case P:
       return "P";
-    case Y:
-      return "Y";
+    case C:
+      return "C";
     case I:
       return "I";
     case X:
@@ -170,7 +170,7 @@ namespace CLEX {
     case O:
     case B:
     case P:
-    case Y:
+    case C:
     case I:
     case X:
     case Z:
