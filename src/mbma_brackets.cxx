@@ -454,21 +454,22 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
   vector<Morpheme*> stack;
   for ( auto const& it : parts ){
     string deeper_desc;
-    int my_cnt = 0;
+    int deep_cnt = 0;
     Morpheme *m = it->createMorpheme( doc,
 				      mbma_tagset,
 				      clex_tagset,
 				      deeper_desc,
-				      my_cnt );
+				      deep_cnt );
     if ( m ){
-      cnt += my_cnt;
       desc += deeper_desc;
+      cnt += deep_cnt;
       stack.push_back( m );
     }
   }
   if ( cnt > 1 ){
     desc = "[" + desc + "]" + CLEX::get_tDescr( tag() );
   }
+  cnt = 1;
   args.clear();
   args["subset"] = "structure";
   args["class"]  = desc;
@@ -500,7 +501,6 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
   for ( size_t i=0; i < stack.size(); ++i ){
     result->append( stack[i] );
   }
-  cnt = 1;
   return result;
 }
 
