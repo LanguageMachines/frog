@@ -301,15 +301,15 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
 				       const string& mbma_tagset,
 				       const string& clex_tagset ) const {
   string desc;
-  int offset = 0;
-  return createMorpheme( doc, mbma_tagset, clex_tagset, offset, desc );
+  int cnt = 0;
+  return createMorpheme( doc, mbma_tagset, clex_tagset, desc, cnt );
 }
 
 Morpheme *BracketLeaf::createMorpheme( Document *doc,
 				       const string& mbma_tagset,
 				       const string& clex_tagset,
-				       int& offset,
-				       string& desc ) const {
+				       string& desc,
+				       int& cnt ) const {
   Morpheme *result = 0;
   desc.clear();
   if ( _status == Status::COMPLEX ){
@@ -323,13 +323,12 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     args.clear();
     string out = UnicodeToUTF8(morph);
     args["value"] = out;
-    args["offset"] = toString(offset);
-    offset += out.length();
     TextContent *t = new TextContent( args );
 #pragma omp critical(foliaupdate)
     {
       result->append( t );
     }
+    ++cnt;
     args.clear();
     args["set"] = clex_tagset;
     args["cls"] = toString( tag() );
@@ -351,13 +350,12 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     else
       desc = "[" + out + "]";
     args["value"] = out;
-    args["offset"] = toString(offset);
     TextContent *t = new TextContent( args );
-    offset += out.length();
 #pragma omp critical(foliaupdate)
     {
       result->append( t );
     }
+    ++cnt;
     args.clear();
     args["subset"] = "inflection";
     for ( size_t i=0; i < inflect.size(); ++i ){
@@ -381,13 +379,12 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     args.clear();
     string out = UnicodeToUTF8(morph);
     args["value"] = out;
-    args["offset"] = toString(offset);
     TextContent *t = new TextContent( args );
-    offset += out.length();
 #pragma omp critical(foliaupdate)
     {
       result->append( t );
     }
+    ++cnt;
     desc = "[" + out + "]"; // pass it up!
     for ( size_t i=0; i < inflect.size(); ++i ){
       if ( inflect[i] != '/' ){
@@ -438,57 +435,40 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
 				       const string& mbma_tagset,
 				       const string& clex_tagset ) const {
   string desc;
-  int offset = 0;
-  return createMorpheme( doc, mbma_tagset, clex_tagset, offset, desc );
+  int cnt = 0;
+  return createMorpheme( doc, mbma_tagset, clex_tagset, desc, cnt );
 }
 
 Morpheme *BracketNest::createMorpheme( Document *doc,
 				       const string& mbma_tagset,
 				       const string& clex_tagset,
-				       int& of,
-				       string& desc ) const {
+				       string& desc,
+				       int& cnt ) const {
   KWargs args;
   args["class"] = "complex";
   args["set"] = mbma_tagset;
   Morpheme *result = new Morpheme( doc, args );
   string mor;
-  int cnt = 0;
+  cnt = 0;
   desc.clear();
   vector<Morpheme*> stack;
-  int offset = 0;
   for ( auto const& it : parts ){
     string deeper_desc;
+    int my_cnt = 0;
     Morpheme *m = it->createMorpheme( doc,
 				      mbma_tagset,
 				      clex_tagset,
-				      offset,
-				      deeper_desc );
+				      deeper_desc,
+				      my_cnt );
     if ( m ){
-      string tmp;
-      try {
-	tmp = UnicodeToUTF8(m->stricttext());
-      }
-      catch (...){
-      };
-      if ( !tmp.empty() ){
-	mor += tmp;
-	++cnt;
-      }
+      cnt += my_cnt;
       desc += deeper_desc;
       stack.push_back( m );
     }
   }
-  args.clear();
-  args["value"] = mor;
-  args["offset"] = toString(of);
-  of += offset;
-  TextContent *t = new TextContent( args );
-#pragma omp critical(foliaupdate)
-  {
-    result->append( t );
-  }
-  if ( cnt > 1 )
+  if ( cnt > 1 ){
     desc = "[" + desc + "]" + CLEX::get_tDescr( tag() );
+  }
   args.clear();
   args["subset"] = "structure";
   args["class"]  = desc;
@@ -520,6 +500,7 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
   for ( size_t i=0; i < stack.size(); ++i ){
     result->append( stack[i] );
   }
+  cnt = 1;
   return result;
 }
 

@@ -89,7 +89,9 @@ class Mbma {
   void addBracketMorph( folia::Word *,
 			const std::string&,
 			const std::string& ) const;
-  void addBracketMorph( folia::Word *, const BracketNest * ) const;
+  void addBracketMorph( folia::Word *,
+			const std::string&,
+			const BracketNest * ) const;
   std::string MTreeFilename;
   Timbl::TimblAPI *MTree;
   std::map<std::string,std::string> TAGconv;

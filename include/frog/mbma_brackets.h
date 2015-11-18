@@ -71,8 +71,7 @@ public:
   virtual folia::Morpheme *createMorpheme( folia::Document *,
 					   const std::string&,
 					   const std::string&,
-					   int&,
-					   std::string& ) const = 0;
+					   std::string&, int& ) const = 0;
   virtual CompoundType compound() const { return CompoundType::NONE; };
   virtual void setCompoundType() { return; };
   CLEX::Type tag() const { return cls; };
@@ -100,8 +99,7 @@ public:
   folia::Morpheme *createMorpheme( folia::Document *,
 				   const std::string&,
 				   const std::string&,
-				   int&,
-				   std::string& ) const;
+				   std::string&, int& ) const;
 private:
   int ifpos;
   UnicodeString morph;
@@ -134,8 +132,7 @@ class BracketNest: public BaseBracket {
   folia::Morpheme *createMorpheme( folia::Document *,
 				   const std::string&,
 				   const std::string&,
-				   int&,
-				   std::string& ) const;
+				   std::string&, int& ) const;
   std::list<BaseBracket *> parts;
   CompoundType compound() const { return _compound; };
  private:

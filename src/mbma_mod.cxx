@@ -357,7 +357,6 @@ void Mbma::addBracketMorph( Word *word,
   Morpheme *result = new Morpheme( word->doc(), args );
   args.clear();
   args["value"] = wrd;
-  args["offset"] = "0";
   TextContent *t = new TextContent( args );
 #pragma omp critical(foliaupdate)
   {
@@ -400,6 +399,7 @@ void Mbma::addBracketMorph( Word *word,
 }
 
 void Mbma::addBracketMorph( Word *word,
+			    const string& orig_word,
 			    const BracketNest *brackets ) const {
   KWargs args;
   args["set"] = mbma_tagset;
@@ -418,8 +418,12 @@ void Mbma::addBracketMorph( Word *word,
 					  mbma_tagset,
 					  clex_tagset );
   if ( m ){
+    args.clear();
+    args["value"] = orig_word;
+    TextContent *t = new TextContent( args );
 #pragma omp critical(foliaupdate)
     {
+      m->append( t );
       ml->append( m );
     }
   }
@@ -427,7 +431,6 @@ void Mbma::addBracketMorph( Word *word,
 
 void Mbma::addMorph( MorphologyLayer *ml,
 		     const vector<string>& morphs ) const {
-  int offset = 0;
   for ( size_t p=0; p < morphs.size(); ++p ){
     KWargs args;
     args["set"] = mbma_tagset;
@@ -438,9 +441,7 @@ void Mbma::addMorph( MorphologyLayer *ml,
     }
     args.clear();
     args["value"] = morphs[p];
-    args["offset"] = toString(offset);
     TextContent *t = new TextContent( args );
-    offset += morphs[p].length();
 #pragma omp critical(foliaupdate)
     {
       m->append( t );
@@ -620,7 +621,7 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
   else {
     for( auto const& sit : analysis ){
       if ( doDaring ){
-	addBracketMorph( fword, sit->brackets );
+	addBracketMorph( fword, UnicodeToUTF8(uword), sit->brackets );
       }
       else {
 	addMorph( fword, sit->extract_morphemes() );
