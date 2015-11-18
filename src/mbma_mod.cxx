@@ -336,34 +336,6 @@ void Mbma::addMorph( Word *word,
   addMorph( ml, morphs );
 }
 
-string CGN_to_CELEX( const string& tag ){
-  // rather clumsy and still incomplete
-  if ( tag == "VNW" ){
-    return "O";
-  }
-  else if ( tag == "VG" ){
-    return "C";
-  }
-  else if ( tag == "BW" ){
-    return "B";
-  }
-  else if ( tag == "ADJ" ){
-    return "A";
-  }
-  else if ( tag == "N" ){
-    return "N";
-  }
-  else if ( tag == "WW" ){
-    return "V";
-  }
-  else if ( tag == "VZ" ){
-    return "P";
-  }
-  else {
-    return "PANIEK-" + tag;
-  }
-}
-
 void Mbma::addBracketMorph( Word *word,
 			    const string& wrd,
 			    const string& tag ) const {
@@ -406,9 +378,14 @@ void Mbma::addBracketMorph( Word *word,
     // unanalysed, so trust the TAGGER
 #pragma omp critical(foliaupdate)
     {
-      auto pos = word->annotation<PosAnnotation>( cgn_tagset );
+      const auto pos = word->annotation<PosAnnotation>( cgn_tagset );
       head = pos->feat("head");
-      head = CGN_to_CELEX( head );
+      const auto tagIt = TAGconv.find( head );
+      if ( tagIt == TAGconv.end() ) {
+	// this should never happen
+	throw ValueError( "unknown head feature '" + head + "'" );
+      }
+      head = tagIt->second;
     }
   }
   args["cls"] = head;
