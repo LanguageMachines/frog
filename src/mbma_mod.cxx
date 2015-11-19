@@ -226,6 +226,8 @@ string find_class( unsigned int step,
   return result;
 }
 
+#define OLD
+#ifdef OLD
 vector<vector<string> > generate_all_perms( const vector<string>& classes ){
   // determine all alternative analyses, remember the largest
   // and store every part in a vector of string vectors
@@ -260,6 +262,61 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
   }
   return result;
 }
+#else
+
+bool next_perm( vector< vector<string>::const_iterator >& its,
+		const vector<vector<string> >& parts ){
+  for ( size_t i=0; i < parts.size(); ++i ){
+    ++its[i];
+    if ( its[i] == parts[i].end() ){
+      if ( i == parts.size() -1 )
+	return false;
+      its[i] = parts[i].begin();
+    }
+    else
+      return true;
+  }
+  return false;
+}
+
+vector<vector<string> > generate_all_perms( const vector<string>& classes ){
+
+  // determine all alternative analyses
+  // store every part in a vector of string vectors
+  vector<vector<string> > classParts;
+  classParts.resize( classes.size() );
+  for ( unsigned int j=0; j< classes.size(); ++j ){
+    vector<string> parts;
+    int num = split_at( classes[j], parts, "|" );
+    if ( num > 0 ){
+     classParts[j] = parts;
+    }
+    else {
+      // only one, create a dummy
+      vector<string> dummy;
+      dummy.push_back( classes[j] );
+      classParts[j] = dummy;
+   }
+  }
+  //
+  // now expand
+  vector< vector<string>::const_iterator > its( classParts.size() );
+  for ( size_t i=0; i<classParts.size(); ++i ){
+    its[i] = classParts[i].begin();
+  }
+  vector<vector<string> > result;
+  bool more = true;
+  while ( more ){
+    vector<string> item(classParts.size());
+    for( size_t j=0; j< classParts.size(); ++j ){
+      item[j] = *its[j];
+    }
+    result.push_back( item );
+    more = next_perm( its, classParts );
+  }
+  return result;
+}
+#endif
 
 void Mbma::clearAnalysis(){
   for ( const auto& a: analysis ){
@@ -276,10 +333,22 @@ Rule* Mbma::matchRule( const std::vector<std::string>& ana,
     if ( debugFlag ){
       *Log(mbmaLog) << "after reduction: " << rule << endl;
     }
+#ifdef OLD
     rule->resolve_inflections();
     if ( debugFlag ){
       *Log(mbmaLog) << "after resolving: " << rule << endl;
     }
+#else
+    //    rule->debugFlag = 1;
+    if ( !rule->check_inflections() ){
+      if ( debugFlag ){
+	*Log(mbmaLog) << "failed inflection check: " << rule << endl;
+      }
+      delete rule;
+      return 0;
+    }
+    //    rule->debugFlag = 0;
+#endif
     rule->resolveBrackets( doDaring );
     rule->getCleanInflect();
     if ( debugFlag ){
@@ -340,6 +409,29 @@ void Mbma::addBracketMorph( Word *word,
 			    const string& wrd,
 			    const string& tag ) const {
   //  *Log(mbmaLog) << "addBracketMorph(" << wrd << "," << tag << ")" << endl;
+  string celex_tag = tag;
+  string head = tag;
+  if ( head == "LET" || head == "SPEC" ){
+    head.clear();
+  }
+  else if ( head == "X" ) {
+    // unanalysed, so trust the TAGGER
+#pragma omp critical(foliaupdate)
+    {
+      const auto pos = word->annotation<PosAnnotation>( cgn_tagset );
+      head = pos->feat("head");
+    }
+    cerr << "head was X, now :" << head << endl;
+    const auto tagIt = TAGconv.find( head );
+    if ( tagIt == TAGconv.end() ) {
+      // this should never happen
+      throw ValueError( "unknown head feature '" + head + "'" );
+    }
+    celex_tag = tagIt->second;
+    head = CLEX::get_tDescr(CLEX::toCLEX(tagIt->second));
+    cerr << "head was X, now :" << head << endl;
+  }
+
   KWargs args;
   args["set"] = mbma_tagset;
   MorphologyLayer *ml;
@@ -364,7 +456,7 @@ void Mbma::addBracketMorph( Word *word,
   }
   args.clear();
   args["subset"] = "structure";
-  args["class"]  = "[" + wrd + "]";
+  args["class"]  = "[" + wrd + "]" + head;
 #pragma omp critical(foliaupdate)
   {
     folia::Feature *feat = new folia::Feature( args );
@@ -372,22 +464,7 @@ void Mbma::addBracketMorph( Word *word,
   }
   args.clear();
   args["set"] = clex_tagset;
-  string head = tag;
-  if ( tag == "X" ) {
-    // unanalysed, so trust the TAGGER
-#pragma omp critical(foliaupdate)
-    {
-      const auto pos = word->annotation<PosAnnotation>( cgn_tagset );
-      head = pos->feat("head");
-      const auto tagIt = TAGconv.find( head );
-      if ( tagIt == TAGconv.end() ) {
-	// this should never happen
-	throw ValueError( "unknown head feature '" + head + "'" );
-      }
-      head = tagIt->second;
-    }
-  }
-  args["cls"] = head;
+  args["cls"] = celex_tag;
 #pragma omp critical(foliaupdate)
   {
     result->addPosAnnotation( args );
@@ -458,9 +535,9 @@ void Mbma::filterHeadTag( const string& head ){
   if (debugFlag){
     *Log(mbmaLog) << "filter with head: " << head << endl;
     *Log(mbmaLog) << "filter: analysis is:" << endl;
-    int i=1;
+    int i=0;
     for( const auto& it : analysis ){
-      *Log(mbmaLog) << i++ << " - " << it << endl;
+      *Log(mbmaLog) << ++i << " - " << it << endl;
     }
   }
   map<string,string>::const_iterator tagIt = TAGconv.find( head );
@@ -468,23 +545,24 @@ void Mbma::filterHeadTag( const string& head ){
     // this should never happen
     throw ValueError( "unknown head feature '" + head + "'" );
   }
+  string head_tag = tagIt->second;
   if (debugFlag){
-    *Log(mbmaLog) << "#matches: " << tagIt->first << " " << tagIt->second << endl;
+    *Log(mbmaLog) << "#matches: CGN:" << head << " CELEX " << head_tag << endl;
   }
   auto ait = analysis.begin();
   while ( ait != analysis.end() ){
     string tagI = CLEX::toString((*ait)->tag);
-    if ( ( tagIt->second == tagI )
-	 || ( tagIt->second == "N" && tagI == "PN" ) ){
+    if ( ( head_tag == tagI )
+	 || ( head_tag == "N" && tagI == "PN" ) ){
       if (debugFlag){
-	*Log(mbmaLog) << "comparing " << tagIt->second << " with "
+	*Log(mbmaLog) << "comparing " << head_tag << " with "
 		      << tagI << " (OK)" << endl;
       }
       ++ait;
     }
     else {
       if (debugFlag){
-	*Log(mbmaLog) << "comparing " << tagIt->second << " with "
+	*Log(mbmaLog) << "comparing " << head_tag << " with "
 		      << tagI << " (rejected)" << endl;
       }
       delete *ait;
@@ -578,7 +656,7 @@ void Mbma::filterSubTags( const vector<string>& feats ){
   }
   if ( debugFlag ){
     *Log(mbmaLog) << "filter: analysis before sort on length:" << endl;
-    int i=1;
+    int i=0;
     for( const auto& it : analysis ){
       *Log(mbmaLog) << ++i << " - " << it << " " << it->getKey(false)
 		    << " (" << it->getKey(false).length() << ")" << endl;
@@ -593,7 +671,7 @@ void Mbma::filterSubTags( const vector<string>& feats ){
 
   if ( debugFlag){
     *Log(mbmaLog) << "filter: definitive analysis:" << endl;
-    int i=1;
+    int i=0;
     for( auto const& it : analysis ){
       *Log(mbmaLog) << ++i << " - " << it << endl;
     }
