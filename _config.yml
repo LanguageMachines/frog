@@ -19,4 +19,8 @@ defaults:
         url: https://github.com/LanguageMachines/frog/
       - label: Releases
         url: https://github.com/LanguageMachines/frog/releases/
+      - label: Ucto
+        url: https://languagemachines.github.io/ucto/
+      - label: Timbl
+        url: https://languagemachines.github.io/timbl/
 ---
