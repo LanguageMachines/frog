@@ -1,0 +1,22 @@
+---
+exclude: [bundle]
+defaults:
+   - 
+    scope:
+     path: ""
+     type: pages
+    values: 
+     layout: lamalayout
+     title: Frog
+     author: Ko van der sloot, Antal van den Bosch, Maarten van Gompel
+     keywords: dutch, tokenisation, lemmatisation, tokenization, lemmatization, part-of-speech tagging, named entity recognition, shallow parsing, chunking, dependency parsing, nederlands, folia, ucto, NLP, natural language processing
+     description: Frog is an integration of memory-based natural language processing (NLP) modules developed for Dutch.
+     lang: en
+     menu: 
+      - label: Home
+        url: https://languagemachines.github.io/frog/
+      - label: Source
+        url: https://github.com/LanguageMachines/frog/
+      - label: Releases
+        url: https://github.com/LanguageMachines/frog/releases/
+---
