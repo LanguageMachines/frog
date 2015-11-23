@@ -127,7 +127,7 @@ Mac OS X. It can also run as a <em>virtual machine</em> under any host OS.</li>
 <li><a href="https://github.com/LanguageMachines/frogdata/releases">Stable releases</a></li>
 </ul>
 
-<p>To compile these manually consult the included <tt>INSTALL</tt> documents, you will need current versions of the following dependencies:</p>
+<p>To compile these manually consult the included <tt>INSTALL</tt> documents, you will need current versions of the following dependencies of our software:</p>
 
 <ul>
 <li><a href="https://github.com/LanguageMachines/ticcutils/">ticcutils</a> - A shared utility library </li>
@@ -136,8 +136,14 @@ Mac OS X. It can also run as a <em>virtual machine</em> under any host OS.</li>
 <li><a href="https://github.com/LanguageMachines/timbl/">timbl</a> - The memory-based classifier engine</li>
 <li><a href="https://github.com/LanguageMachines/timbl/">timblserver</a> - For server functionality around Timbl</li>
 <li><a href="https://github.com/LanguageMachines/mbt/">mbt</a> - The memory-based tagger</li>
-<li><a href="http://icu-project.org">icu</a> - A C++ library for Unicode and Globalization support</li>
-<li><a href="http://xmlsoft.org">libxml2</a> - An XML library</li>
+<ul>
+
+<p>As well as the following 3rd party dependencies:</p>
+
+<ul>
+<li><a href="http://icu-project.org">icu</a> - A C++ library for Unicode and Globalization support. On Debian/Ubuntu systems, install the package <tt>libicu-dev</tt>. </li>
+<li><a href="http://xmlsoft.org">libxml2</a> - An XML library. On Debian/Ubuntu systems install the package <tt>libxml2-dev</tt>.</li>
+<li>A sane build environment with a C++ compiler (e.g. gcc or clang), autotools, libtool, pkg-config</li>
 </ul>
 
 </section>
