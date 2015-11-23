@@ -8,7 +8,7 @@ defaults:
     values: 
      layout: lamalayout
      title: Frog
-     author: Ko van der sloot, Antal van den Bosch, Maarten van Gompel
+     author: Ko van der Sloot, Antal van den Bosch, Maarten van Gompel
      keywords: dutch, tokenisation, lemmatisation, tokenization, lemmatization, part-of-speech tagging, named entity recognition, shallow parsing, chunking, dependency parsing, nederlands, folia, ucto, NLP, natural language processing
      description: Frog is an integration of memory-based natural language processing (NLP) modules developed for Dutch.
      lang: en
