@@ -47,10 +47,6 @@ This software has been tested on:
   Arch Linux, Fedora (both 32 and 64 bits)
 - Apple platform running Mac OS X 10.10
 
-Compilers:
- - GCC (use 4.8 or later)
- - Clang
-
 Contents of this distribution:
 - Sources
 - Licensing information ( COPYING )
@@ -65,7 +61,7 @@ dependencies, it is included as part of our software distribution
 LaMachine: https://proycon.github.io/LaMachine . 
 
 To be able to succesfully build Frog from source instead, you need the following dependencies:
-- pkg-config
+- A sane C++ build enviroment with autoconf, automake, autoconf-archive, pkg-config, gcc or clang,  libtool
 - libxml2
 - libicu
 - ticcutils (https://github.com/LanguageMachines/ticcutils)
@@ -77,8 +73,13 @@ To be able to succesfully build Frog from source instead, you need the following
 The data for Frog is packaged seperately and needs to be installed prior to installing frog:
 - frogdata (https://github.com/LanguageMachines/frogdata)
 
-To compile and install manually from source, provided you have all the
-above dependencies installed, consult the included INSTALL file.
+To compile and install manually from source instead, provided you have all the dependencies installed:
+
+ $ bash bootstrap.sh
+ $ ./configure 
+ $ make
+ $ make install
+
 
 -------------------------------------------------------------------------------
 Credits
