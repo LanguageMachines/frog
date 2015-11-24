@@ -1,51 +1,89 @@
-frog - A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
-
-http://ilk.uvt.nl/frog
+Frog - A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
+ https://languagemachines.github.io/frog
  
-Copyright 2006, 2012 Bertjan Busser, Antal van den Bosch, and Ko van der Sloot
+    Copyright 2006-2015 Bertjan Busser, Antal van den Bosch,  Ko van der Sloot, Maarten van Gompel
 
-ILK Research Group, Faculty of Humanities, Tilburg University http://ilk.uvt.nl
+    Centre for Language Studies, Radboud University Nijmegen
+    Induction of Linguistic Knowledge Research Group, Tilburg University
 
-frog is free software; you can redistribute it and/or modify it under the terms
+Frog is an integration of memory-based natural language processing (NLP)
+modules developed for Dutch. All NLP modules are based on Timbl, the Tilburg
+memory-based learning software package. Most modules were created in the 1990s
+at the ILK Research Group (Tilburg University, the Netherlands) and the CLiPS
+Research Centre (University of Antwerp, Belgium). Over the years they have been
+integrated into a single text processing tool, which is currently maintained
+and developed by the Language Machines Research Group and the Centre for
+Language and Speech Technology at Radboud University Nijmegen. A dependency
+parser, a base phrase chunker, and a named-entity recognizer module were added
+more recently. Where possible, Frog makes use of multi-processor support to run
+subtasks in parallel.
+
+Various (re)programming rounds have been made possible through funding by NWO,
+the Netherlands Organisation for Scientific Research, particularly under the
+CGN project, the IMIX programme, the Implicit Linguistics project, the
+CLARIN-NL programme and the CLARIAH programme.
+
+-----------------------------------------------------------------------------
+
+Frog is free software; you can redistribute it and/or modify it under the terms
 of the GNU General Public License as published by the Free Software Foundation;
-either version 3 of the License, or (at your option) any later version.
+either version 3 of the License, or (at your option) any later version (see the file COPYING)
 
 frog is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.
+While this is NOT a Beta version it may still contain some bugs or behave not
+exactly as documented or expected. Comments and bug-reports are welcome at our
+issue tracker at https://github.com/LanguageMachines/frog/issues or by mailing
+a.vandenbosch (at) let.ru.nl. Updates and more info may be found on
+https://languagemachines.github.io/frog .
 
-For questions and suggestions, see:
-      http://ilk.uvt.nl/software.html
-or send mail to:
-      timbl@uvt.nl
 
--------------------------------------------------------------------------------
-Preliminary note
+----------------------------------------------------------------------------
 
-Frog can be considered beta software, and, as of 2012-06, is being stabilized.
-All planned functionality (including a dependency parser, the multi-word
-chunker, Named Entity Recognition, Chunking and error handling and reporting)
-has been implemented and tested.
+This software has been tested on:
+- Intel platforms running several versions of Linux, including Ubuntu, Debian,
+  Arch Linux, Fedora (both 32 and 64 bits)
+- Apple platform running Mac OS X 10.10
 
--------------------------------------------------------------------------------
-Installation and Quick Start
+Compilers:
+ - GCC (use 4.8 or later)
+ - Clang
 
-TODO
+Contents of this distribution:
+- Sources
+- Licensing information ( COPYING )
+- Installation instructions ( INSTALL )
+- Build system based on GNU Autotools
+- Example data files ( in the demos directory )
+- Documentation ( in the docs directory )
+
+To install Frog, first consult whether your distribution's package manager has
+an up-to-date package.  If not, for easy installation of Frog and its many
+dependencies, it is included as part of our software distribution
+LaMachine: https://proycon.github.io/LaMachine . 
+
+To be able to succesfully build Frog from source instead, you need the following dependencies:
+- pkg-config
+- libxml2
+- libicu
+- ticcutils (https://github.com/LanguageMachines/ticcutils)
+- libfolia (https://github.com/LanguageMachines/libfolia)
+- ucto (https://github.com/LanguageMachines/ucto)
+- timbl (https://github.com/LanguageMachines/timbl)
+- mbt (https://github.com/LanguageMachines/mbt)
+
+To compile and install manually from source, provided you have all the
+above dependencies installed, consult the included INSTALL file.
 
 -------------------------------------------------------------------------------
 Credits
 
 Many thanks go out to the people who made the developments of the Frog
 components possible: Walter Daelemans, Jakub Zavrel, Ko van der Sloot, Sabine
-Buchholz, Sander Canisius, Gert Durieux, and Peter Berck. 
+Buchholz, Sander Canisius, Gert Durieux, Peter Berck and Maarten van Gompel.
 
 Thanks to Erik Tjong Kim Sang and Lieve Macken for stress-testing the first
 versions of Tadpole, the predecessor of Frog
 
--------------------------------------------------------------------------------
-References
-
-TODO
