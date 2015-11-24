@@ -1,6 +1,6 @@
 Frog - A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
  https://languagemachines.github.io/frog
- 
+
     Copyright 2006-2015 Bertjan Busser, Antal van den Bosch,  Ko van der Sloot, Maarten van Gompel
 
     Centre for Language Studies, Radboud University Nijmegen
@@ -33,10 +33,9 @@ frog is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-While this is NOT a Beta version it may still contain some bugs or behave not
-exactly as documented or expected. Comments and bug-reports are welcome at our
-issue tracker at https://github.com/LanguageMachines/frog/issues or by mailing
-a.vandenbosch (at) let.ru.nl. Updates and more info may be found on
+Comments and bug-reports are welcome at our issue tracker at
+https://github.com/LanguageMachines/frog/issues or by mailing
+lamasoftware (at) science.ru.nl. Updates and more info may be found on
 https://languagemachines.github.io/frog .
 
 
@@ -58,12 +57,12 @@ Contents of this distribution:
 To install Frog, first consult whether your distribution's package manager has
 an up-to-date package.  If not, for easy installation of Frog and its many
 dependencies, it is included as part of our software distribution
-LaMachine: https://proycon.github.io/LaMachine . 
+LaMachine: https://proycon.github.io/LaMachine .
 
 To be able to succesfully build Frog from source instead, you need the following dependencies:
 - A sane C++ build enviroment with autoconf, automake, autoconf-archive, pkg-config, gcc or clang,  libtool
-- libxml2
-- libicu
+- libxml2-dev
+- libicu-dev
 - ticcutils (https://github.com/LanguageMachines/ticcutils)
 - libfolia (https://github.com/LanguageMachines/libfolia)
 - ucto (https://github.com/LanguageMachines/ucto)
@@ -76,9 +75,11 @@ The data for Frog is packaged seperately and needs to be installed prior to inst
 To compile and install manually from source instead, provided you have all the dependencies installed:
 
  $ bash bootstrap.sh
- $ ./configure 
+ $ ./configure
  $ make
  $ make install
+ and optionally:
+ $ make check
 
 
 -------------------------------------------------------------------------------
@@ -90,4 +91,3 @@ Buchholz, Sander Canisius, Gert Durieux, Peter Berck and Maarten van Gompel.
 
 Thanks to Erik Tjong Kim Sang and Lieve Macken for stress-testing the first
 versions of Tadpole, the predecessor of Frog
-
