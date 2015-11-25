@@ -132,14 +132,6 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
   // also fill some globals we use for our own main.
 
   string value;
-  if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
-    // we already did show what we wanted.
-    exit( EXIT_SUCCESS );
-  }
-  if ( Opts.is_present( 'h' ) ) {
-    usage();
-    exit( EXIT_SUCCESS );
-  };
   // is a config file specified?
   string configFileName = FrogAPI::defaultConfigFile();
   Opts.extract( 'c',  configFileName );
@@ -397,6 +389,16 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
   return true;
 }
 
+bool StillRunning = true;
+
+void KillServerFun( int Signal ){
+  if ( Signal == SIGTERM ){
+    cerr << "KillServerFun caught a signal SIGTERM" << endl;
+    sleep(10); // give children some spare time...
+    StillRunning = false;
+  }
+}
+
 
 int main(int argc, char *argv[]) {
   cerr << "frog " << VERSION << " (c) ILK 1998 - 2015" << endl;
@@ -416,6 +418,14 @@ int main(int argc, char *argv[]) {
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,daring,"
 			  "debug:,keep-parser-files,version,threads:,KANON");
     Opts.init(argc, argv);
+    if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
+      // we already did show what we wanted.
+      return EXIT_SUCCESS;
+    }
+    if ( Opts.is_present( 'h' ) ) {
+      usage();
+      return EXIT_SUCCESS;
+    };
     bool parsed = parse_args( Opts, options, theErrLog );
     if (!parsed) {
       throw runtime_error( "init failed" );
@@ -492,6 +502,11 @@ int main(int argc, char *argv[]) {
       action.sa_flags = SA_NOCLDWAIT;
 #endif
       sigaction(SIGCHLD, &action, NULL);
+      struct sigaction act;
+      sigaction( SIGTERM, NULL, &act ); // get current action
+      act.sa_handler = KillServerFun;
+      act.sa_flags &= ~SA_RESTART;      // do not continue after SIGTERM
+      sigaction( SIGTERM, &act, NULL );
 
       srand((unsigned)time(0));
 
@@ -506,7 +521,7 @@ int main(int argc, char *argv[]) {
 	  // maximum of 5 pending requests
 	  throw( runtime_error( "listen(5) failed" ) );
 	}
-	while ( true ) {
+	while ( StillRunning ) {
 	  Sockets::ServerSocket conn;
 	  if ( server.accept( conn ) ){
 	    *Log(theErrLog) << "New connection..." << endl;
@@ -517,7 +532,7 @@ int main(int argc, char *argv[]) {
 	    }
 	    else if (pid == 0)  {
 	      frog.FrogServer( conn );
-	      exit(EXIT_SUCCESS);
+	      return EXIT_SUCCESS;
 	    }
 	  }
 	  else {
