@@ -421,7 +421,7 @@ void Mbma::addBracketMorph( Word *word,
       const auto pos = word->annotation<PosAnnotation>( cgn_tagset );
       head = pos->feat("head");
     }
-    cerr << "head was X, now :" << head << endl;
+    //    cerr << "head was X, now :" << head << endl;
     const auto tagIt = TAGconv.find( head );
     if ( tagIt == TAGconv.end() ) {
       // this should never happen
@@ -429,7 +429,7 @@ void Mbma::addBracketMorph( Word *word,
     }
     celex_tag = tagIt->second;
     head = CLEX::get_tDescr(CLEX::toCLEX(tagIt->second));
-    cerr << "head was X, now :" << head << endl;
+    //    cerr << "head was X, now :" << head << endl;
   }
 
   KWargs args;
