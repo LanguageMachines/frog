@@ -394,7 +394,7 @@ bool StillRunning = true;
 void KillServerFun( int Signal ){
   if ( Signal == SIGTERM ){
     cerr << "KillServerFun caught a signal SIGTERM" << endl;
-    sleep(10); // give children some spare time...
+    sleep(5); // give children some spare time...
     StillRunning = false;
   }
 }
