@@ -164,11 +164,11 @@ size_t count_sp( const string& sentence, string::size_type pos ){
   return sp;
 }
 
-void NERTagger::handle_known_ners( const vector<string>& words, 
+void NERTagger::handle_known_ners( const vector<string>& words,
 				   vector<string>& tags ){
   if ( debug )
     *Log(nerLog) << "search for known NER's" << endl;
-  string sentence = "";
+  string sentence = " ";
   for ( size_t i=0; i < words.size()-1; ++i ){
     sentence += words[i] + " ";
   }
@@ -180,11 +180,12 @@ void NERTagger::handle_known_ners( const vector<string>& words,
     if ( mp.empty() )
       continue;
     for( auto const& it : mp ){
-      string::size_type pos = sentence.find( it.first );
+      string blub = " " + it.first + " ";
+      string::size_type pos = sentence.find( blub );
       while ( pos != string::npos ){
 	size_t sp = count_sp( sentence, pos );
 	if ( debug )
-	  *Log(nerLog) << "matched " << it.first << " to " 
+	  *Log(nerLog) << "matched " << it.first << " to "
 		       << sentence << " at position " << sp << endl;
 	bool safe = true;
 	for ( size_t j=0; j < i && safe; ++j ){
@@ -197,13 +198,13 @@ void NERTagger::handle_known_ners( const vector<string>& words,
 	    tags[sp+j] = "I-" + it.second;
 	  }
 	}
-	pos = sentence.find( it.first, pos + it.first.length() );
+	pos = sentence.find( blub, pos + blub.length() );
       }
     }
   }
 }
 
-void NERTagger::merge( const vector<string>& ktags, vector<string>& tags, 
+void NERTagger::merge( const vector<string>& ktags, vector<string>& tags,
 		       vector<double>& conf ){
   if ( debug ){
     using TiCC::operator<<;
@@ -224,7 +225,7 @@ void NERTagger::merge( const vector<string>& ktags, vector<string>& tags,
     }
     else if ( ktags[i][0] == 'B' ){
       // maybe we landed in the middel of some tag.
-      if ( tags[i][0] == 'I' ){ 
+      if ( tags[i][0] == 'I' ){
 	//indeed, so erase it backwards
 	size_t j = i;
 	while ( tags[j][0] == 'I' ){
