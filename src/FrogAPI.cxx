@@ -571,16 +571,19 @@ void FrogAPI::FrogInteractive(){
     line = input;
     if ( options.doSentencePerLine ){
       if ( line.empty() ){
+	free( input );
 	continue;
       }
       else {
-	data += line + "\n";
 	add_history( input );
+	free( input );
+	data += line + "\n";
       }
     }
     else {
       if ( !line.empty() ){
 	add_history( input );
+	free( input );
 	data = line + "\n";
       }
       while ( !eof ){
@@ -591,9 +594,11 @@ void FrogAPI::FrogInteractive(){
 	}
 	line = input;
 	if ( line.empty() ){
+	  free( input );
 	  break;
 	}
 	add_history( input );
+	free( input );
 	data += line + "\n";
       }
     }

@@ -195,6 +195,7 @@ Parser::~Parser(){
   delete rels;
   delete dir;
   delete pairs;
+  delete parseLog;
 }
 
 static vector<Word *> lookup( Word *word,
