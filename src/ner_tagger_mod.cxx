@@ -194,7 +194,7 @@ void NERTagger::handle_known_ners( const vector<string>& words,
 	if ( safe ){
 	  // we can safely change the tag (don't trample upon hits of longer known ners!)
 	  tags[sp] = "B-" + it.second;
-	  for ( size_t j=0; j < i; ++j ){
+	  for ( size_t j=1; j < i; ++j ){
 	    tags[sp+j] = "I-" + it.second;
 	  }
 	}
