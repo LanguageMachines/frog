@@ -40,6 +40,9 @@
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Configuration.h"
 #include "ticcutils/CommandLine.h"
+#include "ticcutils/PrettyPrint.h"
+#include "libfolia/foliautils.h"
+#include "libfolia/folia.h"
 #include "frog/ucto_tokenizer_mod.h"
 #include "frog/cgn_tagger_mod.h"
 #include "frog/mblem_mod.h"
@@ -159,7 +162,7 @@ void Test( istream& in ){
     }
     else
       sentences.push_back( line );
-    
+
     for ( auto const& s : sentences ){
       if ( useTagger ){
 	vector<TagResult> tagv = tagger.tagLine( s );

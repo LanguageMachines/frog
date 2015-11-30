@@ -35,6 +35,10 @@
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Configuration.h"
 #include "ticcutils/Timer.h"
+#include "ticcutils/PrettyPrint.h"
+#include "ticcutils/StringOps.h"
+#include "libfolia/foliautils.h"
+#include "libfolia/folia.h"
 #include "libfolia/document.h"
 
 

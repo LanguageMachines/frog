@@ -28,10 +28,12 @@
 
 #include <string>
 #include <vector>
+#include <list>
 #include <iostream>
-#include "libfolia/document.h"
 #include "ticcutils/LogStream.h"
-#include "ucto/unicode.h"
+#include "ticcutils/StringOps.h"
+#include "ticcutils/PrettyPrint.h"
+#include "libfolia/foliautils.h"
 #include "frog/clex.h"
 #include "frog/mbma_brackets.h"
 #include "frog/mbma_rule.h"
