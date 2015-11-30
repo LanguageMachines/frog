@@ -169,10 +169,10 @@ void NERTagger::handle_known_ners( const vector<string>& words,
   if ( debug )
     *Log(nerLog) << "search for known NER's" << endl;
   string sentence = " ";
-  for ( size_t i=0; i < words.size()-1; ++i ){
-    sentence += words[i] + " ";
+  for ( const auto& w : words ){
+    sentence += w + " ";
   }
-  sentence += words[words.size()-1];
+  // so sentence starts AND ends with a space!
   if ( debug )
     *Log(nerLog) << "Sentence = " << sentence << endl;
   for ( size_t i = KNOWN_NERS_SIZE; i > 0; --i ){
@@ -185,8 +185,9 @@ void NERTagger::handle_known_ners( const vector<string>& words,
       while ( pos != string::npos ){
 	size_t sp = count_sp( sentence, pos );
 	if ( debug )
-	  *Log(nerLog) << "matched " << it.first << " to "
-		       << sentence << " at position " << sp << endl;
+	  *Log(nerLog) << "matched '" << it.first << "' to '"
+		       << sentence << "' at position " << sp
+		       << " : " << it.second << endl;
 	bool safe = true;
 	for ( size_t j=0; j < i && safe; ++j ){
 	  safe = ( tags[sp+j] == "O" );
