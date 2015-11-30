@@ -14,12 +14,12 @@
 
   frog is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
+
   For questions and suggestions, see:
       http://ilk.uvt.nl/software.html
   or send mail to:
@@ -42,12 +42,13 @@ class POSTagger {
   std::vector<TagResult> tagLine( const std::string& );
   std::string getTagset() const { return tagset; };
   bool fill_map( const std::string&, std::map<std::string,std::string>& );
+  std::string set_eos_mark( const std::string& );
  protected:
   int debug;
   std::string tagset;
   LogStream *tag_log;
  private:
-  MbtAPI *tagger;  
+  MbtAPI *tagger;
   std::string version;
   Tokenizer::UnicodeFilter *filter;
   std::map<std::string,std::string> token_tag_map;

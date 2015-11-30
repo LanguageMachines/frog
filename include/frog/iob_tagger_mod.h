@@ -14,12 +14,12 @@
 
   frog is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
+
   For questions and suggestions, see:
       http://ilk.uvt.nl/software.html
   or send mail to:
@@ -37,8 +37,9 @@ class IOBTagger {
   void addDeclaration( folia::Document& ) const;
   void Classify( const std::vector<folia::Word *>& );
   std::string getTagset() const { return tagset; };
+  std::string set_eos_mark( const std::string& );
  private:
-  void addChunk( folia::ChunkingLayer *, 
+  void addChunk( folia::ChunkingLayer *,
 		 const std::vector<folia::Word*>&,
 		 const std::vector<double>&,
 		 const std::string& );

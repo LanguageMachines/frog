@@ -42,12 +42,12 @@ class NERTagger {
   std::string getTagset() const { return tagset; };
   std::vector<TagResult> tagLine( const std::string& );
   bool fill_known_ners( const std::string& );
-  void handle_known_ners( const std::vector<std::string>&, 
+  void handle_known_ners( const std::vector<std::string>&,
 			  std::vector<std::string>& );
   void merge( const std::vector<std::string>&,
-	      std::vector<std::string>& tags, 
+	      std::vector<std::string>& tags,
 	      std::vector<double>& );
-
+  std::string set_eos_mark( const std::string& );
  private:
   MbtAPI *tagger;
   LogStream *nerLog;

@@ -274,3 +274,10 @@ void IOBTagger::Classify( const vector<Word *>& swords ){
     addIOBTags( swords, tags, conf );
   }
 }
+
+string IOBTagger::set_eos_mark( const string& eos ){
+  if ( tagger )
+    return tagger->set_eos_mark(eos);
+  else
+    throw runtime_error( "IOBTagger is not initialized" );
+}

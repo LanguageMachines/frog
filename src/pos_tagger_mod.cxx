@@ -213,6 +213,13 @@ vector<TagResult> POSTagger::tagLine( const string& line ){
     throw runtime_error( "POSTagger is not initialized" );
 }
 
+string POSTagger::set_eos_mark( const std::string& eos ){
+  if ( tagger )
+    return tagger->set_eos_mark( eos );
+  else
+    throw runtime_error( "POSTagger is not initialized" );
+}
+
 void POSTagger::Classify( const vector<Word*>& swords ){
   if ( !swords.empty() ) {
     string sentence; // the tagger needs the whole sentence

@@ -422,3 +422,10 @@ vector<TagResult> NERTagger::tagLine( const string& line ){
   else
     throw runtime_error( "NERTagger is not initialized" );
 }
+
+string NERTagger::set_eos_mark( const string& eos ){
+  if ( tagger )
+    return tagger->set_eos_mark(eos);
+  else
+    throw runtime_error( "NERTagger is not initialized" );
+}

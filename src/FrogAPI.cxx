@@ -97,6 +97,7 @@ FrogOptions::FrogOptions() {
 #else
   numThreads = 1;
 #endif
+  uttmark = "<utt>";
   listenport = "void";
   docid = "untitled";
   debugFlag = 0;
@@ -159,13 +160,20 @@ FrogAPI::FrogAPI( const FrogOptions &opt,
       myCGNTagger = new CGNTagger(theErrLog);
       stat = myCGNTagger->init( configuration );
       if ( stat ){
+	myCGNTagger->set_eos_mark( options.uttmark );
 	if ( options.doIOB ){
 	  myIOBTagger = new IOBTagger(theErrLog);
 	  stat = myIOBTagger->init( configuration );
+	  if ( stat ){
+	    myIOBTagger->set_eos_mark( options.uttmark );
+	  }
 	}
 	if ( stat && options.doNER ){
 	  myNERTagger = new NERTagger(theErrLog);
 	  stat = myNERTagger->init( configuration );
+	  if ( stat ){
+	    myNERTagger->set_eos_mark( options.uttmark );
+	  }
 	}
 	if ( stat && options.doLemma ){
 	  myMblem = new Mblem(theErrLog);
