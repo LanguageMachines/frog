@@ -486,7 +486,10 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
         *Log(theErrLog) << "Processing... " << endl;
         tokenizer->tokenize( doc );
         FrogDoc( doc );
-	showResults( outputstream, doc );
+	if ( options.doXMLout )
+	  doc.save( outputstream, options.doKanon );
+	else
+	  showResults( outputstream, doc );
       }
       else {
         string data = "";
@@ -508,7 +511,10 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
         istringstream inputstream(data,istringstream::in);
         Document doc = tokenizer->tokenize( inputstream );
         FrogDoc( doc );
-	showResults( outputstream, doc );
+	if ( options.doXMLout )
+	  doc.save( outputstream, options.doKanon );
+	else
+	  showResults( outputstream, doc );
       }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
 	if (options.debugFlag)
@@ -885,103 +891,99 @@ void FrogAPI::displayMWU( ostream& os,
 
 ostream& FrogAPI::showResults( ostream& os,
 			       Document& doc ) const {
-  if ( options.doServer && options.doXMLout )
-    doc.save( os, options.doKanon );
-  else {
-    vector<Sentence*> sentences = doc.sentences();
-    for ( size_t i=0; i < sentences.size(); ++i ){
-      Sentence *sentence = sentences[i];
-      vector<Word*> words = sentence->words();
-      vector<Entity*> mwu_entities;
+  vector<Sentence*> sentences = doc.sentences();
+  for ( size_t i=0; i < sentences.size(); ++i ){
+    Sentence *sentence = sentences[i];
+    vector<Word*> words = sentence->words();
+    vector<Entity*> mwu_entities;
+    if (myMwu)
+      mwu_entities = sentence->select<Entity>( myMwu->getTagset() );
+    vector<Dependency*> dependencies;
+    if (myParser)
+      dependencies = sentence->select<Dependency>( myParser->getTagset() );
+    vector<Chunk*> iob_chunking;
+    if ( myIOBTagger )
+      iob_chunking = sentence->select<Chunk>( myIOBTagger->getTagset() );
+    vector<Entity*> ner_entities;
+    if (myNERTagger)
+      ner_entities =  sentence->select<Entity>( myNERTagger->getTagset() );
+    static set<ElementType> excludeSet;
+    vector<Sentence*> parts = sentence->select<Sentence>( excludeSet );
+    if ( !options.doQuoteDetection )
+      assert( parts.size() == 0 );
+    for ( size_t i=0; i < parts.size(); ++i ){
+      vector<Entity*> ents;
       if (myMwu)
-	mwu_entities = sentence->select<Entity>( myMwu->getTagset() );
-      vector<Dependency*> dependencies;
-      if (myParser)
-	dependencies = sentence->select<Dependency>( myParser->getTagset() );
-      vector<Chunk*> iob_chunking;
-      if ( myIOBTagger )
-	iob_chunking = sentence->select<Chunk>( myIOBTagger->getTagset() );
-      vector<Entity*> ner_entities;
-      if (myNERTagger)
-	ner_entities =  sentence->select<Entity>( myNERTagger->getTagset() );
-      static set<ElementType> excludeSet;
-      vector<Sentence*> parts = sentence->select<Sentence>( excludeSet );
-      if ( !options.doQuoteDetection )
-	assert( parts.size() == 0 );
-      for ( size_t i=0; i < parts.size(); ++i ){
-	vector<Entity*> ents;
-	if (myMwu)
-	  ents = parts[i]->select<Entity>( myMwu->getTagset() );
-	mwu_entities.insert( mwu_entities.end(), ents.begin(), ents.end() );
-	vector<Dependency*> deps = parts[i]->select<Dependency>();
-	dependencies.insert( dependencies.end(), deps.begin(), deps.end() );
-	vector<Chunk*> chunks = parts[i]->select<Chunk>();
-	iob_chunking.insert( iob_chunking.end(), chunks.begin(), chunks.end() );
-	vector<Entity*> ners ;
-	if (myNERTagger) ners = parts[i]->select<Entity>( myNERTagger->getTagset() );
-	ner_entities.insert( ner_entities.end(), ners.begin(), ners.end() );
-      }
+	ents = parts[i]->select<Entity>( myMwu->getTagset() );
+      mwu_entities.insert( mwu_entities.end(), ents.begin(), ents.end() );
+      vector<Dependency*> deps = parts[i]->select<Dependency>();
+      dependencies.insert( dependencies.end(), deps.begin(), deps.end() );
+      vector<Chunk*> chunks = parts[i]->select<Chunk>();
+      iob_chunking.insert( iob_chunking.end(), chunks.begin(), chunks.end() );
+      vector<Entity*> ners ;
+      if (myNERTagger) ners = parts[i]->select<Entity>( myNERTagger->getTagset() );
+      ner_entities.insert( ner_entities.end(), ners.begin(), ners.end() );
+    }
 
-      size_t index = 1;
-      map<FoliaElement*, int> enumeration;
-      vector<vector<Word*> > mwus;
-      for( size_t i=0; i < words.size(); ++i ){
-	Word *word = words[i];
-	vector<Word*> mwu = lookup( word, mwu_entities );
-	for ( size_t j=0; j < mwu.size(); ++j ){
-	  enumeration[mwu[j]] = index;
-	}
-	mwus.push_back( mwu );
-	i += mwu.size()-1;
-	++index;
+    size_t index = 1;
+    map<FoliaElement*, int> enumeration;
+    vector<vector<Word*> > mwus;
+    for( size_t i=0; i < words.size(); ++i ){
+      Word *word = words[i];
+      vector<Word*> mwu = lookup( word, mwu_entities );
+      for ( size_t j=0; j < mwu.size(); ++j ){
+	enumeration[mwu[j]] = index;
       }
-      for( size_t i=0; i < mwus.size(); ++i ){
-	displayMWU( os, i+1, mwus[i] );
-	if ( options.doNER ){
-	  string cls;
-	  string s = lookupNEREntity( mwus[i], ner_entities );
-	  os << "\t" << s;
-	}
-	else {
-	  os << "\t\t";
-	}
-	if ( options.doIOB ){
-	  string cls;
-	  string s = lookupIOBChunk( mwus[i], iob_chunking);
-	  os << "\t" << s;
-	}
-	else {
-	  os << "\t\t";
-	}
-	if ( options.doParse ){
-	  string cls;
-	  Dependency *dep = lookupDep( mwus[i][0], dependencies);
-	  if ( dep ){
-	    vector<Headwords*> w = dep->select<Headwords>();
-	    size_t num;
-	    if ( w[0]->index(0)->isinstance( PlaceHolder_t ) ){
-	      string indexS = w[0]->index(0)->str();
-	      FoliaElement *pnt = w[0]->index(0)->doc()->index(indexS);
-	      num = enumeration.find(pnt->index(0))->second;
-	    }
-	    else {
-	      num = enumeration.find(w[0]->index(0))->second;
-	    }
-	    os << "\t" << num << "\t" << dep->cls();
+      mwus.push_back( mwu );
+      i += mwu.size()-1;
+      ++index;
+    }
+    for( size_t i=0; i < mwus.size(); ++i ){
+      displayMWU( os, i+1, mwus[i] );
+      if ( options.doNER ){
+	string cls;
+	string s = lookupNEREntity( mwus[i], ner_entities );
+	os << "\t" << s;
+      }
+      else {
+	os << "\t\t";
+      }
+      if ( options.doIOB ){
+	string cls;
+	string s = lookupIOBChunk( mwus[i], iob_chunking);
+	os << "\t" << s;
+      }
+      else {
+	os << "\t\t";
+      }
+      if ( options.doParse ){
+	string cls;
+	Dependency *dep = lookupDep( mwus[i][0], dependencies);
+	if ( dep ){
+	  vector<Headwords*> w = dep->select<Headwords>();
+	  size_t num;
+	  if ( w[0]->index(0)->isinstance( PlaceHolder_t ) ){
+	    string indexS = w[0]->index(0)->str();
+	    FoliaElement *pnt = w[0]->index(0)->doc()->index(indexS);
+	    num = enumeration.find(pnt->index(0))->second;
 	  }
 	  else {
-	    os << "\t"<< 0 << "\tROOT";
+	    num = enumeration.find(w[0]->index(0))->second;
 	  }
+	  os << "\t" << num << "\t" << dep->cls();
 	}
 	else {
-	  os << "\t\t";
+	  os << "\t"<< 0 << "\tROOT";
 	}
-	os << endl;
-	++index;
       }
-      if ( words.size() )
-	os << endl;
+      else {
+	os << "\t\t";
+      }
+      os << endl;
+      ++index;
     }
+    if ( words.size() )
+      os << endl;
   }
   return os;
 }
