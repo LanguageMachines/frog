@@ -65,11 +65,10 @@ Mbma::~Mbma() {
 }
 
 
-void Mbma::init_cgn( const string& dir ) {
-  string line;
-  string fn = dir + "cgntags.main";
-  ifstream tc( fn );
+void Mbma::init_cgn( const string& main, const string& sub ) {
+  ifstream tc( main );
   if ( tc ){
+    string line;
     while( getline( tc, line) ) {
       vector<string> tmp;
       size_t num = split_at(line, tmp, " ");
@@ -81,10 +80,10 @@ void Mbma::init_cgn( const string& dir ) {
     }
   }
   else
-    throw ( runtime_error( "unable to open:" + fn ) );
-  fn = dir + "cgntags.sub";
-  ifstream tc1( fn );
+    throw ( runtime_error( "unable to open:" + sub ) );
+  ifstream tc1( sub );
   if ( tc1 ){
+    string line;
     while( getline(tc1, line) ) {
       vector<string> tmp;
       size_t num = split_at(line, tmp, " ");
@@ -93,7 +92,7 @@ void Mbma::init_cgn( const string& dir ) {
     }
   }
   else
-    throw ( runtime_error( "unable to open:" + fn ) );
+    throw ( runtime_error( "unable to open:" + sub ) );
 }
 
 Transliterator *Mbma::init_trans( ){
@@ -147,6 +146,25 @@ bool Mbma::init( const Configuration& config ) {
   else
     clex_tagset = val;
 
+  string cgn_clex_main;
+  val = config.lookUp( "cgn_clex_main", "mbma" );
+  if ( val.empty() ){
+    cgn_clex_main = "cgntags.main";
+  }
+  else
+    cgn_clex_main = val;
+  cgn_clex_main = prefix( config.configDir(), cgn_clex_main );
+
+  string cgn_clex_sub;
+  val = config.lookUp( "cgn_clex_sub", "mbma" );
+  if ( val.empty() ){
+    cgn_clex_sub = "cgntags.sub";
+  }
+  else
+    cgn_clex_sub = val;
+  cgn_clex_sub = prefix( config.configDir(), cgn_clex_sub );
+  init_cgn( cgn_clex_main, cgn_clex_sub );
+
   string charFile = config.lookUp( "char_filter_file", "mbma" );
   if ( charFile.empty() )
     charFile = config.lookUp( "char_filter_file" );
@@ -159,7 +177,6 @@ bool Mbma::init( const Configuration& config ) {
   if ( tfName.empty() )
     tfName = "mbma.igtree";
   MTreeFilename = prefix( config.configDir(), tfName );
-  init_cgn( config.configDir() );
   string dof = config.lookUp( "filter_diacritics", "mbma" );
   if ( !dof.empty() ){
     bool b = stringTo<bool>( dof );

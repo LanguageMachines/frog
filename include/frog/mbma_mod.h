@@ -76,7 +76,7 @@ class Mbma {
   void cleanUp();
   bool readsettings( const std::string&, const std::string& );
   void fillMaps();
-  void init_cgn( const std::string& );
+  void init_cgn( const std::string&, const std::string& );
   Transliterator * init_trans();
   UnicodeString filterDiacritics( const UnicodeString& ) const;
   void getFoLiAResult( folia::Word *, const UnicodeString& ) const;
