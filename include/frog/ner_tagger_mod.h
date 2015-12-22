@@ -1,7 +1,4 @@
 /*
-  $Id$
-  $URL$
-
   Copyright (c) 2006 - 2015
   Tilburg University
 
@@ -31,7 +28,7 @@
 
 class NERTagger {
  public:
-  NERTagger(LogStream *);
+  NERTagger(TiCC::LogStream *);
   ~NERTagger();
   bool init( const TiCC::Configuration& );
   void Classify( const std::vector<folia::Word *>& );
@@ -40,7 +37,7 @@ class NERTagger {
 		   const std::vector<std::string>&,
 		   const std::vector<double>& );
   std::string getTagset() const { return tagset; };
-  std::vector<TagResult> tagLine( const std::string& );
+  std::vector<Tagger::TagResult> tagLine( const std::string& );
   bool fill_known_ners( const std::string& );
   void handle_known_ners( const std::vector<std::string>&,
 			  std::vector<std::string>& );
@@ -50,7 +47,7 @@ class NERTagger {
   std::string set_eos_mark( const std::string& );
  private:
   MbtAPI *tagger;
-  LogStream *nerLog;
+  TiCC::LogStream *nerLog;
   int debug;
   std::string version;
   std::string tagset;

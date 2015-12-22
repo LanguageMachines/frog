@@ -49,6 +49,8 @@
 
 using namespace std;
 using namespace Timbl;
+using namespace TiCC;
+using namespace Tagger;
 
 LogStream my_default_log( cerr, "", StampMessage ); // fall-back
 LogStream *theErrLog = &my_default_log;  // fill the externals

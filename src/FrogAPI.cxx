@@ -1,9 +1,6 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  $Id$
-  $URL$
-
-  Copyright (c) 2006 - 2015
+  Copyright (c) 2006 - 2016
   Tilburg University
 
   A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
@@ -72,6 +69,7 @@
 using namespace std;
 using namespace folia;
 using namespace TiCC;
+using namespace Tagger;
 
 string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
 string configFileName = configDir + "frog.cfg";

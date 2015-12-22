@@ -1,7 +1,4 @@
 /*
-  $Id: cgn_tagger_mod.h 18128 2015-03-02 16:11:55Z sloot $
-  $URL: https://ilk.uvt.nl/svn/sources/Frog/trunk/include/frog/cgn_tagger_mod.h $
-
   Copyright (c) 2006 - 2015
   Tilburg University
 
@@ -39,14 +36,14 @@ class POSTagger {
   virtual void Classify( const std::vector<folia::Word *>& );
   void addDeclaration( folia::Document& ) const;
   void addTag( folia::Word *, const std::string&, double );
-  std::vector<TagResult> tagLine( const std::string& );
+  std::vector<Tagger::TagResult> tagLine( const std::string& );
   std::string getTagset() const { return tagset; };
   bool fill_map( const std::string&, std::map<std::string,std::string>& );
   std::string set_eos_mark( const std::string& );
  protected:
   int debug;
   std::string tagset;
-  LogStream *tag_log;
+  TiCC::LogStream *tag_log;
  private:
   MbtAPI *tagger;
   std::string version;

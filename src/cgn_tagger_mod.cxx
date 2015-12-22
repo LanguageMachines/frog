@@ -35,6 +35,8 @@
 
 using namespace std;
 using namespace folia;
+using namespace TiCC;
+using namespace Tagger;
 
 void CGNTagger::fillSubSetTable(){
   // should become a config file!

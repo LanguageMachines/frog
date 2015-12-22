@@ -1,8 +1,5 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  $Id$
-  $URL$
-
   Copyright (c) 2006 - 2015
   Tilburg University
 

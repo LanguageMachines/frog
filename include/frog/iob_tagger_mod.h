@@ -1,7 +1,4 @@
 /*
-  $Id$
-  $URL$
-
   Copyright (c) 2006 - 2015
   Tilburg University
 
@@ -47,7 +44,7 @@ class IOBTagger {
 		   const std::vector<std::string>&,
 		   const std::vector<double>& );
   MbtAPI *tagger;
-  LogStream *iobLog;
+  TiCC::LogStream *iobLog;
   int debug;
   std::string version;
   std::string tagset;

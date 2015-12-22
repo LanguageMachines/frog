@@ -34,6 +34,8 @@
 
 using namespace std;
 using namespace folia;
+using namespace TiCC;
+using namespace Tagger;
 
 const int KNOWN_NERS_SIZE = 10;
 

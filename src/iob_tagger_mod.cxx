@@ -34,6 +34,8 @@
 
 using namespace std;
 using namespace folia;
+using namespace TiCC;
+using namespace Tagger;
 
 IOBTagger::IOBTagger(TiCC::LogStream * logstream){
   tagger = 0;
