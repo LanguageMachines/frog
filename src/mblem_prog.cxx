@@ -1,13 +1,13 @@
+/* ex: set tabstop=8 expandtab: */
 /*
-  $Id$
-  $URL$
+  Copyright (c) 2006 - 2016
+  CLST  - Radboud University
+  ILK   - Tilburg University
 
-  Copyright (c) 2006 - 2015
-  Tilburg University
+  This file is part of frog:
 
-  A Morphological-Analyzer for Dutch
-
-  This file is part of frog
+  A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for
+  several languages
 
   frog is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -23,11 +23,11 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   For questions and suggestions, see:
-      http://ilk.uvt.nl/software.html
+      https://github.com/LanguageMachines/frog/issues
   or send mail to:
-      timbl@uvt.nl
-*/
+      lamasoftware (at ) science.ru.nl
 
+*/
 
 #include <string>
 #include <iostream>
@@ -206,8 +206,11 @@ void Test( istream& in ){
 
 int main(int argc, char *argv[]) {
   std::ios_base::sync_with_stdio(false);
-  cerr << "mblem " << VERSION << " (c) ILK 1998 - 2015" << endl;
-  cerr << "Induction of Linguistic Knowledge Research Group, Tilburg University" << endl;
+  cerr << "mblem " << VERSION << " (c) CLTS, ILK 2014 - 2016" << endl;
+  cerr << "CLST  - Centre for Language and Speech Technology,"
+       << "Radboud University" << endl
+       << "ILK   - Induction of Linguistic Knowledge Research Group,"
+       << "Tilburg University" << endl;
   TiCC::CL_Options Opts("c:t:hVd:", "version,notagger,notokenizer");
   try {
     Opts.init(argc, argv);

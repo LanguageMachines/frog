@@ -23,7 +23,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   For questions and suggestions, see:
-      https://github.com/LanguageMachines/timblserver/issues
+      https://github.com/LanguageMachines/frog/issues
   or send mail to:
       lamasoftware (at ) science.ru.nl
 */

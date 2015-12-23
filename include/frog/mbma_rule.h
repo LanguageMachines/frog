@@ -1,11 +1,13 @@
+/* ex: set tabstop=8 expandtab: */
 /*
-  $Id$
-  $URL$
+  Copyright (c) 2006 - 2016
+  CLST  - Radboud University
+  ILK   - Tilburg University
 
-  Copyright (c) 2006 - 2015
-  Tilburg University
+  This file is part of frog:
 
-  This file is part of frog.
+  A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for
+  several languages
 
   frog is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -21,9 +23,10 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   For questions and suggestions, see:
-      http://ilk.uvt.nl/software.html
+      https://github.com/LanguageMachines/frog/issues
   or send mail to:
-      timbl@uvt.nl
+      lamasoftware (at ) science.ru.nl
+
 */
 
 #ifndef MBMA_RULE_H
