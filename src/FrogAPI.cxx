@@ -1,11 +1,13 @@
 /* ex: set tabstop=8 expandtab: */
 /*
   Copyright (c) 2006 - 2016
-  Tilburg University
+  CLST  - Radboud University
+  ILK   - Tilburg University
 
-  A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
+  This file is part of frog:
 
-  This file is part of frog
+  A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for
+  several languages
 
   frog is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -21,9 +23,9 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   For questions and suggestions, see:
-      http://ilk.uvt.nl/software.html
+      https://github.com/LanguageMachines/timblserver/issues
   or send mail to:
-      timbl@uvt.nl
+      lamasoftware (at ) science.ru.nl
 */
 
 #include <cstdlib>
@@ -101,7 +103,7 @@ FrogOptions::FrogOptions() {
   debugFlag = 0;
 }
 
-FrogAPI::FrogAPI( const FrogOptions &opt,
+FrogAPI::FrogAPI( FrogOptions &opt,
 		  const Configuration &conf,
 		  LogStream *log ):
   configuration(conf),
@@ -121,23 +123,35 @@ FrogAPI::FrogAPI( const FrogOptions &opt,
   //
   if ( options.doTok && !configuration.hasSection("tokenizer") ){
     *Log(theErrLog) << "Missing [[tokenizer]] section in config file." << endl;
-    exit(2);
+    *Log(theErrLog) << "Disabled the tokenizer." << endl;
+    options.doTok = false;
+  }
+  if ( options.doMorph && !configuration.hasSection("mbma") ){
+    *Log(theErrLog) << "Missing [[mbma]] section in config file." << endl;
+    *Log(theErrLog) << "Disabled the Morhological analyzer." << endl;
+    options.doMorph = false;
   }
   if ( options.doIOB && !configuration.hasSection("IOB") ){
     *Log(theErrLog) << "Missing [[IOB]] section in config file." << endl;
-    exit(2);
+    *Log(theErrLog) << "Disabled the IOB Chunker." << endl;
+    options.doIOB = false;
   }
   if ( options.doNER && !configuration.hasSection("NER") ){
     *Log(theErrLog) << "Missing [[NER]] section in config file." << endl;
-    exit(2);
+    *Log(theErrLog) << "Disabled the NER." << endl;
+    options.doNER = false;
   }
   if ( options.doMwu && !configuration.hasSection("mwu") ){
     *Log(theErrLog) << "Missing [[mwu]] section in config file." << endl;
-    exit(2);
+    *Log(theErrLog) << "Disabled the Multi Word Unit." << endl;
+    *Log(theErrLog) << "Also disabled the parser." << endl;
+    options.doMwu = false;
+    options.doParse = false;
   }
   if ( options.doParse && !configuration.hasSection("parser") ){
     *Log(theErrLog) << "Missing [[parser]] section in config file." << endl;
-    exit(2);
+    *Log(theErrLog) << "Disabled the parser." << endl;
+    options.doParse = false;
   }
 
   if ( options.doServer ){
@@ -295,33 +309,33 @@ FrogAPI::FrogAPI( const FrogOptions &opt,
     }   // end omp parallel sections
     if ( ! ( tokStat && iobStat && nerStat && tagStat && lemStat
 	     && mbaStat && mwuStat && parStat ) ){
-      *Log(theErrLog) << "Initialization failed for: ";
-      if ( ! ( tokStat ) ){
-	*Log(theErrLog) << "[tokenizer] ";
+      string out = "Initialization failed for: ";
+      if ( !tokStat ){
+	out += "[tokenizer] ";
       }
-      if ( ! ( tagStat ) ){
-	*Log(theErrLog) << "[tagger] ";
+      if ( !tagStat ){
+	out += "[tagger] ";
       }
-      if ( ! ( iobStat ) ){
-	*Log(theErrLog) << "[IOB] ";
+      if ( !iobStat ){
+	out += "[IOB] ";
       }
-      if ( ! ( nerStat ) ){
-	*Log(theErrLog) << "[NER] ";
+      if ( !nerStat ){
+	out += "[NER] ";
       }
-      if ( ! ( lemStat ) ){
-	*Log(theErrLog) << "[lemmatizer] ";
+      if ( !lemStat ){
+	out += "[lemmatizer] ";
       }
-      if ( ! ( mbaStat ) ){
-	*Log(theErrLog) << "[morphology] ";
+      if ( !mbaStat ){
+	out += "[morphology] ";
       }
-      if ( ! ( mwuStat ) ){
-	*Log(theErrLog) << "[multiword unit] ";
+      if ( !mwuStat ){
+	out += "[multiword unit] ";
       }
-      if ( ! ( parStat ) ){
-	*Log(theErrLog) << "[parser] ";
+      if ( !parStat ){
+	out += "[parser] ";
       }
-      *Log(theErrLog) << endl;
-      exit(2);
+      *Log(theErrLog) << out << endl;
+      exit( EXIT_FAILURE );
     }
   }
   *Log(theErrLog) << "Initialization done." << endl;

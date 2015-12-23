@@ -1,7 +1,8 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  Copyright (c) 2006 - 2015
-  Tilburg University
+  Copyright (c) 2006 - 2016
+  CLST  - Radboud University
+  ILK   - Tilburg University
 
   This file is part of frog
 
@@ -19,9 +20,9 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   For questions and suggestions, see:
-      http://ilk.uvt.nl/software.html
+      https://github.com/LanguageMachines/timblserver/issues
   or send mail to:
-      timbl@uvt.nl
+      lamasoftware (at ) science.ru.nl
 */
 
 
@@ -88,7 +89,7 @@ class FrogOptions {
 
 class FrogAPI {
  public:
-  FrogAPI( const FrogOptions&,
+  FrogAPI( FrogOptions&,
 	   const TiCC::Configuration&,
 	   TiCC::LogStream * );
   ~FrogAPI();
@@ -117,7 +118,7 @@ class FrogAPI {
 
   // data
   const TiCC::Configuration& configuration;
-  const FrogOptions& options;
+  FrogOptions& options;
   TiCC::LogStream *theErrLog;
 
   // pointers to all the modules

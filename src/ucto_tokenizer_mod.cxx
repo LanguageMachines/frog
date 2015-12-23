@@ -1,9 +1,7 @@
 /*
-  $Id$
-  $URL$
-
-  Copyright (c) 2006 - 2015
-  Tilburg University
+  Copyright (c) 2006 - 2016
+  CLST  - Radboud University
+  ILK   - Tilburg University
 
   A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
 
@@ -23,9 +21,9 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   For questions and suggestions, see:
-      http://ilk.uvt.nl/software.html
+      https://github.com/LanguageMachines/timblserver/issues
   or send mail to:
-      timbl@uvt.nl
+      lamasoftware (at ) science.ru.nl
 */
 
 #include <map>
@@ -55,6 +53,9 @@ bool UctoTokenizer::init( const Configuration& config ){
   }
   if ( !val.empty() )
     debug = TiCC::stringTo<int>( val );
+  if ( !config.hasSection("tokenizer") ){
+    tokenizer->setPassThru();
+  }
   tokenizer->setDebug( debug );
   if ( tokenizer->getPassThru() ){
     // when passthru, we don't further initialize the tokenizer
