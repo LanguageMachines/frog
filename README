@@ -1,9 +1,10 @@
 Frog - A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
  https://languagemachines.github.io/frog
 
-    Copyright 2006-2015 Bertjan Busser, Antal van den Bosch,  Ko van der Sloot, Maarten van Gompel
+    Copyright 2006-2016
+    Bertjan Busser, Antal van den Bosch,  Ko van der Sloot, Maarten van Gompel
 
-    Centre for Language Studies, Radboud University Nijmegen
+    Centre for Language and Speech Technology, Radboud University Nijmegen
     Induction of Linguistic Knowledge Research Group, Tilburg University
 
 Frog is an integration of memory-based natural language processing (NLP)
