@@ -1,6 +1,21 @@
 0.13.0 - 2015-09-28
 [Ko van der Sloot]
-* First version without Python dependencies
+* moved repository to GitHub
+* added Travis support
+* First version without Python dependencies!
+  The CSI parser is implemented in C++
+* use more stuff from >ticcutils (BasicServer)
+* frog now runs on a minimal configurations too
+* a lot more stuff is configurable (te become more language independent)
+* added NER lookup from a file
+* mbma is improved.
+   Doesn't have the "eer" and "ere" hacks anymore
+   does hande C tags/inflections better
+   better 'daring' mode
+   adds some comopund info
+* fixed the mbma_prog and mblem_prog to run without a tagger or tokenizer
+* added a 'ner' commandline tool
+* a lot of smaller bug fixes and code refactoring
 
 0.12.20 - 2015-01-29
 [Ko van der Sloot]

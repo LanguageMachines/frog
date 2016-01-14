@@ -1,3 +1,5 @@
+*.tar.gz
+ChangeLog
 INSTALL
 Makefile
 Makefile.in
@@ -44,3 +46,7 @@ src/frog
 src/mbma
 src/mblem
 src/ner
+src/test-suite.log
+src/tst.out
+src/tst.sh.log
+src/tst.sh.trs
