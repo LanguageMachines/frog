@@ -530,8 +530,9 @@ int main(int argc, char *argv[]) {
 	    *Log(theErrLog) << "New connection..." << endl;
 	    int pid = fork();
 	    if (pid < 0) {
-	      *Log(theErrLog) << "ERROR on fork" << endl;
-	      throw runtime_error( "FORK failed" );
+	      string err = strerror(errno);
+	      *Log(theErrLog) << "ERROR on fork: " << err << endl;
+	      throw runtime_error( "FORK failed: " + err );
 	    }
 	    else if (pid == 0)  {
 	      frog.FrogServer( conn );
