@@ -42,6 +42,7 @@
 #include "ticcutils/CommandLine.h"
 #include "ticcutils/PrettyPrint.h"
 #include "libfolia/foliautils.h"
+#include "libfolia/foliatypes.h"
 #include "libfolia/folia.h"
 #include "frog/ucto_tokenizer_mod.h"
 #include "frog/cgn_tagger_mod.h"

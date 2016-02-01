@@ -39,6 +39,7 @@
 #include "ticcutils/StringOps.h"
 #include "ticcutils/PrettyPrint.h"
 #include "libfolia/foliautils.h"
+#include "libfolia/foliatypes.h"
 #include "libfolia/folia.h"
 #include "libfolia/document.h"
 #include "frog/clex.h"
