@@ -1,3 +1,8 @@
+# whitelist
+branches:
+  only:
+    - master
+
 language: cpp
 compiler:
     - gcc
