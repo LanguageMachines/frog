@@ -212,7 +212,7 @@ void CGNTagger::post_process( const vector<Word *>& words ){
     TiCC::split_at_first_of( cls, parts, "()" );
     string head = parts[0];
     KWargs args;
-    args["cls"]    = head;
+    args["class"]  = head;
     args["set"]    = tagset;
     folia::Feature *feat = new folia::HeadFeature( args );
     postag->append( feat );
@@ -226,7 +226,7 @@ void CGNTagger::post_process( const vector<Word *>& words ){
 	KWargs args;
 	args["set"]    = tagset;
 	args["subset"] = getSubSet( tagParts[i], head );
-	args["cls"]    = tagParts[i];
+	args["class"]  = tagParts[i];
 #pragma omp critical(foliaupdate)
 	{
 	  folia::Feature *feat = new folia::Feature( args );

@@ -336,7 +336,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     ++cnt;
     args.clear();
     args["set"] = clex_tagset;
-    args["cls"] = toString( tag() );
+    args["class"] = toString( tag() );
 #pragma omp critical(foliaupdate)
     {
       result->addPosAnnotation( args );
@@ -407,7 +407,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
     args.clear();
     args["set"] = clex_tagset;
-    args["cls"] = orig;
+    args["class"] = orig;
 #pragma omp critical(foliaupdate)
     {
       result->addPosAnnotation( args );
@@ -485,7 +485,7 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
   }
   args.clear();
   args["set"] = clex_tagset;
-  args["cls"] = toString( tag() );
+  args["class"] = toString( tag() );
   PosAnnotation *pos = 0;
 #pragma omp critical(foliaupdate)
   {
