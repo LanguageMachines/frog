@@ -772,7 +772,7 @@ string FrogAPI::lookupNEREntity( const vector<Word *>& mwus,
     else {
       endresult += result;
     }
-    if ( mwu != mwus.back() ){
+    if ( &mwu != &mwus.back() ){
       endresult += "_";
     }
   }
@@ -834,7 +834,7 @@ string FrogAPI::lookupIOBChunk( const vector<Word *>& mwus,
     else {
       endresult += result;
     }
-    if ( mwu != mwus.back() ){
+    if ( &mwu != &mwus.back() ){
       endresult += "_";
     }
   }
@@ -854,7 +854,7 @@ void FrogAPI::displayMWU( ostream& os,
       wrd += word->str();
       PosAnnotation *postag = word->annotation<PosAnnotation>( );
       pos += postag->cls();
-      if ( word != mwu.back() ){
+      if ( &word != &mwu.back() ){
 	wrd += "_";
 	pos += "_";
       }
@@ -869,7 +869,7 @@ void FrogAPI::displayMWU( ostream& os,
     if ( options.doLemma ){
       try {
 	lemma += word->lemma(myMblem->getTagset());
-	if ( word != mwu.back() ){
+	if ( &word != &mwu.back() ){
 	  lemma += "_";
 	}
       }
@@ -893,11 +893,11 @@ void FrogAPI::displayMWU( ostream& os,
 	    str = "?";
 	  }
 	  morph += str;
-	  if ( layer != layers.back() ){
+	  if ( &layer != &layers.back() ){
 	    morph += "/";
 	  }
 	}
-	if (  word != mwu.back() ){
+	if ( &word != &mwu.back() ){
 	  morph += "_";
 	}
       }
@@ -918,11 +918,11 @@ void FrogAPI::displayMWU( ostream& os,
 	    string txt = UnicodeToUTF8( mor->text() );
 	    morph += "[" + txt + "]";
 	  }
-	  if ( layer != layers.back() ){
+	  if ( &layer != &layers.back() ){
 	    morph += "/";
 	  }
 	}
-	if ( word != mwu.back() ){
+	if ( &word != &mwu.back() ){
 	  morph += "_";
 	}
       }

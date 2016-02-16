@@ -56,9 +56,9 @@ ostream& operator<<( ostream& os, const RulePart& r ){
   }
   else {
     os << r.uchar << " - ";
-    for ( size_t i = 0; i < r.RightHand.size(); ++i ){
-      os << r.RightHand[i];
-      if ( i < r.RightHand.size()-1 ){
+    for ( const auto& rh : r.RightHand ){
+      os << rh;
+      if ( &rh < &r.RightHand.back() ){
 	os << "+";
       }
     }
@@ -70,16 +70,21 @@ ostream& operator<<( ostream& os, const RulePart& r ){
       os << " INFLECTION: " << r.inflect;
     }
   }
-  if ( r.fixpos >= 0 )
+  if ( r.fixpos >= 0 ){
     os << " affix at pos: " << r.fixpos;
-  if ( r.xfixpos >= 0 )
+  }
+  if ( r.xfixpos >= 0 ){
     os << " x-affix at pos: " << r.xfixpos;
-  if ( !r.ins.isEmpty() )
+  }
+  if ( !r.ins.isEmpty() ){
     os << " insert='" << r.ins << "'";
-  if ( !r.del.isEmpty() )
+  }
+  if ( !r.del.isEmpty() ){
     os << " delete='" << r.del << "'";
-  if ( !r.morpheme.isEmpty() )
+  }
+  if ( !r.morpheme.isEmpty() ){
     os << " morpheme ='" << r.morpheme << "'";
+  }
   return os;
 }
 
@@ -211,7 +216,12 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
 Rule::Rule( const vector<string>& parts,
 	    const UnicodeString& s,
 	    TiCC::LogStream* ls,
-	    int flag ): debugFlag( flag ), tag(CLEX::UNASS), brackets(0), myLog(ls) {
+	    int flag ):
+  debugFlag( flag ),
+  tag(CLEX::UNASS),
+  brackets(0),
+  myLog(ls)
+{
   for ( size_t k=0; k < parts.size(); ++k ) {
     string this_class = parts[k];
     RulePart cur( this_class, s[k], k==0 );
@@ -225,8 +235,8 @@ Rule::~Rule(){
 
 ostream& operator<<( ostream& os, const Rule& r ){
   os << "MBMA rule:" << endl;
-  for ( size_t k=0; k < r.rules.size(); ++k ) {
-    os << "\t" << r.rules[k] << endl;
+  for ( const auto& rule : r.rules ){
+    os << "\t" << rule << endl;
   }
   os << "tag: " << r.tag << " infl:" << r.inflection << " morhemes: "
      << r.extract_morphemes() << " description: " << r.description;
@@ -234,10 +244,12 @@ ostream& operator<<( ostream& os, const Rule& r ){
 }
 
 ostream& operator<<( ostream& os, const Rule *r ){
-  if ( r )
+  if ( r ){
     os << *r << endl;
-  else
+  }
+  else {
     os << "Empty MBMA rule" << endl;
+  }
   return os;
 }
 
@@ -247,6 +259,7 @@ void Rule::reduceZeroNodes(){
     if ( r.ResultClass == CLEX::NEUTRAL
 	 && r.morpheme.isEmpty()
 	 && r.inflect.empty() ){
+      // do nothing
     }
     else {
       out.push_back(r);
@@ -274,8 +287,9 @@ bool Rule::performEdits(){
   RulePart *last = 0;
   for ( size_t k=0; k < rules.size(); ++k ) {
     RulePart *cur = &rules[k];
-    if ( last == 0 )
+    if ( last == 0 ){
       last = cur;
+    }
     if ( debugFlag){
       *TiCC::Log(myLog) << "edit::act=" << cur << endl;
     }

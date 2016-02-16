@@ -156,8 +156,9 @@ void Test( istream& in ){
   string line;
   while ( getline( in, line ) ){
     line = TiCC::trim( line );
-    if ( line.empty() )
+    if ( line.empty() ){
       continue;
+    }
     cerr << "processing: " << line << endl;
     vector<string> sentences;
     if ( useTokenizer ){
@@ -169,31 +170,33 @@ void Test( istream& in ){
     for ( auto const& s : sentences ){
       if ( useTagger ){
 	vector<TagResult> tagv = tagger.tagLine( s );
-	for ( size_t w=0; w < tagv.size(); ++w ){
-	  UnicodeString uWord = folia::UTF8ToUnicode(tagv[w].word());
+	for ( const auto& tr : tagv ){
+	  UnicodeString uWord = folia::UTF8ToUnicode( tr.word() );
 	  vector<string> v;
-	  size_t num = TiCC::split_at_first_of( tagv[w].assignedTag(),
+	  size_t num = TiCC::split_at_first_of( tr.assignedTag(),
 						v, "(,)" );
 	  if ( num < 1 ){
 	    throw runtime_error( "error: tag not in right format " );
 	  }
 	  string head = v[0];
-	  if ( head != "SPEC" )
+	  if ( head != "SPEC" ){
 	    uWord.toLower();
+	  }
 	  myMbma.Classify( uWord );
 	  myMbma.filterHeadTag( head );
 	  myMbma.filterSubTags( v );
 	  vector<vector<string> > res = myMbma.getResult(true);
-	  cout << tagv[w].word() << " {" << tagv[w].assignedTag() << "}\t";
+	  cout << tr.word() << " {" << tr.assignedTag() << "}\t";
 	  if ( res.size() == 0 ){
 	    cout << "[" << uWord << "]";
 	  }
 	  else {
-	    for ( size_t i=0; i < res.size(); ++i ){
-	      cout << res[i];
-	      if ( i < res.size()-1 )
+	    for ( const auto& r : res ){
+	      cout << r;
+	      if ( &r != &res.back() ){
 		cout << "/";
-	  }
+	      }
+	    }
 	  }
 	  cout << endl;
 	}
@@ -201,7 +204,7 @@ void Test( istream& in ){
       else {
 	vector<string> parts;
 	TiCC::split( s, parts );
-	for( auto const& w : parts ){
+	for ( auto const& w : parts ){
 	  UnicodeString uWord = folia::UTF8ToUnicode(w);
 	  uWord.toLower();
 	  myMbma.Classify( uWord );
@@ -249,8 +252,7 @@ int main(int argc, char *argv[]) {
       cerr << "terminated." << endl;
       return EXIT_FAILURE;
     }
-    for ( size_t i=0; i < fileNames.size(); ++i ){
-      string TestFileName = fileNames[i];
+    for ( const auto& TestFileName : fileNames ){
       ifstream in(TestFileName);
       if ( in.good() ){
 	cerr << "Processing: " << TestFileName << endl;

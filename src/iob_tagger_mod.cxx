@@ -261,7 +261,7 @@ void IOBTagger::Classify( const vector<Word *>& swords ){
       }
       sentence += wrd;
       words.push_back( wrd );
-      if ( sword != swords.back() ){
+      if ( &sword != &swords.back() ){
 	sentence += " ";
       }
     }
