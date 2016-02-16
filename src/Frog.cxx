@@ -159,9 +159,9 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
     value = TiCC::lowercase( value );
     vector<string> vec;
     TiCC::split_at( value, vec, "," );
-    for ( size_t i=0; i < vec.size(); ++i ){
-      char mod = vec[i][0];
-      string value = vec[i].substr(1);
+    for ( const auto& val : vec ){
+      char mod = val[0];
+      string value = val.substr(1);
       int dbval = 0;
       if ( !stringTo<int>( value, dbval ) ){
 	cerr << "expected integer value for --debug=" << mod << value << endl;
@@ -369,8 +369,8 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
     }
     else {
       vector<string> mass = Opts.getMassOpts();
-      for (size_t i=0; i < mass.size(); ++i ){
-	fileNames.insert( mass[i] );
+      for ( const auto& name : mass ){
+	fileNames.insert( name );
       }
     }
   }

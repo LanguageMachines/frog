@@ -115,8 +115,8 @@ void IOBTagger::addChunk( ChunkingLayer *chunks,
 			  const vector<double>& confs,
 			  const string& IOB ){
   double conf = 1;
-  for ( size_t i=0; i < confs.size(); ++i )
-    conf *= confs[i];
+  for ( auto const& val : confs )
+    conf *= val;
   KWargs args;
   args["class"] = IOB;
   args["set"] = tagset;
@@ -134,12 +134,12 @@ void IOBTagger::addChunk( ChunkingLayer *chunks,
       exit( EXIT_FAILURE );
     }
   }
-  for ( size_t i=0; i < words.size(); ++i ){
-    if ( words[i]->isinstance(PlaceHolder_t) )
+  for ( const auto& word : words ){
+    if ( word->isinstance(PlaceHolder_t) )
       continue;
 #pragma omp critical(foliaupdate)
     {
-      chunk->append( words[i] );
+      chunk->append( word );
     }
   }
 }
@@ -243,15 +243,15 @@ void IOBTagger::Classify( const vector<Word *>& swords ){
   if ( !swords.empty() ) {
     vector<string> words;
     string sentence; // the tagger needs the whole sentence
-    for ( size_t w = 0; w < swords.size(); ++w ) {
+    for ( const auto& sword : swords ){
       string wrd;
 #pragma omp critical(foliaupdate)
       {
-	wrd = swords[w]->str();
+	wrd = sword->str();
       }
       sentence += wrd;
       words.push_back( wrd );
-      if ( w < swords.size()-1 )
+      if ( sword != swords.back() )
 	sentence += " ";
     }
     if (debug)
@@ -270,9 +270,9 @@ void IOBTagger::Classify( const vector<Word *>& swords ){
     }
     vector<double> conf;
     vector<string> tags;
-    for ( size_t i=0; i < tagv.size(); ++i ){
-      tags.push_back( tagv[i].assignedTag() );
-      conf.push_back( tagv[i].confidence() );
+    for ( const auto& tag : tagv ){
+      tags.push_back( tag.assignedTag() );
+      conf.push_back( tag.confidence() );
     }
     addIOBTags( swords, tags, conf );
   }
