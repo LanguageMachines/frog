@@ -161,18 +161,18 @@ void Test( istream& in ){
     if ( useTokenizer ){
       sentences = tokenizer.tokenize( line );
     }
-    else
+    else {
       sentences.push_back( line );
-
+    }
     for ( auto const& s : sentences ){
       if ( useTagger ){
-	vector<TagResult> tagv = tagger.tagLine( s );
-	for ( size_t w=0; w < tagv.size(); ++w ){
-	  UnicodeString uWord = folia::UTF8ToUnicode(tagv[w].word());
+	vector<TagResult> tagrv = tagger.tagLine( s );
+	for ( const auto& tr : tagrv ){
+	  UnicodeString uWord = folia::UTF8ToUnicode(tr.word());
 	  myMblem.Classify( uWord );
-	  myMblem.filterTag( tagv[w].assignedTag() );
+	  myMblem.filterTag( tr.assignedTag() );
 	  vector<pair<string,string> > res = myMblem.getResult();
-	  string line = tagv[w].word() + " {" + tagv[w].assignedTag() + "}\t";
+	  string line = tr.word() + " {" + tr.assignedTag() + "}\t";
 	  for ( const auto& p : res ){
 	    line += p.first + "[" + p.second + "]/";
 	  }
@@ -225,8 +225,7 @@ int main(int argc, char *argv[]) {
       cerr << "terminated." << endl;
       return EXIT_FAILURE;
     }
-    for ( size_t i=0; i < fileNames.size(); ++i ){
-      string TestFileName = fileNames[i];
+    for ( const auto& TestFileName : fileNames ){
       ifstream in(TestFileName);
       if ( in.good() ){
 	Test( in );
