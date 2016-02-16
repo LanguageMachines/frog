@@ -66,9 +66,10 @@ ostream& operator<<( ostream& os, const parseData& pd ){
   os << "pd heads " << pd.heads << endl;
   os << "pd mods " << pd.mods << endl;
   os << "pd mwus ";
-  for ( size_t i=0; i < pd.mwus.size(); ++i ){
-    for ( size_t j=0; j < pd.mwus[i].size(); ++j )
-      os << pd.mwus[i][j]->id();
+  for ( const auto& mw : pd.mwus ){
+    for ( const auto& w : mw ){
+      os << w->id();
+    }
     os << endl;
   }
   return os;
@@ -90,29 +91,30 @@ bool Parser::init( const Configuration& configuration ){
   if ( val.empty() ){
     version = "1.0";
   }
-  else
+  else {
     version = val;
+  }
   val = configuration.lookUp( "set", "parser" );
   if ( val.empty() ){
     dep_tagset = "http://ilk.uvt.nl/folia/sets/frog-depparse-nl";
   }
-  else
+  else {
     dep_tagset = val;
-
+  }
   val = configuration.lookUp( "set", "tagger" );
   if ( val.empty() ){
     POS_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
   }
-  else
+  else {
     POS_tagset = val;
-
+  }
   val = configuration.lookUp( "set", "mwu" );
   if ( val.empty() ){
     MWU_tagset = "http://ilk.uvt.nl/folia/sets/frog-mwu-nl";
   }
-  else
+  else {
     MWU_tagset = val;
-
+  }
   val = configuration.lookUp( "maxDepSpan", "parser" );
   if ( !val.empty() ){
     size_t gs = TiCC::stringTo<size_t>( val );
@@ -127,18 +129,21 @@ bool Parser::init( const Configuration& configuration ){
     }
   }
   val = configuration.lookUp( "pairsFile", "parser" );
-  if ( !val.empty() )
+  if ( !val.empty() ){
     pairsFileName = prefix( cDir, val );
+  }
   else {
     *Log(parseLog) << "missing pairsFile option" << endl;
     problem = true;
   }
   val = configuration.lookUp( "pairsOptions", "parser" );
-  if ( !val.empty() )
+  if ( !val.empty() ){
     pairsOptions = val;
+  }
   val = configuration.lookUp( "dirFile", "parser" );
-  if ( !val.empty() )
+  if ( !val.empty() ){
     dirFileName = prefix( cDir, val );
+  }
   else {
     *Log(parseLog) << "missing dirFile option" << endl;
     problem = true;
@@ -148,8 +153,9 @@ bool Parser::init( const Configuration& configuration ){
     dirOptions = val;
   }
   val = configuration.lookUp( "relsFile", "parser" );
-  if ( !val.empty() )
+  if ( !val.empty() ){
     relsFileName = prefix( cDir, val );
+  }
   else {
     *Log(parseLog) << "missing relsFile option" << endl;
     problem = true;
@@ -158,8 +164,9 @@ bool Parser::init( const Configuration& configuration ){
   if ( !val.empty() ){
     relsOptions = val;
   }
-  if ( problem )
+  if ( problem ) {
     return false;
+  }
 
   bool happy = true;
   pairs = new Timbl::TimblAPI( pairsOptions );
@@ -167,24 +174,29 @@ bool Parser::init( const Configuration& configuration ){
     *Log(parseLog) << "reading " <<  pairsFileName << endl;
     happy = pairs->GetInstanceBase( pairsFileName );
   }
-  else
-    *Log(parseLog) << "creating Timbl for pairs failed:" << pairsOptions << endl;
+  else {
+    *Log(parseLog) << "creating Timbl for pairs failed:"
+		   << pairsOptions << endl;
+  }
   if ( happy ){
     dir = new Timbl::TimblAPI( dirOptions );
     if ( dir->Valid() ){
       *Log(parseLog) << "reading " <<  dirFileName << endl;
       happy = dir->GetInstanceBase( dirFileName );
     }
-    else
+    else {
       *Log(parseLog) << "creating Timbl for dir failed:" << dirOptions << endl;
+    }
     if ( happy ){
       rels = new Timbl::TimblAPI( relsOptions );
       if ( rels->Valid() ){
 	*Log(parseLog) << "reading " <<  relsFileName << endl;
 	happy = rels->GetInstanceBase( relsFileName );
       }
-      else
-	*Log(parseLog) << "creating Timbl for rels failed:" << relsOptions << endl;
+      else {
+	*Log(parseLog) << "creating Timbl for rels failed:"
+		       << relsOptions << endl;
+      }
     }
   }
   isInit = happy;
@@ -201,8 +213,8 @@ Parser::~Parser(){
 static vector<Word *> lookup( Word *word,
 			      const vector<Entity*>& entities ){
   vector<Word*> vec;
-  for ( size_t p=0; p < entities.size(); ++p ){
-    vec = entities[p]->select<Word>();
+  for ( const auto& ent : entities ){
+    vec = ent->select<Word>();
     if ( !vec.empty() ){
       if ( vec[0]->id() == word->id() ) {
 	// cerr << "found " << vec << endl;
@@ -281,55 +293,75 @@ vector<string> Parser::createPairInstances( const parseData& pd ){
 	w_tag1 = heads[wPos+1];
       }
       for ( size_t pos=0; pos < words.size(); ++pos ){
-	if ( pos > wPos + maxDepSpan )
+	if ( pos > wPos + maxDepSpan ){
 	  break;
-	if ( wPos == pos )
+	}
+	if ( pos == wPos ){
 	  continue;
-	if ( wPos > maxDepSpan + pos )
+	}
+	if ( pos + maxDepSpan < wPos ){
 	  continue;
-
+	}
 	string inst = w_word_1 + " " + w_word0 + " " + w_word1;
 
-	if ( pos == 0 )
+	if ( pos == 0 ){
 	  inst += " __";
-	else
+	}
+	else {
 	  inst += " " + words[pos-1];
-	if ( pos < words.size() )
+	}
+	if ( pos < words.size() ){
 	  inst += " " + words[pos];
-	else
+	}
+	else {
 	  inst += " __";
-	if ( pos < words.size()-1 )
+	}
+	if ( pos < words.size()-1 ){
 	  inst += " " + words[pos+1];
-	else
+	}
+	else {
 	  inst += " __";
+	}
 	inst += " " + w_tag_1 + " " + w_tag0 + " " + w_tag1;
-	if ( pos == 0 )
+	if ( pos == 0 ){
 	  inst += " __";
-	else
+	}
+	else {
 	  inst += " " + heads[pos-1];
-	if ( pos < words.size() )
+	}
+	if ( pos < words.size() ){
 	  inst += " " + heads[pos];
-	else
+	}
+	else {
 	  inst += " __";
-	if ( pos < words.size()-1 )
+	}
+	if ( pos < words.size()-1 ){
 	  inst += " " + heads[pos+1];
-	else
+	}
+	else {
 	  inst += " __";
+	}
 
 	inst += " " + w_tag0 + "^";
-	if ( pos < words.size() )
+	if ( pos < words.size() ){
 	  inst += heads[pos];
-	else
+	}
+	else {
 	  inst += "__";
+	}
 
-	if ( wPos > pos )
+	if ( wPos > pos ){
 	  inst += " LEFT " + TiCC::toString( wPos - pos );
-	else
+	}
+	else {
 	  inst += " RIGHT "+ TiCC::toString( pos - wPos );
-	if ( pos >= words.size() )
+	}
+	if ( pos >= words.size() ){
 	  inst += " __";
-	else
+	}
+	else {
 	  inst += " " + mods[pos];
+	}
 	inst += "^" + w_mods0 + " __";
 	instances.push_back( inst );
       }
@@ -765,24 +797,25 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
     sent = fwords[0]->sentence();
     entities = sent->select<Entity>(MWU_tagset);
   }
-  for( size_t i=0; i < fwords.size(); ++i ){
+  for ( size_t i=0; i < fwords.size(); ++i ){
     Word *word = fwords[i];
-    vector<Word*> mwu = lookup( word, entities );
-    if ( !mwu.empty() ){
+    vector<Word*> mwuv = lookup( word, entities );
+    if ( !mwuv.empty() ){
       string multi_word;
       string head;
       string mod;
-      for ( size_t p=0; p < mwu.size(); ++p ){
-	multi_word += mwu[p]->str();
-	PosAnnotation *postag = mwu[p]->annotation<PosAnnotation>( POS_tagset );
+      for ( const auto& mwu : mwuv ){
+	multi_word += mwu->str();
+	PosAnnotation *postag = mwu->annotation<PosAnnotation>( POS_tagset );
 	head += postag->feat("head");
 	vector<folia::Feature*> feats = postag->select<folia::Feature>();
-	for ( size_t j=0; j < feats.size(); ++j ){
-	  mod += feats[j]->cls();
-	  if ( j < feats.size()-1 )
+	for ( const auto& feat : feats ){
+	  mod += feat->cls();
+	  if ( &feat != &feats.back() ){
 	    mod += "|";
+	  }
 	}
-	if ( p < mwu.size() -1 ){
+	if ( &mwu != &mwuv.back() ){
 	  multi_word += "_";
 	  head += "_";
 	  mod += "_";
@@ -791,8 +824,8 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
       pd.words.push_back( multi_word );
       pd.heads.push_back( head );
       pd.mods.push_back( mod );
-      pd.mwus.push_back( mwu );
-      i += mwu.size()-1;
+      pd.mwus.push_back( mwuv );
+      i += mwuv.size()-1;
     }
     else {
       pd.words.push_back( word->str() );
@@ -801,13 +834,15 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
       pd.heads.push_back( head );
       string mod;
       vector<folia::Feature*> feats = postag->select<folia::Feature>();
-      if ( feats.size() == 0 )
+      if ( feats.empty() ){
 	mod = "__";
+      }
       else {
-	for ( size_t j=0; j < feats.size(); ++j ){
-	  mod += feats[j]->cls();
-	  if ( j < feats.size()-1 )
+	for ( const auto& feat : feats ){
+	  mod += feat->cls();
+	  if ( &feat != &feats.back() ){
 	    mod += "|";
+	  }
 	}
       }
       pd.mods.push_back( mod );
@@ -844,9 +879,6 @@ void appendResult( const vector<Word *>& words,
 	Dependency *d = new Dependency( sent->doc(), args );
 	dl->append( d );
 	Headwords *dh = new Headwords();
-	// for ( size_t j=0; j < pd.mwus[nums[i]-1].size(); ++ j ){
-	//   dh->append( pd.mwus[nums[i]-1][j] );
-	// }
 	for ( const auto& wrd : pd.mwus[nums[i]-1] ){
 	  dh->append( wrd );
 	}
@@ -879,7 +911,7 @@ void timbl( Timbl::TimblAPI* tim,
 	    const vector<string>& instances,
 	    vector<timbl_result>& results ){
   results.clear();
-  for( const auto& inst : instances ){
+  for ( const auto& inst : instances ){
     const Timbl::ValueDistribution *db;
     const Timbl::TargetValue *tv = tim->Classify( inst, db );
     results.push_back( timbl_result( tv->Name(), db->Confidence(tv), db ) );
