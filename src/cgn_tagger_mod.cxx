@@ -205,7 +205,7 @@ string CGNTagger::getSubSet( const string& val, const string& head ){
 }
 
 void CGNTagger::post_process( const vector<Word *>& words ){
-  for ( auto const word : words ){
+  for ( auto const& word : words ){
     PosAnnotation *postag = word->annotation<PosAnnotation>( );
     string cls = postag->cls();
     vector<string> parts;
@@ -221,12 +221,12 @@ void CGNTagger::post_process( const vector<Word *>& words ){
     }
     if ( parts.size() > 1 ){
       vector<string> tagParts;
-      size_t numParts = TiCC::split_at( parts[1], tagParts, "," );
-      for ( size_t i=0; i < numParts; ++i ){
+      TiCC::split_at( parts[1], tagParts, "," );
+      for ( auto const& part : tagParts ){
 	KWargs args;
 	args["set"]    = tagset;
-	args["subset"] = getSubSet( tagParts[i], head );
-	args["class"]  = tagParts[i];
+	args["subset"] = getSubSet( part, head );
+	args["class"]  = part;
 #pragma omp critical(foliaupdate)
 	{
 	  folia::Feature *feat = new folia::Feature( args );
