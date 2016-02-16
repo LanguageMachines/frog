@@ -354,10 +354,12 @@ FrogAPI::~FrogAPI() {
 
 bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
   vector<Word*> swords;
-  if ( options.doQuoteDetection )
+  if ( options.doQuoteDetection ){
     swords = sent->wordParts();
-  else
+  }
+  else {
     swords = sent->words();
+  }
   bool showParse = options.doParse;
   bool all_well = true;
   string exs;
@@ -408,19 +410,20 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
     if ( !all_well ){
       throw runtime_error( exs );
     }
-    for ( size_t i = 0; i < swords.size(); ++i ) {
+    for ( const auto& sword : swords ) {
 #pragma omp parallel sections
       {
 #pragma omp section
 	{
 	  if ( options.doMorph ){
 	    timers.mbmaTimer.start();
-	    if (options.debugFlag)
+	    if (options.debugFlag){
 	      *Log(theErrLog) << "Calling mbma..." << endl;
-	    try{
-	      myMbma->Classify( swords[i] );
 	    }
-	    catch ( exception&e ){
+	    try {
+	      myMbma->Classify( sword );
+	    }
+	    catch ( exception& e ){
 	      all_well = false;
 	      exs += string(e.what()) + " ";
 	    }
@@ -431,10 +434,11 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
 	{
 	  if ( options.doLemma ){
 	    timers.mblemTimer.start();
-	    if (options.debugFlag)
+	    if (options.debugFlag) {
 	      *Log(theErrLog) << "Calling mblem..." << endl;
+	    }
 	    try {
-	      myMblem->Classify( swords[i] );
+	      myMblem->Classify( sword );
 	    }
 	    catch ( exception&e ){
 	      all_well = false;
@@ -457,7 +461,8 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
       }
     }
     if ( options.doParse ){
-      if ( options.maxParserTokens != 0 && swords.size() > options.maxParserTokens ){
+      if ( options.maxParserTokens != 0
+	   && swords.size() > options.maxParserTokens ){
 	showParse = false;
       }
       else {
@@ -485,11 +490,12 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
             // so this is wrong. Just bail out
             throw( runtime_error( "read garbage" ) );
         }
-        if ( options.debugFlag )
-            *Log(theErrLog) << "received data [" << result << "]" << endl;
+        if ( options.debugFlag ){
+	  *Log(theErrLog) << "received data [" << result << "]" << endl;
+	}
         Document doc;
         try {
-            doc.readFromString( result );
+	  doc.readFromString( result );
         }
 	catch ( std::exception& e ){
 	  *Log(theErrLog) << "FoLiaParsing failed:" << endl << e.what() << endl;
@@ -498,17 +504,21 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
         *Log(theErrLog) << "Processing... " << endl;
         tokenizer->tokenize( doc );
         FrogDoc( doc );
-	if ( options.doXMLout )
+	if ( options.doXMLout ){
 	  doc.save( outputstream, options.doKanon );
-	else
+	}
+	else {
 	  showResults( outputstream, doc );
+	}
       }
       else {
         string data = "";
         if ( options.doSentencePerLine ){
-	  if ( !conn.read( data ) )	 //read data from client
+	  if ( !conn.read( data ) ){
+	    //read data from client
 	    throw( runtime_error( "read failed" ) );
-        }
+	  }
+	}
         else {
 	  string line;
 	  while( conn.read(line) ){
@@ -517,27 +527,32 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	    data += line + "\n";
 	  }
         }
-        if ( options.debugFlag )
-            *Log(theErrLog) << "Received: [" << data << "]" << endl;
+        if ( options.debugFlag ){
+	  *Log(theErrLog) << "Received: [" << data << "]" << endl;
+	}
         *Log(theErrLog) << "Processing... " << endl;
         istringstream inputstream(data,istringstream::in);
         Document doc = tokenizer->tokenize( inputstream );
         FrogDoc( doc );
-	if ( options.doXMLout )
+	if ( options.doXMLout ){
 	  doc.save( outputstream, options.doKanon );
-	else
+	}
+	else {
 	  showResults( outputstream, doc );
+	}
       }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
-	if (options.debugFlag)
+	if (options.debugFlag) {
 	  *Log(theErrLog) << "socket " << conn.getMessage() << endl;
+	}
 	throw( runtime_error( "write to client failed" ) );
       }
     }
   }
   catch ( std::exception& e ) {
-    if (options.debugFlag)
+    if (options.debugFlag){
       *Log(theErrLog) << "connection lost: " << e.what() << endl;
+    }
   }
   *Log(theErrLog) << "Connection closed.\n";
 }
@@ -562,8 +577,9 @@ void FrogAPI::FrogInteractive() {
       cout << "frog>"; cout.flush();
       string line2;
       while( getline( cin, line2 ) ){
-	if ( line2.empty() )
+	if ( line2.empty() ){
 	  break;
+	}
 	data += line2 + "\n";
 	cout << "frog>"; cout.flush();
       }
@@ -645,166 +661,182 @@ void FrogAPI::FrogInteractive(){
 
 vector<Word*> FrogAPI::lookup( Word *word,
 			       const vector<Entity*>& entities ) const {
-  vector<Word*> vec;
-  for ( size_t p=0; p < entities.size(); ++p ){
-    vec = entities[p]->select<Word>();
+  for ( const auto& ent : entities ){
+    vector<Word*> vec = ent->select<Word>();
     if ( !vec.empty() ){
       if ( vec[0]->id() == word->id() ) {
 	return vec;
       }
     }
   }
-  vec.clear();
+  vector<Word*> vec;
   vec.push_back( word ); // single unit
   return vec;
 }
 
-Dependency * FrogAPI::lookupDep( const Word *word,
-				 const vector<Dependency*>&dependencies ) const{
+Dependency *FrogAPI::lookupDep( const Word *word,
+				const vector<Dependency*>&dependencies ) const{
   if (dependencies.size() == 0 ){
     return 0;
   }
   int dbFlag = 0;
-  try{
+  try {
     dbFlag = stringTo<int>( configuration.lookUp( "debug", "parser" ) );
-  } catch (exception & e) {
+  }
+  catch (exception & e) {
     dbFlag = 0;
   }
   if ( dbFlag ){
     using TiCC::operator<<;
     *Log( theErrLog ) << "\nDependency-lookup "<< word << " in " << dependencies << endl;
   }
-  for ( size_t i=0; i < dependencies.size(); ++i ){
+  for ( const auto& dep : dependencies ){
     if ( dbFlag ){
-      *Log( theErrLog ) << "Dependency try: " << dependencies[i] << endl;
+      *Log( theErrLog ) << "Dependency try: " << dep << endl;
     }
     try {
-      vector<DependencyDependent*> dv = dependencies[i]->select<DependencyDependent>();
+      vector<DependencyDependent*> dv = dep->select<DependencyDependent>();
       if ( !dv.empty() ){
-	vector<Word*> v = dv[0]->select<Word>();
-	for ( size_t j=0; j < v.size(); ++j ){
-	  if ( v[j] == word ){
+	vector<Word*> wv = dv[0]->select<Word>();
+	for ( const auto& w : wv ){
+	  if ( w == word ){
 	    if ( dbFlag ){
-	      *Log(theErrLog) << "\nDependency found word " << v[j] << endl;
+	      *Log(theErrLog) << "\nDependency found word " << w << endl;
 	    }
-	    return dependencies[i];
+	    return dep;
 	  }
 	}
       }
     }
     catch ( exception& e ){
-      if (dbFlag > 0)
+      if (dbFlag > 0){
 	*Log(theErrLog) << "get Dependency results failed: "
 			<< e.what() << endl;
+      }
     }
   }
   return 0;
 }
 
-string FrogAPI::lookupNEREntity( const vector<Word *>& mwu,
+string FrogAPI::lookupNEREntity( const vector<Word *>& mwus,
 				 const vector<Entity*>& entities ) const {
   string endresult;
   int dbFlag = 0;
   try{
     dbFlag = stringTo<int>( configuration.lookUp( "debug", "NER" ) );
-  } catch (exception & e) {
+  }
+  catch (exception & e) {
     dbFlag = 0;
   }
-
-  for ( size_t j=0; j < mwu.size(); ++j ){
+  for ( const auto& mwu : mwus ){
     if ( dbFlag ){
       using TiCC::operator<<;
-      *Log(theErrLog) << "\nNER: lookup "<< mwu[j] << " in " << entities << endl;
+      *Log(theErrLog) << "\nNER: lookup "<< mwu << " in " << entities << endl;
     }
     string result;
-    for ( size_t i=0; i < entities.size(); ++i ){
+    for ( const auto& entity :entities ){
       if ( dbFlag ){
-	*Log(theErrLog) << "NER try: " << entities[i] << endl;
+	*Log(theErrLog) << "NER: try: " << entity << endl;
       }
       try {
-	vector<Word*> v = entities[i]->select<Word>();
+	vector<Word*> wv = entity->select<Word>();
 	bool first = true;
-	for ( size_t k=0; k < v.size(); ++k ){
-	  if ( v[k] == mwu[j] ){
+	for ( const auto& word : wv ){
+	  if ( word == mwu ){
 	    if (dbFlag){
-	      *Log(theErrLog) << "NER found word " << v[k] << endl;
+	      *Log(theErrLog) << "NER found word " << word << endl;
 	    }
-	    if ( first )
-	      result += "B-" + uppercase(entities[i]->cls());
-	    else
-	      result += "I-" + uppercase(entities[i]->cls());
+	    if ( first ){
+	      result += "B-" + uppercase(entity->cls());
+	    }
+	    else {
+	      result += "I-" + uppercase(entity->cls());
+	    }
 	    break;
 	  }
-	  else
+	  else {
 	    first = false;
+	  }
 	}
       }
       catch ( exception& e ){
-	if  (dbFlag > 0)
+	if  (dbFlag > 0){
 	  *Log(theErrLog) << "get NER results failed: "
 			  << e.what() << endl;
+	}
       }
     }
-    if ( result.empty() )
+    if ( result.empty() ){
       endresult += "O";
-    else
+    }
+    else {
       endresult += result;
-    if ( j < mwu.size()-1 )
+    }
+    if ( mwu != mwus.back() ){
       endresult += "_";
+    }
   }
   return endresult;
 }
 
 
-string FrogAPI::lookupIOBChunk( const vector<Word *>& mwu,
+string FrogAPI::lookupIOBChunk( const vector<Word *>& mwus,
 				const vector<Chunk*>& chunks ) const{
   string endresult;
   int dbFlag = 0;
   try {
    dbFlag = stringTo<int>( configuration.lookUp( "debug", "IOB" ) );
-  } catch (exception & e) {
+  }
+  catch (exception & e) {
     dbFlag = 0;
-    }
-  for ( size_t j=0; j < mwu.size(); ++j ){
+  }
+  for ( const auto& mwu : mwus ){
     if ( dbFlag ){
       using TiCC::operator<<;
-      *Log(theErrLog) << "IOB lookup "<< mwu[j] << " in " << chunks << endl;
+      *Log(theErrLog) << "IOB lookup "<< mwu << " in " << chunks << endl;
     }
     string result;
-    for ( size_t i=0; i < chunks.size(); ++i ){
+    for ( const auto& chunk : chunks ){
       if ( dbFlag ){
-	*Log(theErrLog) << "IOB try: " << chunks[i] << endl;
+	*Log(theErrLog) << "IOB try: " << chunk << endl;
       }
       try {
-	vector<Word*> v = chunks[i]->select<Word>();
+	vector<Word*> wv = chunk->select<Word>();
 	bool first = true;
-	for ( size_t k=0; k < v.size(); ++k ){
-	  if ( v[k] == mwu[j] ){
+	for ( const auto& word : wv ){
+	  if ( word == mwu ){
 	    if (dbFlag){
-	      *Log(theErrLog) << "IOB found word " << v[k] << endl;
+	      *Log(theErrLog) << "IOB found word " << word << endl;
 	    }
-	    if ( first )
-	      result += "B-" + chunks[i]->cls();
-	    else
-	      result += "I-" + chunks[i]->cls();
+	    if ( first ) {
+	      result += "B-" + chunk->cls();
+	    }
+	    else {
+	      result += "I-" + chunk->cls();
+	    }
 	    break;
 	  }
-	  else
+	  else {
 	    first = false;
+	  }
 	}
       }
       catch ( exception& e ){
-	if  (dbFlag > 0)
+	if  (dbFlag > 0) {
 	  *Log(theErrLog) << "get Chunks results failed: "
 			  << e.what() << endl;
+	}
       }
     }
-    if ( result.empty() )
+    if ( result.empty() ) {
       endresult += "O";
-    else
+    }
+    else {
       endresult += result;
-    if ( j < mwu.size()-1 )
+    }
+    if ( mwu != mwus.back() ){
       endresult += "_";
+    }
   }
   return endresult;
 }
@@ -830,9 +862,10 @@ void FrogAPI::displayMWU( ostream& os,
       conf *= postag->confidence();
     }
     catch ( exception& e ){
-      if  (options.debugFlag > 0)
+      if  (options.debugFlag > 0){
 	*Log(theErrLog) << "get Postag results failed: "
 			<< e.what() << endl;
+      }
     }
     if ( options.doLemma ){
       try {
@@ -842,9 +875,10 @@ void FrogAPI::displayMWU( ostream& os,
 	}
       }
       catch ( exception& e ){
-	if  (options.debugFlag > 0)
+	if  (options.debugFlag > 0){
 	  *Log(theErrLog) << "get Lemma results failed: "
 			  << e.what() << endl;
+	}
       }
     }
     if ( options.doDaringMorph ){
@@ -869,9 +903,10 @@ void FrogAPI::displayMWU( ostream& os,
 	}
       }
       catch ( exception& e ){
-	if  (options.debugFlag > 0)
+	if  (options.debugFlag > 0) {
 	  *Log(theErrLog) << "get Morph results failed: "
 			  << e.what() << endl;
+	}
       }
     }
     else if ( options.doMorph ){
@@ -884,17 +919,19 @@ void FrogAPI::displayMWU( ostream& os,
 	    string txt = UnicodeToUTF8( m[t]->text() );
 	    morph += "[" + txt + "]";
 	  }
-	  if ( q < ml.size()-1 )
+	  if ( q < ml.size()-1 ){
 	    morph += "/";
+	  }
 	}
 	if ( p < mwu.size() -1 ){
 	  morph += "_";
 	}
       }
       catch ( exception& e ){
-	if  (options.debugFlag > 0)
+	if  (options.debugFlag > 0){
 	  *Log(theErrLog) << "get Morph results failed: "
 			  << e.what() << endl;
+	}
       }
     }
   }
@@ -904,43 +941,50 @@ void FrogAPI::displayMWU( ostream& os,
 ostream& FrogAPI::showResults( ostream& os,
 			       Document& doc ) const {
   vector<Sentence*> sentences = doc.sentences();
-  for ( size_t i=0; i < sentences.size(); ++i ){
-    Sentence *sentence = sentences[i];
+  for ( auto const& sentence : sentences ){
     vector<Word*> words = sentence->words();
     vector<Entity*> mwu_entities;
-    if (myMwu)
+    if (myMwu){
       mwu_entities = sentence->select<Entity>( myMwu->getTagset() );
+    }
     vector<Dependency*> dependencies;
-    if (myParser)
+    if (myParser){
       dependencies = sentence->select<Dependency>( myParser->getTagset() );
+    }
     vector<Chunk*> iob_chunking;
-    if ( myIOBTagger )
+    if ( myIOBTagger ){
       iob_chunking = sentence->select<Chunk>( myIOBTagger->getTagset() );
+    }
     vector<Entity*> ner_entities;
-    if (myNERTagger)
+    if (myNERTagger){
       ner_entities =  sentence->select<Entity>( myNERTagger->getTagset() );
+    }
     static set<ElementType> excludeSet;
     vector<Sentence*> parts = sentence->select<Sentence>( excludeSet );
-    if ( !options.doQuoteDetection )
+    if ( !options.doQuoteDetection ){
       assert( parts.size() == 0 );
-    for ( size_t i=0; i < parts.size(); ++i ){
+    }
+    for ( auto const& part : parts ){
       vector<Entity*> ents;
-      if (myMwu)
-	ents = parts[i]->select<Entity>( myMwu->getTagset() );
+      if (myMwu){
+	ents = part->select<Entity>( myMwu->getTagset() );
+      }
       mwu_entities.insert( mwu_entities.end(), ents.begin(), ents.end() );
-      vector<Dependency*> deps = parts[i]->select<Dependency>();
+      vector<Dependency*> deps = part->select<Dependency>();
       dependencies.insert( dependencies.end(), deps.begin(), deps.end() );
-      vector<Chunk*> chunks = parts[i]->select<Chunk>();
+      vector<Chunk*> chunks = part->select<Chunk>();
       iob_chunking.insert( iob_chunking.end(), chunks.begin(), chunks.end() );
       vector<Entity*> ners ;
-      if (myNERTagger) ners = parts[i]->select<Entity>( myNERTagger->getTagset() );
+      if (myNERTagger) {
+	ners = part->select<Entity>( myNERTagger->getTagset() );
+      }
       ner_entities.insert( ner_entities.end(), ners.begin(), ners.end() );
     }
 
     size_t index = 1;
     map<FoliaElement*, int> enumeration;
     vector<vector<Word*> > mwus;
-    for( size_t i=0; i < words.size(); ++i ){
+    for ( size_t i=0; i < words.size(); ++i ){
       Word *word = words[i];
       vector<Word*> mwu = lookup( word, mwu_entities );
       for ( size_t j=0; j < mwu.size(); ++j ){
@@ -950,11 +994,12 @@ ostream& FrogAPI::showResults( ostream& os,
       i += mwu.size()-1;
       ++index;
     }
-    for( size_t i=0; i < mwus.size(); ++i ){
-      displayMWU( os, i+1, mwus[i] );
+    index = 0;
+    for ( const auto& mwu : mwus ){
+      displayMWU( os, ++index, mwu );
       if ( options.doNER ){
 	string cls;
-	string s = lookupNEREntity( mwus[i], ner_entities );
+	string s = lookupNEREntity( mwu, ner_entities );
 	os << "\t" << s;
       }
       else {
@@ -962,7 +1007,7 @@ ostream& FrogAPI::showResults( ostream& os,
       }
       if ( options.doIOB ){
 	string cls;
-	string s = lookupIOBChunk( mwus[i], iob_chunking);
+	string s = lookupIOBChunk( mwu, iob_chunking);
 	os << "\t" << s;
       }
       else {
@@ -970,7 +1015,7 @@ ostream& FrogAPI::showResults( ostream& os,
       }
       if ( options.doParse ){
 	string cls;
-	Dependency *dep = lookupDep( mwus[i][0], dependencies);
+	Dependency *dep = lookupDep( mwu[0], dependencies);
 	if ( dep ){
 	  vector<Headwords*> w = dep->select<Headwords>();
 	  size_t num;
@@ -992,10 +1037,10 @@ ostream& FrogAPI::showResults( ostream& os,
 	os << "\t\t";
       }
       os << endl;
-      ++index;
     }
-    if ( words.size() )
+    if ( words.size() ){
       os << endl;
+    }
   }
   return os;
 }
@@ -1020,61 +1065,80 @@ void FrogAPI::FrogDoc( Document& doc,
   timers.frogTimer.start();
   // first we make sure that the doc will accept our annotations, by
   // declaring them in the doc
-  if (myCGNTagger)
-      myCGNTagger->addDeclaration( doc );
-  if (( options.doLemma ) && (myMblem))
+  if (myCGNTagger){
+    myCGNTagger->addDeclaration( doc );
+  }
+  if ( options.doLemma && myMblem ) {
     myMblem->addDeclaration( doc );
-  if (( options.doMorph ) && (myMbma))
+  }
+  if ( options.doMorph && myMbma ) {
     myMbma->addDeclaration( doc );
-  if ((options.doIOB) && (myIOBTagger))
+  }
+  if ( options.doIOB && myIOBTagger ){
     myIOBTagger->addDeclaration( doc );
-  if ((options.doNER) && (myNERTagger))
+  }
+  if ( options.doNER && myNERTagger ){
     myNERTagger->addDeclaration( doc );
-  if ((options.doMwu) && (myMwu))
+  }
+  if ( options.doMwu && myMwu ){
     myMwu->addDeclaration( doc );
-  if ((options.doParse) && (myParser))
+  }
+  if ( options.doParse && myParser ){
     myParser->addDeclaration( doc );
-
-  if ( options.debugFlag > 5 )
+  }
+  if ( options.debugFlag > 5 ){
     *Log(theErrLog) << "Testing document :" << doc << endl;
+  }
 
   vector<Sentence*> sentences;
-  if ( options.doQuoteDetection )
+  if ( options.doQuoteDetection ){
     sentences = doc.sentenceParts();
-  else
+  }
+  else {
     sentences = doc.sentences();
+  }
   size_t numS = sentences.size();
   if ( numS > 0 ) { //process sentences
-    if  (options.debugFlag > 0)
-      *Log(theErrLog) << "found " << numS << " sentence(s) in document." << endl;
+    if  (options.debugFlag > 0) {
+      *Log(theErrLog) << "found " << numS
+		      << " sentence(s) in document." << endl;
+    }
     for ( size_t i = 0; i < numS; ++i ) {
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)
       bool showParse = TestSentence( sentences[i], timers );
       if ( options.doParse && !showParse ){
 	*Log(theErrLog) << "WARNING!" << endl;
-	*Log(theErrLog) << "Sentence " << i+1 << " isn't parsed because it contains more tokens then set with the --max-parser-tokens=" << options.maxParserTokens << " option." << endl;
+	*Log(theErrLog) << "Sentence " << i+1
+			<< " isn't parsed because it contains more tokens then set with the --max-parser-tokens="
+			<< options.maxParserTokens << " option." << endl;
       }
     }
   }
   else {
-    if  (options.debugFlag > 0)
+    if  (options.debugFlag > 0){
       *Log(theErrLog) << "No sentences found in document. " << endl;
+    }
   }
 
   timers.frogTimer.stop();
   if ( !hidetimers ){
     *Log(theErrLog) << "tokenisation took:  " << timers.tokTimer << endl;
     *Log(theErrLog) << "CGN tagging took:   " << timers.tagTimer << endl;
-    if ( options.doIOB)
+    if ( options.doIOB){
       *Log(theErrLog) << "IOB chunking took:  " << timers.iobTimer << endl;
-    if ( options.doNER)
+    }
+    if ( options.doNER){
       *Log(theErrLog) << "NER took:           " << timers.nerTimer << endl;
-    if ( options.doMorph )
+    }
+    if ( options.doMorph ){
       *Log(theErrLog) << "MBA took:           " << timers.mbmaTimer << endl;
-    if ( options.doLemma )
+    }
+    if ( options.doLemma ){
       *Log(theErrLog) << "Mblem took:         " << timers.mblemTimer << endl;
-    if ( options.doMwu )
+    }
+    if ( options.doMwu ){
       *Log(theErrLog) << "MWU resolving took: " << timers.mwuTimer << endl;
+    }
     if ( options.doParse ){
       *Log(theErrLog) << "Parsing (prepare) took: " << timers.prepareTimer << endl;
       *Log(theErrLog) << "Parsing (pairs)   took: " << timers.pairsTimer << endl;
