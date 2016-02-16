@@ -849,13 +849,12 @@ void FrogAPI::displayMWU( ostream& os,
   string lemma;
   string morph;
   double conf = 1;
-  for ( size_t p=0; p < mwu.size(); ++p ){
-    Word *word = mwu[p];
+  for ( const auto& word : mwu ){
     try {
       wrd += word->str();
       PosAnnotation *postag = word->annotation<PosAnnotation>( );
       pos += postag->cls();
-      if ( p < mwu.size() -1 ){
+      if ( word != mwu.back() ){
 	wrd += "_";
 	pos += "_";
       }
@@ -870,7 +869,7 @@ void FrogAPI::displayMWU( ostream& os,
     if ( options.doLemma ){
       try {
 	lemma += word->lemma(myMblem->getTagset());
-	if ( p < mwu.size() -1 ){
+	if ( word != mwu.back() ){
 	  lemma += "_";
 	}
       }
@@ -883,22 +882,22 @@ void FrogAPI::displayMWU( ostream& os,
     }
     if ( options.doDaringMorph ){
       try {
-	vector<MorphologyLayer*> ml
+	vector<MorphologyLayer*> layers
 	  = word->annotations<MorphologyLayer>( myMbma->getTagset() );
-	for ( size_t q=0; q < ml.size(); ++q ){
+	for ( const auto& layer : layers ){
 	  vector<Morpheme*> m =
-	    ml[q]->select<Morpheme>( myMbma->getTagset(), false );
+	    layer->select<Morpheme>( myMbma->getTagset(), false );
 	  assert( m.size() == 1 ); // top complex layer
 	  string str  = m[0]->feat( "structure" );
 	  if ( str.empty() ){
 	    str = "?";
 	  }
 	  morph += str;
-	  if ( q < ml.size()-1 ){
+	  if ( layer != layers.back() ){
 	    morph += "/";
 	  }
 	}
-	if ( p < mwu.size() -1 ){
+	if (  word != mwu.back() ){
 	  morph += "_";
 	}
       }
@@ -911,19 +910,19 @@ void FrogAPI::displayMWU( ostream& os,
     }
     else if ( options.doMorph ){
       try {
-	vector<MorphologyLayer*> ml =
+	vector<MorphologyLayer*> layers =
 	  word->annotations<MorphologyLayer>(myMbma->getTagset());
-	for ( size_t q=0; q < ml.size(); ++q ){
-	  vector<Morpheme*> m = ml[q]->select<Morpheme>(myMbma->getTagset());
-	  for ( size_t t=0; t < m.size(); ++t ){
-	    string txt = UnicodeToUTF8( m[t]->text() );
+	for ( const auto& layer : layers ){
+	  vector<Morpheme*> m = layer->select<Morpheme>(myMbma->getTagset());
+	  for ( const auto& mor : m ){
+	    string txt = UnicodeToUTF8( mor->text() );
 	    morph += "[" + txt + "]";
 	  }
-	  if ( q < ml.size()-1 ){
+	  if ( layer != layers.back() ){
 	    morph += "/";
 	  }
 	}
-	if ( p < mwu.size() -1 ){
+	if ( word != mwu.back() ){
 	  morph += "_";
 	}
       }
