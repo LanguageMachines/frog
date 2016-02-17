@@ -174,7 +174,7 @@ string CKYParser::bestEdge( const SubTree& leftSubtree,
 
 void CKYParser::parse(){
   for ( size_t k=1; k < numTokens + 2; ++k ){
-    for( size_t s=0; s < numTokens +1 - k; ++s ){
+    for( size_t s=0; s < numTokens + 1 - k; ++s ){
       size_t t = s + k;
       double bestScore = -10E45;
       int bestI = -1;

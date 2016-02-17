@@ -88,8 +88,9 @@ BracketLeaf::BracketLeaf( const RulePart& p, int flag ):
     orig += "_";
     for ( size_t i = 0; i < RightHand.size(); ++i ){
       orig += toString(RightHand[i]);
-      if ( RightHand[i] == CLEX::AFFIX )
+      if ( RightHand[i] == CLEX::AFFIX ){
 	ifpos = i;
+      }
     }
     _status = Status::DERIVATIONAL;
   }
@@ -117,7 +118,7 @@ BaseBracket *BracketNest::append( BaseBracket *t ){
 }
 
 BracketNest::~BracketNest(){
-  for ( auto const it : parts ){
+  for ( auto const& it : parts ){
     delete it;
   }
 }
@@ -136,10 +137,12 @@ UnicodeString BracketLeaf::put( bool noclass ) const {
   result += morph;
   result += "]";
   if ( !noclass ){
-    if ( orig.empty() )
+    if ( orig.empty() ){
       result += UTF8ToUnicode(inflect);
-    else
+    }
+    else {
       result += UTF8ToUnicode(orig);
+    }
   }
   return result;
 }
@@ -151,8 +154,9 @@ UnicodeString BracketNest::put( bool noclass ) const {
   }
   result += "]";
   if ( !noclass ){
-    if ( cls != CLEX::UNASS )
+    if ( cls != CLEX::UNASS ){
       result += UTF8ToUnicode(toString(cls));
+    }
   }
   if ( _compound != CompoundType::NONE ){
     result += " " + UTF8ToUnicode(toString(_compound)) + "-compound";
@@ -220,10 +224,12 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
     if ( debugFlag > 5 ){
       cerr << "test MATCH vergelijk " << *it << " met " << (*rpos)->RightHand[j] << endl;
     }
-    if ( (*rpos)->RightHand[j] == CLEX::XAFFIX)
+    if ( (*rpos)->RightHand[j] == CLEX::XAFFIX){
       continue;
-    else if ( (*rpos)->RightHand[j] == CLEX::AFFIX)
+    }
+    else if ( (*rpos)->RightHand[j] == CLEX::AFFIX){
       continue;
+    }
     else if ( (*rpos)->RightHand[j] != (*it)->tag() ){
       if ( debugFlag > 5 ){
 	cerr << "test MATCH FAIL (" << (*rpos)->RightHand[j]
@@ -261,8 +267,9 @@ void BracketNest::setCompoundType(){
     CLEX::Type tag2 = (*++it)->tag();
     Status st2 = (*it)->status();
     if ( ( st1 != Status::STEM && st1 != Status::COMPLEX )
-	 || ( st2 != Status::STEM && st2 != Status::COMPLEX ) )
+	 || ( st2 != Status::STEM && st2 != Status::COMPLEX ) ){
       return;
+    }
     if ( debugFlag > 5 ){
       cerr << "tag1 :" << tag1 << endl;
       cerr << "tag2 :" << tag2 << endl;
@@ -350,10 +357,12 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     result = new Morpheme( doc, args );
     args.clear();
     string out = UnicodeToUTF8(morph);
-    if ( out.empty() )
+    if ( out.empty() ){
       out = inflect;
-    else
+    }
+    else {
       desc = "[" + out + "]";
+    }
     args["value"] = out;
     TextContent *t = new TextContent( args );
 #pragma omp critical(foliaupdate)
@@ -363,9 +372,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     ++cnt;
     args.clear();
     args["subset"] = "inflection";
-    for ( size_t i=0; i < inflect.size(); ++i ){
-      if ( inflect[i] != '/' ){
-	string d = CLEX::get_iDescr(inflect[i]);
+    for ( const auto& inf : inflect ){
+      if ( inf != '/' ){
+	string d = CLEX::get_iDescr(inf);
 	args["class"] = d;
 	desc += "/" + d;
 	folia::Feature *feat = new folia::Feature( args );
@@ -391,9 +400,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
     ++cnt;
     desc = "[" + out + "]"; // pass it up!
-    for ( size_t i=0; i < inflect.size(); ++i ){
-      if ( inflect[i] != '/' ){
-	string d = CLEX::get_iDescr(inflect[i]);
+    for ( const auto& inf : inflect ){
+      if ( inf != '/' ){
+	string d = CLEX::get_iDescr( inf );
 	desc += "/" + d;
       }
     }
@@ -420,9 +429,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     result = new Morpheme( doc, args );
     args.clear();
     args["subset"] = "inflection";
-    for ( size_t i=0; i < inflect.size(); ++i ){
-      if ( inflect[i] != '/' ){
-	string d = CLEX::get_iDescr(inflect[i]);
+    for ( const auto& inf : inflect ){
+      if ( inf != '/' ){
+	string d = CLEX::get_iDescr( inf );
 	desc += "/" + d;
 	args["class"] = d;
 	folia::Feature *feat = new folia::Feature( args );
@@ -503,8 +512,8 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
     }
   }
 #pragma omp critical(foliaupdate)
-  for ( size_t i=0; i < stack.size(); ++i ){
-    result->append( stack[i] );
+  for ( const auto& s : stack ){
+    result->append( s );
   }
   return result;
 }

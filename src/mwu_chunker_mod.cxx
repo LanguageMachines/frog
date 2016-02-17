@@ -84,10 +84,10 @@ EntitiesLayer *mwuAna::addEntity( const std::string& tagset,
       e = new Entity( el->doc(), args );
       el->append( e );
     }
-    for ( size_t p=0; p < fwords.size(); ++p ){
+    for ( const auto& fw : fwords ){
 #pragma omp critical(foliaupdate)
       {
-	e->append( fwords[p] );
+	e->append( fw );
       }
     }
   }
@@ -104,8 +104,8 @@ Mwu::~Mwu(){
 }
 
 void Mwu::reset(){
-  for( size_t i=0; i< mWords.size(); ++i ){
-    delete mWords[i];
+  for ( const auto& it : mWords ){
+    delete it;
   }
   mWords.clear();
 }
@@ -162,28 +162,30 @@ bool Mwu::init( const Configuration& config ) {
   if ( val.empty() ){
     version = "1.0";
   }
-  else
+  else {
     version = val;
+  }
   val = config.lookUp( "set", "mwu" );
   if ( val.empty() ){
     mwu_tagset = "http://ilk.uvt.nl/folia/sets/frog-mwu-nl";
   }
-  else
+  else {
     mwu_tagset = val;
+  }
 
   val = config.lookUp( "gluetag", "mwu" );
   if ( val.empty() ){
     glue_tag = "SPEC(deeleigen)";
   }
-  else
+  else {
     glue_tag = val;
+  }
 
   return true;
 }
 
-ostream &operator <<( ostream& os,
-		      const Mwu& mwu ){
-  for( size_t i = 0; i < mwu.mWords.size(); ++i )
+ostream &operator<<( ostream& os, const Mwu& mwu ){
+  for ( size_t i = 0; i < mwu.mWords.size(); ++i )
     os << i+1 << "\t" << mwu.mWords[i]->getWord() << endl;
   return os;
 }
@@ -199,11 +201,12 @@ void Mwu::addDeclaration( Document& doc ) const {
 }
 
 void Mwu::Classify( const vector<Word*>& words ){
-  if ( words.empty() )
+  if ( words.empty() ){
     return;
+  }
   reset();
-  for ( size_t i=0; i < words.size(); ++i ){
-    add( words[i] );
+  for ( const auto& word : words ){
+    add( word );
   }
   Classify();
   EntitiesLayer *el = 0;
@@ -212,20 +215,21 @@ void Mwu::Classify( const vector<Word*>& words ){
   {
     sent = words[0]->sentence();
   }
-  for( size_t i = 0; i < mWords.size(); ++i ){
-    el = mWords[i]->addEntity( mwu_tagset, sent, el );
+  for ( const auto& mword : mWords ){
+    el = mword->addEntity( mwu_tagset, sent, el );
   }
 }
 
 void Mwu::Classify(){
-  if ( debug )
+  if ( debug ) {
     *Log(mwuLog) << "Starting mwu Classify" << endl;
+  }
   mymap2::iterator best_match;
   size_t matchLength = 0;
   size_t max = mWords.size();
 
   // add all current sequences of the glue_tag words to MWUs
-  for( size_t i=0; i < max-1; ++i ) {
+  for ( size_t i=0; i < max-1; ++i ) {
     if ( mWords[i]->isSpec() && mWords[i+1]->isSpec() ) {
       vector<string> newmwu;
       while ( i < max && mWords[i]->isSpec() ){
@@ -238,34 +242,41 @@ void Mwu::Classify(){
     }
   }
   size_t i;
-  for( i = 0; i < max; i++) {
+  for ( i = 0; i < max; i++) {
     string word = mWords[i]->getWord();
-    if ( debug )
+    if ( debug ){
       *Log(mwuLog) << "checking word[" << i <<"]: " << word << endl;
-    pair<mymap2::iterator, mymap2::iterator> matches = MWUs.equal_range(word);
+    }
+    //    pair<mymap2::iterator, mymap2::iterator> matches = MWUs.equal_range(word);
+    const auto matches = MWUs.equal_range(word);
     if ( matches.first != MWUs.end() ) {
       //match
-      mymap2::iterator current_match = matches.first;
+      auto current_match = matches.first;
       if (  debug  ) {
 	*Log(mwuLog) << "MWU: match found!\t" << current_match->first << endl;
       }
-      while(current_match != matches.second && current_match != MWUs.end()) {
+      while( current_match != matches.second
+	     && current_match != MWUs.end() ){
 	vector<string> match = current_match->second;
 	size_t max_match = match.size();
 	size_t j = 0;
-	if ( debug )
+	if ( debug ){
 	  *Log(mwuLog) << "checking " << max_match << " matches:" << endl;
-	for(; i + j + 1 < max && j < max_match; j++) {
+	}
+	for (; i + j + 1 < max && j < max_match; j++) {
 	  if ( match[j] != mWords[i+j+1]->getWord() ) {
-	    if ( debug )
+	    if ( debug ){
 	      *Log(mwuLog) << "match " << j <<" (" << match[j]
-		   << ") doesn't match with word " << i+ j + 1
+			   << ") doesn't match with word " << i+ j + 1
 			   << " (" << mWords[i+j + 1]->getWord() <<")" << endl;
+	    }
 	    // mismatch in jth word of current mwu
 	    break;
 	  }
-	  else if ( debug )
-	    *Log(mwuLog) << " matched " <<  mWords[i+j+1]->getWord() << " j=" << j << endl;
+	  else if ( debug ){
+	    *Log(mwuLog) << " matched " <<  mWords[i+j+1]->getWord()
+			 << " j=" << j << endl;
+	  }
 
 	}
 	if (j == max_match && j > matchLength ){
@@ -278,14 +289,16 @@ void Mwu::Classify(){
       if( debug ){
 	if (matchLength >0 ) {
 	  *Log(mwuLog) << "MWU: found match starting with " << (*best_match).first << endl;
-	} else {
+	}
+	else {
 	  *Log(mwuLog) <<"MWU: no match" << endl;
 	}
       }
       // we found a matching mwu, break out of loop thru sentence,
       // do useful stuff, and recurse to find more mwus
-      if (matchLength > 0 )
+      if ( matchLength > 0 ){
 	break;
+      }
     } //match found
     else {
       if( debug )
@@ -294,11 +307,13 @@ void Mwu::Classify(){
   } //for (i < max)
   if (matchLength > 0 ) {
     //concat
-    if ( debug )
+    if ( debug ){
       *Log(mwuLog) << "mwu found, processing" << endl;
+    }
     for ( size_t j = 1; j <= matchLength; ++j) {
-      if ( debug )
+      if ( debug ){
 	*Log(mwuLog) << "concat " << mWords[i+j]->getWord() << endl;
+      }
       mWords[i]->merge( mWords[i+j] );
     }
     vector<mwuAna*>::iterator anatmp1 = mWords.begin() + i;
