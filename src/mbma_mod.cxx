@@ -484,7 +484,7 @@ void Mbma::addBracketMorph( Word *word,
   }
   args.clear();
   args["set"] = clex_tagset;
-  args["cls"] = celex_tag;
+  args["class"] = celex_tag;
 #pragma omp critical(foliaupdate)
   {
     result->addPosAnnotation( args );

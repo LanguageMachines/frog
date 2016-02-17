@@ -38,10 +38,7 @@
 #include "ticcutils/LogStream.h"
 #include "ticcutils/StringOps.h"
 #include "ticcutils/PrettyPrint.h"
-#include "libfolia/foliautils.h"
-#include "libfolia/foliatypes.h"
 #include "libfolia/folia.h"
-#include "libfolia/document.h"
 #include "frog/clex.h"
 #include "frog/mbma_rule.h"
 #include "frog/mbma_brackets.h"
@@ -339,7 +336,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     ++cnt;
     args.clear();
     args["set"] = clex_tagset;
-    args["cls"] = toString( tag() );
+    args["class"] = toString( tag() );
 #pragma omp critical(foliaupdate)
     {
       result->addPosAnnotation( args );
@@ -410,7 +407,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
     args.clear();
     args["set"] = clex_tagset;
-    args["cls"] = orig;
+    args["class"] = orig;
 #pragma omp critical(foliaupdate)
     {
       result->addPosAnnotation( args );
@@ -488,7 +485,7 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
   }
   args.clear();
   args["set"] = clex_tagset;
-  args["cls"] = toString( tag() );
+  args["class"] = toString( tag() );
   PosAnnotation *pos = 0;
 #pragma omp critical(foliaupdate)
   {

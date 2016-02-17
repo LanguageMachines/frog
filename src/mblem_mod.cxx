@@ -213,7 +213,7 @@ string Mblem::make_instance( const UnicodeString& in ) {
 void Mblem::addLemma( Word *word, const string& cls ){
   KWargs args;
   args["set"]=tagset;
-  args["cls"]=cls;
+  args["class"]=cls;
 #pragma omp critical(foliaupdate)
   {
     try {

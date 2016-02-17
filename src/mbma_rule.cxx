@@ -36,7 +36,7 @@
 #include "ticcutils/LogStream.h"
 #include "ticcutils/StringOps.h"
 #include "ticcutils/PrettyPrint.h"
-#include "libfolia/foliautils.h"
+#include "libfolia/folia.h"
 #include "frog/clex.h"
 #include "frog/mbma_brackets.h"
 #include "frog/mbma_rule.h"

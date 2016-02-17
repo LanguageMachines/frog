@@ -41,8 +41,6 @@
 #include "ticcutils/Configuration.h"
 #include "ticcutils/CommandLine.h"
 #include "ticcutils/PrettyPrint.h"
-#include "libfolia/foliautils.h"
-#include "libfolia/foliatypes.h"
 #include "libfolia/folia.h"
 #include "frog/ucto_tokenizer_mod.h"
 #include "mbt/MbtAPI.h"
