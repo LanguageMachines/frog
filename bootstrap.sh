@@ -21,6 +21,8 @@
 automake=automake
 aclocal=aclocal
 
+ln -s README.md README
+
 # if you want to autogenerate a ChangeLog form svn:
 #
 #  svn2cl, a python script, as used in the GNU Enterprise project.

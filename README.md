@@ -1,11 +1,16 @@
+[![Build Status](https://travis-ci.org/LanguageMachines/frog.svg?branch=master)](https://travis-ci.org/LanguageMachines/frog) [![Language Machines Badge](http://applejack.science.ru.nl/lamabadge.php/frog)](http://applejack.science.ru.nl/languagemachines/) 
+
+==============================================================================
 Frog - A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
- https://languagemachines.github.io/frog
+==============================================================================
 
     Copyright 2006-2016
     Bertjan Busser, Antal van den Bosch,  Ko van der Sloot, Maarten van Gompel
 
     Centre for Language and Speech Technology, Radboud University Nijmegen
     Induction of Linguistic Knowledge Research Group, Tilburg University
+
+**Website:** https://languagemachines.github.io/frog
 
 Frog is an integration of memory-based natural language processing (NLP)
 modules developed for Dutch. All NLP modules are based on Timbl, the Tilburg
@@ -59,33 +64,35 @@ Contents of this distribution:
 To install Frog, first consult whether your distribution's package manager has
 an up-to-date package.  If not, for easy installation of Frog and its many
 dependencies, it is included as part of our software distribution
-LaMachine: https://proycon.github.io/LaMachine .
+**LaMachine**: https://proycon.github.io/LaMachine . 
 
 To be able to succesfully build Frog from source instead, you need the following dependencies:
 - A sane C++ build enviroment with autoconf, automake, autoconf-archive, pkg-config, gcc or clang,  libtool
 - libxml2-dev
 - libicu-dev
-- ticcutils (https://github.com/LanguageMachines/ticcutils)
-- libfolia (https://github.com/LanguageMachines/libfolia)
-- ucto (https://github.com/LanguageMachines/ucto)
-- timbl (https://github.com/LanguageMachines/timbl)
-- mbt (https://github.com/LanguageMachines/mbt)
+- [ticcutils](https://github.com/LanguageMachines/ticcutils)
+- [libfolia](https://github.com/LanguageMachines/libfolia)
+- [ucto](https://github.com/LanguageMachines/ucto)
+- [timbl](https://github.com/LanguageMachines/timbl)
+- [mbt](https://github.com/LanguageMachines/mbt)
 
 The data for Frog is packaged seperately and needs to be installed prior to installing frog:
-- frogdata (https://github.com/LanguageMachines/frogdata)
+- [frogdata](https://github.com/LanguageMachines/frogdata)
 
 To compile and install manually from source instead, provided you have all the dependencies installed:
 
- $ bash bootstrap.sh
- $ ./configure
- $ make
- $ make install
- and optionally:
- $ make check
+    $ bash bootstrap.sh
+    $ ./configure
+    $ make
+    $ make install
+
+and optionally:
+    $ make check
 
 
 -------------------------------------------------------------------------------
 Credits
+-------------------------------------------------------------------------------
 
 Many thanks go out to the people who made the developments of the Frog
 components possible: Walter Daelemans, Jakub Zavrel, Ko van der Sloot, Sabine
