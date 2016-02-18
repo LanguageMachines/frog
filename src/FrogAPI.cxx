@@ -532,14 +532,15 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	}
         *Log(theErrLog) << "Processing... " << endl;
         istringstream inputstream(data,istringstream::in);
-        Document doc = tokenizer->tokenize( inputstream );
-        FrogDoc( doc );
+        Document *doc = tokenizer->tokenize( inputstream );
+        FrogDoc( *doc );
 	if ( options.doXMLout ){
-	  doc.save( outputstream, options.doKanon );
+	  doc->save( outputstream, options.doKanon );
 	}
 	else {
-	  showResults( outputstream, doc );
+	  showResults( outputstream, *doc );
 	}
+	delete doc;
       }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
 	if (options.debugFlag) {
@@ -591,10 +592,11 @@ void FrogAPI::FrogInteractive() {
     }
     cout << "Processing... " << endl;
     istringstream inputstream(data,istringstream::in);
-    Document doc = tokenizer->tokenize( inputstream );
-    FrogDoc( doc, true );
-    showResults( cout, doc );
+    Document *doc = tokenizer->tokenize( inputstream );
+    FrogDoc( *doc, true );
+    showResults( cout, *doc );
     cout << "frog>"; cout.flush();
+    delete doc;
   }
   cout << "Done.\n";
 }
@@ -650,9 +652,10 @@ void FrogAPI::FrogInteractive(){
       }
       cout << "Processing... '" << data << "'" << endl;
       istringstream inputstream(data,istringstream::in);
-      Document doc = tokenizer->tokenize( inputstream );
-      FrogDoc( doc, true );
-      showResults( cout, doc );
+      Document *doc = tokenizer->tokenize( inputstream );
+      FrogDoc( *doc, true );
+      showResults( cout, *doc );
+      delete doc;
     }
   }
   cout << "Done.\n";
@@ -1045,10 +1048,11 @@ ostream& FrogAPI::showResults( ostream& os,
 }
 
 string FrogAPI::Frogtostring( const string& s ){
-  Document doc = tokenizer->tokenizestring( s );
+  Document *doc = tokenizer->tokenizestring( s );
   stringstream ss;
-  FrogDoc( doc, true );
-  showResults( ss, doc );
+  FrogDoc( *doc, true );
+  showResults( ss, *doc );
+  delete doc;
   return ss.str();
 }
 
@@ -1187,12 +1191,13 @@ void FrogAPI::FrogFile( const string& infilename,
   }
   else {
     ifstream IN( infilename );
-    Document doc = tokenizer->tokenize( IN );
-    FrogDoc( doc, false );
+    Document *doc = tokenizer->tokenize( IN );
+    FrogDoc( *doc, false );
     if ( !xmlOutFile.empty() ){
-      doc.save( xmlOutFile, options.doKanon );
+      doc->save( xmlOutFile, options.doKanon );
       *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
     }
-    showResults( os, doc );
+    showResults( os, *doc );
+    delete doc;
   }
 }

@@ -181,14 +181,14 @@ string UctoTokenizer::tokenizeStream( istream& is ){
     throw runtime_error( "ucto tokenizer not initialized" );
 }
 
-folia::Document UctoTokenizer::tokenize( istream& is ){
+folia::Document *UctoTokenizer::tokenize( istream& is ){
   if ( tokenizer )
     return tokenizer->tokenize( is );
   else
     throw runtime_error( "ucto tokenizer not initialized" );
 }
 
-folia::Document UctoTokenizer::tokenizestring( const string& s){
+folia::Document *UctoTokenizer::tokenizestring( const string& s){
   if ( tokenizer) {
     istringstream is(s);
     return tokenizer->tokenize( is);
