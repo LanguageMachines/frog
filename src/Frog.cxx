@@ -558,5 +558,6 @@ int main(int argc, char *argv[]) {
     *Log(theErrLog) << "fatal error: " << e.what() << endl;
     return EXIT_FAILURE;
   }
+  delete theErrLog;
   return EXIT_SUCCESS;
 }
