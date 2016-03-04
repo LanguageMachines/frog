@@ -878,7 +878,7 @@ void appendResult( const vector<Word *>& words,
       {
 	Dependency *d = new Dependency( sent->doc(), args );
 	dl->append( d );
-	Headwords *dh = new Headwords();
+	Headspan *dh = new Headspan();
 	for ( const auto& wrd : pd.mwus[nums[i]-1] ){
 	  dh->append( wrd );
 	}

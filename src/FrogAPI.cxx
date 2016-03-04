@@ -1019,7 +1019,7 @@ ostream& FrogAPI::showResults( ostream& os,
 	string cls;
 	Dependency *dep = lookupDep( mwu[0], dependencies);
 	if ( dep ){
-	  vector<Headwords*> w = dep->select<Headwords>();
+	  vector<Headspan*> w = dep->select<Headspan>();
 	  size_t num;
 	  if ( w[0]->index(0)->isinstance( PlaceHolder_t ) ){
 	    string indexS = w[0]->index(0)->str();
