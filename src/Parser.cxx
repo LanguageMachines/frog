@@ -863,7 +863,7 @@ void appendResult( const vector<Word *>& words,
   KWargs args;
   args["generate_id"] = sent->id();
   args["set"] = tagset;
-  DependenciesLayer *dl = new DependenciesLayer(sent->doc(),args);
+  DependenciesLayer *dl = new DependenciesLayer( args, sent->doc() );
 #pragma omp critical(foliaupdate)
   {
     sent->append( dl );
@@ -876,7 +876,7 @@ void appendResult( const vector<Word *>& words,
       args["set"] = tagset;
 #pragma omp critical(foliaupdate)
       {
-	Dependency *d = new Dependency( sent->doc(), args );
+	Dependency *d = new Dependency( args, sent->doc() );
 	dl->append( d );
 	Headspan *dh = new Headspan();
 	for ( const auto& wrd : pd.mwus[nums[i]-1] ){

@@ -316,7 +316,6 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
   }
 
   options.doKanon = Opts.extract("KANON");
-  options.doKanon = false; // just ignore this option!
 
   options.doXMLin = false;
   if ( Opts.extract ('x', value ) ){

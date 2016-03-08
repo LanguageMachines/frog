@@ -492,7 +492,7 @@ void Mbma::addBracketMorph( Word *word,
     }
   }
   args["class"] = "stem";
-  Morpheme *result = new Morpheme( word->doc(), args );
+  Morpheme *result = new Morpheme( args, word->doc() );
   args.clear();
   args["value"] = wrd;
   TextContent *t = new TextContent( args );
@@ -557,7 +557,7 @@ void Mbma::addMorph( MorphologyLayer *ml,
   for ( const auto& mor : morphs ){
     KWargs args;
     args["set"] = mbma_tagset;
-    Morpheme *m = new Morpheme( ml->doc(), args );
+    Morpheme *m = new Morpheme( args, ml->doc() );
 #pragma omp critical(foliaupdate)
     {
       ml->append( m );

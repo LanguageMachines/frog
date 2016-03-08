@@ -283,7 +283,7 @@ static void addEntity( Sentence *sent,
     catch(...){
       KWargs args;
       args["generate_id"] = sent->id();
-      el = new EntitiesLayer(sent->doc(),args);
+      el = new EntitiesLayer( args, sent->doc() );
       sent->append( el );
     }
   }
@@ -300,7 +300,7 @@ static void addEntity( Sentence *sent,
   Entity *e = 0;
 #pragma omp critical(foliaupdate)
   {
-    e = new Entity( el->doc(), args);
+    e = new Entity( args, el->doc() );
     el->append( e );
   }
   for ( const auto& word : words ){

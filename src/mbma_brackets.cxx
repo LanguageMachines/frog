@@ -331,7 +331,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     KWargs args;
     args["set"] = mbma_tagset;
     args["class"] = "stem";
-    result = new Morpheme( doc, args );
+    result = new Morpheme( args, doc );
     args.clear();
     string out = UnicodeToUTF8(morph);
     args["value"] = out;
@@ -354,7 +354,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     KWargs args;
     args["class"] = "affix";
     args["set"] = mbma_tagset;
-    result = new Morpheme( doc, args );
+    result = new Morpheme( args, doc );
     args.clear();
     string out = UnicodeToUTF8(morph);
     if ( out.empty() ){
@@ -389,7 +389,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     KWargs args;
     args["class"] = "derivational";
     args["set"] = mbma_tagset;
-    result = new Morpheme( doc, args );
+    result = new Morpheme( args, doc );
     args.clear();
     string out = UnicodeToUTF8(morph);
     args["value"] = out;
@@ -426,7 +426,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     KWargs args;
     args["class"] = "inflection";
     args["set"] = mbma_tagset;
-    result = new Morpheme( doc, args );
+    result = new Morpheme( args, doc );
     args.clear();
     args["subset"] = "inflection";
     for ( const auto& inf : inflect ){
@@ -461,7 +461,7 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
   KWargs args;
   args["class"] = "complex";
   args["set"] = mbma_tagset;
-  Morpheme *result = new Morpheme( doc, args );
+  Morpheme *result = new Morpheme( args, doc );
   string mor;
   cnt = 0;
   desc.clear();
