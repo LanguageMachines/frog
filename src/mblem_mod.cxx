@@ -213,7 +213,7 @@ string Mblem::make_instance( const UnicodeString& in ) {
 void Mblem::addLemma( Word *word, const string& cls ){
   KWargs args;
   args["set"]=tagset;
-  args["cls"]=cls;
+  args["class"]=cls;
 #pragma omp critical(foliaupdate)
   {
     try {
@@ -272,9 +272,9 @@ void Mblem::makeUnique( ){
   }
   if (debug){
     *Log(mblemLog) << "final result after filter and unique" << endl;
-    for( size_t index=0; index < mblemResult.size(); ++index ){
-      *Log(mblemLog) << "lemma alt: " << mblemResult[index].getLemma()
-		     << "\ttag alt: " << mblemResult[index].getTag() << endl;
+    for ( const auto& mbr : mblemResult ){
+      *Log(mblemLog) << "lemma alt: " << mbr.getLemma()
+		     << "\ttag alt: " << mbr.getTag() << endl;
     }
   }
 }
@@ -381,19 +381,23 @@ void Mblem::Classify( const UnicodeString& uWord ){
       UnicodeString insstr;
       UnicodeString delstr;
       UnicodeString prefix;
-      for ( size_t l=1; l < edits.size(); ++l ) {
-	switch ( edits[l][0] ){
+      for ( const auto& edit : edits ){
+	if ( edit == edits.front() ){
+	  continue;
+	}
+	switch ( edit[0] ){
 	case 'P':
-	  prefix = UTF8ToUnicode( edits[l].substr( 1 ) );
+	  prefix = UTF8ToUnicode( edit.substr( 1 ) );
 	  break;
 	case 'I':
-	  insstr = UTF8ToUnicode( edits[l].substr( 1 ) );
+	  insstr = UTF8ToUnicode( edit.substr( 1 ) );
 	  break;
 	case 'D':
-	  delstr =  UTF8ToUnicode( edits[l].substr( 1 ) );
+	  delstr =  UTF8ToUnicode( edit.substr( 1 ) );
 	  break;
 	default:
-	  *Log(mblemLog) << "Error: strange value in editstring: " << edits[l] << endl;
+	  *Log(mblemLog) << "Error: strange value in editstring: " << edit
+			 << endl;
 	}
       }
       if (debug){
@@ -473,19 +477,20 @@ void Mblem::Classify( const UnicodeString& uWord ){
     mblemResult.push_back( mblemData( UnicodeToUTF8(lemma), restag ) );
   } // while
   if ( debug ) {
-    *Log(mblemLog) << "stored lemma and tag options: " << mblemResult.size() << " lemma's and " << mblemResult.size() << " tags:" << endl;
-    for( size_t index=0; index < mblemResult.size(); ++index ){
-      *Log(mblemLog) << "lemma alt: " << mblemResult[index].getLemma()
-		     << "\ttag alt: " << mblemResult[index].getTag() << endl;
+    *Log(mblemLog) << "stored lemma and tag options: " << mblemResult.size()
+		   << " lemma's and " << mblemResult.size() << " tags:" << endl;
+    for ( const auto& mbr : mblemResult ){
+      *Log(mblemLog) << "lemma alt: " << mbr.getLemma()
+		     << "\ttag alt: " << mbr.getTag() << endl;
     }
   }
 }
 
 vector<pair<string,string> > Mblem::getResult() const {
   vector<pair<string,string> > result;
-  for ( size_t i=0; i < mblemResult.size(); ++i ){
-    result.push_back( make_pair( mblemResult[i].getLemma(),
-				 mblemResult[i].getTag() ) );
+  for ( const auto& mbr : mblemResult ){
+    result.push_back( make_pair( mbr.getLemma(),
+				 mbr.getTag() ) );
   }
   return result;
 }

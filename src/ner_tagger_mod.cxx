@@ -79,8 +79,9 @@ bool NERTagger::init( const Configuration& config ){
   default:
     nerLog->setlevel(LogExtreme);
   }
-  if (debug)
+  if (debug){
     *Log(nerLog) << "NER Tagger Init" << endl;
+  }
   if ( tagger != 0 ){
     *Log(nerLog) << "NER Tagger is already initialized!" << endl;
     return false;
@@ -91,30 +92,37 @@ bool NERTagger::init( const Configuration& config ){
     return false;
   }
   string settings;
-  if ( val[0] == '/' ) // an absolute path
+  if ( val[0] == '/' ){
+    // an absolute path
     settings = val;
-  else
+  }
+  else {
     settings = config.configDir() + val;
-
+  }
   val = config.lookUp( "version", "NER" );
   if ( val.empty() ){
     version = "1.0";
   }
-  else
+  else {
     version = val;
+  }
   val = config.lookUp( "set", "NER" );
   if ( val.empty() ){
     tagset = "http://ilk.uvt.nl/folia/sets/frog-ner-nl";
   }
-  else
+  else {
     tagset = val;
+  }
   val = config.lookUp( "known_ners", "NER" );
   if ( !val.empty() ){
     string file_name;
-    if ( val[0] == '/' ) // an absolute path
+    if ( val[0] == '/' ) {
+      // an absolute path
       file_name = val;
-    else
+    }
+    else {
       file_name = config.configDir() + val;
+    }
     if ( !fill_known_ners( file_name ) ){
       *Log(nerLog) << "Unable to fill known NER's from file: '" << file_name << "'" << endl;
       return false;
@@ -128,12 +136,14 @@ bool NERTagger::init( const Configuration& config ){
 
 bool NERTagger::fill_known_ners( const string& file_name ){
   ifstream is( file_name );
-  if ( !is )
+  if ( !is ){
     return false;
+  }
   string line;
   while ( getline( is, line ) ){
-    if ( line.empty() || line[0] == '#' )
+    if ( line.empty() || line[0] == '#' ){
       continue;
+    }
     vector<string> parts;
     if ( TiCC::split_at( line, parts, "\t" ) != 2 ){
       *Log(nerLog) << "expected 2 TAB-separated parts in line: '" << line << "'" << endl;
@@ -144,14 +154,17 @@ bool NERTagger::fill_known_ners( const string& file_name ){
     size_t num = TiCC::split( line, parts );
     if ( num < 1 || num > KNOWN_NERS_SIZE ){
       *Log(nerLog) << "expected 1 to " << KNOWN_NERS_SIZE
-		   << " SPACE-separated parts in line: '" << line << "'" << endl;
+		   << " SPACE-separated parts in line: '" << line
+		   << "'" << endl;
       return false;
     }
     line = "";
-    for ( size_t i=0; i < num-1; ++i ){
-      line += parts[i] + " ";
+    for ( const auto& part : parts ){
+      line += part;
+      if ( &part != &parts.back() ){
+	line += " ";
+      }
     }
-    line += parts[num-1];
     known_ners[num][line] = ner_value;
   }
   return true;
@@ -169,28 +182,32 @@ size_t count_sp( const string& sentence, string::size_type pos ){
 
 void NERTagger::handle_known_ners( const vector<string>& words,
 				   vector<string>& tags ){
-  if ( debug )
+  if ( debug ){
     *Log(nerLog) << "search for known NER's" << endl;
+  }
   string sentence = " ";
   for ( const auto& w : words ){
     sentence += w + " ";
   }
   // so sentence starts AND ends with a space!
-  if ( debug )
+  if ( debug ){
     *Log(nerLog) << "Sentence = " << sentence << endl;
+  }
   for ( size_t i = KNOWN_NERS_SIZE; i > 0; --i ){
     auto const& mp = known_ners[i];
-    if ( mp.empty() )
+    if ( mp.empty() ){
       continue;
+    }
     for( auto const& it : mp ){
       string blub = " " + it.first + " ";
       string::size_type pos = sentence.find( blub );
       while ( pos != string::npos ){
 	size_t sp = count_sp( sentence, pos );
-	if ( debug )
+	if ( debug ){
 	  *Log(nerLog) << "matched '" << it.first << "' to '"
 		       << sentence << "' at position " << sp
 		       << " : " << it.second << endl;
+	}
 	bool safe = true;
 	for ( size_t j=0; j < i && safe; ++j ){
 	  safe = ( tags[sp+j] == "O" );
@@ -266,7 +283,7 @@ static void addEntity( Sentence *sent,
     catch(...){
       KWargs args;
       args["generate_id"] = sent->id();
-      el = new EntitiesLayer(sent->doc(),args);
+      el = new EntitiesLayer( args, sent->doc() );
       sent->append( el );
     }
   }
@@ -283,13 +300,13 @@ static void addEntity( Sentence *sent,
   Entity *e = 0;
 #pragma omp critical(foliaupdate)
   {
-    e = new Entity( el->doc(), args);
+    e = new Entity( args, el->doc() );
     el->append( e );
   }
-  for ( size_t i=0; i < words.size(); ++i ){
+  for ( const auto& word : words ){
 #pragma omp critical(foliaupdate)
     {
-      e->append( words[i] );
+      e->append( word );
     }
   }
 }
@@ -297,15 +314,17 @@ static void addEntity( Sentence *sent,
 void NERTagger::addNERTags( const vector<Word*>& words,
 			    const vector<string>& tags,
 			    const vector<double>& confs ){
-  if ( words.empty() )
+  if ( words.empty() ) {
     return;
+  }
   Sentence *sent = words[0]->sentence();
   vector<Word*> stack;
   vector<double> dstack;
   string curNER;
   for ( size_t i=0; i < tags.size(); ++i ){
-    if (debug)
+    if (debug){
       *Log(nerLog) << "NER = " << tags[i] << endl;
+    }
     vector<string> ner;
     if ( tags[i] == "O" ){
       if ( !stack.empty() ){
@@ -372,19 +391,21 @@ void NERTagger::Classify( const vector<Word *>& swords ){
   if ( !swords.empty() ) {
     vector<string> words;
     string sentence; // the tagger needs the whole sentence
-    for ( size_t w = 0; w < swords.size(); ++w ) {
+    for ( const auto& sw : swords ){
       string wrd;
 #pragma omp critical(foliaupdate)
       {
-	wrd = swords[w]->str();
+	wrd = sw->str();
       }
       sentence += wrd;
       words.push_back( wrd );
-      if ( w < swords.size()-1 )
+      if ( &sw != &swords.back() ){
 	sentence += " ";
+      }
     }
-    if (debug)
+    if (debug){
       *Log(nerLog) << "NER in: " << sentence << endl;
+    }
     vector<TagResult> tagv = tagger->TagLine(sentence);
     if ( tagv.size() != swords.size() ){
       string out;
@@ -409,9 +430,9 @@ void NERTagger::Classify( const vector<Word *>& swords ){
     }
     vector<double> conf;
     vector<string> tags;
-    for ( size_t i=0; i < tagv.size(); ++i ){
-      tags.push_back( tagv[i].assignedTag() );
-      conf.push_back( tagv[i].confidence() );
+    for ( const auto& tag : tagv ){
+      tags.push_back( tag.assignedTag() );
+      conf.push_back( tag.confidence() );
     }
     vector<string> ktags( tagv.size(), "O" );
     handle_known_ners( words, ktags );
@@ -421,15 +442,15 @@ void NERTagger::Classify( const vector<Word *>& swords ){
 }
 
 vector<TagResult> NERTagger::tagLine( const string& line ){
-  if ( tagger )
+  if ( tagger ){
     return tagger->TagLine(line);
-  else
-    throw runtime_error( "NERTagger is not initialized" );
+  }
+  throw runtime_error( "NERTagger is not initialized" );
 }
 
 string NERTagger::set_eos_mark( const string& eos ){
-  if ( tagger )
+  if ( tagger ){
     return tagger->set_eos_mark(eos);
-  else
-    throw runtime_error( "NERTagger is not initialized" );
+  }
+  throw runtime_error( "NERTagger is not initialized" );
 }

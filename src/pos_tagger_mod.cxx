@@ -192,7 +192,7 @@ void POSTagger::addTag( Word *word, const string& inputTag, double confidence ){
   }
   KWargs args;
   args["set"]  = tagset;
-  args["cls"]  = pos_tag;
+  args["class"]  = pos_tag;
   args["confidence"]= toString(confidence);
 #pragma omp critical(foliaupdate)
   {

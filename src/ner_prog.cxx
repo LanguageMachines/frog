@@ -41,7 +41,6 @@
 #include "ticcutils/Configuration.h"
 #include "ticcutils/CommandLine.h"
 #include "ticcutils/PrettyPrint.h"
-#include "libfolia/foliautils.h"
 #include "libfolia/folia.h"
 #include "frog/ucto_tokenizer_mod.h"
 #include "mbt/MbtAPI.h"
@@ -140,12 +139,13 @@ void Test( istream& in ){
   string line;
   while ( in.good() ){
     string sentence = tokenizer.tokenizeStream( in );
-    if ( sentence.empty() )
+    if ( sentence.empty() ){
       break;
+    }
     cout << "processing: " << sentence << endl;
     vector<TagResult> tagv = tagger.tagLine(sentence);
-    for ( size_t w=0; w < tagv.size(); ++w ){
-      cout << tagv[w].word() << "\t" << tagv[w].assignedTag() << endl;
+    for ( const auto& tr : tagv ){
+      cout << tr.word() << "\t" << tr.assignedTag() << endl;
     }
     cout << "<utt>" << endl << endl;
   }
@@ -174,8 +174,7 @@ int main(int argc, char *argv[]) {
       cerr << "terminated." << endl;
       return EXIT_FAILURE;
     }
-    for ( size_t i=0; i < fileNames.size(); ++i ){
-      string TestFileName = fileNames[i];
+    for ( const auto& TestFileName : fileNames ){
       ifstream in(TestFileName);
       if ( in.good() ){
 	cerr << "Processing: " << TestFileName << endl;

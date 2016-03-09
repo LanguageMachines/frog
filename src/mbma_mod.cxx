@@ -82,20 +82,23 @@ void Mbma::init_cgn( const string& main, const string& sub ) {
       TAGconv.insert( make_pair( tmp[0], tmp[1] ) );
     }
   }
-  else
+  else {
     throw ( runtime_error( "unable to open:" + sub ) );
+  }
   ifstream tc1( sub );
   if ( tc1 ){
     string line;
     while( getline(tc1, line) ) {
       vector<string> tmp;
       size_t num = split_at(line, tmp, " ");
-      if ( num == 2 )
+      if ( num == 2 ){
 	TAGconv.insert( make_pair( tmp[0], tmp[1] ) );
+      }
     }
   }
-  else
+  else {
     throw ( runtime_error( "unable to open:" + sub ) );
+  }
 }
 
 Transliterator *Mbma::init_trans( ){
@@ -120,42 +123,46 @@ bool Mbma::init( const Configuration& config ) {
     debugFlag = TiCC::stringTo<int>( val );
   }
   val = config.lookUp( "daring", "mbma" );
-  if ( !val.empty() )
+  if ( !val.empty() ){
     doDaring = TiCC::stringTo<bool>( val );
+  }
   val = config.lookUp( "version", "mbma" );
   if ( val.empty() ){
     version = "1.0";
   }
-  else
+  else {
     version = val;
+  }
   val = config.lookUp( "set", "mbma" );
   if ( val.empty() ){
     mbma_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbma-nl";
   }
-  else
+  else {
     mbma_tagset = val;
+  }
 
   val = config.lookUp( "set", "tagger" );
   if ( val.empty() ){
     cgn_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
   }
-  else
+  else {
     cgn_tagset = val;
-
+  }
   val = config.lookUp( "clex_set", "mbma" );
   if ( val.empty() ){
     clex_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-clex";
   }
-  else
+  else {
     clex_tagset = val;
-
+  }
   string cgn_clex_main;
   val = config.lookUp( "cgn_clex_main", "mbma" );
   if ( val.empty() ){
     cgn_clex_main = "cgntags.main";
   }
-  else
+  else {
     cgn_clex_main = val;
+  }
   cgn_clex_main = prefix( config.configDir(), cgn_clex_main );
 
   string cgn_clex_sub;
@@ -163,22 +170,25 @@ bool Mbma::init( const Configuration& config ) {
   if ( val.empty() ){
     cgn_clex_sub = "cgntags.sub";
   }
-  else
+  else {
     cgn_clex_sub = val;
+  }
   cgn_clex_sub = prefix( config.configDir(), cgn_clex_sub );
   init_cgn( cgn_clex_main, cgn_clex_sub );
 
   string charFile = config.lookUp( "char_filter_file", "mbma" );
-  if ( charFile.empty() )
+  if ( charFile.empty() ){
     charFile = config.lookUp( "char_filter_file" );
+  }
   if ( !charFile.empty() ){
     charFile = prefix( config.configDir(), charFile );
     filter = new Tokenizer::UnicodeFilter();
     filter->fill( charFile );
   }
   string tfName = config.lookUp( "treeFile", "mbma" );
-  if ( tfName.empty() )
+  if ( tfName.empty() ){
     tfName = "mbma.igtree";
+  }
   MTreeFilename = prefix( config.configDir(), tfName );
   string dof = config.lookUp( "filter_diacritics", "mbma" );
   if ( !dof.empty() ){
@@ -189,8 +199,9 @@ bool Mbma::init( const Configuration& config ) {
   }
   //Read in (igtree) data
   string opts = config.lookUp( "timblOpts", "mbma" );
-  if ( opts.empty() )
+  if ( opts.empty() ){
     opts = "-a1";
+  }
   opts += " +vs -vf"; // make Timbl run quietly
   MTree = new Timbl::TimblAPI(opts);
   return MTree->GetInstanceBase(MTreeFilename);
@@ -206,24 +217,30 @@ void Mbma::cleanUp(){
 vector<string> Mbma::make_instances( const UnicodeString& word ){
   vector<string> insts;
   insts.reserve( word.length() );
-  for( long i=0; i < word.length(); ++i ) {
-    if (debugFlag > 10)
+  for ( long i=0; i < word.length(); ++i ) {
+    if (debugFlag > 10){
       *Log(mbmaLog) << "itt #:" << i << endl;
+    }
     UnicodeString inst;
     for ( long j=i ; j <= i + RIGHT + LEFT; ++j ) {
-      if (debugFlag > 10)
+      if (debugFlag > 10){
 	*Log(mbmaLog) << " " << j-LEFT << ": ";
-      if ( j < LEFT || j >= word.length()+LEFT )
+      }
+      if ( j < LEFT || j >= word.length()+LEFT ){
 	inst += '_';
+      }
       else {
-	if (word[j-LEFT] == ',' )
+	if (word[j-LEFT] == ',' ){
 	  inst += 'C';
-	else
+	}
+	else {
 	  inst += word[j-LEFT];
+	}
       }
       inst += ",";
-      if (debugFlag > 10)
+      if (debugFlag > 10){
 	*Log(mbmaLog) << " : " << inst << endl;
+      }
     }
     inst += "?";
     insts.push_back( UnicodeToUTF8(inst) );
@@ -237,10 +254,12 @@ string find_class( unsigned int step,
   string result = classes[0];
   if ( nranal > 1 ){
     if ( classes.size() > 1 ){
-      if ( classes.size() > step )
+      if ( classes.size() > step ){
 	result = classes[step];
-      else
+      }
+      else {
 	result = "0";
+      }
     }
   }
   return result;
@@ -259,8 +278,9 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
     int num = split_at( cl, parts, "|" );
     if ( num > 0 ){
       classParts.push_back( parts );
-      if ( num > largest_anal )
+      if ( num > largest_anal ){
 	largest_anal = num;
+      }
     }
     else {
       // only one, create a dummy
@@ -274,9 +294,9 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
   vector<vector<string> > result;
   result.reserve( largest_anal );
   for ( int step=0; step < largest_anal; ++step ){
-    vector<string> item(classParts.size());
-    for ( size_t k=0; k < classParts.size(); ++k ) {
-      item[k] = find_class( step, classParts[k], largest_anal );
+    vector<string> item;
+    for ( const auto& cp : classParts ){
+      item.push_back( find_class( step, cp, largest_anal ) );
     }
     result.push_back( item );
   }
@@ -289,12 +309,14 @@ bool next_perm( vector< vector<string>::const_iterator >& its,
   for ( size_t i=0; i < parts.size(); ++i ){
     ++its[i];
     if ( its[i] == parts[i].end() ){
-      if ( i == parts.size() -1 )
+      if ( i == parts.size() -1 ){
 	return false;
+      }
       its[i] = parts[i].begin();
     }
-    else
+    else {
       return true;
+    }
   }
   return false;
 }
@@ -320,18 +342,20 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
   }
   //
   // now expand
-  vector< vector<string>::const_iterator > its( classParts.size() );
-  for ( size_t i=0; i<classParts.size(); ++i ){
-    its[i] = classParts[i].begin();
+  vector< vector<string>::const_iterator > its;
+  its.reserve( classParts.size() );
+  for ( const auto& cp : classParts ){
+    its.push_back( cp.begin() );
   }
   vector<vector<string> > result;
   bool more = true;
   while ( more ){
-    vector<string> item(classParts.size());
-    for( size_t j=0; j< classParts.size(); ++j ){
-      item[j] = *its[j];
+    vector<string> items;
+    items.reserve(its.size());
+    for ( auto const& it : its ){
+      items.push_back( it );
     }
-    result.push_back( item );
+    result.push_back( items );
     more = next_perm( its, classParts );
   }
   return result;
@@ -390,8 +414,9 @@ vector<Rule*> Mbma::execute( const UnicodeString& word,
   vector<vector<string> > allParts = generate_all_perms( classes );
   if ( debugFlag ){
     string out = "alternatives: word=" + UnicodeToUTF8(word) + ", classes=<";
-    for ( size_t i=0; i < classes.size(); ++i )
-      out += classes[i] + ",";
+    for ( const auto& cls : classes ){
+      out += cls + ",";
+    }
     out += ">";
     *Log(mbmaLog) << out << endl;
     *Log(mbmaLog) << "allParts : " << allParts << endl;
@@ -401,8 +426,9 @@ vector<Rule*> Mbma::execute( const UnicodeString& word,
   // now loop over all the analysis
   for ( auto const& ana : allParts ){
     Rule *rule = matchRule( ana, word );
-    if ( rule )
+    if ( rule ){
       accepted.push_back( rule );
+    }
   }
   return accepted;
 }
@@ -466,7 +492,7 @@ void Mbma::addBracketMorph( Word *word,
     }
   }
   args["class"] = "stem";
-  Morpheme *result = new Morpheme( word->doc(), args );
+  Morpheme *result = new Morpheme( args, word->doc() );
   args.clear();
   args["value"] = wrd;
   TextContent *t = new TextContent( args );
@@ -484,7 +510,7 @@ void Mbma::addBracketMorph( Word *word,
   }
   args.clear();
   args["set"] = clex_tagset;
-  args["cls"] = celex_tag;
+  args["class"] = celex_tag;
 #pragma omp critical(foliaupdate)
   {
     result->addPosAnnotation( args );
@@ -528,16 +554,16 @@ void Mbma::addBracketMorph( Word *word,
 
 void Mbma::addMorph( MorphologyLayer *ml,
 		     const vector<string>& morphs ) const {
-  for ( size_t p=0; p < morphs.size(); ++p ){
+  for ( const auto& mor : morphs ){
     KWargs args;
     args["set"] = mbma_tagset;
-    Morpheme *m = new Morpheme( ml->doc(), args );
+    Morpheme *m = new Morpheme( args, ml->doc() );
 #pragma omp critical(foliaupdate)
     {
       ml->append( m );
     }
     args.clear();
-    args["value"] = morphs[p];
+    args["value"] = mor;
     TextContent *t = new TextContent( args );
 #pragma omp critical(foliaupdate)
     {
@@ -556,7 +582,7 @@ void Mbma::filterHeadTag( const string& head ){
     *Log(mbmaLog) << "filter with head: " << head << endl;
     *Log(mbmaLog) << "filter: analysis is:" << endl;
     int i=0;
-    for( const auto& it : analysis ){
+    for ( const auto& it : analysis ){
       *Log(mbmaLog) << ++i << " - " << it << endl;
     }
   }
@@ -592,7 +618,7 @@ void Mbma::filterHeadTag( const string& head ){
   if (debugFlag){
     *Log(mbmaLog) << "filter: analysis after head filter:" << endl;
     int i=0;
-    for( const auto& it : analysis ){
+    for ( const auto& it : analysis ){
       *Log(mbmaLog) << ++i << " - " << it << endl;
     }
   }
@@ -613,7 +639,7 @@ void Mbma::filterSubTags( const vector<string>& feats ){
   // and match with inflections from each m
   set<Rule *> bestMatches;
   int max_count = 0;
-  for ( auto& q : analysis ){
+  for ( const auto& q : analysis ){
     int match_count = 0;
     string inflection = q->inflection;
     if ( inflection.empty() ){
@@ -623,12 +649,12 @@ void Mbma::filterSubTags( const vector<string>& feats ){
     if (debugFlag){
       *Log(mbmaLog) << "matching " << inflection << " with " << feats << endl;
     }
-    for ( size_t u=0; u < feats.size(); ++u ) {
-      map<string,string>::const_iterator conv_tag_p = TAGconv.find(feats[u]);
+    for ( const auto& feat : feats ){
+      map<string,string>::const_iterator conv_tag_p = TAGconv.find( feat );
       if (conv_tag_p != TAGconv.end()) {
 	string c = conv_tag_p->second;
 	if (debugFlag){
-	  *Log(mbmaLog) << "found " << feats[u] << " ==> " << c << endl;
+	  *Log(mbmaLog) << "found " << feat << " ==> " << c << endl;
 	}
 	if ( inflection.find( c ) != string::npos ){
 	  if (debugFlag){
@@ -677,7 +703,7 @@ void Mbma::filterSubTags( const vector<string>& feats ){
   if ( debugFlag ){
     *Log(mbmaLog) << "filter: analysis before sort on length:" << endl;
     int i=0;
-    for( const auto& it : analysis ){
+    for ( const auto& it : analysis ){
       *Log(mbmaLog) << ++i << " - " << it << " " << it->getKey(false)
 		    << " (" << it->getKey(false).length() << ")" << endl;
     }
@@ -692,7 +718,7 @@ void Mbma::filterSubTags( const vector<string>& feats ){
   if ( debugFlag){
     *Log(mbmaLog) << "filter: definitive analysis:" << endl;
     int i=0;
-    for( auto const& it : analysis ){
+    for ( auto const& it : analysis ){
       *Log(mbmaLog) << ++i << " - " << it << endl;
     }
     *Log(mbmaLog) << "done filtering" << endl;
@@ -717,7 +743,7 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
     }
   }
   else {
-    for( auto const& sit : analysis ){
+    for ( auto const& sit : analysis ){
       if ( doDaring ){
 	addBracketMorph( fword, UnicodeToUTF8(uword), sit->brackets );
       }
@@ -748,13 +774,15 @@ UnicodeString Mbma::filterDiacritics( const UnicodeString& in ) const {
     transliterator->transliterate( result );
     return result;
   }
-  else
+  else {
     return in;
+  }
 }
 
 void Mbma::Classify( Word* sword ){
-  if ( sword->isinstance(PlaceHolder_t) )
+  if ( sword->isinstance(PlaceHolder_t) ){
     return;
+  }
   UnicodeString uWord;
   PosAnnotation *pos;
   string head;
@@ -766,11 +794,13 @@ void Mbma::Classify( Word* sword ){
     head = pos->feat("head");
     token_class = sword->cls();
   }
-  if (debugFlag)
+  if (debugFlag){
     *Log(mbmaLog) << "Classify " << uWord << "(" << pos << ") ["
 		  << token_class << "]" << endl;
-  if ( filter )
+  }
+  if ( filter ){
     uWord = filter->filter( uWord );
+  }
   if ( head == "LET" || head == "SPEC" ){
     // take over the letter/word 'as-is'.
     string word = UnicodeToUTF8( uWord );
@@ -785,8 +815,9 @@ void Mbma::Classify( Word* sword ){
   }
   else {
     UnicodeString lWord = uWord;
-    if ( head != "SPEC" )
+    if ( head != "SPEC" ){
       lWord.toLower();
+    }
     Classify( lWord );
     vector<string> featVals;
 #pragma omp critical(foliaupdate)
@@ -809,7 +840,7 @@ void Mbma::Classify( const UnicodeString& word ){
   vector<string> classes;
   classes.reserve( insts.size() );
   int i = 0;
-  for( auto const& inst : insts ) {
+  for ( auto const& inst : insts ) {
     string ans;
     MTree->Classify( inst, ans );
     if ( debugFlag ){
@@ -821,8 +852,9 @@ void Mbma::Classify( const UnicodeString& word ){
   }
 
   // fix for 1st char class ==0
-  if ( classes[0] == "0" )
+  if ( classes[0] == "0" ){
     classes[0] = "X";
+  }
   analysis = execute( uWord, classes );
 }
 

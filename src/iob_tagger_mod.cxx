@@ -75,8 +75,9 @@ bool IOBTagger::init( const Configuration& config ){
   default:
     iobLog->setlevel(LogExtreme);
   }
-  if (debug)
+  if (debug) {
     *Log(iobLog) << "IOB Chunker Init" << endl;
+  }
   if ( tagger != 0 ){
     *Log(iobLog) << "IOBTagger is already initialized!" << endl;
     return false;
@@ -87,23 +88,28 @@ bool IOBTagger::init( const Configuration& config ){
     return false;
   }
   string settings;
-  if ( val[0] == '/' ) // an absolute path
+  if ( val[0] == '/' ) {
+    // an absolute path
     settings = val;
-  else
+  }
+  else {
     settings = config.configDir() + val;
+  }
 
   val = config.lookUp( "version", "IOB" );
   if ( val.empty() ){
     version = "1.0";
   }
-  else
+  else {
     version = val;
+  }
   val = config.lookUp( "set", "IOB" );
   if ( val.empty() ){
     tagset = "http://ilk.uvt.nl/folia/sets/frog-chunker-nl";
   }
-  else
+  else {
     tagset = val;
+  }
 
   string init = "-s " + settings + " -vcf";
   tagger = new MbtAPI( init, *iobLog );
@@ -115,8 +121,8 @@ void IOBTagger::addChunk( ChunkingLayer *chunks,
 			  const vector<double>& confs,
 			  const string& IOB ){
   double conf = 1;
-  for ( size_t i=0; i < confs.size(); ++i )
-    conf *= confs[i];
+  for ( auto const& val : confs )
+    conf *= val;
   KWargs args;
   args["class"] = IOB;
   args["set"] = tagset;
@@ -126,7 +132,7 @@ void IOBTagger::addChunk( ChunkingLayer *chunks,
 #pragma omp critical(foliaupdate)
   {
     try {
-      chunk = new Chunk( chunks->doc(), args );
+      chunk = new Chunk( args, chunks->doc() );
       chunks->append( chunk );
     }
     catch ( exception& e ){
@@ -134,12 +140,13 @@ void IOBTagger::addChunk( ChunkingLayer *chunks,
       exit( EXIT_FAILURE );
     }
   }
-  for ( size_t i=0; i < words.size(); ++i ){
-    if ( words[i]->isinstance(PlaceHolder_t) )
+  for ( const auto& word : words ){
+    if ( word->isinstance(PlaceHolder_t) ){
       continue;
+    }
 #pragma omp critical(foliaupdate)
     {
-      chunk->append( words[i] );
+      chunk->append( word );
     }
   }
 }
@@ -147,8 +154,9 @@ void IOBTagger::addChunk( ChunkingLayer *chunks,
 void IOBTagger::addIOBTags( const vector<Word*>& words,
 			    const vector<string>& tags,
 			    const vector<double>& confs ){
-  if ( words.empty() )
+  if ( words.empty() ){
     return;
+  }
   ChunkingLayer *el = 0;
 #pragma omp critical(foliaupdate)
   {
@@ -160,7 +168,7 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
       KWargs args;
       args["generate_id"] = sent->id();
       args["set"] = tagset;
-      el = new ChunkingLayer(sent->doc(),args);
+      el = new ChunkingLayer( args, sent->doc() );
       sent->append( el );
     }
   }
@@ -168,8 +176,9 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
   vector<double> dstack;
   string curIOB;
   for ( size_t i=0; i < tags.size(); ++i ){
-    if (debug)
+    if (debug){
       *Log(iobLog) << "tag = " << tags[i] << endl;
+    }
     vector<string> tagwords;
     size_t num_words = TiCC::split_at( tags[i], tagwords, "_" );
     if ( num_words != 2 ){
@@ -177,8 +186,9 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
       exit( EXIT_FAILURE );
     }
     vector<string> iob;
-    if (debug)
+    if (debug){
       *Log(iobLog) << "IOB = " << tagwords[1] << endl;
+    }
     if ( tagwords[1] == "O" ){
       if ( !stack.empty() ){
 	if (debug) {
@@ -243,19 +253,21 @@ void IOBTagger::Classify( const vector<Word *>& swords ){
   if ( !swords.empty() ) {
     vector<string> words;
     string sentence; // the tagger needs the whole sentence
-    for ( size_t w = 0; w < swords.size(); ++w ) {
+    for ( const auto& sword : swords ){
       string wrd;
 #pragma omp critical(foliaupdate)
       {
-	wrd = swords[w]->str();
+	wrd = sword->str();
       }
       sentence += wrd;
       words.push_back( wrd );
-      if ( w < swords.size()-1 )
+      if ( &sword != &swords.back() ){
 	sentence += " ";
+      }
     }
-    if (debug)
+    if (debug){
       *Log(iobLog) << "IOB in: " << sentence << endl;
+    }
     vector<TagResult> tagv = tagger->TagLine(sentence);
     if ( tagv.size() != swords.size() ){
       throw runtime_error( "IOB tagger is confused" );
@@ -270,17 +282,19 @@ void IOBTagger::Classify( const vector<Word *>& swords ){
     }
     vector<double> conf;
     vector<string> tags;
-    for ( size_t i=0; i < tagv.size(); ++i ){
-      tags.push_back( tagv[i].assignedTag() );
-      conf.push_back( tagv[i].confidence() );
+    for ( const auto& tag : tagv ){
+      tags.push_back( tag.assignedTag() );
+      conf.push_back( tag.confidence() );
     }
     addIOBTags( swords, tags, conf );
   }
 }
 
 string IOBTagger::set_eos_mark( const string& eos ){
-  if ( tagger )
+  if ( tagger ){
     return tagger->set_eos_mark(eos);
-  else
+  }
+  else {
     throw runtime_error( "IOBTagger is not initialized" );
+  }
 }

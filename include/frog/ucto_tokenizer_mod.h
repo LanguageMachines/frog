@@ -33,7 +33,7 @@
 class UctoTokenizer {
  public:
   UctoTokenizer(TiCC::LogStream *);
-  ~UctoTokenizer() { delete tokenizer; delete uctoLog; };
+  ~UctoTokenizer() { delete tokenizer; };
   bool init( const TiCC::Configuration& );
   void setUttMarker( const std::string& );
   void setPassThru( bool );
@@ -44,8 +44,8 @@ class UctoTokenizer {
   void setInputXml( bool );
   void setTextClass( const std::string& );
   void setDocID( const std::string& );
-  folia::Document tokenizestring( const std::string& );
-  folia::Document tokenize( std::istream& );
+  folia::Document *tokenizestring( const std::string& );
+  folia::Document *tokenize( std::istream& );
   bool tokenize( folia::Document& );
   std::vector<std::string> tokenize( const std::string&  );
   std::string tokenizeStream( std::istream& );
