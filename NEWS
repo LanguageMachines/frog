@@ -1,6 +1,6 @@
 0.13.3 - 2016-03-10
 [Ko van der Sloot]
-* Now based on linfolia 1.0
+* Now based on libfolia 1.0
 * lot of code refactoring
 * minor bug fixes
 
