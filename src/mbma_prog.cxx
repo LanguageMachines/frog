@@ -73,7 +73,7 @@ void usage( ) {
        << "\t============= OTHER OPTIONS ============================================\n"
        << "\t -h. give some help.\n"
        << "\t -V or --version .   Show version info.\n"
-       << "\t --daring . Deliver structured output. Default false\n"
+       << "\t --deep-morph. Deliver structured output. Default false\n"
        << "\t -d <debug level>    (for more verbosity)\n";
 }
 
@@ -122,8 +122,8 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   }
   useTagger = !Opts.extract( "notagger" );
   useTokenizer = !Opts.extract( "notokenizer" );
-  if ( Opts.extract( "daring" ) ){
-    configuration.setatt( "daring", "1", "mbma" );
+  if ( Opts.extract( "deep-morph" ) ){
+    configuration.setatt( "deep-morph", "1", "mbma" );
   };
   return true;
 }
@@ -237,7 +237,7 @@ int main(int argc, char *argv[]) {
        << "Radboud University" << endl
        << "ILK   - Induction of Linguistic Knowledge Research Group,"
        << "Tilburg University" << endl;
-  TiCC::CL_Options Opts("Vt:d:hc:","daring,version,notagger,notokenizer");
+  TiCC::CL_Options Opts("Vt:d:hc:","deep-morph,version,notagger,notokenizer");
   try {
     Opts.init(argc, argv);
   }

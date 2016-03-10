@@ -443,10 +443,10 @@ bool Rule::check_inflections() const {
   return true;
 }
 
-UnicodeString Rule::getKey( bool daring ){
+UnicodeString Rule::getKey( bool deep ){
   if ( sortkey.isEmpty() ){
     UnicodeString tmp;
-    if ( daring ){
+    if ( deep ){
       stringstream ss;
       ss << brackets << endl;
       tmp = UTF8ToUnicode(ss.str());
@@ -494,7 +494,7 @@ void Rule::getCleanInflect() {
   }
 }
 
-void Rule::resolveBrackets( bool daring ) {
+void Rule::resolveBrackets( bool deep ) {
   if ( debugFlag > 5 ){
     *TiCC::Log(myLog) << "check rule for bracketing: " << this << endl;
   }
@@ -512,7 +512,7 @@ void Rule::resolveBrackets( bool daring ) {
   if ( debugFlag > 5 ){
     *TiCC::Log(myLog) << "STEP 1:" << brackets << endl;
   }
-  if ( daring ){
+  if ( deep ){
     brackets->resolveNouns( );
     if ( debugFlag > 5 ){
       *TiCC::Log(myLog) << "STEP 2:" << brackets << endl;

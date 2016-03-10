@@ -221,8 +221,8 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
     Opts.remove("skip");
   };
 
-  if ( Opts.extract( "daring" ) ) {
-    options.doDaringMorph = true;
+  if ( Opts.extract( "deep-morpho" ) ) {
+    options.doDeepMorph = true;
     options.doMorph = true;
   }
 
@@ -418,7 +418,7 @@ int main(int argc, char *argv[]) {
   try {
     TiCC::CL_Options Opts("c:e:o:t:x::X::nQhVd:S:",
 			  "textclass:,testdir:,uttmarker:,max-parser-tokens:,"
-			  "skip:,id:,outputdir:,xmldir:,tmpdir:,daring,"
+			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
 			  "debug:,keep-parser-files,version,threads:,KANON");
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){

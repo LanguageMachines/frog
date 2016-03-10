@@ -81,7 +81,7 @@ string FrogAPI::defaultConfigFile(){ return configFileName; }
 
 FrogOptions::FrogOptions() {
   doTok = doLemma = doMorph = doMwu = doIOB = doNER = doParse = true;
-  doDaringMorph = false;
+  doDeepMorph = false;
   doSentencePerLine = false;
   doQuoteDetection = false;
   doDirTest = false;
@@ -195,8 +195,8 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	  myMbma = new Mbma(theErrLog);
 	  stat = myMbma->init( configuration );
 	  if ( stat ) {
-	    if ( options.doDaringMorph )
-	      myMbma->setDaring(true);
+	    if ( options.doDeepMorph )
+	      myMbma->setDeepMorph(true);
 	  }
 	}
 	if ( stat && options.doMwu ){
@@ -268,8 +268,8 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	if ( options.doMorph ){
 	  myMbma = new Mbma(theErrLog);
 	  mbaStat = myMbma->init( configuration );
-	  if ( options.doDaringMorph )
-	    myMbma->setDaring(true);
+	  if ( options.doDeepMorph )
+	    myMbma->setDeepMorph(true);
 	}
       }
 #pragma omp section
@@ -883,7 +883,7 @@ void FrogAPI::displayMWU( ostream& os,
 	}
       }
     }
-    if ( options.doDaringMorph ){
+    if ( options.doDeepMorph ){
       try {
 	vector<MorphologyLayer*> layers
 	  = word->annotations<MorphologyLayer>( myMbma->getTagset() );

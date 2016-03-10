@@ -69,7 +69,7 @@ class Mbma {
   void filterHeadTag( const std::string& );
   void filterSubTags( const std::vector<std::string>& );
   std::vector<std::vector<std::string> > getResult( bool = true ) const;
-  void setDaring( bool b ){ doDaring = b; };
+  void setDeepMorph( bool b ){ doDeepMorph = b; };
   void clearAnalysis();
   std::string getTagset() const { return mbma_tagset; };
   Rule* matchRule( const std::vector<std::string>&, const UnicodeString& );
@@ -106,7 +106,7 @@ class Mbma {
   TiCC::LogStream *mbmaLog;
   Transliterator *transliterator;
   Tokenizer::UnicodeFilter *filter;
-  bool doDaring;
+  bool doDeepMorph;
 };
 
 #endif

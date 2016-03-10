@@ -55,7 +55,7 @@ class FrogOptions {
   bool doTok;
   bool doLemma;
   bool doMorph;
-  bool doDaringMorph;
+  bool doDeepMorph;
   bool doMwu;
   bool doIOB;
   bool doNER;

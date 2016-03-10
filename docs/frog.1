@@ -1,7 +1,7 @@
-.TH frog 1 "2014 december 2"
+.TH frog 1 "2016 march 10"
 
 .SH NAME
-frog \- Dutch morpho-syntactic analyzer, IOB chunker and dependency parser
+frog \- Dutch Natural Language Toolkit
 .SH SYNOPSYS
 frog [options]
 
@@ -31,6 +31,11 @@ to 3 )
 .BR \-d " <level>"
 .RS
 set global debug level. (for all modules)
+.RE
+
+.BR \-\-deep\(hymorph
+.RS
+generate a deep morphological analisys
 .RE
 
 .BR \-e " <encoding>"
@@ -68,7 +73,7 @@ send all output to 'dir' instead of stdout. Creates filenames from the inputfile
 
 .BR \-\-skip =[aclmnpt]
 .RS
-skip parts of the proces: Tokenizer (t), Chunker (c), Lemmatizer (l), Morphological Analyzer (a), Multi\(hy-Word unit (m), Named\(hyEntity recognizer (n) or Parser (p)
+skip parts of the proces: Tokenizer (t), Chunker (c), Lemmatizer (l), Morphological Analyzer (a), Multi\(hyWord unit (m), Named\(hyEntity recognizer (n) or Parser (p)
 .RE
 
 .BR \-Q
@@ -117,7 +122,7 @@ location to store intermediate files. Default /tmp.
 .BR \-\-threads =<n>
 .RS
 use a maximum of 'n' threads. The default is to take whatever is needed.
-In servermode we always run on 1 thread.
+In servermode we always run on 1 thread per session.
 .RE
 
 .BR \-V " or " \-\-version

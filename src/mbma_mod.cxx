@@ -55,7 +55,7 @@ Mbma::Mbma(LogStream * logstream):
   MTree(0),
   transliterator(0),
   filter(0),
-  doDaring(false)
+  doDeepMorph(false)
 {
   mbmaLog = new LogStream( logstream, "mbma-" );
 }
@@ -122,9 +122,9 @@ bool Mbma::init( const Configuration& config ) {
   if ( !val.empty() ){
     debugFlag = TiCC::stringTo<int>( val );
   }
-  val = config.lookUp( "daring", "mbma" );
+  val = config.lookUp( "deep-morph", "mbma" );
   if ( !val.empty() ){
-    doDaring = TiCC::stringTo<bool>( val );
+    doDeepMorph = TiCC::stringTo<bool>( val );
   }
   val = config.lookUp( "version", "mbma" );
   if ( val.empty() ){
@@ -393,7 +393,7 @@ Rule* Mbma::matchRule( const std::vector<std::string>& ana,
     }
     //    rule->debugFlag = 0;
 #endif
-    rule->resolveBrackets( doDaring );
+    rule->resolveBrackets( doDeepMorph );
     rule->getCleanInflect();
     if ( debugFlag ){
       *Log(mbmaLog) << "1 added Inflection: " << rule << endl;
@@ -680,7 +680,7 @@ void Mbma::filterSubTags( const vector<string>& feats ){
   //
   map<UnicodeString, Rule*> unique;
   for ( const auto& ait : bestMatches ){
-    UnicodeString tmp = ait->getKey( doDaring );
+    UnicodeString tmp = ait->getKey( doDeepMorph );
     unique[tmp] = ait;
   }
   // so now we have map of 'equal' analysis.
@@ -733,7 +733,7 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
       *Log(mbmaLog) << "no matches found, use the word instead: "
 		    << uword << endl;
     }
-    if ( doDaring ){
+    if ( doDeepMorph ){
       addBracketMorph( fword, UnicodeToUTF8(uword), "X" );
     }
     else {
@@ -744,7 +744,7 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
   }
   else {
     for ( auto const& sit : analysis ){
-      if ( doDaring ){
+      if ( doDeepMorph ){
 	addBracketMorph( fword, UnicodeToUTF8(uword), sit->brackets );
       }
       else {
@@ -760,7 +760,7 @@ void Mbma::addDeclaration( Document& doc ) const {
     doc.declare( AnnotationType::MORPHOLOGICAL, mbma_tagset,
 		 "annotator='frog-mbma-" +  version +
 		 + "', annotatortype='auto', datetime='" + getTime() + "'");
-    if ( doDaring ){
+    if ( doDeepMorph ){
       doc.declare( AnnotationType::POS, clex_tagset,
 		   "annotator='frog-mbma-" +  version +
 		   + "', annotatortype='auto', datetime='" + getTime() + "'");
@@ -805,7 +805,7 @@ void Mbma::Classify( Word* sword ){
     // take over the letter/word 'as-is'.
     //  also ABBREVIATION's aren't handled bij mbma-rules
     string word = UnicodeToUTF8( uWord );
-    if ( doDaring ){
+    if ( doDeepMorph ){
       addBracketMorph( sword, word, head );
     }
     else {
@@ -862,7 +862,7 @@ void Mbma::Classify( const UnicodeString& word ){
 vector<vector<string> > Mbma::getResult( bool show_class ) const {
   vector<vector<string> > result;
   result.reserve( analysis.size() );
-  if ( doDaring ){
+  if ( doDeepMorph ){
     for ( const auto& it : analysis ){
       stringstream ss;
       ss << it->brackets->put( !show_class ) << endl;
