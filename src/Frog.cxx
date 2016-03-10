@@ -221,7 +221,7 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
     Opts.remove("skip");
   };
 
-  if ( Opts.extract( "deep-morpho" ) ) {
+  if ( Opts.extract( "deep-morph" ) ) {
     options.doDeepMorph = true;
     options.doMorph = true;
   }
