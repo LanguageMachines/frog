@@ -323,8 +323,16 @@ void Mblem::Classify( Word *sword ){
   if ( filter )
     uword = filter->filter( uword );
 
+  if ( token_class == "ABBREVIATION" ){
+    // We dont handle ABBREVIATION's so just take the word as such
+    string word = UnicodeToUTF8(uword);
+    addLemma( sword, word );
+    return;
+  }
   auto const& it1 = token_strip_map.find( pos );
   if ( it1 != token_strip_map.end() ){
+    // some tag/tokenizer_class combinations are special
+    // we have to strip a few letters to get a lemma
     auto const& it2 = it1->second.find( token_class );
     if ( it2 != it1->second.end() ){
       uword = UnicodeString( uword, 0, uword.length() - it2->second );
@@ -334,11 +342,11 @@ void Mblem::Classify( Word *sword ){
     }
   }
   if ( one_one_tags.find(pos) != one_one_tags.end() ){
+    // some tags are just taken as such
     string word = UnicodeToUTF8(uword);
     addLemma( sword, word );
     return;
   }
-
   uword.toLower();
   Classify( uword );
   filterTag( pos );

@@ -801,8 +801,9 @@ void Mbma::Classify( Word* sword ){
   if ( filter ){
     uWord = filter->filter( uWord );
   }
-  if ( head == "LET" || head == "SPEC" ){
+  if ( head == "LET" || head == "SPEC" || token_class == "ABBREVIATION" ){
     // take over the letter/word 'as-is'.
+    //  also ABBREVIATION's aren't handled bij mbma-rules
     string word = UnicodeToUTF8( uWord );
     if ( doDaring ){
       addBracketMorph( sword, word, head );
