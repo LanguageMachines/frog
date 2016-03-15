@@ -60,8 +60,30 @@ string toString( const CompoundType& ct ){
   }
 }
 
-ostream& operator<<( ostream& os, const CompoundType ct ){
+ostream& operator<<( ostream& os, const CompoundType& ct ){
   os << toString( ct );
+  return os;
+}
+
+string toString( const Status& st ){
+  switch ( st ){
+  case Status::INFO:
+    return "info";
+  case Status::STEM:
+    return "stem";
+  case Status::COMPLEX:
+    return "complex";
+  case Status::INFLECTION:
+    return "inflection";
+  case Status::DERIVATIONAL:
+    return "derivational";
+  default:
+    return "nostat";
+  }
+}
+
+ostream& operator<<( ostream& os, const Status& st ){
+  os << toString( st );
   return os;
 }
 
@@ -253,35 +275,26 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
 }
 
 void BracketNest::setCompoundType(){
+  cerr << "set compoundType: " << this << endl;
+  cerr << "#parts: " << parts.size() << endl;
   if ( parts.size() == 1 ){
     auto part = *parts.begin();
     part->setCompoundType();
     _compound = part->compound();
   }
-  else if ( parts.size() == 2
-	    || parts.size() == 3 ){
+  else if ( parts.size() == 2 ){
     auto it = parts.begin();
     CLEX::Type tag1 = (*it)->tag();
     CompoundType cp1 = (*it)->compound();
     Status st1 = (*it)->status();
     CLEX::Type tag2 = (*++it)->tag();
     Status st2 = (*it)->status();
+    if ( debugFlag > 5 ){
+      cerr << "tag1 :" << tag1 << " stat1: " << st1 << endl;
+      cerr << "tag2 :" << tag2 << " stat2: " << st2 << endl;
+    }
     if ( ( st1 != Status::STEM && st1 != Status::COMPLEX )
 	 || ( st2 != Status::STEM && st2 != Status::COMPLEX ) ){
-      return;
-    }
-    if ( debugFlag > 5 ){
-      cerr << "tag1 :" << tag1 << endl;
-      cerr << "tag2 :" << tag2 << endl;
-    }
-    CLEX::Type tag3 = CLEX::NEUTRAL;
-    if ( ++it != parts.end() ){
-      tag3 = (*it)->tag();
-      if ( debugFlag > 5 ){
-	cerr << "extra tag :" << tag3 << endl;
-      }
-    }
-    if ( tag3 != CLEX::NEUTRAL && tag3 != CLEX::UNASS ){
       return;
     }
     if ( tag1 == CLEX::N ){
@@ -290,6 +303,45 @@ void BracketNest::setCompoundType(){
       }
       else if ( tag2 == CLEX::NEUTRAL || tag2 == CLEX::UNASS ){
 	_compound = cp1;
+      }
+    }
+    else if ( tag1 == CLEX::P ){
+      if ( tag2 == CLEX::N ){
+	_compound = CompoundType::PN;
+      }
+      else if ( tag2 == CLEX::V ){
+	_compound = CompoundType::PV;
+      }
+      else if ( tag2 == CLEX::NEUTRAL || tag2 == CLEX::UNASS ){
+	_compound = cp1;
+      }
+    }
+  }
+  else if ( parts.size() == 3 ){
+    auto it = parts.begin();
+    CLEX::Type tag1 = (*it)->tag();
+    CompoundType cp1 = (*it)->compound();
+    Status st1 = (*it)->status();
+    CLEX::Type tag2 = (*++it)->tag();
+    Status st2 = (*it)->status();
+    CLEX::Type tag3 = (*++it)->tag();
+    Status st3 = (*it)->status();
+    if ( debugFlag > 5 ){
+      cerr << "tag1 :" << tag1 << " stat1: " << st1 << endl;
+      cerr << "tag2 :" << tag2 << " stat2: " << st2 << endl;
+      cerr << "tag3 :" << tag3 << " stat3: " << st3 << endl;
+    }
+    if ( ( st1 != Status::STEM && st1 != Status::COMPLEX )
+	 || ( st2 != Status::STEM && st2 != Status::DERIVATIONAL )
+	 || ( st3 != Status::STEM && st3 != Status::COMPLEX ) ){
+      return;
+    }
+    if ( tag1 == CLEX::N ){
+      if ( tag2 == CLEX::N && tag3 == CLEX::NEUTRAL ){
+	_compound = CompoundType::NN;
+      }
+      else if ( st2 == Status::DERIVATIONAL && tag3 == CLEX::N ){
+	_compound = CompoundType::NN;
       }
     }
     else if ( tag1 == CLEX::P ){

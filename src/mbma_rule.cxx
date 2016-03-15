@@ -256,10 +256,11 @@ ostream& operator<<( ostream& os, const Rule *r ){
 void Rule::reduceZeroNodes(){
   vector<RulePart> out;
   for ( auto const& r : rules ){
-    if ( r.ResultClass == CLEX::NEUTRAL
+    if ( ( r.ResultClass == CLEX::NEUTRAL
+	   || r.fixpos == 1 )
 	 && r.morpheme.isEmpty()
 	 && r.inflect.empty() ){
-      // do nothing
+      // skip
     }
     else {
       out.push_back(r);
