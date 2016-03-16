@@ -363,7 +363,9 @@ CompoundType BracketNest::setCompoundType(){
       }
     }
   }
-  cerr << "   ASSIGNED :" << _compound << endl;
+  if ( debugFlag > 5 ){
+    cerr << "   ASSIGNED :" << _compound << endl;
+  }
   return _compound;
 }
 
