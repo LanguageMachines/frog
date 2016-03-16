@@ -34,7 +34,7 @@
 
 enum Status { INFO, STEM, COMPLEX, INFLECTION, DERIVATIONAL };
 
-enum CompoundType : int { NONE, NN, PN, PV, NA };
+enum CompoundType : int { NONE, NN, PN, PV, NA, AN, AA };
 
 namespace folia {
   class Document;

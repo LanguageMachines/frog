@@ -57,6 +57,10 @@ string toString( const CompoundType& ct ){
     return "PV";
   case CompoundType::NA:
     return "NA";
+  case CompoundType::AN:
+    return "AN";
+  case CompoundType::AA:
+    return "AA";
   default:
     return "none";
   }
@@ -301,10 +305,22 @@ CompoundType BracketNest::setCompoundType(){
       if ( tag2 == CLEX::N && st2 == Status::STEM ){
 	_compound = CompoundType::NN;
       }
-      else if ( tag2 == CLEX::A ){
+      else if ( st2 == Status::DERIVATIONAL
+		|| st2 == Status::INFO
+		|| st2 == Status::INFLECTION ){
+	_compound = cp1;
+      }
+      else if ( tag2 == CLEX::A && st2 == Status::STEM ){
 	_compound = CompoundType::NA;
       }
-      else if ( tag2 == CLEX::NEUTRAL || tag2 == CLEX::UNASS ){
+    }
+    else if ( tag1 == CLEX::A ){
+      if ( tag2 == CLEX::N && st2 == Status::STEM ){
+	_compound = CompoundType::AN;
+      }
+      else if ( st2 == Status::DERIVATIONAL
+		|| st2 == Status::INFO
+		|| st2 == Status::INFLECTION ){
 	_compound = cp1;
       }
     }
@@ -351,6 +367,18 @@ CompoundType BracketNest::setCompoundType(){
       else {
 	if ( tag2 == CLEX::N && tag3 == CLEX::N ){
 	  _compound = CompoundType::NN;
+	}
+      }
+    }
+    else if ( tag1 == CLEX::A ){
+      if ( st1 == Status::STEM || st1 == Status::COMPLEX ){
+	if ( tag2 == CLEX::N
+	     && ( tag3 == CLEX::NEUTRAL ||  tag3 == CLEX::UNASS ) ){
+	  _compound = CompoundType::AN;
+	}
+	if ( tag2 == CLEX::A
+	     && ( tag3 == CLEX::NEUTRAL ||  tag3 == CLEX::UNASS ) ){
+	  _compound = CompoundType::AA;
 	}
       }
     }
