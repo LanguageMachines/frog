@@ -32,6 +32,8 @@
 #ifndef MBMA_RULE_H
 #define MBMA_RULE_H
 
+enum CompoundType : int;
+
 class RulePart {
 public:
   RulePart( const std::string&, const UChar, bool );
@@ -73,8 +75,10 @@ public:
   int debugFlag;
   CLEX::Type tag;
   UnicodeString sortkey;
+  UnicodeString orig_word;
   std::string description;
   std::string inflection;
+  CompoundType compound;
   BracketNest *brackets;
   TiCC::LogStream *myLog;
 };

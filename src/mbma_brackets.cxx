@@ -276,15 +276,15 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
   return true;
 }
 
-void BracketNest::setCompoundType(){
+CompoundType BracketNest::setCompoundType(){
   if ( debugFlag > 5 ){
     cerr << "set compoundType: " << this << endl;
     cerr << "#parts: " << parts.size() << endl;
   }
+  _compound = CompoundType::NONE;
   if ( parts.size() == 1 ){
     auto part = *parts.begin();
-    part->setCompoundType();
-    _compound = part->compound();
+    _compound = part->setCompoundType();
   }
   else if ( parts.size() == 2 ){
     auto it = parts.begin();
@@ -294,15 +294,11 @@ void BracketNest::setCompoundType(){
     CLEX::Type tag2 = (*++it)->tag();
     Status st2 = (*it)->status();
     if ( debugFlag > 5 ){
-      cerr << "tag1 :" << tag1 << " stat1: " << st1 << endl;
+      cerr << "tag1 :" << tag1 << " stat1: " << st1 << " cp1: " << cp1 << endl;
       cerr << "tag2 :" << tag2 << " stat2: " << st2 << endl;
     }
-    if ( ( st1 != Status::STEM && st1 != Status::COMPLEX )
-	 || ( st2 != Status::STEM && st2 != Status::COMPLEX ) ){
-      return;
-    }
     if ( tag1 == CLEX::N ){
-      if ( tag2 ==CLEX::N ){
+      if ( tag2 == CLEX::N && st2 == Status::STEM ){
 	_compound = CompoundType::NN;
       }
       else if ( tag2 == CLEX::A ){
@@ -326,6 +322,7 @@ void BracketNest::setCompoundType(){
   }
   else if ( parts.size() > 2 ){
     auto it = parts.begin();
+    CompoundType cp1 = (*it)->compound();
     CLEX::Type tag1 = (*it)->tag();
     Status st1 = (*it)->status();
     CLEX::Type tag2 = (*++it)->tag();
@@ -338,12 +335,23 @@ void BracketNest::setCompoundType(){
       cerr << "tag3 :" << tag3 << " stat3: " << st3 << endl;
     }
     if ( tag1 == CLEX::N ){
-      if ( tag2 == CLEX::N &&
-	   (tag3 == CLEX::NEUTRAL || st3 == Status::INFLECTION ) ) {
-	_compound = CompoundType::NN;
+      if ( st1 == Status::STEM || st1 == Status::COMPLEX ){
+	if ( (tag2 == CLEX::N &&
+	      ( st2 == Status::STEM || st2 == Status::COMPLEX ) )
+	     && (tag3 == CLEX::NEUTRAL || st3 == Status::INFLECTION ) ) {
+	  _compound = CompoundType::NN;
+	}
+	else if ( st2 == Status::DERIVATIONAL && tag3 == CLEX::NEUTRAL ){
+	  _compound = cp1;
+	}
+	else if ( st2 == Status::DERIVATIONAL && tag3 == CLEX::N ){
+	  _compound = CompoundType::NN;
+	}
       }
-      else if ( st2 == Status::DERIVATIONAL && tag3 == CLEX::N ){
-	_compound = CompoundType::NN;
+      else {
+	if ( tag2 == CLEX::N && tag3 == CLEX::N ){
+	  _compound = CompoundType::NN;
+	}
       }
     }
     else if ( tag1 == CLEX::P ){
@@ -355,9 +363,8 @@ void BracketNest::setCompoundType(){
       }
     }
   }
-  else {
-    return;
-  }
+  cerr << "   ASSIGNED :" << _compound << endl;
+  return _compound;
 }
 
 Morpheme *BracketLeaf::createMorpheme( Document *doc,
@@ -601,7 +608,7 @@ list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& resu
       if ( debugFlag > 5 ){
 	cerr << "new node:" << tmp << endl;
       }
-      tmp->setCompoundType();
+      _compound = tmp->setCompoundType();
       result.insert( ++bit, tmp );
       return bit;
     }
@@ -622,7 +629,8 @@ void BracketNest::resolveNouns( ){
   list<BaseBracket*>::iterator prev = it++;
   while ( it != parts.end() ){
     if ( (*prev)->tag() == CLEX::N && (*prev)->RightHand.size() == 0
-	 && (*it)->tag() == CLEX::N && (*it)->RightHand.size() == 0 ){
+	 && ( (*it)->tag() == CLEX::N && (*it)->status() == Status::STEM )
+	 && (*it)->RightHand.size() == 0 ){
       BaseBracket *tmp
 	= new BracketNest( CLEX::N, CompoundType::NN, debugFlag );
       tmp->append( *prev );

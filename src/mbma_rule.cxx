@@ -219,6 +219,8 @@ Rule::Rule( const vector<string>& parts,
 	    int flag ):
   debugFlag( flag ),
   tag(CLEX::UNASS),
+  orig_word(s),
+  compound( CompoundType::NONE ),
   brackets(0),
   myLog(ls)
 {
@@ -234,12 +236,15 @@ Rule::~Rule(){
 }
 
 ostream& operator<<( ostream& os, const Rule& r ){
-  os << "MBMA rule:" << endl;
+  os << "MBMA rule (" << r.orig_word << "):" << endl;
   for ( const auto& rule : r.rules ){
     os << "\t" << rule << endl;
   }
   os << "tag: " << r.tag << " infl:" << r.inflection << " morhemes: "
      << r.extract_morphemes() << " description: " << r.description;
+  if ( r.compound != CompoundType::NONE ){
+    os << " (" << r.compound << "-compound)"<< endl;
+  }
   return os;
 }
 
@@ -528,7 +533,7 @@ void Rule::resolveBrackets( bool deep ) {
     }
     brackets->resolveMiddle();
   }
-  brackets->setCompoundType();
+  compound = brackets->setCompoundType();
   tag = brackets->getFinalTag();
   description = get_tDescr( tag );
   if ( debugFlag > 4 ){
