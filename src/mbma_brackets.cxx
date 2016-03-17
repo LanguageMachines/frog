@@ -422,6 +422,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     result = new Morpheme( args, doc );
     args.clear();
     string out = UnicodeToUTF8(morph);
+    if ( out.empty() ){
+      throw logic_error( "stem has empty morpheme" );
+    }
     args["value"] = out;
     TextContent *t = new TextContent( args );
 #pragma omp critical(foliaupdate)
@@ -450,6 +453,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
     else {
       desc = "[" + out + "]";
+    }
+    if ( out.empty() ){
+      throw logic_error( "Inflection and morpheme empty" );
     }
     args["value"] = out;
     TextContent *t = new TextContent( args );
@@ -480,6 +486,10 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     result = new Morpheme( args, doc );
     args.clear();
     string out = UnicodeToUTF8(morph);
+    if ( out.empty() ){
+      cerr << "problem: " << this << endl;
+      throw logic_error( "Derivation with empty morpheme" );
+    }
     args["value"] = out;
     TextContent *t = new TextContent( args );
 #pragma omp critical(foliaupdate)
@@ -772,6 +782,41 @@ void BracketNest::resolveMiddle(){
 	++it;
       }
     }
+  }
+}
+
+void BracketNest::clearEmptyNodes(){
+  // remove all nodes that don't have a morpheme or an inlection
+  if ( debugFlag > 5 ){
+    cerr << "clear emptyNodes: " << this << endl;
+  }
+  list<BaseBracket*> out;
+  list<BaseBracket*>::iterator it = parts.begin();
+  while ( it != parts.end() ){
+    if ( debugFlag > 5 ){
+      cerr << "loop clear emptyNodes : " << *it << endl;
+    }
+    if ( (*it)->isNested() ){
+      if ( debugFlag > 5 ){
+	cerr << "nested! " << endl;
+      }
+      (*it)->clearEmptyNodes( );
+      out.push_back( *it );
+    }
+    else {
+      if ( (*it)->morpheme().isEmpty() &&
+	   (*it)->inflection().empty() ){
+	// skip
+      }
+      else {
+	out.push_back( *it );
+      }
+    }
+    ++it;
+  }
+  parts.swap( out );
+  if ( debugFlag > 5 ){
+    cerr << "RESULT clear emptyNodes: " << this << endl;
   }
 }
 

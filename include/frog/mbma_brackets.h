@@ -68,6 +68,7 @@ public:
   virtual void resolveLead(){ abort(); };
   virtual void resolveTail(){ abort(); };
   virtual void resolveMiddle(){ abort(); };
+  virtual void clearEmptyNodes() { abort(); };
   virtual folia::Morpheme *createMorpheme( folia::Document *,
 					   const std::string&,
 					   const std::string& ) const = 0;
@@ -116,6 +117,7 @@ class BracketNest: public BaseBracket {
   BaseBracket *append( BaseBracket * );
   ~BracketNest();
   bool isNested() { return true; };
+  void clearEmptyNodes();
   UnicodeString put( bool = false ) const;
   bool testMatch( std::list<BaseBracket*>& result,
 		  const std::list<BaseBracket*>::iterator& rpos,

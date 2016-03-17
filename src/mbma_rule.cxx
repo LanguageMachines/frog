@@ -532,6 +532,7 @@ void Rule::resolveBrackets( bool deep ) {
       *TiCC::Log(myLog) << "STEP 4:" << brackets << endl;
     }
     brackets->resolveMiddle();
+    brackets->clearEmptyNodes();
   }
   compound = brackets->setCompoundType();
   tag = brackets->getFinalTag();

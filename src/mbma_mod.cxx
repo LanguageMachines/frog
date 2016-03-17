@@ -537,9 +537,16 @@ void Mbma::addBracketMorph( Word *word,
       exit(EXIT_FAILURE);
     }
   }
-  Morpheme *m = brackets->createMorpheme( word->doc(),
-					  mbma_tagset,
-					  clex_tagset );
+  Morpheme *m = 0;
+  try {
+    m = brackets->createMorpheme( word->doc(),
+				  mbma_tagset,
+				  clex_tagset );
+  }
+  catch( const exception& e ){
+    cerr << "createMorpheme failed: " << e.what() << endl;
+    exit(1);
+  }
   if ( m ){
     args.clear();
     args["value"] = orig_word;
