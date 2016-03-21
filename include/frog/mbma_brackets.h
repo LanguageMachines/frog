@@ -32,7 +32,7 @@
 #ifndef MBMA_BRACKETS_H
 #define MBMA_BRACKETS_H
 
-enum Status { INFO, STEM, COMPLEX, INFLECTION, DERIVATIONAL };
+enum Status { INFO, STEM, COMPLEX, INFLECTION, DERIVATIONAL, FAILED };
 
 enum CompoundType : int { NONE, NN, PN, PV, NA, AN, AA };
 
@@ -57,6 +57,7 @@ public:
   virtual ~BaseBracket() {};
 
   Status status() const { return _status; };
+  void set_status( const Status s ) { _status = s; };
   virtual UnicodeString morpheme() const { return "";};
   virtual UnicodeString deepmorphemes() const { return "";};
   virtual std::string inflection() const { return ""; };
@@ -77,7 +78,7 @@ public:
 					   const std::string&,
 					   std::string&, int& ) const = 0;
   virtual CompoundType compound() const { return CompoundType::NONE; };
-  virtual CompoundType setCompoundType() { return compound(); };
+  virtual CompoundType getCompoundType() { return compound(); };
   CLEX::Type tag() const { return cls; };
   void setTag( CLEX::Type t ) { cls = t; };
   std::vector<CLEX::Type> RightHand;
@@ -128,7 +129,7 @@ class BracketNest: public BaseBracket {
   void resolveLead();
   void resolveTail();
   void resolveMiddle();
-  CompoundType setCompoundType();
+  CompoundType getCompoundType();
   UnicodeString deepmorphemes() const;
   CLEX::Type getFinalTag();
   folia::Morpheme *createMorpheme( folia::Document *,

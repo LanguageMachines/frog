@@ -83,6 +83,8 @@ string toString( const Status& st ){
     return "inflection";
   case Status::DERIVATIONAL:
     return "derivational";
+  case Status::FAILED:
+    return "failed";
   default:
     return "nostat";
   }
@@ -263,6 +265,7 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
 	cerr << "test MATCH FAIL (" << (*rpos)->RightHand[j]
 	     << " != " << (*it)->tag() << ")" << endl;
       }
+      (*rpos)->set_status(Status::FAILED);
       bpos = it;
       return false;
     }
@@ -280,15 +283,15 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
   return true;
 }
 
-CompoundType BracketNest::setCompoundType(){
+CompoundType BracketNest::getCompoundType(){
   if ( debugFlag > 5 ){
-    cerr << "set compoundType: " << this << endl;
+    cerr << "get compoundType: " << this << endl;
     cerr << "#parts: " << parts.size() << endl;
   }
-  _compound = CompoundType::NONE;
+  CompoundType compound = CompoundType::NONE;
   if ( parts.size() == 1 ){
     auto part = *parts.begin();
-    _compound = part->setCompoundType();
+    compound = part->getCompoundType();
   }
   else if ( parts.size() == 2 ){
     auto it = parts.begin();
@@ -301,38 +304,41 @@ CompoundType BracketNest::setCompoundType(){
       cerr << "tag1 :" << tag1 << " stat1: " << st1 << " cp1: " << cp1 << endl;
       cerr << "tag2 :" << tag2 << " stat2: " << st2 << endl;
     }
-    if ( tag1 == CLEX::N ){
-      if ( tag2 == CLEX::N && st2 == Status::STEM ){
-	_compound = CompoundType::NN;
+    if ( st1 != Status::FAILED && st2 != Status::FAILED ){
+      if ( tag1 == CLEX::N ){
+	if ( tag2 == CLEX::N && st2 == Status::STEM ){
+	  compound = CompoundType::NN;
+	}
+	else if ( st2 == Status::DERIVATIONAL
+		  || st2 == Status::INFO
+		  || st2 == Status::INFLECTION ){
+	  compound = cp1;
+	}
+	else if ( tag2 == CLEX::A && st2 == Status::STEM ){
+	  compound = CompoundType::NA;
+	}
       }
-      else if ( st2 == Status::DERIVATIONAL
-		|| st2 == Status::INFO
-		|| st2 == Status::INFLECTION ){
-	_compound = cp1;
+      else if ( tag1 == CLEX::A
+		&& ( st1 == Status::STEM || st1 == Status::COMPLEX) ){
+	if ( tag2 == CLEX::N && st2 == Status::STEM ){
+	  compound = CompoundType::AN;
+	}
+	else if ( st2 == Status::DERIVATIONAL
+		  || st2 == Status::INFO
+		  || st2 == Status::INFLECTION ){
+	  compound = cp1;
+	}
       }
-      else if ( tag2 == CLEX::A && st2 == Status::STEM ){
-	_compound = CompoundType::NA;
-      }
-    }
-    else if ( tag1 == CLEX::A ){
-      if ( tag2 == CLEX::N && st2 == Status::STEM ){
-	_compound = CompoundType::AN;
-      }
-      else if ( st2 == Status::DERIVATIONAL
-		|| st2 == Status::INFO
-		|| st2 == Status::INFLECTION ){
-	_compound = cp1;
-      }
-    }
-    else if ( tag1 == CLEX::P ){
-      if ( tag2 == CLEX::N ){
-	_compound = CompoundType::PN;
-      }
-      else if ( tag2 == CLEX::V ){
-	_compound = CompoundType::PV;
-      }
-      else if ( tag2 == CLEX::NEUTRAL || tag2 == CLEX::UNASS ){
-	_compound = cp1;
+      else if ( tag1 == CLEX::P ){
+	if ( tag2 == CLEX::N ){
+	  compound = CompoundType::PN;
+	}
+	else if ( tag2 == CLEX::V ){
+	  compound = CompoundType::PV;
+	}
+	else if ( tag2 == CLEX::NEUTRAL || tag2 == CLEX::UNASS ){
+	  compound = cp1;
+	}
       }
     }
   }
@@ -350,51 +356,64 @@ CompoundType BracketNest::setCompoundType(){
       cerr << "tag2 :" << tag2 << " stat2: " << st2 << endl;
       cerr << "tag3 :" << tag3 << " stat3: " << st3 << endl;
     }
-    if ( tag1 == CLEX::N ){
-      if ( st1 == Status::STEM || st1 == Status::COMPLEX ){
-	if ( (tag2 == CLEX::N &&
-	      ( st2 == Status::STEM || st2 == Status::COMPLEX ) )
-	     && (tag3 == CLEX::NEUTRAL || st3 == Status::INFLECTION ) ) {
-	  _compound = CompoundType::NN;
+    if ( st1 != Status::FAILED
+	 && st2 != Status::FAILED
+	 && st3 != Status::FAILED ){
+      if ( tag1 == CLEX::N ){
+	if ( st1 == Status::STEM || st1 == Status::COMPLEX ){
+	  if ( (tag2 == CLEX::N &&
+		( st2 == Status::STEM || st2 == Status::COMPLEX ) )
+	       && (tag3 == CLEX::NEUTRAL || st3 == Status::INFLECTION ) ) {
+	    compound = CompoundType::NN;
+	  }
+	  else if ( ( tag2 == CLEX::A &&
+		      ( st2 == Status::STEM || st2 == Status::COMPLEX ) )
+		    && ( tag3 == CLEX::A && st3 == Status::DERIVATIONAL ) ){
+	    compound = CompoundType::NA;
+	  }
+	  else if ( st2 == Status::DERIVATIONAL && tag3 == CLEX::NEUTRAL ){
+	    compound = cp1;
+	  }
+	  else if ( st2 == Status::DERIVATIONAL && tag3 == CLEX::N ){
+	    compound = CompoundType::NN;
+	  }
 	}
-	else if ( st2 == Status::DERIVATIONAL && tag3 == CLEX::NEUTRAL ){
-	  _compound = cp1;
-	}
-	else if ( st2 == Status::DERIVATIONAL && tag3 == CLEX::N ){
-	  _compound = CompoundType::NN;
-	}
-      }
-      else {
-	if ( tag2 == CLEX::N && tag3 == CLEX::N ){
-	  _compound = CompoundType::NN;
-	}
-      }
-    }
-    else if ( tag1 == CLEX::A ){
-      if ( st1 == Status::STEM || st1 == Status::COMPLEX ){
-	if ( tag2 == CLEX::N
-	     && ( tag3 == CLEX::NEUTRAL ||  tag3 == CLEX::UNASS ) ){
-	  _compound = CompoundType::AN;
-	}
-	if ( tag2 == CLEX::A
-	     && ( tag3 == CLEX::NEUTRAL ||  tag3 == CLEX::UNASS ) ){
-	  _compound = CompoundType::AA;
+	else {
+	  if ( tag2 == CLEX::N && tag3 == CLEX::N ){
+	    compound = CompoundType::NN;
+	  }
 	}
       }
-    }
-    else if ( tag1 == CLEX::P ){
-      if ( tag2 == CLEX::N && tag3 == CLEX::NEUTRAL ){
-	_compound = CompoundType::PN;
+      else if ( tag1 == CLEX::A ){
+	if ( st1 == Status::STEM || st1 == Status::COMPLEX ){
+	  if ( tag2 == CLEX::N
+	       && ( tag3 == CLEX::NEUTRAL ||  tag3 == CLEX::UNASS ) ){
+	    compound = CompoundType::AN;
+	  }
+	  else if ( tag2 == CLEX::A
+		    && ( tag3 == CLEX::NEUTRAL ||  tag3 == CLEX::UNASS ) ){
+	    compound = CompoundType::AA;
+	  }
+	  else if ( st2 == Status::INFLECTION && st3 == Status::INFLECTION ){
+	    compound = cp1;
+	  }
+	}
       }
-      else if ( tag2 == CLEX::V && tag3 == CLEX::NEUTRAL ){
-	_compound = CompoundType::PV;
+      else if ( tag1 == CLEX::P ){
+	if ( tag2 == CLEX::N && tag3 == CLEX::NEUTRAL ){
+	  compound = CompoundType::PN;
+	}
+	else if ( tag2 == CLEX::V && tag3 == CLEX::NEUTRAL ){
+	  compound = CompoundType::PV;
+	}
       }
     }
   }
   if ( debugFlag > 5 ){
-    cerr << "   ASSIGNED :" << _compound << endl;
+    cerr << "   ASSIGNED :" << compound << endl;
   }
-  return _compound;
+  _compound = compound;
+  return compound;
 }
 
 Morpheme *BracketLeaf::createMorpheme( Document *doc,
@@ -479,7 +498,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
       }
     }
   }
-  else if ( _status == Status::DERIVATIONAL ){
+  else if ( _status == Status::DERIVATIONAL || _status == Status::FAILED ){
     KWargs args;
     args["class"] = "derivational";
     args["set"] = mbma_tagset;
@@ -648,7 +667,7 @@ list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& resu
       if ( debugFlag > 5 ){
 	cerr << "new node:" << tmp << endl;
       }
-      _compound = tmp->setCompoundType();
+      _compound = tmp->getCompoundType();
       result.insert( ++bit, tmp );
       return bit;
     }
