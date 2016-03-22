@@ -53,6 +53,8 @@ string toString( const CompoundType& ct ){
     return "NN";
   case CompoundType::NA:
     return "NA";
+  case CompoundType::NB:
+    return "NB";
   case CompoundType::NP:
     return "NP";
   case CompoundType::NV:
@@ -81,6 +83,8 @@ string toString( const CompoundType& ct ){
     return "PN";
   case CompoundType::PA:
     return "PA";
+  case CompoundType::PB:
+    return "PB";
   case CompoundType::PP:
     return "PP";
   case CompoundType::PV:
@@ -335,6 +339,95 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
   return true;
 }
 
+CompoundType construct( const CLEX::Type tag1, const CLEX::Type tag2 ){
+  CompoundType compound = CompoundType::NONE;
+  switch ( tag1 ){
+  case CLEX::N:
+    switch( tag2 ){
+    case CLEX::N: compound = CompoundType::NN;
+      break;
+    case CLEX::A: compound = CompoundType::NA;
+      break;
+    case CLEX::B: compound = CompoundType::NB;
+      break;
+    case CLEX::P: compound = CompoundType::NP;
+      break;
+    case CLEX::V: compound = CompoundType::NV;
+      break;
+    default:
+      break;
+    }
+    break;
+  case CLEX::A:
+    switch( tag2 ){
+    case CLEX::N: compound = CompoundType::AN;
+      break;
+    case CLEX::A: compound = CompoundType::AA;
+      break;
+    case CLEX::B: compound = CompoundType::AB;
+      break;
+    case CLEX::P: compound = CompoundType::AP;
+      break;
+    case CLEX::V: compound = CompoundType::AV;
+      break;
+    default:
+      break;
+    }
+    break;
+  case CLEX::B:
+    switch( tag2 ){
+    case CLEX::N: compound = CompoundType::BN;
+      break;
+    case CLEX::A: compound = CompoundType::BA;
+      break;
+    case CLEX::B: compound = CompoundType::BB;
+      break;
+    case CLEX::P: compound = CompoundType::BP;
+      break;
+    case CLEX::V: compound = CompoundType::BV;
+      break;
+    default:
+      break;
+    }
+    break;
+  case CLEX::P:
+    switch( tag2 ){
+    case CLEX::N: compound = CompoundType::PN;
+      break;
+    case CLEX::A: compound = CompoundType::PA;
+      break;
+    case CLEX::B: compound = CompoundType::PB;
+      break;
+    case CLEX::P: compound = CompoundType::PP;
+      break;
+    case CLEX::V: compound = CompoundType::PV;
+      break;
+    default:
+      break;
+    }
+    break;
+  case CLEX::V:
+    switch( tag2 ){
+    case CLEX::N: compound = CompoundType::VN;
+      break;
+    case CLEX::A: compound = CompoundType::VA;
+      break;
+    case CLEX::B: compound = CompoundType::VB;
+      break;
+    case CLEX::P: compound = CompoundType::VP;
+      break;
+    case CLEX::V: compound = CompoundType::VV;
+      break;
+    default:
+      break;
+    }
+    break;
+  default:
+    break;
+  }
+  return compound;
+}
+
 CompoundType BracketNest::getCompoundType(){
   if ( debugFlag > 5 ){
     cerr << "get compoundType: " << this << endl;
@@ -362,18 +455,7 @@ CompoundType BracketNest::getCompoundType(){
 	   && st1 != Status::PARTICLE
 	   && st1 != Status::PARTICIPLE ){
 	if ( st2 == Status::STEM ){
-	  switch( tag2 ){
-	  case CLEX::N: compound = CompoundType::NN;
-	    break;
-	  case CLEX::A: compound = CompoundType::NA;
-	    break;
-	  case CLEX::P: compound = CompoundType::NP;
-	    break;
-	  case CLEX::V: compound = CompoundType::NV;
-	    break;
-	  default:
-	    break;
-	  }
+	  compound = construct( tag1, tag2 );
 	}
 	else if ( st2 == Status::DERIVATIONAL
 		  || st2 == Status::INFO
@@ -385,20 +467,7 @@ CompoundType BracketNest::getCompoundType(){
 		&& st1 != Status::PARTICLE
 		&& st1 != Status::PARTICIPLE ){
 	if ( st2 == Status::STEM ){
-	  switch( tag2 ){
-	  case CLEX::N: compound = CompoundType::AN;
-	    break;
-	  case CLEX::A: compound = CompoundType::AA;
-	    break;
-	  case CLEX::B: compound = CompoundType::AB;
-	    break;
-	  case CLEX::P: compound = CompoundType::AP;
-	    break;
-	  case CLEX::V: compound = CompoundType::AV;
-	    break;
-	  default:
-	    break;
-	  }
+	  compound = construct( tag1, tag2 );
 	}
 	else if ( st2 == Status::DERIVATIONAL
 		  || st2 == Status::INFO
@@ -408,36 +477,12 @@ CompoundType BracketNest::getCompoundType(){
       }
       else if ( tag1 == CLEX::B ){
 	if ( st2 == Status::STEM ){
-	  switch( tag2 ){
-	  case CLEX::N: compound = CompoundType::BN;
-	    break;
-	  case CLEX::A: compound = CompoundType::BA;
-	    break;
-	  case CLEX::B: compound = CompoundType::BB;
-	    break;
-	  case CLEX::P: compound = CompoundType::BP;
-	    break;
-	  case CLEX::V: compound = CompoundType::BV;
-	    break;
-	  default:
-	    break;
-	  }
+	  compound = construct( tag1, tag2 );
 	}
       }
       else if ( tag1 == CLEX::P ){
 	if ( st2 == Status::STEM ){
-	  switch( tag2 ){
-	  case CLEX::N: compound = CompoundType::PN;
-	    break;
-	  case CLEX::A: compound = CompoundType::PA;
-	    break;
-	  case CLEX::P: compound = CompoundType::PP;
-	    break;
-	  case CLEX::V: compound = CompoundType::PV;
-	    break;
-	  default:
-	    break;
-	  }
+	  compound = construct( tag1, tag2 );
 	}
 	else if ( tag2 == CLEX::NEUTRAL || tag2 == CLEX::UNASS ){
 	  compound = cp1;
@@ -447,20 +492,7 @@ CompoundType BracketNest::getCompoundType(){
 		&& st1 != Status::PARTICLE
 		&& st1 != Status::PARTICIPLE ){
 	if ( st2 == Status::STEM ){
-	  switch( tag2 ){
-	  case CLEX::N: compound = CompoundType::VN;
-	    break;
-	  case CLEX::A: compound = CompoundType::VA;
-	    break;
-	  case CLEX::B: compound = CompoundType::VB;
-	    break;
-	  case CLEX::P: compound = CompoundType::VP;
-	    break;
-	  case CLEX::V: compound = CompoundType::VV;
-	    break;
-	  default:
-	    break;
-	  }
+	  compound = construct( tag1, tag2 );
 	}
       }
     }
@@ -487,18 +519,7 @@ CompoundType BracketNest::getCompoundType(){
 	   && st1 != Status::PARTICIPLE ){
 	if ( st2 == Status::STEM &&
 	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
-	  switch( tag2 ){
-	  case CLEX::N: compound = CompoundType::NN;
-	    break;
-	  case CLEX::A: compound = CompoundType::NA;
-	    break;
-	  case CLEX::P: compound = CompoundType::NP;
-	    break;
-	  case CLEX::V: compound = CompoundType::NV;
-	    break;
-	  default:
-	    break;
-	  }
+	  compound = construct( tag1, tag2 );
 	}
 	else if ( st1 == Status::STEM || st1 == Status::COMPLEX ){
 	  if ( (tag2 == CLEX::N &&
@@ -529,20 +550,7 @@ CompoundType BracketNest::getCompoundType(){
 		&& st1 != Status::PARTICIPLE ){
 	if ( st2 == Status::STEM &&
 	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
-	  switch( tag2 ){
-	  case CLEX::N: compound = CompoundType::AN;
-	    break;
-	  case CLEX::A: compound = CompoundType::AA;
-	    break;
-	  case CLEX::B: compound = CompoundType::AB;
-	    break;
-	  case CLEX::P: compound = CompoundType::AP;
-	    break;
-	  case CLEX::V: compound = CompoundType::AV;
-	    break;
-	  default:
-	    break;
-	  }
+	  compound = construct( tag1, tag2 );
 	}
 	else if ( st1 == Status::STEM || st1 == Status::COMPLEX ){
 	  if ( tag2 == CLEX::N
@@ -561,90 +569,25 @@ CompoundType BracketNest::getCompoundType(){
       else if ( tag1 == CLEX::P ){
 	if ( st2 == Status::STEM &&
 	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
-	  switch( tag2 ){
-	  case CLEX::N: compound = CompoundType::PN;
-	    break;
-	  case CLEX::A: compound = CompoundType::PA;
-	    break;
-	  case CLEX::B: compound = CompoundType::PB;
-	    break;
-	  case CLEX::P: compound = CompoundType::PP;
-	    break;
-	  case CLEX::V: compound = CompoundType::PV;
-	    break;
-	  default:
-	    break;
-	  }
+	  compound = construct( tag1, tag2 );
 	}
 	else if ( tag3 == CLEX::NEUTRAL ){
-	  switch( tag2 ){
-	  case CLEX::N: compound = CompoundType::PN;
-	    break;
-	  case CLEX::A: compound = CompoundType::PA;
-	    break;
-	  case CLEX::B: compound = CompoundType::PB;
-	    break;
-	  case CLEX::P: compound = CompoundType::PP;
-	    break;
-	  case CLEX::V: compound = CompoundType::PV;
-	    break;
-	  default:
-	    break;
-	  }
+	  compound = construct( tag1, tag2 );
 	}
 	else if ( st3 == Status::DERIVATIONAL ){
-	  switch( tag3 ){
-	  case CLEX::N: compound = CompoundType::PN;
-	    break;
-	  case CLEX::A: compound = CompoundType::PA;
-	    break;
-	  case CLEX::B: compound = CompoundType::PB;
-	    break;
-	  case CLEX::P: compound = CompoundType::PP;
-	    break;
-	  case CLEX::V: compound = CompoundType::PV;
-	    break;
-	  default:
-	    break;
-	  }
+	  compound = construct( tag1, tag3 );
 	}
       }
       else if ( tag1 == CLEX::B ){
       	if ( st2 == Status::STEM &&
 	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
-	  switch( tag2 ){
-	  case CLEX::N: compound = CompoundType::BN;
-	    break;
-	  case CLEX::A: compound = CompoundType::BA;
-	    break;
-	  case CLEX::B: compound = CompoundType::BB;
-	    break;
-	  case CLEX::P: compound = CompoundType::BP;
-	    break;
-	  case CLEX::V: compound = CompoundType::BV;
-	    break;
-	  default:
-	    break;
-	  }
+	  compound = construct( tag1, tag2 );
 	}
       }
       else if ( tag1 == CLEX::V ){
       	if ( st2 == Status::STEM &&
 	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
-	  switch( tag2 ){
-	  case CLEX::N: compound = CompoundType::VN;
-	    break;
-	  case CLEX::A: compound = CompoundType::VA;
-	    break;
-	  case CLEX::B: compound = CompoundType::VB;
-	    break;
-	  case CLEX::P: compound = CompoundType::VP;
-	    break;
-	  case CLEX::V: compound = CompoundType::VV;
-	    break;
-	  default:
-	    break;
-	  }
+	  compound = construct( tag1, tag2 );
 	}
       }
     }

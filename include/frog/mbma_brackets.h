@@ -38,10 +38,10 @@ enum Status { INFO, PARTICLE, PARTICIPLE, STEM, COMPLEX, INFLECTION,
 enum CompoundType : int {
   // NB and PB compounds don't exist
   NONE,
-    NN, NA,     NP, NV,
+    NN, NA, NB, NP, NV,
     AN, AA, AB, AP, AV,
     BN, BA, BB, BP, BV,
-    PN, PA,     PP, PV,
+    PN, PA, PB, PP, PV,
     VN, VA, VB, VP, VV };
 
 namespace folia {
