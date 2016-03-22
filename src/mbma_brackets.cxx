@@ -51,19 +51,54 @@ string toString( const CompoundType& ct ){
   switch ( ct ){
   case CompoundType::NN:
     return "NN";
-  case CompoundType::PN:
-    return "PN";
-  case CompoundType::PV:
-    return "PV";
   case CompoundType::NA:
     return "NA";
+  case CompoundType::NP:
+    return "NP";
+  case CompoundType::NV:
+    return "NV";
   case CompoundType::AN:
     return "AN";
   case CompoundType::AA:
     return "AA";
-  default:
+  case CompoundType::AB:
+    return "AB";
+  case CompoundType::AP:
+    return "AP";
+  case CompoundType::AV:
+    return "AV";
+  case CompoundType::BN:
+    return "BN";
+  case CompoundType::BA:
+    return "BA";
+  case CompoundType::BB:
+    return "BB";
+  case CompoundType::BP:
+    return "BP";
+  case CompoundType::BV:
+    return "BV";
+  case CompoundType::PN:
+    return "PN";
+  case CompoundType::PA:
+    return "PA";
+  case CompoundType::PP:
+    return "PP";
+  case CompoundType::PV:
+    return "PV";
+  case CompoundType::VN:
+    return "VN";
+  case CompoundType::VA:
+    return "VA";
+  case CompoundType::VB:
+    return "VB";
+  case CompoundType::VP:
+    return "VP";
+  case CompoundType::VV:
+    return "VV";
+  case CompoundType::NONE:
     return "none";
   }
+  return "DEADLY";
 }
 
 ostream& operator<<( ostream& os, const CompoundType& ct ){
@@ -77,6 +112,10 @@ string toString( const Status& st ){
     return "info";
   case Status::STEM:
     return "stem";
+  case Status::PARTICLE:
+    return "particle";
+  case Status::PARTICIPLE:
+    return "participle";
   case Status::COMPLEX:
     return "complex";
   case Status::INFLECTION:
@@ -111,7 +150,15 @@ BracketLeaf::BracketLeaf( const RulePart& p, int flag ):
   }
   else if ( RightHand.size() == 0 ){
     orig = toString( cls );
-    _status = Status::STEM;
+    if ( ( p.ResultClass == CLEX::N
+	   || p.ResultClass == CLEX::A )
+	 &&
+	 ( morph == "be" || morph == "ge" || morph == "ver" || morph == "ex" ) ){
+      _status = Status::PARTICLE;
+    }
+    else {
+      _status = Status::STEM;
+    }
   }
   else {
     orig = toString( cls );
@@ -122,7 +169,12 @@ BracketLeaf::BracketLeaf( const RulePart& p, int flag ):
 	ifpos = i;
       }
     }
-    _status = Status::DERIVATIONAL;
+    if ( morph == "be" || morph == "ge" || morph == "ver" || morph == "ex" ){
+      _status = Status::PARTICIPLE;
+    }
+    else {
+      _status = Status::DERIVATIONAL;
+    }
   }
 }
 
@@ -304,24 +356,49 @@ CompoundType BracketNest::getCompoundType(){
       cerr << "tag1 :" << tag1 << " stat1: " << st1 << " cp1: " << cp1 << endl;
       cerr << "tag2 :" << tag2 << " stat2: " << st2 << endl;
     }
-    if ( st1 != Status::FAILED && st2 != Status::FAILED ){
-      if ( tag1 == CLEX::N ){
-	if ( tag2 == CLEX::N && st2 == Status::STEM ){
-	  compound = CompoundType::NN;
+    if ( st1 != Status::FAILED
+	 && st2 != Status::FAILED ){
+      if ( tag1 == CLEX::N
+	   && st1 != Status::PARTICLE
+	   && st1 != Status::PARTICIPLE ){
+	if ( st2 == Status::STEM ){
+	  switch( tag2 ){
+	  case CLEX::N: compound = CompoundType::NN;
+	    break;
+	  case CLEX::A: compound = CompoundType::NA;
+	    break;
+	  case CLEX::P: compound = CompoundType::NP;
+	    break;
+	  case CLEX::V: compound = CompoundType::NV;
+	    break;
+	  default:
+	    break;
+	  }
 	}
 	else if ( st2 == Status::DERIVATIONAL
 		  || st2 == Status::INFO
 		  || st2 == Status::INFLECTION ){
 	  compound = cp1;
-	}
-	else if ( tag2 == CLEX::A && st2 == Status::STEM ){
-	  compound = CompoundType::NA;
 	}
       }
       else if ( tag1 == CLEX::A
-		&& ( st1 == Status::STEM || st1 == Status::COMPLEX) ){
-	if ( tag2 == CLEX::N && st2 == Status::STEM ){
-	  compound = CompoundType::AN;
+		&& st1 != Status::PARTICLE
+		&& st1 != Status::PARTICIPLE ){
+	if ( st2 == Status::STEM ){
+	  switch( tag2 ){
+	  case CLEX::N: compound = CompoundType::AN;
+	    break;
+	  case CLEX::A: compound = CompoundType::AA;
+	    break;
+	  case CLEX::B: compound = CompoundType::AB;
+	    break;
+	  case CLEX::P: compound = CompoundType::AP;
+	    break;
+	  case CLEX::V: compound = CompoundType::AV;
+	    break;
+	  default:
+	    break;
+	  }
 	}
 	else if ( st2 == Status::DERIVATIONAL
 		  || st2 == Status::INFO
@@ -329,15 +406,61 @@ CompoundType BracketNest::getCompoundType(){
 	  compound = cp1;
 	}
       }
-      else if ( tag1 == CLEX::P ){
-	if ( tag2 == CLEX::N ){
-	  compound = CompoundType::PN;
+      else if ( tag1 == CLEX::B ){
+	if ( st2 == Status::STEM ){
+	  switch( tag2 ){
+	  case CLEX::N: compound = CompoundType::BN;
+	    break;
+	  case CLEX::A: compound = CompoundType::BA;
+	    break;
+	  case CLEX::B: compound = CompoundType::BB;
+	    break;
+	  case CLEX::P: compound = CompoundType::BP;
+	    break;
+	  case CLEX::V: compound = CompoundType::BV;
+	    break;
+	  default:
+	    break;
+	  }
 	}
-	else if ( tag2 == CLEX::V ){
-	  compound = CompoundType::PV;
+      }
+      else if ( tag1 == CLEX::P ){
+	if ( st2 == Status::STEM ){
+	  switch( tag2 ){
+	  case CLEX::N: compound = CompoundType::PN;
+	    break;
+	  case CLEX::A: compound = CompoundType::PA;
+	    break;
+	  case CLEX::P: compound = CompoundType::PP;
+	    break;
+	  case CLEX::V: compound = CompoundType::PV;
+	    break;
+	  default:
+	    break;
+	  }
 	}
 	else if ( tag2 == CLEX::NEUTRAL || tag2 == CLEX::UNASS ){
 	  compound = cp1;
+	}
+      }
+      else if ( tag1 == CLEX::V
+		&& st1 != Status::PARTICLE
+		&& st1 != Status::PARTICIPLE ){
+	if ( st2 == Status::STEM ){
+	  switch( tag2 ){
+	  case CLEX::N: compound = CompoundType::VN;
+	    break;
+	  case CLEX::A: compound = CompoundType::VA;
+	    break;
+	  case CLEX::B: compound = CompoundType::VB;
+	    break;
+	  case CLEX::P: compound = CompoundType::VP;
+	    break;
+	  case CLEX::V: compound = CompoundType::VV;
+	    break;
+	  default:
+	    break;
+	  }
 	}
       }
     }
@@ -359,8 +482,25 @@ CompoundType BracketNest::getCompoundType(){
     if ( st1 != Status::FAILED
 	 && st2 != Status::FAILED
 	 && st3 != Status::FAILED ){
-      if ( tag1 == CLEX::N ){
-	if ( st1 == Status::STEM || st1 == Status::COMPLEX ){
+      if ( tag1 == CLEX::N
+	   && st1 != Status::PARTICLE
+	   && st1 != Status::PARTICIPLE ){
+	if ( st2 == Status::STEM &&
+	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
+	  switch( tag2 ){
+	  case CLEX::N: compound = CompoundType::NN;
+	    break;
+	  case CLEX::A: compound = CompoundType::NA;
+	    break;
+	  case CLEX::P: compound = CompoundType::NP;
+	    break;
+	  case CLEX::V: compound = CompoundType::NV;
+	    break;
+	  default:
+	    break;
+	  }
+	}
+	else if ( st1 == Status::STEM || st1 == Status::COMPLEX ){
 	  if ( (tag2 == CLEX::N &&
 		( st2 == Status::STEM || st2 == Status::COMPLEX ) )
 	       && (tag3 == CLEX::NEUTRAL || st3 == Status::INFLECTION ) ) {
@@ -384,8 +524,27 @@ CompoundType BracketNest::getCompoundType(){
 	  }
 	}
       }
-      else if ( tag1 == CLEX::A ){
-	if ( st1 == Status::STEM || st1 == Status::COMPLEX ){
+      else if ( tag1 == CLEX::A
+		&& st1 != Status::PARTICLE
+		&& st1 != Status::PARTICIPLE ){
+	if ( st2 == Status::STEM &&
+	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
+	  switch( tag2 ){
+	  case CLEX::N: compound = CompoundType::AN;
+	    break;
+	  case CLEX::A: compound = CompoundType::AA;
+	    break;
+	  case CLEX::B: compound = CompoundType::AB;
+	    break;
+	  case CLEX::P: compound = CompoundType::AP;
+	    break;
+	  case CLEX::V: compound = CompoundType::AV;
+	    break;
+	  default:
+	    break;
+	  }
+	}
+	else if ( st1 == Status::STEM || st1 == Status::COMPLEX ){
 	  if ( tag2 == CLEX::N
 	       && ( tag3 == CLEX::NEUTRAL ||  tag3 == CLEX::UNASS ) ){
 	    compound = CompoundType::AN;
@@ -400,11 +559,64 @@ CompoundType BracketNest::getCompoundType(){
 	}
       }
       else if ( tag1 == CLEX::P ){
+	if ( st2 == Status::STEM &&
+	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
+	  switch( tag2 ){
+	  case CLEX::N: compound = CompoundType::PN;
+	    break;
+	  case CLEX::A: compound = CompoundType::PA;
+	    break;
+	  case CLEX::P: compound = CompoundType::PP;
+	    break;
+	  case CLEX::V: compound = CompoundType::PV;
+	    break;
+	  default:
+	    break;
+	  }
+	}
 	if ( tag2 == CLEX::N && tag3 == CLEX::NEUTRAL ){
 	  compound = CompoundType::PN;
 	}
 	else if ( tag2 == CLEX::V && tag3 == CLEX::NEUTRAL ){
 	  compound = CompoundType::PV;
+	}
+      }
+      else if ( tag1 == CLEX::B ){
+      	if ( st2 == Status::STEM &&
+	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
+	  switch( tag2 ){
+	  case CLEX::N: compound = CompoundType::BN;
+	    break;
+	  case CLEX::A: compound = CompoundType::BA;
+	    break;
+	  case CLEX::B: compound = CompoundType::BB;
+	    break;
+	  case CLEX::P: compound = CompoundType::BP;
+	    break;
+	  case CLEX::V: compound = CompoundType::BV;
+	    break;
+	  default:
+	    break;
+	  }
+	}
+      }
+      else if ( tag1 == CLEX::V ){
+      	if ( st2 == Status::STEM &&
+	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
+	  switch( tag2 ){
+	  case CLEX::N: compound = CompoundType::VN;
+	    break;
+	  case CLEX::A: compound = CompoundType::VA;
+	    break;
+	  case CLEX::B: compound = CompoundType::VB;
+	    break;
+	  case CLEX::P: compound = CompoundType::VP;
+	    break;
+	  case CLEX::V: compound = CompoundType::VV;
+	    break;
+	  default:
+	    break;
+	  }
 	}
       }
     }
@@ -460,6 +672,32 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
     desc = "[" + out + "]" + CLEX::get_tDescr( tag() ); // spread the word upwards!
   }
+  if ( _status == Status::PARTICLE ){
+    KWargs args;
+    args["set"] = mbma_tagset;
+    args["class"] = "particle";
+    result = new Morpheme( args, doc );
+    args.clear();
+    string out = UnicodeToUTF8(morph);
+    if ( out.empty() ){
+      throw logic_error( "particle has empty morpheme" );
+    }
+    args["value"] = out;
+    TextContent *t = new TextContent( args );
+#pragma omp critical(foliaupdate)
+    {
+      result->append( t );
+    }
+    ++cnt;
+    args.clear();
+    args["set"] = clex_tagset;
+    args["class"] = toString( tag() );
+#pragma omp critical(foliaupdate)
+    {
+      result->addPosAnnotation( args );
+    }
+    desc = "[" + out + "]"; // spread the word upwards! maybe add 'part' ??
+  }
   else if ( _status == Status::INFLECTION ){
     KWargs args;
     args["class"] = "affix";
@@ -498,7 +736,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
       }
     }
   }
-  else if ( _status == Status::DERIVATIONAL || _status == Status::FAILED ){
+  else if ( _status == Status::DERIVATIONAL
+	    || _status == Status::PARTICIPLE
+	    || _status == Status::FAILED ){
     KWargs args;
     args["class"] = "derivational";
     args["set"] = mbma_tagset;
@@ -517,6 +757,8 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
     ++cnt;
     desc = "[" + out + "]"; // pass it up!
+    // if ( _status == Status::PARTICIPLE )
+    //   desc += "part";
     for ( const auto& inf : inflect ){
       if ( inf != '/' ){
 	string d = CLEX::get_iDescr( inf );

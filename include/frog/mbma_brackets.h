@@ -32,9 +32,17 @@
 #ifndef MBMA_BRACKETS_H
 #define MBMA_BRACKETS_H
 
-enum Status { INFO, STEM, COMPLEX, INFLECTION, DERIVATIONAL, FAILED };
+enum Status { INFO, PARTICLE, PARTICIPLE, STEM, COMPLEX, INFLECTION,
+	      DERIVATIONAL, FAILED };
 
-enum CompoundType : int { NONE, NN, PN, PV, NA, AN, AA };
+enum CompoundType : int {
+  // NB and PB compounds don't exist
+  NONE,
+    NN, NA,     NP, NV,
+    AN, AA, AB, AP, AV,
+    BN, BA, BB, BP, BV,
+    PN, PA,     PP, PV,
+    VN, VA, VB, VP, VV };
 
 namespace folia {
   class Document;
