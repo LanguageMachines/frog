@@ -566,6 +566,8 @@ CompoundType BracketNest::getCompoundType(){
 	    break;
 	  case CLEX::A: compound = CompoundType::PA;
 	    break;
+	  case CLEX::B: compound = CompoundType::PB;
+	    break;
 	  case CLEX::P: compound = CompoundType::PP;
 	    break;
 	  case CLEX::V: compound = CompoundType::PV;
@@ -574,11 +576,37 @@ CompoundType BracketNest::getCompoundType(){
 	    break;
 	  }
 	}
-	if ( tag2 == CLEX::N && tag3 == CLEX::NEUTRAL ){
-	  compound = CompoundType::PN;
+	else if ( tag3 == CLEX::NEUTRAL ){
+	  switch( tag2 ){
+	  case CLEX::N: compound = CompoundType::PN;
+	    break;
+	  case CLEX::A: compound = CompoundType::PA;
+	    break;
+	  case CLEX::B: compound = CompoundType::PB;
+	    break;
+	  case CLEX::P: compound = CompoundType::PP;
+	    break;
+	  case CLEX::V: compound = CompoundType::PV;
+	    break;
+	  default:
+	    break;
+	  }
 	}
-	else if ( tag2 == CLEX::V && tag3 == CLEX::NEUTRAL ){
-	  compound = CompoundType::PV;
+	else if ( st3 == Status::DERIVATIONAL ){
+	  switch( tag3 ){
+	  case CLEX::N: compound = CompoundType::PN;
+	    break;
+	  case CLEX::A: compound = CompoundType::PA;
+	    break;
+	  case CLEX::B: compound = CompoundType::PB;
+	    break;
+	  case CLEX::P: compound = CompoundType::PP;
+	    break;
+	  case CLEX::V: compound = CompoundType::PV;
+	    break;
+	  default:
+	    break;
+	  }
 	}
       }
       else if ( tag1 == CLEX::B ){
