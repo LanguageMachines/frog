@@ -1063,7 +1063,10 @@ CLEX::Type BracketNest::getFinalTag() {
 	      && !(*it)->morpheme().isEmpty() ) ){
       cls = (*it)->tag();
       // cerr << "final tag = " << cls << endl;
-      break;
+      if ( cls != CLEX::P ){
+	// in case of P we hope for better
+	break;
+      }
     }
     ++it;
   }

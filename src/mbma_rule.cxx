@@ -179,17 +179,22 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
   }
   else {
     //    cerr << "normal RulePart " << s << endl;
-    CLEX::Type tag = CLEX::toCLEX( s[0] );
-    if ( !first && tag == CLEX::C ){
+    CLEX::Type tag0 = CLEX::toCLEX( s[0] );
+    if ( !first && tag0 == CLEX::C ){
       // special case: a C tag can only be at first postition
       // otherwise it is a C inflection!
       inflect = "C";
+      //      cerr << "inflect =" << inflect << endl;
     }
     else {
       string::size_type pos = s.find("/");
+      CLEX::Type tag = CLEX::toCLEX( s );
       if ( pos != string::npos ){
 	// some inflection
-	if ( tag != CLEX::UNASS ){
+	string ts = s.substr(0, pos );
+	//	cerr << "ts=" << ts << endl;
+	tag = CLEX::toCLEX( ts );
+	if ( tag0 != CLEX::UNASS ){
 	  // cases like 0/e 0/te2I
 	  ResultClass = tag;
 	  inflect = s.substr(pos+1);
@@ -198,7 +203,7 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
 	  //  E/P
 	  inflect = s;
 	}
-	//      cerr << "inflect =" << inflect << endl;
+	//	cerr << "inflect =" << inflect << endl;
       }
       else if ( tag != CLEX::UNASS ){
 	// dull case
@@ -374,24 +379,26 @@ void Rule::resolve_inflections(){
 	  *TiCC::Log(myLog) << inf[0] << " selects " << new_tag << endl;
 	}
 	// go back to the previous morpheme
-	size_t k = i-1;
-	//	  *TiCC::Log(myLog) << "een terug is " << rule.rules[k].ResultClass << endl;
-	if ( rules[k].isBasic() ){
-	  // now see if we can replace this class for a better one
-	  if ( rules[k].ResultClass == CLEX::PN &&
-	       new_tag == CLEX::N ){
-	    if ( debugFlag  ){
-	      *TiCC::Log(myLog) << "Don't replace PN by N" << endl;
+	for( size_t k=i-1; k+1 > 0; --k ){
+	  *TiCC::Log(myLog) << "een terug is " << rules[k].ResultClass << endl;
+	  if ( rules[k].isBasic() && rules[k].ResultClass != CLEX::P ){
+	    // skip Prepositions. The never get inflected
+	    // now see if we can replace this class for a better one
+	    if ( rules[k].ResultClass == CLEX::PN &&
+		 new_tag == CLEX::N ){
+	      if ( debugFlag  ){
+		*TiCC::Log(myLog) << "Don't replace PN by N" << endl;
+	      }
 	    }
-	  }
-	  else {
-	    if ( debugFlag  ){
-	      *TiCC::Log(myLog) << " replace " << rules[k].ResultClass
-				<< " by " << new_tag << endl;
+	    else {
+	      if ( debugFlag  ){
+		*TiCC::Log(myLog) << " replace " << rules[k].ResultClass
+				  << " by " << new_tag << endl;
+	      }
+	      rules[k].ResultClass = new_tag;
 	    }
-	    rules[k].ResultClass = new_tag;
+	    return;
 	  }
-	  return;
 	}
       }
     }
