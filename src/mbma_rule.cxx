@@ -405,57 +405,6 @@ void Rule::resolve_inflections(){
   }
 }
 
-bool Rule::check_inflections() const {
-  if (debugFlag){
-    *TiCC::Log(myLog) << " check all inflections: " << this << endl;
-  }
-  // check for every inflection if it matches the previous tag
-  for ( size_t i = 1; i < rules.size(); ++i ){
-    // skip inflections on first letter??
-    string inf = rules[i].inflect;
-    if ( !inf.empty() && !rules[i].participle ){
-      // it is an inflection tag
-      if (debugFlag){
-	*TiCC::Log(myLog) << " inflection: >" << inf << "<" << endl;
-      }
-      // given the specific selections of certain inflections,
-      //    select a tag!
-      CLEX::Type match_tag = CLEX::select_tag( inf[0] );
-
-      if ( match_tag != CLEX::UNASS ) {
-	if ( debugFlag  ){
-	  *TiCC::Log(myLog) << inf[0] << " selects " << match_tag << endl;
-	}
-	// go back to the previous morpheme
-	size_t k = i-1;
-	//	  *TiCC::Log(myLog) << "een terug is " << rule.rules[k].ResultClass << endl;
-	if ( rules[k].isBasic() ){
-	  // now see if we can replace this class for a better one
-	  if ( rules[k].ResultClass == CLEX::PN &&
-	       match_tag == CLEX::N ){
-	    if ( debugFlag  ){
-	      *TiCC::Log(myLog) << "match PN with N" << endl;
-	    }
-	  }
-	  else if ( match_tag == rules[k].ResultClass ){
-	    if ( debugFlag  ){
-	      *TiCC::Log(myLog) << " matched: " << match_tag << endl;
-	    }
-	  }
-	  else {
-	    if ( debugFlag  ){
-	      *TiCC::Log(myLog) << "didn't match: " << match_tag
-				<< " with " << rules[k].ResultClass << endl;
-	    }
-	    return false;
-	  }
-	}
-      }
-    }
-  }
-  return true;
-}
-
 UnicodeString Rule::getKey( bool deep ){
   if ( sortkey.isEmpty() ){
     UnicodeString tmp;

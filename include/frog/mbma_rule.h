@@ -70,7 +70,6 @@ public:
   void reduceZeroNodes();
   void resolveBrackets( bool );
   void resolve_inflections();
-  bool check_inflections() const;
   std::vector<RulePart> rules;
   int debugFlag;
   CLEX::Type tag;

@@ -265,8 +265,6 @@ string find_class( unsigned int step,
   return result;
 }
 
-#define OLD
-#ifdef OLD
 vector<vector<string> > generate_all_perms( const vector<string>& classes ){
   // determine all alternative analyses, remember the largest
   // and store every part in a vector of string vectors
@@ -302,65 +300,6 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
   }
   return result;
 }
-#else
-
-bool next_perm( vector< vector<string>::const_iterator >& its,
-		const vector<vector<string> >& parts ){
-  for ( size_t i=0; i < parts.size(); ++i ){
-    ++its[i];
-    if ( its[i] == parts[i].end() ){
-      if ( i == parts.size() -1 ){
-	return false;
-      }
-      its[i] = parts[i].begin();
-    }
-    else {
-      return true;
-    }
-  }
-  return false;
-}
-
-vector<vector<string> > generate_all_perms( const vector<string>& classes ){
-
-  // determine all alternative analyses
-  // store every part in a vector of string vectors
-  vector<vector<string> > classParts;
-  classParts.resize( classes.size() );
-  for ( unsigned int j=0; j< classes.size(); ++j ){
-    vector<string> parts;
-    int num = split_at( classes[j], parts, "|" );
-    if ( num > 0 ){
-     classParts[j] = parts;
-    }
-    else {
-      // only one, create a dummy
-      vector<string> dummy;
-      dummy.push_back( classes[j] );
-      classParts[j] = dummy;
-   }
-  }
-  //
-  // now expand
-  vector< vector<string>::const_iterator > its;
-  its.reserve( classParts.size() );
-  for ( const auto& cp : classParts ){
-    its.push_back( cp.begin() );
-  }
-  vector<vector<string> > result;
-  bool more = true;
-  while ( more ){
-    vector<string> items;
-    items.reserve(its.size());
-    for ( auto const& it : its ){
-      items.push_back( it );
-    }
-    result.push_back( items );
-    more = next_perm( its, classParts );
-  }
-  return result;
-}
-#endif
 
 void Mbma::clearAnalysis(){
   for ( const auto& a: analysis ){
@@ -377,22 +316,10 @@ Rule* Mbma::matchRule( const std::vector<std::string>& ana,
     if ( debugFlag ){
       *Log(mbmaLog) << "after reduction: " << rule << endl;
     }
-#ifdef OLD
     rule->resolve_inflections();
     if ( debugFlag ){
       *Log(mbmaLog) << "after resolving: " << rule << endl;
     }
-#else
-    //    rule->debugFlag = 1;
-    if ( !rule->check_inflections() ){
-      if ( debugFlag ){
-	*Log(mbmaLog) << "failed inflection check: " << rule << endl;
-      }
-      delete rule;
-      return 0;
-    }
-    //    rule->debugFlag = 0;
-#endif
     rule->resolveBrackets( doDeepMorph );
     rule->getCleanInflect();
     if ( debugFlag ){
@@ -598,24 +525,24 @@ void Mbma::filterHeadTag( const string& head ){
     // this should never happen
     throw ValueError( "unknown head feature '" + head + "'" );
   }
-  string head_tag = tagIt->second;
+  string celex_tag = tagIt->second;
   if (debugFlag){
-    *Log(mbmaLog) << "#matches: CGN:" << head << " CELEX " << head_tag << endl;
+    *Log(mbmaLog) << "#matches: CGN:" << head << " CELEX " << celex_tag << endl;
   }
   auto ait = analysis.begin();
   while ( ait != analysis.end() ){
     string tagI = CLEX::toString((*ait)->tag);
-    if ( ( head_tag == tagI )
-	 || ( head_tag == "N" && tagI == "PN" ) ){
+    if ( ( celex_tag == tagI )
+	 || ( celex_tag == "N" && tagI == "PN" ) ){
       if (debugFlag){
-	*Log(mbmaLog) << "comparing " << head_tag << " with "
+	*Log(mbmaLog) << "comparing " << celex_tag << " with "
 		      << tagI << " (OK)" << endl;
       }
       ++ait;
     }
     else {
       if (debugFlag){
-	*Log(mbmaLog) << "comparing " << head_tag << " with "
+	*Log(mbmaLog) << "comparing " << celex_tag << " with "
 		      << tagI << " (rejected)" << endl;
       }
       delete *ait;
