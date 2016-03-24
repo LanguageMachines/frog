@@ -532,12 +532,28 @@ void Mbma::filterHeadTag( const string& head ){
   auto ait = analysis.begin();
   while ( ait != analysis.end() ){
     string tagI = CLEX::toString((*ait)->tag);
-    if ( ( celex_tag == tagI )
-	 || ( celex_tag == "N" && tagI == "PN" ) ){
+    if ( celex_tag == tagI ){
       if (debugFlag){
 	*Log(mbmaLog) << "comparing " << celex_tag << " with "
 		      << tagI << " (OK)" << endl;
       }
+      (*ait)->confidence = 1.0;
+      ++ait;
+    }
+    else if ( celex_tag == "N" && tagI == "PN" ){
+      if (debugFlag){
+	*Log(mbmaLog) << "comparing " << celex_tag << " with "
+		      << tagI << " (OK)" << endl;
+      }
+      (*ait)->confidence = 1.0;
+      ++ait;
+    }
+    else if ( celex_tag == "B" && tagI == "A" ){
+      if (debugFlag){
+	*Log(mbmaLog) << "comparing " << celex_tag << " with "
+		      << tagI << " (OK)" << endl;
+      }
+      (*ait)->confidence = 0.5;
       ++ait;
     }
     else {
@@ -609,11 +625,45 @@ void Mbma::filterSubTags( const vector<string>& feats ){
     }
   }
   //
+  // now filter on confidence:
+  //
+  if ( debugFlag ){
+    *Log(mbmaLog) << "filter: best matches before sort on confidence:" << endl;
+    int i=0;
+    for ( const auto& it : bestMatches ){
+      *Log(mbmaLog) << ++i << " - " << it << endl;
+    }
+    *Log(mbmaLog) << "" << endl;
+  }
+  double best_conf = -0.1;
+  set<Rule*> highConf;
+  for ( const auto& it : bestMatches ){
+    if ( it->confidence >= best_conf ){
+      if ( it->confidence > best_conf ){
+	best_conf = it->confidence;
+	highConf.clear();
+      }
+      highConf.insert( it );
+    }
+  }
+  // now we can remove all analysis that aren't in the set.
+  auto it = analysis.begin();
+  while ( it != analysis.end() ){
+    if ( highConf.find( *it ) == highConf.end() ){
+      delete *it;
+      it = analysis.erase( it );
+    }
+    else {
+      ++it;
+    }
+  }
+
+  //
   // we still might have doubles. (different Rule's yielding the same result)
   // reduce these
   //
   map<UnicodeString, Rule*> unique;
-  for ( const auto& ait : bestMatches ){
+  for ( const auto& ait : highConf ){
     UnicodeString tmp = ait->getKey( doDeepMorph );
     unique[tmp] = ait;
   }
@@ -624,7 +674,7 @@ void Mbma::filterSubTags( const vector<string>& feats ){
     uniqueAna.insert( uit.second );
   }
   // now we can remove all analysis that aren't in that set.
-  auto it = analysis.begin();
+  it = analysis.begin();
   while ( it != analysis.end() ){
     if ( uniqueAna.find( *it ) == uniqueAna.end() ){
       delete *it;

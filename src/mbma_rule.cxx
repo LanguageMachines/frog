@@ -227,7 +227,8 @@ Rule::Rule( const vector<string>& parts,
   orig_word(s),
   compound( CompoundType::NONE ),
   brackets(0),
-  myLog(ls)
+  myLog(ls),
+  confidence(0.0)
 {
   for ( size_t k=0; k < parts.size(); ++k ) {
     string this_class = parts[k];
@@ -246,7 +247,8 @@ ostream& operator<<( ostream& os, const Rule& r ){
     os << "\t" << rule << endl;
   }
   os << "tag: " << r.tag << " infl:" << r.inflection << " morhemes: "
-     << r.extract_morphemes() << " description: " << r.description;
+     << r.extract_morphemes() << " description: " << r.description
+     << " confidence: " << r.confidence;
   if ( r.compound != CompoundType::NONE ){
     os << " (" << r.compound << "-compound)"<< endl;
   }
@@ -380,9 +382,10 @@ void Rule::resolve_inflections(){
 	}
 	// go back to the previous morpheme
 	for( size_t k=i-1; k+1 > 0; --k ){
-	  *TiCC::Log(myLog) << "een terug is " << rules[k].ResultClass << endl;
-	  if ( rules[k].isBasic() && rules[k].ResultClass != CLEX::P ){
-	    // skip Prepositions. The never get inflected
+	  //	  *TiCC::Log(myLog) << "een terug is " << rules[k].ResultClass << endl;
+	  if ( rules[k].isBasic() &&
+	       rules[k].ResultClass != CLEX::P ){
+	    // only nodes that can get inflected (and unanalysed too)
 	    // now see if we can replace this class for a better one
 	    if ( rules[k].ResultClass == CLEX::PN &&
 		 new_tag == CLEX::N ){

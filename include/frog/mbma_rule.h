@@ -80,6 +80,7 @@ public:
   CompoundType compound;
   BracketNest *brackets;
   TiCC::LogStream *myLog;
+  double confidence;
 };
 
 std::ostream& operator<<( std::ostream& os, const Rule& );
