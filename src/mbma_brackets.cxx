@@ -41,6 +41,7 @@
 #include "libfolia/folia.h"
 #include "frog/clex.h"
 #include "frog/mbma_rule.h"
+#include "frog/mbma_mod.h"
 #include "frog/mbma_brackets.h"
 
 using namespace std;
@@ -599,17 +600,13 @@ CompoundType BracketNest::getCompoundType(){
   return compound;
 }
 
-Morpheme *BracketLeaf::createMorpheme( Document *doc,
-				       const string& mbma_tagset,
-				       const string& clex_tagset ) const {
+Morpheme *BracketLeaf::createMorpheme( Document *doc ) const {
   string desc;
   int cnt = 0;
-  return createMorpheme( doc, mbma_tagset, clex_tagset, desc, cnt );
+  return createMorpheme( doc, desc, cnt );
 }
 
 Morpheme *BracketLeaf::createMorpheme( Document *doc,
-				       const string& mbma_tagset,
-				       const string& clex_tagset,
 				       string& desc,
 				       int& cnt ) const {
   Morpheme *result = 0;
@@ -619,7 +616,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
   }
   if ( _status == Status::STEM ){
     KWargs args;
-    args["set"] = mbma_tagset;
+    args["set"] = Mbma::mbma_tagset;
     args["class"] = "stem";
     result = new Morpheme( args, doc );
     args.clear();
@@ -635,7 +632,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
     ++cnt;
     args.clear();
-    args["set"] = clex_tagset;
+    args["set"] = Mbma::clex_tagset;
     args["class"] = toString( tag() );
 #pragma omp critical(foliaupdate)
     {
@@ -645,7 +642,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
   }
   if ( _status == Status::PARTICLE ){
     KWargs args;
-    args["set"] = mbma_tagset;
+    args["set"] = Mbma::mbma_tagset;
     args["class"] = "particle";
     result = new Morpheme( args, doc );
     args.clear();
@@ -661,7 +658,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
     ++cnt;
     args.clear();
-    args["set"] = clex_tagset;
+    args["set"] = Mbma::clex_tagset;
     args["class"] = toString( tag() );
 #pragma omp critical(foliaupdate)
     {
@@ -672,7 +669,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
   else if ( _status == Status::INFLECTION ){
     KWargs args;
     args["class"] = "affix";
-    args["set"] = mbma_tagset;
+    args["set"] = Mbma::mbma_tagset;
     result = new Morpheme( args, doc );
     args.clear();
     string out = UnicodeToUTF8(morph);
@@ -712,7 +709,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
 	    || _status == Status::FAILED ){
     KWargs args;
     args["class"] = "derivational";
-    args["set"] = mbma_tagset;
+    args["set"] = Mbma::mbma_tagset;
     result = new Morpheme( args, doc );
     args.clear();
     string out = UnicodeToUTF8(morph);
@@ -745,7 +742,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
       result->append( feat );
     }
     args.clear();
-    args["set"] = clex_tagset;
+    args["set"] = Mbma::clex_tagset;
     args["class"] = orig;
 #pragma omp critical(foliaupdate)
     {
@@ -755,7 +752,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
   else if ( _status == Status::INFO ){
     KWargs args;
     args["class"] = "inflection";
-    args["set"] = mbma_tagset;
+    args["set"] = Mbma::mbma_tagset;
     result = new Morpheme( args, doc );
     args.clear();
     args["subset"] = "inflection";
@@ -775,22 +772,18 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
   return result;
 }
 
-Morpheme *BracketNest::createMorpheme( Document *doc,
-				       const string& mbma_tagset,
-				       const string& clex_tagset ) const {
+Morpheme *BracketNest::createMorpheme( Document *doc ) const {
   string desc;
   int cnt = 0;
-  return createMorpheme( doc, mbma_tagset, clex_tagset, desc, cnt );
+  return createMorpheme( doc, desc, cnt );
 }
 
 Morpheme *BracketNest::createMorpheme( Document *doc,
-				       const string& mbma_tagset,
-				       const string& clex_tagset,
 				       string& desc,
 				       int& cnt ) const {
   KWargs args;
   args["class"] = "complex";
-  args["set"] = mbma_tagset;
+  args["set"] = Mbma::mbma_tagset;
   Morpheme *result = new Morpheme( args, doc );
   string mor;
   cnt = 0;
@@ -800,8 +793,6 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
     string deeper_desc;
     int deep_cnt = 0;
     Morpheme *m = it->createMorpheme( doc,
-				      mbma_tagset,
-				      clex_tagset,
 				      deeper_desc,
 				      deep_cnt );
     if ( m ){
@@ -823,7 +814,7 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
     result->append( feat );
   }
   args.clear();
-  args["set"] = clex_tagset;
+  args["set"] = Mbma::clex_tagset;
   args["class"] = toString( tag() );
   PosAnnotation *pos = 0;
 #pragma omp critical(foliaupdate)

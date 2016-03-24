@@ -78,12 +78,8 @@ public:
   virtual void resolveTail(){ abort(); };
   virtual void resolveMiddle(){ abort(); };
   virtual void clearEmptyNodes() { abort(); };
+  virtual folia::Morpheme *createMorpheme( folia::Document *  ) const = 0;
   virtual folia::Morpheme *createMorpheme( folia::Document *,
-					   const std::string&,
-					   const std::string& ) const = 0;
-  virtual folia::Morpheme *createMorpheme( folia::Document *,
-					   const std::string&,
-					   const std::string&,
 					   std::string&, int& ) const = 0;
   virtual CompoundType compound() const { return CompoundType::NONE; };
   virtual CompoundType getCompoundType() { return compound(); };
@@ -106,12 +102,8 @@ public:
   std::string inflection() const { return inflect; };
   std::string original() const { return orig; };
   int infixpos() const { return ifpos; };
+  folia::Morpheme *createMorpheme( folia::Document * ) const;
   folia::Morpheme *createMorpheme( folia::Document *,
-				   const std::string&,
-				   const std::string& ) const;
-  folia::Morpheme *createMorpheme( folia::Document *,
-				   const std::string&,
-				   const std::string&,
 				   std::string&, int& ) const;
 private:
   int ifpos;
@@ -140,12 +132,8 @@ class BracketNest: public BaseBracket {
   CompoundType getCompoundType();
   UnicodeString deepmorphemes() const;
   CLEX::Type getFinalTag();
+  folia::Morpheme *createMorpheme( folia::Document * ) const;
   folia::Morpheme *createMorpheme( folia::Document *,
-				   const std::string&,
-				   const std::string& ) const;
-  folia::Morpheme *createMorpheme( folia::Document *,
-				   const std::string&,
-				   const std::string&,
 				   std::string&, int& ) const;
   std::list<BaseBracket *> parts;
   CompoundType compound() const { return _compound; };

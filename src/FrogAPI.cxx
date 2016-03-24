@@ -886,10 +886,10 @@ void FrogAPI::displayMWU( ostream& os,
     if ( options.doDeepMorph ){
       try {
 	vector<MorphologyLayer*> layers
-	  = word->annotations<MorphologyLayer>( myMbma->getTagset() );
+	  = word->annotations<MorphologyLayer>( Mbma::mbma_tagset );
 	for ( const auto& layer : layers ){
 	  vector<Morpheme*> m =
-	    layer->select<Morpheme>( myMbma->getTagset(), false );
+	    layer->select<Morpheme>( Mbma::mbma_tagset, false );
 	  assert( m.size() == 1 ); // top complex layer
 	  string str  = m[0]->feat( "structure" );
 	  if ( str.empty() ){
@@ -914,9 +914,9 @@ void FrogAPI::displayMWU( ostream& os,
     else if ( options.doMorph ){
       try {
 	vector<MorphologyLayer*> layers =
-	  word->annotations<MorphologyLayer>(myMbma->getTagset());
+	  word->annotations<MorphologyLayer>( Mbma::mbma_tagset );
 	for ( const auto& layer : layers ){
-	  vector<Morpheme*> m = layer->select<Morpheme>(myMbma->getTagset());
+	  vector<Morpheme*> m = layer->select<Morpheme>( Mbma::mbma_tagset );
 	  for ( const auto& mor : m ){
 	    string txt = UnicodeToUTF8( mor->text() );
 	    morph += "[" + txt + "]";

@@ -71,10 +71,13 @@ class Mbma {
   std::vector<std::vector<std::string> > getResult( bool = true ) const;
   void setDeepMorph( bool b ){ doDeepMorph = b; };
   void clearAnalysis();
-  std::string getTagset() const { return mbma_tagset; };
   Rule* matchRule( const std::vector<std::string>&, const UnicodeString& );
   std::vector<Rule*> execute( const UnicodeString& ,
 			      const std::vector<std::string>& );
+  static std::map<std::string,std::string> TAGconv;
+  static std::string mbma_tagset;
+  static std::string cgn_tagset;
+  static std::string clex_tagset;
  private:
   void cleanUp();
   bool readsettings( const std::string&, const std::string& );
@@ -97,12 +100,8 @@ class Mbma {
 			const BracketNest * ) const;
   std::string MTreeFilename;
   Timbl::TimblAPI *MTree;
-  std::map<std::string,std::string> TAGconv;
   std::vector<Rule*> analysis;
   std::string version;
-  std::string mbma_tagset;
-  std::string cgn_tagset;
-  std::string clex_tagset;
   TiCC::LogStream *mbmaLog;
   Transliterator *transliterator;
   Tokenizer::UnicodeFilter *filter;

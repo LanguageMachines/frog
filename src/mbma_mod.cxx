@@ -60,6 +60,12 @@ Mbma::Mbma(LogStream * logstream):
   mbmaLog = new LogStream( logstream, "mbma-" );
 }
 
+// define the statics
+map<string,string> Mbma::TAGconv;
+string Mbma::mbma_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbma-nl";
+string Mbma::cgn_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
+string Mbma::clex_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-clex";
+
 Mbma::~Mbma() {
   cleanUp();
   delete transliterator;
@@ -134,25 +140,16 @@ bool Mbma::init( const Configuration& config ) {
     version = val;
   }
   val = config.lookUp( "set", "mbma" );
-  if ( val.empty() ){
-    mbma_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbma-nl";
-  }
-  else {
+  if ( !val.empty() ){
     mbma_tagset = val;
   }
 
   val = config.lookUp( "set", "tagger" );
-  if ( val.empty() ){
-    cgn_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
-  }
-  else {
+  if ( !val.empty() ){
     cgn_tagset = val;
   }
   val = config.lookUp( "clex_set", "mbma" );
-  if ( val.empty() ){
-    clex_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-clex";
-  }
-  else {
+  if ( !val.empty() ){
     clex_tagset = val;
   }
   string cgn_clex_main;
@@ -466,9 +463,7 @@ void Mbma::addBracketMorph( Word *word,
   }
   Morpheme *m = 0;
   try {
-    m = brackets->createMorpheme( word->doc(),
-				  mbma_tagset,
-				  clex_tagset );
+    m = brackets->createMorpheme( word->doc() );
   }
   catch( const exception& e ){
     cerr << "createMorpheme failed: " << e.what() << endl;
