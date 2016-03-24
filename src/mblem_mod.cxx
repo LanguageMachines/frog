@@ -48,7 +48,8 @@ Mblem::Mblem( LogStream *logstream ):
   myLex(0),
   punctuation( "?...,:;\\'`(){}[]%#+-_=/!" ),
   history(20),
-  debug(0)
+  debug(0),
+  filter(0)
 {
   mblemLog = new LogStream( logstream, "mblem" );
 }
