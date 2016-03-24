@@ -49,6 +49,7 @@ Mblem::Mblem( LogStream *logstream ):
   punctuation( "?...,:;\\'`(){}[]%#+-_=/!" ),
   history(20),
   debug(0),
+  keep_case( false ),
   filter(0)
 {
   mblemLog = new LogStream( logstream, "mblem" );
@@ -168,6 +169,11 @@ bool Mblem::init( const Configuration& config ) {
     for ( auto const& t : tags ){
       one_one_tags.insert( t );
     }
+  }
+
+  string par = config.lookUp( "keep_case", "mblem" );
+  if ( !par.empty() ){
+    keep_case = stringTo<bool>( par );
   }
 
   string opts = config.lookUp( "timblOpts", "mblem" );
@@ -348,7 +354,9 @@ void Mblem::Classify( Word *sword ){
     addLemma( sword, word );
     return;
   }
-  uword.toLower();
+  if ( !keep_case ){
+    uword.toLower();
+  }
   Classify( uword );
   filterTag( pos );
   makeUnique();

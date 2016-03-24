@@ -70,6 +70,7 @@ class Mblem {
   std::string punctuation;
   size_t history;
   int debug;
+  bool keep_case;
   std::map<std::string,std::string> classMap;
   std::map<std::string, std::map<std::string, int>> token_strip_map;
   std::set<std::string> one_one_tags;
