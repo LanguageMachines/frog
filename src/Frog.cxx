@@ -321,9 +321,7 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
   if ( Opts.extract ('x', value ) ){
     options.doXMLin = true;
     if ( !value.empty() ){
-      if ( ! (xmlDirName.empty() &&
-	      testDirName.empty() &&
-	      TestFileName.empty() ) ){
+      if ( !xmlDirName.empty() || !testDirName.empty() ){
 	*Log(theErrLog) << "-x may not provide a value when --testdir or --xmldir is provided" << endl;
 	return false;
       }
@@ -461,24 +459,30 @@ int main(int argc, char *argv[]) {
 	    outS = &cout;
 	  }
 	}
-	string xmlName = XMLoutFileName;
-	if ( xmlName.empty() ){
+	string xmlOutName = XMLoutFileName;
+	if ( xmlOutName.empty() ){
 	  if ( !xmlDirName.empty() ){
 	    if ( name.rfind(".xml") == string::npos )
-	      xmlName = xmlPath + name + ".xml";
+	      xmlOutName = xmlPath + name + ".xml";
 	    else
-	      xmlName = xmlPath + name;
+	      xmlOutName = xmlPath + name;
 	  }
 	  else if ( options.doXMLout )
-	    xmlName = name + ".xml"; // do not clobber the inputdir!
+	    xmlOutName = name + ".xml"; // do not clobber the inputdir!
+	}
+	if ( !xmlOutName.empty() && !TiCC::createPath( xmlOutName ) ){
+	  *Log(theErrLog) << "problem frogging: " << name << endl
+			  << "unable to create outputfile: " << xmlOutName
+			  << endl;
+	  continue;
 	}
 	*Log(theErrLog) << "Frogging " << testName << endl;
 	try {
-	  frog.FrogFile( testName, *outS, xmlName );
+	  frog.FrogFile( testName, *outS, xmlOutName );
 	}
 	catch ( exception& e ){
-	  *Log(theErrLog) << "problem frogging: " << name << endl;
-	  *Log(theErrLog) << e.what() << endl;
+	  *Log(theErrLog) << "problem frogging: " << name << endl
+			  << e.what() << endl;
 	  continue;
 	}
 	if ( !outName.empty() ){
