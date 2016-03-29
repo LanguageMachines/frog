@@ -348,10 +348,6 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
   }
 
   Opts.extract ("uttmarker", options.uttmark );
-  if ( !outputDirName.empty() && testDirName.empty() ){
-    *Log(theErrLog) << "useless -outputdir option" << endl;
-    return false;
-  }
   if ( !testDirName.empty() ){
     if ( options.doXMLin )
       getFileNames( testDirName, ".xml", fileNames );
