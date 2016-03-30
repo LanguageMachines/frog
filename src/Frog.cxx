@@ -260,23 +260,18 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
   }
   string TestFileName;
   if ( Opts.extract( "testdir", TestFileName ) ) {
-#ifdef HAVE_DIRENT_H
     options.doDirTest = true;
     testDirName = TestFileName;
     if ( testDirName[testDirName.size()-1] != '/' ){
       testDirName += "/";
     }
-    if ( !existsDir( testDirName ) ){
+    if ( !TiCC::isDir( testDirName ) ){
       *Log(theErrLog) << "input dir " << testDirName << " not readable" << endl;
       return false;
     }
-#else
-      *Log(theErrLog) << "--testdir option not supported!" << endl;
-#endif
   }
   else if ( Opts.extract( 't', TestFileName ) ) {
-    ifstream is( TestFileName );
-    if ( !is ){
+    if ( !TiCC::isFile( TestFileName ) ){
       *Log(theErrLog) << "input stream " << TestFileName << " is not readable" << endl;
       return false;
     }
@@ -286,12 +281,10 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
     if ( outputDirName[outputDirName.size()-1] != '/' ){
       outputDirName += "/";
     }
-#ifdef HAVE_DIRENT_H
-    if ( !existsDir( outputDirName ) ){
+    if ( !TiCC::createPath( outputDirName ) ){
       *Log(theErrLog) << "output dir " << outputDirName << " not readable" << endl;
       return false;
     }
-#endif
     wantOUT = true;
   }
   else if ( Opts.extract( 'o', outputFileName ) ){
@@ -303,12 +296,10 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
     if ( xmlDirName[xmlDirName.size()-1] != '/' ){
       xmlDirName += "/";
     }
-#ifdef HAVE_DIRENT_H
-    if ( !existsDir( xmlDirName ) ){
+    if ( !TiCC::createPath( xmlDirName ) ){
       *Log(theErrLog) << "XML output dir " << xmlDirName << " not readable" << endl;
       return false;
     }
-#endif
     options.doXMLout = true;
   }
   else if ( Opts.extract('X', XMLoutFileName ) ){
@@ -326,8 +317,7 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
 	return false;
       }
       TestFileName = value;
-      ifstream is( value );
-      if ( !is ){
+      if ( !TiCC::isFile( TestFileName ) ){
 	*Log(theErrLog) << "input stream " << value << " is not readable" << endl;
 	return false;
       }

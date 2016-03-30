@@ -51,15 +51,6 @@ string prefix( const string& path, const string& fn ){
 }
 
 #ifdef HAVE_DIRENT_H
-bool existsDir( const string& dirName ){
-  bool result = false;
-  DIR *dir = opendir( dirName.c_str() );
-  if ( dir ){
-    result = (closedir( dir ) == 0);
-  }
-  return result;
-}
-
 void getFileNames( const string& dirName,
 		   const string& ext,
 		   set<string>& fileNames ){
