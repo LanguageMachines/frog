@@ -548,6 +548,14 @@ void Mbma::filterHeadTag( const string& head ){
 	*Log(mbmaLog) << "comparing " << celex_tag << " with "
 		      << tagI << " (OK)" << endl;
       }
+      (*ait)->confidence = 0.8;
+      ++ait;
+    }
+    else if ( celex_tag == "A" && tagI == "V" ){
+      if (debugFlag){
+	*Log(mbmaLog) << "comparing " << celex_tag << " with "
+		      << tagI << " (OK)" << endl;
+      }
       (*ait)->confidence = 0.5;
       ++ait;
     }
