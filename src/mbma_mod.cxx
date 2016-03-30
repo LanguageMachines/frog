@@ -526,35 +526,35 @@ void Mbma::filterHeadTag( const string& head ){
   }
   auto ait = analysis.begin();
   while ( ait != analysis.end() ){
-    string tagI = CLEX::toString((*ait)->tag);
-    if ( celex_tag == tagI ){
+    string mbma_tag = CLEX::toString((*ait)->tag);
+    if ( celex_tag == mbma_tag ){
       if (debugFlag){
 	*Log(mbmaLog) << "comparing " << celex_tag << " with "
-		      << tagI << " (OK)" << endl;
+		      << mbma_tag << " (OK)" << endl;
       }
       (*ait)->confidence = 1.0;
       ++ait;
     }
-    else if ( celex_tag == "N" && tagI == "PN" ){
+    else if ( celex_tag == "N" && mbma_tag == "PN" ){
       if (debugFlag){
 	*Log(mbmaLog) << "comparing " << celex_tag << " with "
-		      << tagI << " (OK)" << endl;
+		      << mbma_tag << " (OK)" << endl;
       }
       (*ait)->confidence = 1.0;
       ++ait;
     }
-    else if ( celex_tag == "B" && tagI == "A" ){
+    else if ( celex_tag == "B" && mbma_tag == "A" ){
       if (debugFlag){
 	*Log(mbmaLog) << "comparing " << celex_tag << " with "
-		      << tagI << " (OK)" << endl;
+		      << mbma_tag << " (OK)" << endl;
       }
       (*ait)->confidence = 0.8;
       ++ait;
     }
-    else if ( celex_tag == "A" && tagI == "V" ){
+    else if ( celex_tag == "A" && mbma_tag == "V" ){
       if (debugFlag){
 	*Log(mbmaLog) << "comparing " << celex_tag << " with "
-		      << tagI << " (OK)" << endl;
+		      << mbma_tag << " (OK)" << endl;
       }
       (*ait)->confidence = 0.5;
       ++ait;
@@ -562,7 +562,7 @@ void Mbma::filterHeadTag( const string& head ){
     else {
       if (debugFlag){
 	*Log(mbmaLog) << "comparing " << celex_tag << " with "
-		      << tagI << " (rejected)" << endl;
+		      << mbma_tag << " (rejected)" << endl;
       }
       delete *ait;
       ait = analysis.erase( ait );
