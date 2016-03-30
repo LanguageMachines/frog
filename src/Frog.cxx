@@ -435,6 +435,11 @@ int main(int argc, char *argv[]) {
 
       ostream *outS = 0;
       if ( !outputFileName.empty() ){
+	if ( !TiCC::createPath( outputFileName ) ) {
+	  *Log(theErrLog) << "problem: unable to create outputfile: "
+			  << outputFileName << endl;
+	  return EXIT_FAILURE;
+	}
         outS = new ofstream( outputFileName );
       }
       for ( auto const& name : fileNames ){
@@ -453,6 +458,12 @@ int main(int argc, char *argv[]) {
 	    }
 	    else {
 	      outName = outPath + name + ".out";
+	    }
+	    if ( !TiCC::createPath( outName ) ) {
+	      *Log(theErrLog) << "problem frogging: " << name << endl
+			      << "unable to create outputfile: " << outName
+			      << endl;
+	      continue;
 	    }
 	    outS = new ofstream( outName );
 	  } else {
