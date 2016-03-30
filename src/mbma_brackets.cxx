@@ -579,7 +579,7 @@ CompoundType BracketNest::getCompoundType(){
 	  compound = construct( tag1, tag3 );
 	}
       }
-      else if ( tag1 == CLEX::B ){
+      else if ( tag1 == CLEX::B && st1 == Status::STEM ){
       	if ( st2 == Status::STEM &&
 	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
 	  compound = construct( tag1, tag2 );
