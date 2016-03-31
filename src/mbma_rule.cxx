@@ -309,11 +309,21 @@ bool Rule::performEdits(){
     if ( !cur->del.isEmpty() ){
       // sanity check
       for ( int j=0; j < cur->del.length(); ++j ){
-	if ( rules[k+j].uchar != cur->del[j] ){
+	if ( (k + j) < rules.size() ){
+	  if ( rules[k+j].uchar != cur->del[j] ){
+	    UnicodeString tmp(cur->del[j]);
+	    *TiCC::Log(myLog) << "Hmm: deleting " << cur->del << " is impossible. ("
+			      << rules[k+j].uchar << " != " << tmp
+			      << ")." << endl;
+	    *TiCC::Log(myLog) << "Reject rule: " << this << endl;
+	    return false;
+	  }
+	}
+	else {
 	  UnicodeString tmp(cur->del[j]);
-	  *TiCC::Log(myLog) << "Hmm: deleting " << cur->del << " is impossible. ("
-			<< rules[k+j].uchar << " != " << tmp
-			<< ")." << endl;
+	  *TiCC::Log(myLog) << "Hmm: deleting " << cur->del
+			    << " is impossible. (beyond end of the rule)"
+			    << endl;
 	  *TiCC::Log(myLog) << "Reject rule: " << this << endl;
 	  return false;
 	}
