@@ -156,6 +156,7 @@ BracketLeaf::BracketLeaf( const RulePart& p, int flag ):
   else if ( RightHand.size() == 0 ){
     orig = toString( cls );
     if ( ( p.ResultClass == CLEX::N
+	   || p.ResultClass == CLEX::V
 	   || p.ResultClass == CLEX::A )
 	 &&
 	 ( morph == "be" || morph == "ge" || morph == "ver" || morph == "ex" ) ){
@@ -518,10 +519,10 @@ CompoundType BracketNest::getCompoundType(){
     }
     if ( st1 != Status::FAILED
 	 && st2 != Status::FAILED
-	 && st3 != Status::FAILED ){
-      if ( tag1 == CLEX::N
-	   && st1 != Status::PARTICLE
-	   && st1 != Status::PARTICIPLE ){
+	 && st3 != Status::FAILED
+	 && st1 != Status::PARTICLE
+	 && st1 != Status::PARTICIPLE ){
+      if ( tag1 == CLEX::N ){
 	if ( st2 == Status::STEM &&
 	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
 	  compound = construct( tag1, tag2 );
@@ -550,9 +551,7 @@ CompoundType BracketNest::getCompoundType(){
 	  }
 	}
       }
-      else if ( tag1 == CLEX::A
-		&& st1 != Status::PARTICLE
-		&& st1 != Status::PARTICIPLE ){
+      else if ( tag1 == CLEX::A ){
 	if ( st2 == Status::STEM &&
 	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
 	  compound = construct( tag1, tag2 );
