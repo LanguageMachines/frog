@@ -445,10 +445,11 @@ CompoundType BracketNest::getCompoundType(){
     CompoundType cp1 = (*it)->compound();
     Status st1 = (*it)->status();
     CLEX::Type tag2 = (*++it)->tag();
+    CompoundType cp2 = (*it)->compound();
     Status st2 = (*it)->status();
     if ( debugFlag > 5 ){
       cerr << "tag1 :" << tag1 << " stat1: " << st1 << " cp1: " << cp1 << endl;
-      cerr << "tag2 :" << tag2 << " stat2: " << st2 << endl;
+      cerr << "tag2 :" << tag2 << " stat2: " << st2 << " cp2: " << cp2 << endl;
     }
     if ( st1 != Status::FAILED
 	 && st2 != Status::FAILED ){
@@ -492,7 +493,10 @@ CompoundType BracketNest::getCompoundType(){
       else if ( tag1 == CLEX::V
 		&& st1 != Status::PARTICLE
 		&& st1 != Status::PARTICIPLE ){
-	if ( st2 == Status::STEM ){
+	if ( st1 == Status::DERIVATIONAL ){
+	  compound = cp2;
+	}
+	else if ( st2 == Status::STEM ){
 	  compound = construct( tag1, tag2 );
 	}
       }
