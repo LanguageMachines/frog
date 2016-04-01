@@ -337,6 +337,7 @@ bool Rule::performEdits(){
     }
 
     bool inserted = false;
+    UnicodeString part; // store to-be-inserted particles here!
     if ( cur->isBasic() ){
       // encountering real POS tag
       // start a new morpheme, BUT: inserts are appended to the previous one
@@ -345,7 +346,13 @@ bool Rule::performEdits(){
 	*TiCC::Log(myLog) << "FOUND a basic tag " << cur->ResultClass << endl;
       }
       if ( cur->del.isEmpty() ){ // So not a replace
-	last->morpheme += cur->ins;
+	if ( cur->ins == "ge" ){
+	  // save particle, to add it to the NEXT node!
+	  part = cur->ins;
+	}
+	else {
+	  last->morpheme += cur->ins;
+	}
 	inserted = true;
       }
       last = cur;
@@ -356,7 +363,13 @@ bool Rule::performEdits(){
     }
     if ( !inserted ){
       // insert the deletestring :-)
+      *TiCC::Log(myLog) << "a to morpheme: " << cur->ins << endl;
       last->morpheme += cur->ins;
+    }
+    if ( !part.isEmpty() ){
+      *TiCC::Log(myLog) << "a part to add: " << part << endl;
+      last->morpheme += part;
+      part.remove();
     }
     last->morpheme += cur->uchar; // might be empty because of deletion
   }
