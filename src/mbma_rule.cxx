@@ -369,7 +369,9 @@ bool Rule::performEdits(){
       last->morpheme += cur->ins;
     }
     else if ( !part.isEmpty() ){
-      *TiCC::Log(myLog) << "a part to add: " << part << endl;
+      if ( debugFlag ){
+	*TiCC::Log(myLog) << "a part to add: " << part << endl;
+      }
       last->morpheme += part;
       part.remove();
     }
