@@ -136,8 +136,8 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
     //    cerr << "EDIT = " << edit << endl;
     get_ins_del( edit );
     s = rs.substr(0, ppos );
-    participle = ( s.find( 'p' ) != string::npos ) &&
-      ( del == "ge" || del == "be" );
+    participle = ( s.find( "pv" ) != string::npos ) &&
+      ( del == "ge" );
   }
   string::size_type pos = s.find("_");
   if ( pos != string::npos ){
@@ -363,10 +363,12 @@ bool Rule::performEdits(){
     }
     if ( !inserted ){
       // insert the deletestring :-)
-      *TiCC::Log(myLog) << "a to morpheme: " << cur->ins << endl;
+      if ( debugFlag ){
+	*TiCC::Log(myLog) << "add to morpheme: " << cur->ins << endl;
+      }
       last->morpheme += cur->ins;
     }
-    if ( !part.isEmpty() ){
+    else if ( !part.isEmpty() ){
       *TiCC::Log(myLog) << "a part to add: " << part << endl;
       last->morpheme += part;
       part.remove();
