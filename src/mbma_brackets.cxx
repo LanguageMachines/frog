@@ -1048,22 +1048,32 @@ void BracketNest::clearEmptyNodes(){
 
 CLEX::Type BracketNest::getFinalTag() {
   // cerr << "get Final Tag from: " << this << endl;
-  cls = CLEX::UNASS;
+  CLEX::Type result_cls = CLEX::UNASS;
   auto it = parts.rbegin();
   while ( it != parts.rend() ){
-    // cerr << "bekijk: " << *it << endl;
+    //    cerr << "bekijk: " << *it << endl;
     if ( (*it)->isNested()
 	 || ( (*it)->inflection().empty()
 	      && !(*it)->morpheme().isEmpty() ) ){
-      cls = (*it)->tag();
-      // cerr << "final tag = " << cls << endl;
-      if ( cls != CLEX::P ){
+      result_cls = (*it)->tag();
+      //      cerr << "maybe tag = " << result_cls << endl;
+      if ( result_cls != CLEX::P ){
+	auto it2 = it;
+	++it2;
+	if ( it2 != parts.rend() ){
+	  //	  cerr << "bekijk ook " << *it2 << endl;
+	  if ( (*it2)->infixpos() == 0 ){
+	    result_cls = (*it2)->tag();
+	  }
+	}
 	// in case of P we hope for better
+	// in case of a X_*Y rule we need X
 	break;
       }
     }
     ++it;
   }
-  //  cerr << "final tag = X " << endl;
+  //  cerr << "final tag = " << result_cls << endl;
+  cls = result_cls;
   return cls;
 }
