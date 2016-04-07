@@ -456,33 +456,50 @@ UnicodeString Rule::getKey( bool deep ){
 }
 
 void Rule::getCleanInflect() {
-  // get the FIRST inflection and clean it up by extracting only
+  // get the last inflection and clean it up by extracting only
   //  known inflection names
+  if ( debugFlag > 5 ){
+    *TiCC::Log(myLog) << "getCleanInflect: " << this << endl;
+  }
   inflection = "";
-  for ( const auto& rule: rules ){
+  auto it = rules.rbegin();
+  while ( it != rules.rend() ){
+    RulePart rule = *it;
+    if ( debugFlag > 5 ){
+      *TiCC::Log(myLog) << rule << endl;
+    }
     if ( !rule.inflect.empty() ){
-      //      *TiCC::Log(myLog) << "x inflect:'" << rule->inflect << "'" << endl;
+      if ( debugFlag > 5 ){
+	*TiCC::Log(myLog) << "x inflect:'" << rule.inflect << "'" << endl;
+      }
       string inflect;
       for ( auto const& i : rule.inflect ){
 	if ( i != '/' ){
 	  // check if it is a known inflection
-	  //	  *TiCC::Log(myLog) << "x bekijk [" << i << "]" << endl;
+	  if ( debugFlag > 5 ){
+	    *TiCC::Log(myLog) << "x bekijk [" << i << "]" << endl;
+	  }
 	  string inf = CLEX::get_iDescr(i);
 	  if ( inf.empty() ){
-	    //	    *TiCC::Log(myLog) << "added unknown inflection X" << endl;
+	    *TiCC::Log(myLog) << "added unknown inflection X" << endl;
 	    inflect += "X";
 	  }
 	  else {
-	    //	    *TiCC::Log(myLog) << "added known inflection " << i
-	    //	     	 << " (" << inf << ")" << endl;
+	    if ( debugFlag > 5 ){
+	      *TiCC::Log(myLog) << "added known inflection " << i
+				<< " (" << inf << ")" << endl;
+	    }
 	    inflect += i;
 	  }
 	}
       }
-      //      *TiCC::Log(myLog) << "cleaned inflection " << inflect << endl;
+      if ( debugFlag > 5 ){
+	*TiCC::Log(myLog) << "cleaned inflection " << inflect << endl;
+      }
       inflection = inflect;
       return;
     }
+    ++it;
   }
 }
 
