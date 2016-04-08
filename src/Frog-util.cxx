@@ -43,8 +43,9 @@
 using namespace std;
 
 string prefix( const string& path, const string& fn ){
-  if ( fn.find( "/" ) == string::npos ){
-    // only append prefix when NO path is specified
+  if ( fn.find( "/" ) == string::npos && !path.empty() ){
+    // only append prefix when it isn't empty AND
+    // NO path is specified in the filename
     return path + "/" + fn;
   }
   return fn;
