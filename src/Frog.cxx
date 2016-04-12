@@ -121,7 +121,7 @@ void usage( ) {
        << "\t\t Set debug value for Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"
        << "\t -S <port>              Run as server instead of reading from testfile\n"
 #ifdef HAVE_OPENMP
-       << "\t --threads=<n>       Use a maximun of 'n' threads. Default: all we can get. \n"
+       << "\t --threads=<n>       Use a maximum of 'n' threads. Default: all we can get. \n"
 #endif
        << "\t                     (but always 1 for server mode)\n";
 }
@@ -241,6 +241,7 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
   if ( options.doServer ) {
     // run in one thread in server mode, forking is too expensive for lots of small snippets
     options.numThreads =  1;
+    Opts.extract( "threads", value ); //discard threads option
   }
   else if ( Opts.extract( "threads", value ) ){
     int num;
