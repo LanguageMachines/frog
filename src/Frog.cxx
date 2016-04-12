@@ -113,6 +113,7 @@ void usage( ) {
        << "\t --id=<docid>          Document ID, used in FoLiA output. (Default 'untitled')\n"
        << "\t --outputdir=<dir>     Output to dir, instead of default stdout\n"
        << "\t --xmldir=<dir>        Use 'dir' to output FoliA XML to.\n"
+       << "\t --deep-morph          add deep morphological information to the output\n"
        << "\t============= OTHER OPTIONS ============================================\n"
        << "\t -h. give some help.\n"
        << "\t -V or --version .   Show version info.\n"
