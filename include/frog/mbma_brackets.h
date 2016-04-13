@@ -67,11 +67,10 @@ public:
   Status status() const { return _status; };
   void set_status( const Status s ) { _status = s; };
   virtual UnicodeString morpheme() const { return "";};
-  virtual UnicodeString deepmorphemes() const { return "";};
   virtual std::string inflection() const { return ""; };
   virtual std::string original() const { return ""; };
   virtual int infixpos() const { return -1; };
-  virtual UnicodeString put( bool = false ) const;
+  virtual UnicodeString put( bool = true ) const;
   virtual BaseBracket *append( BaseBracket * ){ abort(); };
   virtual bool isNested() { return false; };
   virtual void resolveLead(){ abort(); };
@@ -96,9 +95,8 @@ class BracketLeaf: public BaseBracket {
 public:
   BracketLeaf( const RulePart&, int );
   BracketLeaf( CLEX::Type, const UnicodeString&, int );
-  UnicodeString put( bool = false ) const;
+  UnicodeString put( bool = true ) const;
   UnicodeString morpheme() const { return morph; };
-  UnicodeString deepmorphemes() const { return morph; };
   std::string inflection() const { return inflect; };
   std::string original() const { return orig; };
   int infixpos() const { return ifpos; };
@@ -119,7 +117,7 @@ class BracketNest: public BaseBracket {
   ~BracketNest();
   bool isNested() { return true; };
   void clearEmptyNodes();
-  UnicodeString put( bool = false ) const;
+  UnicodeString put( bool = true ) const;
   bool testMatch( std::list<BaseBracket*>& result,
 		  const std::list<BaseBracket*>::iterator& rpos,
 		  std::list<BaseBracket*>::iterator& bpos );
@@ -130,7 +128,6 @@ class BracketNest: public BaseBracket {
   void resolveTail();
   void resolveMiddle();
   CompoundType getCompoundType();
-  UnicodeString deepmorphemes() const;
   CLEX::Type getFinalTag();
   folia::Morpheme *createMorpheme( folia::Document * ) const;
   folia::Morpheme *createMorpheme( folia::Document *,

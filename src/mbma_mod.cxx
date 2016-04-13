@@ -846,29 +846,11 @@ void Mbma::Classify( const UnicodeString& word ){
   analysis = execute( uWord, classes );
 }
 
-vector<vector<string> > Mbma::getResult( bool show_class ) const {
-  vector<vector<string> > result;
-  result.reserve( analysis.size() );
-  if ( doDeepMorph ){
-    for ( const auto& it : analysis ){
-      stringstream ss;
-      ss << it->brackets->put( !show_class ) << endl;
-      vector<string> mors;
-      mors.push_back( ss.str() );
-      if ( debugFlag ){
-	*Log(mbmaLog) << "Morphs " << mors << endl;
-      }
-      result.push_back( mors );
-    }
-  }
-  else {
-    for ( const auto& it : analysis ){
-      vector<string> mors = it->extract_morphemes();
-      if ( debugFlag ){
-	*Log(mbmaLog) << "Morphs " << mors << endl;
-      }
-      result.push_back( mors );
-    }
+vector<string> Mbma::getResult() const {
+  vector<string> result;
+  for ( const auto& it : analysis ){
+    string tmp = it->morpheme_string( doDeepMorph );
+    result.push_back( tmp );
   }
   if ( debugFlag ){
     *Log(mbmaLog) << "result of morph analyses: " << result << endl;

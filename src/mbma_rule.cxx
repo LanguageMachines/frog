@@ -281,7 +281,7 @@ void Rule::reduceZeroNodes(){
   rules.swap( out );
 }
 
-vector<string> Rule::extract_morphemes() const {
+vector<string> Rule::extract_morphemes( ) const {
   vector<string> morphemes;
   morphemes.reserve( rules.size() );
   for ( const auto& it : rules ){
@@ -291,6 +291,21 @@ vector<string> Rule::extract_morphemes() const {
     }
   }
   return morphemes;
+}
+
+string Rule::morpheme_string( bool structured ) const {
+  string result;
+  if ( structured ){
+    UnicodeString us = brackets->put(false);
+    result = UnicodeToUTF8( us );
+  }
+  else {
+    vector<string> vec = extract_morphemes();
+    for ( const auto& m : vec ){
+      result += "[" + m + "]";
+    }
+  }
+  return result;
 }
 
 bool Rule::performEdits(){

@@ -211,20 +211,23 @@ BracketNest::~BracketNest(){
   }
 }
 
-UnicodeString BaseBracket::put( bool noclass ) const {
+UnicodeString BaseBracket::put( bool full ) const {
   UnicodeString result = "[err?]";
-  if ( !noclass ){
+  if ( full ){
     UnicodeString s = UTF8ToUnicode(toString(cls));
     result += s;
   }
   return result;
 }
 
-UnicodeString BracketLeaf::put( bool noclass ) const {
-  UnicodeString result = "[";
-  result += morph;
-  result += "]";
-  if ( !noclass ){
+UnicodeString BracketLeaf::put( bool full ) const {
+  UnicodeString result;
+  if ( !morph.isEmpty() ){
+    result += "[";
+    result += morph;
+    result += "]";
+  }
+  if ( full ){
     if ( orig.empty() ){
       result += UTF8ToUnicode(inflect);
     }
@@ -235,19 +238,22 @@ UnicodeString BracketLeaf::put( bool noclass ) const {
   return result;
 }
 
-UnicodeString BracketNest::put( bool noclass ) const {
+UnicodeString BracketNest::put( bool full ) const {
   UnicodeString result = "[ ";
   for ( auto const& it : parts ){
-    result += it->put(noclass) + " ";
+    UnicodeString m = it->put( full );
+    if ( !m.isEmpty() ){
+      result +=  m + " ";
+    }
   }
   result += "]";
-  if ( !noclass ){
+  if ( full ){
     if ( cls != CLEX::UNASS ){
       result += UTF8ToUnicode(toString(cls));
     }
-  }
-  if ( _compound != CompoundType::NONE ){
-    result += " " + UTF8ToUnicode(toString(_compound)) + "-compound";
+    if ( _compound != CompoundType::NONE ){
+      result += " " + UTF8ToUnicode(toString(_compound)) + "-compound";
+    }
   }
   return result;
 }
@@ -265,14 +271,6 @@ ostream& operator<< ( ostream& os, const BaseBracket *c ){
     os << "[EMPTY]";
   }
   return os;
-}
-
-UnicodeString BracketNest::deepmorphemes() const{
-  UnicodeString res;
-  for ( auto const& it : parts ){
-    res += it->deepmorphemes();
-  }
-  return res;
 }
 
 void prettyP( ostream& os, const list<BaseBracket*>& v ){

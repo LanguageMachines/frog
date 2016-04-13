@@ -64,6 +64,7 @@ public:
 	int );
   ~Rule();
   std::vector<std::string> extract_morphemes() const;
+  std::string morpheme_string( bool = false ) const;
   UnicodeString getKey( bool );
   bool performEdits();
   void getCleanInflect();
