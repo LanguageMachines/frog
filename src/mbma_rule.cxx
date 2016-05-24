@@ -321,6 +321,7 @@ bool Rule::performEdits(){
     if ( debugFlag){
       *TiCC::Log(myLog) << "edit::act=" << cur << endl;
     }
+    bool is_replace = false;
     if ( !cur->del.isEmpty() ){
       // sanity check
       for ( int j=0; j < cur->del.length(); ++j ){
@@ -343,6 +344,7 @@ bool Rule::performEdits(){
 	  return false;
 	}
       }
+      is_replace = !cur->ins.isEmpty();
     }
     if ( !cur->participle ){
       for ( int j=0; j < cur->del.length(); ++j ){
@@ -360,7 +362,7 @@ bool Rule::performEdits(){
       if ( debugFlag ){
 	*TiCC::Log(myLog) << "FOUND a basic tag " << cur->ResultClass << endl;
       }
-      if ( cur->del.isEmpty() ){ // So not a replace
+      if ( !is_replace ){
 	if ( cur->ins == "ge" ){
 	  // save particle, to add it to the NEXT node!
 	  part = cur->ins;
