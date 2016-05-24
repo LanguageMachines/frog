@@ -40,15 +40,16 @@
 #include "timbl/TimblAPI.h"
 
 #include "frog/Frog.h" // defines etc.
+#include "ucto/unicode.h"
 #include "frog/mwu_chunker_mod.h"
 
 using namespace std;
 using namespace TiCC;
 using namespace folia;
 
-mwuAna::mwuAna( Word *fwrd, const string& glue_tag ){
+mwuAna::mwuAna( Word *fwrd, const string& txt, const string& glue_tag ){
   spec = false;
-  word = fwrd->str();
+  word = txt;
   string tag;
 #pragma omp critical(foliaupdate)
   {
@@ -96,11 +97,13 @@ EntitiesLayer *mwuAna::addEntity( const std::string& tagset,
 
 Mwu::Mwu(LogStream * logstream){
   mwuLog = new LogStream( logstream, "mwu-" );
+  filter = 0;
 }
 
 Mwu::~Mwu(){
   reset();
   delete mwuLog;
+  delete filter;
 }
 
 void Mwu::reset(){
@@ -111,7 +114,15 @@ void Mwu::reset(){
 }
 
 void Mwu::add( Word *word ){
-  mWords.push_back( new mwuAna( word, glue_tag ) );
+  UnicodeString tmp;
+#pragma omp critical(foliaupdate)
+  {
+    tmp = word->text();
+  }
+  if ( filter )
+    tmp = filter->filter( tmp );
+  string txt = UnicodeToUTF8( tmp );
+  mWords.push_back( new mwuAna( word, txt, glue_tag ) );
 }
 
 
@@ -172,7 +183,14 @@ bool Mwu::init( const Configuration& config ) {
   else {
     mwu_tagset = val;
   }
-
+  string charFile = config.lookUp( "char_filter_file", "tagger" );
+  if ( charFile.empty() )
+    charFile = config.lookUp( "char_filter_file" );
+  if ( !charFile.empty() ){
+    charFile = prefix( config.configDir(), charFile );
+    filter = new Tokenizer::UnicodeFilter();
+    filter->fill( charFile );
+  }
   val = config.lookUp( "gluetag", "mwu" );
   if ( val.empty() ){
     glue_tag = "SPEC(deeleigen)";

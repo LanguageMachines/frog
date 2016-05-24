@@ -39,6 +39,7 @@
 #include "config.h"
 #include "ticcutils/Configuration.h"
 #include "timbl/TimblAPI.h"
+#include "ucto/unicode.h"
 #include "frog/Frog.h"
 #include "frog/Parser.h"
 #include "frog/csidp.h"
@@ -76,6 +77,7 @@ ostream& operator<<( ostream& os, const parseData& pd ){
 }
 
 bool Parser::init( const Configuration& configuration ){
+  filter = 0;
   string pairsFileName;
   string pairsOptions = "-a1 +D -G0 +vdb+di";
   string dirFileName;
@@ -114,6 +116,14 @@ bool Parser::init( const Configuration& configuration ){
   }
   else {
     MWU_tagset = val;
+  }
+  string charFile = configuration.lookUp( "char_filter_file", "tagger" );
+  if ( charFile.empty() )
+    charFile = configuration.lookUp( "char_filter_file" );
+  if ( !charFile.empty() ){
+    charFile = prefix( configuration.configDir(), charFile );
+    filter = new Tokenizer::UnicodeFilter();
+    filter->fill( charFile );
   }
   val = configuration.lookUp( "maxDepSpan", "parser" );
   if ( !val.empty() ){
@@ -208,6 +218,7 @@ Parser::~Parser(){
   delete dir;
   delete pairs;
   delete parseLog;
+  delete filter;
 }
 
 static vector<Word *> lookup( Word *word,
@@ -805,7 +816,15 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
       string head;
       string mod;
       for ( const auto& mwu : mwuv ){
-	multi_word += mwu->str();
+	UnicodeString tmp;
+#pragma omp critical(foliaupdate)
+	{
+	  tmp = mwu->text();
+	}
+	if ( filter )
+	  tmp = filter->filter( tmp );
+	string ms = UnicodeToUTF8( tmp );
+	multi_word += ms;
 	PosAnnotation *postag = mwu->annotation<PosAnnotation>( POS_tagset );
 	head += postag->feat("head");
 	vector<folia::Feature*> feats = postag->select<folia::Feature>();
@@ -828,7 +847,15 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
       i += mwuv.size()-1;
     }
     else {
-      pd.words.push_back( word->str() );
+      UnicodeString tmp;
+#pragma omp critical(foliaupdate)
+      {
+	tmp = word->text();
+      }
+      if ( filter )
+	tmp = filter->filter( tmp );
+      string ms = UnicodeToUTF8( tmp );
+      pd.words.push_back( ms );
       PosAnnotation *postag = word->annotation<PosAnnotation>( POS_tagset );
       string head = postag->feat("head");
       pd.heads.push_back( head );

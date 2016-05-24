@@ -35,7 +35,7 @@
 class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );
  public:
-  mwuAna( folia::Word *, const std::string& );
+  mwuAna( folia::Word *, const std::string&, const std::string& );
   virtual ~mwuAna() {};
 
   void merge( const mwuAna * );
@@ -82,6 +82,7 @@ class Mwu {
   std::string version;
   std::string mwu_tagset;
   std::string glue_tag;
+  Tokenizer::UnicodeFilter *filter;
 };
 
 #endif

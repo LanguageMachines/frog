@@ -63,6 +63,7 @@ class Parser {
   std::string dep_tagset;
   std::string POS_tagset;
   std::string MWU_tagset;
+  Tokenizer::UnicodeFilter *filter;
 };
 
 
