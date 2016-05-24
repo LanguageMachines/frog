@@ -31,6 +31,7 @@
 
 #include "mbt/MbtAPI.h"
 #include "frog/Frog.h"
+#include "ucto/unicode.h"
 #include "frog/iob_tagger_mod.h"
 
 using namespace std;
@@ -41,11 +42,13 @@ using namespace Tagger;
 IOBTagger::IOBTagger(TiCC::LogStream * logstream){
   tagger = 0;
   iobLog = new LogStream( logstream, "iob-" );
+  filter = 0;
 }
 
 IOBTagger::~IOBTagger(){
   delete tagger;
   delete iobLog;
+  delete filter;
 }
 
 bool IOBTagger::init( const Configuration& config ){
@@ -110,7 +113,14 @@ bool IOBTagger::init( const Configuration& config ){
   else {
     tagset = val;
   }
-
+  string charFile = config.lookUp( "char_filter_file", "IOB" );
+  if ( charFile.empty() )
+    charFile = config.lookUp( "char_filter_file" );
+  if ( !charFile.empty() ){
+    charFile = prefix( config.configDir(), charFile );
+    filter = new Tokenizer::UnicodeFilter();
+    filter->fill( charFile );
+  }
   string init = "-s " + settings + " -vcf";
   tagger = new MbtAPI( init, *iobLog );
   return tagger->isInit();
@@ -251,16 +261,16 @@ void IOBTagger::addDeclaration( Document& doc ) const {
 
 void IOBTagger::Classify( const vector<Word *>& swords ){
   if ( !swords.empty() ) {
-    vector<string> words;
     string sentence; // the tagger needs the whole sentence
     for ( const auto& sword : swords ){
-      string wrd;
+      UnicodeString word;
 #pragma omp critical(foliaupdate)
       {
-	wrd = sword->str();
+	word = sword->text();
       }
-      sentence += wrd;
-      words.push_back( wrd );
+      if ( filter )
+	word = filter->filter( word );
+      sentence += UnicodeToUTF8(word);
       if ( &sword != &swords.back() ){
 	sentence += " ";
       }

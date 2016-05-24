@@ -58,6 +58,7 @@ class NERTagger {
   std::string version;
   std::string tagset;
   std::vector<std::map<std::string,std::string>> known_ners;
+  Tokenizer::UnicodeFilter *filter;
 };
 
 #endif // NER_TAGGER_MOD_H

@@ -54,6 +54,7 @@ class IOBTagger {
   int debug;
   std::string version;
   std::string tagset;
+  Tokenizer::UnicodeFilter *filter;
 };
 
 #endif // IOB_TAGGER_MOD_H

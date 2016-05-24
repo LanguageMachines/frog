@@ -31,6 +31,7 @@
 
 #include "mbt/MbtAPI.h"
 #include "frog/Frog.h"
+#include "ucto/unicode.h"
 #include "frog/ner_tagger_mod.h"
 
 using namespace std;
@@ -43,6 +44,7 @@ const int KNOWN_NERS_SIZE = 10;
 
 NERTagger::NERTagger(TiCC::LogStream * logstream){
   tagger = 0;
+  filter = 0;
   nerLog = new LogStream( logstream, "ner-" );
   known_ners.resize( KNOWN_NERS_SIZE+1 );
 }
@@ -50,6 +52,7 @@ NERTagger::NERTagger(TiCC::LogStream * logstream){
 NERTagger::~NERTagger(){
   delete tagger;
   delete nerLog;
+  delete filter;
 }
 
 bool NERTagger::init( const Configuration& config ){
@@ -112,6 +115,14 @@ bool NERTagger::init( const Configuration& config ){
   }
   else {
     tagset = val;
+  }
+  string charFile = config.lookUp( "char_filter_file", "NER" );
+  if ( charFile.empty() )
+    charFile = config.lookUp( "char_filter_file" );
+  if ( !charFile.empty() ){
+    charFile = prefix( config.configDir(), charFile );
+    filter = new Tokenizer::UnicodeFilter();
+    filter->fill( charFile );
   }
   val = config.lookUp( "known_ners", "NER" );
   if ( !val.empty() ){
@@ -392,13 +403,15 @@ void NERTagger::Classify( const vector<Word *>& swords ){
     vector<string> words;
     string sentence; // the tagger needs the whole sentence
     for ( const auto& sw : swords ){
-      string wrd;
+      UnicodeString word;
 #pragma omp critical(foliaupdate)
       {
-	wrd = sw->str();
+	word = sw->text();
       }
-      sentence += wrd;
-      words.push_back( wrd );
+      if ( filter )
+	word = filter->filter( word );
+      sentence += UnicodeToUTF8(word);
+      words.push_back( UnicodeToUTF8(word) );
       if ( &sw != &swords.back() ){
 	sentence += " ";
       }
