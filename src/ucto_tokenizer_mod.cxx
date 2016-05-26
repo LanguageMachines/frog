@@ -34,6 +34,7 @@
 #include "timbl/TimblAPI.h"
 #include "frog/Frog.h"
 #include "ticcutils/Configuration.h"
+#include "ticcutils/FileUtils.h"
 #include "frog/ucto_tokenizer_mod.h"
 
 using namespace std;
@@ -42,6 +43,18 @@ using namespace TiCC;
 UctoTokenizer::UctoTokenizer(LogStream * logstream) {
   tokenizer = 0;
   uctoLog = new LogStream( logstream, "tok-" );
+}
+
+string resolve_configdir( const string& rules_name, const string& dir ){
+  if ( TiCC::isFile( rules_name ) ){
+    return rules_name;
+  }
+  string temp = prefix( dir, rules_name );
+  if ( TiCC::isFile( temp ) ){
+    return temp;
+  }
+  // not found. so lets hope ucto can find it!
+  return rules_name;
 }
 
 bool UctoTokenizer::init( const Configuration& config ){
@@ -71,6 +84,7 @@ bool UctoTokenizer::init( const Configuration& config ){
       return false;
     }
     else {
+      rulesName = resolve_configdir( rulesName, config.configDir() );
       if ( !tokenizer->init( rulesName ) )
 	return false;
     }
