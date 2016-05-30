@@ -133,7 +133,7 @@ bool Parser::init( const Configuration& configuration ){
       maxDepSpan = gs;
     }
     else {
-      *Log(parseLog) << "invalid maxDepSPan value in config file" << endl;
+      *Log(parseLog) << "invalid maxDepSpan value in config file" << endl;
       *Log(parseLog) << "keeping default " << maxDepSpan << endl;
       problem = true;
     }
