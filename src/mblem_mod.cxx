@@ -55,32 +55,6 @@ Mblem::Mblem( LogStream *logstream ):
   mblemLog = new LogStream( logstream, "mblem" );
 }
 
-void Mblem::read_transtable( const string& tableName ) {
-  ifstream bron( tableName );
-  if ( !bron ) {
-    *Log(mblemLog) << "translation table file '" << tableName
-		    << "' appears to be missing." << endl;
-    exit(1);
-  }
-  while( bron ){
-    string className;
-    string classCode;
-    bron >> className;
-    bron >> ws;
-    bron >> classCode;
-    if ( classMap.find( classCode ) == classMap.end() ){
-      // stupid HACK to only accept first occurence
-      // multiple occurences is a NO NO i think
-      classMap[classCode] = className;
-    }
-    // else {
-    //   *Log(mblemLog) << "multiple entry " << className << " " << classCode << " in translation table file: " << tableName  << " (Ignored) " << endl;
-    // }
-    bron >> ws;
-  }
-  return;
-}
-
 bool Mblem::fill_ts_map( const string& file ){
   ifstream is( file );
   if ( !is ){
@@ -139,7 +113,6 @@ bool Mblem::init( const Configuration& config ) {
     transName = prefix( config.configDir(), transName );
     cerr << "usage of a mblem transFile is no longer needed!" << endl;
     cerr << "skipping : " << transName << endl;
-    //    read_transtable( transName );
   }
   string treeName = config.lookUp( "treeFile", "mblem"  );
   if ( treeName.empty() )
