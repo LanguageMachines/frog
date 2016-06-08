@@ -139,9 +139,11 @@ bool POSTagger::init( const Configuration& config ){
   val = config.lookUp( "set", "tagger" );
   if ( val.empty() ){
     *Log(tag_log) << "missing set declaration in config" << endl;
+    exit(EXIT_FAILURE);
   }
-  else
+  else {
     tagset = val;
+  }
   string charFile = config.lookUp( "char_filter_file", "tagger" );
   if ( charFile.empty() )
     charFile = config.lookUp( "char_filter_file" );
