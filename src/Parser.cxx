@@ -45,8 +45,11 @@
 #include "frog/csidp.h"
 
 using namespace std;
-using namespace TiCC;
 using namespace folia;
+
+using TiCC::operator<<;
+
+#define LOG *TiCC::Log(parseLog)
 
 TiCC::Timer prepareTimer;
 TiCC::Timer relsTimer;
@@ -76,7 +79,7 @@ ostream& operator<<( ostream& os, const parseData& pd ){
   return os;
 }
 
-bool Parser::init( const Configuration& configuration ){
+bool Parser::init( const TiCC::Configuration& configuration ){
   filter = 0;
   string pairsFileName;
   string pairsOptions = "-a1 +D -G0 +vdb+di";
@@ -87,7 +90,7 @@ bool Parser::init( const Configuration& configuration ){
   maxDepSpanS = "20";
   maxDepSpan = 20;
   bool problem = false;
-  *Log(parseLog) << "initiating parser ... " << endl;
+  LOG << "initiating parser ... " << endl;
   string cDir = configuration.configDir();
   string val = configuration.lookUp( "version", "parser" );
   if ( val.empty() ){
@@ -133,8 +136,8 @@ bool Parser::init( const Configuration& configuration ){
       maxDepSpan = gs;
     }
     else {
-      *Log(parseLog) << "invalid maxDepSpan value in config file" << endl;
-      *Log(parseLog) << "keeping default " << maxDepSpan << endl;
+      LOG << "invalid maxDepSpan value in config file" << endl;
+      LOG << "keeping default " << maxDepSpan << endl;
       problem = true;
     }
   }
@@ -143,7 +146,7 @@ bool Parser::init( const Configuration& configuration ){
     pairsFileName = prefix( cDir, val );
   }
   else {
-    *Log(parseLog) << "missing pairsFile option" << endl;
+    LOG << "missing pairsFile option" << endl;
     problem = true;
   }
   val = configuration.lookUp( "pairsOptions", "parser" );
@@ -155,7 +158,7 @@ bool Parser::init( const Configuration& configuration ){
     dirFileName = prefix( cDir, val );
   }
   else {
-    *Log(parseLog) << "missing dirFile option" << endl;
+    LOG << "missing dirFile option" << endl;
     problem = true;
   }
   val = configuration.lookUp( "dirOptions", "parser" );
@@ -167,7 +170,7 @@ bool Parser::init( const Configuration& configuration ){
     relsFileName = prefix( cDir, val );
   }
   else {
-    *Log(parseLog) << "missing relsFile option" << endl;
+    LOG << "missing relsFile option" << endl;
     problem = true;
   }
   val = configuration.lookUp( "relsOptions", "parser" );
@@ -181,31 +184,34 @@ bool Parser::init( const Configuration& configuration ){
   bool happy = true;
   pairs = new Timbl::TimblAPI( pairsOptions );
   if ( pairs->Valid() ){
-    *Log(parseLog) << "reading " <<  pairsFileName << endl;
+    LOG << "reading " <<  pairsFileName << endl;
     happy = pairs->GetInstanceBase( pairsFileName );
   }
   else {
-    *Log(parseLog) << "creating Timbl for pairs failed:"
+    LOG << "creating Timbl for pairs failed:"
 		   << pairsOptions << endl;
+    happy = false;
   }
   if ( happy ){
     dir = new Timbl::TimblAPI( dirOptions );
     if ( dir->Valid() ){
-      *Log(parseLog) << "reading " <<  dirFileName << endl;
+      LOG << "reading " <<  dirFileName << endl;
       happy = dir->GetInstanceBase( dirFileName );
     }
     else {
-      *Log(parseLog) << "creating Timbl for dir failed:" << dirOptions << endl;
+      LOG << "creating Timbl for dir failed:" << dirOptions << endl;
+      happy = false;
     }
     if ( happy ){
       rels = new Timbl::TimblAPI( relsOptions );
       if ( rels->Valid() ){
-	*Log(parseLog) << "reading " <<  relsFileName << endl;
+	LOG << "reading " <<  relsFileName << endl;
 	happy = rels->GetInstanceBase( relsFileName );
       }
       else {
-	*Log(parseLog) << "creating Timbl for rels failed:"
+	LOG << "creating Timbl for rels failed:"
 		       << relsOptions << endl;
+	happy = false;
       }
     }
   }
@@ -827,7 +833,7 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
 	multi_word += ms;
 	PosAnnotation *postag = mwu->annotation<PosAnnotation>( POS_tagset );
 	head += postag->feat("head");
-	vector<folia::Feature*> feats = postag->select<folia::Feature>();
+	vector<Feature*> feats = postag->select<Feature>();
 	for ( const auto& feat : feats ){
 	  mod += feat->cls();
 	  if ( &feat != &feats.back() ){
@@ -860,7 +866,7 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
       string head = postag->feat("head");
       pd.heads.push_back( head );
       string mod;
-      vector<folia::Feature*> feats = postag->select<folia::Feature>();
+      vector<Feature*> feats = postag->select<Feature>();
       if ( feats.empty() ){
 	mod = "__";
       }
@@ -924,7 +930,6 @@ void appendParseResult( const vector<Word *>& words,
 			parseData& pd,
 			const string& tagset,
 			const vector<parsrel>& res ){
-  string line;
   vector<int> nums;
   vector<string> roles;
   for ( const auto& it : res ){
@@ -949,11 +954,11 @@ void Parser::Parse( const vector<Word*>& words,
 		    TimerBlock& timers ){
   timers.parseTimer.start();
   if ( !isInit ){
-    *Log(parseLog) << "Parser is not initialized!" << endl;
+    LOG << "Parser is not initialized!" << endl;
     exit(1);
   }
   if ( words.empty() ){
-    *Log(parseLog) << "unable to parse an analisis without words" << endl;
+    LOG << "unable to parse an analisis without words" << endl;
     return;
   }
   timers.prepareTimer.start();
