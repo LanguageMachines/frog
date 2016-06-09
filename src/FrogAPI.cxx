@@ -844,6 +844,36 @@ string FrogAPI::lookupIOBChunk( const vector<Word *>& mwus,
   return endresult;
 }
 
+vector<string> get_morphs( folia::Word* w ){
+  vector<string> result;
+  vector<MorphologyLayer*> layers
+    = w->annotations<MorphologyLayer>( Mbma::mbma_tagset );
+  for ( const auto& layer : layers ){
+    vector<Morpheme*> m =
+      layer->select<Morpheme>( Mbma::mbma_tagset, false );
+    bool is_deep = false;
+    if ( m.size() == 1 ) {
+      // check for top layer from deep morph analysis
+      string str  = m[0]->feat( "structure" );
+      if ( !str.empty() ){
+	is_deep = true;
+	result.push_back( str );
+      }
+    }
+    if ( !is_deep ){
+      // flat structure
+      string morph;
+      vector<Morpheme*> m = layer->select<Morpheme>( Mbma::mbma_tagset );
+      for ( const auto& mor : m ){
+	string txt = UnicodeToUTF8( mor->text() );
+	morph += "[" + txt + "]";
+      }
+      result.push_back( morph );
+    }
+  }
+  return result;
+}
+
 void FrogAPI::displayMWU( ostream& os,
 			  size_t index,
 			  const vector<Word*>& mwu ) const {
@@ -883,45 +913,13 @@ void FrogAPI::displayMWU( ostream& os,
 	}
       }
     }
-    if ( options.doDeepMorph ){
+    if ( options.doMorph ){
+      // also covers doDeepMorph
       try {
-	vector<MorphologyLayer*> layers
-	  = word->annotations<MorphologyLayer>( Mbma::mbma_tagset );
-	for ( const auto& layer : layers ){
-	  vector<Morpheme*> m =
-	    layer->select<Morpheme>( Mbma::mbma_tagset, false );
-	  assert( m.size() == 1 ); // top complex layer
-	  string str  = m[0]->feat( "structure" );
-	  if ( str.empty() ){
-	    str = "?";
-	  }
-	  morph += str;
-	  if ( &layer != &layers.back() ){
-	    morph += "/";
-	  }
-	}
-	if ( &word != &mwu.back() ){
-	  morph += "_";
-	}
-      }
-      catch ( exception& e ){
-	if  (options.debugFlag > 0) {
-	  *Log(theErrLog) << "get Morph results failed: "
-			  << e.what() << endl;
-	}
-      }
-    }
-    else if ( options.doMorph ){
-      try {
-	vector<MorphologyLayer*> layers =
-	  word->annotations<MorphologyLayer>( Mbma::mbma_tagset );
-	for ( const auto& layer : layers ){
-	  vector<Morpheme*> m = layer->select<Morpheme>( Mbma::mbma_tagset );
-	  for ( const auto& mor : m ){
-	    string txt = UnicodeToUTF8( mor->text() );
-	    morph += "[" + txt + "]";
-	  }
-	  if ( &layer != &layers.back() ){
+	vector<string> morphs = get_morphs( word );
+	for ( const auto& m : morphs ){
+	  morph += m;
+	  if ( &m != &morphs.back() ){
 	    morph += "/";
 	  }
 	}

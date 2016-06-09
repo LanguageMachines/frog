@@ -378,7 +378,9 @@ void Mbma::addMorph( Word *word,
 void Mbma::addBracketMorph( Word *word,
 			    const string& wrd,
 			    const string& tag ) const {
-  //  *Log(mbmaLog) << "addBracketMorph(" << wrd << "," << tag << ")" << endl;
+  if (debugFlag){
+    *Log(mbmaLog) << "addBracketMorph(" << wrd << "," << tag << ")" << endl;
+  }
   string celex_tag = tag;
   string head = tag;
   if ( head == "LET" || head == "SPEC" ){
@@ -391,7 +393,9 @@ void Mbma::addBracketMorph( Word *word,
       const auto pos = word->annotation<PosAnnotation>( cgn_tagset );
       head = pos->feat("head");
     }
-    //    cerr << "head was X, now :" << head << endl;
+    if (debugFlag){
+      *Log(mbmaLog) << "head was X, tagger gives :" << head << endl;
+    }
     const auto tagIt = TAGconv.find( head );
     if ( tagIt == TAGconv.end() ) {
       // this should never happen
@@ -399,7 +403,9 @@ void Mbma::addBracketMorph( Word *word,
     }
     celex_tag = tagIt->second;
     head = CLEX::get_tDescr(CLEX::toCLEX(tagIt->second));
-    //    cerr << "head was X, now :" << head << endl;
+    if (debugFlag){
+      *Log(mbmaLog) << "replaced X by: " << head << endl;
+    }
   }
 
   KWargs args;
