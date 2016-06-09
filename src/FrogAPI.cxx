@@ -982,7 +982,7 @@ void FrogAPI::displayMWU( ostream& os,
     }
   }
   os << index << "\t" << wrd << "\t" << lemma << "\t" << morph;
-  if ( false && options.doDeepMorph ){
+  if ( options.doDeepMorph ){
     if ( comp.empty() ){
       comp = "0";
     }
