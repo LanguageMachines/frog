@@ -126,10 +126,13 @@ class FrogAPI {
   Mblem *myMblem;
   Mwu *myMwu;
   Parser *myParser;
-  POSTagger *myCGNTagger;
+  POSTagger *myPoSTagger;
   IOBTagger *myIOBTagger;
   NERTagger *myNERTagger;
   UctoTokenizer *tokenizer;
 };
+
+std::vector<std::string> get_full_morph_analysis( folia::Word * );
+std::vector<std::string> get_compound_analysis( folia::Word * );
 
 #endif

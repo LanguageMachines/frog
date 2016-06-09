@@ -113,7 +113,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
   myMblem(0),
   myMwu(0),
   myParser(0),
-  myCGNTagger(0),
+  myPoSTagger(0),
   myIOBTagger(0),
   myNERTagger(0),
   tokenizer(0)
@@ -169,10 +169,10 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       tokenizer->setInputXml( options.doXMLin );
       tokenizer->setUttMarker( options.uttmark );
       tokenizer->setTextClass( options.textclass );
-      myCGNTagger = new CGNTagger(theErrLog);
-      stat = myCGNTagger->init( configuration );
+      myPoSTagger = new CGNTagger(theErrLog);
+      stat = myPoSTagger->init( configuration );
       if ( stat ){
-	myCGNTagger->set_eos_mark( options.uttmark );
+	myPoSTagger->set_eos_mark( options.uttmark );
 	if ( options.doIOB ){
 	  myIOBTagger = new IOBTagger(theErrLog);
 	  stat = myIOBTagger->init( configuration );
@@ -274,8 +274,8 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       }
 #pragma omp section
       {
-	myCGNTagger = new CGNTagger(theErrLog);
-	tagStat = myCGNTagger->init( configuration );
+	myPoSTagger = new CGNTagger(theErrLog);
+	tagStat = myPoSTagger->init( configuration );
       }
 #pragma omp section
       {
@@ -345,7 +345,7 @@ FrogAPI::~FrogAPI() {
   delete myMbma;
   delete myMblem;
   delete myMwu;
-  delete myCGNTagger;
+  delete myPoSTagger;
   delete myIOBTagger;
   delete myNERTagger;
   delete myParser;
@@ -370,7 +370,7 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
       {
 	timers.tagTimer.start();
 	try {
-	  myCGNTagger->Classify( swords );
+	  myPoSTagger->Classify( swords );
 	}
 	catch ( exception&e ){
 	  all_well = false;
@@ -844,7 +844,27 @@ string FrogAPI::lookupIOBChunk( const vector<Word *>& mwus,
   return endresult;
 }
 
-vector<string> get_morphs( folia::Word* w ){
+vector<string> get_compound_analysis( folia::Word* word ){
+  vector<string> result;
+  vector<MorphologyLayer*> layers
+    = word->annotations<MorphologyLayer>( Mbma::mbma_tagset );
+  for ( const auto& layer : layers ){
+    vector<Morpheme*> m =
+      layer->select<Morpheme>( Mbma::mbma_tagset, false );
+    if ( m.size() == 1 ) {
+      // check for top layer compound
+      PosAnnotation *postag
+	= m[0]->annotation<PosAnnotation>( Mbma::clex_tagset );
+      if ( postag ){
+	cerr << "found a clex postag!" << endl;
+	result.push_back( postag->feat( "compound" ) ); // might be empty
+      }
+    }
+  }
+  return result;
+}
+
+vector<string> get_full_morph_analysis( folia::Word* w ){
   vector<string> result;
   vector<MorphologyLayer*> layers
     = w->annotations<MorphologyLayer>( Mbma::mbma_tagset );
@@ -881,11 +901,12 @@ void FrogAPI::displayMWU( ostream& os,
   string pos;
   string lemma;
   string morph;
+  string comp;
   double conf = 1;
   for ( const auto& word : mwu ){
     try {
       wrd += word->str();
-      PosAnnotation *postag = word->annotation<PosAnnotation>( );
+      PosAnnotation *postag = word->annotation<PosAnnotation>( myPoSTagger->getTagset() );
       pos += postag->cls();
       if ( &word != &mwu.back() ){
 	wrd += "_";
@@ -916,7 +937,7 @@ void FrogAPI::displayMWU( ostream& os,
     if ( options.doMorph ){
       // also covers doDeepMorph
       try {
-	vector<string> morphs = get_morphs( word );
+	vector<string> morphs = get_full_morph_analysis( word );
 	for ( const auto& m : morphs ){
 	  morph += m;
 	  if ( &m != &morphs.back() ){
@@ -934,8 +955,40 @@ void FrogAPI::displayMWU( ostream& os,
 	}
       }
     }
+    if ( options.doDeepMorph ){
+      try {
+	vector<string> cpv = get_compound_analysis( word );
+	for ( const auto& cp : cpv ){
+	  if ( cp.empty() ){
+	    comp += "0";
+	  }
+	  else {
+	    comp += cp+"-compound";
+	  }
+	  if ( &cp != &cpv.back() ){
+	    morph += "/";
+	  }
+	}
+	if ( &word != &mwu.back() ){
+	  comp += "_";
+	}
+      }
+      catch ( exception& e ){
+	if  (options.debugFlag > 0){
+	  *Log(theErrLog) << "get Morph results failed: "
+			  << e.what() << endl;
+	}
+      }
+    }
   }
-  os << index << "\t" << wrd << "\t" << lemma << "\t" << morph << "\t" << pos << "\t" << std::fixed << conf;
+  os << index << "\t" << wrd << "\t" << lemma << "\t" << morph;
+  if ( false && options.doDeepMorph ){
+    if ( comp.empty() ){
+      comp = "0";
+    }
+    os << "\t" << comp;
+  }
+  os << "\t" << pos << "\t" << std::fixed << conf;
 }
 
 ostream& FrogAPI::showResults( ostream& os,
@@ -1066,8 +1119,8 @@ void FrogAPI::FrogDoc( Document& doc,
   timers.frogTimer.start();
   // first we make sure that the doc will accept our annotations, by
   // declaring them in the doc
-  if (myCGNTagger){
-    myCGNTagger->addDeclaration( doc );
+  if (myPoSTagger){
+    myPoSTagger->addDeclaration( doc );
   }
   if ( options.doLemma && myMblem ) {
     myMblem->addDeclaration( doc );
