@@ -856,7 +856,7 @@ vector<string> get_compound_analysis( folia::Word* word ){
       PosAnnotation *postag
 	= m[0]->annotation<PosAnnotation>( Mbma::clex_tagset );
       if ( postag ){
-	cerr << "found a clex postag!" << endl;
+	//	cerr << "found a clex postag!" << endl;
 	result.push_back( postag->feat( "compound" ) ); // might be empty
       }
     }
@@ -864,7 +864,31 @@ vector<string> get_compound_analysis( folia::Word* word ){
   return result;
 }
 
-vector<string> get_full_morph_analysis( folia::Word* w ){
+string flatten( const string& s ){
+  string result;
+  string::size_type bpos = s.find_first_not_of( "[" );
+  if ( bpos != string::npos ){
+    string::size_type epos = s.find_first_of( "]", bpos );
+    result += "[" + s.substr( bpos, epos-bpos ) + "]";
+    bpos = s.find_first_of( "[", epos+1 );
+    bpos = s.find_first_not_of( "[", bpos );
+    while ( bpos != string::npos ){
+      string::size_type epos = s.find_first_of( "]", bpos );
+      if ( epos == string::npos ){
+	break;
+      }
+      result += "[" + s.substr( bpos, epos-bpos ) + "]";
+      bpos = s.find_first_of( "[", epos+1 );
+      bpos = s.find_first_not_of( "[", bpos );
+    }
+  }
+  else {
+    result = s;
+  }
+  return result;
+}
+
+vector<string> get_full_morph_analysis( folia::Word* w, bool flat ){
   vector<string> result;
   vector<MorphologyLayer*> layers
     = w->annotations<MorphologyLayer>( Mbma::mbma_tagset );
@@ -877,6 +901,9 @@ vector<string> get_full_morph_analysis( folia::Word* w ){
       string str  = m[0]->feat( "structure" );
       if ( !str.empty() ){
 	is_deep = true;
+	if ( flat ){
+	  str = flatten(str);
+	}
 	result.push_back( str );
       }
     }
