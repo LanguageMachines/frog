@@ -225,7 +225,7 @@ Rule::Rule( const vector<string>& parts,
   debugFlag( flag ),
   tag(CLEX::UNASS),
   orig_word(s),
-  compound( CompoundType::NONE ),
+  compound( Compound::Type::NONE ),
   brackets(0),
   myLog(ls),
   confidence(0.0)
@@ -249,7 +249,7 @@ ostream& operator<<( ostream& os, const Rule& r ){
   os << "tag: " << r.tag << " infl:" << r.inflection << " morhemes: "
      << r.extract_morphemes() << " description: " << r.description
      << " confidence: " << r.confidence;
-  if ( r.compound != CompoundType::NONE ){
+  if ( r.compound != Compound::Type::NONE ){
     os << " (" << r.compound << "-compound)"<< endl;
   }
   return os;
@@ -524,7 +524,7 @@ void Rule::resolveBrackets( bool deep ) {
   if ( debugFlag > 5 ){
     *TiCC::Log(myLog) << "check rule for bracketing: " << this << endl;
   }
-  brackets = new BracketNest( CLEX::UNASS, CompoundType::NONE, debugFlag );
+  brackets = new BracketNest( CLEX::UNASS, Compound::Type::NONE, debugFlag );
   for ( auto const& rule : rules ){
     // fill a flat result;
     BracketLeaf *tmp = new BracketLeaf( rule, debugFlag );

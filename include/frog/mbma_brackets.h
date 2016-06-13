@@ -35,14 +35,16 @@
 enum Status { INFO, PARTICLE, PARTICIPLE, STEM, COMPLEX, INFLECTION,
 	      DERIVATIONAL, FAILED };
 
-enum CompoundType : int {
-  // NB and PB compounds don't exist
-  NONE,
-    NN, NA, NB, NP, NV,
-    AN, AA, AB, AP, AV,
-    BN, BA, BB, BP, BV,
-    PN, PA, PB, PP, PV,
-    VN, VA, VB, VP, VV };
+namespace Compound {
+  enum Type : int {
+    // NB and PB compounds don't exist
+    NONE,
+      NN, NA, NB, NP, NV,
+      AN, AA, AB, AP, AV,
+      BN, BA, BB, BP, BV,
+      PN, PA, PB, PP, PV,
+      VN, VA, VB, VP, VV };
+}
 
 namespace folia {
   class Document;
@@ -80,8 +82,8 @@ public:
   virtual folia::Morpheme *createMorpheme( folia::Document *  ) const = 0;
   virtual folia::Morpheme *createMorpheme( folia::Document *,
 					   std::string&, int& ) const = 0;
-  virtual CompoundType compound() const { return CompoundType::NONE; };
-  virtual CompoundType getCompoundType() { return compound(); };
+  virtual Compound::Type compound() const { return Compound::Type::NONE; };
+  virtual Compound::Type getCompoundType() { return compound(); };
   CLEX::Type tag() const { return cls; };
   void setTag( CLEX::Type t ) { cls = t; };
   std::vector<CLEX::Type> RightHand;
@@ -112,7 +114,7 @@ private:
 
 class BracketNest: public BaseBracket {
  public:
-  BracketNest( CLEX::Type, CompoundType, int );
+  BracketNest( CLEX::Type, Compound::Type, int );
   BaseBracket *append( BaseBracket * );
   ~BracketNest();
   bool isNested() { return true; };
@@ -127,20 +129,20 @@ class BracketNest: public BaseBracket {
   void resolveLead();
   void resolveTail();
   void resolveMiddle();
-  CompoundType getCompoundType();
+  Compound::Type getCompoundType();
   CLEX::Type getFinalTag();
   folia::Morpheme *createMorpheme( folia::Document * ) const;
   folia::Morpheme *createMorpheme( folia::Document *,
 				   std::string&, int& ) const;
   std::list<BaseBracket *> parts;
-  CompoundType compound() const { return _compound; };
+  Compound::Type compound() const { return _compound; };
  private:
-  CompoundType _compound;
+  Compound::Type _compound;
 };
 
-std::string toString( const CompoundType& );
+std::string toString( const Compound::Type& );
 std::ostream& operator<<( std::ostream&, const Status& );
-std::ostream& operator<<( std::ostream&, const CompoundType& );
+std::ostream& operator<<( std::ostream&, const Compound::Type& );
 std::ostream& operator<<( std::ostream&, const BaseBracket& );
 std::ostream& operator<<( std::ostream&, const BaseBracket * );
 

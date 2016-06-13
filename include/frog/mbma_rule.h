@@ -32,7 +32,9 @@
 #ifndef MBMA_RULE_H
 #define MBMA_RULE_H
 
-enum CompoundType : int;
+namespace Compound {
+  enum Type : int;
+}
 
 class RulePart {
 public:
@@ -78,7 +80,7 @@ public:
   UnicodeString orig_word;
   std::string description;
   std::string inflection;
-  CompoundType compound;
+  Compound::Type compound;
   BracketNest *brackets;
   TiCC::LogStream *myLog;
   double confidence;

@@ -48,65 +48,65 @@ using namespace std;
 using namespace TiCC;
 using namespace folia;
 
-string toString( const CompoundType& ct ){
+string toString( const Compound::Type& ct ){
   switch ( ct ){
-  case CompoundType::NN:
+  case Compound::Type::NN:
     return "NN";
-  case CompoundType::NA:
+  case Compound::Type::NA:
     return "NA";
-  case CompoundType::NB:
+  case Compound::Type::NB:
     return "NB";
-  case CompoundType::NP:
+  case Compound::Type::NP:
     return "NP";
-  case CompoundType::NV:
+  case Compound::Type::NV:
     return "NV";
-  case CompoundType::AN:
+  case Compound::Type::AN:
     return "AN";
-  case CompoundType::AA:
+  case Compound::Type::AA:
     return "AA";
-  case CompoundType::AB:
+  case Compound::Type::AB:
     return "AB";
-  case CompoundType::AP:
+  case Compound::Type::AP:
     return "AP";
-  case CompoundType::AV:
+  case Compound::Type::AV:
     return "AV";
-  case CompoundType::BN:
+  case Compound::Type::BN:
     return "BN";
-  case CompoundType::BA:
+  case Compound::Type::BA:
     return "BA";
-  case CompoundType::BB:
+  case Compound::Type::BB:
     return "BB";
-  case CompoundType::BP:
+  case Compound::Type::BP:
     return "BP";
-  case CompoundType::BV:
+  case Compound::Type::BV:
     return "BV";
-  case CompoundType::PN:
+  case Compound::Type::PN:
     return "PN";
-  case CompoundType::PA:
+  case Compound::Type::PA:
     return "PA";
-  case CompoundType::PB:
+  case Compound::Type::PB:
     return "PB";
-  case CompoundType::PP:
+  case Compound::Type::PP:
     return "PP";
-  case CompoundType::PV:
+  case Compound::Type::PV:
     return "PV";
-  case CompoundType::VN:
+  case Compound::Type::VN:
     return "VN";
-  case CompoundType::VA:
+  case Compound::Type::VA:
     return "VA";
-  case CompoundType::VB:
+  case Compound::Type::VB:
     return "VB";
-  case CompoundType::VP:
+  case Compound::Type::VP:
     return "VP";
-  case CompoundType::VV:
+  case Compound::Type::VV:
     return "VV";
-  case CompoundType::NONE:
+  case Compound::Type::NONE:
     return "none";
   }
   return "DEADLY";
 }
 
-ostream& operator<<( ostream& os, const CompoundType& ct ){
+ostream& operator<<( ostream& os, const Compound::Type& ct ){
   os << toString( ct );
   return os;
 }
@@ -194,7 +194,7 @@ BracketLeaf::BracketLeaf( CLEX::Type t, const UnicodeString& us, int flag ):
 }
 
 BracketNest::BracketNest( CLEX::Type t,
-			  CompoundType c,
+			  Compound::Type c,
 			  int flag ): BaseBracket( t, flag ){
   _status = Status::COMPLEX;
   _compound = c;
@@ -251,7 +251,7 @@ UnicodeString BracketNest::put( bool full ) const {
     if ( cls != CLEX::UNASS ){
       result += UTF8ToUnicode(toString(cls));
     }
-    if ( _compound != CompoundType::NONE ){
+    if ( _compound != Compound::Type::NONE ){
       result += " " + UTF8ToUnicode(toString(_compound)) + "-compound";
     }
   }
@@ -339,20 +339,20 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
   return true;
 }
 
-CompoundType construct( const CLEX::Type tag1, const CLEX::Type tag2 ){
-  CompoundType compound = CompoundType::NONE;
+Compound::Type construct( const CLEX::Type tag1, const CLEX::Type tag2 ){
+  Compound::Type compound = Compound::Type::NONE;
   switch ( tag1 ){
   case CLEX::N:
     switch( tag2 ){
-    case CLEX::N: compound = CompoundType::NN;
+    case CLEX::N: compound = Compound::Type::NN;
       break;
-    case CLEX::A: compound = CompoundType::NA;
+    case CLEX::A: compound = Compound::Type::NA;
       break;
-    case CLEX::B: compound = CompoundType::NB;
+    case CLEX::B: compound = Compound::Type::NB;
       break;
-    case CLEX::P: compound = CompoundType::NP;
+    case CLEX::P: compound = Compound::Type::NP;
       break;
-    case CLEX::V: compound = CompoundType::NV;
+    case CLEX::V: compound = Compound::Type::NV;
       break;
     default:
       break;
@@ -360,15 +360,15 @@ CompoundType construct( const CLEX::Type tag1, const CLEX::Type tag2 ){
     break;
   case CLEX::A:
     switch( tag2 ){
-    case CLEX::N: compound = CompoundType::AN;
+    case CLEX::N: compound = Compound::Type::AN;
       break;
-    case CLEX::A: compound = CompoundType::AA;
+    case CLEX::A: compound = Compound::Type::AA;
       break;
-    case CLEX::B: compound = CompoundType::AB;
+    case CLEX::B: compound = Compound::Type::AB;
       break;
-    case CLEX::P: compound = CompoundType::AP;
+    case CLEX::P: compound = Compound::Type::AP;
       break;
-    case CLEX::V: compound = CompoundType::AV;
+    case CLEX::V: compound = Compound::Type::AV;
       break;
     default:
       break;
@@ -376,15 +376,15 @@ CompoundType construct( const CLEX::Type tag1, const CLEX::Type tag2 ){
     break;
   case CLEX::B:
     switch( tag2 ){
-    case CLEX::N: compound = CompoundType::BN;
+    case CLEX::N: compound = Compound::Type::BN;
       break;
-    case CLEX::A: compound = CompoundType::BA;
+    case CLEX::A: compound = Compound::Type::BA;
       break;
-    case CLEX::B: compound = CompoundType::BB;
+    case CLEX::B: compound = Compound::Type::BB;
       break;
-    case CLEX::P: compound = CompoundType::BP;
+    case CLEX::P: compound = Compound::Type::BP;
       break;
-    case CLEX::V: compound = CompoundType::BV;
+    case CLEX::V: compound = Compound::Type::BV;
       break;
     default:
       break;
@@ -392,15 +392,15 @@ CompoundType construct( const CLEX::Type tag1, const CLEX::Type tag2 ){
     break;
   case CLEX::P:
     switch( tag2 ){
-    case CLEX::N: compound = CompoundType::PN;
+    case CLEX::N: compound = Compound::Type::PN;
       break;
-    case CLEX::A: compound = CompoundType::PA;
+    case CLEX::A: compound = Compound::Type::PA;
       break;
-    case CLEX::B: compound = CompoundType::PB;
+    case CLEX::B: compound = Compound::Type::PB;
       break;
-    case CLEX::P: compound = CompoundType::PP;
+    case CLEX::P: compound = Compound::Type::PP;
       break;
-    case CLEX::V: compound = CompoundType::PV;
+    case CLEX::V: compound = Compound::Type::PV;
       break;
     default:
       break;
@@ -408,15 +408,15 @@ CompoundType construct( const CLEX::Type tag1, const CLEX::Type tag2 ){
     break;
   case CLEX::V:
     switch( tag2 ){
-    case CLEX::N: compound = CompoundType::VN;
+    case CLEX::N: compound = Compound::Type::VN;
       break;
-    case CLEX::A: compound = CompoundType::VA;
+    case CLEX::A: compound = Compound::Type::VA;
       break;
-    case CLEX::B: compound = CompoundType::VB;
+    case CLEX::B: compound = Compound::Type::VB;
       break;
-    case CLEX::P: compound = CompoundType::VP;
+    case CLEX::P: compound = Compound::Type::VP;
       break;
-    case CLEX::V: compound = CompoundType::VV;
+    case CLEX::V: compound = Compound::Type::VV;
       break;
     default:
       break;
@@ -428,12 +428,12 @@ CompoundType construct( const CLEX::Type tag1, const CLEX::Type tag2 ){
   return compound;
 }
 
-CompoundType BracketNest::getCompoundType(){
+Compound::Type BracketNest::getCompoundType(){
   if ( debugFlag > 5 ){
     cerr << "get compoundType: " << this << endl;
     cerr << "#parts: " << parts.size() << endl;
   }
-  CompoundType compound = CompoundType::NONE;
+  Compound::Type compound = Compound::Type::NONE;
   if ( parts.size() == 1 ){
     auto part = *parts.begin();
     compound = part->getCompoundType();
@@ -441,10 +441,10 @@ CompoundType BracketNest::getCompoundType(){
   else if ( parts.size() == 2 ){
     auto it = parts.begin();
     CLEX::Type tag1 = (*it)->tag();
-    CompoundType cp1 = (*it)->compound();
+    Compound::Type cp1 = (*it)->compound();
     Status st1 = (*it)->status();
     CLEX::Type tag2 = (*++it)->tag();
-    CompoundType cp2 = (*it)->compound();
+    Compound::Type cp2 = (*it)->compound();
     Status st2 = (*it)->status();
     if ( debugFlag > 5 ){
       cerr << "tag1 :" << tag1 << " stat1: " << st1 << " cp1: " << cp1 << endl;
@@ -503,7 +503,7 @@ CompoundType BracketNest::getCompoundType(){
   }
   else if ( parts.size() > 2 ){
     auto it = parts.begin();
-    CompoundType cp1 = (*it)->compound();
+    Compound::Type cp1 = (*it)->compound();
     CLEX::Type tag1 = (*it)->tag();
     Status st1 = (*it)->status();
     CLEX::Type tag2 = (*++it)->tag();
@@ -529,23 +529,23 @@ CompoundType BracketNest::getCompoundType(){
 	  if ( (tag2 == CLEX::N &&
 		( st2 == Status::STEM || st2 == Status::COMPLEX ) )
 	       && (tag3 == CLEX::NEUTRAL || st3 == Status::INFLECTION ) ) {
-	    compound = CompoundType::NN;
+	    compound = Compound::Type::NN;
 	  }
 	  else if ( ( tag2 == CLEX::A &&
 		      ( st2 == Status::STEM || st2 == Status::COMPLEX ) )
 		    && ( tag3 == CLEX::A && st3 == Status::DERIVATIONAL ) ){
-	    compound = CompoundType::NA;
+	    compound = Compound::Type::NA;
 	  }
 	  else if ( st2 == Status::DERIVATIONAL && tag3 == CLEX::NEUTRAL ){
 	    compound = cp1;
 	  }
 	  else if ( st2 == Status::DERIVATIONAL && tag3 == CLEX::N ){
-	    compound = CompoundType::NN;
+	    compound = Compound::Type::NN;
 	  }
 	}
 	else {
 	  if ( tag2 == CLEX::N && tag3 == CLEX::N ){
-	    compound = CompoundType::NN;
+	    compound = Compound::Type::NN;
 	  }
 	}
       }
@@ -557,11 +557,11 @@ CompoundType BracketNest::getCompoundType(){
 	else if ( st1 == Status::STEM || st1 == Status::COMPLEX ){
 	  if ( tag2 == CLEX::N
 	       && ( tag3 == CLEX::NEUTRAL ||  tag3 == CLEX::UNASS ) ){
-	    compound = CompoundType::AN;
+	    compound = Compound::Type::AN;
 	  }
 	  else if ( tag2 == CLEX::A
 		    && ( tag3 == CLEX::NEUTRAL ||  tag3 == CLEX::UNASS ) ){
-	    compound = CompoundType::AA;
+	    compound = Compound::Type::AA;
 	  }
 	  else if ( st2 == Status::INFLECTION && st3 == Status::INFLECTION ){
 	    compound = cp1;
@@ -822,8 +822,8 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
   {
     pos = result->addPosAnnotation( args );
   }
-  CompoundType ct = compound();
-  if ( ct != CompoundType::NONE ){
+  Compound::Type ct = compound();
+  if ( ct != Compound::Type::NONE ){
     args.clear();
     args["subset"] = "compound";
     args["class"]  = toString(ct);
@@ -861,7 +861,7 @@ list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& resu
     else {
       list<BaseBracket*>::iterator it = bit--;
       BracketNest *tmp
-	= new BracketNest( (*rpos)->tag(), CompoundType::NONE, debugFlag );
+	= new BracketNest( (*rpos)->tag(), Compound::Type::NONE, debugFlag );
       for ( size_t j = 0; j < len; ++j ){
 	tmp->append( *it );
 	if ( debugFlag > 5 ){
@@ -896,7 +896,7 @@ void BracketNest::resolveNouns( ){
 	 && ( (*it)->tag() == CLEX::N && (*it)->status() == Status::STEM )
 	 && (*it)->RightHand.size() == 0 ){
       BaseBracket *tmp
-	= new BracketNest( CLEX::N, CompoundType::NN, debugFlag );
+	= new BracketNest( CLEX::N, Compound::Type::NN, debugFlag );
       tmp->append( *prev );
       tmp->append( *it );
       if ( debugFlag > 5 ){
