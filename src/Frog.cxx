@@ -115,9 +115,9 @@ void usage( ) {
        << "\t --xmldir=<dir>        Use 'dir' to output FoliA XML to.\n"
        << "\t --deep-morph          add deep morphological information to the output\n"
        << "\t============= OTHER OPTIONS ============================================\n"
-       << "\t -h. give some help.\n"
-       << "\t -V or --version .   Show version info.\n"
-       << "\t -d <debug level>    (for more verbosity)\n"
+       << "\t -h or --help          give some help.\n"
+       << "\t -V or --version       Show version info.\n"
+       << "\t -d <debug level>  (for more verbosity)\n"
        << "\t --debug=<module><level>,<module><level>... (eg --debug=l5,n3) \n"
        << "\t\t Set debug value for Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"
        << "\t -S <port>              Run as server instead of reading from testfile\n"
@@ -404,14 +404,15 @@ int main(int argc, char *argv[]) {
   try {
     TiCC::CL_Options Opts("c:e:o:t:x::X::nQhVd:S:",
 			  "textclass:,testdir:,uttmarker:,max-parser-tokens:,"
-			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
+			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,help,"
 			  "debug:,keep-parser-files,version,threads:,KANON");
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
       // we already did show what we wanted.
       return EXIT_SUCCESS;
     }
-    if ( Opts.is_present( 'h' ) ) {
+    if ( Opts.is_present( 'h' )
+	 || Opts.is_present( "help" ) ) {
       usage();
       return EXIT_SUCCESS;
     };
