@@ -549,7 +549,8 @@ void Mbma::filterHeadTag( const string& head ){
       (*ait)->confidence = 1.0;
       ++ait;
     }
-    else if ( celex_tag == "B" && mbma_tag == "A" ){
+    else if ( ( celex_tag == "B" && mbma_tag == "A" )
+	      || ( celex_tag == "A" && mbma_tag == "B" ) ){
       if (debugFlag){
 	*Log(mbmaLog) << "comparing " << celex_tag << " with "
 		      << mbma_tag << " (OK)" << endl;

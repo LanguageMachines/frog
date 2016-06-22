@@ -1212,7 +1212,7 @@ void FrogAPI::FrogDoc( Document& doc,
       *Log(theErrLog) << "NER took:           " << timers.nerTimer << endl;
     }
     if ( options.doMorph ){
-      *Log(theErrLog) << "MBA took:           " << timers.mbmaTimer << endl;
+      *Log(theErrLog) << "MBMA took:          " << timers.mbmaTimer << endl;
     }
     if ( options.doLemma ){
       *Log(theErrLog) << "Mblem took:         " << timers.mblemTimer << endl;
