@@ -884,11 +884,14 @@ vector<string> get_compound_analysis( folia::Word* word ){
       layer->select<Morpheme>( Mbma::mbma_tagset, false );
     if ( m.size() == 1 ) {
       // check for top layer compound
-      PosAnnotation *postag
-	= m[0]->annotation<PosAnnotation>( Mbma::clex_tagset );
-      if ( postag ){
+      PosAnnotation *postag = 0;
+      try {
+	postag = m[0]->annotation<PosAnnotation>( Mbma::clex_tagset );
 	//	cerr << "found a clex postag!" << endl;
 	result.push_back( postag->feat( "compound" ) ); // might be empty
+      }
+      catch (...){
+	result.push_back( "" ); // pad with empty strings
       }
     }
   }
