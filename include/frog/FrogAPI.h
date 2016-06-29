@@ -37,18 +37,18 @@
 #include "ticcutils/FdStream.h"
 #include "ticcutils/ServerBase.h"
 
-#include "frog/ucto_tokenizer_mod.h"
-#include "frog/mbma_mod.h"
-#include "frog/mblem_mod.h"
-#include "frog/mwu_chunker_mod.h"
-#include "frog/cgn_tagger_mod.h"
-#include "frog/iob_tagger_mod.h"
-#include "frog/ner_tagger_mod.h"
-#include "frog/Parser.h"
-
 #include <vector>
 #include <string>
 #include <iostream>
+
+class UctoTokenizer;
+class Mbma;
+class Mblem;
+class Mwu;
+class Parser;
+class POSTagger;
+class IOBTagger;
+class NERTagger;
 
 class FrogOptions {
  public:

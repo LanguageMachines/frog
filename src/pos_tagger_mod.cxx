@@ -32,12 +32,16 @@
 #include "mbt/MbtAPI.h"
 #include "ucto/unicode.h"
 #include "frog/Frog.h"
+#include "frog/ucto_tokenizer_mod.h"
 #include "frog/pos_tagger_mod.h"
 
 using namespace std;
 using namespace folia;
 using namespace TiCC;
 using namespace Tagger;
+
+
+#define LOG *Log(tag_log)
 
 POSTagger::POSTagger(TiCC::LogStream * logstream){
   debug = 0;
@@ -79,8 +83,8 @@ bool POSTagger::fill_map( const string& file, map<string,string>& mp ){
     vector<string> parts;
     size_t num = TiCC::split_at( line, parts, "\t" );
     if ( num != 2 ){
-      *Log(tag_log) << "invalid entry in '" << file << "'" << endl;
-      *Log(tag_log) << "expected 2 tab-separated values, but got: '"
+      LOG << "invalid entry in '" << file << "'" << endl;
+      LOG << "expected 2 tab-separated values, but got: '"
 		   << line << "'" << endl;
       return false;
     }
@@ -116,12 +120,12 @@ bool POSTagger::init( const Configuration& config ){
     tag_log->setlevel(LogExtreme);
   }
   if ( tagger != 0 ){
-    *Log(tag_log) << "POS-Tagger is already initialized!" << endl;
+    LOG << "POS-Tagger is already initialized!" << endl;
     return false;
   }
   val = config.lookUp( "settings", "tagger" );
   if ( val.empty() ){
-    *Log(tag_log) << "Unable to find settings for Tagger" << endl;
+    LOG << "Unable to find settings for Tagger" << endl;
     return false;
   }
   string settings;
@@ -138,7 +142,7 @@ bool POSTagger::init( const Configuration& config ){
     version = val;
   val = config.lookUp( "set", "tagger" );
   if ( val.empty() ){
-    *Log(tag_log) << "missing set declaration in config" << endl;
+    LOG << "missing set declaration in config" << endl;
     exit(EXIT_FAILURE);
   }
   else {
@@ -158,7 +162,7 @@ bool POSTagger::init( const Configuration& config ){
   if ( !tokFile.empty() ){
     tokFile = prefix( config.configDir(), tokFile );
     if ( !fill_map( tokFile, token_tag_map ) ){
-      *Log(tag_log) << "failed to load a token translation file from: '"
+      LOG << "failed to load a token translation file from: '"
 		   << tokFile << "'"<< endl;
       exit(EXIT_FAILURE);
     }
@@ -169,7 +173,7 @@ bool POSTagger::init( const Configuration& config ){
   if ( !tagsFile.empty() ){
     tagsFile = prefix( config.configDir(), tagsFile );
     if ( !fill_set( tagsFile, valid_tags ) ){
-      *Log(tag_log) << "failed to load a tags file from: '"
+      LOG << "failed to load a tags file from: '"
 		   << tagsFile << "'"<< endl;
       exit(EXIT_FAILURE);
     }
@@ -182,13 +186,15 @@ bool POSTagger::init( const Configuration& config ){
 void POSTagger::addTag( Word *word, const string& inputTag, double confidence ){
   string pos_tag = inputTag;
   string ucto_class = word->cls();
-  if ( debug )
-    *Log(tag_log) << "lookup ucto class= " << ucto_class << endl;
+  if ( debug ){
+    LOG << "lookup ucto class= " << ucto_class << endl;
+  }
   auto const tt = token_tag_map.find( ucto_class );
   if ( tt != token_tag_map.end() ){
-    if ( debug )
-      *Log(tag_log) << "found translation ucto class= " << ucto_class
-		    << " to POS-Tag=" << tt->second << endl;
+    if ( debug ){
+      LOG << "found translation ucto class= " << ucto_class
+	  << " to POS-Tag=" << tt->second << endl;
+    }
     pos_tag = tt->second;
     confidence = 1.0;
   }
@@ -240,27 +246,28 @@ void POSTagger::Classify( const vector<Word*>& swords ){
       if ( w < swords.size()-1 )
 	sentence += " ";
     }
-    if (debug)
-      *Log(tag_log) << "POS tagger in: " << sentence << endl;
+    if (debug){
+      LOG << "POS tagger in: " << sentence << endl;
+    }
     vector<TagResult> tagv = tagger->TagLine(sentence);
     if ( tagv.size() != swords.size() ){
-      *Log(tag_log) << "mismatch between number of <w> tags and the tagger result." << endl;
-      *Log(tag_log) << "words according to <w> tags: " << endl;
+      LOG << "mismatch between number of <w> tags and the tagger result." << endl;
+      LOG << "words according to <w> tags: " << endl;
       for ( size_t w = 0; w < swords.size(); ++w ) {
-	*Log(tag_log) << "w[" << w << "]= " << swords[w]->str() << endl;
+	LOG << "w[" << w << "]= " << swords[w]->str() << endl;
       }
-      *Log(tag_log) << "words according to POS tagger: " << endl;
+      LOG << "words according to POS tagger: " << endl;
       for ( size_t i=0; i < tagv.size(); ++i ){
-	*Log(tag_log) << "word[" << i << "]=" << tagv[i].word() << endl;
+	LOG << "word[" << i << "]=" << tagv[i].word() << endl;
       }
       throw runtime_error( "POS tagger is confused" );
     }
     if ( debug ){
-      *Log(tag_log) << "POS tagger out: " << endl;
+      LOG << "POS tagger out: " << endl;
       for ( size_t i=0; i < tagv.size(); ++i ){
-	*Log(tag_log) << "[" << i << "] : word=" << tagv[i].word()
-		     << " tag=" << tagv[i].assignedTag()
-		     << " confidence=" << tagv[i].confidence() << endl;
+	LOG << "[" << i << "] : word=" << tagv[i].word()
+	    << " tag=" << tagv[i].assignedTag()
+	    << " confidence=" << tagv[i].confidence() << endl;
       }
     }
     for ( size_t i=0; i < tagv.size(); ++i ){

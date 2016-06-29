@@ -52,6 +52,8 @@
 
 #include "frog/Frog.h" //internal interface, included by all modules
 #include "frog/FrogAPI.h" //public API interface
+#include "frog/ucto_tokenizer_mod.h"
+#include "frog/pos_tagger_mod.h"
 #include "ticcutils/StringOps.h"
 #include "ticcutils/CommandLine.h"
 #include "ticcutils/FileUtils.h"

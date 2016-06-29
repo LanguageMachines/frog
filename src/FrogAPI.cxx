@@ -66,8 +66,16 @@
 
 
 // individual module headers
-
 #include "frog/FrogAPI.h" //will also include Frog.h (internals), FrogAPI.h is for public  interface
+#include "frog/ucto_tokenizer_mod.h"
+#include "frog/mblem_mod.h"
+#include "frog/mbma_mod.h"
+#include "frog/mwu_chunker_mod.h"
+#include "frog/cgn_tagger_mod.h"
+#include "frog/iob_tagger_mod.h"
+#include "frog/ner_tagger_mod.h"
+#include "frog/Parser.h"
+
 
 using namespace std;
 using namespace folia;
