@@ -105,6 +105,7 @@ class FrogAPI {
  private:
   // functions
   bool TestSentence( folia::Sentence*, TimerBlock&);
+  void FrogStdin( bool prompt );
   std::vector<folia::Word*> lookup( folia::Word *,
 				    const std::vector<folia::Entity*>& ) const;
   folia::Dependency *lookupDep( const folia::Word *,

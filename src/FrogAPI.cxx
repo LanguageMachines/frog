@@ -30,6 +30,7 @@
 
 #include <cstdlib>
 #include <cstdio>
+#include <unistd.h>
 #include <sys/wait.h>
 #include <signal.h>
 #include <string>
@@ -558,16 +559,19 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
   *Log(theErrLog) << "Connection closed.\n";
 }
 
-#ifdef NO_READLINE
-void FrogAPI::FrogInteractive() {
-  cout << "frog>"; cout.flush();
+void FrogAPI::FrogStdin( bool prompt ) {
+  if ( prompt ){
+    cout << "frog>"; cout.flush();
+  }
   string line;
   string data;
   while ( getline( cin, line ) ){
     string data = line;
     if ( options.doSentencePerLine ){
       if ( line.empty() ){
-	cout << "frog>"; cout.flush();
+	if ( prompt ){
+	  cout << "frog>"; cout.flush();
+	}
 	continue;
       }
     }
@@ -575,92 +579,111 @@ void FrogAPI::FrogInteractive() {
       if ( !line.empty() ){
 	data += "\n";
       }
-      cout << "frog>"; cout.flush();
+      if ( prompt ){
+	cout << "frog>"; cout.flush();
+      }
       string line2;
       while( getline( cin, line2 ) ){
 	if ( line2.empty() ){
 	  break;
 	}
 	data += line2 + "\n";
-	cout << "frog>"; cout.flush();
+	if (prompt ){
+	  cout << "frog>"; cout.flush();
+	}
       }
     }
-    if ( data.empty() ){
+    if ( prompt && data.empty() ){
       cout << "ignoring empty input" << endl;
       cout << "frog>"; cout.flush();
       continue;
     }
-    cout << "Processing... " << endl;
+    if ( prompt ){
+      cout << "Processing... " << endl;
+    }
     istringstream inputstream(data,istringstream::in);
     Document *doc = tokenizer->tokenize( inputstream );
     FrogDoc( *doc, true );
     showResults( cout, *doc );
-    cout << "frog>"; cout.flush();
     delete doc;
+    if ( prompt ){
+      cout << "frog>"; cout.flush();
+    }
   }
-  cout << "Done.\n";
+  if ( prompt ){
+    cout << "Done.\n";
+  }
 }
-#else
+
 void FrogAPI::FrogInteractive(){
-  const char *prompt = "frog> ";
-  string line;
-  bool eof = false;
-  while ( !eof ){
-    string data;
-    char *input = readline( prompt );
-    if ( !input ){
-      eof = true;
-      break;
-    }
-    line = input;
-    if ( options.doSentencePerLine ){
-      if ( line.empty() ){
-	free( input );
-	continue;
+  bool isTTY = isatty(0);
+#ifdef NO_READLINE
+  FrogStdin(isTTY);
+#else
+  if ( !isTTY ){
+    FrogStdin( false );
+  }
+  else {
+    const char *prompt = "frog> ";
+    string line;
+    bool eof = false;
+    while ( !eof ){
+      string data;
+      char *input = readline( prompt );
+      if ( !input ){
+	eof = true;
+	break;
       }
-      else {
-	add_history( input );
-	free( input );
-	data += line + "\n";
-      }
-    }
-    else {
-      if ( !line.empty() ){
-	add_history( input );
-	free( input );
-	data = line + "\n";
-      }
-      while ( !eof ){
-	char *input = readline( prompt );
-	if ( !input ){
-	  eof = true;
-	  break;
-	}
-	line = input;
+      line = input;
+      if ( options.doSentencePerLine ){
 	if ( line.empty() ){
 	  free( input );
-	  break;
+	  continue;
 	}
-	add_history( input );
-	free( input );
-	data += line + "\n";
+	else {
+	  add_history( input );
+	  free( input );
+	  data += line + "\n";
+	}
+      }
+      else {
+	if ( !line.empty() ){
+	  add_history( input );
+	  free( input );
+	  data = line + "\n";
+	}
+	while ( !eof ){
+	  char *input = readline( prompt );
+	  if ( !input ){
+	    eof = true;
+	    break;
+	  }
+	  line = input;
+	  if ( line.empty() ){
+	    free( input );
+	    break;
+	  }
+	  add_history( input );
+	  free( input );
+	  data += line + "\n";
+	}
+      }
+      if ( !data.empty() ){
+	if ( data[data.size()-1] == '\n' ){
+	  data = data.substr( 0, data.size()-1 );
+	}
+	cout << "Processing... '" << data << "'" << endl;
+	istringstream inputstream(data,istringstream::in);
+	Document *doc = tokenizer->tokenize( inputstream );
+	FrogDoc( *doc, true );
+	showResults( cout, *doc );
+	delete doc;
       }
     }
-    if ( !data.empty() ){
-      if ( data[data.size()-1] == '\n' ){
-        data = data.substr( 0, data.size()-1 );
-      }
-      cout << "Processing... '" << data << "'" << endl;
-      istringstream inputstream(data,istringstream::in);
-      Document *doc = tokenizer->tokenize( inputstream );
-      FrogDoc( *doc, true );
-      showResults( cout, *doc );
-      delete doc;
-    }
+    cout << "Done.\n";
   }
-  cout << "Done.\n";
-}
 #endif
+}
 
 vector<Word*> FrogAPI::lookup( Word *word,
 			       const vector<Entity*>& entities ) const {
