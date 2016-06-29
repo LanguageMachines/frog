@@ -252,6 +252,12 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
     }
     options.numThreads = num;
   }
+#else
+  if ( Opts.extract( "threads", value ) ){
+    *Log(theErrLog) << "WARNING!\n---> There is NO OpenMP support enabled\n"
+		    << "---> --threads=" << value << " is ignored.\n"
+		    << "---> Will continue on just 1 thread." << endl;
+  }
 #endif
 
   if ( Opts.extract( "keep-parser-files" ) ){
