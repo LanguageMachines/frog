@@ -85,8 +85,18 @@ using namespace Tagger;
 string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
 string configFileName = configDir + "frog.cfg";
 
-string FrogAPI::defaultConfigDir(){ return configDir; }
-string FrogAPI::defaultConfigFile(){ return configFileName; }
+string FrogAPI::defaultConfigDir( const string& lang ){
+  if ( lang.empty() ){
+    return configDir;
+  }
+  else {
+    return configDir+lang+"/";
+  }
+}
+
+string FrogAPI::defaultConfigFile( const string& lang ){
+  return defaultConfigDir( lang ) + "frog.cfg";
+}
 
 FrogOptions::FrogOptions() {
   doTok = doLemma = doMorph = doMwu = doIOB = doNER = doParse = true;

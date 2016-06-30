@@ -129,14 +129,24 @@ void usage( ) {
        << "\t                     (but always 1 for server mode)\n";
 }
 
-bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
+bool parse_args( TiCC::CL_Options& Opts,
+		 FrogOptions& options,
 		 LogStream* theErrLog ) {
   // process the command line and fill FrogOptions to initialize the API
   // also fill some globals we use for our own main.
 
-  string value;
-  // is a config file specified?
-  string configFileName = FrogAPI::defaultConfigFile();
+  // is a language specified? Default is dutch
+  string language = "nl";
+  Opts.extract ("language", language );
+  // is a config file for this language specified?
+  string configFileName = FrogAPI::defaultConfigFile(language);
+  if ( language == "nl" && !TiCC::isFile( configFileName ) ){
+    // for now, ignore language when it is dutch
+    language.clear();
+    configFileName = FrogAPI::defaultConfigFile();
+  }
+  options.language = language;
+  // override language settings when a configfile is specified
   Opts.extract( 'c',  configFileName );
   if ( configuration.fill( configFileName ) ){
     *Log(theErrLog) << "config read from: " << configFileName << endl;
@@ -147,6 +157,7 @@ bool parse_args( TiCC::CL_Options& Opts, FrogOptions& options,
     return false;
   }
 
+  string value;
   // debug opts
   if ( Opts.extract ('d', value) ) {
     if ( !stringTo<int>( value, options.debugFlag ) ){
@@ -412,7 +423,8 @@ int main(int argc, char *argv[]) {
   try {
     TiCC::CL_Options Opts("c:e:o:t:x::X::nQhVd:S:",
 			  "textclass:,testdir:,uttmarker:,max-parser-tokens:,"
-			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,help,"
+			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
+			  "help,language:,"
 			  "debug:,keep-parser-files,version,threads:,KANON");
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){

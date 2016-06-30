@@ -78,6 +78,7 @@ class FrogOptions {
   std::string listenport;
   std::string docid;
   std::string textclass;
+  std::string language;
 
   unsigned int maxParserTokens;
 
@@ -93,8 +94,8 @@ class FrogAPI {
 	   const TiCC::Configuration&,
 	   TiCC::LogStream * );
   ~FrogAPI();
-  static std::string defaultConfigDir();
-  static std::string defaultConfigFile();
+  static std::string defaultConfigDir( const std::string& ="" );
+  static std::string defaultConfigFile( const std::string& ="" );
   void FrogFile( const std::string&, std::ostream&, const std::string& );
   void FrogDoc( folia::Document&, bool=false );
   void FrogServer( Sockets::ServerSocket &conn );
