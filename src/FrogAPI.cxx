@@ -511,7 +511,10 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	  throw;
         }
         *Log(theErrLog) << "Processing... " << endl;
-        tokenizer->tokenize( doc );
+	timers.reset();
+	timers.tokTimer.start();
+	tokenizer->tokenize( doc );
+	timers.tokTimer.stop();
         FrogDoc( doc );
 	if ( options.doXMLout ){
 	  doc.save( outputstream, options.doKanon );
@@ -541,7 +544,10 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	}
         *Log(theErrLog) << "Processing... " << endl;
         istringstream inputstream(data,istringstream::in);
+	timers.reset();
+	timers.tokTimer.start();
         Document *doc = tokenizer->tokenize( inputstream );
+	timers.tokTimer.stop();
         FrogDoc( *doc );
 	if ( options.doXMLout ){
 	  doc->save( outputstream, options.doKanon );
@@ -1176,7 +1182,6 @@ string FrogAPI::Frogtostringfromfile( const string& name ){
 
 void FrogAPI::FrogDoc( Document& doc,
 		       bool hidetimers ){
-  TimerBlock timers;
   timers.frogTimer.start();
   // first we make sure that the doc will accept our annotations, by
   // declaring them in the doc
@@ -1293,8 +1298,11 @@ void FrogAPI::FrogFile( const string& infilename,
       cerr << e.what() << endl;
       return;
     }
+    timers.reset();
+    timers.tokTimer.start();
     tokenizer->tokenize( doc );
-    FrogDoc( doc, false );
+    timers.tokTimer.stop();
+    FrogDoc( doc );
     if ( !xmlOutFile.empty() ){
       doc.save( xmlOutFile, options.doKanon );
       *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
@@ -1303,8 +1311,11 @@ void FrogAPI::FrogFile( const string& infilename,
   }
   else {
     ifstream IN( infilename );
+    timers.reset();
+    timers.tokTimer.start();
     Document *doc = tokenizer->tokenize( IN );
-    FrogDoc( *doc, false );
+    timers.tokTimer.stop();
+    FrogDoc( *doc );
     if ( !xmlOutFile.empty() ){
       doc->save( xmlOutFile, options.doKanon );
       *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;

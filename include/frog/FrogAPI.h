@@ -121,7 +121,7 @@ class FrogAPI {
   const TiCC::Configuration& configuration;
   FrogOptions& options;
   TiCC::LogStream *theErrLog;
-
+  TimerBlock timers;
   // pointers to all the modules
   Mbma *myMbma;
   Mblem *myMblem;

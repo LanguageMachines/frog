@@ -62,6 +62,22 @@ public:
   TiCC::Timer dirTimer;
   TiCC::Timer csiTimer;
   TiCC::Timer frogTimer;
+  void reset(){
+    parseTimer.reset();
+    tokTimer.reset();
+    mblemTimer.reset();
+    mbmaTimer.reset();
+    mwuTimer.reset();
+    tagTimer.reset();
+    iobTimer.reset();
+    nerTimer.reset();
+    prepareTimer.reset();
+    pairsTimer.reset();
+    relsTimer.reset();
+    dirTimer.reset();
+    csiTimer.reset();
+    frogTimer.reset();
+  }
 };
 
 
