@@ -1,3 +1,20 @@
+0.13.4 - 2016-07-11
+[Ko van der Sloot]
+- added long options --help and --version
+- interactive use is limited to TTY's only, so pipes from std in work
+- added a --language='name' option. it tries to read the configuration from
+  a subdirectory with 'name' in the configdir
+  The default is 'nl'
+- tokenizer timing is fixed at last
+- be robust agains a missing clex tag
+- better warning when OpenMP is not present
+- adaptation in mbma
+- added 2 convenience functions to FragAPI:
+    get_full_morph_analysis() and
+    get_compound_analysis()
+- CompoundType is now in it;s own namespace
+- some code refactoring, as usual
+
 0.13.3 - 2016-03-10
 [Ko van der Sloot]
 * Now based on libfolia 1.0
