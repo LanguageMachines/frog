@@ -24,6 +24,13 @@ before_install:
     - make
     - sudo make install
     - cd ..
+    - git clone https://github.com/proycon/uctodata
+    - cd uctodata
+    - bash bootstrap.sh
+    - ./configure
+    - make
+    - sudo make install
+    - cd ..
     - git clone https://github.com/proycon/ucto
     - cd ucto
     - bash bootstrap.sh
