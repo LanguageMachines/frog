@@ -10,49 +10,49 @@ compiler:
 before_install:
     - sudo apt-get update
     - sudo apt-get install pkg-config autoconf-archive autotools-dev libicu-dev libxml2-dev libbz2-dev zlib1g-dev
-    - git clone https://github.com/proycon/ticcutils
+    - git clone https://github.com/LanguageMachines/ticcutils
     - cd ticcutils
     - bash bootstrap.sh
     - ./configure
     - make
     - sudo make install
     - cd ..
-    - git clone https://github.com/proycon/libfolia
+    - git clone https://github.com/LanguageMachines/libfolia
     - cd libfolia
     - bash bootstrap.sh
     - ./configure
     - make
     - sudo make install
     - cd ..
-    - git clone https://github.com/proycon/uctodata
+    - git clone https://github.com/LanguageMachines/uctodata
     - cd uctodata
     - bash bootstrap.sh
     - ./configure
     - make
     - sudo make install
     - cd ..
-    - git clone https://github.com/proycon/ucto
+    - git clone https://github.com/LanguageMachines/ucto
     - cd ucto
     - bash bootstrap.sh
     - ./configure
     - make
     - sudo make install
     - cd ..
-    - git clone https://github.com/proycon/timbl
+    - git clone https://github.com/LanguageMachines/timbl
     - cd timbl
     - bash bootstrap.sh
     - ./configure
     - make
     - sudo make install
     - cd ..
-    - git clone https://github.com/proycon/mbt
+    - git clone https://github.com/LanguageMachines/mbt
     - cd mbt
     - bash bootstrap.sh
     - ./configure
     - make
     - sudo make install
     - cd ..
-    - git clone https://github.com/proycon/frogdata
+    - git clone https://github.com/LanguageMachines/frogdata
     - cd frogdata
     - bash bootstrap.sh
     - ./configure
@@ -64,6 +64,6 @@ install:
     - ./configure
     - make
     - sudo make install
-    - git clone https://github.com/proycon/frogtests.git
+    - git clone https://github.com/LanguageMachines/frogtests.git
 script:
     - cd frogtests && LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib && frog_bin=/usr/local/bin ./testall >&2
