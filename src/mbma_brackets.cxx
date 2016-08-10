@@ -195,9 +195,10 @@ BracketLeaf::BracketLeaf( CLEX::Type t, const UnicodeString& us, int flag ):
 
 BracketNest::BracketNest( CLEX::Type t,
 			  Compound::Type c,
-			  int flag ): BaseBracket( t, flag ){
+			  int flag ): BaseBracket( t, flag ),
+				      _compound( c )
+{
   _status = Status::COMPLEX;
-  _compound = c;
 }
 
 BaseBracket *BracketNest::append( BaseBracket *t ){
