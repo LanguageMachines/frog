@@ -102,7 +102,7 @@ void usage( ) {
        << "\t --uttmarker=<mark>     utterances are separated by 'mark' symbols"
        << "\t                        (default none)\n"
        << "\t -n                     Assume input file to hold one sentence per line\n"
-       << "\t --max-parser-tokens=<n> inhibit parsing when a sentence contains over 'n' tokens. (default: no limit)\n"
+       << "\t --max-parser-tokens=<n> inhibit parsing when a sentence contains over 'n' tokens. (default: 500, needs already 16Gb of memory!)\n"
        << "\t -Q                   Enable quote detection in tokeniser.\n"
        << "\t============= MODULE SELECTION ==========================================\n"
        << "\t --skip=[mptncla]    Skip Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"

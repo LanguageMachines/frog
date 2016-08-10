@@ -110,7 +110,8 @@ FrogOptions::FrogOptions() {
   doKanon =  false;
   interactive = false;
 
-  maxParserTokens = 1000; // 1000 words in a sentence is already insane
+  maxParserTokens = 500; // 500 words in a sentence is already insane
+  // needs about 16 Gb memory to parse!
   // set tot 0 for unlimited
 #ifdef HAVE_OPENMP
   numThreads = omp_get_max_threads();
