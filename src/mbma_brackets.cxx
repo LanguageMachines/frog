@@ -696,12 +696,15 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     for ( const auto& inf : inflect ){
       if ( inf != '/' ){
 	string d = CLEX::get_iDescr(inf);
-	args["class"] = d;
-	desc += "/" + d;
-	folia::Feature *feat = new folia::Feature( args );
+	if ( !d.empty() ){
+	  // happens sometimes when there is fawlty data
+	  args["class"] = d;
+	  desc += "/" + d;
+	  folia::Feature *feat = new folia::Feature( args );
 #pragma omp critical(foliaupdate)
-	{
-	  result->append( feat );
+	  {
+	    result->append( feat );
+	  }
 	}
       }
     }
@@ -732,7 +735,10 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     for ( const auto& inf : inflect ){
       if ( inf != '/' ){
 	string d = CLEX::get_iDescr( inf );
-	desc += "/" + d;
+	if ( !d.empty() ){
+	  // happens sometimes when there is fawlty data
+	  desc += "/" + d;
+	}
       }
     }
     args.clear();
@@ -761,12 +767,15 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     for ( const auto& inf : inflect ){
       if ( inf != '/' ){
 	string d = CLEX::get_iDescr( inf );
-	desc += "/" + d;
-	args["class"] = d;
-	folia::Feature *feat = new folia::Feature( args );
+	if ( !d.empty() ){
+	  // happens sometimes when there is fawlty data
+	  desc += "/" + d;
+	  args["class"] = d;
+	  folia::Feature *feat = new folia::Feature( args );
 #pragma omp critical(foliaupdate)
-	{
-	  result->append( feat );
+	  {
+	    result->append( feat );
+	  }
 	}
       }
     }
