@@ -414,16 +414,22 @@ void Rule::resolve_inflections(){
       }
       // given the specific selections of certain inflections,
       //    select a tag!
-      CLEX::Type new_tag = CLEX::select_tag( inf[0] );
-
-      // apply the change. Remember, the idea is that an inflection is
-      // far more certain of the tag of its predecessing morpheme than
-      // the morpheme itself.
-      // This is not always the case, but it works
-      if ( new_tag != CLEX::UNASS ) {
-	if ( debugFlag  ){
-	  *TiCC::Log(myLog) << inf[0] << " selects " << new_tag << endl;
+      CLEX::Type new_tag = CLEX::UNASS;
+      for ( size_t i=0; i < inf.size(); ++i ){
+	new_tag = CLEX::select_tag( inf[i] );
+	if ( new_tag != CLEX::UNASS ){
+	  if ( debugFlag  ){
+	    *TiCC::Log(myLog) << inf[i] << " selects " << new_tag << endl;
+	  }
+	  break;
 	}
+      }
+      if ( new_tag != CLEX::UNASS ) {
+	// apply the change. Remember, the idea is that an inflection is
+	// far more certain of the tag of its predecessing morpheme than
+	// the morpheme itself.
+	// This is not always the case, but it works
+	//
 	// go back to the previous morpheme
 	for( size_t k=i-1; k+1 > 0; --k ){
 	  //	  *TiCC::Log(myLog) << "een terug is " << rules[k].ResultClass << endl;
@@ -447,6 +453,11 @@ void Rule::resolve_inflections(){
 	    return;
 	  }
 	}
+      }
+      else {
+	// this realy shouldn't happen. probably an error in the data!?
+	*TiCC::Log(myLog) << "inflection: " << inf
+			  << " Problem: DOESN'T select a tag" << endl;
       }
     }
   }
