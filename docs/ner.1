@@ -1,0 +1,52 @@
+.TH ner 1 "2016 Sept 09"
+
+.SH NAME
+ner - a simple Named Entity Recognizer
+.SH SYNOPSYS
+ner -t test-file
+
+.SH DESCRIPTION
+ner will tokenize, tag and assign IOB labels to Named Entities in Dutch text files.
+
+.SH OPTIONS
+
+.BR -c " <configfile>"
+.RS
+set the configuration using 'file'.
+
+The default is to use the Frog config file.
+.RE
+
+.BR -d " <level>"
+.RS
+set debug level.
+.RE
+
+.BR -h
+.RS
+give some help
+.RE
+
+.BR -V
+or
+.BR --version
+.RS
+display version number
+.RE
+
+.BR -t " <file>"
+.RS
+process 'file'
+.RE
+
+.SH BUGS
+likely
+
+.SH AUTHORS
+Ko van der Sloot Timbl@uvt.nl
+
+Antal van den Bosch Timbl@uvt.nl
+
+.SH SEE ALSO
+.BR frog (1)
+.BR ucto (1)
