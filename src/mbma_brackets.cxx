@@ -490,13 +490,17 @@ Compound::Type BracketNest::getCompoundType(){
 	  compound = cp1;
 	}
       }
-      else if ( tag1 == CLEX::V
-		&& st1 != Status::PARTICLE
-		&& st1 != Status::PARTICIPLE ){
-	if ( st1 == Status::DERIVATIONAL ){
-	  compound = cp2;
+      else if ( tag1 == CLEX::V ){
+	if ( st1 != Status::PARTICLE
+	     && st1 != Status::PARTICIPLE ){
+	  if ( st1 == Status::DERIVATIONAL ){
+	    compound = cp2;
+	  }
+	  else if ( st2 == Status::STEM ){
+	    compound = construct( tag1, tag2 );
+	  }
 	}
-	else if ( st2 == Status::STEM ){
+	else if ( st2 == Status::COMPLEX ) {
 	  compound = construct( tag1, tag2 );
 	}
       }
@@ -540,14 +544,15 @@ Compound::Type BracketNest::getCompoundType(){
 	  else if ( st2 == Status::DERIVATIONAL && tag3 == CLEX::NEUTRAL ){
 	    compound = cp1;
 	  }
+	  else if ( st2 == Status::INFLECTION && tag3 == CLEX::NEUTRAL ){
+	    compound = cp1;
+	  }
 	  else if ( st2 == Status::DERIVATIONAL && tag3 == CLEX::N ){
 	    compound = Compound::Type::NN;
 	  }
 	}
-	else {
-	  if ( tag2 == CLEX::N && tag3 == CLEX::N ){
-	    compound = Compound::Type::NN;
-	  }
+	else if ( tag2 == CLEX::N && tag3 == CLEX::N ){
+	  compound = Compound::Type::NN;
 	}
       }
       else if ( tag1 == CLEX::A ){
@@ -582,7 +587,8 @@ Compound::Type BracketNest::getCompoundType(){
 	}
       }
       else if ( tag1 == CLEX::B && st1 == Status::STEM ){
-      	if ( st2 == Status::STEM &&
+      	if ( (st2 == Status::STEM || st2 == Status::COMPLEX)
+	     &&
 	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
 	  compound = construct( tag1, tag2 );
 	}
