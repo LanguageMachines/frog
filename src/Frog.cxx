@@ -150,6 +150,10 @@ bool parse_args( TiCC::CL_Options& Opts,
   Opts.extract( 'c',  configFileName );
   if ( configuration.fill( configFileName ) ){
     *Log(theErrLog) << "config read from: " << configFileName << endl;
+    string vers = configuration.lookUp( "version" );
+    if ( !vers.empty() ){
+      *Log(theErrLog) << "configuration version = " << vers << endl;
+    }
   }
   else {
     cerr << "failed to read configuration from '" << configFileName << "' !!" << endl;
