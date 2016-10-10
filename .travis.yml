@@ -1,3 +1,5 @@
+sudo: required
+dist: trusty
 # whitelist
 branches:
   only:
