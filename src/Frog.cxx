@@ -109,7 +109,7 @@ void usage( ) {
        << "\t============= CONFIGURATION OPTIONS =====================================\n"
        << "\t -c <filename>    Set configuration file (default "
        << FrogAPI::defaultConfigFile() << ")\n"
-    //       << "\t -language <language>  Set the language. (default dutch)."
+       << "\t -language <language>  Set the language. (default dutch)."
        << "\t============= OUTPUT OPTIONS ============================================\n"
        << "\t -o <outputfile>	    Output columned output to file, instead of default stdout\n"
        << "\t -X <xmlfile>          Output also to an XML file in FoLiA format\n"
@@ -137,7 +137,7 @@ bool parse_args( TiCC::CL_Options& Opts,
   // also fill some globals we use for our own main.
 
   // is a language specified? Default is dutch
-  string language = "nl";
+  string language;
   Opts.extract ("language", language );
   // is a config file for this language specified?
   string configFileName = FrogAPI::defaultConfigFile(language);
@@ -158,7 +158,8 @@ bool parse_args( TiCC::CL_Options& Opts,
   }
   else {
     cerr << "failed to read configuration from '" << configFileName << "' !!" << endl;
-    cerr << "Did you correctly install the frogdata package?" << endl;
+    cerr << "Did you correctly install the frogdata package for language="
+	 << language << "?" << endl;
     return false;
   }
 
