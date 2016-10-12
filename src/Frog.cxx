@@ -141,10 +141,9 @@ bool parse_args( TiCC::CL_Options& Opts,
   Opts.extract ("language", language );
   // is a config file for this language specified?
   string configFileName = FrogAPI::defaultConfigFile(language);
-  if ( (language == "nld" || language == "dut")
+  if ( (language == "nld")
        && !TiCC::isFile( configFileName ) ){
     // for now, ignore language when it is dutch
-    language = "dut";
     configFileName = FrogAPI::defaultConfigFile();
   }
   options.language = language;
