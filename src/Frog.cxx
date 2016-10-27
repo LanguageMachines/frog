@@ -109,7 +109,8 @@ void usage( ) {
        << "\t============= CONFIGURATION OPTIONS =====================================\n"
        << "\t -c <filename>    Set configuration file (default "
        << FrogAPI::defaultConfigFile() << ")\n"
-       << "\t -language <language>  Set the language. (default dutch)."
+       << "\t --language <language-list>  Set the languages. e.g. -language=nld,eng,por"
+       << "\t\t The first language in the list will be the default. (default dutch)."
        << "\t============= OUTPUT OPTIONS ============================================\n"
        << "\t -o <outputfile>	    Output columned output to file, instead of default stdout\n"
        << "\t -X <xmlfile>          Output also to an XML file in FoLiA format\n"
@@ -136,15 +137,26 @@ bool parse_args( TiCC::CL_Options& Opts,
   // process the command line and fill FrogOptions to initialize the API
   // also fill some globals we use for our own main.
 
-  // is a language specified? Default is dutch
-  string language;
-  Opts.extract ("language", language );
-  // is a config file for this language specified?
-  string configFileName = FrogAPI::defaultConfigFile(language);
-  if ( (language == "nld")
-       && !TiCC::isFile( configFileName ) ){
-    // for now, ignore language when it is dutch
+  // is a language-list specified? Default is dutch
+  string language="nld";
+  string languages;
+  Opts.extract ("language", languages );
+  string configFileName;
+  if ( !languages.empty() ){
+    vector<string> lang;
+    split( languages, lang, "," );
+    language = lang[0];
+    // is a config file for the default language specified?
+    configFileName = FrogAPI::defaultConfigFile(language);
+    if ( (language == "nld")
+	 && !TiCC::isFile( configFileName ) ){
+      // for now, daualt back to dutch
+      configFileName = FrogAPI::defaultConfigFile();
+    }
+  }
+  else {
     configFileName = FrogAPI::defaultConfigFile();
+    language = "none";
   }
   options.language = language;
   // override language settings when a configfile is specified

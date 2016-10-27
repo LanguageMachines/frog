@@ -40,6 +40,8 @@
 using namespace std;
 using namespace TiCC;
 
+#define LOG *Log(uctoLog)
+
 UctoTokenizer::UctoTokenizer(LogStream * logstream) {
   tokenizer = 0;
   uctoLog = new LogStream( logstream, "tok-" );
@@ -80,13 +82,24 @@ bool UctoTokenizer::init( const Configuration& config ){
   else {
     string rulesName = config.lookUp( "rulesFile", "tokenizer" );
     if ( rulesName.empty() ){
-      *Log(uctoLog) << "no rulesFile found in configuration" << endl;
-      return false;
+      string languages = config.lookUp( "languages", "tokenizer" );
+      if ( languages.empty() ){
+	LOG << "no 'rulesFile' or 'languages' found in configuration" << endl;
+	return false;
+      }
+      vector<string> language_list;
+      split_at( languages, language_list, "," );
+      using TiCC::operator<<;
+      LOG << "Language List ="  << language_list << endl;
+      if ( !tokenizer->init( language_list ) ){
+	return false;
+      }
     }
     else {
       rulesName = resolve_configdir( rulesName, config.configDir() );
-      if ( !tokenizer->init( rulesName ) )
+      if ( !tokenizer->init( rulesName ) ){
 	return false;
+      }
     }
   }
   tokenizer->setEosMarker( "" );

@@ -1240,10 +1240,11 @@ void FrogAPI::FrogDoc( Document& doc,
     for ( size_t i = 0; i < numS; ++i ) {
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)
       string lan = sentences[i]->language();
-      if ( !options.language.empty() &&
-	   !lan.empty() &&
-	   lan != options.language ){
-	if  (options.debugFlag > 0){
+      if ( !options.language.empty()
+	   && options.language != "none"
+	   && !lan.empty()
+	   && lan != options.language ){
+	if  (options.debugFlag >= 0){
 	  *Log(theErrLog) << "Not processing sentence " << i+1 << endl
 			  << " different language: " << lan << endl
 			  << " --language=" << options.language << endl;
