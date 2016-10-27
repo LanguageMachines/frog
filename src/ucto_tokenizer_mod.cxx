@@ -75,6 +75,13 @@ bool UctoTokenizer::init( const Configuration& config ){
     tokenizer->setPassThru();
   }
   tokenizer->setDebug( debug );
+  string languages = config.lookUp( "languages", "tokenizer" );
+  vector<string> language_list;
+  if ( !languages.empty() ){
+    split_at( languages, language_list, "," );
+    using TiCC::operator<<;
+    LOG << "Language List ="  << language_list << endl;
+  }
   if ( tokenizer->getPassThru() ){
     // when passthru, we don't further initialize the tokenizer
     // it wil run in minimal mode then.
@@ -82,26 +89,29 @@ bool UctoTokenizer::init( const Configuration& config ){
   else {
     string rulesName = config.lookUp( "rulesFile", "tokenizer" );
     if ( rulesName.empty() ){
-      string languages = config.lookUp( "languages", "tokenizer" );
-      if ( languages.empty() ){
+      if ( language_list.empty() ){
 	LOG << "no 'rulesFile' or 'languages' found in configuration" << endl;
 	return false;
       }
-      vector<string> language_list;
-      split_at( languages, language_list, "," );
-      using TiCC::operator<<;
-      LOG << "Language List ="  << language_list << endl;
       if ( !tokenizer->init( language_list ) ){
 	return false;
       }
+      tokenizer->setLanguage( language_list[0] );
     }
     else {
       rulesName = resolve_configdir( rulesName, config.configDir() );
       if ( !tokenizer->init( rulesName ) ){
 	return false;
       }
+      if ( !language_list.empty() ){
+	tokenizer->setLanguage( language_list[0] );
+      }
+      else {
+	tokenizer->setLanguage( "none" );
+      }
     }
   }
+
   tokenizer->setEosMarker( "" );
   tokenizer->setVerbose( false );
   tokenizer->setSentenceDetection( true ); //detection of sentences

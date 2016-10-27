@@ -189,7 +189,6 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       tokenizer->setInputEncoding( options.encoding );
       tokenizer->setInputXml( options.doXMLin );
       tokenizer->setUttMarker( options.uttmark );
-      tokenizer->setLanguage( options.language );
       tokenizer->setTextClass( options.textclass );
       myPoSTagger = new CGNTagger(theErrLog);
       stat = myPoSTagger->init( configuration );
@@ -275,7 +274,6 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	  tokenizer->setInputEncoding( options.encoding );
 	  tokenizer->setInputXml( options.doXMLin );
 	  tokenizer->setUttMarker( options.uttmark );
-	  tokenizer->setLanguage( options.language );
 	  tokenizer->setTextClass( options.textclass );
 	}
       }
