@@ -112,7 +112,7 @@ void usage( ) {
        << "\t -c <filename>    Set configuration file (default "
        << FrogAPI::defaultConfigFile() << ")\n"
        << "\t --language <language-list>  Set the languages. e.g. --language=nld,eng,por"
-       << "\t\t The first language in the list will be the default. (default dutch)."
+       << "\t\t The first language in the list will be the default. (default dutch).\n"
        << "\t============= OUTPUT OPTIONS ============================================\n"
        << "\t -o <outputfile>	    Output columned output to file, instead of default stdout\n"
        << "\t -X <xmlfile>          Output also to an XML file in FoLiA format\n"
