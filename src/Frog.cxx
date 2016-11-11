@@ -152,15 +152,28 @@ bool parse_args( TiCC::CL_Options& Opts,
   }
   else {
     vector<string> lang;
-    split( languages, lang, "," );
+    int num = split_at( languages, lang, "," );
+    if ( num < 0 ){
+      cerr<< "invalid value in --languages=" << languages
+	  << " option. " << endl;
+      return false;
+    }
     language = lang[0]; // the first mentioned is the default.
+    if ( num > 1 ){
+      cerr << "WARNING: you used the --language=" << languages << " option"
+	   << " with more then one language " << endl
+	   << "\t specified. These values will be handled to the tokenizer,"
+	   << " but Frog"<< endl
+	   << "\t will only handle the first language: " << language
+	   << " for further processing!" << endl;
+    }
     configFileName = FrogAPI::defaultConfigFile(language);
     if ( !TiCC::isFile( configFileName ) ){
-      LOG << "configuration file: " << configFileName << " not found" << endl;
-      LOG << "Did you correctly install the frogdata package for language="
+      cerr << "configuration file: " << configFileName << " not found" << endl;
+      cerr << "Did you correctly install the frogdata package for language="
 	   << language << "?" << endl;
       configFileName = FrogAPI::defaultConfigFile();
-      LOG << "using fallback configuration file: " << configFileName << endl;
+      cerr << "using fallback configuration file: " << configFileName << endl;
     }
   }
   options.language = language;
