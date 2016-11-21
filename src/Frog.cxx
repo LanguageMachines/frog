@@ -62,6 +62,8 @@ using namespace std;
 using namespace folia;
 using namespace TiCC;
 
+#define LOG *Log(theErrLog)
+
 string testDirName;
 string outputFileName;
 bool wantOUT;
@@ -109,8 +111,8 @@ void usage( ) {
        << "\t============= CONFIGURATION OPTIONS =====================================\n"
        << "\t -c <filename>    Set configuration file (default "
        << FrogAPI::defaultConfigFile() << ")\n"
-       << "\t --language <language-list>  Set the languages. e.g. -language=nld,eng,por"
-       << "\t\t The first language in the list will be the default. (default dutch)."
+       << "\t --language <language-list>  Set the languages. e.g. --language=nld,eng,por"
+       << "\t\t The first language in the list will be the default. (default dutch).\n"
        << "\t============= OUTPUT OPTIONS ============================================\n"
        << "\t -o <outputfile>	    Output columned output to file, instead of default stdout\n"
        << "\t -X <xmlfile>          Output also to an XML file in FoLiA format\n"
@@ -138,34 +140,50 @@ bool parse_args( TiCC::CL_Options& Opts,
   // also fill some globals we use for our own main.
 
   // is a language-list specified? Default is dutch
-  string language="nld";
+  string language;
   string languages;
   Opts.extract ("language", languages );
   string configFileName;
-  if ( !languages.empty() ){
-    vector<string> lang;
-    split( languages, lang, "," );
-    language = lang[0];
-    // is a config file for the default language specified?
-    configFileName = FrogAPI::defaultConfigFile(language);
-    if ( (language == "nld")
-	 && !TiCC::isFile( configFileName ) ){
-      // for now, daualt back to dutch
-      configFileName = FrogAPI::defaultConfigFile();
-    }
-  }
-  else {
-    configFileName = FrogAPI::defaultConfigFile();
+  if ( languages.empty() ){
+    // ok no languages parameter.
+    // us a (default) configfile. Dutch
+    configFileName = FrogAPI::defaultConfigFile("nld");
     language = "none";
   }
+  else {
+    vector<string> lang;
+    int num = split_at( languages, lang, "," );
+    if ( num < 0 ){
+      cerr<< "invalid value in --languages=" << languages
+	  << " option. " << endl;
+      return false;
+    }
+    language = lang[0]; // the first mentioned is the default.
+    if ( num > 1 ){
+      cerr << "WARNING: you used the --language=" << languages << " option"
+	   << " with more then one language " << endl
+	   << "\t specified. These values will be handled to the tokenizer,"
+	   << " but Frog"<< endl
+	   << "\t will only handle the first language: " << language
+	   << " for further processing!" << endl;
+    }
+    configFileName = FrogAPI::defaultConfigFile(language);
+    if ( !TiCC::isFile( configFileName ) ){
+      cerr << "configuration file: " << configFileName << " not found" << endl;
+      cerr << "Did you correctly install the frogdata package for language="
+	   << language << "?" << endl;
+      configFileName = FrogAPI::defaultConfigFile();
+      cerr << "using fallback configuration file: " << configFileName << endl;
+    }
+  }
   options.language = language;
-  // override language settings when a configfile is specified
+  // override default config settings when a configfile is specified
   Opts.extract( 'c',  configFileName );
   if ( configuration.fill( configFileName ) ){
-    *Log(theErrLog) << "config read from: " << configFileName << endl;
+    LOG << "config read from: " << configFileName << endl;
     string vers = configuration.lookUp( "version" );
     if ( !vers.empty() ){
-      *Log(theErrLog) << "configuration version = " << vers << endl;
+      LOG << "configuration version = " << vers << endl;
     }
   }
   else {
@@ -174,12 +192,14 @@ bool parse_args( TiCC::CL_Options& Opts,
 	 << language << "?" << endl;
     return false;
   }
-
+  if ( !languages.empty() ){
+    configuration.setatt( "languages", languages, "tokenizer" );
+  }
   string value;
   // debug opts
   if ( Opts.extract ('d', value) ) {
     if ( !stringTo<int>( value, options.debugFlag ) ){
-      *Log(theErrLog) << "-d value should be an integer" << endl;
+      LOG << "-d value should be an integer" << endl;
       return false;
     }
     configuration.setatt( "debug", value );
@@ -247,7 +267,7 @@ bool parse_args( TiCC::CL_Options& Opts,
     if ( skip.find_first_of("pP") != string::npos )
       options.doParse = false;
     else if ( !options.doMwu ){
-      *Log(theErrLog) << " Parser disabled, because MWU is deselected" << endl;
+      LOG << " Parser disabled, because MWU is deselected" << endl;
       options.doParse = false;
     }
     Opts.remove("skip");
@@ -262,7 +282,7 @@ bool parse_args( TiCC::CL_Options& Opts,
 
   if ( Opts.extract( "max-parser-tokens", value ) ){
     if ( !stringTo<unsigned int>( value, options.maxParserTokens ) ){
-      *Log(theErrLog) << "max-parser-tokens value should be an integer" << endl;
+      LOG << "max-parser-tokens value should be an integer" << endl;
       return false;
     }
   }
@@ -278,24 +298,24 @@ bool parse_args( TiCC::CL_Options& Opts,
   else if ( Opts.extract( "threads", value ) ){
     int num;
     if ( !stringTo<int>( value, num ) || num < 1 ){
-      *Log(theErrLog) << "threads value should be a positive integer" << endl;
+      LOG << "threads value should be a positive integer" << endl;
       return false;
     }
     options.numThreads = num;
   }
 #else
   if ( Opts.extract( "threads", value ) ){
-    *Log(theErrLog) << "WARNING!\n---> There is NO OpenMP support enabled\n"
+    LOG << "WARNING!\n---> There is NO OpenMP support enabled\n"
 		    << "---> --threads=" << value << " is ignored.\n"
 		    << "---> Will continue on just 1 thread." << endl;
   }
 #endif
 
   if ( Opts.extract( "keep-parser-files" ) ){
-    *Log(theErrLog) << "keep-parser-files option not longer supported. (ignored)" << endl;
+    LOG << "keep-parser-files option not longer supported. (ignored)" << endl;
   }
   if ( Opts.extract( "tmpdir" ) ){
-    *Log(theErrLog) << "tmpdir option not longer supported. (ignored)" << endl;
+    LOG << "tmpdir option not longer supported. (ignored)" << endl;
   }
   string TestFileName;
   if ( Opts.extract( "testdir", TestFileName ) ) {
@@ -305,13 +325,13 @@ bool parse_args( TiCC::CL_Options& Opts,
       testDirName += "/";
     }
     if ( !TiCC::isDir( testDirName ) ){
-      *Log(theErrLog) << "input dir " << testDirName << " not readable" << endl;
+      LOG << "input dir " << testDirName << " not readable" << endl;
       return false;
     }
   }
   else if ( Opts.extract( 't', TestFileName ) ) {
     if ( !TiCC::isFile( TestFileName ) ){
-      *Log(theErrLog) << "input stream " << TestFileName << " is not readable" << endl;
+      LOG << "input stream " << TestFileName << " is not readable" << endl;
       return false;
     }
   };
@@ -321,7 +341,7 @@ bool parse_args( TiCC::CL_Options& Opts,
       outputDirName += "/";
     }
     if ( !TiCC::createPath( outputDirName ) ){
-      *Log(theErrLog) << "output dir " << outputDirName << " not readable" << endl;
+      LOG << "output dir " << outputDirName << " not readable" << endl;
       return false;
     }
     wantOUT = true;
@@ -336,7 +356,7 @@ bool parse_args( TiCC::CL_Options& Opts,
       xmlDirName += "/";
     }
     if ( !TiCC::createPath( xmlDirName ) ){
-      *Log(theErrLog) << "XML output dir " << xmlDirName << " not readable" << endl;
+      LOG << "XML output dir " << xmlDirName << " not readable" << endl;
       return false;
     }
     options.doXMLout = true;
@@ -352,25 +372,25 @@ bool parse_args( TiCC::CL_Options& Opts,
     options.doXMLin = true;
     if ( !value.empty() ){
       if ( !xmlDirName.empty() || !testDirName.empty() ){
-	*Log(theErrLog) << "-x may not provide a value when --testdir or --xmldir is provided" << endl;
+	LOG << "-x may not provide a value when --testdir or --xmldir is provided" << endl;
 	return false;
       }
       TestFileName = value;
       if ( !TiCC::isFile( TestFileName ) ){
-	*Log(theErrLog) << "input stream " << value << " is not readable" << endl;
+	LOG << "input stream " << value << " is not readable" << endl;
 	return false;
       }
     }
   }
   if ( Opts.extract( "textclass", options.textclass ) ){
     if ( !options.doXMLin ){
-      *Log(theErrLog) << "--textclass is only valid when -x is also present" << endl;
+      LOG << "--textclass is only valid when -x is also present" << endl;
       return false;
     }
   }
 
   if ( !XMLoutFileName.empty() && !testDirName.empty() ){
-    *Log(theErrLog) << "useless -X value" << endl;
+    LOG << "useless -X value" << endl;
     return false;
   }
 
@@ -381,7 +401,7 @@ bool parse_args( TiCC::CL_Options& Opts,
     else
       getFileNames( testDirName, "", fileNames );
     if ( fileNames.empty() ){
-      *Log(theErrLog) << "error: couldn't find any files in directory: "
+      LOG << "error: couldn't find any files in directory: "
 		      << testDirName << endl;
       return false;
     }
@@ -399,13 +419,13 @@ bool parse_args( TiCC::CL_Options& Opts,
   }
   if ( fileNames.size() > 1 ){
     if ( !XMLoutFileName.empty() ){
-      *Log(theErrLog) << "'-X " << XMLoutFileName
+      LOG << "'-X " << XMLoutFileName
 		      << "' is invalid for multiple inputfiles." << endl;
       return false;
     }
   }
   if ( !Opts.empty() ){
-    *Log(theErrLog) << "unhandled commandline options: " << Opts.toString() << endl;
+    LOG << "unhandled commandline options: " << Opts.toString() << endl;
 
     return false;
   }
@@ -467,7 +487,7 @@ int main(int argc, char *argv[]) {
       ostream *outS = 0;
       if ( !outputFileName.empty() ){
 	if ( !TiCC::createPath( outputFileName ) ) {
-	  *Log(theErrLog) << "problem: unable to create outputfile: "
+	  LOG << "problem: unable to create outputfile: "
 			  << outputFileName << endl;
 	  return EXIT_FAILURE;
 	}
@@ -476,7 +496,7 @@ int main(int argc, char *argv[]) {
       for ( auto const& name : fileNames ){
 	string testName = testDirName + name;
 	if ( !TiCC::isFile( testName ) ){
-	  *Log(theErrLog) << "skip " << testName << " (file not found )"
+	  LOG << "skip " << testName << " (file not found )"
 			  << endl;
 	  continue;
 	}
@@ -491,7 +511,7 @@ int main(int argc, char *argv[]) {
 	      outName = outPath + name + ".out";
 	    }
 	    if ( !TiCC::createPath( outName ) ) {
-	      *Log(theErrLog) << "problem frogging: " << name << endl
+	      LOG << "problem frogging: " << name << endl
 			      << "unable to create outputfile: " << outName
 			      << endl;
 	      continue;
@@ -513,28 +533,28 @@ int main(int argc, char *argv[]) {
 	    xmlOutName = name + ".xml"; // do not clobber the inputdir!
 	}
 	if ( !xmlOutName.empty() && !TiCC::createPath( xmlOutName ) ){
-	  *Log(theErrLog) << "problem frogging: " << name << endl
+	  LOG << "problem frogging: " << name << endl
 			  << "unable to create outputfile: " << xmlOutName
 			  << endl;
 	  continue;
 	}
-	*Log(theErrLog) << "Frogging " << testName << endl;
+	LOG << "Frogging " << testName << endl;
 	try {
 	  frog.FrogFile( testName, *outS, xmlOutName );
 	}
 	catch ( exception& e ){
-	  *Log(theErrLog) << "problem frogging: " << name << endl
+	  LOG << "problem frogging: " << name << endl
 			  << e.what() << endl;
 	  continue;
 	}
 	if ( !outName.empty() ){
-	  *Log(theErrLog) << "results stored in " << outName << endl;
+	  LOG << "results stored in " << outName << endl;
 	  delete outS;
 	  outS = 0;
 	}
       }
       if ( !outputFileName.empty() ){
-	*Log(theErrLog) << "results stored in " << outputFileName << endl;
+	LOG << "results stored in " << outputFileName << endl;
 	delete outS;
       }
     }
@@ -555,7 +575,7 @@ int main(int argc, char *argv[]) {
 
       srand((unsigned)time(0));
 
-      *Log(theErrLog) << "Listening on port " << options.listenport << "\n";
+      LOG << "Listening on port " << options.listenport << "\n";
 
       try {
 	// Create the socket
@@ -569,11 +589,11 @@ int main(int argc, char *argv[]) {
 	while ( StillRunning ) {
 	  Sockets::ServerSocket conn;
 	  if ( server.accept( conn ) ){
-	    *Log(theErrLog) << "New connection..." << endl;
+	    LOG << "New connection..." << endl;
 	    int pid = fork();
 	    if (pid < 0) {
 	      string err = strerror(errno);
-	      *Log(theErrLog) << "ERROR on fork: " << err << endl;
+	      LOG << "ERROR on fork: " << err << endl;
 	      throw runtime_error( "FORK failed: " + err );
 	    }
 	    else if (pid == 0)  {
@@ -587,7 +607,7 @@ int main(int argc, char *argv[]) {
 	}
       }
       catch ( std::exception& e ) {
-	*Log(theErrLog) << "Server error:" << e.what() << " Exiting." << endl;
+	LOG << "Server error:" << e.what() << " Exiting." << endl;
 	throw;
       }
     }
@@ -597,7 +617,7 @@ int main(int argc, char *argv[]) {
     }
   }
   catch ( const exception& e ){
-    *Log(theErrLog) << "fatal error: " << e.what() << endl;
+    LOG << "fatal error: " << e.what() << endl;
     return EXIT_FAILURE;
   }
   delete theErrLog;

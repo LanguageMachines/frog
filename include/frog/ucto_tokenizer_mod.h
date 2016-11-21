@@ -39,7 +39,6 @@ class UctoTokenizer {
   void setPassThru( bool );
   bool getPassThru() const;
   void setSentencePerLineInput( bool );
-  void setLanguage( const std::string& );
   void setInputEncoding( const std::string& );
   void setQuoteDetection( bool );
   void setInputXml( bool );

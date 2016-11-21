@@ -114,7 +114,7 @@ FrogOptions::FrogOptions() {
   // needs about 16 Gb memory to parse!
   // set tot 0 for unlimited
 #ifdef HAVE_OPENMP
-  numThreads = min( 8, omp_get_max_threads() ); // ok, don't overdo
+  numThreads = min<int>( 8, omp_get_max_threads() ); // ok, don't overdo
 #else
   numThreads = 1;
 #endif
@@ -189,7 +189,6 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       tokenizer->setInputEncoding( options.encoding );
       tokenizer->setInputXml( options.doXMLin );
       tokenizer->setUttMarker( options.uttmark );
-      tokenizer->setLanguage( options.language );
       tokenizer->setTextClass( options.textclass );
       myPoSTagger = new CGNTagger(theErrLog);
       stat = myPoSTagger->init( configuration );
@@ -275,7 +274,6 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	  tokenizer->setInputEncoding( options.encoding );
 	  tokenizer->setInputXml( options.doXMLin );
 	  tokenizer->setUttMarker( options.uttmark );
-	  tokenizer->setLanguage( options.language );
 	  tokenizer->setTextClass( options.textclass );
 	}
       }
