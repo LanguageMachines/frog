@@ -57,6 +57,8 @@ LogStream *theErrLog = &my_default_log;  // fill the externals
 vector<string> fileNames;
 bool useTagger = true;
 bool useTokenizer = true;
+bool bulk = false;
+bool verbose = false;
 
 Configuration configuration;
 static string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
@@ -68,13 +70,17 @@ static CGNTagger tagger(theErrLog);
 void usage( ) {
   cout << endl << "Options:\n";
   cout << "\t============= INPUT MODE (mandatory, choose one) ========================\n"
-       << "\t -t <testfile>          Run mbma on this file\n"
-       << "\t -c <filename>    Set configuration file (default " << configFileName << ")\n"
+       << "\t -t <testfile>\t\t Run mbma on this file\n"
+       << "\t -c <filename>\t\t Set configuration file (default " << configFileName << ")\n"
        << "\t============= OTHER OPTIONS ============================================\n"
        << "\t -h. give some help.\n"
-       << "\t -V or --version .   Show version info.\n"
-       << "\t --deep-morph. Deliver structured output. Default false\n"
-       << "\t -d <debug level>    (for more verbosity)\n";
+       << "\t -V or --version\t\t Show version info.\n"
+       << "\t -v or --verbode\t\t be verbose.\n"
+       << "\t --deep-morph\t\t Deliver structured output. Default false\n"
+       << "\t -d <debug level>\t\t (for more verbosity)\n"
+       << "\t --notagger\t\t don't use the default tagger\n"
+       << "\t --notokenizer\t\t don't use the default tokenizer\n"
+       << "\t --bulk\t\t run on a list of words. Implies 'notagger' and 'notokenizer'r\n";
 }
 
 static Mbma myMbma(theErrLog);
@@ -120,8 +126,16 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   else {
     fileNames = Opts.getMassOpts();
   }
-  useTagger = !Opts.extract( "notagger" );
-  useTokenizer = !Opts.extract( "notokenizer" );
+  verbose = Opts.extract( "verbose" ) || Opts.extract( "v" );
+  bulk = Opts.extract( "bulk" );
+  if ( bulk ){
+    useTagger = false;
+    useTokenizer = false;
+  }
+  else {
+    useTagger = !Opts.extract( "notagger" );
+    useTokenizer = !Opts.extract( "notokenizer" );
+  }
   if ( Opts.extract( "deep-morph" ) ){
     configuration.setatt( "deep-morph", "1", "mbma" );
   };
@@ -159,7 +173,9 @@ void Test( istream& in ){
     if ( line.empty() ){
       continue;
     }
-    cerr << "processing: " << line << endl;
+    if ( verbose ){
+      cerr << "processing: " << line << endl;
+    }
     vector<string> sentences;
     if ( useTokenizer ){
       sentences = tokenizer.tokenize( line );
@@ -185,14 +201,17 @@ void Test( istream& in ){
 	  myMbma.Classify( uWord );
 	  myMbma.filterHeadTag( head );
 	  myMbma.filterSubTags( v );
-	  vector<string> res = myMbma.getResult();
 	  cout << tr.word() << " {" << tr.assignedTag() << "}\t";
+	  vector<pair<string,string>> res = myMbma.getResults();
 	  if ( res.size() == 0 ){
 	    cout << "[" << uWord << "]";
 	  }
 	  else {
 	    for ( const auto& r : res ){
-	      cout << r;
+	      cout << r.first;
+	      if ( !r.second.empty() && r.second != "none" ){
+		cout << "\t(" << r.second << "-compound)";
+	      }
 	      if ( &r != &res.back() ){
 		cout << "/";
 	      }
@@ -208,10 +227,13 @@ void Test( istream& in ){
 	  UnicodeString uWord = folia::UTF8ToUnicode(w);
 	  uWord.toLower();
 	  myMbma.Classify( uWord );
-	  vector<string> res = myMbma.getResult();
+	  vector<pair<string,string>> res = myMbma.getResults();
 	  string line = w + "\t";
 	  for ( auto const& r : res ){
-	    line += r;
+	    line += r.first;
+	    if ( !r.second.empty() ){
+	      line += "\t("+r.second+"-compound)";
+	    }
 	    if ( &r != &res.back() ){
 	      line += "/";
 	    }
@@ -219,9 +241,13 @@ void Test( istream& in ){
 	  cout << line << endl;
 	}
       }
-      cout << "<utt>" << endl << endl;
+      if ( !bulk ){
+	cout << "<utt>" << endl;
+      }
     }
-    cout << endl;
+    if ( !bulk ){
+      cout << endl;
+    }
   }
   return;
 }
@@ -234,7 +260,7 @@ int main(int argc, char *argv[]) {
        << "Radboud University" << endl
        << "ILK   - Induction of Linguistic Knowledge Research Group,"
        << "Tilburg University" << endl;
-  TiCC::CL_Options Opts("Vt:d:hc:","deep-morph,version,notagger,notokenizer");
+  TiCC::CL_Options Opts("Vt:d:hc:","bulk,deep-morph,version,notagger,notokenizer");
   try {
     Opts.init(argc, argv);
   }
@@ -252,7 +278,7 @@ int main(int argc, char *argv[]) {
     for ( const auto& TestFileName : fileNames ){
       ifstream in(TestFileName);
       if ( in.good() ){
-	cerr << "Processing: " << TestFileName << endl;
+	cerr << "Processing file: " << TestFileName << endl;
 	Test( in );
       }
       else {

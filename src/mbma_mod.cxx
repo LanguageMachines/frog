@@ -866,3 +866,19 @@ vector<string> Mbma::getResult() const {
   }
   return result;
 }
+
+vector<pair<string,string>> Mbma::getResults( ) const {
+  vector<pair<string,string>> result;
+  for ( const auto& it : analysis ){
+    string tmp = it->morpheme_string( true );
+    string cmp = toString( it->compound );
+    result.push_back( make_pair(tmp,cmp) );
+  }
+  if ( debugFlag ){
+    LOG << "result of morph analyses: ";
+    for ( const auto& r : result ){
+      LOG << " " << r.first << "/" << r.second << "," << endl;
+    }
+  }
+  return result;
+}

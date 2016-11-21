@@ -69,6 +69,7 @@ class Mbma {
   void filterHeadTag( const std::string& );
   void filterSubTags( const std::vector<std::string>& );
   std::vector<std::string> getResult() const;
+  std::vector<std::pair<std::string,std::string>> getResults( ) const;
   void setDeepMorph( bool b ){ doDeepMorph = b; };
   void clearAnalysis();
   Rule* matchRule( const std::vector<std::string>&, const UnicodeString& );
