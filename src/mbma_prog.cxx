@@ -210,10 +210,10 @@ void Test( istream& in ){
 	    for ( const auto& r : res ){
 	      cout << r.first;
 	      if ( !r.second.empty() && r.second != "none" ){
-		cout << "\t(" << r.second << "-compound)";
+		cout << "\t" << r.second;
 	      }
 	      if ( &r != &res.back() ){
-		cout << "/";
+		cout << "\t";
 	      }
 	    }
 	  }
@@ -232,10 +232,10 @@ void Test( istream& in ){
 	  for ( auto const& r : res ){
 	    line += r.first;
 	    if ( !r.second.empty() ){
-	      line += "\t("+r.second+"-compound)";
+	      line += "\t"+r.second;
 	    }
 	    if ( &r != &res.back() ){
-	      line += "/";
+	      line += "\t";
 	    }
 	  }
 	  cout << line << endl;
