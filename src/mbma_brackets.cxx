@@ -511,7 +511,8 @@ Compound::Type BracketNest::getCompoundType(){
     Compound::Type cp1 = (*it)->compound();
     CLEX::Type tag1 = (*it)->tag();
     Status st1 = (*it)->status();
-    CLEX::Type tag2 = (*++it)->tag();
+    Compound::Type cp2 = (*++it)->compound();
+    CLEX::Type tag2 = (*it)->tag();
     Status st2 = (*it)->status();
     CLEX::Type tag3 = (*++it)->tag();
     Status st3 = (*it)->status();
@@ -579,6 +580,9 @@ Compound::Type BracketNest::getCompoundType(){
 	if ( st2 == Status::STEM &&
 	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
 	  compound = construct( tag1, tag2 );
+	}
+	else if ( st2 == Status::COMPLEX ){
+	  compound = cp2;
 	}
 	else if ( tag3 == CLEX::NEUTRAL ){
 	  compound = construct( tag1, tag2 );
