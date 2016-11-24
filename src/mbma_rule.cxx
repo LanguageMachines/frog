@@ -565,7 +565,6 @@ void Rule::resolveBrackets( bool deep ) {
     brackets->resolveMiddle();
     brackets->clearEmptyNodes();
   }
-  compound = brackets->getCompoundType();
   tag = brackets->getFinalTag();
   description = get_tDescr( tag );
   if ( debugFlag > 4 ){

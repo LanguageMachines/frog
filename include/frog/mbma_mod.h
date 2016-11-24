@@ -68,6 +68,7 @@ class Mbma {
   void Classify( const UnicodeString& );
   void filterHeadTag( const std::string& );
   void filterSubTags( const std::vector<std::string>& );
+  void assign_compounds();
   std::vector<std::string> getResult() const;
   std::vector<std::pair<std::string,std::string>> getResults( ) const;
   void setDeepMorph( bool b ){ doDeepMorph = b; };

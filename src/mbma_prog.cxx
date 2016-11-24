@@ -201,6 +201,7 @@ void Test( istream& in ){
 	  myMbma.Classify( uWord );
 	  myMbma.filterHeadTag( head );
 	  myMbma.filterSubTags( v );
+	  myMbma.assign_compounds();
 	  cout << tr.word() << " {" << tr.assignedTag() << "}\t";
 	  vector<pair<string,string>> res = myMbma.getResults();
 	  if ( res.size() == 0 ){
@@ -227,6 +228,7 @@ void Test( istream& in ){
 	  UnicodeString uWord = folia::UTF8ToUnicode(w);
 	  uWord.toLower();
 	  myMbma.Classify( uWord );
+	  myMbma.assign_compounds();
 	  vector<pair<string,string>> res = myMbma.getResults();
 	  string line = w + "\t";
 	  for ( auto const& r : res ){

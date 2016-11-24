@@ -722,6 +722,12 @@ void Mbma::filterSubTags( const vector<string>& feats ){
   return;
 }
 
+void Mbma::assign_compounds(){
+  for ( auto const& sit : analysis ){
+    sit->compound = sit->brackets->getCompoundType();
+  }
+}
+
 void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
   if ( analysis.size() == 0 ){
     // fallback option: use the word and pretend it's a morpheme ;-)
@@ -826,6 +832,7 @@ void Mbma::Classify( Word* sword ){
     }
     filterHeadTag( head );
     filterSubTags( featVals );
+    assign_compounds();
     getFoLiAResult( sword, lWord );
   }
 }
