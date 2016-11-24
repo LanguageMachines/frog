@@ -592,10 +592,12 @@ Compound::Type BracketNest::getCompoundType(){
 	}
       }
       else if ( tag1 == CLEX::B && st1 == Status::STEM ){
-      	if ( (st2 == Status::STEM || st2 == Status::COMPLEX)
-	     &&
-	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
+      	if ( ( st2 == Status::STEM
+	       && ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ) ){
 	  compound = construct( tag1, tag2 );
+	}
+      	else if ( st2 == Status::COMPLEX ){
+	  compound = cp2;
 	}
       }
       else if ( tag1 == CLEX::V ){
