@@ -606,6 +606,10 @@ Compound::Type BracketNest::getCompoundType(){
 	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
 	  compound = construct( tag1, tag2 );
 	}
+      	else if ( st3 == Status::STEM &&
+	     ( st2 == Status::INFLECTION ) ){
+	  compound = construct( tag1, tag3 );
+	}
       }
     }
   }
