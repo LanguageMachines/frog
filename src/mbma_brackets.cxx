@@ -454,6 +454,7 @@ Compound::Type BracketNest::getCompoundType(){
     if ( st1 != Status::FAILED
 	 && st2 != Status::FAILED ){
       if ( tag1 == CLEX::N
+	   && st1 != Status::DERIVATIONAL
 	   && st1 != Status::PARTICLE
 	   && st1 != Status::PARTICIPLE ){
 	if ( st2 == Status::STEM ){
