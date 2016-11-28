@@ -563,6 +563,10 @@ Compound::Type BracketNest::getCompoundType(){
 	       && (tag3 == CLEX::NEUTRAL || st3 == Status::INFLECTION ) ) {
 	    compound = Compound::Type::NN;
 	  }
+	  else if ( ( tag2 == CLEX::V && st2 == Status::STEM )
+		    && ( tag3 == CLEX::N && st3 == Status::STEM ) ){
+	    compound = Compound::Type::NVN;
+	  }
 	  else if ( ( tag2 == CLEX::A &&
 		      ( st2 == Status::STEM || st2 == Status::COMPLEX ) )
 		    && ( tag3 == CLEX::A && st3 == Status::DERIVATIONAL ) ){
