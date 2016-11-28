@@ -34,7 +34,7 @@
 
 namespace CLEX {
   enum Type { UNASS, N, A, Q, V, D, O, B, P, C, I, X, Z, PN, AFFIX, XAFFIX,
-	      NEUTRAL };
+	      GLUE, NEUTRAL };
   bool isBasicClass( const Type& );
   Type select_tag( const char ch );
   std::string toString( const Type& );

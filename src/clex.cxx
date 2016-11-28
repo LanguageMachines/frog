@@ -112,6 +112,8 @@ namespace CLEX {
       return AFFIX;
     else if ( s == "x" )
       return XAFFIX;
+    else if ( s == "^" )
+      return GLUE;
     else if ( s == "0" )
       return NEUTRAL;
     else
@@ -156,6 +158,8 @@ namespace CLEX {
       return "*";
     case XAFFIX:
       return "x";
+    case GLUE:
+      return "^";
     case NEUTRAL:
       return "0";
     default:

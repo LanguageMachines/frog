@@ -73,8 +73,11 @@ ostream& operator<<( ostream& os, const RulePart& r ){
   if ( r.fixpos >= 0 ){
     os << " affix at pos: " << r.fixpos;
   }
-  if ( r.xfixpos >= 0 ){
-    os << " x-affix at pos: " << r.xfixpos;
+  else if ( r.xfixpos >= 0 ){
+    os << " x-affix at pos: " << r.fixpos;
+  }
+  else if ( r.gluepos >= 0 ){
+    os << " glue at pos: " << r.gluepos;
   }
   if ( !r.ins.isEmpty() ){
     os << " insert='" << r.ins << "'";
@@ -115,6 +118,7 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
   uchar(kar),
   fixpos(-1),
   xfixpos(-1),
+  gluepos(-1),
   participle(false)
 {
   //  cerr << "extract RulePart:" << rs << endl;
@@ -170,8 +174,11 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
 	  if ( tag == CLEX::AFFIX ){
 	    fixpos = i;
 	  }
-	  if ( tag == CLEX::XAFFIX ){
+	  else if ( tag == CLEX::XAFFIX ){
 	    xfixpos = i;
+	  }
+	  else if ( tag == CLEX::GLUE ){
+	    gluepos = i;
 	  }
 	}
       }
@@ -550,17 +557,21 @@ void Rule::resolveBrackets( bool deep ) {
     *TiCC::Log(myLog) << "STEP 1:" << brackets << endl;
   }
   if ( deep ){
-    brackets->resolveNouns( );
+    brackets->resolveGlue( );
     if ( debugFlag > 5 ){
       *TiCC::Log(myLog) << "STEP 2:" << brackets << endl;
     }
-    brackets->resolveLead( );
+    brackets->resolveNouns( );
     if ( debugFlag > 5 ){
       *TiCC::Log(myLog) << "STEP 3:" << brackets << endl;
     }
-    brackets->resolveTail( );
+    brackets->resolveLead( );
     if ( debugFlag > 5 ){
       *TiCC::Log(myLog) << "STEP 4:" << brackets << endl;
+    }
+    brackets->resolveTail( );
+    if ( debugFlag > 5 ){
+      *TiCC::Log(myLog) << "STEP 5:" << brackets << endl;
     }
     brackets->resolveMiddle();
     brackets->clearEmptyNodes();

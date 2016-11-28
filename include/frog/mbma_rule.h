@@ -50,6 +50,7 @@ public:
   std::string inflect;
   int fixpos;
   int xfixpos;
+  int gluepos;
   bool participle;
 };
 
