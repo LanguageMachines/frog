@@ -40,11 +40,12 @@ class RulePart {
 public:
   RulePart( const std::string&, const UChar, bool );
   bool isBasic() const;
-  void get_ins_del( const std::string& );
+  void get_edits( const std::string& );
   CLEX::Type ResultClass;
   std::vector<CLEX::Type> RightHand;
   UnicodeString ins;
   UnicodeString del;
+  UnicodeString hide;
   UnicodeString uchar;
   UnicodeString morpheme;
   std::string inflect;

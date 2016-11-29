@@ -384,7 +384,7 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
 			     const list<BaseBracket*>::iterator& rpos,
 			     list<BaseBracket*>::iterator& bpos ){
   if ( debugFlag > 5 ){
-    cerr << "test MATCH " << endl;
+    cerr << "test MATCH: rpos= " << *rpos << endl;
   }
   bpos = result.end();
   size_t len = (*rpos)->RightHand.size();
