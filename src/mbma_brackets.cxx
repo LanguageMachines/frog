@@ -264,13 +264,11 @@ BracketLeaf::BracketLeaf( const RulePart& p, int flag ):
   else {
     orig = toString( cls );
     orig += "_";
+    glue = p.is_glue;
     for ( size_t i = 0; i < RightHand.size(); ++i ){
       orig += toString(RightHand[i]);
       if ( RightHand[i] == CLEX::AFFIX ){
 	ifpos = i;
-      }
-      if ( RightHand[i] == CLEX::GLUE ){
-	glue = true;
       }
     }
     if ( morph == "be" || morph == "ge" || morph == "ver" || morph == "ex" ){
@@ -1001,7 +999,7 @@ list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
   if ( debugFlag > 5 ){
     cerr << "glue " << endl;
   }
-  size_t len = (*rpos)->RightHand.size()-1;
+  size_t len = (*rpos)->RightHand.size();
   bool matched = true;
   if ( len == 0 || len > result.size() ){
     if ( debugFlag > 5 ){
@@ -1017,6 +1015,7 @@ list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
 	cerr << "test MATCH vergelijk " << *it << " met " << (*rpos)->RightHand[j] << endl;
       }
       if ( (*rpos)->RightHand[j] == CLEX::GLUE ){
+	++j;
 	continue;
       }
       else if ( (*rpos)->RightHand[j] != (*it)->tag() ){
@@ -1038,7 +1037,7 @@ list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
     list<BaseBracket*>::iterator it = bit--;
     BracketNest *tmp
       = new BracketNest( (*rpos)->tag(), Compound::Type::NONE, debugFlag );
-    for ( size_t j = 0; j < len; ++j ){
+    for ( size_t j = 0; j < len-1; ++j ){
       tmp->append( *it );
       tags.push_back( (*it)->tag() );
       if ( debugFlag > 5 ){
@@ -1065,9 +1064,9 @@ list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
 void BracketNest::resolveGlue( ){
   list<BaseBracket*>::iterator it = parts.begin();
   while ( it != parts.end() ){
-    // search for rules with a ^ at the begin
+    // search for glue rules
     if ( debugFlag > 5 ){
-      cerr << "search ^: bekijk: " << *it << endl;
+      cerr << "search glue: bekijk: " << *it << endl;
     }
     if ( (*it)->isglue() ){
       it = glue( parts, it );

@@ -70,7 +70,7 @@ ostream& operator<<( ostream& os, const RulePart& r ){
       os << " INFLECTION: " << r.inflect;
     }
   }
-  if ( r.is_affix >= 0 ){
+  if ( r.is_affix ){
     os << " affix";
   }
   else if ( r.is_glue ){
