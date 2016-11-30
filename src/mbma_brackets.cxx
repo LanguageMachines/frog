@@ -785,8 +785,13 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
     ++cnt;
     desc = "[" + out + "]"; // pass it up!
-    // if ( _status == Status::PARTICIPLE )
-    //   desc += "part";
+    string tag = orig;
+    string::size_type pos = tag.find( "^" );
+    if ( pos != string::npos ){
+      // A glue tag! Override orig with the implicit tag!
+      tag = orig[pos+1];
+      desc += CLEX::get_tDescr( CLEX::toCLEX(tag) );
+    }
     for ( const auto& inf : inflect ){
       if ( inf != '/' ){
 	string d = CLEX::get_iDescr( inf );
@@ -806,7 +811,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
     args.clear();
     args["set"] = Mbma::clex_tagset;
-    args["class"] = orig;
+    args["class"] = tag;
 #pragma omp critical(foliaupdate)
     {
       result->addPosAnnotation( args );
