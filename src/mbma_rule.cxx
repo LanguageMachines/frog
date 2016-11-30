@@ -70,14 +70,11 @@ ostream& operator<<( ostream& os, const RulePart& r ){
       os << " INFLECTION: " << r.inflect;
     }
   }
-  if ( r.fixpos >= 0 ){
-    os << " affix at pos: " << r.fixpos;
+  if ( r.is_affix >= 0 ){
+    os << " affix";
   }
-  else if ( r.xfixpos >= 0 ){
-    os << " x-affix at pos: " << r.fixpos;
-  }
-  else if ( r.gluepos >= 0 ){
-    os << " glue at pos: " << r.gluepos;
+  else if ( r.is_glue ){
+    os << " glue ";
   }
   if ( !r.ins.isEmpty() ){
     os << " insert='" << r.ins << "'";
@@ -123,10 +120,9 @@ void RulePart::get_edits( const string& edit ){
 RulePart::RulePart( const string& rs, const UChar kar, bool first ):
   ResultClass(CLEX::UNASS),
   uchar(kar),
-  fixpos(-1),
-  xfixpos(-1),
-  gluepos(-1),
-  participle(false)
+  is_affix(false),
+  is_glue(false),
+  is_participle(false)
 {
   //  cerr << "extract RulePart:" << rs << endl;
   string edit;
@@ -147,7 +143,7 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
     //    cerr << "EDIT = " << edit << endl;
     get_edits( edit );
     s = rs.substr(0, ppos );
-    participle = ( s.find( "pv" ) != string::npos ) &&
+    is_participle = ( s.find( "pv" ) != string::npos ) &&
       ( del == "ge" );
   }
   string::size_type pos = s.find("_");
@@ -179,13 +175,18 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
 	  //	  cerr << "found tag '" << tag << "' in " << rhs << endl;
 	  RightHand[i] = tag;
 	  if ( tag == CLEX::AFFIX ){
-	    fixpos = i;
+	    is_affix = true;
 	  }
 	  else if ( tag == CLEX::XAFFIX ){
-	    xfixpos = i;
+	    is_affix = true;
 	  }
 	  else if ( tag == CLEX::GLUE ){
-	    gluepos = i;
+	    if ( i != 0 ){
+	      cerr << "glue symbol '^' may only occur at first position!"
+		   << endl;
+	      continue;
+	    }
+	    is_glue = true;
 	  }
 	}
       }
@@ -282,8 +283,7 @@ ostream& operator<<( ostream& os, const Rule *r ){
 void Rule::reduceZeroNodes(){
   vector<RulePart> out;
   for ( auto const& r : rules ){
-    if ( ( r.ResultClass == CLEX::NEUTRAL
-	   || r.fixpos == 1 )
+    if ( r.ResultClass == CLEX::NEUTRAL
 	 && r.morpheme.isEmpty()
 	 && r.inflect.empty() ){
       // skip
@@ -360,7 +360,7 @@ bool Rule::performEdits(){
       }
       is_replace = !cur->ins.isEmpty();
     }
-    if ( !cur->participle ){
+    if ( !cur->is_participle ){
       for ( int j=0; j < cur->del.length(); ++j ){
 	rules[k+j].uchar = "";
 	// so perform the deletion on this and subsequent nodes
@@ -427,7 +427,7 @@ void Rule::resolve_inflections(){
   // When applicable, we replace the class from the rule
   for ( size_t i = 1; i < rules.size(); ++i ){
     string inf = rules[i].inflect;
-    if ( !inf.empty() && !rules[i].participle ){
+    if ( !inf.empty() && !rules[i].is_participle ){
       // it is an inflection tag
       if (debugFlag){
 	*TiCC::Log(myLog) << " inflection: >" << inf << "<" << endl;

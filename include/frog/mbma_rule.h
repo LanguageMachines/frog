@@ -49,10 +49,9 @@ public:
   UnicodeString uchar;
   UnicodeString morpheme;
   std::string inflect;
-  int fixpos;
-  int xfixpos;
-  int gluepos;
-  bool participle;
+  bool is_affix;
+  bool is_glue;
+  bool is_participle;
 };
 
 std::ostream& operator<<( std::ostream& os, const RulePart&  );

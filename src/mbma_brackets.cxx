@@ -1009,9 +1009,29 @@ list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
     }
     matched = false;
   }
-  list<BaseBracket*>::iterator bit = rpos;
-  vector<CLEX::Type> tags;
+  else {
+    size_t j = 0;
+    list<BaseBracket*>::iterator it = rpos;
+    for (; j < len && it != result.end(); ++j, ++it ){
+      if ( debugFlag > 5 ){
+	cerr << "test MATCH vergelijk " << *it << " met " << (*rpos)->RightHand[j] << endl;
+      }
+      if ( (*rpos)->RightHand[j] == CLEX::GLUE ){
+	continue;
+      }
+      else if ( (*rpos)->RightHand[j] != (*it)->tag() ){
+	if ( debugFlag > 5 ){
+	  cerr << "test MATCH FAIL (" << (*rpos)->RightHand[j]
+	       << " != " << (*it)->tag() << ")" << endl;
+	}
+	(*rpos)->set_status(Status::FAILED);
+	matched = false;
+      }
+    }
+  }
   if ( matched ){
+    list<BaseBracket*>::iterator bit = rpos;
+    vector<CLEX::Type> tags;
     if ( debugFlag > 5 ){
       cerr << "OK een match" << endl;
     }
@@ -1036,7 +1056,7 @@ list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
   else {
     // the glueing failed.
     // we should try to start at the next node
-    bit = rpos;
+    list<BaseBracket*>::iterator bit = rpos;
     return ++bit;
   }
 }
