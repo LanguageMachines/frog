@@ -310,7 +310,7 @@ vector<string> Rule::extract_morphemes( ) const {
 string Rule::morpheme_string( bool structured ) const {
   string result;
   if ( structured ){
-    UnicodeString us = brackets->put(false);
+    UnicodeString us = brackets->put(true);
     result = UnicodeToUTF8( us );
   }
   else {
