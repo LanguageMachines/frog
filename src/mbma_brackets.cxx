@@ -52,6 +52,10 @@ string toString( const Compound::Type& ct ){
   switch ( ct ){
   case Compound::Type::NN:
     return "NN";
+  case Compound::Type::NNN:
+    return "NNN";
+  case Compound::Type::NVN:
+    return "NVN";
   case Compound::Type::NA:
     return "NA";
   case Compound::Type::NB:
@@ -106,6 +110,96 @@ string toString( const Compound::Type& ct ){
   return "DEADLY";
 }
 
+Compound::Type stringToCompound( const string& s ){
+  if ( s == "NN" ){
+    return Compound::Type::NN;
+  }
+  else if ( s == "NNN" ){
+    return Compound::Type::NNN;
+  }
+  else if ( s == "NVN" ){
+    return Compound::Type::NVN;
+  }
+  else if ( s == "NA" ){
+    return Compound::Type::NA;
+  }
+  else if ( s == "NB" ){
+    return Compound::Type::NB;
+  }
+  else if ( s == "NP" ){
+    return Compound::Type::NP;
+  }
+  else if ( s == "NV" ){
+    return  Compound::Type::NV;
+  }
+  else if ( s == "AN" ){
+    return  Compound::Type::AN;
+  }
+  else if ( s == "AA" ){
+    return  Compound::Type::AA;
+  }
+  else if ( s == "AB" ){
+    return  Compound::Type::AB;
+  }
+  else if ( s == "AP" ){
+    return  Compound::Type::AP;
+  }
+  else if ( s == "AV" ){
+    return  Compound::Type::AV;
+  }
+  else if ( s == "BN" ){
+    return  Compound::Type::BN;
+  }
+  else if ( s == "BA" ){
+    return  Compound::Type::BA;
+  }
+  else if ( s == "BB" ){
+    return  Compound::Type::BB;
+  }
+  else if ( s == "BP" ){
+    return  Compound::Type::BP;
+  }
+  else if ( s == "BV" ){
+    return  Compound::Type::BV;
+  }
+  else if ( s == "PN" ){
+    return  Compound::Type::PN;
+  }
+  else if ( s == "PA" ){
+    return  Compound::Type::PA;
+  }
+  else if ( s == "PB" ){
+    return  Compound::Type::PB;
+  }
+  else if ( s == "PP" ){
+    return  Compound::Type::PP;
+  }
+  else if ( s == "PV" ){
+    return  Compound::Type::PV;
+  }
+  else if ( s == "VN" ){
+    return  Compound::Type::VN;
+  }
+  else if ( s == "VA" ){
+    return  Compound::Type::VA;
+  }
+  else if ( s == "VB" ){
+    return  Compound::Type::VB;
+  }
+  else if ( s == "VP" ){
+    return  Compound::Type::VP;
+  }
+  else if ( s == "VV" ){
+    return  Compound::Type::VV;
+  }
+  else if ( s.empty() || s == "none" ){
+    return  Compound::Type::NONE;
+  }
+  else {
+    throw runtime_error( "no such compound:" + s );
+  }
+}
+
 ostream& operator<<( ostream& os, const Compound::Type& ct ){
   os << toString( ct );
   return os;
@@ -141,6 +235,7 @@ ostream& operator<<( ostream& os, const Status& st ){
 
 BracketLeaf::BracketLeaf( const RulePart& p, int flag ):
   BaseBracket(p.ResultClass, p.RightHand, flag),
+  glue(false),
   morph(p.morpheme )
 {
   ifpos = -1;
@@ -169,6 +264,7 @@ BracketLeaf::BracketLeaf( const RulePart& p, int flag ):
   else {
     orig = toString( cls );
     orig += "_";
+    glue = p.is_glue;
     for ( size_t i = 0; i < RightHand.size(); ++i ){
       orig += toString(RightHand[i]);
       if ( RightHand[i] == CLEX::AFFIX ){
@@ -286,7 +382,7 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
 			     const list<BaseBracket*>::iterator& rpos,
 			     list<BaseBracket*>::iterator& bpos ){
   if ( debugFlag > 5 ){
-    cerr << "test MATCH " << endl;
+    cerr << "test MATCH: rpos= " << *rpos << endl;
   }
   bpos = result.end();
   size_t len = (*rpos)->RightHand.size();
@@ -311,10 +407,10 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
     if ( debugFlag > 5 ){
       cerr << "test MATCH vergelijk " << *it << " met " << (*rpos)->RightHand[j] << endl;
     }
-    if ( (*rpos)->RightHand[j] == CLEX::XAFFIX){
+    if ( (*rpos)->RightHand[j] == CLEX::XAFFIX ){
       continue;
     }
-    else if ( (*rpos)->RightHand[j] == CLEX::AFFIX){
+    else if ( (*rpos)->RightHand[j] == CLEX::AFFIX ){
       continue;
     }
     else if ( (*rpos)->RightHand[j] != (*it)->tag() ){
@@ -340,93 +436,24 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
   return true;
 }
 
-Compound::Type construct( const CLEX::Type tag1, const CLEX::Type tag2 ){
-  Compound::Type compound = Compound::Type::NONE;
-  switch ( tag1 ){
-  case CLEX::N:
-    switch( tag2 ){
-    case CLEX::N: compound = Compound::Type::NN;
-      break;
-    case CLEX::A: compound = Compound::Type::NA;
-      break;
-    case CLEX::B: compound = Compound::Type::NB;
-      break;
-    case CLEX::P: compound = Compound::Type::NP;
-      break;
-    case CLEX::V: compound = Compound::Type::NV;
-      break;
-    default:
-      break;
-    }
-    break;
-  case CLEX::A:
-    switch( tag2 ){
-    case CLEX::N: compound = Compound::Type::AN;
-      break;
-    case CLEX::A: compound = Compound::Type::AA;
-      break;
-    case CLEX::B: compound = Compound::Type::AB;
-      break;
-    case CLEX::P: compound = Compound::Type::AP;
-      break;
-    case CLEX::V: compound = Compound::Type::AV;
-      break;
-    default:
-      break;
-    }
-    break;
-  case CLEX::B:
-    switch( tag2 ){
-    case CLEX::N: compound = Compound::Type::BN;
-      break;
-    case CLEX::A: compound = Compound::Type::BA;
-      break;
-    case CLEX::B: compound = Compound::Type::BB;
-      break;
-    case CLEX::P: compound = Compound::Type::BP;
-      break;
-    case CLEX::V: compound = Compound::Type::BV;
-      break;
-    default:
-      break;
-    }
-    break;
-  case CLEX::P:
-    switch( tag2 ){
-    case CLEX::N: compound = Compound::Type::PN;
-      break;
-    case CLEX::A: compound = Compound::Type::PA;
-      break;
-    case CLEX::B: compound = Compound::Type::PB;
-      break;
-    case CLEX::P: compound = Compound::Type::PP;
-      break;
-    case CLEX::V: compound = Compound::Type::PV;
-      break;
-    default:
-      break;
-    }
-    break;
-  case CLEX::V:
-    switch( tag2 ){
-    case CLEX::N: compound = Compound::Type::VN;
-      break;
-    case CLEX::A: compound = Compound::Type::VA;
-      break;
-    case CLEX::B: compound = Compound::Type::VB;
-      break;
-    case CLEX::P: compound = Compound::Type::VP;
-      break;
-    case CLEX::V: compound = Compound::Type::VV;
-      break;
-    default:
-      break;
-    }
-    break;
-  default:
-    break;
+Compound::Type construct( const vector<CLEX::Type> tags ){
+  string s;
+  for ( const auto& t : tags ){
+    s += toString( t );
   }
-  return compound;
+  try {
+    return stringToCompound( s );
+  }
+  catch (...){
+    return Compound::Type::NONE;
+  }
+}
+
+Compound::Type construct( const CLEX::Type tag1, const CLEX::Type tag2 ){
+  vector<CLEX::Type> v;
+  v.push_back( tag1 );
+  v.push_back( tag2 );
+  return construct( v );
 }
 
 Compound::Type BracketNest::getCompoundType(){
@@ -515,12 +542,13 @@ Compound::Type BracketNest::getCompoundType(){
     Compound::Type cp2 = (*++it)->compound();
     CLEX::Type tag2 = (*it)->tag();
     Status st2 = (*it)->status();
-    CLEX::Type tag3 = (*++it)->tag();
+    Compound::Type cp3 = (*++it)->compound();
+    CLEX::Type tag3 = (*it)->tag();
     Status st3 = (*it)->status();
     if ( debugFlag > 5 ){
-      cerr << "tag1 :" << tag1 << " stat1: " << st1 << endl;
-      cerr << "tag2 :" << tag2 << " stat2: " << st2 << endl;
-      cerr << "tag3 :" << tag3 << " stat3: " << st3 << endl;
+      cerr << "tag1 :" << tag1 << " stat1: " << st1 << " cp1: " << cp1 << endl;
+      cerr << "tag2 :" << tag2 << " stat2: " << st2 << " cp2: " << cp2 << endl;
+      cerr << "tag3 :" << tag3 << " stat3: " << st3 << " cp3: " << cp3 << endl;
     }
     if ( st1 != Status::FAILED
 	 && st2 != Status::FAILED
@@ -538,6 +566,10 @@ Compound::Type BracketNest::getCompoundType(){
 	       && (tag3 == CLEX::NEUTRAL || st3 == Status::INFLECTION ) ) {
 	    compound = Compound::Type::NN;
 	  }
+	  else if ( ( tag2 == CLEX::V && st2 == Status::STEM )
+		    && ( tag3 == CLEX::N && st3 == Status::STEM ) ){
+	    compound = Compound::Type::NVN;
+	  }
 	  else if ( ( tag2 == CLEX::A &&
 		      ( st2 == Status::STEM || st2 == Status::COMPLEX ) )
 		    && ( tag3 == CLEX::A && st3 == Status::DERIVATIONAL ) ){
@@ -549,13 +581,23 @@ Compound::Type BracketNest::getCompoundType(){
 	  else if ( st2 == Status::INFLECTION && tag3 == CLEX::NEUTRAL ){
 	    compound = cp1;
 	  }
-	  else if ( ( st2 == Status::DERIVATIONAL || st3 == Status::DERIVATIONAL )
+	  else if (  st2 == Status::DERIVATIONAL
+		     && tag3 == CLEX::N ){
+	    if  ( cp3 == Compound::Type::NN ||
+		  cp3 == Compound::Type::NNN ) {
+	      compound = Compound::Type::NNN;
+	    }
+	    else {
+	      compound = Compound::Type::NN;
+	    }
+	  }
+	  else if ( st3 == Status::DERIVATIONAL
 		    && tag3 == CLEX::N ){
 	    compound = Compound::Type::NN;
 	  }
 	}
 	else if ( tag2 == CLEX::N && tag3 == CLEX::N ){
-	  compound = Compound::Type::NN;
+	  compound = Compound::Type::NNN;
 	}
       }
       else if ( tag1 == CLEX::A ){
@@ -748,8 +790,13 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
     ++cnt;
     desc = "[" + out + "]"; // pass it up!
-    // if ( _status == Status::PARTICIPLE )
-    //   desc += "part";
+    string tag = orig;
+    string::size_type pos = tag.find( "^" );
+    if ( pos != string::npos ){
+      // A glue tag! Override orig with the implicit tag!
+      tag = orig[pos+1];
+      desc += CLEX::get_tDescr( CLEX::toCLEX(tag) );
+    }
     for ( const auto& inf : inflect ){
       if ( inf != '/' ){
 	string d = CLEX::get_iDescr( inf );
@@ -769,7 +816,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
     args.clear();
     args["set"] = Mbma::clex_tagset;
-    args["class"] = orig;
+    args["class"] = tag;
 #pragma omp critical(foliaupdate)
     {
       result->addPosAnnotation( args );
@@ -923,8 +970,12 @@ void BracketNest::resolveNouns( ){
     if ( (*prev)->tag() == CLEX::N && (*prev)->RightHand.size() == 0
 	 && ( (*it)->tag() == CLEX::N && (*it)->status() == Status::STEM )
 	 && (*it)->RightHand.size() == 0 ){
-      BaseBracket *tmp
-	= new BracketNest( CLEX::N, Compound::Type::NN, debugFlag );
+      Compound::Type newt = Compound::Type::NN;
+      if ( (*prev)->compound() == Compound::Type::NN
+	   || (*prev)->compound() == Compound::Type::NN ){
+	newt = Compound::Type::NNN;
+      }
+      BaseBracket *tmp = new BracketNest( CLEX::N, newt, debugFlag );
       tmp->append( *prev );
       tmp->append( *it );
       if ( debugFlag > 5 ){
@@ -950,6 +1001,89 @@ void BracketNest::resolveNouns( ){
   }
   if ( debugFlag > 5 ){
     cerr << "resolve NOUNS result:" << this << endl;
+  }
+}
+
+list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
+						const list<BaseBracket*>::iterator& rpos ){
+  if ( debugFlag > 5 ){
+    cerr << "glue " << endl;
+  }
+  size_t len = (*rpos)->RightHand.size();
+  bool matched = true;
+  if ( len == 0 || len > result.size() ){
+    if ( debugFlag > 5 ){
+      cerr << "test MATCH FAIL (no RHS or RHS > result)" << endl;
+    }
+    matched = false;
+  }
+  else {
+    size_t j = 0;
+    list<BaseBracket*>::iterator it = rpos;
+    for (; j < len && it != result.end(); ++j, ++it ){
+      if ( debugFlag > 5 ){
+	cerr << "test MATCH vergelijk " << *it << " met " << (*rpos)->RightHand[j] << endl;
+      }
+      if ( (*rpos)->RightHand[j] == CLEX::GLUE ){
+	++j;
+	continue;
+      }
+      else if ( (*rpos)->RightHand[j] != (*it)->tag() ){
+	if ( debugFlag > 5 ){
+	  cerr << "test MATCH FAIL (" << (*rpos)->RightHand[j]
+	       << " != " << (*it)->tag() << ")" << endl;
+	}
+	(*rpos)->set_status(Status::FAILED);
+	matched = false;
+      }
+    }
+  }
+  if ( matched ){
+    list<BaseBracket*>::iterator bit = rpos;
+    vector<CLEX::Type> tags;
+    if ( debugFlag > 5 ){
+      cerr << "OK een match" << endl;
+    }
+    list<BaseBracket*>::iterator it = bit--;
+    BracketNest *tmp
+      = new BracketNest( (*rpos)->tag(), Compound::Type::NONE, debugFlag );
+    for ( size_t j = 0; j < len-1; ++j ){
+      tmp->append( *it );
+      tags.push_back( (*it)->tag() );
+      if ( debugFlag > 5 ){
+	cerr << "erase " << *it << endl;
+      }
+      it = result.erase(it);
+    }
+    if ( debugFlag > 5 ){
+      cerr << "new node:" << tmp << endl;
+    }
+    tmp->_compound = construct( tags );
+    result.insert( ++bit, tmp );
+    return bit;
+  }
+  else {
+    // the glueing failed.
+    // we should try to start at the next node
+    list<BaseBracket*>::iterator bit = rpos;
+    return ++bit;
+  }
+}
+
+
+void BracketNest::resolveGlue( ){
+  list<BaseBracket*>::iterator it = parts.begin();
+  while ( it != parts.end() ){
+    // search for glue rules
+    if ( debugFlag > 5 ){
+      cerr << "search glue: bekijk: " << *it << endl;
+    }
+    if ( (*it)->isglue() ){
+      it = glue( parts, it );
+    }
+    else {
+      ++it;
+    }
   }
 }
 

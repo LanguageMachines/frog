@@ -456,6 +456,9 @@ void Mbma::addBracketMorph( Word *word,
 void Mbma::addBracketMorph( Word *word,
 			    const string& orig_word,
 			    const BracketNest *brackets ) const {
+  if (debugFlag){
+    LOG << "addBracketMorph(" << word << "," << orig_word << "," << brackets << ")" << endl;
+  }
   KWargs args;
   args["set"] = mbma_tagset;
   MorphologyLayer *ml;

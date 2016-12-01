@@ -70,17 +70,20 @@ ostream& operator<<( ostream& os, const RulePart& r ){
       os << " INFLECTION: " << r.inflect;
     }
   }
-  if ( r.fixpos >= 0 ){
-    os << " affix at pos: " << r.fixpos;
+  if ( r.is_affix ){
+    os << " affix";
   }
-  if ( r.xfixpos >= 0 ){
-    os << " x-affix at pos: " << r.xfixpos;
+  else if ( r.is_glue ){
+    os << " glue ";
   }
   if ( !r.ins.isEmpty() ){
     os << " insert='" << r.ins << "'";
   }
   if ( !r.del.isEmpty() ){
     os << " delete='" << r.del << "'";
+  }
+  if ( !r.hide.isEmpty() ){
+    os << " hidden='" << r.hide << "'";
   }
   if ( !r.morpheme.isEmpty() ){
     os << " morpheme ='" << r.morpheme << "'";
@@ -92,14 +95,18 @@ ostream& operator<<( ostream& os, const RulePart *r ){
   return os << *r;
 }
 
-void RulePart::get_ins_del( const string& edit ){
+void RulePart::get_edits( const string& edit ){
   if (edit[0]=='D') { // delete operation
     string s = edit.substr(1);
     ins = UTF8ToUnicode( s );
   }
-  else if ( edit[0]=='I') {  //insert operation
+  else if ( edit[0]=='I') {  // insert operation
     string s = edit.substr(1);
     del = UTF8ToUnicode( s );
+  }
+  else if ( edit[0]=='H') {  // hidden morpheme
+    string s = edit.substr(1);
+    hide = UTF8ToUnicode( s );
   }
   else if ( edit[0]=='R') { // replace operation
     string::size_type pos = edit.find( ">" );
@@ -113,9 +120,9 @@ void RulePart::get_ins_del( const string& edit ){
 RulePart::RulePart( const string& rs, const UChar kar, bool first ):
   ResultClass(CLEX::UNASS),
   uchar(kar),
-  fixpos(-1),
-  xfixpos(-1),
-  participle(false)
+  is_affix(false),
+  is_glue(false),
+  is_participle(false)
 {
   //  cerr << "extract RulePart:" << rs << endl;
   string edit;
@@ -134,9 +141,9 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
       edit = rs.substr( ppos+1 );
     }
     //    cerr << "EDIT = " << edit << endl;
-    get_ins_del( edit );
+    get_edits( edit );
     s = rs.substr(0, ppos );
-    participle = ( s.find( "pv" ) != string::npos ) &&
+    is_participle = ( s.find( "pv" ) != string::npos ) &&
       ( del == "ge" );
   }
   string::size_type pos = s.find("_");
@@ -168,10 +175,18 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
 	  //	  cerr << "found tag '" << tag << "' in " << rhs << endl;
 	  RightHand[i] = tag;
 	  if ( tag == CLEX::AFFIX ){
-	    fixpos = i;
+	    is_affix = true;
 	  }
-	  if ( tag == CLEX::XAFFIX ){
-	    xfixpos = i;
+	  else if ( tag == CLEX::XAFFIX ){
+	    is_affix = true;
+	  }
+	  else if ( tag == CLEX::GLUE ){
+	    if ( i != 0 ){
+	      cerr << "glue symbol '^' may only occur at first position!"
+		   << endl;
+	      continue;
+	    }
+	    is_glue = true;
 	  }
 	}
       }
@@ -268,8 +283,7 @@ ostream& operator<<( ostream& os, const Rule *r ){
 void Rule::reduceZeroNodes(){
   vector<RulePart> out;
   for ( auto const& r : rules ){
-    if ( ( r.ResultClass == CLEX::NEUTRAL
-	   || r.fixpos == 1 )
+    if ( r.ResultClass == CLEX::NEUTRAL
 	 && r.morpheme.isEmpty()
 	 && r.inflect.empty() ){
       // skip
@@ -296,7 +310,7 @@ vector<string> Rule::extract_morphemes( ) const {
 string Rule::morpheme_string( bool structured ) const {
   string result;
   if ( structured ){
-    UnicodeString us = brackets->put(false);
+    UnicodeString us = brackets->put(true);
     result = UnicodeToUTF8( us );
   }
   else {
@@ -346,7 +360,7 @@ bool Rule::performEdits(){
       }
       is_replace = !cur->ins.isEmpty();
     }
-    if ( !cur->participle ){
+    if ( !cur->is_participle ){
       for ( int j=0; j < cur->del.length(); ++j ){
 	rules[k+j].uchar = "";
 	// so perform the deletion on this and subsequent nodes
@@ -355,12 +369,17 @@ bool Rule::performEdits(){
 
     bool inserted = false;
     UnicodeString part; // store to-be-inserted particles here!
-    if ( cur->isBasic() ){
+    if ( !cur->hide.isEmpty() ){
+      last->morpheme += cur->uchar; // add to prevvoius morheme
+      cur->uchar = "";
+      last = cur;
+    }
+    else if ( cur->isBasic() ){
       // encountering real POS tag
       // start a new morpheme, BUT: inserts are appended to the previous one
       // except in case of Replace edits
       if ( debugFlag ){
-	*TiCC::Log(myLog) << "FOUND a basic tag " << cur->ResultClass << endl;
+	*TiCC::Log(myLog) << "FOUND a (basic) tag " << cur->ResultClass << endl;
       }
       if ( !is_replace ){
 	if ( cur->ins == "ge" ){
@@ -378,12 +397,13 @@ bool Rule::performEdits(){
       // non 0 inflection starts a new morheme
       last = cur;
     }
-    if ( !inserted ){
+    if ( !inserted || !cur->hide.isEmpty() ){
       // insert the deletestring :-)
       if ( debugFlag ){
-	*TiCC::Log(myLog) << "add to morpheme: " << cur->ins << endl;
+	*TiCC::Log(myLog) << "add to morpheme: '" << cur->ins
+			  << cur->hide<< "'" << endl;
       }
-      last->morpheme += cur->ins;
+      last->morpheme += cur->ins + cur->hide;
     }
     else if ( !part.isEmpty() ){
       if ( debugFlag ){
@@ -407,7 +427,7 @@ void Rule::resolve_inflections(){
   // When applicable, we replace the class from the rule
   for ( size_t i = 1; i < rules.size(); ++i ){
     string inf = rules[i].inflect;
-    if ( !inf.empty() && !rules[i].participle ){
+    if ( !inf.empty() && !rules[i].is_participle ){
       // it is an inflection tag
       if (debugFlag){
 	*TiCC::Log(myLog) << " inflection: >" << inf << "<" << endl;
@@ -550,17 +570,21 @@ void Rule::resolveBrackets( bool deep ) {
     *TiCC::Log(myLog) << "STEP 1:" << brackets << endl;
   }
   if ( deep ){
-    brackets->resolveNouns( );
+    brackets->resolveGlue( );
     if ( debugFlag > 5 ){
       *TiCC::Log(myLog) << "STEP 2:" << brackets << endl;
     }
-    brackets->resolveLead( );
+    brackets->resolveNouns( );
     if ( debugFlag > 5 ){
       *TiCC::Log(myLog) << "STEP 3:" << brackets << endl;
     }
-    brackets->resolveTail( );
+    brackets->resolveLead( );
     if ( debugFlag > 5 ){
       *TiCC::Log(myLog) << "STEP 4:" << brackets << endl;
+    }
+    brackets->resolveTail( );
+    if ( debugFlag > 5 ){
+      *TiCC::Log(myLog) << "STEP 5:" << brackets << endl;
     }
     brackets->resolveMiddle();
     brackets->clearEmptyNodes();

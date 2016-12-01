@@ -43,7 +43,8 @@ namespace Compound {
       AN, AA, AB, AP, AV,
       BN, BA, BB, BP, BV,
       PN, PA, PB, PP, PV,
-      VN, VA, VB, VP, VV };
+      VN, VA, VB, VP, VV,
+      NNN, NVN };
 }
 
 namespace folia {
@@ -72,9 +73,11 @@ public:
   virtual std::string inflection() const { return ""; };
   virtual std::string original() const { return ""; };
   virtual int infixpos() const { return -1; };
+  virtual bool isglue() const { return false; };
   virtual UnicodeString put( bool = true ) const;
   virtual BaseBracket *append( BaseBracket * ){ abort(); };
   virtual bool isNested() { return false; };
+  virtual void resolveGlue(){ abort(); };
   virtual void resolveLead(){ abort(); };
   virtual void resolveTail(){ abort(); };
   virtual void resolveMiddle(){ abort(); };
@@ -102,11 +105,13 @@ public:
   std::string inflection() const { return inflect; };
   std::string original() const { return orig; };
   int infixpos() const { return ifpos; };
+  bool isglue() const { return glue; };
   folia::Morpheme *createMorpheme( folia::Document * ) const;
   folia::Morpheme *createMorpheme( folia::Document *,
 				   std::string&, int& ) const;
 private:
   int ifpos;
+  bool glue;
   UnicodeString morph;
   std::string orig;
   std::string inflect;
@@ -123,8 +128,11 @@ class BracketNest: public BaseBracket {
   bool testMatch( std::list<BaseBracket*>& result,
 		  const std::list<BaseBracket*>::iterator& rpos,
 		  std::list<BaseBracket*>::iterator& bpos );
+  std::list<BaseBracket*>::iterator glue( std::list<BaseBracket*>&,
+					  const std::list<BaseBracket*>::iterator& );
   std::list<BaseBracket*>::iterator resolveAffix( std::list<BaseBracket*>&,
 						  const std::list<BaseBracket*>::iterator& );
+  void resolveGlue();
   void resolveNouns();
   void resolveLead();
   void resolveTail();
