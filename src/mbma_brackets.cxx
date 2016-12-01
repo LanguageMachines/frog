@@ -441,7 +441,12 @@ Compound::Type construct( const vector<CLEX::Type> tags ){
   for ( const auto& t : tags ){
     s += toString( t );
   }
-  return stringToCompound( s );
+  try {
+    return stringToCompound( s );
+  }
+  catch (...){
+    return Compound::Type::NONE;
+  }
 }
 
 Compound::Type construct( const CLEX::Type tag1, const CLEX::Type tag2 ){
