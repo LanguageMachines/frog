@@ -61,7 +61,7 @@ bool bulk = false;
 bool verbose = false;
 
 Configuration configuration;
-static string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
+static string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/nld/";
 static string configFileName = configDir + "frog.cfg";
 
 static UctoTokenizer tokenizer(theErrLog);
