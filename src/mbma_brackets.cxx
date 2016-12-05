@@ -1008,9 +1008,12 @@ list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
 						const list<BaseBracket*>::iterator& rpos ){
   if ( debugFlag > 5 ){
     cerr << "glue " << endl;
+    cerr << "result IN : " << result << endl;
+    cerr << "rpos= " << *rpos << endl;
   }
   size_t len = (*rpos)->RightHand.size();
   bool matched = true;
+  vector<CLEX::Type> match_tags;
   if ( len == 0 || len > result.size() ){
     if ( debugFlag > 5 ){
       cerr << "test MATCH FAIL (no RHS or RHS > result)" << endl;
@@ -1022,25 +1025,26 @@ list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
     list<BaseBracket*>::iterator it = rpos;
     for (; j < len && it != result.end(); ++j, ++it ){
       if ( debugFlag > 5 ){
-	cerr << "test MATCH vergelijk " << *it << " met " << (*rpos)->RightHand[j] << endl;
+	cerr << "test MATCH vergelijk " << (*it)->tag() << " met " << (*rpos)->RightHand[j] << endl;
       }
       if ( (*rpos)->RightHand[j] == CLEX::GLUE ){
 	++j;
-	continue;
+	match_tags.push_back( (*rpos)->RightHand[j] );
+	continue; // the ^ is always OK
       }
-      else if ( (*rpos)->RightHand[j] != (*it)->tag() ){
+      if ( (*rpos)->RightHand[j] != (*it)->tag() ){
 	if ( debugFlag > 5 ){
-	  cerr << "test MATCH FAIL (" << (*rpos)->RightHand[j]
-	       << " != " << (*it)->tag() << ")" << endl;
+	  cerr << "test MATCH FAIL (" << (*it)->tag()
+	       << " != " << (*rpos)->RightHand[j] << ")" << endl;
 	}
 	(*rpos)->set_status(Status::FAILED);
 	matched = false;
       }
+      match_tags.push_back( (*rpos)->RightHand[j] );
     }
   }
   if ( matched ){
     list<BaseBracket*>::iterator bit = rpos;
-    vector<CLEX::Type> tags;
     if ( debugFlag > 5 ){
       cerr << "OK een match" << endl;
     }
@@ -1049,7 +1053,6 @@ list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
       = new BracketNest( (*rpos)->tag(), Compound::Type::NONE, debugFlag );
     for ( size_t j = 0; j < len-1; ++j ){
       tmp->append( *it );
-      tags.push_back( (*it)->tag() );
       if ( debugFlag > 5 ){
 	cerr << "erase " << *it << endl;
       }
@@ -1057,8 +1060,9 @@ list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
     }
     if ( debugFlag > 5 ){
       cerr << "new node:" << tmp << endl;
+      cerr << "match_tags = " << match_tags << endl;
     }
-    tmp->_compound = construct( tags );
+    tmp->_compound = construct( match_tags );
     result.insert( ++bit, tmp );
     return bit;
   }
