@@ -574,19 +574,19 @@ void Rule::resolveBrackets( bool deep ) {
     if ( debugFlag > 5 ){
       *TiCC::Log(myLog) << "STEP 2:" << brackets << endl;
     }
-    brackets->resolveNouns( );
+    brackets->resolveLead( );
     if ( debugFlag > 5 ){
       *TiCC::Log(myLog) << "STEP 3:" << brackets << endl;
     }
-    brackets->resolveLead( );
+    brackets->resolveTail( );
     if ( debugFlag > 5 ){
       *TiCC::Log(myLog) << "STEP 4:" << brackets << endl;
     }
-    brackets->resolveTail( );
+    brackets->resolveMiddle();
     if ( debugFlag > 5 ){
       *TiCC::Log(myLog) << "STEP 5:" << brackets << endl;
     }
-    brackets->resolveMiddle();
+    brackets->resolveNouns( );
     brackets->clearEmptyNodes();
   }
   tag = brackets->getFinalTag();
