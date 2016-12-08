@@ -578,7 +578,8 @@ Compound::Type BracketNest::getCompoundType(){
 	  else if ( st2 == Status::DERIVATIONAL && tag3 == CLEX::NEUTRAL ){
 	    compound = cp1;
 	  }
-	  else if ( st2 == Status::INFLECTION && tag3 == CLEX::NEUTRAL ){
+	  else if ( st2 == Status::INFLECTION &&
+		    ( tag3 == CLEX::NEUTRAL || st3 == Status::INFLECTION ) ){
 	    compound = cp1;
 	  }
 	  else if (  st2 == Status::DERIVATIONAL
@@ -640,7 +641,12 @@ Compound::Type BracketNest::getCompoundType(){
 	  compound = construct( tag1, tag2 );
 	}
       	else if ( st2 == Status::COMPLEX ){
-	  compound = cp2;
+	  if ( tag2 == CLEX::N ){
+	    compound = Compound::Type::BN;
+	  }
+	  else {
+	    compound = cp2;
+	  }
 	}
       }
       else if ( tag1 == CLEX::V ){
