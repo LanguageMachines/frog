@@ -679,10 +679,13 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
 				       int& cnt ) const {
   Morpheme *result = 0;
   desc.clear();
+  string::size_type pos = orig.find( "^" );
+  bool glue = ( pos != string::npos );
   if ( _status == Status::COMPLEX ){
     abort();
   }
-  else if ( _status == Status::STEM ){
+  else if ( _status == Status::STEM
+	    || ( _status == Status::DERIVATIONAL && glue ) ){
     KWargs args;
     args["set"] = Mbma::mbma_tagset;
     args["class"] = "stem";
@@ -736,7 +739,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
   }
   else if ( _status == Status::INFLECTION ){
     KWargs args;
-    args["class"] = "affix";
+    args["class"] = "inflection";
     args["set"] = Mbma::mbma_tagset;
     result = new Morpheme( args, doc );
     args.clear();
@@ -779,7 +782,15 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
 	    || _status == Status::PARTICIPLE
 	    || _status == Status::FAILED ){
     KWargs args;
-    args["class"] = "derivational";
+    if ( _status == Status::DERIVATIONAL ){
+      args["class"] = "affix";
+    }
+    else if ( _status == Status::PARTICIPLE ){
+      args["class"] = "participle";
+    }
+    else {
+      args["class"] = "derivational";
+    }
     args["set"] = Mbma::mbma_tagset;
     result = new Morpheme( args, doc );
     args.clear();
@@ -796,13 +807,6 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
     ++cnt;
     desc = "[" + out + "]"; // pass it up!
-    string tag = orig;
-    string::size_type pos = tag.find( "^" );
-    if ( pos != string::npos ){
-      // A glue tag! Override orig with the implicit tag!
-      tag = orig[pos+1];
-      desc += CLEX::get_tDescr( CLEX::toCLEX(tag) );
-    }
     for ( const auto& inf : inflect ){
       if ( inf != '/' ){
 	string d = CLEX::get_iDescr( inf );
@@ -822,7 +826,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
     args.clear();
     args["set"] = Mbma::clex_tagset;
-    args["class"] = tag;
+    args["class"] = orig;
 #pragma omp critical(foliaupdate)
     {
       result->addPosAnnotation( args );
