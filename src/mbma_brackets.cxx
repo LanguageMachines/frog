@@ -704,7 +704,14 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     ++cnt;
     args.clear();
     args["set"] = Mbma::clex_tagset;
-    args["class"] = toString( tag() );
+    if ( glue ){
+      string tag;
+      tag += orig[pos+1];
+      args["class"] = tag;
+    }
+    else {
+      args["class"] = toString( tag() );
+    }
 #pragma omp critical(foliaupdate)
     {
       result->addPosAnnotation( args );
