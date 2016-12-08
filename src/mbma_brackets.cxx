@@ -832,12 +832,12 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
       result->append( feat );
     }
     args.clear();
-    args["set"] = Mbma::clex_tagset;
-    args["class"] = orig;
-#pragma omp critical(foliaupdate)
-    {
-      result->addPosAnnotation( args );
-    }
+//     args["set"] = Mbma::clex_tagset;
+//     args["class"] = orig;
+// #pragma omp critical(foliaupdate)
+//     {
+//       result->addPosAnnotation( args );
+//     }
   }
   else if ( _status == Status::INFO ){
     KWargs args;
@@ -888,6 +888,19 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
     Morpheme *m = it->createMorpheme( doc,
 				      deeper_desc,
 				      deep_cnt );
+    if ( it->status() == Status::DERIVATIONAL
+	 || it->status() == Status::PARTICIPLE ){
+      if ( !it->original().empty() ){
+	args.clear();
+	args["subset"] = "applied_rule";
+	args["class"] = it->original();
+#pragma omp critical(foliaupdate)
+	{
+	  folia::Feature *feat = new folia::Feature( args );
+	  result->append( feat );
+	}
+      }
+    }
     if ( m ){
       desc += deeper_desc;
       cnt += deep_cnt;
