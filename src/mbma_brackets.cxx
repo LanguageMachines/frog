@@ -682,7 +682,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
   if ( _status == Status::COMPLEX ){
     abort();
   }
-  if ( _status == Status::STEM ){
+  else if ( _status == Status::STEM ){
     KWargs args;
     args["set"] = Mbma::mbma_tagset;
     args["class"] = "stem";
@@ -708,7 +708,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
     desc = "[" + out + "]" + CLEX::get_tDescr( tag() ); // spread the word upwards!
   }
-  if ( _status == Status::PARTICLE ){
+  else if ( _status == Status::PARTICLE ){
     KWargs args;
     args["set"] = Mbma::mbma_tagset;
     args["class"] = "particle";
