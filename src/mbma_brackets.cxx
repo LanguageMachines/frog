@@ -708,15 +708,17 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
       string tag;
       tag += orig[pos+1];
       args["class"] = tag;
+      desc = "[" + out + "]" + CLEX::get_tDescr( CLEX::toCLEX(tag) ); // spread the word upwards!
+
     }
     else {
       args["class"] = toString( tag() );
+      desc = "[" + out + "]" + CLEX::get_tDescr( tag() ); // spread the word upwards!
     }
 #pragma omp critical(foliaupdate)
     {
       result->addPosAnnotation( args );
     }
-    desc = "[" + out + "]" + CLEX::get_tDescr( tag() ); // spread the word upwards!
   }
   else if ( _status == Status::PARTICLE ){
     KWargs args;
