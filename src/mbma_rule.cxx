@@ -215,7 +215,7 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
 	  inflect = s.substr(pos+1);
 	}
 	else {
-	  //  E/P
+	  //  E/P (suffix=e/postive infection)
 	  inflect = s;
 	}
 	//	cerr << "inflect =" << inflect << endl;
@@ -394,7 +394,7 @@ bool Rule::performEdits(){
       last = cur;
     }
     else if ( cur->ResultClass != CLEX::NEUTRAL ){
-      // non 0 inflection starts a new morheme
+      // this MUST be an inflection. like E, C S.. It starts a new morheme
       last = cur;
     }
     if ( !inserted || !cur->hide.isEmpty() ){
@@ -484,23 +484,25 @@ void Rule::resolve_inflections(){
 }
 
 UnicodeString Rule::getKey( bool deep ){
-  if ( sortkey.isEmpty() ){
-    UnicodeString tmp;
-    if ( deep ){
+  if ( deep ){
+    if ( sortkey.isEmpty() ){
+      UnicodeString tmp;
       stringstream ss;
       ss << brackets << endl;
       tmp = UTF8ToUnicode(ss.str());
+      sortkey = tmp;
     }
-    else {
-      vector<string> morphs = extract_morphemes();
-      // create an unique string
-      for ( auto const& mor : morphs ){
-	tmp += UTF8ToUnicode(mor) + "++";
-      }
-    }
-    sortkey = tmp;
+    return sortkey;
   }
-  return sortkey;
+  else {
+    vector<string> morphs = extract_morphemes();
+    UnicodeString tmp;
+    // create an unique string
+    for ( auto const& mor : morphs ){
+      tmp += UTF8ToUnicode(mor) + "++";
+    }
+    return tmp;
+  }
 }
 
 void Rule::getCleanInflect() {

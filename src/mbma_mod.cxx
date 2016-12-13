@@ -704,7 +704,7 @@ void Mbma::filterSubTags( const vector<string>& feats ){
     int i=0;
     for ( const auto& it : analysis ){
       LOG << ++i << " - " << it << " " << it->getKey(false)
-		    << " (" << it->getKey(false).length() << ")" << endl;
+	  << " (" << it->getKey(false).length() << ")" << endl;
     }
     LOG << "" << endl;
   }

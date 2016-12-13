@@ -1254,19 +1254,70 @@ CLEX::Type BracketNest::getFinalTag() {
       result_cls = (*it)->tag();
       //      cerr << "maybe tag = " << result_cls << endl;
       if ( result_cls != CLEX::P ){
+	// in case of P we hope for better to the left
 	auto it2 = it;
 	++it2;
 	if ( it2 != parts.rend() ){
 	  //	  cerr << "bekijk ook " << *it2 << endl;
 	  if ( (*it2)->infixpos() == 0 ){
 	    result_cls = (*it2)->tag();
+	    // in case of a X_*Y rule we need X
 	  }
 	}
-	// in case of P we hope for better
-	// in case of a X_*Y rule we need X
 	break;
       }
     }
+#ifdef NO_WAY
+    else if ( !(*it)->inflection().empty()
+	      && (*it)->morpheme().isEmpty() ){
+      string inf = (*it)->inflection();
+      // it is an inflection tag
+      cerr << " inflection: >" << inf << "<" << endl;
+      // given the specific selections of certain inflections,
+      //    select a tag!
+      CLEX::Type new_tag = CLEX::UNASS;
+      for ( size_t i=0; i < inf.size(); ++i ){
+	new_tag = CLEX::select_tag( inf[i] );
+	if ( new_tag != CLEX::UNASS ){
+	  cerr << inf[i] << " selects " << new_tag << endl;
+	  break;
+	}
+      }
+      if ( new_tag != CLEX::UNASS ) {
+	// apply the change. Remember, the idea is that an inflection is
+	// far more certain of the tag of its predecessing morpheme than
+	// the morpheme itself.
+	// This is not always the case, but it works
+	//
+	// go back to the previous morpheme
+	auto pit = it;
+	for( ++pit; pit != parts.rend(); ++pit ){
+	  CLEX::Type old_tag = (*pit)->tag();
+	  cerr << "een terug is " << *pit << endl;
+	  if ( CLEX::isBasicClass( old_tag ) &&
+	       old_tag != CLEX::P ){
+	    // only nodes that can get inflected (and unanalysed too)
+	    // now see if we can replace this class for a better one
+	    if ( old_tag == CLEX::PN && new_tag == CLEX::N ){
+	      cerr << "Don't replace PN by N" << endl;
+	    }
+	    else {
+	      cerr << " replace " << old_tag
+		   << " by " << new_tag << endl;
+	      (*pit)->setTag( new_tag );
+	      cls = new_tag;
+	    }
+	    return new_tag;
+	  }
+	}
+      }
+      else {
+	// this realy shouldn't happen. probably an error in the data!?
+	cerr << "inflection: " << inf
+	     << " Problem: DOESN'T select a tag" << endl;
+      }
+    }
+#endif
     ++it;
   }
   //  cerr << "final tag = " << result_cls << endl;
