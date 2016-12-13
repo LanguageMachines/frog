@@ -469,6 +469,11 @@ void Rule::resolve_inflections(){
 				  << " by " << new_tag << endl;
 	      }
 	      rules[k].ResultClass = new_tag;
+#ifdef EXPERIMENT
+	      tag = new_tag;
+	      brackets->setTag( new_tag );
+	      description = get_tDescr( new_tag );
+#endif
 	    }
 	    return;
 	  }
