@@ -257,7 +257,7 @@ string find_class( unsigned int step,
 	result = classes[step];
       }
       else {
-	result = "0";
+	result = classes.back();
       }
     }
   }
