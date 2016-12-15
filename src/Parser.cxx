@@ -954,8 +954,8 @@ void Parser::Parse( const vector<Word*>& words,
 		    TimerBlock& timers ){
   timers.parseTimer.start();
   if ( !isInit ){
-    LOG << "Parser is not initialized!" << endl;
-    exit(1);
+    LOG << "Parser is not initialized! EXIT!" << endl;
+    throw runtime_error( "Parser is not initialized!" );
   }
   if ( words.empty() ){
     LOG << "unable to parse an analisis without words" << endl;

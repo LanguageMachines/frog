@@ -309,7 +309,7 @@ void Mbma::clearAnalysis(){
 
 Rule* Mbma::matchRule( const std::vector<std::string>& ana,
 		       const UnicodeString& word ){
-  Rule *rule = new Rule( ana, word, mbmaLog, debugFlag );
+  Rule *rule = new Rule( ana, word, *mbmaLog, debugFlag );
   if ( rule->performEdits() ){
     rule->reduceZeroNodes();
     if ( debugFlag ){
@@ -376,7 +376,7 @@ void Mbma::addMorph( Word *word,
     }
     catch( const exception& e ){
       LOG << e.what() << " addMorph failed." << endl;
-      exit(EXIT_FAILURE);
+      throw;
     }
   }
   addMorph( ml, morphs );
@@ -425,7 +425,7 @@ void Mbma::addBracketMorph( Word *word,
     }
     catch( const exception& e ){
       LOG << e.what() << " addBracketMorph failed." << endl;
-      exit(EXIT_FAILURE);
+      throw;
     }
   }
   args["class"] = "stem";
@@ -474,7 +474,7 @@ void Mbma::addBracketMorph( Word *word,
     }
     catch( const exception& e ){
       LOG << e.what() << " addBracketMorph failed." << endl;
-      exit(EXIT_FAILURE);
+      throw;
     }
   }
   Morpheme *m = 0;
@@ -483,7 +483,7 @@ void Mbma::addBracketMorph( Word *word,
   }
   catch( const exception& e ){
     cerr << "createMorpheme failed: " << e.what() << endl;
-    exit(1);
+    throw;
   }
   if ( m ){
     args.clear();
@@ -634,8 +634,9 @@ void Mbma::filterSubTags( const vector<string>& feats ){
 	}
       }
     }
-    if (debugFlag)
+    if (debugFlag){
       LOG << "score: " << match_count << " max was " << max_count << endl;
+    }
     if (match_count >= max_count) {
       if (match_count > max_count) {
 	max_count = match_count;

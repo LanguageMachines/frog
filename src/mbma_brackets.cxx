@@ -48,6 +48,8 @@ using namespace std;
 using namespace TiCC;
 using namespace folia;
 
+#define LOG *Log(myLog)
+
 string toString( const Compound::Type& ct ){
   switch ( ct ){
   case Compound::Type::NN:
@@ -233,8 +235,8 @@ ostream& operator<<( ostream& os, const Status& st ){
   return os;
 }
 
-BracketLeaf::BracketLeaf( const RulePart& p, int flag ):
-  BaseBracket(p.ResultClass, p.RightHand, flag),
+BracketLeaf::BracketLeaf( const RulePart& p, int flag, LogStream& l ):
+  BaseBracket(p.ResultClass, p.RightHand, flag, l ),
   glue(false),
   morph(p.morpheme )
 {
@@ -280,8 +282,11 @@ BracketLeaf::BracketLeaf( const RulePart& p, int flag ):
   }
 }
 
-BracketLeaf::BracketLeaf( CLEX::Type t, const UnicodeString& us, int flag ):
-  BaseBracket( t, vector<CLEX::Type>(), flag ),
+BracketLeaf::BracketLeaf( CLEX::Type t,
+			  const UnicodeString& us,
+			  int flag,
+			  LogStream& l ):
+  BaseBracket( t, vector<CLEX::Type>(), flag, l ),
   morph( us )
 {
   ifpos = -1;
@@ -291,8 +296,9 @@ BracketLeaf::BracketLeaf( CLEX::Type t, const UnicodeString& us, int flag ):
 
 BracketNest::BracketNest( CLEX::Type t,
 			  Compound::Type c,
-			  int flag ): BaseBracket( t, flag ),
-				      _compound( c )
+			  int flag,
+			  LogStream& l ): BaseBracket( t, flag, l ),
+					  _compound( c )
 {
   _status = Status::COMPLEX;
 }
@@ -382,19 +388,19 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
 			     const list<BaseBracket*>::iterator& rpos,
 			     list<BaseBracket*>::iterator& bpos ){
   if ( debugFlag > 5 ){
-    cerr << "test MATCH: rpos= " << *rpos << endl;
+    LOG << "test MATCH: rpos= " << *rpos << endl;
   }
   bpos = result.end();
   size_t len = (*rpos)->RightHand.size();
   if ( len == 0 || len > result.size() ){
     if ( debugFlag > 5 ){
-      cerr << "test MATCH FAIL (no RHS or RHS > result)" << endl;
+      LOG << "test MATCH FAIL (no RHS or RHS > result)" << endl;
     }
     return false;
   }
   size_t fpos = (*rpos)->infixpos();
   if ( debugFlag > 5 ){
-    cerr << "test MATCH, fpos=" << fpos << " en len=" << len << endl;
+    LOG << "test MATCH, fpos=" << fpos << " en len=" << len << endl;
   }
   list<BaseBracket*>::iterator it = rpos;
   while ( fpos > 0 ){
@@ -405,7 +411,7 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
   bpos = it;
   for (; j < len && it != result.end(); ++j, ++it ){
     if ( debugFlag > 5 ){
-      cerr << "test MATCH vergelijk " << *it << " met " << (*rpos)->RightHand[j] << endl;
+      LOG << "test MATCH vergelijk " << *it << " met " << (*rpos)->RightHand[j] << endl;
     }
     if ( (*rpos)->RightHand[j] == CLEX::XAFFIX ){
       continue;
@@ -415,8 +421,8 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
     }
     else if ( (*rpos)->RightHand[j] != (*it)->tag() ){
       if ( debugFlag > 5 ){
-	cerr << "test MATCH FAIL (" << (*rpos)->RightHand[j]
-	     << " != " << (*it)->tag() << ")" << endl;
+	LOG << "test MATCH FAIL (" << (*rpos)->RightHand[j]
+	    << " != " << (*it)->tag() << ")" << endl;
       }
       (*rpos)->set_status(Status::FAILED);
       bpos = it;
@@ -425,13 +431,13 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
   }
   if ( j < len ){
     if ( debugFlag > 5 ){
-      cerr << "test MATCH FAIL (j < len)" << endl;
+      LOG << "test MATCH FAIL (j < len)" << endl;
     }
     bpos = result.end();
     return false;
   }
   if ( debugFlag > 5 ){
-    cerr << "test MATCH OK" << endl;
+    LOG << "test MATCH OK" << endl;
   }
   return true;
 }
@@ -458,8 +464,8 @@ Compound::Type construct( const CLEX::Type tag1, const CLEX::Type tag2 ){
 
 Compound::Type BracketNest::getCompoundType(){
   if ( debugFlag > 5 ){
-    cerr << "get compoundType: " << this << endl;
-    cerr << "#parts: " << parts.size() << endl;
+    LOG << "get compoundType: " << this << endl;
+    LOG << "#parts: " << parts.size() << endl;
   }
   Compound::Type compound = Compound::Type::NONE;
   if ( parts.size() == 1 ){
@@ -475,8 +481,8 @@ Compound::Type BracketNest::getCompoundType(){
     Compound::Type cp2 = (*it)->compound();
     Status st2 = (*it)->status();
     if ( debugFlag > 5 ){
-      cerr << "tag1 :" << tag1 << " stat1: " << st1 << " cp1: " << cp1 << endl;
-      cerr << "tag2 :" << tag2 << " stat2: " << st2 << " cp2: " << cp2 << endl;
+      LOG << "tag1 :" << tag1 << " stat1: " << st1 << " cp1: " << cp1 << endl;
+      LOG << "tag2 :" << tag2 << " stat2: " << st2 << " cp2: " << cp2 << endl;
     }
     if ( st1 != Status::FAILED
 	 && st2 != Status::FAILED ){
@@ -546,9 +552,9 @@ Compound::Type BracketNest::getCompoundType(){
     CLEX::Type tag3 = (*it)->tag();
     Status st3 = (*it)->status();
     if ( debugFlag > 5 ){
-      cerr << "tag1 :" << tag1 << " stat1: " << st1 << " cp1: " << cp1 << endl;
-      cerr << "tag2 :" << tag2 << " stat2: " << st2 << " cp2: " << cp2 << endl;
-      cerr << "tag3 :" << tag3 << " stat3: " << st3 << " cp3: " << cp3 << endl;
+      LOG << "tag1 :" << tag1 << " stat1: " << st1 << " cp1: " << cp1 << endl;
+      LOG << "tag2 :" << tag2 << " stat2: " << st2 << " cp2: " << cp2 << endl;
+      LOG << "tag3 :" << tag3 << " stat3: " << st3 << " cp3: " << cp3 << endl;
     }
     if ( st1 != Status::FAILED
 	 && st2 != Status::FAILED
@@ -662,7 +668,7 @@ Compound::Type BracketNest::getCompoundType(){
     }
   }
   if ( debugFlag > 5 ){
-    cerr << "   ASSIGNED :" << compound << endl;
+    LOG << "   ASSIGNED :" << compound << endl;
   }
   _compound = compound;
   return compound;
@@ -805,7 +811,7 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     args.clear();
     string out = UnicodeToUTF8(morph);
     if ( out.empty() ){
-      cerr << "problem: " << this << endl;
+      LOG << "problem: " << this << endl;
       throw logic_error( "Derivation with empty morpheme" );
     }
     args["value"] = out;
@@ -950,13 +956,13 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
 list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& result,
 							const list<BaseBracket*>::iterator& rpos ){
   if ( debugFlag > 5 ){
-    cerr << "resolve affix" << endl;
+    LOG << "resolve affix" << endl;
   }
   list<BaseBracket*>::iterator bit;
   bool matched = testMatch( result, rpos, bit );
   if ( matched ){
     if ( debugFlag > 5 ){
-      cerr << "OK een match" << endl;
+      LOG << "OK een match" << endl;
     }
     size_t len = (*rpos)->RightHand.size();
     if ( len == result.size() ){
@@ -968,16 +974,16 @@ list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& resu
     else {
       list<BaseBracket*>::iterator it = bit--;
       BracketNest *tmp
-	= new BracketNest( (*rpos)->tag(), Compound::Type::NONE, debugFlag );
+	= new BracketNest( (*rpos)->tag(), Compound::Type::NONE, debugFlag, myLog );
       for ( size_t j = 0; j < len; ++j ){
 	tmp->append( *it );
 	if ( debugFlag > 5 ){
-	  cerr << "erase " << *it << endl;
+	  LOG << "erase " << *it << endl;
 	}
 	it = result.erase(it);
       }
       if ( debugFlag > 5 ){
-	cerr << "new node:" << tmp << endl;
+	LOG << "new node:" << tmp << endl;
       }
       _compound = tmp->getCompoundType();
       result.insert( ++bit, tmp );
@@ -994,7 +1000,7 @@ list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& resu
 
 void BracketNest::resolveNouns( ){
   if ( debugFlag > 5 ){
-    cerr << "resolve NOUNS in:" << this << endl;
+    LOG << "resolve NOUNS in:" << this << endl;
   }
   list<BaseBracket*>::iterator it = parts.begin();
   list<BaseBracket*>::iterator prev = it++;
@@ -1007,22 +1013,22 @@ void BracketNest::resolveNouns( ){
 	   || (*prev)->compound() == Compound::Type::NN ){
 	newt = Compound::Type::NNN;
       }
-      BaseBracket *tmp = new BracketNest( CLEX::N, newt, debugFlag );
+      BaseBracket *tmp = new BracketNest( CLEX::N, newt, debugFlag, myLog );
       tmp->append( *prev );
       tmp->append( *it );
       if ( debugFlag > 5 ){
-	cerr << "current result:" << parts << endl;
-	cerr << "new node:" << tmp << endl;
-	cerr << "erase " << *prev << endl;
+	LOG << "current result:" << parts << endl;
+	LOG << "new node:" << tmp << endl;
+	LOG << "erase " << *prev << endl;
       }
       prev = parts.erase(prev);
       if ( debugFlag > 5 ){
-	cerr << "erase " << *prev << endl;
+	LOG << "erase " << *prev << endl;
       }
       prev = parts.erase(prev);
       prev = parts.insert( prev, tmp );
       if ( debugFlag > 5 ){
-	cerr << "current result:" << parts << endl;
+	LOG << "current result:" << parts << endl;
       }
       it = prev;
       ++it;
@@ -1032,23 +1038,23 @@ void BracketNest::resolveNouns( ){
     }
   }
   if ( debugFlag > 5 ){
-    cerr << "resolve NOUNS result:" << this << endl;
+    LOG << "resolve NOUNS result:" << this << endl;
   }
 }
 
 list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
 						const list<BaseBracket*>::iterator& rpos ){
   if ( debugFlag > 5 ){
-    cerr << "glue " << endl;
-    cerr << "result IN : " << result << endl;
-    cerr << "rpos= " << *rpos << endl;
+    LOG << "glue " << endl;
+    LOG << "result IN : " << result << endl;
+    LOG << "rpos= " << *rpos << endl;
   }
   size_t len = (*rpos)->RightHand.size();
   bool matched = true;
   vector<CLEX::Type> match_tags;
   if ( len == 0 || len > result.size() ){
     if ( debugFlag > 5 ){
-      cerr << "test MATCH FAIL (no RHS or RHS > result)" << endl;
+      LOG << "test MATCH FAIL (no RHS or RHS > result)" << endl;
     }
     matched = false;
   }
@@ -1057,7 +1063,7 @@ list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
     list<BaseBracket*>::iterator it = rpos;
     for (; j < len && it != result.end(); ++j, ++it ){
       if ( debugFlag > 5 ){
-	cerr << "test MATCH vergelijk " << (*it)->tag() << " met " << (*rpos)->RightHand[j] << endl;
+	LOG << "test MATCH vergelijk " << (*it)->tag() << " met " << (*rpos)->RightHand[j] << endl;
       }
       if ( (*rpos)->RightHand[j] == CLEX::GLUE ){
 	++j;
@@ -1066,7 +1072,7 @@ list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
       }
       if ( (*rpos)->RightHand[j] != (*it)->tag() ){
 	if ( debugFlag > 5 ){
-	  cerr << "test MATCH FAIL (" << (*it)->tag()
+	  LOG << "test MATCH FAIL (" << (*it)->tag()
 	       << " != " << (*rpos)->RightHand[j] << ")" << endl;
 	}
 	(*rpos)->set_status(Status::FAILED);
@@ -1078,21 +1084,21 @@ list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
   if ( matched ){
     list<BaseBracket*>::iterator bit = rpos;
     if ( debugFlag > 5 ){
-      cerr << "OK een match" << endl;
+      LOG << "OK een match" << endl;
     }
     list<BaseBracket*>::iterator it = bit--;
     BracketNest *tmp
-      = new BracketNest( (*rpos)->tag(), Compound::Type::NONE, debugFlag );
+      = new BracketNest( (*rpos)->tag(), Compound::Type::NONE, debugFlag, myLog );
     for ( size_t j = 0; j < len-1; ++j ){
       tmp->append( *it );
       if ( debugFlag > 5 ){
-	cerr << "erase " << *it << endl;
+	LOG << "erase " << *it << endl;
       }
       it = result.erase(it);
     }
     if ( debugFlag > 5 ){
-      cerr << "new node:" << tmp << endl;
-      cerr << "match_tags = " << match_tags << endl;
+      LOG << "new node:" << tmp << endl;
+      LOG << "match_tags = " << match_tags << endl;
     }
     tmp->_compound = construct( match_tags );
     result.insert( ++bit, tmp );
@@ -1112,7 +1118,7 @@ void BracketNest::resolveGlue( ){
   while ( it != parts.end() ){
     // search for glue rules
     if ( debugFlag > 5 ){
-      cerr << "search glue: bekijk: " << *it << endl;
+      LOG << "search glue: bekijk: " << *it << endl;
     }
     if ( (*it)->isglue() ){
       it = glue( parts, it );
@@ -1128,11 +1134,11 @@ void BracketNest::resolveLead( ){
   while ( it != parts.end() ){
     // search for rules with a * at the begin
     if ( debugFlag > 5 ){
-      cerr << "search leading *: bekijk: " << *it << endl;
+      LOG << "search leading *: bekijk: " << *it << endl;
     }
     if ( (*it)->isNested() ){
       if ( debugFlag > 5 ){
-	cerr << "nested! " << endl;
+	LOG << "nested! " << endl;
       }
       (*it)->resolveLead();
       ++it;
@@ -1153,11 +1159,11 @@ void BracketNest::resolveTail(){
   while ( it != parts.end() ){
     // search for rules with a * at the end
     if ( debugFlag > 5 ){
-      cerr << "search trailing *: bekijk: " << *it << endl;
+      LOG << "search trailing *: bekijk: " << *it << endl;
     }
     if ( (*it)->isNested() ){
       if ( debugFlag > 5 ){
-	cerr << "nested! " << endl;
+	LOG << "nested! " << endl;
       }
       (*it)->resolveTail();
       ++it;
@@ -1167,9 +1173,9 @@ void BracketNest::resolveTail(){
       if ( (*it)->infixpos() > 0
 	   && (*it)->infixpos() == signed(len)-1 ){
 	if ( debugFlag > 5 ){
-	  cerr << "found trailing * " << *it << endl;
-	  cerr << "infixpos=" << (*it)->infixpos() << endl;
-	  cerr << "len=" << len << endl;
+	  LOG << "found trailing * " << *it << endl;
+	  LOG << "infixpos=" << (*it)->infixpos() << endl;
+	  LOG << "len=" << len << endl;
 	}
 	it = resolveAffix( parts, it );
       }
@@ -1185,11 +1191,11 @@ void BracketNest::resolveMiddle(){
   while ( it != parts.end() ){
     // now search for other rules with a * in the middle
     if ( debugFlag > 5 ){
-      cerr << "hoofd infix loop bekijk: " << *it << endl;
+      LOG << "hoofd infix loop bekijk: " << *it << endl;
     }
     if ( (*it)->isNested() ){
       if ( debugFlag > 5 ){
-	cerr << "nested! " << endl;
+	LOG << "nested! " << endl;
       }
       (*it)->resolveMiddle( );
       ++it;
@@ -1210,17 +1216,17 @@ void BracketNest::resolveMiddle(){
 void BracketNest::clearEmptyNodes(){
   // remove all nodes that don't have a morpheme or an inlection
   if ( debugFlag > 5 ){
-    cerr << "clear emptyNodes: " << this << endl;
+    LOG << "clear emptyNodes: " << this << endl;
   }
   list<BaseBracket*> out;
   list<BaseBracket*>::iterator it = parts.begin();
   while ( it != parts.end() ){
     if ( debugFlag > 5 ){
-      cerr << "loop clear emptyNodes : " << *it << endl;
+      LOG << "loop clear emptyNodes : " << *it << endl;
     }
     if ( (*it)->isNested() ){
       if ( debugFlag > 5 ){
-	cerr << "nested! " << endl;
+	LOG << "nested! " << endl;
       }
       (*it)->clearEmptyNodes( );
       out.push_back( *it );
@@ -1238,27 +1244,27 @@ void BracketNest::clearEmptyNodes(){
   }
   parts.swap( out );
   if ( debugFlag > 5 ){
-    cerr << "RESULT clear emptyNodes: " << this << endl;
+    LOG << "RESULT clear emptyNodes: " << this << endl;
   }
 }
 
 CLEX::Type BracketNest::getFinalTag() {
-  // cerr << "get Final Tag from: " << this << endl;
+  // LOG << "get Final Tag from: " << this << endl;
   CLEX::Type result_cls = CLEX::UNASS;
   auto it = parts.rbegin();
   while ( it != parts.rend() ){
-    //    cerr << "bekijk: " << *it << endl;
+    //    LOG << "bekijk: " << *it << endl;
     if ( (*it)->isNested()
 	 || ( (*it)->inflection().empty()
 	      && !(*it)->morpheme().isEmpty() ) ){
       result_cls = (*it)->tag();
-      //      cerr << "maybe tag = " << result_cls << endl;
+      //      LOG << "maybe tag = " << result_cls << endl;
       if ( result_cls != CLEX::P ){
 	// in case of P we hope for better to the left
 	auto it2 = it;
 	++it2;
 	if ( it2 != parts.rend() ){
-	  //	  cerr << "bekijk ook " << *it2 << endl;
+	  //	  LOG << "bekijk ook " << *it2 << endl;
 	  if ( (*it2)->infixpos() == 0 ){
 	    result_cls = (*it2)->tag();
 	    // in case of a X_*Y rule we need X
@@ -1272,14 +1278,14 @@ CLEX::Type BracketNest::getFinalTag() {
 	      && (*it)->morpheme().isEmpty() ){
       string inf = (*it)->inflection();
       // it is an inflection tag
-      cerr << " inflection: >" << inf << "<" << endl;
+      LOG << " inflection: >" << inf << "<" << endl;
       // given the specific selections of certain inflections,
       //    select a tag!
       CLEX::Type new_tag = CLEX::UNASS;
       for ( size_t i=0; i < inf.size(); ++i ){
 	new_tag = CLEX::select_tag( inf[i] );
 	if ( new_tag != CLEX::UNASS ){
-	  cerr << inf[i] << " selects " << new_tag << endl;
+	  LOG << inf[i] << " selects " << new_tag << endl;
 	  break;
 	}
       }
@@ -1293,17 +1299,17 @@ CLEX::Type BracketNest::getFinalTag() {
 	auto pit = it;
 	for( ++pit; pit != parts.rend(); ++pit ){
 	  CLEX::Type old_tag = (*pit)->tag();
-	  cerr << "een terug is " << *pit << endl;
+	  LOG << "een terug is " << *pit << endl;
 	  if ( CLEX::isBasicClass( old_tag ) &&
 	       old_tag != CLEX::P ){
 	    // only nodes that can get inflected (and unanalysed too)
 	    // now see if we can replace this class for a better one
 	    if ( old_tag == CLEX::PN && new_tag == CLEX::N ){
-	      cerr << "Don't replace PN by N" << endl;
+	      LOG << "Don't replace PN by N" << endl;
 	    }
 	    else {
-	      cerr << " replace " << old_tag
-		   << " by " << new_tag << endl;
+	      LOG << " replace " << old_tag
+		  << " by " << new_tag << endl;
 	      (*pit)->setTag( new_tag );
 	      cls = new_tag;
 	    }
@@ -1313,14 +1319,14 @@ CLEX::Type BracketNest::getFinalTag() {
       }
       else {
 	// this realy shouldn't happen. probably an error in the data!?
-	cerr << "inflection: " << inf
-	     << " Problem: DOESN'T select a tag" << endl;
+	LOG << "inflection: " << inf
+	    << " Problem: DOESN'T select a tag" << endl;
       }
     }
 #endif
     ++it;
   }
-  //  cerr << "final tag = " << result_cls << endl;
+  //  LOG << "final tag = " << result_cls << endl;
   cls = result_cls;
   return cls;
 }

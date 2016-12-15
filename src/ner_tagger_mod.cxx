@@ -41,6 +41,7 @@ using namespace Tagger;
 
 const int KNOWN_NERS_SIZE = 10;
 
+#define LOG *Log(nerLog)
 
 NERTagger::NERTagger(TiCC::LogStream * logstream){
   tagger = 0;
@@ -83,15 +84,15 @@ bool NERTagger::init( const Configuration& config ){
     nerLog->setlevel(LogExtreme);
   }
   if (debug){
-    *Log(nerLog) << "NER Tagger Init" << endl;
+    LOG << "NER Tagger Init" << endl;
   }
   if ( tagger != 0 ){
-    *Log(nerLog) << "NER Tagger is already initialized!" << endl;
+    LOG << "NER Tagger is already initialized!" << endl;
     return false;
   }
   val = config.lookUp( "settings", "NER" );
   if ( val.empty() ){
-    *Log(nerLog) << "Unable to find settings for NER" << endl;
+    LOG << "Unable to find settings for NER" << endl;
     return false;
   }
   string settings;
@@ -135,7 +136,7 @@ bool NERTagger::init( const Configuration& config ){
       file_name = config.configDir() + val;
     }
     if ( !fill_known_ners( file_name ) ){
-      *Log(nerLog) << "Unable to fill known NER's from file: '" << file_name << "'" << endl;
+      LOG << "Unable to fill known NER's from file: '" << file_name << "'" << endl;
       return false;
     }
   }
@@ -157,14 +158,14 @@ bool NERTagger::fill_known_ners( const string& file_name ){
     }
     vector<string> parts;
     if ( TiCC::split_at( line, parts, "\t" ) != 2 ){
-      *Log(nerLog) << "expected 2 TAB-separated parts in line: '" << line << "'" << endl;
+      LOG << "expected 2 TAB-separated parts in line: '" << line << "'" << endl;
       return false;
     }
     line = parts[0];
     string ner_value = parts[1];
     size_t num = TiCC::split( line, parts );
     if ( num < 1 || num > KNOWN_NERS_SIZE ){
-      *Log(nerLog) << "expected 1 to " << KNOWN_NERS_SIZE
+      LOG << "expected 1 to " << KNOWN_NERS_SIZE
 		   << " SPACE-separated parts in line: '" << line
 		   << "'" << endl;
       return false;
@@ -194,7 +195,7 @@ size_t count_sp( const string& sentence, string::size_type pos ){
 void NERTagger::handle_known_ners( const vector<string>& words,
 				   vector<string>& tags ){
   if ( debug ){
-    *Log(nerLog) << "search for known NER's" << endl;
+    LOG << "search for known NER's" << endl;
   }
   string sentence = " ";
   for ( const auto& w : words ){
@@ -202,7 +203,7 @@ void NERTagger::handle_known_ners( const vector<string>& words,
   }
   // so sentence starts AND ends with a space!
   if ( debug ){
-    *Log(nerLog) << "Sentence = " << sentence << endl;
+    LOG << "Sentence = " << sentence << endl;
   }
   for ( size_t i = KNOWN_NERS_SIZE; i > 0; --i ){
     auto const& mp = known_ners[i];
@@ -215,7 +216,7 @@ void NERTagger::handle_known_ners( const vector<string>& words,
       while ( pos != string::npos ){
 	size_t sp = count_sp( sentence, pos );
 	if ( debug ){
-	  *Log(nerLog) << "matched '" << it.first << "' to '"
+	  LOG << "matched '" << it.first << "' to '"
 		       << sentence << "' at position " << sp
 		       << " : " << it.second << endl;
 	}
@@ -240,8 +241,7 @@ void NERTagger::merge( const vector<string>& ktags, vector<string>& tags,
 		       vector<double>& conf ){
   if ( debug ){
     using TiCC::operator<<;
-    *Log(nerLog) << "merge " << ktags << endl
-		 << "with  " << tags << endl;
+    LOG << "merge " << ktags << endl << "with  " << tags << endl;
   }
   for ( size_t i=0; i < ktags.size(); ++i ){
     if ( ktags[i] == "O" ){
@@ -276,7 +276,7 @@ void NERTagger::merge( const vector<string>& ktags, vector<string>& tags,
     }
   }
   if ( debug ){
-    *Log(nerLog) << "Merge gave " << tags << endl;
+    LOG << "Merge gave " << tags << endl;
   }
 }
 
@@ -334,16 +334,16 @@ void NERTagger::addNERTags( const vector<Word*>& words,
   string curNER;
   for ( size_t i=0; i < tags.size(); ++i ){
     if (debug){
-      *Log(nerLog) << "NER = " << tags[i] << endl;
+      LOG << "NER = " << tags[i] << endl;
     }
     vector<string> ner;
     if ( tags[i] == "O" ){
       if ( !stack.empty() ){
 	if (debug) {
-	  *Log(nerLog) << "O spit out " << curNER << endl;
+	  LOG << "O spit out " << curNER << endl;
 	  using TiCC::operator<<;
-	  *Log(nerLog) << "ners  " << stack << endl;
-	  *Log(nerLog) << "confs " << dstack << endl;
+	  LOG << "ners  " << stack << endl;
+	  LOG << "confs " << dstack << endl;
 	}
 	addEntity( sent, tagset, stack, dstack, curNER );
 	dstack.clear();
@@ -354,8 +354,9 @@ void NERTagger::addNERTags( const vector<Word*>& words,
     else {
       size_t num_words = TiCC::split_at( tags[i], ner, "-" );
       if ( num_words != 2 ){
-	*Log(nerLog) << "expected <NER>-tag, got: " << tags[i] << endl;
-	exit( EXIT_FAILURE );
+	LOG << "expected <NER>-tag, got: " << tags[i] << endl;
+	throw runtime_error( "NER: unable to retrieve a NER tag from: "
+			     + tags[i] );
       }
     }
     if ( ner[0] == "B" ||
@@ -365,9 +366,9 @@ void NERTagger::addNERTags( const vector<Word*>& words,
       // an I with a different TAG is also handled as a B
       if ( !stack.empty() ){
 	if ( debug ){
-	  *Log(nerLog) << "B spit out " << curNER << endl;
+	  LOG << "B spit out " << curNER << endl;
 	  using TiCC::operator<<;
-	  *Log(nerLog) << "spit out " << stack << endl;
+	  LOG << "spit out " << stack << endl;
 	}
 	addEntity( sent, tagset, stack, dstack, curNER );
 	dstack.clear();
@@ -380,9 +381,9 @@ void NERTagger::addNERTags( const vector<Word*>& words,
   }
   if ( !stack.empty() ){
     if ( debug ){
-      *Log(nerLog) << "END spit out " << curNER << endl;
+      LOG << "END spit out " << curNER << endl;
       using TiCC::operator<<;
-      *Log(nerLog) << "spit out " << stack << endl;
+      LOG << "spit out " << stack << endl;
     }
     addEntity( sent, tagset, stack, dstack, curNER );
   }
@@ -417,7 +418,7 @@ void NERTagger::Classify( const vector<Word *>& swords ){
       }
     }
     if (debug){
-      *Log(nerLog) << "NER in: " << sentence << endl;
+      LOG << "NER in: " << sentence << endl;
     }
     vector<TagResult> tagv = tagger->TagLine(sentence);
     if ( tagv.size() != swords.size() ){
@@ -426,19 +427,19 @@ void NERTagger::Classify( const vector<Word *>& swords ){
 	out += val.word() + "//" + val.assignedTag() + " ";
       }
       if ( debug ){
-	*Log(nerLog) << "NER tagger is confused" << endl;
-	*Log(nerLog) << "sentences was: '" << sentence << "'" << endl;
-	*Log(nerLog) << "but tagged:" << endl;
-	*Log(nerLog) << out << endl;
+	LOG << "NER tagger is confused" << endl;
+	LOG << "sentences was: '" << sentence << "'" << endl;
+	LOG << "but tagged:" << endl;
+	LOG << out << endl;
       }
       throw runtime_error( "NER failed: '" + sentence + "' ==> '" + out + "'" );
     }
     if ( debug ){
-      *Log(nerLog) << "NER tagger out: " << endl;
+      LOG << "NER tagger out: " << endl;
       for ( size_t i=0; i < tagv.size(); ++i ){
-	*Log(nerLog) << "[" << i << "] : word=" << tagv[i].word()
-		     << " tag=" << tagv[i].assignedTag()
-		     << " confidence=" << tagv[i].confidence() << endl;
+	LOG << "[" << i << "] : word=" << tagv[i].word()
+	    << " tag=" << tagv[i].assignedTag()
+	    << " confidence=" << tagv[i].confidence() << endl;
       }
     }
     vector<double> conf;

@@ -63,7 +63,7 @@ class Rule {
 public:
   Rule( const std::vector<std::string>&,
 	const UnicodeString&,
-	TiCC::LogStream *,
+	TiCC::LogStream&,
 	int );
   ~Rule();
   std::vector<std::string> extract_morphemes() const;
@@ -83,7 +83,7 @@ public:
   std::string inflection;
   Compound::Type compound;
   BracketNest *brackets;
-  TiCC::LogStream *myLog;
+  TiCC::LogStream& myLog;
   double confidence;
 };
 

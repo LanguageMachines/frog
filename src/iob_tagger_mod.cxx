@@ -39,6 +39,8 @@ using namespace folia;
 using namespace TiCC;
 using namespace Tagger;
 
+#define LOG *Log(iobLog)
+
 IOBTagger::IOBTagger(TiCC::LogStream * logstream){
   tagger = 0;
   iobLog = new LogStream( logstream, "iob-" );
@@ -79,15 +81,15 @@ bool IOBTagger::init( const Configuration& config ){
     iobLog->setlevel(LogExtreme);
   }
   if (debug) {
-    *Log(iobLog) << "IOB Chunker Init" << endl;
+    LOG << "IOB Chunker Init" << endl;
   }
   if ( tagger != 0 ){
-    *Log(iobLog) << "IOBTagger is already initialized!" << endl;
+    LOG << "IOBTagger is already initialized!" << endl;
     return false;
   }
   val = config.lookUp( "settings", "IOB" );
   if ( val.empty() ){
-    *Log(iobLog) << "Unable to find settings for IOB" << endl;
+    LOG << "Unable to find settings for IOB" << endl;
     return false;
   }
   string settings;
@@ -146,8 +148,8 @@ void IOBTagger::addChunk( ChunkingLayer *chunks,
       chunks->append( chunk );
     }
     catch ( exception& e ){
-      *Log(iobLog) << "addChunk failed: " << e.what() << endl;
-      exit( EXIT_FAILURE );
+      LOG << "addChunk failed: " << e.what() << endl;
+      throw;
     }
   }
   for ( const auto& word : words ){
@@ -187,24 +189,24 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
   string curIOB;
   for ( size_t i=0; i < tags.size(); ++i ){
     if (debug){
-      *Log(iobLog) << "tag = " << tags[i] << endl;
+      LOG << "tag = " << tags[i] << endl;
     }
     vector<string> tagwords;
     size_t num_words = TiCC::split_at( tags[i], tagwords, "_" );
     if ( num_words != 2 ){
-      *Log(iobLog) << "expected <POS>_<IOB>, got: " << tags[i] << endl;
-      exit( EXIT_FAILURE );
+      LOG << "expected <POS>_<IOB>, got: " << tags[i] << endl;
+      throw;
     }
     vector<string> iob;
     if (debug){
-      *Log(iobLog) << "IOB = " << tagwords[1] << endl;
+      LOG << "IOB = " << tagwords[1] << endl;
     }
     if ( tagwords[1] == "O" ){
       if ( !stack.empty() ){
 	if (debug) {
-	  *Log(iobLog) << "O spit out " << curIOB << endl;
+	  LOG << "O spit out " << curIOB << endl;
 	  using TiCC::operator<<;
-	  *Log(iobLog) << "spit out " << stack << endl;
+	  LOG << "spit out " << stack << endl;
 	}
 	addChunk( el, stack, dstack, curIOB );
 	dstack.clear();
@@ -215,8 +217,8 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
     else {
       num_words = TiCC::split_at( tagwords[1], iob, "-" );
       if ( num_words != 2 ){
-	*Log(iobLog) << "expected <IOB>-tag, got: " << tagwords[1] << endl;
-	exit( EXIT_FAILURE );
+	LOG << "expected <IOB>-tag, got: " << tagwords[1] << endl;
+	throw;
       }
     }
     if ( iob[0] == "B" ||
@@ -226,9 +228,9 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
       // an I with a different TAG is also handled as a B
       if ( !stack.empty() ){
 	if ( debug ){
-	  *Log(iobLog) << "B spit out " << curIOB << endl;
+	  LOG << "B spit out " << curIOB << endl;
 	  using TiCC::operator<<;
-	  *Log(iobLog) << "spit out " << stack << endl;
+	  LOG << "spit out " << stack << endl;
 	}
 	addChunk( el, stack, dstack, curIOB );
 	dstack.clear();
@@ -241,9 +243,9 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
   }
   if ( !stack.empty() ){
     if ( debug ){
-      *Log(iobLog) << "END spit out " << curIOB << endl;
+      LOG << "END spit out " << curIOB << endl;
       using TiCC::operator<<;
-      *Log(iobLog) << "spit out " << stack << endl;
+      LOG << "spit out " << stack << endl;
     }
     addChunk( el, stack, dstack, curIOB );
   }
@@ -276,18 +278,18 @@ void IOBTagger::Classify( const vector<Word *>& swords ){
       }
     }
     if (debug){
-      *Log(iobLog) << "IOB in: " << sentence << endl;
+      LOG << "IOB in: " << sentence << endl;
     }
     vector<TagResult> tagv = tagger->TagLine(sentence);
     if ( tagv.size() != swords.size() ){
       throw runtime_error( "IOB tagger is confused" );
     }
     if ( debug ){
-      *Log(iobLog) << "IOB tagger out: " << endl;
+      LOG << "IOB tagger out: " << endl;
       for ( size_t i=0; i < tagv.size(); ++i ){
-	*Log(iobLog) << "[" << i << "] : word=" << tagv[i].word()
-		     << " tag=" << tagv[i].assignedTag()
-		     << " confidence=" << tagv[i].confidence() << endl;
+	LOG << "[" << i << "] : word=" << tagv[i].word()
+	    << " tag=" << tagv[i].assignedTag()
+	    << " confidence=" << tagv[i].confidence() << endl;
       }
     }
     vector<double> conf;

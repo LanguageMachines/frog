@@ -82,6 +82,8 @@ using namespace folia;
 using namespace TiCC;
 using namespace Tagger;
 
+#define LOG *Log(theErrLog)
+
 string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
 string configFileName = configDir + "frog.cfg";
 
@@ -143,35 +145,35 @@ FrogAPI::FrogAPI( FrogOptions &opt,
   // so first make sure it will not fail on some trivialities
   //
   if ( options.doTok && !configuration.hasSection("tokenizer") ){
-    *Log(theErrLog) << "Missing [[tokenizer]] section in config file." << endl;
-    *Log(theErrLog) << "Disabled the tokenizer." << endl;
+    LOG << "Missing [[tokenizer]] section in config file." << endl;
+    LOG << "Disabled the tokenizer." << endl;
     options.doTok = false;
   }
   if ( options.doMorph && !configuration.hasSection("mbma") ){
-    *Log(theErrLog) << "Missing [[mbma]] section in config file." << endl;
-    *Log(theErrLog) << "Disabled the Morhological analyzer." << endl;
+    LOG << "Missing [[mbma]] section in config file." << endl;
+    LOG << "Disabled the Morhological analyzer." << endl;
     options.doMorph = false;
   }
   if ( options.doIOB && !configuration.hasSection("IOB") ){
-    *Log(theErrLog) << "Missing [[IOB]] section in config file." << endl;
-    *Log(theErrLog) << "Disabled the IOB Chunker." << endl;
+    LOG << "Missing [[IOB]] section in config file." << endl;
+    LOG << "Disabled the IOB Chunker." << endl;
     options.doIOB = false;
   }
   if ( options.doNER && !configuration.hasSection("NER") ){
-    *Log(theErrLog) << "Missing [[NER]] section in config file." << endl;
-    *Log(theErrLog) << "Disabled the NER." << endl;
+    LOG << "Missing [[NER]] section in config file." << endl;
+    LOG << "Disabled the NER." << endl;
     options.doNER = false;
   }
   if ( options.doMwu && !configuration.hasSection("mwu") ){
-    *Log(theErrLog) << "Missing [[mwu]] section in config file." << endl;
-    *Log(theErrLog) << "Disabled the Multi Word Unit." << endl;
-    *Log(theErrLog) << "Also disabled the parser." << endl;
+    LOG << "Missing [[mwu]] section in config file." << endl;
+    LOG << "Disabled the Multi Word Unit." << endl;
+    LOG << "Also disabled the parser." << endl;
     options.doMwu = false;
     options.doParse = false;
   }
   if ( options.doParse && !configuration.hasSection("parser") ){
-    *Log(theErrLog) << "Missing [[parser]] section in config file." << endl;
-    *Log(theErrLog) << "Disabled the parser." << endl;
+    LOG << "Missing [[parser]] section in config file." << endl;
+    LOG << "Disabled the parser." << endl;
     options.doParse = false;
   }
 
@@ -231,8 +233,8 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       }
     }
     if ( !stat ){
-      *Log(theErrLog) << "Frog initialization failed." << endl;
-      exit(2);
+      LOG << "Frog initialization failed." << endl;
+      throw runtime_error( "Frog initialization failed" );
     }
   }
   else {
@@ -240,12 +242,12 @@ FrogAPI::FrogAPI( FrogOptions &opt,
     omp_set_num_threads( options.numThreads );
     int curt = omp_get_max_threads();
     if ( curt != options.numThreads ){
-      *Log(theErrLog) << "attempt to set to " << options.numThreads
+      LOG << "attempt to set to " << options.numThreads
 		      << " threads FAILED, running on " << curt
 		      << " threads instead" << endl;
     }
     else if ( options.debugFlag ){
-      *Log(theErrLog) << "running on " << curt
+      LOG << "running on " << curt
 		      << " threads" << endl;
     }
 
@@ -323,7 +325,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	    myParser = new Parser(theErrLog);
 	    parStat = myParser->init( configuration );
 	    initTimer.stop();
-	    *Log(theErrLog) << "init Parse took: " << initTimer << endl;
+	    LOG << "init Parse took: " << initTimer << endl;
 	  }
 	}
       }
@@ -355,11 +357,11 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       if ( !parStat ){
 	out += "[parser] ";
       }
-      *Log(theErrLog) << out << endl;
-      exit( EXIT_FAILURE );
+      LOG << out << endl;
+      throw runtime_error( "Frog init failed" );
     }
   }
-  *Log(theErrLog) << "Initialization done." << endl;
+  LOG << "Initialization done." << endl;
 }
 
 FrogAPI::~FrogAPI() {
@@ -439,7 +441,7 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
 	  if ( options.doMorph ){
 	    timers.mbmaTimer.start();
 	    if (options.debugFlag){
-	      *Log(theErrLog) << "Calling mbma..." << endl;
+	      LOG << "Calling mbma..." << endl;
 	    }
 	    try {
 	      myMbma->Classify( sword );
@@ -456,7 +458,7 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
 	  if ( options.doLemma ){
 	    timers.mblemTimer.start();
 	    if (options.debugFlag) {
-	      *Log(theErrLog) << "Calling mblem..." << endl;
+	      LOG << "Calling mblem..." << endl;
 	    }
 	    try {
 	      myMblem->Classify( sword );
@@ -512,17 +514,17 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
             throw( runtime_error( "read garbage" ) );
         }
         if ( options.debugFlag ){
-	  *Log(theErrLog) << "received data [" << result << "]" << endl;
+	  LOG << "received data [" << result << "]" << endl;
 	}
         Document doc;
         try {
 	  doc.readFromString( result );
         }
 	catch ( std::exception& e ){
-	  *Log(theErrLog) << "FoLiaParsing failed:" << endl << e.what() << endl;
+	  LOG << "FoLiaParsing failed:" << endl << e.what() << endl;
 	  throw;
         }
-        *Log(theErrLog) << "Processing... " << endl;
+        LOG << "Processing... " << endl;
 	timers.reset();
 	timers.tokTimer.start();
 	tokenizer->tokenize( doc );
@@ -552,9 +554,9 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	  }
         }
         if ( options.debugFlag ){
-	  *Log(theErrLog) << "Received: [" << data << "]" << endl;
+	  LOG << "Received: [" << data << "]" << endl;
 	}
-        *Log(theErrLog) << "Processing... " << endl;
+        LOG << "Processing... " << endl;
         istringstream inputstream(data,istringstream::in);
 	timers.reset();
 	timers.tokTimer.start();
@@ -571,7 +573,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
       }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
 	if (options.debugFlag) {
-	  *Log(theErrLog) << "socket " << conn.getMessage() << endl;
+	  LOG << "socket " << conn.getMessage() << endl;
 	}
 	throw( runtime_error( "write to client failed" ) );
       }
@@ -579,10 +581,10 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
   }
   catch ( std::exception& e ) {
     if (options.debugFlag){
-      *Log(theErrLog) << "connection lost: " << e.what() << endl;
+      LOG << "connection lost: " << e.what() << endl;
     }
   }
-  *Log(theErrLog) << "Connection closed.\n";
+  LOG << "Connection closed.\n";
 }
 
 void FrogAPI::FrogStdin( bool prompt ) {
@@ -740,11 +742,11 @@ Dependency *FrogAPI::lookupDep( const Word *word,
   }
   if ( dbFlag ){
     using TiCC::operator<<;
-    *Log( theErrLog ) << "\nDependency-lookup "<< word << " in " << dependencies << endl;
+    LOG << "\nDependency-lookup "<< word << " in " << dependencies << endl;
   }
   for ( const auto& dep : dependencies ){
     if ( dbFlag ){
-      *Log( theErrLog ) << "Dependency try: " << dep << endl;
+      LOG << "Dependency try: " << dep << endl;
     }
     try {
       vector<DependencyDependent*> dv = dep->select<DependencyDependent>();
@@ -753,7 +755,7 @@ Dependency *FrogAPI::lookupDep( const Word *word,
 	for ( const auto& w : wv ){
 	  if ( w == word ){
 	    if ( dbFlag ){
-	      *Log(theErrLog) << "\nDependency found word " << w << endl;
+	      LOG << "\nDependency found word " << w << endl;
 	    }
 	    return dep;
 	  }
@@ -762,7 +764,7 @@ Dependency *FrogAPI::lookupDep( const Word *word,
     }
     catch ( exception& e ){
       if (dbFlag > 0){
-	*Log(theErrLog) << "get Dependency results failed: "
+	LOG << "get Dependency results failed: "
 			<< e.what() << endl;
       }
     }
@@ -783,12 +785,12 @@ string FrogAPI::lookupNEREntity( const vector<Word *>& mwus,
   for ( const auto& mwu : mwus ){
     if ( dbFlag ){
       using TiCC::operator<<;
-      *Log(theErrLog) << "\nNER: lookup "<< mwu << " in " << entities << endl;
+      LOG << "\nNER: lookup "<< mwu << " in " << entities << endl;
     }
     string result;
     for ( const auto& entity :entities ){
       if ( dbFlag ){
-	*Log(theErrLog) << "NER: try: " << entity << endl;
+	LOG << "NER: try: " << entity << endl;
       }
       try {
 	vector<Word*> wv = entity->select<Word>();
@@ -796,7 +798,7 @@ string FrogAPI::lookupNEREntity( const vector<Word *>& mwus,
 	for ( const auto& word : wv ){
 	  if ( word == mwu ){
 	    if (dbFlag){
-	      *Log(theErrLog) << "NER found word " << word << endl;
+	      LOG << "NER found word " << word << endl;
 	    }
 	    if ( first ){
 	      result += "B-" + uppercase(entity->cls());
@@ -813,7 +815,7 @@ string FrogAPI::lookupNEREntity( const vector<Word *>& mwus,
       }
       catch ( exception& e ){
 	if  (dbFlag > 0){
-	  *Log(theErrLog) << "get NER results failed: "
+	  LOG << "get NER results failed: "
 			  << e.what() << endl;
 	}
       }
@@ -845,12 +847,12 @@ string FrogAPI::lookupIOBChunk( const vector<Word *>& mwus,
   for ( const auto& mwu : mwus ){
     if ( dbFlag ){
       using TiCC::operator<<;
-      *Log(theErrLog) << "IOB lookup "<< mwu << " in " << chunks << endl;
+      LOG << "IOB lookup "<< mwu << " in " << chunks << endl;
     }
     string result;
     for ( const auto& chunk : chunks ){
       if ( dbFlag ){
-	*Log(theErrLog) << "IOB try: " << chunk << endl;
+	LOG << "IOB try: " << chunk << endl;
       }
       try {
 	vector<Word*> wv = chunk->select<Word>();
@@ -858,7 +860,7 @@ string FrogAPI::lookupIOBChunk( const vector<Word *>& mwus,
 	for ( const auto& word : wv ){
 	  if ( word == mwu ){
 	    if (dbFlag){
-	      *Log(theErrLog) << "IOB found word " << word << endl;
+	      LOG << "IOB found word " << word << endl;
 	    }
 	    if ( first ) {
 	      result += "B-" + chunk->cls();
@@ -875,7 +877,7 @@ string FrogAPI::lookupIOBChunk( const vector<Word *>& mwus,
       }
       catch ( exception& e ){
 	if  (dbFlag > 0) {
-	  *Log(theErrLog) << "get Chunks results failed: "
+	  LOG << "get Chunks results failed: "
 			  << e.what() << endl;
 	}
       }
@@ -995,7 +997,7 @@ void FrogAPI::displayMWU( ostream& os,
     }
     catch ( exception& e ){
       if  (options.debugFlag > 0){
-	*Log(theErrLog) << "get Postag results failed: "
+	LOG << "get Postag results failed: "
 			<< e.what() << endl;
       }
     }
@@ -1008,7 +1010,7 @@ void FrogAPI::displayMWU( ostream& os,
       }
       catch ( exception& e ){
 	if  (options.debugFlag > 0){
-	  *Log(theErrLog) << "get Lemma results failed: "
+	  LOG << "get Lemma results failed: "
 			  << e.what() << endl;
 	}
       }
@@ -1029,7 +1031,7 @@ void FrogAPI::displayMWU( ostream& os,
       }
       catch ( exception& e ){
 	if  (options.debugFlag > 0){
-	  *Log(theErrLog) << "get Morph results failed: "
+	  LOG << "get Morph results failed: "
 			  << e.what() << endl;
 	}
       }
@@ -1054,7 +1056,7 @@ void FrogAPI::displayMWU( ostream& os,
       }
       catch ( exception& e ){
 	if  (options.debugFlag > 0){
-	  *Log(theErrLog) << "get Morph results failed: "
+	  LOG << "get Morph results failed: "
 			  << e.what() << endl;
 	}
       }
@@ -1219,7 +1221,7 @@ void FrogAPI::FrogDoc( Document& doc,
     myParser->addDeclaration( doc );
   }
   if ( options.debugFlag > 5 ){
-    *Log(theErrLog) << "Testing document :" << doc << endl;
+    LOG << "Testing document :" << doc << endl;
   }
 
   vector<Sentence*> sentences;
@@ -1232,7 +1234,7 @@ void FrogAPI::FrogDoc( Document& doc,
   size_t numS = sentences.size();
   if ( numS > 0 ) { //process sentences
     if  (options.debugFlag > 0) {
-      *Log(theErrLog) << "found " << numS
+      LOG << "found " << numS
 		      << " sentence(s) in document." << endl;
     }
     for ( size_t i = 0; i < numS; ++i ) {
@@ -1243,7 +1245,7 @@ void FrogAPI::FrogDoc( Document& doc,
 	   && !lan.empty()
 	   && lan != options.language ){
 	if  (options.debugFlag >= 0){
-	  *Log(theErrLog) << "Not processing sentence " << i+1 << endl
+	  LOG << "Not processing sentence " << i+1 << endl
 			  << " different language: " << lan << endl
 			  << " --language=" << options.language << endl;
 	}
@@ -1251,8 +1253,8 @@ void FrogAPI::FrogDoc( Document& doc,
       }
       bool showParse = TestSentence( sentences[i], timers );
       if ( options.doParse && !showParse ){
-	*Log(theErrLog) << "WARNING!" << endl;
-	*Log(theErrLog) << "Sentence " << i+1
+	LOG << "WARNING!" << endl;
+	LOG << "Sentence " << i+1
 			<< " isn't parsed because it contains more tokens then set with the --max-parser-tokens="
 			<< options.maxParserTokens << " option." << endl;
       }
@@ -1260,38 +1262,38 @@ void FrogAPI::FrogDoc( Document& doc,
   }
   else {
     if  (options.debugFlag > 0){
-      *Log(theErrLog) << "No sentences found in document. " << endl;
+      LOG << "No sentences found in document. " << endl;
     }
   }
 
   timers.frogTimer.stop();
   if ( !hidetimers ){
-    *Log(theErrLog) << "tokenisation took:  " << timers.tokTimer << endl;
-    *Log(theErrLog) << "CGN tagging took:   " << timers.tagTimer << endl;
+    LOG << "tokenisation took:  " << timers.tokTimer << endl;
+    LOG << "CGN tagging took:   " << timers.tagTimer << endl;
     if ( options.doIOB){
-      *Log(theErrLog) << "IOB chunking took:  " << timers.iobTimer << endl;
+      LOG << "IOB chunking took:  " << timers.iobTimer << endl;
     }
     if ( options.doNER){
-      *Log(theErrLog) << "NER took:           " << timers.nerTimer << endl;
+      LOG << "NER took:           " << timers.nerTimer << endl;
     }
     if ( options.doMorph ){
-      *Log(theErrLog) << "MBMA took:          " << timers.mbmaTimer << endl;
+      LOG << "MBMA took:          " << timers.mbmaTimer << endl;
     }
     if ( options.doLemma ){
-      *Log(theErrLog) << "Mblem took:         " << timers.mblemTimer << endl;
+      LOG << "Mblem took:         " << timers.mblemTimer << endl;
     }
     if ( options.doMwu ){
-      *Log(theErrLog) << "MWU resolving took: " << timers.mwuTimer << endl;
+      LOG << "MWU resolving took: " << timers.mwuTimer << endl;
     }
     if ( options.doParse ){
-      *Log(theErrLog) << "Parsing (prepare) took: " << timers.prepareTimer << endl;
-      *Log(theErrLog) << "Parsing (pairs)   took: " << timers.pairsTimer << endl;
-      *Log(theErrLog) << "Parsing (rels)    took: " << timers.relsTimer << endl;
-      *Log(theErrLog) << "Parsing (dir)     took: " << timers.dirTimer << endl;
-      *Log(theErrLog) << "Parsing (csi)     took: " << timers.csiTimer << endl;
-      *Log(theErrLog) << "Parsing (total)   took: " << timers.parseTimer << endl;
+      LOG << "Parsing (prepare) took: " << timers.prepareTimer << endl;
+      LOG << "Parsing (pairs)   took: " << timers.pairsTimer << endl;
+      LOG << "Parsing (rels)    took: " << timers.relsTimer << endl;
+      LOG << "Parsing (dir)     took: " << timers.dirTimer << endl;
+      LOG << "Parsing (csi)     took: " << timers.csiTimer << endl;
+      LOG << "Parsing (total)   took: " << timers.parseTimer << endl;
     }
-   *Log(theErrLog) << "Frogging in total took: " << timers.frogTimer << endl;
+   LOG << "Frogging in total took: " << timers.frogTimer << endl;
   }
   return;
 }
@@ -1318,7 +1320,7 @@ void FrogAPI::FrogFile( const string& infilename,
       doc.readFromFile( infilename );
     }
     catch ( exception &e ){
-      *Log(theErrLog) << "retrieving FoLiA from '" << infilename << "' failed with exception:" << endl;
+      LOG << "retrieving FoLiA from '" << infilename << "' failed with exception:" << endl;
       cerr << e.what() << endl;
       return;
     }
@@ -1329,7 +1331,7 @@ void FrogAPI::FrogFile( const string& infilename,
     FrogDoc( doc );
     if ( !xmlOutFile.empty() ){
       doc.save( xmlOutFile, options.doKanon );
-      *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
+      LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
     }
     showResults( os, doc );
   }
@@ -1342,7 +1344,7 @@ void FrogAPI::FrogFile( const string& infilename,
     FrogDoc( *doc );
     if ( !xmlOutFile.empty() ){
       doc->save( xmlOutFile, options.doKanon );
-      *Log(theErrLog) << "resulting FoLiA doc saved in " << xmlOutFile << endl;
+      LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
     }
     showResults( os, *doc );
     delete doc;

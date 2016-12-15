@@ -45,6 +45,8 @@ using namespace std;
 using namespace folia;
 using TiCC::operator<<;
 
+#define LOG *TiCC::Log(myLog)
+
 bool RulePart::isBasic() const {
   return isBasicClass( ResultClass );
 }
@@ -235,7 +237,7 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
 
 Rule::Rule( const vector<string>& parts,
 	    const UnicodeString& s,
-	    TiCC::LogStream* ls,
+	    TiCC::LogStream& ls,
 	    int flag ):
   debugFlag( flag ),
   tag(CLEX::UNASS),
@@ -324,7 +326,7 @@ string Rule::morpheme_string( bool structured ) const {
 
 bool Rule::performEdits(){
   if ( debugFlag ){
-    *TiCC::Log(myLog) << "FOUND rule " << this << endl;
+    LOG << "FOUND rule " << this << endl;
   }
   RulePart *last = 0;
   for ( size_t k=0; k < rules.size(); ++k ) {
@@ -333,7 +335,7 @@ bool Rule::performEdits(){
       last = cur;
     }
     if ( debugFlag){
-      *TiCC::Log(myLog) << "edit::act=" << cur << endl;
+      LOG << "edit::act=" << cur << endl;
     }
     bool is_replace = false;
     if ( !cur->del.isEmpty() ){
@@ -342,19 +344,19 @@ bool Rule::performEdits(){
 	if ( (k + j) < rules.size() ){
 	  if ( rules[k+j].uchar != cur->del[j] ){
 	    UnicodeString tmp(cur->del[j]);
-	    *TiCC::Log(myLog) << "Hmm: deleting " << cur->del << " is impossible. ("
+	    LOG << "Hmm: deleting " << cur->del << " is impossible. ("
 			      << rules[k+j].uchar << " != " << tmp
 			      << ")." << endl;
-	    *TiCC::Log(myLog) << "Reject rule: " << this << endl;
+	    LOG << "Reject rule: " << this << endl;
 	    return false;
 	  }
 	}
 	else {
 	  UnicodeString tmp(cur->del[j]);
-	  *TiCC::Log(myLog) << "Hmm: deleting " << cur->del
+	  LOG << "Hmm: deleting " << cur->del
 			    << " is impossible. (beyond end of the rule)"
 			    << endl;
-	  *TiCC::Log(myLog) << "Reject rule: " << this << endl;
+	  LOG << "Reject rule: " << this << endl;
 	  return false;
 	}
       }
@@ -379,7 +381,7 @@ bool Rule::performEdits(){
       // start a new morpheme, BUT: inserts are appended to the previous one
       // except in case of Replace edits
       if ( debugFlag ){
-	*TiCC::Log(myLog) << "FOUND a (basic) tag " << cur->ResultClass << endl;
+	LOG << "FOUND a (basic) tag " << cur->ResultClass << endl;
       }
       if ( !is_replace ){
 	if ( cur->ins == "ge" ){
@@ -400,14 +402,14 @@ bool Rule::performEdits(){
     if ( !inserted || !cur->hide.isEmpty() ){
       // insert the deletestring :-)
       if ( debugFlag ){
-	*TiCC::Log(myLog) << "add to morpheme: '" << cur->ins
+	LOG << "add to morpheme: '" << cur->ins
 			  << cur->hide<< "'" << endl;
       }
       last->morpheme += cur->ins + cur->hide;
     }
     else if ( !part.isEmpty() ){
       if ( debugFlag ){
-	*TiCC::Log(myLog) << "a part to add: " << part << endl;
+	LOG << "a part to add: " << part << endl;
       }
       last->morpheme += part;
       part.remove();
@@ -415,7 +417,7 @@ bool Rule::performEdits(){
     last->morpheme += cur->uchar; // might be empty because of deletion
   }
   if ( debugFlag ){
-    *TiCC::Log(myLog) << "edited rule " << this << endl;
+    LOG << "edited rule " << this << endl;
   }
   return true;
 }
@@ -430,7 +432,7 @@ void Rule::resolve_inflections(){
     if ( !inf.empty() && !rules[i].is_participle ){
       // it is an inflection tag
       if (debugFlag){
-	*TiCC::Log(myLog) << " inflection: >" << inf << "<" << endl;
+	LOG << " inflection: >" << inf << "<" << endl;
       }
       // given the specific selections of certain inflections,
       //    select a tag!
@@ -439,7 +441,7 @@ void Rule::resolve_inflections(){
 	new_tag = CLEX::select_tag( inf[i] );
 	if ( new_tag != CLEX::UNASS ){
 	  if ( debugFlag  ){
-	    *TiCC::Log(myLog) << inf[i] << " selects " << new_tag << endl;
+	    LOG << inf[i] << " selects " << new_tag << endl;
 	  }
 	  break;
 	}
@@ -452,7 +454,7 @@ void Rule::resolve_inflections(){
 	//
 	// go back to the previous morpheme
 	for( size_t k=i-1; k+1 > 0; --k ){
-	  //	  *TiCC::Log(myLog) << "een terug is " << rules[k].ResultClass << endl;
+	  //	  LOG << "een terug is " << rules[k].ResultClass << endl;
 	  if ( rules[k].isBasic() &&
 	       rules[k].ResultClass != CLEX::P ){
 	    // only nodes that can get inflected (and unanalysed too)
@@ -460,12 +462,12 @@ void Rule::resolve_inflections(){
 	    if ( rules[k].ResultClass == CLEX::PN &&
 		 new_tag == CLEX::N ){
 	      if ( debugFlag  ){
-		*TiCC::Log(myLog) << "Don't replace PN by N" << endl;
+		LOG << "Don't replace PN by N" << endl;
 	      }
 	    }
 	    else {
 	      if ( debugFlag  ){
-		*TiCC::Log(myLog) << " replace " << rules[k].ResultClass
+		LOG << " replace " << rules[k].ResultClass
 				  << " by " << new_tag << endl;
 	      }
 	      rules[k].ResultClass = new_tag;
@@ -481,7 +483,7 @@ void Rule::resolve_inflections(){
       }
       else {
 	// this realy shouldn't happen. probably an error in the data!?
-	*TiCC::Log(myLog) << "inflection: " << inf
+	LOG << "inflection: " << inf
 			  << " Problem: DOESN'T select a tag" << endl;
       }
     }
@@ -514,34 +516,34 @@ void Rule::getCleanInflect() {
   // get the last inflection and clean it up by extracting only
   //  known inflection names
   if ( debugFlag > 5 ){
-    *TiCC::Log(myLog) << "getCleanInflect: " << this << endl;
+    LOG << "getCleanInflect: " << this << endl;
   }
   inflection = "";
   auto it = rules.rbegin();
   while ( it != rules.rend() ){
     RulePart rule = *it;
     if ( debugFlag > 5 ){
-      *TiCC::Log(myLog) << rule << endl;
+      LOG << rule << endl;
     }
     if ( !rule.inflect.empty() ){
       if ( debugFlag > 5 ){
-	*TiCC::Log(myLog) << "x inflect:'" << rule.inflect << "'" << endl;
+	LOG << "x inflect:'" << rule.inflect << "'" << endl;
       }
       string inflect;
       for ( auto const& i : rule.inflect ){
 	if ( i != '/' ){
 	  // check if it is a known inflection
 	  if ( debugFlag > 5 ){
-	    *TiCC::Log(myLog) << "x bekijk [" << i << "]" << endl;
+	    LOG << "x bekijk [" << i << "]" << endl;
 	  }
 	  string inf = CLEX::get_iDescr(i);
 	  if ( inf.empty() ){
-	    *TiCC::Log(myLog) << "added unknown inflection X" << endl;
+	    LOG << "added unknown inflection X" << endl;
 	    inflect += "X";
 	  }
 	  else {
 	    if ( debugFlag > 5 ){
-	      *TiCC::Log(myLog) << "added known inflection " << i
+	      LOG << "added known inflection " << i
 				<< " (" << inf << ")" << endl;
 	    }
 	    inflect += i;
@@ -549,7 +551,7 @@ void Rule::getCleanInflect() {
 	}
       }
       if ( debugFlag > 5 ){
-	*TiCC::Log(myLog) << "cleaned inflection " << inflect << endl;
+	LOG << "cleaned inflection " << inflect << endl;
       }
       inflection = inflect;
       return;
@@ -560,12 +562,12 @@ void Rule::getCleanInflect() {
 
 void Rule::resolveBrackets( bool deep ) {
   if ( debugFlag > 5 ){
-    *TiCC::Log(myLog) << "check rule for bracketing: " << this << endl;
+    LOG << "check rule for bracketing: " << this << endl;
   }
-  brackets = new BracketNest( CLEX::UNASS, Compound::Type::NONE, debugFlag );
+  brackets = new BracketNest( CLEX::UNASS, Compound::Type::NONE, debugFlag, myLog );
   for ( auto const& rule : rules ){
     // fill a flat result;
-    BracketLeaf *tmp = new BracketLeaf( rule, debugFlag );
+    BracketLeaf *tmp = new BracketLeaf( rule, debugFlag, myLog );
     if ( tmp->status() == Status::STEM && tmp->morpheme().isEmpty() ){
       delete tmp;
     }
@@ -574,24 +576,24 @@ void Rule::resolveBrackets( bool deep ) {
     }
   }
   if ( debugFlag > 5 ){
-    *TiCC::Log(myLog) << "STEP 1:" << brackets << endl;
+    LOG << "STEP 1:" << brackets << endl;
   }
   if ( deep ){
     brackets->resolveGlue( );
     if ( debugFlag > 5 ){
-      *TiCC::Log(myLog) << "STEP 2:" << brackets << endl;
+      LOG << "STEP 2:" << brackets << endl;
     }
     brackets->resolveLead( );
     if ( debugFlag > 5 ){
-      *TiCC::Log(myLog) << "STEP 3:" << brackets << endl;
+      LOG << "STEP 3:" << brackets << endl;
     }
     brackets->resolveTail( );
     if ( debugFlag > 5 ){
-      *TiCC::Log(myLog) << "STEP 4:" << brackets << endl;
+      LOG << "STEP 4:" << brackets << endl;
     }
     brackets->resolveMiddle();
     if ( debugFlag > 5 ){
-      *TiCC::Log(myLog) << "STEP 5:" << brackets << endl;
+      LOG << "STEP 5:" << brackets << endl;
     }
     brackets->resolveNouns( );
     brackets->clearEmptyNodes();
@@ -599,6 +601,6 @@ void Rule::resolveBrackets( bool deep ) {
   tag = brackets->getFinalTag();
   description = get_tDescr( tag );
   if ( debugFlag > 4 ){
-    *TiCC::Log(myLog) << "Final Bracketing:" << brackets << " with tag=" << tag << endl;
+    LOG << "Final Bracketing:" << brackets << " with tag=" << tag << endl;
   }
 }

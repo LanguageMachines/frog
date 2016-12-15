@@ -44,6 +44,8 @@ using namespace std;
 using namespace TiCC;
 using namespace folia;
 
+#define LOG *Log(mblemLog)
+
 Mblem::Mblem( LogStream *logstream ):
   myLex(0),
   punctuation( "?...,:;\\'`(){}[]%#+-_=/!" ),
@@ -58,7 +60,7 @@ Mblem::Mblem( LogStream *logstream ):
 bool Mblem::fill_ts_map( const string& file ){
   ifstream is( file );
   if ( !is ){
-    *Log(mblemLog) << "Unable to open file: '" << file << "'" << endl;
+    LOG << "Unable to open file: '" << file << "'" << endl;
     return false;
   }
   string line;
@@ -67,19 +69,19 @@ bool Mblem::fill_ts_map( const string& file ){
       continue;
     vector<string> parts;
     if ( TiCC::split( line, parts ) != 3 ){
-      *Log(mblemLog) << "invalid line in: '" << file << "' (expected 3 parts)" << endl;
+      LOG << "invalid line in: '" << file << "' (expected 3 parts)" << endl;
       return false;
     }
     token_strip_map[parts[0]].insert( make_pair( parts[1], TiCC::stringTo<int>( parts[2] ) ) );
   }
   if ( debug ){
-    *Log(mblemLog) << "read token strip rules from: '" << file << "'" << endl;
+    LOG << "read token strip rules from: '" << file << "'" << endl;
   }
   return true;
 }
 
 bool Mblem::init( const Configuration& config ) {
-  *Log(mblemLog) << "Initiating lemmatizer..." << endl;
+  LOG << "Initiating lemmatizer..." << endl;
   debug = 0;
   string val = config.lookUp( "debug", "mblem" );
   if ( val.empty() ){
@@ -160,7 +162,7 @@ bool Mblem::init( const Configuration& config ) {
 }
 
 Mblem::~Mblem(){
-  //    *Log(mblemLog) << "cleaning up MBLEM stuff" << endl;
+  //    LOG << "cleaning up MBLEM stuff" << endl;
   delete filter;
   delete myLex;
   myLex = 0;
@@ -168,8 +170,9 @@ Mblem::~Mblem(){
 }
 
 string Mblem::make_instance( const UnicodeString& in ) {
-  if (debug)
-    *Log(mblemLog) << "making instance from: " << in << endl;
+  if (debug) {
+    LOG << "making instance from: " << in << endl;
+  }
   UnicodeString instance = "";
   size_t length = in.length();
   for ( size_t i=0; i < history; i++) {
@@ -184,9 +187,9 @@ string Mblem::make_instance( const UnicodeString& in ) {
   }
   instance += "?";
   string result = UnicodeToUTF8(instance);
-  if (debug)
-    *Log(mblemLog) << "inst: " << instance << endl;
-
+  if ( debug ){
+    LOG << "inst: " << instance << endl;
+  }
   return result;
 }
 
@@ -200,8 +203,8 @@ void Mblem::addLemma( Word *word, const string& cls ){
       word->addLemmaAnnotation( args );
     }
     catch( const exception& e ){
-      *Log(mblemLog) << e.what() << " addLemma failed." << endl;
-      exit(EXIT_FAILURE);
+      LOG << e.what() << " addLemma failed." << endl;
+      throw;
     }
   }
 }
@@ -212,21 +215,22 @@ void Mblem::filterTag( const string& postag ){
     string tag = it->getTag();
     if ( postag == tag ){
       if ( debug ){
-	*Log(mblemLog) << "compare cgn-tag " << postag << " with mblem-tag " << tag
+	LOG << "compare cgn-tag " << postag << " with mblem-tag " << tag
 		       << "\n\t==> identical tags"  << endl;
       }
       ++it;
     }
     else {
       if ( debug ){
-	*Log(mblemLog) << "compare cgn-tag " << postag << " with mblem-tag " << tag
+	LOG << "compare cgn-tag " << postag << " with mblem-tag " << tag
 		       << "\n\t==> different tags" << endl;
       }
       it = mblemResult.erase(it);
     }
   }
-  if ( debug && mblemResult.empty() )
-    *Log(mblemLog) << "NO CORRESPONDING TAG! " << postag << endl;
+  if ( debug && mblemResult.empty() ){
+    LOG << "NO CORRESPONDING TAG! " << postag << endl;
+  }
 }
 
 void Mblem::makeUnique( ){
@@ -235,26 +239,29 @@ void Mblem::makeUnique( ){
     string lemma = it->getLemma();
     auto it2 = it+1;
     while( it2 != mblemResult.end() ){
-      if (debug)
-	*Log(mblemLog) << "compare lemma " << lemma << " with " << it2->getLemma() << " ";
+      if (debug){
+	LOG << "compare lemma " << lemma << " with " << it2->getLemma() << " ";
+      }
       if ( lemma == it2->getLemma() ){
-	if ( debug )
-	  *Log(mblemLog) << "equal " << endl;
+	if ( debug ){
+	  LOG << "equal " << endl;
+	}
 	it2 = mblemResult.erase(it2);
       }
       else {
-	if ( debug )
-	  *Log(mblemLog) << "NOT equal! " << endl;
+	if ( debug ){
+	  LOG << "NOT equal! " << endl;
+	}
 	++it2;
       }
     }
     ++it;
   }
   if (debug){
-    *Log(mblemLog) << "final result after filter and unique" << endl;
+    LOG << "final result after filter and unique" << endl;
     for ( const auto& mbr : mblemResult ){
-      *Log(mblemLog) << "lemma alt: " << mbr.getLemma()
-		     << "\ttag alt: " << mbr.getTag() << endl;
+      LOG << "lemma alt: " << mbr.getLemma()
+	  << "\ttag alt: " << mbr.getTag() << endl;
     }
   }
 }
@@ -296,10 +303,10 @@ void Mblem::Classify( Word *sword ){
     pos = sword->pos();
     token_class = sword->cls();
   }
-  if (debug)
-    *Log(mblemLog) << "Classify " << uword << "(" << pos << ") ["
-		   << token_class << "]" << endl;
-
+  if (debug){
+    LOG << "Classify " << uword << "(" << pos << ") ["
+	<< token_class << "]" << endl;
+  }
   if ( filter )
     uword = filter->filter( uword );
 
@@ -341,13 +348,14 @@ void Mblem::Classify( const UnicodeString& uWord ){
   string inst = make_instance(uWord);
   string classString;
   myLex->Classify( inst, classString );
-  if (debug)
-    *Log(mblemLog) << "class: " << classString  << endl;
+  if (debug){
+    LOG << "class: " << classString  << endl;
+  }
   // 1st find all alternatives
   vector<string> parts;
   int numParts = split_at( classString, parts, "|" );
   if ( numParts < 1 ){
-    *Log(mblemLog) << "no alternatives found" << endl;
+    LOG << "no alternatives found" << endl;
   }
   int index = 0;
   while ( index < numParts ) {
@@ -386,12 +394,12 @@ void Mblem::Classify( const UnicodeString& uWord ){
 	  delstr =  UTF8ToUnicode( edit.substr( 1 ) );
 	  break;
 	default:
-	  *Log(mblemLog) << "Error: strange value in editstring: " << edit
+	  LOG << "Error: strange value in editstring: " << edit
 			 << endl;
 	}
       }
       if (debug){
-	*Log(mblemLog) << "pre-prefix word: '" << uWord << "' prefix: '"
+	LOG << "pre-prefix word: '" << uWord << "' prefix: '"
 		       << prefix << "'" << endl;
       }
       int prefixpos = 0;
@@ -400,8 +408,9 @@ void Mblem::Classify( const UnicodeString& uWord ){
 	// 'tegemoetgekomen' example), this should probably
 	// become prefixpos = uWord.lastIndexOf(prefix);
 	prefixpos = uWord.indexOf(prefix);
-	if (debug)
-	  *Log(mblemLog) << "prefixpos = " << prefixpos << endl;
+	if (debug){
+	  LOG << "prefixpos = " << prefixpos << endl;
+	}
 	// repair cases where there's actually not a prefix present
 	if (prefixpos > uWord.length()-2) {
 	  prefixpos = 0;
@@ -409,20 +418,21 @@ void Mblem::Classify( const UnicodeString& uWord ){
 	}
       }
 
-      if (debug)
-	*Log(mblemLog) << "prefixpos = " << prefixpos << endl;
+      if (debug){
+	LOG << "prefixpos = " << prefixpos << endl;
+      }
       if (prefixpos >= 0) {
 	lemma = UnicodeString( uWord, 0L, prefixpos );
 	prefixpos = prefixpos + prefix.length();
       }
-      if (debug)
-	*Log(mblemLog) << "post word: "<< uWord
-		       << " lemma: " << lemma
-		       << " prefix: " << prefix
-		       << " delstr: " << delstr
-		       << " insstr: " << insstr
-		       << endl;
-
+      if (debug){
+	LOG << "post word: "<< uWord
+	    << " lemma: " << lemma
+	    << " prefix: " << prefix
+	    << " delstr: " << delstr
+	    << " insstr: " << insstr
+	    << endl;
+      }
       if ( uWord.endsWith( delstr ) ){
 	if ( uWord.length() > delstr.length() ){
 	  // chop delstr from the back, but do not delete the whole word
@@ -451,27 +461,31 @@ void Mblem::Classify( const UnicodeString& uWord ){
     if ( !classMap.empty() ){
       // translate TAG(number) stuf back to CGN things
       auto const& it = classMap.find(restag);
-      if ( debug )
-	*Log(mblemLog) << "looking up " << restag << endl;
+      if ( debug ){
+	LOG << "looking up " << restag << endl;
+      }
       if ( it != classMap.end() ){
 	restag = it->second;
-	if ( debug )
-	  *Log(mblemLog) << "found " << restag << endl;
+	if ( debug ){
+	  LOG << "found " << restag << endl;
+	}
       }
-      else
-	*Log(mblemLog) << "problem: found no translation for "
-		       << restag << " using it 'as-is'" << endl;
+      else {
+	LOG << "problem: found no translation for "
+	    << restag << " using it 'as-is'" << endl;
+      }
     }
-    if ( debug )
-      *Log(mblemLog) << "appending lemma " << lemma << " and tag " << restag << endl;
+    if ( debug ){
+      LOG << "appending lemma " << lemma << " and tag " << restag << endl;
+    }
     mblemResult.push_back( mblemData( UnicodeToUTF8(lemma), restag ) );
   } // while
   if ( debug ) {
-    *Log(mblemLog) << "stored lemma and tag options: " << mblemResult.size()
-		   << " lemma's and " << mblemResult.size() << " tags:" << endl;
+    LOG << "stored lemma and tag options: " << mblemResult.size()
+	<< " lemma's and " << mblemResult.size() << " tags:" << endl;
     for ( const auto& mbr : mblemResult ){
-      *Log(mblemLog) << "lemma alt: " << mbr.getLemma()
-		     << "\ttag alt: " << mbr.getTag() << endl;
+      LOG << "lemma alt: " << mbr.getLemma()
+	  << "\ttag alt: " << mbr.getTag() << endl;
     }
   }
 }

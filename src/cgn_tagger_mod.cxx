@@ -39,6 +39,8 @@ using namespace folia;
 using namespace TiCC;
 using namespace Tagger;
 
+#define LOG *Log(tag_log)
+
 void CGNTagger::fillSubSetTable(){
   // should become a config file!
   cgnSubSets.insert( make_pair("soort", "ntype" ));
@@ -166,12 +168,14 @@ void CGNTagger::fillSubSetTable(){
 
 
 bool CGNTagger::init( const Configuration& config ){
-  if ( debug )
-    *Log(tag_log) << "INIT CGN Tagger." << endl;
+  if ( debug ){
+    LOG << "INIT CGN Tagger." << endl;
+  }
   if ( POSTagger::init( config ) ){
     fillSubSetTable();
-    if ( debug )
-      *Log(tag_log) << "DONE CGN Tagger." << endl;
+    if ( debug ){
+      LOG << "DONE CGN Tagger." << endl;
+    }
     return true;
   }
   return false;
@@ -240,7 +244,7 @@ void CGNTagger::post_process( const vector<Word *>& words ){
 void CGNTagger::Classify( const vector<Word*>& swords ){
   POSTagger::Classify( swords );
   if ( debug ){
-    *Log(tag_log) << "POS Classify done:" << endl;
+    LOG << "POS Classify done:" << endl;
   }
   post_process( swords );
 }

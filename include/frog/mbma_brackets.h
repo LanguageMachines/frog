@@ -56,14 +56,16 @@ class RulePart;
 
 class BaseBracket {
 public:
- BaseBracket( CLEX::Type t, const std::vector<CLEX::Type>& R, int flag ):
+ BaseBracket( CLEX::Type t, const std::vector<CLEX::Type>& R, int flag,
+	      TiCC::LogStream& l ):
   RightHand(R),
     cls(t),
-    debugFlag(flag)
+    debugFlag(flag),
+    myLog(l)
 
    {};
- BaseBracket( CLEX::Type t, int flag ):
-  cls(t), debugFlag(flag)
+ BaseBracket( CLEX::Type t, int flag, TiCC::LogStream& l ):
+  cls(t), debugFlag(flag), myLog(l)
   {};
   virtual ~BaseBracket() {};
 
@@ -94,12 +96,13 @@ public:
   CLEX::Type cls;
   Status _status;
   int debugFlag;
+  TiCC::LogStream& myLog;
 };
 
 class BracketLeaf: public BaseBracket {
 public:
-  BracketLeaf( const RulePart&, int );
-  BracketLeaf( CLEX::Type, const UnicodeString&, int );
+  BracketLeaf( const RulePart&, int, TiCC::LogStream& );
+  BracketLeaf( CLEX::Type, const UnicodeString&, int, TiCC::LogStream& );
   UnicodeString put( bool = true ) const;
   UnicodeString morpheme() const { return morph; };
   std::string inflection() const { return inflect; };
@@ -119,7 +122,7 @@ private:
 
 class BracketNest: public BaseBracket {
  public:
-  BracketNest( CLEX::Type, Compound::Type, int );
+  BracketNest( CLEX::Type, Compound::Type, int, TiCC::LogStream& );
   BaseBracket *append( BaseBracket * );
   ~BracketNest();
   bool isNested() { return true; };

@@ -85,7 +85,7 @@ bool POSTagger::fill_map( const string& file, map<string,string>& mp ){
     if ( num != 2 ){
       LOG << "invalid entry in '" << file << "'" << endl;
       LOG << "expected 2 tab-separated values, but got: '"
-		   << line << "'" << endl;
+	  << line << "'" << endl;
       return false;
     }
     mp[ parts[0] ] = parts[1];
@@ -143,7 +143,7 @@ bool POSTagger::init( const Configuration& config ){
   val = config.lookUp( "set", "tagger" );
   if ( val.empty() ){
     LOG << "missing set declaration in config" << endl;
-    exit(EXIT_FAILURE);
+    return false;
   }
   else {
     tagset = val;
@@ -164,7 +164,7 @@ bool POSTagger::init( const Configuration& config ){
     if ( !fill_map( tokFile, token_tag_map ) ){
       LOG << "failed to load a token translation file from: '"
 		   << tokFile << "'"<< endl;
-      exit(EXIT_FAILURE);
+      return false;
     }
   }
   string tagsFile = config.lookUp( "tags_file", "tagger" );
@@ -175,7 +175,7 @@ bool POSTagger::init( const Configuration& config ){
     if ( !fill_set( tagsFile, valid_tags ) ){
       LOG << "failed to load a tags file from: '"
 		   << tagsFile << "'"<< endl;
-      exit(EXIT_FAILURE);
+      return false;
     }
   }
   string init = "-s " + settings + " -vcf";
