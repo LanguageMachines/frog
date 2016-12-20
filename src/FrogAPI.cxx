@@ -697,7 +697,7 @@ void FrogAPI::FrogInteractive(){
 	}
       }
       if ( !data.empty() ){
-	if ( data[data.size()-1] == '\n' ){
+	if ( data.back() == '\n' ){
 	  data = data.substr( 0, data.size()-1 );
 	}
 	cout << "Processing... '" << data << "'" << endl;

@@ -321,7 +321,7 @@ bool parse_args( TiCC::CL_Options& Opts,
   if ( Opts.extract( "testdir", TestFileName ) ) {
     options.doDirTest = true;
     testDirName = TestFileName;
-    if ( testDirName[testDirName.size()-1] != '/' ){
+    if ( testDirName.back() != '/' ){
       testDirName += "/";
     }
     if ( !TiCC::isDir( testDirName ) ){
@@ -337,7 +337,7 @@ bool parse_args( TiCC::CL_Options& Opts,
   };
   wantOUT = false;
   if ( Opts.extract( "outputdir", outputDirName )) {
-    if ( outputDirName[outputDirName.size()-1] != '/' ){
+    if ( outputDirName.back() != '/' ){
       outputDirName += "/";
     }
     if ( !TiCC::createPath( outputDirName ) ){
@@ -352,7 +352,7 @@ bool parse_args( TiCC::CL_Options& Opts,
   options.doXMLout = false;
   Opts.extract( "id", options.docid );
   if ( Opts.extract( "xmldir", xmlDirName ) ){
-    if ( xmlDirName[xmlDirName.size()-1] != '/' ){
+    if ( xmlDirName.back() != '/' ){
       xmlDirName += "/";
     }
     if ( !TiCC::createPath( xmlDirName ) ){
