@@ -205,7 +205,7 @@ void Test( istream& in ){
 
 int main(int argc, char *argv[]) {
   std::ios_base::sync_with_stdio(false);
-  cerr << "mblem " << VERSION << " (c) CLTS, ILK 2014 - 2016" << endl;
+  cerr << "mblem " << VERSION << " (c) CLTS, ILK 2014 - 2017" << endl;
   cerr << "CLST  - Centre for Language and Speech Technology,"
        << "Radboud University" << endl
        << "ILK   - Induction of Linguistic Knowledge Research Group,"

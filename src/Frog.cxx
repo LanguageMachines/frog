@@ -444,7 +444,7 @@ void KillServerFun( int Signal ){
 
 
 int main(int argc, char *argv[]) {
-  cerr << "frog " << VERSION << " (c) CLTS, ILK 1998 - 2016" << endl
+  cerr << "frog " << VERSION << " (c) CLTS, ILK 1998 - 2017" << endl
        << "CLST  - Centre for Language and Speech Technology,"
        << "Radboud University" << endl
        << "ILK   - Induction of Linguistic Knowledge Research Group,"
