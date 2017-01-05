@@ -1,5 +1,17 @@
 0.13.5 - 2017-01-05
+[Ko van der Sloot]
+* rework done on compounding in MBMA. (still work in progress)
+* lots of improvement in MBMA rule handling. (but still work in progress)
+  - support for 'glue' rules added.
+  - support for 'hidden' morphemes added.
+  - proper CELEX tags are outputted now in the XML
+  - some structure labels have better names now
+* removed exit() calls from library modules (issue #17)
+* added languages option which is handled over to ucto too.
+  - detect multiple languages
+  - handle a selected language an ignore the rest
 
+- some minor code refactoring. )logging etc.)
 0.13.4 - 2016-07-11
 [Ko van der Sloot]
 - added long options --help and --version
