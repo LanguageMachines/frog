@@ -183,7 +183,10 @@ bool POSTagger::init( const Configuration& config ){
   return tagger->isInit();
 }
 
-void POSTagger::addTag( Word *word, const string& inputTag, double confidence ){
+void POSTagger::addTag( Word *word,
+			const string& inputTag,
+			double confidence,
+			bool /*known NOT USED yet*/ ){
   string pos_tag = inputTag;
   string ucto_class = word->cls();
   if ( debug ){
@@ -206,6 +209,18 @@ void POSTagger::addTag( Word *word, const string& inputTag, double confidence ){
   {
     word->addPosAnnotation( args );
   }
+  //  folia::FoliaElement *pos = 0;
+  //#pragma omp critical(foliaupdate)
+  //  {
+  //    pos = word->addPosAnnotation( args );
+  //  }
+  // if ( !known ){
+  //   args.clear();
+  //   args["class"] = "yes";
+  //   args["subset"] = "unknown_word";
+  //   folia::Feature *feat = new folia::Feature( args );
+  //   pos->append( feat );
+  // }
 }
 
 void POSTagger::addDeclaration( Document& doc ) const {
@@ -271,7 +286,10 @@ void POSTagger::Classify( const vector<Word*>& swords ){
       }
     }
     for ( size_t i=0; i < tagv.size(); ++i ){
-      addTag( swords[i], tagv[i].assignedTag(), tagv[i].confidence() );
+      addTag( swords[i],
+	      tagv[i].assignedTag(),
+	      tagv[i].confidence(),
+	      tagv[i].isKnown() );
     }
   }
 }

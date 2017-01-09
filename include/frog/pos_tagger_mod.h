@@ -41,7 +41,7 @@ class POSTagger {
   virtual bool init( const TiCC::Configuration& );
   virtual void Classify( const std::vector<folia::Word *>& );
   void addDeclaration( folia::Document& ) const;
-  void addTag( folia::Word *, const std::string&, double );
+  void addTag( folia::Word *, const std::string&, double, bool );
   std::vector<Tagger::TagResult> tagLine( const std::string& );
   std::string getTagset() const { return tagset; };
   bool fill_map( const std::string&, std::map<std::string,std::string>& );
