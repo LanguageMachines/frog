@@ -833,7 +833,7 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
 	multi_word += ms;
 	PosAnnotation *postag = mwu->annotation<PosAnnotation>( POS_tagset );
 	head += postag->feat("head");
-	vector<Feature*> feats = postag->select<Feature>( POS_tagset );
+	vector<Feature*> feats = postag->select<Feature>();
 	for ( const auto& feat : feats ){
 	  mod += feat->cls();
 	  if ( &feat != &feats.back() ){
@@ -866,7 +866,7 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
       string head = postag->feat("head");
       pd.heads.push_back( head );
       string mod;
-      vector<Feature*> feats = postag->select<Feature>( POS_tagset );
+      vector<Feature*> feats = postag->select<Feature>();
       if ( feats.empty() ){
 	mod = "__";
       }
