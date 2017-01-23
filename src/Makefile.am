@@ -1,5 +1,5 @@
 AM_CPPFLAGS = -I@top_srcdir@/include
-AM_CXXFLAGS = -DSYSCONF_PATH=\"$(SYSCONFDIR)\" -std=c++0x # -Weffc++
+AM_CXXFLAGS = -DSYSCONF_PATH=\"$(datadir)\" -std=c++0x # -Weffc++
 bin_PROGRAMS = frog mbma mblem ner
 
 frog_SOURCES = Frog.cxx
