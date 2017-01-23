@@ -139,11 +139,11 @@ AC_ARG_WITH(ucto,
        [  --with-ucto=DIR       use ucto installed in <DIR>],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
-PKG_CHECK_MODULES([ucto], [ucto >= 0.9.4] )
+PKG_CHECK_MODULES([ucto], [ucto >= 0.9.6] )
 CXXFLAGS="$CXXFLAGS $ucto_CFLAGS"
 LIBS="$ucto_LIBS $LIBS"
 
-PKG_CHECK_MODULES([frogdata], [frogdata >= 0.9] )
+PKG_CHECK_MODULES([frogdata], [frogdata >= 0.13] )
 #
 
 AC_OUTPUT([
