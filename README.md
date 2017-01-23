@@ -4,7 +4,7 @@
 Frog - A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
 ==============================================================================
 
-    Copyright 2006-2016
+    Copyright 2006-2017
     Bertjan Busser, Antal van den Bosch,  Ko van der Sloot, Maarten van Gompel
 
     Centre for Language and Speech Technology, Radboud University Nijmegen
@@ -72,9 +72,11 @@ To be able to succesfully build Frog from source instead, you need the following
 - libicu-dev
 - [ticcutils](https://github.com/LanguageMachines/ticcutils)
 - [libfolia](https://github.com/LanguageMachines/libfolia)
+- [uctodata](https://github.com/LanguageMachines/uctodata)
 - [ucto](https://github.com/LanguageMachines/ucto)
 - [timbl](https://github.com/LanguageMachines/timbl)
 - [mbt](https://github.com/LanguageMachines/mbt)
+- [frogdata](https://github.com/LanguageMachines/frogdata)
 
 The data for Frog is packaged seperately and needs to be installed prior to installing frog:
 - [frogdata](https://github.com/LanguageMachines/frogdata)
