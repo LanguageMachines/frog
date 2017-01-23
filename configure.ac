@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([frog], [0.13.7], [lamasoftware@science.ru.nl])
+AC_INIT([frog], [0.13.8], [lamasoftware@science.ru.nl])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_MACRO_DIR([m4])
@@ -25,9 +25,6 @@ fi
 # use libtool
 AC_PROG_LIBTOOL
 LT_INIT
-
-SYSCONFDIR=$sysconfdir
-AC_SUBST([SYSCONFDIR])
 
 # when running tests, use CXX
 AC_LANG([C++])
