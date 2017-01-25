@@ -43,9 +43,11 @@ const int KNOWN_NERS_SIZE = 10;
 
 #define LOG *Log(nerLog)
 
-NERTagger::NERTagger(TiCC::LogStream * logstream){
-  tagger = 0;
-  filter = 0;
+NERTagger::NERTagger(TiCC::LogStream * logstream):
+  tagger(0),
+  debug(0),
+  filter(0)
+{
   nerLog = new LogStream( logstream, "ner-" );
   known_ners.resize( KNOWN_NERS_SIZE+1 );
 }

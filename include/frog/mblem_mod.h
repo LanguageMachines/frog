@@ -47,7 +47,7 @@ class mblemData {
 
 class Mblem {
  public:
-  Mblem(TiCC::LogStream *);
+  explicit Mblem( TiCC::LogStream * );
   ~Mblem();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;

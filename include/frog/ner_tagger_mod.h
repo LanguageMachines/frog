@@ -34,7 +34,7 @@
 
 class NERTagger {
  public:
-  NERTagger(TiCC::LogStream *);
+  explicit NERTagger( TiCC::LogStream * );
   ~NERTagger();
   bool init( const TiCC::Configuration& );
   void Classify( const std::vector<folia::Word *>& );
@@ -59,6 +59,7 @@ class NERTagger {
   std::string tagset;
   std::vector<std::map<std::string,std::string>> known_ners;
   Tokenizer::UnicodeFilter *filter;
+  NERTagger( const NERTagger& ){}; //inhibit copy
 };
 
 #endif // NER_TAGGER_MOD_H

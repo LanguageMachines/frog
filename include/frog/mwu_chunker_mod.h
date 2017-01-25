@@ -61,7 +61,7 @@ class mwuAna {
 class Mwu {
   friend std::ostream& operator<< (std::ostream&, const Mwu& );
  public:
-  Mwu(TiCC::LogStream*);
+  explicit Mwu(TiCC::LogStream*);
   ~Mwu();
   void reset();
   bool init( const TiCC::Configuration& );

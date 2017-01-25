@@ -442,7 +442,7 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
   return true;
 }
 
-Compound::Type construct( const vector<CLEX::Type> tags ){
+Compound::Type construct( const vector<CLEX::Type>& tags ){
   string s;
   for ( const auto& t : tags ){
     s += toString( t );
@@ -886,7 +886,6 @@ Morpheme *BracketNest::createMorpheme( Document *doc,
   args["class"] = "complex";
   args["set"] = Mbma::mbma_tagset;
   Morpheme *result = new Morpheme( args, doc );
-  string mor;
   cnt = 0;
   desc.clear();
   vector<Morpheme*> stack;
@@ -1009,8 +1008,7 @@ void BracketNest::resolveNouns( ){
 	 && ( (*it)->tag() == CLEX::N && (*it)->status() == Status::STEM )
 	 && (*it)->RightHand.size() == 0 ){
       Compound::Type newt = Compound::Type::NN;
-      if ( (*prev)->compound() == Compound::Type::NN
-	   || (*prev)->compound() == Compound::Type::NN ){
+      if ( (*prev)->compound() == Compound::Type::NN ){
 	newt = Compound::Type::NNN;
       }
       BaseBracket *tmp = new BracketNest( CLEX::N, newt, debugFlag, myLog );

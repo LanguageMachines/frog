@@ -34,7 +34,7 @@
 
 class IOBTagger {
  public:
-  IOBTagger(TiCC::LogStream *);
+  explicit IOBTagger( TiCC::LogStream * );
   ~IOBTagger();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
@@ -55,6 +55,7 @@ class IOBTagger {
   std::string version;
   std::string tagset;
   Tokenizer::UnicodeFilter *filter;
+  IOBTagger( const IOBTagger& ) {}; // inhibit copies
 };
 
 #endif // IOB_TAGGER_MOD_H

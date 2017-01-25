@@ -56,6 +56,7 @@ class POSTagger {
   Tokenizer::UnicodeFilter *filter;
   std::map<std::string,std::string> token_tag_map;
   std::set<std::string> valid_tags;
+  POSTagger( const POSTagger& ){} // inhibit copies
 };
 
 #endif // POS_TAGGER_MOD_H

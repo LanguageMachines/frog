@@ -63,13 +63,12 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
   for ( size_t dependent_id = 1;
 	dependent_id <= sent_len;
 	++dependent_id ){
-    int headId = 0;
     string top_class = pit->cls();
     double conf = pit->confidence();
     ++pit;
     //    cerr << "class=" << top_class << " met conf " << conf << endl;
     if ( top_class != "__" ){
-      constraints.push_back(new HasDependency(dependent_id,headId,top_class,conf));
+      constraints.push_back( new HasDependency( dependent_id, 0 ,top_class, conf ) );
     }
   }
 

@@ -41,10 +41,12 @@ using namespace Tagger;
 
 #define LOG *Log(iobLog)
 
-IOBTagger::IOBTagger(TiCC::LogStream * logstream){
-  tagger = 0;
+IOBTagger::IOBTagger(TiCC::LogStream * logstream):
+  tagger( 0 ),
+  filter( 0 ),
+  debug( 0 )
+{
   iobLog = new LogStream( logstream, "iob-" );
-  filter = 0;
 }
 
 IOBTagger::~IOBTagger(){

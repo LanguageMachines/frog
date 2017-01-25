@@ -36,9 +36,16 @@ struct parseData;
 
 class Parser {
  public:
-  Parser(TiCC::LogStream* logstream):pairs(0),dir(0),rels(0),isInit(false) {
-    parseLog = new TiCC::LogStream(logstream, "parser-");
-  };
+  explicit Parser( TiCC::LogStream* logstream ):
+  pairs(0),
+    dir(0),
+    rels(0),
+    maxDepSpan( 0 ),
+    isInit( false ),
+    filter( 0 )
+      {
+	parseLog = new TiCC::LogStream(logstream, "parser-");
+      };
   ~Parser();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;
@@ -64,6 +71,7 @@ class Parser {
   std::string POS_tagset;
   std::string MWU_tagset;
   Tokenizer::UnicodeFilter *filter;
+  Parser( const Parser& ){}; // inhibit copies
 };
 
 

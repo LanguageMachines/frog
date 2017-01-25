@@ -60,7 +60,7 @@ namespace folia {
 
 class Mbma {
  public:
-  Mbma(TiCC::LogStream *);
+ explicit Mbma( TiCC::LogStream * );
   ~Mbma();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;
