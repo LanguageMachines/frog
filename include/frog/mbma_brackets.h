@@ -55,18 +55,21 @@ namespace folia {
 class RulePart;
 
 class BaseBracket {
-public:
+ public:
  BaseBracket( CLEX::Type t, const std::vector<CLEX::Type>& R, int flag,
 	      TiCC::LogStream& l ):
   RightHand(R),
     cls(t),
+    _status( FAILED ),
     debugFlag(flag),
     myLog(l)
-
-   {};
+    {};
  BaseBracket( CLEX::Type t, int flag, TiCC::LogStream& l ):
-  cls(t), debugFlag(flag), myLog(l)
-  {};
+  cls(t),
+    _status( FAILED ),
+    debugFlag(flag),
+    myLog(l)
+    {};
   virtual ~BaseBracket() {};
 
   Status status() const { return _status; };

@@ -34,10 +34,9 @@
 
 class mblemData {
  public:
-  mblemData( const std::string& l, const std::string& t ){
-    lemma = l;
-    tag   = t;
-  };
+ mblemData( const std::string& l, const std::string& t ):
+  lemma( l ),
+    tag( t ) { };
   std::string getLemma() const { return lemma; };
   std::string getTag() const { return tag; };
  private:
