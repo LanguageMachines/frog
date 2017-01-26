@@ -43,8 +43,8 @@ using namespace Tagger;
 
 IOBTagger::IOBTagger(TiCC::LogStream * logstream):
   tagger( 0 ),
-  filter( 0 ),
-  debug( 0 )
+  debug( 0 ),
+  filter( 0 )
 {
   iobLog = new LogStream( logstream, "iob-" );
 }
