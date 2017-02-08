@@ -70,6 +70,7 @@ class Parser {
   std::string dep_tagset;
   std::string POS_tagset;
   std::string MWU_tagset;
+  std::string textclass;
   Tokenizer::UnicodeFilter *filter;
   Parser( const Parser& ){}; // inhibit copies
 };

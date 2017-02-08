@@ -387,6 +387,7 @@ bool parse_args( TiCC::CL_Options& Opts,
       LOG << "--textclass is only valid when -x is also present" << endl;
       return false;
     }
+    configuration.setatt( "textclass", options.textclass );
   }
 
   if ( !XMLoutFileName.empty() && !testDirName.empty() ){

@@ -119,7 +119,7 @@ void Mwu::add( Word *word ){
   UnicodeString tmp;
 #pragma omp critical(foliaupdate)
   {
-    tmp = word->text();
+    tmp = word->text( textclass );
   }
   if ( filter )
     tmp = filter->filter( tmp );
@@ -199,6 +199,14 @@ bool Mwu::init( const Configuration& config ) {
   }
   else {
     glue_tag = val;
+  }
+
+  string cls = config.lookUp( "textclass" );
+  if ( !cls.empty() ){
+    textclass = cls;
+  }
+  else {
+    textclass = "current";
   }
 
   return true;

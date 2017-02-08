@@ -80,6 +80,7 @@ class Mwu {
   mymap2 MWUs;
   TiCC::LogStream *mwuLog;
   std::string version;
+  std::string textclass;
   std::string mwu_tagset;
   std::string glue_tag;
   Tokenizer::UnicodeFilter *filter;

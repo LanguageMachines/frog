@@ -151,6 +151,14 @@ bool Mblem::init( const Configuration& config ) {
     keep_case = stringTo<bool>( par );
   }
 
+  string cls = config.lookUp( "textclass" );
+  if ( !cls.empty() ){
+    textclass = cls;
+  }
+  else {
+    textclass = "current";
+  }
+
   string opts = config.lookUp( "timblOpts", "mblem" );
   if ( opts.empty() )
     opts = "-a1";
@@ -299,7 +307,7 @@ void Mblem::Classify( Word *sword ){
   string token_class;
 #pragma omp critical(foliaupdate)
   {
-    uword = sword->text();
+    uword = sword->text( textclass );
     pos = sword->pos();
     token_class = sword->cls();
   }

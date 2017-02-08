@@ -181,6 +181,13 @@ bool Parser::init( const TiCC::Configuration& configuration ){
     return false;
   }
 
+  string cls = configuration.lookUp( "textclass" );
+  if ( !cls.empty() ){
+    textclass = cls;
+  }
+  else {
+    textclass = "current";
+  }
   bool happy = true;
   pairs = new Timbl::TimblAPI( pairsOptions );
   if ( pairs->Valid() ){
@@ -825,7 +832,7 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
 	UnicodeString tmp;
 #pragma omp critical(foliaupdate)
 	{
-	  tmp = mwu->text();
+	  tmp = mwu->text( textclass );
 	}
 	if ( filter )
 	  tmp = filter->filter( tmp );
@@ -856,7 +863,7 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
       UnicodeString tmp;
 #pragma omp critical(foliaupdate)
       {
-	tmp = word->text();
+	tmp = word->text( textclass );
       }
       if ( filter )
 	tmp = filter->filter( tmp );

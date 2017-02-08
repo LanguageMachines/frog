@@ -57,6 +57,7 @@ class NERTagger {
   int debug;
   std::string version;
   std::string tagset;
+  std::string textclass;
   std::vector<std::map<std::string,std::string>> known_ners;
   Tokenizer::UnicodeFilter *filter;
   NERTagger( const NERTagger& ){}; //inhibit copy

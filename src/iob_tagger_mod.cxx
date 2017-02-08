@@ -125,6 +125,15 @@ bool IOBTagger::init( const Configuration& config ){
     filter = new Tokenizer::UnicodeFilter();
     filter->fill( charFile );
   }
+
+  string cls = config.lookUp( "textclass" );
+  if ( !cls.empty() ){
+    textclass = cls;
+  }
+  else {
+    textclass = "current";
+  }
+
   string init = "-s " + settings + " -vcf";
   tagger = new MbtAPI( init, *iobLog );
   return tagger->isInit();
@@ -270,7 +279,7 @@ void IOBTagger::Classify( const vector<Word *>& swords ){
       UnicodeString word;
 #pragma omp critical(foliaupdate)
       {
-	word = sword->text();
+	word = sword->text( textclass );
       }
       if ( filter )
 	word = filter->filter( word );

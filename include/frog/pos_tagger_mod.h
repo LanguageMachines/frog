@@ -53,6 +53,7 @@ class POSTagger {
  private:
   MbtAPI *tagger;
   std::string version;
+  std::string textclass;
   Tokenizer::UnicodeFilter *filter;
   std::map<std::string,std::string> token_tag_map;
   std::set<std::string> valid_tags;

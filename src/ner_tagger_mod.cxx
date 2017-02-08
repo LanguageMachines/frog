@@ -142,7 +142,13 @@ bool NERTagger::init( const Configuration& config ){
       return false;
     }
   }
-
+  string cls = config.lookUp( "textclass" );
+  if ( !cls.empty() ){
+    textclass = cls;
+  }
+  else {
+    textclass = "current";
+  }
   string init = "-s " + settings + " -vcf";
   tagger = new MbtAPI( init, *nerLog );
   return tagger->isInit();
@@ -409,7 +415,7 @@ void NERTagger::Classify( const vector<Word *>& swords ){
       UnicodeString word;
 #pragma omp critical(foliaupdate)
       {
-	word = sw->text();
+	word = sw->text( textclass );
       }
       if ( filter )
 	word = filter->filter( word );

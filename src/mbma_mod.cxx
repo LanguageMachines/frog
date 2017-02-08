@@ -196,6 +196,15 @@ bool Mbma::init( const Configuration& config ) {
       transliterator = init_trans();
     }
   }
+
+  string cls = config.lookUp( "textclass" );
+  if ( !cls.empty() ){
+    textclass = cls;
+  }
+  else {
+    textclass = "current";
+  }
+
   //Read in (igtree) data
   string opts = config.lookUp( "timblOpts", "mbma" );
   if ( opts.empty() ){
@@ -800,7 +809,7 @@ void Mbma::Classify( Word* sword ){
   string token_class;
 #pragma omp critical(foliaupdate)
   {
-    uWord = sword->text();
+    uWord = sword->text( textclass );
     pos = sword->annotation<PosAnnotation>( cgn_tagset );
     head = pos->feat("head");
     token_class = sword->cls();

@@ -178,6 +178,13 @@ bool POSTagger::init( const Configuration& config ){
       return false;
     }
   }
+  string cls = config.lookUp( "textclass" );
+  if ( !cls.empty() ){
+    textclass = cls;
+  }
+  else {
+    textclass = "current";
+  }
   string init = "-s " + settings + " -vcf";
   tagger = new MbtAPI( init, *tag_log );
   return tagger->isInit();
@@ -253,7 +260,7 @@ void POSTagger::Classify( const vector<Word*>& swords ){
       UnicodeString word;
 #pragma omp critical(foliaupdate)
       {
-	word = swords[w]->text();
+	word = swords[w]->text( textclass );
       }
       if ( filter )
 	word = filter->filter( word );

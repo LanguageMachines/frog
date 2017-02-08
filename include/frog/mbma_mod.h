@@ -104,6 +104,7 @@ class Mbma {
   Timbl::TimblAPI *MTree;
   std::vector<Rule*> analysis;
   std::string version;
+  std::string textclass;
   TiCC::LogStream *mbmaLog;
   Transliterator *transliterator;
   Tokenizer::UnicodeFilter *filter;

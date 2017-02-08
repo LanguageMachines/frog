@@ -77,6 +77,7 @@ class Mblem {
   std::string version;
   std::string tagset;
   std::string POS_tagset;
+  std::string textclass;
   TiCC::LogStream *mblemLog;
   Tokenizer::UnicodeFilter *filter;
 };

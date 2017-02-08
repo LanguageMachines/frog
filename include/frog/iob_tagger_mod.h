@@ -54,6 +54,7 @@ class IOBTagger {
   int debug;
   std::string version;
   std::string tagset;
+  std::string textclass;
   Tokenizer::UnicodeFilter *filter;
   IOBTagger( const IOBTagger& ) {}; // inhibit copies
 };
