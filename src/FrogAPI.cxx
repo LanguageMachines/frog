@@ -123,6 +123,8 @@ FrogOptions::FrogOptions() {
   uttmark = "<utt>";
   listenport = "void";
   docid = "untitled";
+  inputclass="current";
+  outputclass="current";
   debugFlag = 0;
 }
 
@@ -144,8 +146,6 @@ FrogAPI::FrogAPI( FrogOptions &opt,
   // for some modules init can take a long time
   // so first make sure it will not fail on some trivialities
   //
-  cerr << "OPTIONS!" << opt.inputclass << endl;
-  cerr << "OPTIONS!" << opt.outputclass << endl;
   if ( options.doTok && !configuration.hasSection("tokenizer") ){
     LOG << "Missing [[tokenizer]] section in config file." << endl;
     LOG << "Disabled the tokenizer." << endl;
