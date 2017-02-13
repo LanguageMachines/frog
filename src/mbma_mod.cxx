@@ -197,7 +197,7 @@ bool Mbma::init( const Configuration& config ) {
     }
   }
 
-  string cls = config.lookUp( "textclass" );
+  string cls = config.lookUp( "outputclass" );
   if ( !cls.empty() ){
     textclass = cls;
   }

@@ -152,10 +152,19 @@ void UctoTokenizer::setInputEncoding( const std::string & enc ){
     throw runtime_error( "ucto tokenizer not initialized" );
 }
 
-void UctoTokenizer::setTextClass( const std::string& cls ){
+void UctoTokenizer::setInputClass( const std::string& cls ){
   if ( tokenizer ){
     if ( !cls.empty() )
-      tokenizer->setTextClass( cls );
+      tokenizer->setOutputClass( cls );
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initialized" );
+}
+
+void UctoTokenizer::setOutputClass( const std::string& cls ){
+  if ( tokenizer ){
+    if ( !cls.empty() )
+      tokenizer->setOutputClass( cls );
   }
   else
     throw runtime_error( "ucto tokenizer not initialized" );

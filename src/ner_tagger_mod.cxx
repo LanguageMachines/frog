@@ -142,7 +142,7 @@ bool NERTagger::init( const Configuration& config ){
       return false;
     }
   }
-  string cls = config.lookUp( "textclass" );
+  string cls = config.lookUp( "outputclass" );
   if ( !cls.empty() ){
     textclass = cls;
   }

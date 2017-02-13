@@ -99,7 +99,10 @@ void usage( ) {
        << "\t -e <encoding>          specify encoding of the input (default UTF-8)\n"
        << "\t -t <testfile>          Run frog on this file\n"
        << "\t -x <testfile>          Run frog on this FoLiA XML file. Or the files from 'testdir'\n"
-       << "\t --textclass=<cls>      use the specified class to search for text in the the FoLia docs.\n"
+       << "\t --textclass=<cls>      use the specified class to search for text in the the FoLia docs. (default 'current').\n"
+       << "\t\t\t the same value is used for output too.\n"
+       << "\t --inputclass=<cls>     use the specified class to search for text in the the FoLia docs. (default 'current') \n"
+       << "\t --outputclass=<cls>    use the specified class to output text in the the FoLia docs. (default 'inputclass') \n"
        << "\t --testdir=<directory>  All files in this dir will be tested\n"
        << "\t --uttmarker=<mark>     utterances are separated by 'mark' symbols"
        << "\t                        (default none)\n"
@@ -382,14 +385,44 @@ bool parse_args( TiCC::CL_Options& Opts,
       }
     }
   }
-  if ( Opts.extract( "textclass", options.textclass ) ){
-    if ( !options.doXMLin ){
+  string textclass;
+  string inputclass;
+  string outputclass;
+  Opts.extract( "textclass", textclass );
+  Opts.extract( "inputclass", inputclass );
+  Opts.extract( "outputclass", outputclass );
+  if ( !options.doXMLin ){
+    if ( !textclass.empty() ){
       LOG << "--textclass is only valid when -x is also present" << endl;
       return false;
     }
-    configuration.setatt( "textclass", options.textclass );
+    if ( !inputclass.empty() ){
+      LOG << "--inputclass is only valid when -x is also present" << endl;
+      return false;
+    }
+    if ( !outputclass.empty() ){
+      LOG << "--outputclass is only valid when -x is also present" << endl;
+      return false;
+    }
   }
-
+  else { // FoLiA files...
+    if ( !textclass.empty() ){
+      if ( !inputclass.empty() || !outputclass.empty() ){
+	LOG << "when --textclass is specified, --inputclass or --outputclass may NOT be present." << endl;
+	return false;
+      }
+      configuration.setatt( "inputclass", textclass );
+      configuration.setatt( "outputclass", textclass );
+    }
+    else {
+      if ( !inputclass.empty() ){
+	configuration.setatt( "inputclass", inputclass );
+      }
+      if ( !outputclass.empty() ){
+	configuration.setatt( "outputclass", outputclass );
+      }
+    }
+  }
   if ( !XMLoutFileName.empty() && !testDirName.empty() ){
     LOG << "useless -X value" << endl;
     return false;

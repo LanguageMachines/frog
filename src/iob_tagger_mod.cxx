@@ -126,7 +126,7 @@ bool IOBTagger::init( const Configuration& config ){
     filter->fill( charFile );
   }
 
-  string cls = config.lookUp( "textclass" );
+  string cls = config.lookUp( "outputclass" );
   if ( !cls.empty() ){
     textclass = cls;
   }

@@ -77,7 +77,8 @@ class FrogOptions {
   std::string uttmark;
   std::string listenport;
   std::string docid;
-  std::string textclass;
+  std::string inputclass;
+  std::string outputclass;
   std::string language;
 
   unsigned int maxParserTokens;

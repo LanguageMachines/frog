@@ -151,7 +151,7 @@ bool Mblem::init( const Configuration& config ) {
     keep_case = stringTo<bool>( par );
   }
 
-  string cls = config.lookUp( "textclass" );
+  string cls = config.lookUp( "outputclass" );
   if ( !cls.empty() ){
     textclass = cls;
   }

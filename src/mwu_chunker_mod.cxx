@@ -201,7 +201,7 @@ bool Mwu::init( const Configuration& config ) {
     glue_tag = val;
   }
 
-  string cls = config.lookUp( "textclass" );
+  string cls = config.lookUp( "outputclass" );
   if ( !cls.empty() ){
     textclass = cls;
   }

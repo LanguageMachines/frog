@@ -191,7 +191,8 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       tokenizer->setInputEncoding( options.encoding );
       tokenizer->setInputXml( options.doXMLin );
       tokenizer->setUttMarker( options.uttmark );
-      tokenizer->setTextClass( options.textclass );
+      tokenizer->setInputClass( options.inputclass );
+      tokenizer->setOutputClass( options.outputclass );
       myPoSTagger = new CGNTagger(theErrLog);
       stat = myPoSTagger->init( configuration );
       if ( stat ){
@@ -276,7 +277,8 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	  tokenizer->setInputEncoding( options.encoding );
 	  tokenizer->setInputXml( options.doXMLin );
 	  tokenizer->setUttMarker( options.uttmark );
-	  tokenizer->setTextClass( options.textclass );
+	  tokenizer->setInputClass( options.inputclass );
+	  tokenizer->setOutputClass( options.outputclass );
 	}
       }
 #pragma omp section
