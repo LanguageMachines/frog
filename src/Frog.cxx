@@ -420,15 +420,13 @@ bool parse_args( TiCC::CL_Options& Opts,
       if ( !inputclass.empty() ){
 	options.inputclass = inputclass;
 	configuration.setatt( "inputclass", inputclass );
+	if ( outputclass.empty() ){
+	  options.outputclass = inputclass;
+	  configuration.setatt( "outputclass", inputclass );
+	}
       }
-      if ( outputclass.empty() ){
+      if ( !outputclass.empty() ){
 	options.outputclass = outputclass;
-	configuration.setatt( "outputclass", outputclass );
-      }
-      else {
-	options.inputclass = textclass;
-	options.outputclass = textclass;
-	configuration.setatt( "inputclass", inputclass );
 	configuration.setatt( "outputclass", outputclass );
       }
     }

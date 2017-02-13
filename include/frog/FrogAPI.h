@@ -136,6 +136,9 @@ class FrogAPI {
 };
 
 std::vector<std::string> get_full_morph_analysis( folia::Word *, bool = false );
+std::vector<std::string> get_full_morph_analysis( folia::Word *,
+						  const std::string&,
+						  bool = false );
 std::vector<std::string> get_compound_analysis( folia::Word * );
 
 #endif

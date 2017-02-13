@@ -947,6 +947,12 @@ string flatten( const string& s ){
 }
 
 vector<string> get_full_morph_analysis( folia::Word* w, bool flat ){
+  return get_full_morph_analysis( w, "current", flat );
+}
+
+vector<string> get_full_morph_analysis( folia::Word* w,
+					const string& cls,
+					bool flat ){
   vector<string> result;
   vector<MorphologyLayer*> layers
     = w->annotations<MorphologyLayer>( Mbma::mbma_tagset );
@@ -970,7 +976,7 @@ vector<string> get_full_morph_analysis( folia::Word* w, bool flat ){
       string morph;
       vector<Morpheme*> m = layer->select<Morpheme>( Mbma::mbma_tagset );
       for ( const auto& mor : m ){
-	string txt = UnicodeToUTF8( mor->text( ) ); // NEED textclass here???
+	string txt = UnicodeToUTF8( mor->text( cls ) );
 	morph += "[" + txt + "]";
       }
       result.push_back( morph );
@@ -1022,7 +1028,7 @@ void FrogAPI::displayMWU( ostream& os,
     if ( options.doMorph ){
       // also covers doDeepMorph
       try {
-	vector<string> morphs = get_full_morph_analysis( word );
+	vector<string> morphs = get_full_morph_analysis( word, options.outputclass );
 	for ( const auto& m : morphs ){
 	  morph += m;
 	  if ( &m != &morphs.back() ){
@@ -1078,6 +1084,7 @@ void FrogAPI::displayMWU( ostream& os,
 
 ostream& FrogAPI::showResults( ostream& os,
 			       Document& doc ) const {
+  cerr << "OPTIONS.outputclass=" << options.outputclass << endl;
   vector<Sentence*> sentences = doc.sentences();
   for ( auto const& sentence : sentences ){
     vector<Word*> words = sentence->words();
@@ -1305,6 +1312,7 @@ void FrogAPI::FrogDoc( Document& doc,
 void FrogAPI::FrogFile( const string& infilename,
 			ostream &os,
 			const string& xmlOutF ) {
+  cerr << "OPTIONS.outputclass=" << options.outputclass << endl;
   // stuff the whole input into one FoLiA document.
   // This is not a good idea on the long term, I think (agreed [proycon] )
   string xmlOutFile = xmlOutF;
