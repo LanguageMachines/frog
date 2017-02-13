@@ -1084,7 +1084,6 @@ void FrogAPI::displayMWU( ostream& os,
 
 ostream& FrogAPI::showResults( ostream& os,
 			       Document& doc ) const {
-  cerr << "OPTIONS.outputclass=" << options.outputclass << endl;
   vector<Sentence*> sentences = doc.sentences();
   for ( auto const& sentence : sentences ){
     vector<Word*> words = sentence->words();
@@ -1312,7 +1311,6 @@ void FrogAPI::FrogDoc( Document& doc,
 void FrogAPI::FrogFile( const string& infilename,
 			ostream &os,
 			const string& xmlOutF ) {
-  cerr << "OPTIONS.outputclass=" << options.outputclass << endl;
   // stuff the whole input into one FoLiA document.
   // This is not a good idea on the long term, I think (agreed [proycon] )
   string xmlOutFile = xmlOutF;
