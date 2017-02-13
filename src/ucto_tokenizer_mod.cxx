@@ -155,7 +155,7 @@ void UctoTokenizer::setInputEncoding( const std::string & enc ){
 void UctoTokenizer::setInputClass( const std::string& cls ){
   if ( tokenizer ){
     if ( !cls.empty() )
-      tokenizer->setOutputClass( cls );
+      tokenizer->setInputClass( cls );
   }
   else
     throw runtime_error( "ucto tokenizer not initialized" );

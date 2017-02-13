@@ -144,6 +144,8 @@ FrogAPI::FrogAPI( FrogOptions &opt,
   // for some modules init can take a long time
   // so first make sure it will not fail on some trivialities
   //
+  cerr << "OPTIONS!" << opt.inputclass << endl;
+  cerr << "OPTIONS!" << opt.outputclass << endl;
   if ( options.doTok && !configuration.hasSection("tokenizer") ){
     LOG << "Missing [[tokenizer]] section in config file." << endl;
     LOG << "Disabled the tokenizer." << endl;
@@ -988,7 +990,7 @@ void FrogAPI::displayMWU( ostream& os,
   double conf = 1;
   for ( const auto& word : mwu ){
     try {
-      wrd += word->str();
+      wrd += word->str( options.outputclass );
       PosAnnotation *postag = word->annotation<PosAnnotation>( myPoSTagger->getTagset() );
       pos += postag->cls();
       if ( &word != &mwu.back() ){

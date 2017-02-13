@@ -411,14 +411,24 @@ bool parse_args( TiCC::CL_Options& Opts,
 	LOG << "when --textclass is specified, --inputclass or --outputclass may NOT be present." << endl;
 	return false;
       }
+      options.inputclass = textclass;
+      options.outputclass = textclass;
       configuration.setatt( "inputclass", textclass );
       configuration.setatt( "outputclass", textclass );
     }
     else {
       if ( !inputclass.empty() ){
+	options.inputclass = inputclass;
 	configuration.setatt( "inputclass", inputclass );
       }
-      if ( !outputclass.empty() ){
+      if ( outputclass.empty() ){
+	options.outputclass = outputclass;
+	configuration.setatt( "outputclass", outputclass );
+      }
+      else {
+	options.inputclass = textclass;
+	options.outputclass = textclass;
+	configuration.setatt( "inputclass", inputclass );
 	configuration.setatt( "outputclass", outputclass );
       }
     }
@@ -494,7 +504,8 @@ int main(int argc, char *argv[]) {
 
   try {
     TiCC::CL_Options Opts("c:e:o:t:x::X::nQhVd:S:",
-			  "textclass:,testdir:,uttmarker:,max-parser-tokens:,"
+			  "textclass:,inputclass:,outputclass:,testdir:,"
+			  "uttmarker:,max-parser-tokens:,"
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
 			  "help,language:,"
 			  "debug:,keep-parser-files,version,threads:,KANON");
