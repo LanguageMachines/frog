@@ -536,6 +536,9 @@ int main(int argc, char *argv[]) {
 	}
         outS = new ofstream( outputFileName );
       }
+      if ( fileNames.size() > 1 ){
+	LOG << "start procesessing " << fileNames.size() << " files..." << endl;
+      }
       for ( auto const& name : fileNames ){
 	string testName = testDirName + name;
 	if ( !TiCC::isFile( testName ) ){
