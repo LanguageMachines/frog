@@ -36,7 +36,6 @@
 #include "frog/pos_tagger_mod.h"
 
 using namespace std;
-using namespace folia;
 using namespace TiCC;
 using namespace Tagger;
 
@@ -191,7 +190,7 @@ bool POSTagger::init( const Configuration& config ){
   return tagger->isInit();
 }
 
-void POSTagger::addTag( Word *word,
+void POSTagger::addTag( folia::Word *word,
 			const string& inputTag,
 			double confidence,
 			bool /*known NOT USED yet*/ ){
@@ -209,7 +208,7 @@ void POSTagger::addTag( Word *word,
     pos_tag = tt->second;
     confidence = 1.0;
   }
-  KWargs args;
+  folia::KWargs args;
   args["set"]  = tagset;
   args["class"]  = pos_tag;
   args["confidence"]= toString(confidence);
@@ -231,10 +230,11 @@ void POSTagger::addTag( Word *word,
   // }
 }
 
-void POSTagger::addDeclaration( Document& doc ) const {
+void POSTagger::addDeclaration( folia::Document& doc ) const {
 #pragma omp critical(foliaupdate)
   {
-    doc.declare( AnnotationType::POS, tagset,
+    doc.declare( folia::AnnotationType::POS,
+		 tagset,
 		 "annotator='frog-mbpos-" + version
 		 + "', annotatortype='auto', datetime='" + getTime() + "'");
   }
@@ -254,7 +254,7 @@ string POSTagger::set_eos_mark( const std::string& eos ){
     throw runtime_error( "POSTagger is not initialized" );
 }
 
-void POSTagger::Classify( const vector<Word*>& swords ){
+void POSTagger::Classify( const vector<folia::Word*>& swords ){
   if ( !swords.empty() ) {
     string sentence; // the tagger needs the whole sentence
     for ( size_t w = 0; w < swords.size(); ++w ) {
@@ -265,7 +265,7 @@ void POSTagger::Classify( const vector<Word*>& swords ){
       }
       if ( filter )
 	word = filter->filter( word );
-      sentence += UnicodeToUTF8(word);
+      sentence += folia::UnicodeToUTF8(word);
       if ( w < swords.size()-1 )
 	sentence += " ";
     }

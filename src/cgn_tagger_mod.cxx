@@ -35,7 +35,6 @@
 #include "frog/cgn_tagger_mod.h"
 
 using namespace std;
-using namespace folia;
 using namespace TiCC;
 using namespace Tagger;
 
@@ -183,8 +182,9 @@ bool CGNTagger::init( const Configuration& config ){
 
 string CGNTagger::getSubSet( const string& val, const string& head ){
   auto it = cgnSubSets.find( val );
-  if ( it == cgnSubSets.end() )
+  if ( it == cgnSubSets.end() ){
     throw folia::ValueError( "unknown cgn subset for class: '" + val + "'" );
+  }
   string result;
   while ( it != cgnSubSets.upper_bound(val) ){
     result = it->second;
@@ -208,14 +208,18 @@ string CGNTagger::getSubSet( const string& val, const string& head ){
 			   "' whithin the constraints for '" + head + "'" );
 }
 
-void CGNTagger::post_process( const vector<Word *>& words ){
+void CGNTagger::post_process( const vector<folia::Word *>& words ){
   for ( auto const& word : words ){
-    PosAnnotation *postag = word->annotation<PosAnnotation>( );
+    folia::PosAnnotation *postag = 0;
+#pragma omp critical(foliaupdate)
+    {
+      postag = word->annotation<folia::PosAnnotation>( );
+    }
     string cls = postag->cls();
     vector<string> parts;
     TiCC::split_at_first_of( cls, parts, "()" );
     string head = parts[0];
-    KWargs args;
+    folia::KWargs args;
     args["class"]  = head;
     args["set"]    = tagset;
     folia::Feature *feat = new folia::HeadFeature( args );
@@ -227,7 +231,7 @@ void CGNTagger::post_process( const vector<Word *>& words ){
       vector<string> tagParts;
       TiCC::split_at( parts[1], tagParts, "," );
       for ( auto const& part : tagParts ){
-	KWargs args;
+	folia::KWargs args;
 	args["set"]    = tagset;
 	args["subset"] = getSubSet( part, head );
 	args["class"]  = part;
@@ -241,7 +245,7 @@ void CGNTagger::post_process( const vector<Word *>& words ){
   }
 }
 
-void CGNTagger::Classify( const vector<Word*>& swords ){
+void CGNTagger::Classify( const vector<folia::Word*>& swords ){
   POSTagger::Classify( swords );
   if ( debug ){
     LOG << "POS Classify done:" << endl;

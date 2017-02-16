@@ -391,7 +391,7 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
   bool all_well = true;
   string exs;
   if ( !swords.empty() ) {
-#pragma omp parallel sections shared(all_well,exs)
+#pragma omp parallel sections shared(all_well,exs,swords)
     {
 #pragma omp section
       {
