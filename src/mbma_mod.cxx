@@ -439,13 +439,9 @@ void Mbma::addBracketMorph( Word *word,
   }
   args["class"] = "stem";
   Morpheme *result = new Morpheme( args, word->doc() );
-  args.clear();
-  args["value"] = wrd;
-  args["class"] = textclass;
-  TextContent *t = new TextContent( args );
 #pragma omp critical(foliaupdate)
   {
-    result->append( t );
+    result->settext( wrd, textclass );
   }
   args.clear();
   args["subset"] = "structure";
@@ -496,13 +492,9 @@ void Mbma::addBracketMorph( Word *word,
     throw;
   }
   if ( m ){
-    args.clear();
-    args["value"] = orig_word;
-    args["class"] = textclass;
-    TextContent *t = new TextContent( args );
 #pragma omp critical(foliaupdate)
     {
-      m->append( t );
+      m->settext( orig_word, textclass );
       ml->append( m );
     }
   }
@@ -516,15 +508,8 @@ void Mbma::addMorph( MorphologyLayer *ml,
     Morpheme *m = new Morpheme( args, ml->doc() );
 #pragma omp critical(foliaupdate)
     {
+      m->settext( mor, textclass );
       ml->append( m );
-    }
-    args.clear();
-    args["value"] = mor;
-    args["class"] = textclass;
-    TextContent *t = new TextContent( args );
-#pragma omp critical(foliaupdate)
-    {
-      m->append( t );
     }
   }
 }

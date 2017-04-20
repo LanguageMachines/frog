@@ -692,20 +692,17 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
   }
   else if ( _status == Status::STEM
 	    || ( _status == Status::DERIVATIONAL && glue ) ){
-    KWargs args;
-    args["set"] = Mbma::mbma_tagset;
-    args["class"] = "stem";
-    result = new Morpheme( args, doc );
-    args.clear();
     string out = UnicodeToUTF8(morph);
     if ( out.empty() ){
       throw logic_error( "stem has empty morpheme" );
     }
-    args["value"] = out;
-    TextContent *t = new TextContent( args );
+    KWargs args;
+    args["set"] = Mbma::mbma_tagset;
+    args["class"] = "stem";
+    result = new Morpheme( args, doc );
 #pragma omp critical(foliaupdate)
     {
-      result->append( t );
+      result->settext( out );
     }
     ++cnt;
     args.clear();
@@ -727,20 +724,17 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
   }
   else if ( _status == Status::PARTICLE ){
-    KWargs args;
-    args["set"] = Mbma::mbma_tagset;
-    args["class"] = "particle";
-    result = new Morpheme( args, doc );
-    args.clear();
     string out = UnicodeToUTF8(morph);
     if ( out.empty() ){
       throw logic_error( "particle has empty morpheme" );
     }
-    args["value"] = out;
-    TextContent *t = new TextContent( args );
+    KWargs args;
+    args["set"] = Mbma::mbma_tagset;
+    args["class"] = "particle";
+    result = new Morpheme( args, doc );
 #pragma omp critical(foliaupdate)
     {
-      result->append( t );
+      result->settext( out );
     }
     ++cnt;
     args.clear();
@@ -753,11 +747,6 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     desc = "[" + out + "]"; // spread the word upwards! maybe add 'part' ??
   }
   else if ( _status == Status::INFLECTION ){
-    KWargs args;
-    args["class"] = "inflection";
-    args["set"] = Mbma::mbma_tagset;
-    result = new Morpheme( args, doc );
-    args.clear();
     string out = UnicodeToUTF8(morph);
     if ( out.empty() ){
       out = inflect;
@@ -768,11 +757,13 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     if ( out.empty() ){
       throw logic_error( "Inflection and morpheme empty" );
     }
-    args["value"] = out;
-    TextContent *t = new TextContent( args );
+    KWargs args;
+    args["class"] = "inflection";
+    args["set"] = Mbma::mbma_tagset;
+    result = new Morpheme( args, doc );
 #pragma omp critical(foliaupdate)
     {
-      result->append( t );
+      result->settext( out );
     }
     ++cnt;
     args.clear();
@@ -796,6 +787,10 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
   else if ( _status == Status::DERIVATIONAL
 	    || _status == Status::PARTICIPLE
 	    || _status == Status::FAILED ){
+    string out = UnicodeToUTF8(morph);
+    if ( out.empty() ){
+      throw logic_error( "Derivation with empty morpheme" );
+    }
     KWargs args;
     if ( _status == Status::DERIVATIONAL ){
       args["class"] = "affix";
@@ -808,17 +803,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     }
     args["set"] = Mbma::mbma_tagset;
     result = new Morpheme( args, doc );
-    args.clear();
-    string out = UnicodeToUTF8(morph);
-    if ( out.empty() ){
-      LOG << "problem: " << this << endl;
-      throw logic_error( "Derivation with empty morpheme" );
-    }
-    args["value"] = out;
-    TextContent *t = new TextContent( args );
 #pragma omp critical(foliaupdate)
     {
-      result->append( t );
+      result->settext( out );
     }
     ++cnt;
     desc = "[" + out + "]"; // pass it up!
