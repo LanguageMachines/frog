@@ -184,7 +184,9 @@ bool POSTagger::init( const Configuration& config ){
   else {
     textclass = "current";
   }
-  LOG << "PSO taggger textclass= " << textclass << endl;
+  if ( debug ){
+    LOG << "POS taggger textclass= " << textclass << endl;
+  }
   string init = "-s " + settings + " -vcf";
   tagger = new MbtAPI( init, *tag_log );
   return tagger->isInit();
