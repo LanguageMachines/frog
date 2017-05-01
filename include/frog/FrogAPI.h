@@ -63,10 +63,11 @@ class FrogOptions {
   bool doSentencePerLine;
   bool doQuoteDetection;
   bool doDirTest;
-  bool doServer;
-
+  bool doRetry;
+  bool noStdOut;
   bool doXMLin;
   bool doXMLout;
+  bool doServer;
   bool doKanon;
 
   int debugFlag;

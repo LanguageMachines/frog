@@ -106,6 +106,8 @@ FrogOptions::FrogOptions() {
   doSentencePerLine = false;
   doQuoteDetection = false;
   doDirTest = false;
+  doRetry = false;
+  noStdOut = false;
   doServer = false;
   doXMLin =  false;
   doXMLout =  false;
@@ -1309,7 +1311,7 @@ void FrogAPI::FrogDoc( Document& doc,
 }
 
 void FrogAPI::FrogFile( const string& infilename,
-			ostream &os,
+			ostream& os,
 			const string& xmlOutF ) {
   // stuff the whole input into one FoLiA document.
   // This is not a good idea on the long term, I think (agreed [proycon] )
@@ -1343,7 +1345,9 @@ void FrogAPI::FrogFile( const string& infilename,
       doc.save( xmlOutFile, options.doKanon );
       LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
     }
-    showResults( os, doc );
+    if ( !options.noStdOut ){
+      showResults( os, doc );
+    }
   }
   else {
     ifstream IN( infilename );
@@ -1356,7 +1360,9 @@ void FrogAPI::FrogFile( const string& infilename,
       doc->save( xmlOutFile, options.doKanon );
       LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
     }
-    showResults( os, *doc );
+    if ( !options.noStdOut ){
+      showResults( os, *doc );
+    }
     delete doc;
   }
 }

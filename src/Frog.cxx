@@ -107,6 +107,8 @@ void usage( ) {
        << "\t --uttmarker=<mark>     utterances are separated by 'mark' symbols"
        << "\t                        (default none)\n"
        << "\t -n                     Assume input file to hold one sentence per line\n"
+       << "\t --retry                assume frog is running again on the same input,\n"
+       << "\t                        already done files are skipped. (detected on the basis of already existing output files)\n"
        << "\t --max-parser-tokens=<n> inhibit parsing when a sentence contains over 'n' tokens. (default: 500, needs already 16Gb of memory!)\n"
        << "\t -Q                   Enable quote detection in tokeniser.\n"
        << "\t============= MODULE SELECTION ==========================================\n"
@@ -118,6 +120,7 @@ void usage( ) {
        << "\t\t The first language in the list will be the default. (default dutch).\n"
        << "\t============= OUTPUT OPTIONS ============================================\n"
        << "\t -o <outputfile>	    Output columned output to file, instead of default stdout\n"
+       << "\t --nostdout            suppress columned output to stdout\n"
        << "\t -X <xmlfile>          Output also to an XML file in FoLiA format\n"
        << "\t --id=<docid>          Document ID, used in FoLiA output. (Default 'untitled')\n"
        << "\t --outputdir=<dir>     Output to dir, instead of default stdout\n"
@@ -280,7 +283,8 @@ bool parse_args( TiCC::CL_Options& Opts,
     options.doDeepMorph = true;
     options.doMorph = true;
   }
-
+  options.doRetry = Opts.extract( "retry" );
+  options.noStdOut = Opts.extract( "nostdout" );
   Opts.extract( 'e', options.encoding );
 
   if ( Opts.extract( "max-parser-tokens", value ) ){
@@ -505,7 +509,7 @@ int main(int argc, char *argv[]) {
 			  "textclass:,inputclass:,outputclass:,testdir:,"
 			  "uttmarker:,max-parser-tokens:,"
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
-			  "help,language:,"
+			  "help,language:,retry,nostdout,"
 			  "debug:,keep-parser-files,version,threads:,KANON");
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
@@ -529,9 +533,13 @@ int main(int argc, char *argv[]) {
 
       ostream *outS = 0;
       if ( !outputFileName.empty() ){
+	if ( options.doRetry && TiCC::isFile( outputFileName ) ){
+	  LOG << "retry, skip: " << outputFileName << " already exists" << endl;
+	  return EXIT_SUCCESS;
+	}
 	if ( !TiCC::createPath( outputFileName ) ) {
 	  LOG << "problem: unable to create outputfile: "
-			  << outputFileName << endl;
+	      << outputFileName << endl;
 	  return EXIT_FAILURE;
 	}
         outS = new ofstream( outputFileName );
@@ -543,7 +551,7 @@ int main(int argc, char *argv[]) {
 	string testName = testDirName + name;
 	if ( !TiCC::isFile( testName ) ){
 	  LOG << "skip " << testName << " (file not found )"
-			  << endl;
+	      << endl;
 	  continue;
 	}
 	string outName;
@@ -556,6 +564,10 @@ int main(int argc, char *argv[]) {
 	    else {
 	      outName = outPath + name + ".out";
 	    }
+	    if ( options.doRetry && TiCC::isFile( outName ) ){
+	      LOG << "retry, skip: " << outName << " already exists" << endl;
+	      continue;
+	    }
 	    if ( !TiCC::createPath( outName ) ) {
 	      LOG << "problem frogging: " << name << endl
 			      << "unable to create outputfile: " << outName
@@ -563,7 +575,8 @@ int main(int argc, char *argv[]) {
 	      continue;
 	    }
 	    outS = new ofstream( outName );
-	  } else {
+	  }
+	  else {
 	    outS = &cout;
 	  }
 	}
@@ -578,11 +591,17 @@ int main(int argc, char *argv[]) {
 	  else if ( options.doXMLout )
 	    xmlOutName = name + ".xml"; // do not clobber the inputdir!
 	}
-	if ( !xmlOutName.empty() && !TiCC::createPath( xmlOutName ) ){
-	  LOG << "problem frogging: " << name << endl
-			  << "unable to create outputfile: " << xmlOutName
-			  << endl;
-	  continue;
+	if ( !xmlOutName.empty() ){
+	  if ( options.doRetry && TiCC::isFile( xmlOutName ) ){
+	    LOG << "retry, skip: " << xmlOutName << " already exists" << endl;
+	    continue;
+	  }
+	  if ( !TiCC::createPath( xmlOutName ) ){
+	    LOG << "problem frogging: " << name << endl
+		<< "unable to create outputfile: " << xmlOutName
+		<< endl;
+	    continue;
+	  }
 	}
 	LOG << "Frogging " << testName << endl;
 	try {
