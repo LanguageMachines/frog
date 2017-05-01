@@ -1,4 +1,4 @@
-.TH frog 1 "2016 march 10"
+.TH frog 1 "2017 may 1"
 
 .SH NAME
 frog \- Dutch Natural Language Toolkit
@@ -45,7 +45,7 @@ The default tabbed output is also more detailed in the Morpheme field.
 set input encoding. (default UTF8)
 .RE
 
-.BR \-h
+.BR \-h " or " \-\-help
 .RS
 give some help
 .RE
@@ -53,6 +53,18 @@ give some help
 .BR \-\-keep\-parser\-files =[yes|no]
 .RS
 keep the intermediate files from the parser. Last sentence only!
+.RE
+
+.BR \-\-language='comma separated list of languages'
+.RS
+Set the languages to work on. This parameter is also passed to the tokenizer.
+The strings are assumed to be ISO 639\-2 codes.
+
+The first language in the list will be the default, unspecified languages are
+asumed to be that default.
+
+e.g. \-\-language=nld,eng,por
+means: detect Dutch, English and Portuguese, with Dutch being the default.
 .RE
 
 .BR \-n
@@ -63,6 +75,15 @@ Very useful when running interactive, otherwise an empty line is needed to
 signal end of input.
 .RE
 
+.BR \-\-nostdout
+.RS
+suppress the collumned output to stdout. (when no outputfile is specified with
+\-o or \-\-outputdir)
+
+Especially useful when XML output is speifies with \-X or \-\-xmldir.
+.RE
+
+
 .BR \-o " <file>"
 .RS
 send output to 'file' instead of stdout. Defaults to the name of the inputfile with '.out' appended.
@@ -72,6 +93,15 @@ send output to 'file' instead of stdout. Defaults to the name of the inputfile w
 .RS
 send all output to 'dir' instead of stdout. Creates filenames from the inputfilename(s) with '.out' appended.
 .RE
+
+.BR \-\-retry
+.RS
+assume a re-run on the same input file(s). Frog wil only process those files
+that haven't been processed yet. This is accomplished by looking at the output
+file names. (so this has no effect if neither \-o, \-\-outputdir, \-X or
+\-\-xmldir is used)
+.RE
+
 
 .BR \-\-skip =[aclmnpt]
 .RS
@@ -106,9 +136,21 @@ is provided, all '.xml' files in 'dir' will be processed as FoLia XML.
 .RS
 When
 .BR \-x
-is given, use 'cls' to find text in the FoLiA document(s).
+is given, use 'cls' to find AND store text in the FoLiA document(s).
+Using \-\-inputclass and \-\-\outputclass is in general a better choice.
 .RE
 
+
+.BR \-\-inputclass "=<cls>"
+.RS
+use 'cls' to find text in the FoLiA input document(s).
+.RE
+
+.BR \-\-outputclass "=<cls>"
+.RS
+use 'cls' to output text in the FoLiA input document(s).
+Preferably this is another class then the inputclass.
+.RE
 
 .BR \-\-testdir =<dir>
 .RS
@@ -119,6 +161,11 @@ process all files in 'dir'. When the input mode is XML, only '.xml' files are te
 .BR \-\-tmpdir =<dir>
 .RS
 location to store intermediate files. Default /tmp.
+.RE
+
+.BR \-\-uttmarker =<mark>
+.RS
+assume all utterances are separeted by 'mark'. (the default is none).
 .RE
 
 .BR \-\-threads =<n>
@@ -154,11 +201,12 @@ for FoLia is given, use 'id' to give the doc an ID.
 likely
 
 .SH AUTHORS
-Maarten van Gompel proycon@anaproy.nl
+Maarten van Gompel
 
-Ko van der Sloot Timbl@uvt.nl
+Ko van der Sloot
 
-Antal van den Bosch Timbl@uvt.nl
+Antal van den Bosch
 
+e\-mail: lamasoftware@science.ru.nl
 .SH SEE ALSO
 .BR ucto (1)
