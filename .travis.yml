@@ -5,6 +5,11 @@ branches:
   only:
     - master
 
+notification:
+  irc:
+    channels:
+      - "irc.uvt.nl#gitlama"
+
 language: cpp
 compiler:
     - gcc
