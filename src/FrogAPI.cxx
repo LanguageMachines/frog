@@ -477,7 +477,7 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
 	  }
 	}
       } // omp parallel sections
-    } //for int i = 0 to num_words
+    } //for all words
     if ( !all_well ){
       throw runtime_error( exs );
     }
