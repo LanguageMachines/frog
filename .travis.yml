@@ -5,10 +5,12 @@ branches:
   only:
     - master
 
-notification:
+notifications:
   irc:
     channels:
       - "irc.uvt.nl#gitlama"
+    use_notice: true
+    skip_join: true
 
 language: cpp
 compiler:
