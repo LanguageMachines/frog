@@ -1334,7 +1334,7 @@ void FrogAPI::FrogFile( const string& infilename,
     catch ( exception &e ){
       LOG << "retrieving FoLiA from '" << infilename << "' failed with exception:" << endl;
       cerr << e.what() << endl;
-      return;
+      throw ( runtime_error( "read failed" ) );
     }
     timers.reset();
     timers.tokTimer.start();
