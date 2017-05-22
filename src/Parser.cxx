@@ -912,9 +912,9 @@ void appendResult( const vector<Word *>& words,
   KWargs args;
   args["generate_id"] = sent->id();
   args["set"] = tagset;
-  DependenciesLayer *dl = new DependenciesLayer( args, sent->doc() );
 #pragma omp critical(foliaupdate)
   {
+    DependenciesLayer *dl = new DependenciesLayer( args, sent->doc() );
     sent->append( dl );
   }
   for ( size_t i=0; i < nums.size(); ++i ){
