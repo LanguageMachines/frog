@@ -36,9 +36,13 @@
 
 #include "ticcutils/StringOps.h"
 #include "ticcutils/PrettyPrint.h"
+#include "ticcutils/LogStream.h"
 #include "frog/csidp.h"
 
 using namespace std;
+
+#define LOG *TiCC::Log(log)
+#define DBG *TiCC::Dbg(log)
 
 void split_dist( const vector< pair<string,double>>& dist,
 		 map<string,double>& result ){
@@ -54,10 +58,11 @@ void split_dist( const vector< pair<string,double>>& dist,
 }
 
 vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
-				   const vector<timbl_result>& r_res,
-				   const vector<timbl_result>& p_res,
-				   size_t sent_len,
-				   size_t maxDist ){
+					 const vector<timbl_result>& r_res,
+					 const vector<timbl_result>& p_res,
+					 size_t sent_len,
+					 size_t maxDist,
+					 TiCC::LogStream *log ){
   vector<const Constraint*> constraints;
   vector<timbl_result>::const_iterator pit = p_res.begin();
   for ( size_t dependent_id = 1;
@@ -66,7 +71,7 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
     string top_class = pit->cls();
     double conf = pit->confidence();
     ++pit;
-    //    cerr << "class=" << top_class << " met conf " << conf << endl;
+    DBG << "class=" << top_class << " met conf " << conf << endl;
     if ( top_class != "__" ){
       constraints.push_back( new HasDependency( dependent_id, 0 ,top_class, conf ) );
     }
@@ -82,13 +87,13 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
       if ( diff != 0 && diff <= maxDist ){
 	string line;
 	if ( pit == p_res.end() ){
-	  cerr << "OEPS p_res leeg? " << endl;
+	  LOG << "OEPS p_res leeg? " << endl;
 	  break;
 	}
 	string top_class = pit->cls();
 	double conf = pit->confidence();
 	++pit;
-	//	cerr << "class=" << top_class << " met conf " << conf << endl;
+	DBG << "class=" << top_class << " met conf " << conf << endl;
 	if ( top_class != "__" ){
 	  constraints.push_back( new HasDependency(dependent_id,headId,top_class,conf));
 	}
@@ -143,10 +148,11 @@ vector<parsrel> parse( const vector<timbl_result>& p_res,
 		       const vector<timbl_result>& r_res,
 		       const vector<timbl_result>& d_res,
 		       size_t parse_size,
-		       int maxDist ){
+		       int maxDist,
+		       TiCC::LogStream *log ){
   vector<const Constraint*> constraints
-    = formulateWCSP( d_res, r_res, p_res, parse_size, maxDist );
-  CKYParser parser( parse_size, constraints );
+    = formulateWCSP( d_res, r_res, p_res, parse_size, maxDist, log );
+  CKYParser parser( parse_size, constraints, log );
   parser.parse();
   vector<parsrel> result( parse_size );
   parser.rightComplete(0, parse_size, result );

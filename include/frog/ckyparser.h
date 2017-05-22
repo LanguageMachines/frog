@@ -110,7 +110,8 @@ class chart_rec {
 
 class CKYParser {
 public:
-  CKYParser( size_t, const std::vector<const Constraint*>& );
+  CKYParser( size_t, const std::vector<const Constraint*>&, TiCC::LogStream* );
+  ~CKYParser(){ delete ckyLog; };
   void parse();
   void leftIncomplete( int , int , std::vector<parsrel>& );
   void rightIncomplete( int , int , std::vector<parsrel>& );
@@ -127,6 +128,7 @@ private:
   std::vector< std::vector< std::vector<const Constraint*>>> edgeConstraints;
   std::vector< std::vector<chart_rec>> chart;
 
+  TiCC::LogStream *ckyLog;
 };
 
 #endif

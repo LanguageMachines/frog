@@ -438,9 +438,10 @@ void Mbma::addBracketMorph( Word *word,
     }
   }
   args["class"] = "stem";
-  Morpheme *result = new Morpheme( args, word->doc() );
+  folia::Morpheme *result = 0;
 #pragma omp critical(foliaupdate)
   {
+    result = new Morpheme( args, word->doc() );
     result->settext( wrd, textclass );
   }
   args.clear();
@@ -488,7 +489,7 @@ void Mbma::addBracketMorph( Word *word,
     m = brackets->createMorpheme( word->doc() );
   }
   catch( const exception& e ){
-    cerr << "createMorpheme failed: " << e.what() << endl;
+    LOG << "createMorpheme failed: " << e.what() << endl;
     throw;
   }
   if ( m ){
@@ -505,9 +506,9 @@ void Mbma::addMorph( MorphologyLayer *ml,
   for ( const auto& mor : morphs ){
     KWargs args;
     args["set"] = mbma_tagset;
-    Morpheme *m = new Morpheme( args, ml->doc() );
 #pragma omp critical(foliaupdate)
     {
+      Morpheme *m = new Morpheme( args, ml->doc() );
       m->settext( mor, textclass );
       ml->append( m );
     }

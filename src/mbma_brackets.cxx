@@ -699,9 +699,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     KWargs args;
     args["set"] = Mbma::mbma_tagset;
     args["class"] = "stem";
-    result = new Morpheme( args, doc );
 #pragma omp critical(foliaupdate)
     {
+      result = new Morpheme( args, doc );
       result->settext( out );
     }
     ++cnt;
@@ -731,9 +731,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     KWargs args;
     args["set"] = Mbma::mbma_tagset;
     args["class"] = "particle";
-    result = new Morpheme( args, doc );
 #pragma omp critical(foliaupdate)
     {
+      result = new Morpheme( args, doc );
       result->settext( out );
     }
     ++cnt;
@@ -760,9 +760,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     KWargs args;
     args["class"] = "inflection";
     args["set"] = Mbma::mbma_tagset;
-    result = new Morpheme( args, doc );
 #pragma omp critical(foliaupdate)
     {
+      result = new Morpheme( args, doc );
       result->settext( out );
     }
     ++cnt;
@@ -775,9 +775,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
 	  // happens sometimes when there is fawlty data
 	  args["class"] = d;
 	  desc += "/" + d;
-	  folia::Feature *feat = new folia::Feature( args );
 #pragma omp critical(foliaupdate)
 	  {
+	    folia::Feature *feat = new folia::Feature( args );
 	    result->append( feat );
 	  }
 	}
@@ -802,9 +802,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
       args["class"] = "derivational";
     }
     args["set"] = Mbma::mbma_tagset;
-    result = new Morpheme( args, doc );
 #pragma omp critical(foliaupdate)
     {
+      result = new Morpheme( args, doc );
       result->settext( out );
     }
     ++cnt;
@@ -838,7 +838,10 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
     KWargs args;
     args["class"] = "inflection";
     args["set"] = Mbma::mbma_tagset;
-    result = new Morpheme( args, doc );
+#pragma omp critical(foliaupdate)
+    {
+      result = new Morpheme( args, doc );
+    }
     args.clear();
     args["subset"] = "inflection";
     for ( const auto& inf : inflect ){
@@ -848,9 +851,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
 	  // happens sometimes when there is fawlty data
 	  desc += "/" + d;
 	  args["class"] = d;
-	  folia::Feature *feat = new folia::Feature( args );
 #pragma omp critical(foliaupdate)
 	  {
+	    folia::Feature *feat = new folia::Feature( args );
 	    result->append( feat );
 	  }
 	}
@@ -869,10 +872,14 @@ Morpheme *BracketNest::createMorpheme( Document *doc ) const {
 Morpheme *BracketNest::createMorpheme( Document *doc,
 				       string& desc,
 				       int& cnt ) const {
+  Morpheme *result = 0;
   KWargs args;
   args["class"] = "complex";
   args["set"] = Mbma::mbma_tagset;
-  Morpheme *result = new Morpheme( args, doc );
+#pragma omp critical(foliaupdate)
+  {
+    result = new Morpheme( args, doc );
+  }
   cnt = 0;
   desc.clear();
   vector<Morpheme*> stack;

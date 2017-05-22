@@ -748,7 +748,7 @@ Dependency *FrogAPI::lookupDep( const Word *word,
   }
   if ( dbFlag ){
     using TiCC::operator<<;
-    LOG << "\nDependency-lookup "<< word << " in " << dependencies << endl;
+    LOG << endl << "Dependency-lookup "<< word << " in " << dependencies << endl;
   }
   for ( const auto& dep : dependencies ){
     if ( dbFlag ){
@@ -761,7 +761,7 @@ Dependency *FrogAPI::lookupDep( const Word *word,
 	for ( const auto& w : wv ){
 	  if ( w == word ){
 	    if ( dbFlag ){
-	      LOG << "\nDependency found word " << w << endl;
+	      LOG << "Dependency found word " << w << endl;
 	    }
 	    return dep;
 	  }
@@ -791,7 +791,7 @@ string FrogAPI::lookupNEREntity( const vector<Word *>& mwus,
   for ( const auto& mwu : mwus ){
     if ( dbFlag ){
       using TiCC::operator<<;
-      LOG << "\nNER: lookup "<< mwu << " in " << entities << endl;
+      LOG << endl << "NER: lookup "<< mwu << " in " << entities << endl;
     }
     string result;
     for ( const auto& entity :entities ){
@@ -913,7 +913,6 @@ vector<string> get_compound_analysis( folia::Word* word ){
       PosAnnotation *postag = 0;
       try {
 	postag = m[0]->annotation<PosAnnotation>( Mbma::clex_tagset );
-	//	cerr << "found a clex postag!" << endl;
 	result.push_back( postag->feat( "compound" ) ); // might be empty
       }
       catch (...){
@@ -1333,7 +1332,7 @@ void FrogAPI::FrogFile( const string& infilename,
     }
     catch ( exception &e ){
       LOG << "retrieving FoLiA from '" << infilename << "' failed with exception:" << endl;
-      cerr << e.what() << endl;
+      LOG << e.what() << endl;
       throw ( runtime_error( "read failed" ) );
     }
     timers.reset();

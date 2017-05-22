@@ -92,7 +92,16 @@ bool Parser::init( const TiCC::Configuration& configuration ){
   bool problem = false;
   LOG << "initiating parser ... " << endl;
   string cDir = configuration.configDir();
-  string val = configuration.lookUp( "version", "parser" );
+  string val = configuration.lookUp( "debug", "parser" );
+  if ( !val.empty() ){
+    int level;
+    if ( TiCC::stringTo<int>( val, level ) ){
+      if ( level > 5 ){
+	parseLog->setlevel( LogLevel::LogDebug );
+      }
+    }
+  }
+  val = configuration.lookUp( "version", "parser" );
   if ( val.empty() ){
     version = "1.0";
   }
@@ -1004,7 +1013,8 @@ void Parser::Parse( const vector<Word*>& words,
 			       r_results,
 			       d_results,
 			       pd.words.size(),
-			       maxDepSpan );
+			       maxDepSpan,
+			       parseLog );
   timers.csiTimer.stop();
   appendParseResult( words, pd, dep_tagset, res );
   timers.parseTimer.stop();

@@ -34,9 +34,13 @@
 #include <string>
 
 #include "ticcutils/PrettyPrint.h"
+#include "ticcutils/LogStream.h"
 #include "frog/ckyparser.h"
 
 using namespace std;
+
+#define LOG *TiCC::Log(ckyLog)
+#define DBG *TiCC::Dbg(ckyLog)
 
 ostream& operator<<( ostream& os, const Constraint* c ){
   if ( c ){
@@ -50,6 +54,8 @@ ostream& operator<<( ostream& os, const Constraint* c ){
 ostream& operator<<( ostream& os, const Constraint& c ){
   return os << &c;
 }
+
+using TiCC::operator<<;
 
 void HasIncomingRel::put( ostream& os ) const {
   Constraint::put( os );
@@ -68,7 +74,9 @@ void DependencyDirection::put( ostream & os ) const {
 }
 
 
-CKYParser::CKYParser( size_t num, const vector<const Constraint*>& constraints ):
+CKYParser::CKYParser( size_t num,
+		      const vector<const Constraint*>& constraints,
+		      TiCC::LogStream* log ):
   numTokens(num)
 {
   inDepConstraints.resize( numTokens + 1 );
@@ -84,7 +92,7 @@ CKYParser::CKYParser( size_t num, const vector<const Constraint*>& constraints )
   for ( const auto& constraint : constraints ){
     addConstraint( constraint );
   }
-
+  ckyLog = new TiCC::LogStream( log, "cky:" );
 }
 
 
@@ -100,7 +108,7 @@ void CKYParser::addConstraint( const Constraint *c ){
     outDepConstraints[c->tIndex()].push_back( c );
     break;
   default:
-    cerr << "UNSUPPORTED constraint type" << endl;
+    LOG << "UNSUPPORTED constraint type" << endl;
     abort();
   }
 }
@@ -111,25 +119,25 @@ string CKYParser::bestEdge( const SubTree& leftSubtree,
 			    set<const Constraint*>& bestConstraints,
 			    double& bestScore ){
   bestConstraints.clear();
-  //  cerr << "BESTEDGE " << headIndex << " <> " << depIndex << endl;
+  DBG << "BESTEDGE " << headIndex << " <> " << depIndex << endl;
   if ( headIndex == 0 ){
     bestScore = 0.0;
     for ( auto const& constraint : outDepConstraints[depIndex] ){
-      //      cerr << "CHECK " << constraint << endl;
+      DBG << "CHECK " << constraint << endl;
       if ( constraint->direct() == dirType::ROOT ){
-	//	cerr << "head outdep matched " << constraint << endl;
+	DBG << "head outdep matched " << constraint << endl;
 	bestScore = constraint->wght();
 	bestConstraints.insert( constraint );
       }
     }
     string label = "ROOT";
     for ( auto const& constraint : edgeConstraints[depIndex][0] ){
-      //      cerr << "head edge matched " << constraint << endl;
+      DBG << "head edge matched " << constraint << endl;
       bestScore += constraint->wght();
       bestConstraints.insert( constraint );
       label = constraint->rel();
     }
-    //    cerr << "best HEAD==>" << label << " " << bestScore << " " << bestConstraints << endl;
+    DBG << "best HEAD==>" << label << " " << bestScore << " " << bestConstraints << endl;
     return label;
   }
   bestScore = -0.5;
@@ -143,7 +151,7 @@ string CKYParser::bestEdge( const SubTree& leftSubtree,
       if ( constraint->rel() == my_label &&
 	   leftSubtree.satisfiedConstraints.find( constraint ) == leftSubtree.satisfiedConstraints.end() &&
 	   rightSubtree.satisfiedConstraints.find( constraint ) == rightSubtree.satisfiedConstraints.end() ){
-	//	cerr << "inDep matched: " << constraint << endl;
+	DBG << "inDep matched: " << constraint << endl;
 	my_score += constraint->wght();
 	my_constraints.insert(constraint);
       }
@@ -156,7 +164,7 @@ string CKYParser::bestEdge( const SubTree& leftSubtree,
 	       headIndex > depIndex ) )
 	   && leftSubtree.satisfiedConstraints.find( constraint ) == leftSubtree.satisfiedConstraints.end()
 	   && rightSubtree.satisfiedConstraints.find( constraint ) == rightSubtree.satisfiedConstraints.end() ){
-	//	cerr << "outdep matched: " << constraint << endl;
+	DBG << "outdep matched: " << constraint << endl;
 	my_score += constraint->wght();
 	my_constraints.insert(constraint);
       }
@@ -165,10 +173,10 @@ string CKYParser::bestEdge( const SubTree& leftSubtree,
       bestScore = my_score;
       bestLabel = my_label;
       bestConstraints = std::move(my_constraints);
-      //      cerr << "UPDATE BEst " << bestLabel << " " << bestScore << " " << bestConstraints << endl;
+      DBG << "UPDATE BEst " << bestLabel << " " << bestScore << " " << bestConstraints << endl;
     }
   }
-  //  cerr << "GRAND TOTAL " << bestLabel << " " << bestScore << " " << bestConstraints << endl;
+  DBG << "GRAND TOTAL " << bestLabel << " " << bestScore << " " << bestConstraints << endl;
   return bestLabel;
 }
 
@@ -186,7 +194,7 @@ void CKYParser::parse(){
 	string label = bestEdge( chart[s][r].r_True,
 				 chart[r+1][t].l_True,
 				 t, s, constraints, edgeScore );
-	//	cerr << "STEP 1 BEST EDGE==> " << label << " ( " << edgeScore << ")" << endl;
+	DBG << "STEP 1 BEST EDGE==> " << label << " ( " << edgeScore << ")" << endl;
 	double score = chart[s][r].r_True.score() + chart[r+1][t].l_True.score() + edgeScore;
 	if ( score > bestScore ){
 	  bestScore = score;
@@ -195,7 +203,7 @@ void CKYParser::parse(){
 	  bestConstraints = std::move(constraints);
 	}
       }
-      //      cerr << "STEP 1 ADD: " << bestScore <<"-" << bestI << "-" << bestL << endl;
+      DBG << "STEP 1 ADD: " << bestScore <<"-" << bestI << "-" << bestL << endl;
       chart[s][t].l_False = SubTree( bestScore, bestI, bestL );
       chart[s][t].l_False.satisfiedConstraints.insert( chart[s][bestI].r_True.satisfiedConstraints.begin(), chart[s][bestI].r_True.satisfiedConstraints.end() );
       chart[s][t].l_False.satisfiedConstraints.insert( chart[bestI+1][t].l_True.satisfiedConstraints.begin(), chart[bestI+1][t].l_True.satisfiedConstraints.end() );
@@ -211,7 +219,7 @@ void CKYParser::parse(){
 	string label = bestEdge( chart[s][r].r_True,
 				 chart[r+1][t].l_True,
 				 s, t, constraints, edgeScore );
-	//	cerr << "STEP 2 BEST EDGE==> " << label << " ( " << edgeScore << ")" << endl;
+	DBG << "STEP 2 BEST EDGE==> " << label << " ( " << edgeScore << ")" << endl;
 	double score = chart[s][r].r_True.score() + chart[r+1][t].l_True.score() + edgeScore;
 	if ( score > bestScore ){
 	  bestScore = score;
@@ -221,7 +229,7 @@ void CKYParser::parse(){
 	}
       }
 
-      //      cerr << "STEP 2 ADD: " << bestScore <<"-" << bestI << "-" << bestL << endl;
+      DBG << "STEP 2 ADD: " << bestScore <<"-" << bestI << "-" << bestL << endl;
       chart[s][t].r_False = SubTree( bestScore, bestI, bestL );
       chart[s][t].r_False.satisfiedConstraints.insert( chart[s][bestI].r_True.satisfiedConstraints.begin(), chart[s][bestI].r_True.satisfiedConstraints.end() );
       chart[s][t].r_False.satisfiedConstraints.insert( chart[bestI+1][t].l_True.satisfiedConstraints.begin(), chart[bestI+1][t].l_True.satisfiedConstraints.end() );
@@ -237,7 +245,7 @@ void CKYParser::parse(){
 	  bestI = r;
 	}
       }
-      //      cerr << "STEP 3 ADD: " << bestScore <<"-" << bestI << "-" << bestL << endl;
+      DBG << "STEP 3 ADD: " << bestScore <<"-" << bestI << "-" << bestL << endl;
       chart[s][t].l_True = SubTree( bestScore, bestI, bestL );
       chart[s][t].l_True.satisfiedConstraints.insert( chart[s][bestI].l_True.satisfiedConstraints.begin(), chart[s][bestI].l_True.satisfiedConstraints.end() );
       chart[s][t].l_True.satisfiedConstraints.insert( chart[bestI][t].l_False.satisfiedConstraints.begin(), chart[bestI][t].l_False.satisfiedConstraints.end() );
@@ -253,7 +261,7 @@ void CKYParser::parse(){
 	}
       }
 
-      //      cerr << "STEP 4 ADD: " << bestScore <<"-" << bestI << "-" << bestL << endl;
+      DBG << "STEP 4 ADD: " << bestScore <<"-" << bestI << "-" << bestL << endl;
       chart[s][t].r_True = SubTree( bestScore, bestI, bestL );
       chart[s][t].r_True.satisfiedConstraints.insert( chart[s][bestI].r_False.satisfiedConstraints.begin(), chart[s][bestI].r_False.satisfiedConstraints.end() );
       chart[s][t].r_True.satisfiedConstraints.insert( chart[bestI][t].r_True.satisfiedConstraints.begin(), chart[bestI][t].r_True.satisfiedConstraints.end() );

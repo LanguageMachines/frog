@@ -22,6 +22,7 @@ std::vector<parsrel> parse( const std::vector<timbl_result>&,
 			    const std::vector<timbl_result>&,
 			    const std::vector<timbl_result>&,
 			    size_t,
-			    int );
+			    int,
+			    TiCC::LogStream* );
 
 #endif
