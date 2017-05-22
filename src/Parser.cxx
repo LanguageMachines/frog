@@ -908,13 +908,18 @@ void appendResult( const vector<Word *>& words,
 		   const string& tagset,
 		   const vector<int>& nums,
 		   const vector<string>& roles ){
-  Sentence *sent = words[0]->sentence();
+  Sentence *sent = 0;
+#pragma omp critical(foliaupdate)
+  {
+    sent = words[0]->sentence();
+  }
+  DependenciesLayer *dl = 0;
   KWargs args;
   args["generate_id"] = sent->id();
   args["set"] = tagset;
 #pragma omp critical(foliaupdate)
   {
-    DependenciesLayer *dl = new DependenciesLayer( args, sent->doc() );
+    dl = new DependenciesLayer( args, sent->doc() );
     sent->append( dl );
   }
   for ( size_t i=0; i < nums.size(); ++i ){
