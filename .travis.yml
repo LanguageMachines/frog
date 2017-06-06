@@ -76,6 +76,6 @@ install:
     - sudo make install
     - git clone https://github.com/LanguageMachines/frogtests.git
 script:
-    - cd frogtests && LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib && frog_bin=/usr/local/bin ./testall >&2
+    - cd frogtests && LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib; frog_bin=/usr/local/bin ./testall >&2
 after_failure:
-    - for file in *.diff *.err; do if [ -s $file ]; then cat 20 $file; fi; done
+    - for file in *.err *.diff; do if [ -s $file ]; then tail -n 50 $file; fi; done
