@@ -77,3 +77,5 @@ install:
     - git clone https://github.com/LanguageMachines/frogtests.git
 script:
     - cd frogtests && LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib && frog_bin=/usr/local/bin ./testall >&2
+after_failure:
+    - for file in *.diff; do if [ -s $file ]; then cat $file; fi; done
