@@ -78,4 +78,4 @@ install:
 script:
     - cd frogtests && LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib && frog_bin=/usr/local/bin ./testall >&2
 after_failure:
-    - for file in *.diff; do if [ -s $file ]; then cat $file; fi; done
+    - for file in *.diff *.err; do if [ -s $file ]; then cat 20 $file; fi; done
