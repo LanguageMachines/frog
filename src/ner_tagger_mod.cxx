@@ -184,6 +184,10 @@ bool NERTagger::fill_known_ners( const string& file_name ){
     line = parts[0];
     string ner_value = parts[1];
     size_t num = TiCC::split( line, parts );
+    if ( num == 1 ){
+      // ignore single word NE's
+      continue;
+    }
     if ( num < 1 || num > (unsigned)max_ner_size ){
       // LOG << "expected 1 to " << max_ner_size
       // 		   << " SPACE-separated parts in line: '" << line
