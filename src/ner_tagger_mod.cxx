@@ -38,17 +38,15 @@ using namespace std;
 using namespace TiCC;
 using namespace Tagger;
 
-const int KNOWN_NERS_SIZE = 10;
-
 #define LOG *Log(nerLog)
 
 NERTagger::NERTagger(TiCC::LogStream * logstream):
   tagger(0),
   debug(0),
-  filter(0)
+  filter(0),
+  max_ner_size(10)
 {
   nerLog = new LogStream( logstream, "ner-" );
-  known_ners.resize( KNOWN_NERS_SIZE+1 );
 }
 
 NERTagger::~NERTagger(){
@@ -126,6 +124,11 @@ bool NERTagger::init( const Configuration& config ){
     filter = new Tokenizer::UnicodeFilter();
     filter->fill( charFile );
   }
+  val = config.lookUp( "max_ner_size", "NER" );
+  if ( !val.empty() ){
+    max_ner_size = TiCC::stringTo<int>( val );
+  }
+  known_ners.resize( max_ner_size + 1 );
   val = config.lookUp( "known_ners", "NER" );
   if ( !val.empty() ){
     string file_name;
@@ -158,6 +161,9 @@ bool NERTagger::fill_known_ners( const string& file_name ){
   if ( !is ){
     return false;
   }
+  int err_cnt = 0;
+  int long_err_cnt = 0;
+  size_t ner_cnt = 0;
   string line;
   while ( getline( is, line ) ){
     if ( line.empty() || line[0] == '#' ){
@@ -166,16 +172,32 @@ bool NERTagger::fill_known_ners( const string& file_name ){
     vector<string> parts;
     if ( TiCC::split_at( line, parts, "\t" ) != 2 ){
       LOG << "expected 2 TAB-separated parts in line: '" << line << "'" << endl;
-      return false;
+      if ( ++err_cnt > 50 ){
+	LOG << "too many errors in additional wordlist file. "<< endl;
+	return false;
+      }
+      else {
+	LOG << "ignoring entry" << endl;
+	continue;
+      }
     }
     line = parts[0];
     string ner_value = parts[1];
     size_t num = TiCC::split( line, parts );
-    if ( num < 1 || num > KNOWN_NERS_SIZE ){
-      LOG << "expected 1 to " << KNOWN_NERS_SIZE
-		   << " SPACE-separated parts in line: '" << line
-		   << "'" << endl;
-      return false;
+    if ( num < 1 || num > (unsigned)max_ner_size ){
+      // LOG << "expected 1 to " << max_ner_size
+      // 		   << " SPACE-separated parts in line: '" << line
+      // 		   << "'" << endl;
+      if ( ++long_err_cnt > 50 ){
+	LOG << "too many long entries in additional wordlist file. "<< endl;
+	LOG << "consider raising the max_ner_size in the configuration. (now "
+	    << max_ner_size << ")" << endl;
+	return false;
+      }
+      else {
+	//	LOG << "ignoring entry" << endl;
+	continue;
+      }
     }
     line = "";
     for ( const auto& part : parts ){
@@ -185,7 +207,10 @@ bool NERTagger::fill_known_ners( const string& file_name ){
       }
     }
     known_ners[num][line] = ner_value;
+    ++ner_cnt;
   }
+  LOG << "loaded " << ner_cnt << " additional Named Entities from"
+      << file_name << endl;
   return true;
 }
 
@@ -212,7 +237,7 @@ void NERTagger::handle_known_ners( const vector<string>& words,
   if ( debug ){
     LOG << "Sentence = " << sentence << endl;
   }
-  for ( size_t i = KNOWN_NERS_SIZE; i > 0; --i ){
+  for ( size_t i = max_ner_size; i > 0; --i ){
     auto const& mp = known_ners[i];
     if ( mp.empty() ){
       continue;
@@ -224,8 +249,8 @@ void NERTagger::handle_known_ners( const vector<string>& words,
 	size_t sp = count_sp( sentence, pos );
 	if ( debug ){
 	  LOG << "matched '" << it.first << "' to '"
-		       << sentence << "' at position " << sp
-		       << " : " << it.second << endl;
+	      << sentence << "' at position " << sp
+	      << " : " << it.second << endl;
 	}
 	bool safe = true;
 	for ( size_t j=0; j < i && safe; ++j ){
@@ -263,9 +288,10 @@ void NERTagger::merge( const vector<string>& ktags, vector<string>& tags,
       continue;
     }
     else if ( ktags[i][0] == 'B' ){
-      // maybe we landed in the middel of some tag.
-      if ( tags[i][0] == 'I' ){
-	//indeed, so erase it backwards
+      // maybe we landed in the middle of some tag.
+      if ( i > 0 && tags[i][0] == 'I' ){
+	// indeed, so erase it backwards
+	// except when at the start. then an 'I' should be a 'B' anyway
 	size_t j = i;
 	while ( tags[j][0] == 'I' ){
 	  tags[j] = "O";
