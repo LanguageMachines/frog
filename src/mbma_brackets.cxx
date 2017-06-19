@@ -492,18 +492,8 @@ Compound::Type BracketNest::getCompoundType(){
 	 && st1 != Status::PARTICIPLE ){
       switch ( tag1 ){
       case CLEX::N:
-	if ( st1 != Status::DERIVATIONAL ){
-	  if ( st2 == Status::STEM ){
-	    compound = construct( tag1, tag2 );
-	  }
-	  else if ( st2 == Status::DERIVATIONAL
-		    || st2 == Status::INFO
-		    || st2 == Status::INFLECTION ){
-	    compound = cp1;
-	  }
-	}
-	break;
-      case  CLEX::A:
+      case CLEX::A:
+      case CLEX::V:
 	if ( st2 == Status::STEM ){
 	  compound = construct( tag1, tag2 );
 	}
@@ -525,14 +515,6 @@ Compound::Type BracketNest::getCompoundType(){
 	else if ( tag2 == CLEX::NEUTRAL
 		  || tag2 == CLEX::UNASS ){
 	  compound = cp1;
-	}
-	break;
-      case CLEX::V:
-	if ( st1 == Status::DERIVATIONAL ){
-	  compound = cp2;
-	}
-	else if ( st2 == Status::STEM ){
-	  compound = construct( tag1, tag2 );
 	}
 	break;
       default:
