@@ -333,7 +333,13 @@ UnicodeString BracketLeaf::put( bool full ) const {
   }
   if ( full ){
     if ( orig.empty() ){
-      result += UTF8ToUnicode(inflect);
+      UnicodeString s = UTF8ToUnicode(toString(cls));
+      if ( s == "/" ){
+	result += s + UTF8ToUnicode(inflect);
+      }
+      else {
+	result += s + "/" + UTF8ToUnicode(inflect);
+      }
     }
     else {
       result += UTF8ToUnicode(orig);
@@ -347,7 +353,10 @@ UnicodeString BracketNest::put( bool full ) const {
   for ( auto const& it : parts ){
     UnicodeString m = it->put( full );
     if ( !m.isEmpty() ){
-      result +=  m + " ";
+      result += m + " ";
+      // if (&it != &parts.back() ){
+      // 	result += " ";
+      // }
     }
   }
   result += "]";
@@ -380,7 +389,10 @@ ostream& operator<< ( ostream& os, const BaseBracket *c ){
 void prettyP( ostream& os, const list<BaseBracket*>& v ){
   os << "[";
   for ( auto const& it : v ){
-    os << it << " ";
+    os << it;
+    if ( &it != &v.back() ){
+      os << " ";
+    }
   }
   os << "]";
 }
@@ -529,7 +541,7 @@ Compound::Type BracketNest::getCompoundType(){
       }
     }
   }
-  else {
+  else if ( parts.size() > 2 ){
     auto it = parts.begin();
     Compound::Type cp1 = (*it)->compound();
     CLEX::Type tag1 = (*it)->tag();
@@ -552,7 +564,11 @@ Compound::Type BracketNest::getCompoundType(){
 	 && st1 != Status::PARTICIPLE ){
       switch ( tag1 ){
       case CLEX::N:
-	if ( st2 == Status::STEM &&
+	if ( st2 == Status::STEM && tag2 == CLEX::N
+	     && st3 == Status::STEM && tag3 == CLEX::N ){
+	  compound = Compound::Type::NNN;
+	}
+	else if ( st1 != Status::DERIVATIONAL && st2 == Status::STEM &&
 	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
 	  compound = construct( tag1, tag2 );
 	}
@@ -592,9 +608,6 @@ Compound::Type BracketNest::getCompoundType(){
 		    && tag3 == CLEX::N ){
 	    compound = Compound::Type::NN;
 	  }
-	}
-	else if ( tag2 == CLEX::N && tag3 == CLEX::N ){
-	  compound = Compound::Type::NNN;
 	}
 	break;
       case CLEX::A:
@@ -743,14 +756,8 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
   }
   else if ( _status == Status::INFLECTION ){
     string out = UnicodeToUTF8(morph);
-    if ( out.empty() ){
-      out = inflect;
-    }
-    else {
+    if ( !out.empty() ){
       desc = "[" + out + "]";
-    }
-    if ( out.empty() ){
-      throw logic_error( "Inflection and morpheme empty" );
     }
     KWargs args;
     args["class"] = "inflection";
@@ -758,7 +765,9 @@ Morpheme *BracketLeaf::createMorpheme( Document *doc,
 #pragma omp critical(foliaupdate)
     {
       result = new Morpheme( args, doc );
-      result->settext( out );
+      if ( !out.empty() ){
+	result->settext( out );
+      }
     }
     ++cnt;
     args.clear();
