@@ -1,5 +1,8 @@
 sudo: required
 dist: trusty
+
+group: edge
+
 # whitelist
 branches:
   only:
@@ -19,7 +22,7 @@ compiler:
     - clang
 before_install:
     - sudo apt-get update
-    - sudo apt-get install pkg-config autoconf-archive autotools-dev libicu-dev libxml2-dev libbz2-dev zlib1g-dev expect
+    - sudo apt-get install pkg-config autoconf-archive autotools-dev libicu-dev libxml2-dev libbz2-dev zlib1g-dev libtar-dev expect
     - git clone https://github.com/LanguageMachines/ticcutils
     - cd ticcutils
     - bash bootstrap.sh
