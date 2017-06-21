@@ -32,6 +32,7 @@
 #include "mbt/MbtAPI.h"
 #include "frog/Frog.h"
 #include "ucto/unicode.h"
+#include "ticcutils/FileUtils.h"
 #include "frog/ner_tagger_mod.h"
 
 using namespace std;
@@ -131,16 +132,7 @@ bool NERTagger::init( const Configuration& config ){
   known_ners.resize( max_ner_size + 1 );
   val = config.lookUp( "known_ners", "NER" );
   if ( !val.empty() ){
-    string file_name;
-    if ( val[0] == '/' ) {
-      // an absolute path
-      file_name = val;
-    }
-    else {
-      file_name = config.configDir() + val;
-    }
-    if ( !fill_known_ners( file_name ) ){
-      LOG << "Unable to fill known NER's from file: '" << file_name << "'" << endl;
+    if ( !fill_known_ners( val, config.configDir() ) ){
       return false;
     }
   }
@@ -156,9 +148,14 @@ bool NERTagger::init( const Configuration& config ){
   return tagger->isInit();
 }
 
-bool NERTagger::fill_known_ners( const string& file_name ){
+bool NERTagger::fill_known_ners( const string& name, const string& config_dir ){
+  string file_name = name;
+  if ( name[0] != '/' ) {
+    file_name = config_dir + file_name;
+  }
   ifstream is( file_name );
   if ( !is ){
+    LOG << "unable to load additional NE from " << file_name << endl;
     return false;
   }
   int err_cnt = 0;
@@ -169,49 +166,65 @@ bool NERTagger::fill_known_ners( const string& file_name ){
     if ( line.empty() || line[0] == '#' ){
       continue;
     }
-    vector<string> parts;
-    if ( TiCC::split_at( line, parts, "\t" ) != 2 ){
-      LOG << "expected 2 TAB-separated parts in line: '" << line << "'" << endl;
-      if ( ++err_cnt > 50 ){
-	LOG << "too many errors in additional wordlist file. "<< endl;
+    if ( TiCC::isFile( line ) ){
+      if ( !fill_known_ners( line, "" ) ){
+	LOG << "unable to load additional NE from included file: "
+	    << line << endl;
 	return false;
       }
-      else {
-	LOG << "ignoring entry" << endl;
+    }
+    else if ( TiCC::isFile( config_dir + line ) ){
+      if ( !fill_known_ners( line, config_dir ) ){
+	LOG << "unable to load additional NE from include file: "
+	    << config_dir + line << endl;
+	return false;
+      }
+    }
+    else {
+      vector<string> parts;
+      if ( TiCC::split_at( line, parts, "\t" ) != 2 ){
+	LOG << "expected 2 TAB-separated parts in line: '" << line << "'" << endl;
+	if ( ++err_cnt > 50 ){
+	  LOG << "too many errors in additional wordlist file: " << file_name << endl;
+	  return false;
+	}
+	else {
+	  LOG << "ignoring entry" << endl;
+	  continue;
+	}
+      }
+      line = parts[0];
+      string ner_value = parts[1];
+      size_t num = TiCC::split( line, parts );
+      if ( num == 1 ){
+	// ignore single word NE's
 	continue;
       }
-    }
-    line = parts[0];
-    string ner_value = parts[1];
-    size_t num = TiCC::split( line, parts );
-    if ( num == 1 ){
-      // ignore single word NE's
-      continue;
-    }
-    if ( num < 1 || num > (unsigned)max_ner_size ){
-      // LOG << "expected 1 to " << max_ner_size
-      // 		   << " SPACE-separated parts in line: '" << line
-      // 		   << "'" << endl;
-      if ( ++long_err_cnt > 50 ){
-	LOG << "too many long entries in additional wordlist file. "<< endl;
-	LOG << "consider raising the max_ner_size in the configuration. (now "
-	    << max_ner_size << ")" << endl;
-	return false;
-      }
-      else {
+      if ( num < 1 || num > (unsigned)max_ner_size ){
+	// LOG << "expected 1 to " << max_ner_size
+	// 		   << " SPACE-separated parts in line: '" << line
+	// 		   << "'" << endl;
+	if ( ++long_err_cnt > 50 ){
+	  LOG << "too many long entries in additional wordlist file. " << file_name << endl;
+	  LOG << "consider raising the max_ner_size in the configuration. (now "
+	      << max_ner_size << ")" << endl;
+	  return false;
+	}
+	else {
 	//	LOG << "ignoring entry" << endl;
-	continue;
+	  continue;
+	}
       }
-    }
-    line = "";
-    for ( const auto& part : parts ){
-      line += part;
-      if ( &part != &parts.back() ){
-	line += " ";
+      line = "";
+      for ( const auto& part : parts ){
+	line += part;
+	if ( &part != &parts.back() ){
+	  line += " ";
+	}
       }
+      known_ners[num][line] = ner_value;
+      ++ner_cnt;
     }
-    known_ners[num][line] = ner_value;
-    ++ner_cnt;
   }
   LOG << "loaded " << ner_cnt << " additional Named Entities from"
       << file_name << endl;
