@@ -505,7 +505,10 @@ Compound::Type BracketNest::getCompoundType(){
       switch ( tag1 ){
       case CLEX::N:
       case CLEX::A:
-	if ( st2 == Status::STEM ){
+	if ( st1 == Status::DERIVATIONAL ){
+	  compound = cp2;
+	}
+	else if ( st2 == Status::STEM ){
 	  compound = construct( tag1, tag2 );
 	}
 	else if ( st2 == Status::DERIVATIONAL

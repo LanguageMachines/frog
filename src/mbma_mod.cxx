@@ -324,16 +324,11 @@ Rule* Mbma::matchRule( const std::vector<std::string>& ana,
     if ( debugFlag ){
       LOG << "after reduction: " << rule << endl;
     }
-#ifdef EXPERIMENT
-    rule->resolveBrackets( doDeepMorph );
-#endif
     rule->resolve_inflections();
     if ( debugFlag ){
       LOG << "after resolving: " << rule << endl;
     }
-#ifndef EXPERIMENT
     rule->resolveBrackets( doDeepMorph );
-#endif
     rule->getCleanInflect();
     if ( debugFlag ){
       LOG << "1 added Inflection: " << rule << endl;
