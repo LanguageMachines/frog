@@ -1194,7 +1194,12 @@ string FrogAPI::Frogtostring( const string& s ){
   Document *doc = tokenizer->tokenizestring( s );
   stringstream ss;
   FrogDoc( *doc, true );
-  showResults( ss, *doc );
+  if ( options.doXMLout ){
+    doc->save( ss, options.doKanon );
+  }
+  else {
+    showResults( ss, *doc );
+  }
   delete doc;
   return ss.str();
 }
