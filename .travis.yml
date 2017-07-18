@@ -17,9 +17,24 @@ notifications:
     skip_join: true
 
 language: cpp
-compiler:
-    - gcc
-    - clang
+
+language: cpp
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          packages:
+            - libiomp-dev
+      env:
+# libiomp is a very strange abberation in trusty
+# changed to libomp in newer Ubuntu versions.
+       - CXXFLAGS="-fopenmp=libiomp5"
+
 before_install:
     - sudo apt-get update
     - sudo apt-get install pkg-config autoconf-archive autotools-dev libicu-dev libxml2-dev libbz2-dev zlib1g-dev libtar-dev libboost-dev libboost-regex-dev expect
