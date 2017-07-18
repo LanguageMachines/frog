@@ -602,6 +602,9 @@ int main(int argc, char *argv[]) {
 		<< endl;
 	    continue;
 	  }
+	  else {
+	    remove( xmlOutName.c_str() );
+	  }
 	}
 	LOG << "Frogging " << testName << endl;
 	try {
