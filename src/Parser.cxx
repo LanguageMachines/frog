@@ -190,7 +190,7 @@ bool Parser::init( const TiCC::Configuration& configuration ){
     return false;
   }
 
-  string cls = configuration.lookUp( "textclass" );
+  string cls = configuration.lookUp( "outputclass" );
   if ( !cls.empty() ){
     textclass = cls;
   }
@@ -906,6 +906,7 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
 void appendResult( const vector<Word *>& words,
 		   parseData& pd,
 		   const string& tagset,
+		   const string& textclass,
 		   const vector<int>& nums,
 		   const vector<string>& roles ){
   Sentence *sent = 0;
@@ -928,6 +929,9 @@ void appendResult( const vector<Word *>& words,
       args["generate_id"] = dl->id();
       args["class"] = roles[i];
       args["set"] = tagset;
+      if ( textclass != "current" ){
+	args["textclass"] = textclass;
+      }
 #pragma omp critical(foliaupdate)
       {
 	Dependency *d = new Dependency( args, sent->doc() );
@@ -950,6 +954,7 @@ void appendResult( const vector<Word *>& words,
 void appendParseResult( const vector<Word *>& words,
 			parseData& pd,
 			const string& tagset,
+			const string& textclass,
 			const vector<parsrel>& res ){
   vector<int> nums;
   vector<string> roles;
@@ -957,7 +962,7 @@ void appendParseResult( const vector<Word *>& words,
     nums.push_back( it.head );
     roles.push_back( it.deprel );
   }
-  appendResult( words, pd, tagset, nums, roles );
+  appendResult( words, pd, tagset, textclass, nums, roles );
 }
 
 void timbl( Timbl::TimblAPI* tim,
@@ -1021,6 +1026,6 @@ void Parser::Parse( const vector<Word*>& words,
 			       maxDepSpan,
 			       parseLog );
   timers.csiTimer.stop();
-  appendParseResult( words, pd, dep_tagset, res );
+  appendParseResult( words, pd, dep_tagset, textclass, res );
   timers.parseTimer.stop();
 }
