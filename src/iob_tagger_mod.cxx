@@ -151,6 +151,9 @@ void IOBTagger::addChunk( ChunkingLayer *chunks,
   args["set"] = tagset;
   args["confidence"] = toString(conf);
   args["generate_id"] = chunks->id();
+  if ( textclass != "current" ){
+    args["textclass"] = textclass;
+  }
   Chunk *chunk = 0;
 #pragma omp critical(foliaupdate)
   {

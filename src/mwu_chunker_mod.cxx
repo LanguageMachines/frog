@@ -66,8 +66,10 @@ void mwuAna::merge( const mwuAna *add ){
   delete add;
 }
 
-EntitiesLayer *mwuAna::addEntity( const std::string& tagset,
-				  Sentence *sent, EntitiesLayer *el ){
+EntitiesLayer *mwuAna::addEntity( const string& tagset,
+				  const string& textclass,
+				  Sentence *sent,
+				  EntitiesLayer *el ){
   if ( fwords.size() > 1 ){
     if ( el == 0 ){
 #pragma omp critical(foliaupdate)
@@ -81,6 +83,9 @@ EntitiesLayer *mwuAna::addEntity( const std::string& tagset,
     KWargs args;
     args["set"] = tagset;
     args["generate_id"] = el->id();
+    if ( textclass != "current" ){
+      args["textclass"] = textclass;
+    }
     Entity *e=0;
 #pragma omp critical(foliaupdate)
     {
@@ -244,7 +249,7 @@ void Mwu::Classify( const vector<Word*>& words ){
     sent = words[0]->sentence();
   }
   for ( const auto& mword : mWords ){
-    el = mword->addEntity( mwu_tagset, sent, el );
+    el = mword->addEntity( mwu_tagset, textclass, sent, el );
   }
 }
 

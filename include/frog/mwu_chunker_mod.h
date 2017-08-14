@@ -46,6 +46,7 @@ class mwuAna {
 
   bool isSpec(){ return spec; };
   folia::EntitiesLayer *addEntity( const std::string&,
+				   const std::string&,
 				   folia::Sentence *,
 				   folia::EntitiesLayer * );
 

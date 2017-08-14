@@ -334,7 +334,8 @@ static void addEntity( folia::Sentence *sent,
 		       const string& tagset,
 		       const vector<folia::Word*>& words,
 		       const vector<double>& confs,
-		       const string& NER ){
+		       const string& NER,
+		       const string& textclass ){
   folia::EntitiesLayer *el = 0;
 #pragma omp critical(foliaupdate)
   {
@@ -358,6 +359,9 @@ static void addEntity( folia::Sentence *sent,
   args["confidence"] =  toString(c);
   args["set"] = tagset;
   args["generate_id"] = el->id();
+  if ( textclass != "current" ){
+    args["textclass"] = textclass;
+  }
   folia::Entity *e = 0;
 #pragma omp critical(foliaupdate)
   {
@@ -395,7 +399,7 @@ void NERTagger::addNERTags( const vector<folia::Word*>& words,
 	  LOG << "ners  " << stack << endl;
 	  LOG << "confs " << dstack << endl;
 	}
-	addEntity( sent, tagset, stack, dstack, curNER );
+	addEntity( sent, tagset, stack, dstack, curNER, textclass );
 	dstack.clear();
 	stack.clear();
       }
@@ -420,7 +424,7 @@ void NERTagger::addNERTags( const vector<folia::Word*>& words,
 	  using TiCC::operator<<;
 	  LOG << "spit out " << stack << endl;
 	}
-	addEntity( sent, tagset, stack, dstack, curNER );
+	addEntity( sent, tagset, stack, dstack, curNER, textclass );
 	dstack.clear();
 	stack.clear();
       }
@@ -435,7 +439,7 @@ void NERTagger::addNERTags( const vector<folia::Word*>& words,
       using TiCC::operator<<;
       LOG << "spit out " << stack << endl;
     }
-    addEntity( sent, tagset, stack, dstack, curNER );
+    addEntity( sent, tagset, stack, dstack, curNER, textclass );
   }
 }
 

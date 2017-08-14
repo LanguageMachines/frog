@@ -205,6 +205,10 @@ void Mblem::addLemma( Word *word, const string& cls ){
   KWargs args;
   args["set"]=tagset;
   args["class"]=cls;
+  if ( textclass != "current" ){
+    args["textclass"] = textclass;
+  }
+
 #pragma omp critical(foliaupdate)
   {
     try {

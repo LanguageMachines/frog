@@ -214,6 +214,9 @@ void POSTagger::addTag( folia::Word *word,
   args["set"]  = tagset;
   args["class"]  = pos_tag;
   args["confidence"]= toString(confidence);
+  if ( textclass != "current" ){
+    args["textclass"] = textclass;
+  }
 #pragma omp critical(foliaupdate)
   {
     word->addPosAnnotation( args );
