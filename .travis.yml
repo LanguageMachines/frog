@@ -98,4 +98,6 @@ script:
     - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
     - frog_bin=/usr/local/bin ./testall >&2
 after_failure:
-    - for file in *.diff; do echo "DIFF in $file"; cat $file; echo "ERRORS in $file"; cat $file; done
+    - for file in *.diff; do echo DIFF in $file; cat $file; done
+    - for file in *.err; do echo ERRORS in $file; cat $file; done
+    - for file in *.log; do echo SERVER LOGS in $file; cat $file; done
