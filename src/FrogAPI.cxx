@@ -530,7 +530,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	  LOG << "FoLiaParsing failed:" << endl << e.what() << endl;
 	  throw;
         }
-        LOG << "Processing... " << endl;
+        LOG << "Processing XML... " << endl;
 	timers.reset();
 	timers.tokTimer.start();
 	tokenizer->tokenize( doc );
@@ -542,6 +542,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	else {
 	  showResults( outputstream, doc );
 	}
+        LOG << "Done Processing XML... " << endl;
       }
       else {
         string data = "";
@@ -576,6 +577,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	  showResults( outputstream, *doc );
 	}
 	delete doc;
+	LOG << "Done Processing... " << endl;
       }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
 	if (options.debugFlag) {
