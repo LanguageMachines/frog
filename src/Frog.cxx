@@ -478,11 +478,11 @@ bool parse_args( TiCC::CL_Options& Opts,
   return true;
 }
 
-bool StillRunning = true;
+static bool StillRunning = true;
 
 void KillServerFun( int Signal ){
   if ( Signal == SIGTERM ){
-    cerr << "KillServerFun caught a signal SIGTERM" << endl;
+    cerr << Timer::now() << " KillServerFun caught a signal SIGTERM" << endl;
     sleep(5); // give children some spare time...
     StillRunning = false;
   }
@@ -673,6 +673,7 @@ int main(int argc, char *argv[]) {
 	    throw( runtime_error( "Accept failed" ) );
 	  }
 	}
+	LOG << Timer::now() << " server terminated by SIGTERM" << endl;
       }
       catch ( std::exception& e ) {
 	LOG << "Server error:" << e.what() << " Exiting." << endl;
