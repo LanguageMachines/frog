@@ -98,5 +98,5 @@ script:
     - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
     - frog_bin=/usr/local/bin ./testall >&2
 after_failure:
-    - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib ldd /usr/local/bin/frog
-    - for file in *.err *.diff; do if [ -s $file ]; then tail -n 100 $file; fi; done
+    - for file in *.diff; do if [ -s $file ]; then cat $file; fi; done
+    - for file in *.er; do if [ -s $file ]; then cat $file; fi; done
