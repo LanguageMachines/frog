@@ -568,8 +568,10 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	timers.reset();
 	timers.tokTimer.start();
         Document *doc = tokenizer->tokenize( inputstream );
+        LOG << "done tokenizing... " << endl;
 	timers.tokTimer.stop();
         FrogDoc( *doc );
+        LOG << "done Frogging... " << endl;
 	if ( options.doXMLout ){
 	  doc->save( outputstream, options.doKanon );
 	}
