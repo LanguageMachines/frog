@@ -43,7 +43,7 @@ matrix:
           packages:
             - clang-4.0++
             - libiomp-dev
-            - libomp-dev
+#            - libomp-dev
 
 before_install:
     - sudo apt-get update
