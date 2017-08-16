@@ -542,7 +542,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	else {
 	  showResults( outputstream, doc );
 	}
-        LOG << "Done Processing XML... " << endl;
+	//        LOG << "Done Processing XML... " << endl;
       }
       else {
         string data = "";
@@ -569,11 +569,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	timers.tokTimer.start();
         Document *doc = tokenizer->tokenize( inputstream );
 	timers.tokTimer.stop();
-        LOG << Timer::now() << " done tokenizing... " << endl;
-	LOG << "doc pointer= " << (void *)doc << endl;
-	doc->save( "debugdoc.log" );
         FrogDoc( *doc );
-        LOG << Timer::now() <<" done Frogging... " << endl;
 	if ( options.doXMLout ){
 	  doc->save( outputstream, options.doKanon );
 	}
@@ -581,7 +577,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	  showResults( outputstream, *doc );
 	}
 	delete doc;
-	LOG << "Done Processing... " << endl;
+	//	LOG << "Done Processing... " << endl;
       }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
 	if (options.debugFlag) {
@@ -1218,42 +1214,33 @@ string FrogAPI::Frogtostringfromfile( const string& name ){
 
 void FrogAPI::FrogDoc( Document& doc,
 		       bool hidetimers ){
-  LOG << Timer::now() << " In FrogDoc 1" << endl;
   timers.frogTimer.start();
   // first we make sure that the doc will accept our annotations, by
   // declaring them in the doc
-  LOG << Timer::now() << " In FrogDoc 2" << endl;
   if (myPoSTagger){
     myPoSTagger->addDeclaration( doc );
   }
-  LOG << Timer::now() << " In FrogDoc 3" << endl;
   if ( options.doLemma && myMblem ) {
     myMblem->addDeclaration( doc );
   }
-  LOG << Timer::now() << " In FrogDoc 4" << endl;
   if ( options.doMorph && myMbma ) {
     myMbma->addDeclaration( doc );
   }
-  LOG << Timer::now() << " In FrogDoc 5" << endl;
   if ( options.doIOB && myIOBTagger ){
     myIOBTagger->addDeclaration( doc );
   }
-  LOG << Timer::now() << " In FrogDoc 6" << endl;
   if ( options.doNER && myNERTagger ){
     myNERTagger->addDeclaration( doc );
   }
-  LOG << Timer::now() << " In FrogDoc 7" << endl;
   if ( options.doMwu && myMwu ){
     myMwu->addDeclaration( doc );
   }
-  LOG << Timer::now() << " In FrogDoc 8" << endl;
   if ( options.doParse && myParser ){
     myParser->addDeclaration( doc );
   }
   if ( options.debugFlag > 5 ){
     LOG << "Testing document :" << doc << endl;
   }
-  LOG << Timer::now() << " In FrogDoc 10" << endl;
   vector<Sentence*> sentences;
   if ( options.doQuoteDetection ){
     sentences = doc.sentenceParts();
@@ -1262,7 +1249,6 @@ void FrogAPI::FrogDoc( Document& doc,
     sentences = doc.sentences();
   }
   size_t numS = sentences.size();
-  LOG << "In FrogDoc numS=" << numS << endl;
   if ( numS > 0 ) { //process sentences
     if  (options.debugFlag > 0) {
       LOG << "found " << numS
@@ -1292,9 +1278,9 @@ void FrogAPI::FrogDoc( Document& doc,
     }
   }
   else {
-    //    if  (options.debugFlag > 0){
-    LOG << "No sentences found in document. " << endl;
-    //    }
+    if  (options.debugFlag > 0){
+      LOG << "No sentences found in document. " << endl;
+    }
   }
 
   timers.frogTimer.stop();
