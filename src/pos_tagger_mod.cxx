@@ -237,7 +237,7 @@ void POSTagger::addTag( folia::Word *word,
 
 void POSTagger::addDeclaration( folia::Document& doc ) const {
   LOG << Timer::now() << " add a declaration: " << tagset << endl;
-#pragma omp critical (foliaupdate)
+#pragma omp critical
   {
     doc.declare( folia::AnnotationType::POS,
 		 tagset,
