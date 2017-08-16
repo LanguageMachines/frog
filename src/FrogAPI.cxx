@@ -1218,35 +1218,42 @@ string FrogAPI::Frogtostringfromfile( const string& name ){
 
 void FrogAPI::FrogDoc( Document& doc,
 		       bool hidetimers ){
-  LOG << "In FrogDoc 1" << endl;
+  LOG << Timer::now() << " In FrogDoc 1" << endl;
   timers.frogTimer.start();
   // first we make sure that the doc will accept our annotations, by
   // declaring them in the doc
+  LOG << Timer::now() << " In FrogDoc 2" << endl;
   if (myPoSTagger){
     myPoSTagger->addDeclaration( doc );
   }
+  LOG << Timer::now() << " In FrogDoc 3" << endl;
   if ( options.doLemma && myMblem ) {
     myMblem->addDeclaration( doc );
   }
+  LOG << Timer::now() << " In FrogDoc 4" << endl;
   if ( options.doMorph && myMbma ) {
     myMbma->addDeclaration( doc );
   }
+  LOG << Timer::now() << " In FrogDoc 5" << endl;
   if ( options.doIOB && myIOBTagger ){
     myIOBTagger->addDeclaration( doc );
   }
+  LOG << Timer::now() << " In FrogDoc 6" << endl;
   if ( options.doNER && myNERTagger ){
     myNERTagger->addDeclaration( doc );
   }
+  LOG << Timer::now() << " In FrogDoc 7" << endl;
   if ( options.doMwu && myMwu ){
     myMwu->addDeclaration( doc );
   }
+  LOG << Timer::now() << " In FrogDoc 8" << endl;
   if ( options.doParse && myParser ){
     myParser->addDeclaration( doc );
   }
   if ( options.debugFlag > 5 ){
     LOG << "Testing document :" << doc << endl;
   }
-  LOG << "In FrogDoc 2" << endl;
+  LOG << Timer::now() << " In FrogDoc 10" << endl;
   vector<Sentence*> sentences;
   if ( options.doQuoteDetection ){
     sentences = doc.sentenceParts();
