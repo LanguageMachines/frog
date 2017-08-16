@@ -236,6 +236,7 @@ void POSTagger::addTag( folia::Word *word,
 }
 
 void POSTagger::addDeclaration( folia::Document& doc ) const {
+  LOG << Timer::now() << " add a declaration: " << tagset << endl;
 #pragma omp critical (foliaupdate)
   {
     doc.declare( folia::AnnotationType::POS,
@@ -243,7 +244,7 @@ void POSTagger::addDeclaration( folia::Document& doc ) const {
 		 "annotator='frog-mbpos-" + version
 		 + "', annotatortype='auto', datetime='" + getTime() + "'");
   }
-  LOG << Timer::now() << " added a declaration: " << tagset << endl;
+  LOG << Timer::now() << " after add a declaration: " << tagset << endl;
 }
 
 vector<TagResult> POSTagger::tagLine( const string& line ){
