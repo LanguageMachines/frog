@@ -21,6 +21,8 @@ matrix:
   include:
     - os: linux
       compiler: gcc
+      env:
+        - COMPILER=g++
 
     - os: linux
       compiler: clang
@@ -29,6 +31,7 @@ matrix:
           packages:
             - libiomp-dev
       env:
+        - COMPILER=clang++
 # libiomp is a very strange abberation in trusty
 # changed to libomp in newer Ubuntu versions.
        - CXXFLAGS="-fopenmp=libiomp5"
@@ -41,9 +44,15 @@ matrix:
             - llvm-toolchain-trusty-4.0
             - ubuntu-toolchain-r-test
           packages:
+            - COMPILER=clang-4.0++
             - clang-4.0++
             - libiomp-dev
 #            - libomp-dev
+      env:
+# libiomp is a very strange abberation in trusty
+# changed to libomp in newer Ubuntu versions.
+       - CXXFLAGS="-fopenmp=libomp"
+
 
 before_install:
     - sudo apt-get update
@@ -52,56 +61,56 @@ before_install:
     - cd ticcutils
     - bash bootstrap.sh
     - ./configure
-    - make
-    - sudo make install
+    - make CXX=$COMPILER
+    - sudo make CXX=$COMPILER install
     - cd ..
     - git clone https://github.com/LanguageMachines/libfolia
     - cd libfolia
     - bash bootstrap.sh
     - ./configure
-    - make
-    - sudo make install
+    - make CXX=$COMPILER
+    - sudo make CXX=$COMPILER install
     - cd ..
     - git clone https://github.com/LanguageMachines/uctodata
     - cd uctodata
     - bash bootstrap.sh
     - ./configure
-    - make
-    - sudo make install
+    - make CXX=$COMPILER
+    - sudo make CXX=$COMPILER install
     - cd ..
     - git clone https://github.com/LanguageMachines/ucto
     - cd ucto
     - bash bootstrap.sh
     - ./configure
-    - make
-    - sudo make install
+    - make CXX=$COMPILER
+    - sudo make CXX=$COMPILER install
     - cd ..
     - git clone https://github.com/LanguageMachines/timbl
     - cd timbl
     - bash bootstrap.sh
     - ./configure
-    - make
-    - sudo make install
+    - make CXX=$COMPILER
+    - sudo make CXX=$COMPILER install
     - cd ..
     - git clone https://github.com/LanguageMachines/mbt
     - cd mbt
     - bash bootstrap.sh
     - ./configure
-    - make
-    - sudo make install
+    - make CXX=$COMPILER
+    - sudo make CXX=$COMPILER install
     - cd ..
     - git clone https://github.com/LanguageMachines/frogdata
     - cd frogdata
     - bash bootstrap.sh
     - ./configure
-    - make
-    - sudo make install
+    - make CXX=$COMPILER
+    - sudo make CXX=$COMPILER install
     - cd ..
 install:
     - bash bootstrap.sh
     - ./configure
-    - make
-    - sudo make install
+    - make CXX=$COMPILER
+    - sudo make CXX=$COMPILER install
     - git clone https://github.com/LanguageMachines/frogtests.git
     - cd frogtests
 script:
