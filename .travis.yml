@@ -44,14 +44,13 @@ matrix:
             - llvm-toolchain-trusty-4.0
             - ubuntu-toolchain-r-test
           packages:
-            - COMPILER=clang-4.0++
             - clang-4.0++
             - libiomp-dev
-#            - libomp-dev
       env:
 # libiomp is a very strange abberation in trusty
 # changed to libomp in newer Ubuntu versions.
        - CXXFLAGS="-fopenmp=libomp"
+       - COMPILER=clang-4.0++
 
 
 before_install:
