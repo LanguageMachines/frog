@@ -35,6 +35,16 @@ matrix:
 # changed to libomp in newer Ubuntu versions.
        - CXXFLAGS="-fopenmp=libiomp5"
 
+    - os: linux
+      compiler: clang-4.0
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-4.0
+          packages:
+            - clang-4.0++
+            - libomp-dev
+
 before_install:
     - sudo apt-get update
     - sudo apt-get install pkg-config autoconf-archive autotools-dev libicu-dev libxml2-dev libbz2-dev zlib1g-dev libtar-dev libboost-dev libboost-regex-dev expect
