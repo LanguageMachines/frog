@@ -563,15 +563,17 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
         if ( options.debugFlag ){
 	  LOG << "Received: [" << data << "]" << endl;
 	}
-        LOG << "Processing... " << endl;
+        LOG << Timer::now() << " Processing... " << endl;
         istringstream inputstream(data,istringstream::in);
 	timers.reset();
 	timers.tokTimer.start();
         Document *doc = tokenizer->tokenize( inputstream );
-        LOG << "done tokenizing... " << endl;
 	timers.tokTimer.stop();
+        LOG << Timer::now() << " done tokenizing... " << endl;
+	LOG << "doc pointer= " << (void *)doc << endl;
+	doc->save( "debugdoc.log" );
         FrogDoc( *doc );
-        LOG << "done Frogging... " << endl;
+        LOG << Timer::now() <<" done Frogging... " << endl;
 	if ( options.doXMLout ){
 	  doc->save( outputstream, options.doKanon );
 	}
@@ -1216,6 +1218,7 @@ string FrogAPI::Frogtostringfromfile( const string& name ){
 
 void FrogAPI::FrogDoc( Document& doc,
 		       bool hidetimers ){
+  LOG << "In FrogDoc 1" << endl;
   timers.frogTimer.start();
   // first we make sure that the doc will accept our annotations, by
   // declaring them in the doc
@@ -1243,7 +1246,7 @@ void FrogAPI::FrogDoc( Document& doc,
   if ( options.debugFlag > 5 ){
     LOG << "Testing document :" << doc << endl;
   }
-  LOG << "In FrogDoc" << endl;
+  LOG << "In FrogDoc 2" << endl;
   vector<Sentence*> sentences;
   if ( options.doQuoteDetection ){
     sentences = doc.sentenceParts();
