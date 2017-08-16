@@ -1243,7 +1243,7 @@ void FrogAPI::FrogDoc( Document& doc,
   if ( options.debugFlag > 5 ){
     LOG << "Testing document :" << doc << endl;
   }
-
+  LOG << "In FrogDoc" << endl;
   vector<Sentence*> sentences;
   if ( options.doQuoteDetection ){
     sentences = doc.sentenceParts();
@@ -1252,6 +1252,7 @@ void FrogAPI::FrogDoc( Document& doc,
     sentences = doc.sentences();
   }
   size_t numS = sentences.size();
+  LOG << "In FrogDoc numS=" << numS << endl;
   if ( numS > 0 ) { //process sentences
     if  (options.debugFlag > 0) {
       LOG << "found " << numS
@@ -1281,9 +1282,9 @@ void FrogAPI::FrogDoc( Document& doc,
     }
   }
   else {
-    if  (options.debugFlag > 0){
-      LOG << "No sentences found in document. " << endl;
-    }
+    //    if  (options.debugFlag > 0){
+    LOG << "No sentences found in document. " << endl;
+    //    }
   }
 
   timers.frogTimer.stop();
