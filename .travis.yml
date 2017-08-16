@@ -32,8 +32,8 @@ matrix:
       env:
         - COMPILER=clang++
         - CXXFLAGS="-fopenmp=libiomp5"
-        # libiomp is a very strange abberation in trusty
-        # changed to libomp in newer Ubuntu versions.
+# libiomp is a very strange abberation in trusty
+# changed to libomp in newer Ubuntu versions.
 
 
     - os: linux
