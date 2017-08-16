@@ -17,8 +17,6 @@ notifications:
     skip_join: true
 
 language: cpp
-
-language: cpp
 matrix:
   include:
     - os: linux
@@ -36,7 +34,7 @@ matrix:
        - CXXFLAGS="-fopenmp=libiomp5"
 
     - os: linux
-      compiler: clang-4.0
+      compiler: clang
       addons:
         apt:
           sources:
