@@ -373,7 +373,7 @@ void Mbma::addMorph( Word *word,
   KWargs args;
   args["set"] = mbma_tagset;
   MorphologyLayer *ml;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     try {
       ml = word->addMorphologyLayer( args );
@@ -399,7 +399,7 @@ void Mbma::addBracketMorph( Word *word,
   }
   else if ( head == "X" ) {
     // unanalysed, so trust the TAGGER
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
     {
       const auto pos = word->annotation<PosAnnotation>( cgn_tagset );
       head = pos->feat("head");
@@ -422,7 +422,7 @@ void Mbma::addBracketMorph( Word *word,
   KWargs args;
   args["set"] = mbma_tagset;
   MorphologyLayer *ml;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     try {
       ml = word->addMorphologyLayer( args );
@@ -434,7 +434,7 @@ void Mbma::addBracketMorph( Word *word,
   }
   args["class"] = "stem";
   folia::Morpheme *result = 0;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     result = new Morpheme( args, word->doc() );
     result->settext( wrd, textclass );
@@ -442,7 +442,7 @@ void Mbma::addBracketMorph( Word *word,
   args.clear();
   args["subset"] = "structure";
   args["class"]  = "[" + wrd + "]" + head;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     folia::Feature *feat = new folia::Feature( args );
     result->append( feat );
@@ -450,11 +450,11 @@ void Mbma::addBracketMorph( Word *word,
   args.clear();
   args["set"] = clex_tagset;
   args["class"] = celex_tag;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     result->addPosAnnotation( args );
   }
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     ml->append( result );
   }
@@ -469,7 +469,7 @@ void Mbma::addBracketMorph( Word *word,
   KWargs args;
   args["set"] = mbma_tagset;
   MorphologyLayer *ml;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     try {
       ml = word->addMorphologyLayer( args );
@@ -488,7 +488,7 @@ void Mbma::addBracketMorph( Word *word,
     throw;
   }
   if ( m ){
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
     {
       m->settext( orig_word, textclass );
       ml->append( m );
@@ -501,7 +501,7 @@ void Mbma::addMorph( MorphologyLayer *ml,
   for ( const auto& mor : morphs ){
     KWargs args;
     args["set"] = mbma_tagset;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
     {
       Morpheme *m = new Morpheme( args, ml->doc() );
       m->settext( mor, textclass );
@@ -759,7 +759,7 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
 }
 
 void Mbma::addDeclaration( Document& doc ) const {
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     doc.declare( AnnotationType::MORPHOLOGICAL, mbma_tagset,
 		 "annotator='frog-mbma-" +  version +
@@ -791,7 +791,7 @@ void Mbma::Classify( Word* sword ){
   PosAnnotation *pos;
   string head;
   string token_class;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     uWord = sword->text( textclass );
     pos = sword->annotation<PosAnnotation>( cgn_tagset );
@@ -825,7 +825,7 @@ void Mbma::Classify( Word* sword ){
     }
     Classify( lWord );
     vector<string> featVals;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
     {
       vector<folia::Feature*> feats = pos->select<folia::Feature>();
       featVals.reserve( feats.size() );

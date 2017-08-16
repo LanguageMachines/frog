@@ -155,7 +155,7 @@ void IOBTagger::addChunk( ChunkingLayer *chunks,
     args["textclass"] = textclass;
   }
   Chunk *chunk = 0;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     try {
       chunk = new Chunk( args, chunks->doc() );
@@ -170,7 +170,7 @@ void IOBTagger::addChunk( ChunkingLayer *chunks,
     if ( word->isinstance(PlaceHolder_t) ){
       continue;
     }
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
     {
       chunk->append( word );
     }
@@ -184,7 +184,7 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
     return;
   }
   ChunkingLayer *el = 0;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     Sentence *sent = words[0]->sentence();
     try {
@@ -266,7 +266,7 @@ void IOBTagger::addIOBTags( const vector<Word*>& words,
 }
 
 void IOBTagger::addDeclaration( Document& doc ) const {
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     doc.declare( AnnotationType::CHUNKING,
 		 tagset,
@@ -280,7 +280,7 @@ void IOBTagger::Classify( const vector<Word *>& swords ){
     string sentence; // the tagger needs the whole sentence
     for ( const auto& sword : swords ){
       UnicodeString word;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
       {
 	word = sword->text( textclass );
       }

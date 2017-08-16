@@ -53,7 +53,7 @@ mwuAna::mwuAna( Word *fwrd, const string& txt, const string& glue_tag ){
   spec = false;
   word = txt;
   string tag;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     tag = fwrd->annotation<PosAnnotation>()->cls();
   }
@@ -72,7 +72,7 @@ EntitiesLayer *mwuAna::addEntity( const string& tagset,
 				  EntitiesLayer *el ){
   if ( fwords.size() > 1 ){
     if ( el == 0 ){
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
       {
 	KWargs args;
 	args["generate_id"] = sent->id();
@@ -87,13 +87,13 @@ EntitiesLayer *mwuAna::addEntity( const string& tagset,
       args["textclass"] = textclass;
     }
     Entity *e=0;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
     {
       e = new Entity( args, el->doc() );
       el->append( e );
     }
     for ( const auto& fw : fwords ){
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
       {
 	e->append( fw );
       }
@@ -122,7 +122,7 @@ void Mwu::reset(){
 
 void Mwu::add( Word *word ){
   UnicodeString tmp;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     tmp = word->text( textclass );
   }
@@ -224,7 +224,7 @@ ostream &operator<<( ostream& os, const Mwu& mwu ){
 }
 
 void Mwu::addDeclaration( Document& doc ) const {
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     doc.declare( AnnotationType::ENTITY,
 		 mwu_tagset,
@@ -244,7 +244,7 @@ void Mwu::Classify( const vector<Word*>& words ){
   Classify();
   EntitiesLayer *el = 0;
   Sentence *sent;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     sent = words[0]->sentence();
   }

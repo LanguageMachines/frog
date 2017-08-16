@@ -211,7 +211,7 @@ string CGNTagger::getSubSet( const string& val, const string& head ){
 void CGNTagger::post_process( const vector<folia::Word *>& words ){
   for ( auto const& word : words ){
     folia::PosAnnotation *postag = 0;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
     {
       postag = word->annotation<folia::PosAnnotation>( );
     }
@@ -235,7 +235,7 @@ void CGNTagger::post_process( const vector<folia::Word *>& words ){
 	args["set"]    = tagset;
 	args["subset"] = getSubSet( part, head );
 	args["class"]  = part;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
 	{
 	  folia::Feature *feat = new folia::Feature( args );
 	  postag->append( feat );

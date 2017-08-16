@@ -209,7 +209,7 @@ void Mblem::addLemma( Word *word, const string& cls ){
     args["textclass"] = textclass;
   }
 
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     try {
       word->addLemmaAnnotation( args );
@@ -309,7 +309,7 @@ void Mblem::Classify( Word *sword ){
   UnicodeString uword;
   string pos;
   string token_class;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     uword = sword->text( textclass );
     pos = sword->pos();

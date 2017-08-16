@@ -217,12 +217,12 @@ void POSTagger::addTag( folia::Word *word,
   if ( textclass != "current" ){
     args["textclass"] = textclass;
   }
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     word->addPosAnnotation( args );
   }
   //  folia::FoliaElement *pos = 0;
-  //#pragma omp critical(foliaupdate)
+  //#pragma omp critical (foliaupdate)
   //  {
   //    pos = word->addPosAnnotation( args );
   //  }
@@ -236,13 +236,14 @@ void POSTagger::addTag( folia::Word *word,
 }
 
 void POSTagger::addDeclaration( folia::Document& doc ) const {
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     doc.declare( folia::AnnotationType::POS,
 		 tagset,
 		 "annotator='frog-mbpos-" + version
 		 + "', annotatortype='auto', datetime='" + getTime() + "'");
   }
+  LOG << Timer::now() << " added a declaration: " << tagset << endl;
 }
 
 vector<TagResult> POSTagger::tagLine( const string& line ){
@@ -264,7 +265,7 @@ void POSTagger::Classify( const vector<folia::Word*>& swords ){
     string sentence; // the tagger needs the whole sentence
     for ( size_t w = 0; w < swords.size(); ++w ) {
       UnicodeString word;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
       {
 	word = swords[w]->text( textclass );
       }

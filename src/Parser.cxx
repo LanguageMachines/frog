@@ -813,7 +813,7 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
 
 
 void Parser::addDeclaration( Document& doc ) const {
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     doc.declare( AnnotationType::DEPENDENCY, dep_tagset,
 		 "annotator='frog-depparse-" + version
@@ -825,7 +825,7 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
   parseData pd;
   Sentence *sent = 0;
   vector<Entity*> entities;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     sent = fwords[0]->sentence();
     entities = sent->select<Entity>(MWU_tagset);
@@ -839,7 +839,7 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
       string mod;
       for ( const auto& mwu : mwuv ){
 	UnicodeString tmp;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
 	{
 	  tmp = mwu->text( textclass );
 	}
@@ -870,7 +870,7 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
     }
     else {
       UnicodeString tmp;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
       {
 	tmp = word->text( textclass );
       }
@@ -910,7 +910,7 @@ void appendResult( const vector<Word *>& words,
 		   const vector<int>& nums,
 		   const vector<string>& roles ){
   Sentence *sent = 0;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     sent = words[0]->sentence();
   }
@@ -918,7 +918,7 @@ void appendResult( const vector<Word *>& words,
   KWargs args;
   args["generate_id"] = sent->id();
   args["set"] = tagset;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     dl = new DependenciesLayer( args, sent->doc() );
     sent->append( dl );
@@ -932,7 +932,7 @@ void appendResult( const vector<Word *>& words,
       if ( textclass != "current" ){
 	args["textclass"] = textclass;
       }
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
       {
 	Dependency *d = new Dependency( args, sent->doc() );
 	dl->append( d );
