@@ -46,8 +46,6 @@ matrix:
             - libiomp-dev
       env:
         - MATRIX_EVAL="CC=clang4.0 && CXX=clang++-4.0"
-#        - COMPILER=clang++-4.0
-#        - CXXFLAGS="-fopenmp=libomp"
 
         # libiomp is a very strange abberation in trusty
         # changed to libomp in newer Ubuntu versions.
@@ -61,56 +59,56 @@ before_install:
     - cd ticcutils
     - bash bootstrap.sh
     - ./configure
-    - make CXX=$COMPILER
-    - sudo make CXX=$COMPILER install
+    - make
+    - sudo make install
     - cd ..
     - git clone https://github.com/LanguageMachines/libfolia
     - cd libfolia
     - bash bootstrap.sh
     - ./configure
-    - make CXX=$COMPILER
-    - sudo make CXX=$COMPILER install
+    - make
+    - sudo make install
     - cd ..
     - git clone https://github.com/LanguageMachines/uctodata
     - cd uctodata
     - bash bootstrap.sh
     - ./configure
-    - make CXX=$COMPILER
-    - sudo make CXX=$COMPILER install
+    - make
+    - sudo make install
     - cd ..
     - git clone https://github.com/LanguageMachines/ucto
     - cd ucto
     - bash bootstrap.sh
     - ./configure
-    - make CXX=$COMPILER
-    - sudo make CXX=$COMPILER install
+    - make
+    - sudo make install
     - cd ..
     - git clone https://github.com/LanguageMachines/timbl
     - cd timbl
     - bash bootstrap.sh
     - ./configure
-    - make CXX=$COMPILER
-    - sudo make CXX=$COMPILER install
+    - make
+    - sudo make install
     - cd ..
     - git clone https://github.com/LanguageMachines/mbt
     - cd mbt
     - bash bootstrap.sh
     - ./configure
-    - make CXX=$COMPILER
-    - sudo make CXX=$COMPILER install
+    - make
+    - sudo make install
     - cd ..
     - git clone https://github.com/LanguageMachines/frogdata
     - cd frogdata
     - bash bootstrap.sh
     - ./configure
-    - make CXX=$COMPILER
-    - sudo make CXX=$COMPILER install
+    - make
+    - sudo make install
     - cd ..
 install:
     - bash bootstrap.sh
     - ./configure
-    - make CXX=$COMPILER
-    - sudo make CXX=$COMPILER install
+    - make
+    - sudo make install
     - git clone https://github.com/LanguageMachines/frogtests.git
     - cd frogtests
 script:
