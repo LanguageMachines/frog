@@ -49,12 +49,17 @@ if test x"$acx_pthread_ok" = xyes; then
 fi
 
 # check OpenMP support
-AX_OPENMP
+AC_OPENMP
 if test "x$ac_cv_prog_cxx_openmp" != "xunsupported"; then
    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
    AC_DEFINE(HAVE_OPENMP, 1 , Define to 1 if you have OpenMP )
 else
-   AC_MSG_NOTICE(We don't have OpenMP. Multithreaded operation is disabled)
+   if test "$CXX" = "clang++-4.0"; then
+      CXXFLAGS="$CXXFLAGS -fopenmp"
+      AC_DEFINE(HAVE_OPENMP, 1 , Define to 1 if you have OpenMP )
+   else
+      AC_MSG_NOTICE(We don't have OpenMP. Multithreaded operation is disabled)
+   fi
 fi
 
 if test $prefix = "NONE"; then

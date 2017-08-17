@@ -109,6 +109,7 @@ install:
     - if [ "$CXX" == "clang++" ]; then export CXXFLAGS="-O3 -fopenmp=libiomp5"; fi
     - echo $CXXFLAGS
     - ./configure
+    - cat config.log
     - make
     - sudo make install
     - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib make check
