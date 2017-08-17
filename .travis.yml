@@ -20,25 +20,22 @@ language: cpp
 matrix:
   include:
     - os: linux
-      compiler: gcc
-      env: COMPILER=g++
+       env:
+        - MATRIX_EVAL="CC=gcc && CXX=g++"
 
     - os: linux
-      compiler: clang
-      addons:
+       addons:
         apt:
           packages:
             - libiomp-dev
       env:
-        - COMPILER=clang++
-        - CXXFLAGS="-fopenmp=libiomp5"
+        - MATRIX_EVAL="CC=clang && CXX=clang++ && CXXFLAGS=\"-fopenmp=libiomp5\""
 # libiomp is a very strange abberation in trusty
 # changed to libomp in newer Ubuntu versions.
 
 
     - os: linux
-      compiler: clang
-      addons:
+       addons:
         apt:
           sources:
             - llvm-toolchain-trusty-4.0
@@ -47,8 +44,10 @@ matrix:
             - clang++-4.0
             - libiomp-dev
       env:
-        - CXXFLAGS="-fopenmp=libomp"
-        - COMPILER=clang++-4.0
+        - MATRIX_EVAL="CC=clang4.0 && CXX=clang++-4.0"
+#        - COMPILER=clang++-4.0
+#        - CXXFLAGS="-fopenmp=libomp"
+
         # libiomp is a very strange abberation in trusty
         # changed to libomp in newer Ubuntu versions.
 
@@ -56,6 +55,7 @@ matrix:
 before_install:
     - sudo apt-get update
     - sudo apt-get install pkg-config autoconf-archive autotools-dev libicu-dev libxml2-dev libbz2-dev zlib1g-dev libtar-dev libboost-dev libboost-regex-dev expect
+    - eval "${MATRIX_EVAL}"
     - git clone https://github.com/LanguageMachines/ticcutils
     - cd ticcutils
     - bash bootstrap.sh
