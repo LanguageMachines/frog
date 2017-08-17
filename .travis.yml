@@ -24,6 +24,8 @@ matrix:
       env:
         - MATRIX_EVAL="CC=gcc && CXX=g++"
       script:
+        - git clone https://github.com/LanguageMachines/frogtests.git
+        - cd frogtests
         - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
         - frog_bin=/usr/local/bin ./testall >&2
 
@@ -39,17 +41,17 @@ matrix:
 # changed to libomp in newer Ubuntu versions.
 
 
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-trusty-4.0
-            - ubuntu-toolchain-r-test
-          packages:
-            - clang++-4.0
-            - libiomp-dev
-      env:
-        - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
+#    - os: linux
+#      addons:
+#        apt:
+#          sources:
+#            - llvm-toolchain-trusty-4.0
+#            - ubuntu-toolchain-r-test
+#          packages:
+#            - clang++-4.0
+#            - libiomp-dev
+#      env:
+#        - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
 
 before_install:
     - sudo apt-get update
@@ -115,8 +117,6 @@ install:
     - make
     - sudo make install
     - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib make check
-    - git clone https://github.com/LanguageMachines/frogtests.git
-    - cd frogtests
 
 after_failure:
     - for file in *.diff; do echo DIFF in $file; cat $file; done
