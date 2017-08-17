@@ -30,7 +30,7 @@ matrix:
           packages:
             - libiomp-dev
       env:
-        - MATRIX_EVAL="CC=clang && CXX=clang++ && CXXFLAGS=\"-fopenmp=libiomp5\""
+        - MATRIX_EVAL="CC=clang && CXX=clang++ && CXXFLAGS=""-fopenmp=libiomp5""
 # libiomp is a very strange abberation in trusty
 # changed to libomp in newer Ubuntu versions.
 
