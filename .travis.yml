@@ -45,7 +45,7 @@ matrix:
             - clang++-4.0
             - libiomp-dev
       env:
-        - MATRIX_EVAL="CC=clang4.0 && CXX=clang++-4.0"
+        - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
 
         # libiomp is a very strange abberation in trusty
         # changed to libomp in newer Ubuntu versions.
@@ -55,6 +55,9 @@ before_install:
     - sudo apt-get update
     - sudo apt-get install pkg-config autoconf-archive autotools-dev libicu-dev libxml2-dev libbz2-dev zlib1g-dev libtar-dev libboost-dev libboost-regex-dev expect
     - eval "${MATRIX_EVAL}"
+    - echo $CC
+    - echo $CXX
+    - echo $CXXFLAGS
     - git clone https://github.com/LanguageMachines/ticcutils
     - cd ticcutils
     - bash bootstrap.sh
