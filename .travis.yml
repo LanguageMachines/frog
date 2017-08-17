@@ -47,8 +47,6 @@ matrix:
             - libiomp-dev
       env:
         - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
-        - CXXFLAGS="-fopenmp"
-
 
 before_install:
     - sudo apt-get update
@@ -109,6 +107,7 @@ before_install:
 install:
     - bash bootstrap.sh
     - if [ "$CXX" == "clang++" ]; then export CXXFLAGS="-O3 -fopenmp=libiomp5"; fi
+    - if [ "$CXX" == "clang++-4.0" ]; then export CXXFLAGS="-fopenmp"; fi
     - echo $CXXFLAGS
     - ./configure
     - make
