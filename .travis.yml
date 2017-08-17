@@ -31,6 +31,7 @@ matrix:
             - libiomp-dev
       env:
         - MATRIX_EVAL='CC=clang && CXX=clang++ && CXXFLAGS="-fopenmp=libiomp5"'
+        - CXXFLAGS="-fopenmp=libiomp5"
 # libiomp is a very strange abberation in trusty
 # changed to libomp in newer Ubuntu versions.
 
@@ -109,11 +110,12 @@ before_install:
     - cd ..
 install:
     - bash bootstrap.sh
-    - ./configure
     - if [ "$CXX" == "clang++" ]; then export CXXFLAGS="-O3 -fopenmp=libiomp5"; fi
+    - echo $CXXFLAGS
+    - ./configure
     - make
     - sudo make install
-    - make check
+    - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib make check
     - git clone https://github.com/LanguageMachines/frogtests.git
     - cd frogtests
 script:
