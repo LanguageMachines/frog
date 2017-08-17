@@ -30,7 +30,7 @@ matrix:
           packages:
             - libiomp-dev
       env:
-        - MATRIX_EVAL='CC=clang && CXX=clang++ && CXXFLAGS="-fopenmp=libiomp5"'
+        - MATRIX_EVAL='CC=clang && CXX=clang++'
         - CXXFLAGS="-fopenmp=libiomp5"
 # libiomp is a very strange abberation in trusty
 # changed to libomp in newer Ubuntu versions.
@@ -47,9 +47,7 @@ matrix:
             - libiomp-dev
       env:
         - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
-
-        # libiomp is a very strange abberation in trusty
-        # changed to libomp in newer Ubuntu versions.
+        - CXXFLAGS="-fopenmp"
 
 
 before_install:
