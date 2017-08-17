@@ -17,14 +17,15 @@ notifications:
     skip_join: true
 
 language: cpp
+
 matrix:
   include:
     - os: linux
-       env:
+      env:
         - MATRIX_EVAL="CC=gcc && CXX=g++"
 
     - os: linux
-       addons:
+      addons:
         apt:
           packages:
             - libiomp-dev
