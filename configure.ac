@@ -49,7 +49,7 @@ if test x"$acx_pthread_ok" = xyes; then
 fi
 
 # check OpenMP support
-AC_OPENMP
+AX_OPENMP
 if test "x$ac_cv_prog_cxx_openmp" != "xunsupported"; then
    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
    AC_DEFINE(HAVE_OPENMP, 1 , Define to 1 if you have OpenMP )

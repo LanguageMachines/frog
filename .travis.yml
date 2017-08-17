@@ -107,7 +107,6 @@ before_install:
 install:
     - bash bootstrap.sh
     - if [ "$CXX" == "clang++" ]; then export CXXFLAGS="-O3 -fopenmp=libiomp5"; fi
-    - if [ "$CXX" == "clang++-4.0" ]; then export CXXFLAGS="-fopenmp"; fi
     - echo $CXXFLAGS
     - ./configure
     - make
