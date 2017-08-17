@@ -45,6 +45,7 @@ matrix:
           packages:
             - clang++-4.0
             - libiomp-dev
+            - libomp-dev
       env:
         - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
 
