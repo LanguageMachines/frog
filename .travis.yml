@@ -23,6 +23,9 @@ matrix:
     - os: linux
       env:
         - MATRIX_EVAL="CC=gcc && CXX=g++"
+      script:
+        - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+        - frog_bin=/usr/local/bin ./testall >&2
 
     - os: linux
       addons:
@@ -107,18 +110,14 @@ before_install:
 install:
     - bash bootstrap.sh
     - if [ "$CXX" == "clang++" ]; then export CXXFLAGS="-O3 -fopenmp=libiomp5"; fi
-    - if [ "$CXX" == "clang++-4.0" ]; then export CXXFLAGS="-fopenmp=libiomp"; fi
     - echo $CXXFLAGS
     - ./configure
-    - cat config.log
     - make
     - sudo make install
     - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib make check
     - git clone https://github.com/LanguageMachines/frogtests.git
     - cd frogtests
-script:
-    - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
-    - frog_bin=/usr/local/bin ./testall >&2
+
 after_failure:
     - for file in *.diff; do echo DIFF in $file; cat $file; done
     - for file in *.err; do echo ERRORS in $file; cat $file; done
