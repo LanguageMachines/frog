@@ -110,8 +110,10 @@ before_install:
 install:
     - bash bootstrap.sh
     - ./configure
+    - if [ "$CXX" == "clang++" ]; then export CXXFLAGS="-O3 -fopenmp=libiomp5"; fi
     - make
     - sudo make install
+    - make check
     - git clone https://github.com/LanguageMachines/frogtests.git
     - cd frogtests
 script:
