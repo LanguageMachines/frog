@@ -10,9 +10,9 @@ AC_CONFIG_HEADER([config.h])
 
 if test x"${CXXFLAGS+set}" = xset; then
   # the user set CXXFLAGS; don't override it.
-  cxx_flags_were_set=true
-else
   cxx_flags_were_set=false
+else
+  cxx_flags_were_set=true
 fi
 
 # Checks for programs.
