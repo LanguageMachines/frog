@@ -41,17 +41,18 @@ matrix:
 # changed to libomp in newer Ubuntu versions.
 
 
-#    - os: linux
-#      addons:
-#        apt:
-#          sources:
-#            - llvm-toolchain-trusty-4.0
-#            - ubuntu-toolchain-r-test
-#          packages:
-#            - clang++-4.0
-#            - libiomp-dev
-#      env:
-#        - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-4.0
+            - ubuntu-toolchain-r-test
+          packages:
+            - clang++-4.0
+            - libiomp-dev
+      env:
+        - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
+        - CXXFLAGS="-fopenmp=libiomp"
 
 before_install:
     - sudo apt-get update
