@@ -52,7 +52,7 @@ matrix:
             - libiomp-dev
       env:
         - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
-        - CXXFLAGS="-fopenmp=libiomp"
+        - CXXFLAGS="-fopenmp=libiomp5"
 
 before_install:
     - sudo apt-get update
