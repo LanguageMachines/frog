@@ -334,8 +334,11 @@ void Mblem::Classify( Word *sword ){
     // we have to strip a few letters to get a lemma
     auto const& it2 = it1->second.find( token_class );
     if ( it2 != it1->second.end() ){
-      uword = UnicodeString( uword, 0, uword.length() - it2->second );
-      string word = UnicodeToUTF8(uword);
+      UnicodeString uword2 = UnicodeString( uword, 0, uword.length() - it2->second );
+      if ( uword2.isEmpty() ){
+	uword2 = uword;
+      }
+      string word = UnicodeToUTF8(uword2);
       addLemma( sword, word );
       return;
     }
