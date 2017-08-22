@@ -187,10 +187,10 @@ string Mblem::make_instance( const UnicodeString& in ) {
     size_t j = length - history + i;
     if (( i < history - length ) &&
 	(length<history))
-      instance += "= ";
+      instance += "=\t";
     else {
       instance += in[j];
-      instance += ' ';
+      instance += '\t';
     }
   }
   instance += "?";
