@@ -198,7 +198,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       tokenizer->setInputClass( options.inputclass );
       tokenizer->setOutputClass( options.outputclass );
       myPoSTagger = new CGNTagger(theErrLog);
-      stat = myPoSTagger->init( configuration );
+      stat = myPoSTagger->init( configuration, "tagger" );
       if ( stat ){
 	myPoSTagger->set_eos_mark( options.uttmark );
 	if ( options.doIOB ){
@@ -304,7 +304,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 #pragma omp section
       {
 	myPoSTagger = new CGNTagger(theErrLog);
-	tagStat = myPoSTagger->init( configuration );
+	tagStat = myPoSTagger->init( configuration, "tagger" );
       }
 #pragma omp section
       {

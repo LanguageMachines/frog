@@ -36,9 +36,11 @@
 
 class POSTagger {
  public:
-  explicit POSTagger( TiCC::LogStream * );
+  explicit POSTagger( TiCC::LogStream *, const std::string& );
   virtual ~POSTagger();
-  virtual bool init( const TiCC::Configuration& );
+  virtual bool init( const TiCC::Configuration&, const std::string& );
+  std::string extract_sentence( const std::vector<folia::Word*>&,
+				std::vector<std::string>& );
   virtual void Classify( const std::vector<folia::Word *>& );
   void addDeclaration( folia::Document& ) const;
   void addTag( folia::Word *, const std::string&, double, bool );

@@ -42,11 +42,11 @@ using namespace Tagger;
 
 #define LOG *Log(tag_log)
 
-POSTagger::POSTagger(TiCC::LogStream * logstream){
+POSTagger::POSTagger( TiCC::LogStream *logstream, const string& label ){
   debug = 0;
   tagger = 0;
   filter = 0;
-  tag_log = new LogStream( logstream, "pos-tagger-" );
+  tag_log = new LogStream( logstream, label+"-tagger-" );
 }
 
 POSTagger::~POSTagger(){
@@ -92,9 +92,13 @@ bool POSTagger::fill_map( const string& file, map<string,string>& mp ){
   return true;
 }
 
-bool POSTagger::init( const Configuration& config ){
+bool POSTagger::init( const Configuration& config, const string& label ){
   debug = 0;
-  string val = config.lookUp( "debug", "tagger" );
+  if ( tagger != 0 ){
+    LOG << "POS-Tagger is already initialized!" << endl;
+    return false;
+  }
+  string val = config.lookUp( "debug", label );
   if ( val.empty() ){
     val = config.lookUp( "debug" );
   }
@@ -118,13 +122,9 @@ bool POSTagger::init( const Configuration& config ){
   default:
     tag_log->setlevel(LogExtreme);
   }
-  if ( tagger != 0 ){
-    LOG << "POS-Tagger is already initialized!" << endl;
-    return false;
-  }
-  val = config.lookUp( "settings", "tagger" );
+  val = config.lookUp( "settings", label );
   if ( val.empty() ){
-    LOG << "Unable to find settings for Tagger" << endl;
+    LOG << "Unable to find settings for: " << label << endl;
     return false;
   }
   string settings;
@@ -133,13 +133,13 @@ bool POSTagger::init( const Configuration& config ){
   else
     settings =  config.configDir() + val;
 
-  val = config.lookUp( "version", "tagger" );
+  val = config.lookUp( "version", label );
   if ( val.empty() ){
     version = "1.0";
   }
   else
     version = val;
-  val = config.lookUp( "set", "tagger" );
+  val = config.lookUp( "set", label );
   if ( val.empty() ){
     LOG << "missing set declaration in config" << endl;
     return false;
@@ -147,7 +147,7 @@ bool POSTagger::init( const Configuration& config ){
   else {
     tagset = val;
   }
-  string charFile = config.lookUp( "char_filter_file", "tagger" );
+  string charFile = config.lookUp( "char_filter_file", label );
   if ( charFile.empty() )
     charFile = config.lookUp( "char_filter_file" );
   if ( !charFile.empty() ){
@@ -155,7 +155,7 @@ bool POSTagger::init( const Configuration& config ){
     filter = new Tokenizer::UnicodeFilter();
     filter->fill( charFile );
   }
-  string tokFile = config.lookUp( "token_trans_file", "tagger" );
+  string tokFile = config.lookUp( "token_trans_file", label );
   if ( tokFile.empty() )
     tokFile = config.lookUp( "token_trans_file" );
   if ( !tokFile.empty() ){
@@ -166,7 +166,7 @@ bool POSTagger::init( const Configuration& config ){
       return false;
     }
   }
-  string tagsFile = config.lookUp( "tags_file", "tagger" );
+  string tagsFile = config.lookUp( "tags_file", label );
   if ( tagsFile.empty() )
     tagsFile = config.lookUp( "tags_file" );
   if ( !tagsFile.empty() ){
@@ -259,27 +259,38 @@ string POSTagger::set_eos_mark( const std::string& eos ){
     throw runtime_error( "POSTagger is not initialized" );
 }
 
+string POSTagger::extract_sentence( const vector<folia::Word*>& swords,
+				    vector<string>& words ){
+  words.clear();
+  string sentence;
+  for ( const auto& sword : swords ){
+    UnicodeString word;
+#pragma omp critical (foliaupdate)
+    {
+      word = sword->text( textclass );
+    }
+    if ( filter )
+      word = filter->filter( word );
+    string word_s = folia::UnicodeToUTF8( word );
+    vector<string> parts;
+    TiCC::split( word_s, parts );
+    word_s.clear();
+    for ( const auto& p : parts ){
+      word_s += p;
+    }
+    words.push_back( word_s );
+    sentence += word_s;
+    if ( &sword != &swords.back() ){
+      sentence += " ";
+    }
+  }
+  return sentence;
+}
+
 void POSTagger::Classify( const vector<folia::Word*>& swords ){
   if ( !swords.empty() ) {
-    string sentence; // the tagger needs the whole sentence
-    for ( const auto& sword : swords ){
-      UnicodeString word;
-#pragma omp critical (foliaupdate)
-      {
-	word = sword->text( textclass );
-      }
-      if ( filter )
-	word = filter->filter( word );
-      string word_s = folia::UnicodeToUTF8( word );
-      vector<string> parts;
-      TiCC::split( word_s, parts );
-      for ( const auto& p : parts ){
-	sentence += p;
-      }
-      if ( &sword != &swords.back() ){
-	sentence += " ";
-      }
-    }
+    vector<string> words; // not used here
+    string sentence = extract_sentence( swords, words );
     if (debug){
       LOG << "POS tagger in: " << sentence << endl;
     }

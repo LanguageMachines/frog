@@ -275,27 +275,39 @@ void IOBTagger::addDeclaration( Document& doc ) const {
   }
 }
 
+string IOBTagger::extract_sentence( const vector<folia::Word*>& swords,
+				    vector<string>& words ){
+  words.clear();
+  string sentence;
+  for ( const auto& sword : swords ){
+    UnicodeString word;
+#pragma omp critical (foliaupdate)
+    {
+      word = sword->text( textclass );
+    }
+    if ( filter )
+      word = filter->filter( word );
+    string word_s = folia::UnicodeToUTF8( word );
+    vector<string> parts;
+    TiCC::split( word_s, parts );
+    word_s.clear();
+    for ( const auto& p : parts ){
+      word_s += p;
+    }
+    words.push_back( word_s );
+    sentence += word_s;
+    if ( &sword != &swords.back() ){
+      sentence += " ";
+    }
+  }
+  return sentence;
+}
+
+
 void IOBTagger::Classify( const vector<Word *>& swords ){
   if ( !swords.empty() ) {
-    string sentence; // the tagger needs the whole sentence
-    for ( const auto& sword : swords ){
-      UnicodeString word;
-#pragma omp critical (foliaupdate)
-      {
-	word = sword->text( textclass );
-      }
-      if ( filter )
-	word = filter->filter( word );
-      string word_s = folia::UnicodeToUTF8( word );
-      vector<string> parts;
-      TiCC::split( word_s, parts );
-      for ( const auto& p : parts ){
-	sentence += p;
-      }
-      if ( &sword != &swords.back() ){
-	sentence += " ";
-      }
-    }
+    vector<string> words;
+    string sentence = extract_sentence( swords, words );
     if (debug){
       LOG << "IOB in: " << sentence << endl;
     }

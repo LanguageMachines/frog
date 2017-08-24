@@ -34,13 +34,15 @@
 
 class IOBTagger {
  public:
-  explicit IOBTagger( TiCC::LogStream * );
+  explicit IOBTagger( TiCC::LogStream *l );
   ~IOBTagger();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
   void Classify( const std::vector<folia::Word *>& );
   std::string getTagset() const { return tagset; };
   std::string set_eos_mark( const std::string& );
+  std::string extract_sentence( const std::vector<folia::Word*>&,
+				std::vector<std::string>& );
  private:
   void addChunk( folia::ChunkingLayer *,
 		 const std::vector<folia::Word*>&,
@@ -56,7 +58,6 @@ class IOBTagger {
   std::string tagset;
   std::string textclass;
   Tokenizer::UnicodeFilter *filter;
-  IOBTagger( const IOBTagger& ) {}; // inhibit copies
 };
 
 #endif // IOB_TAGGER_MOD_H
