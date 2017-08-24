@@ -282,7 +282,7 @@ void POSTagger::Classify( const vector<folia::Word*>& swords ){
       LOG << "mismatch between number of <w> tags and the tagger result." << endl;
       LOG << "words according to <w> tags: " << endl;
       for ( size_t w = 0; w < swords.size(); ++w ) {
-	LOG << "w[" << w << "]= " << swords[w]->str() << endl;
+	LOG << "w[" << w << "]= " << swords[w]->str( textclass ) << endl;
       }
       LOG << "words according to POS tagger: " << endl;
       for ( size_t i=0; i < tagv.size(); ++i ){
