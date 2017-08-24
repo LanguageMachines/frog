@@ -805,6 +805,14 @@ void Mbma::Classify( Word* sword ){
   if ( filter ){
     uWord = filter->filter( uWord );
   }
+  string word_s = UnicodeToUTF8( uWord );
+  vector<string> parts;
+  TiCC::split( word_s, parts );
+  word_s.clear();
+  for ( const auto& p : parts ){
+    word_s += p;
+  }
+  uWord = UTF8ToUnicode( word_s );
   if ( head == "LET" || head == "SPEC" || token_class == "ABBREVIATION" ){
     // take over the letter/word 'as-is'.
     //  also ABBREVIATION's aren't handled bij mbma-rules

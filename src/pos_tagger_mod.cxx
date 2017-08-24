@@ -262,17 +262,23 @@ string POSTagger::set_eos_mark( const std::string& eos ){
 void POSTagger::Classify( const vector<folia::Word*>& swords ){
   if ( !swords.empty() ) {
     string sentence; // the tagger needs the whole sentence
-    for ( size_t w = 0; w < swords.size(); ++w ) {
+    for ( const auto& sword : swords ){
       UnicodeString word;
 #pragma omp critical (foliaupdate)
       {
-	word = swords[w]->text( textclass );
+	word = sword->text( textclass );
       }
       if ( filter )
 	word = filter->filter( word );
-      sentence += folia::UnicodeToUTF8(word);
-      if ( w < swords.size()-1 )
+      string word_s = folia::UnicodeToUTF8( word );
+      vector<string> parts;
+      TiCC::split( word_s, parts );
+      for ( const auto& p : parts ){
+	sentence += p;
+      }
+      if ( &sword != &swords.back() ){
 	sentence += " ";
+      }
     }
     if (debug){
       LOG << "POS tagger in: " << sentence << endl;
@@ -282,7 +288,7 @@ void POSTagger::Classify( const vector<folia::Word*>& swords ){
       LOG << "mismatch between number of <w> tags and the tagger result." << endl;
       LOG << "words according to <w> tags: " << endl;
       for ( size_t w = 0; w < swords.size(); ++w ) {
-	LOG << "w[" << w << "]= " << swords[w]->str() << endl;
+	LOG << "w[" << w << "]= " << swords[w]->str( textclass ) << endl;
       }
       LOG << "words according to POS tagger: " << endl;
       for ( size_t i=0; i < tagv.size(); ++i ){

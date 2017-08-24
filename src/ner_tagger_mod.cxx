@@ -465,8 +465,13 @@ void NERTagger::Classify( const vector<folia::Word *>& swords ){
       }
       if ( filter )
 	word = filter->filter( word );
-      sentence += folia::UnicodeToUTF8(word);
-      words.push_back( folia::UnicodeToUTF8(word) );
+      string word_s = folia::UnicodeToUTF8( word );
+      words.push_back( word_s );
+      vector<string> parts;
+      TiCC::split( word_s, parts );
+      for ( const auto& p : parts ){
+	sentence += p;
+      }
       if ( &sw != &swords.back() ){
 	sentence += " ";
       }

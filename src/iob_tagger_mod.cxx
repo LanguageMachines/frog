@@ -286,7 +286,12 @@ void IOBTagger::Classify( const vector<Word *>& swords ){
       }
       if ( filter )
 	word = filter->filter( word );
-      sentence += UnicodeToUTF8(word);
+      string word_s = folia::UnicodeToUTF8( word );
+      vector<string> parts;
+      TiCC::split( word_s, parts );
+      for ( const auto& p : parts ){
+	sentence += p;
+      }
       if ( &sword != &swords.back() ){
 	sentence += " ";
       }
