@@ -141,7 +141,7 @@ bool POSTagger::init( const Configuration& config, const string& label ){
     version = val;
   val = config.lookUp( "set", label );
   if ( val.empty() ){
-    LOG << "missing set declaration in config" << endl;
+    LOG << "missing 'set' declaration in config" << endl;
     return false;
   }
   else {

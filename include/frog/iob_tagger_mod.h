@@ -32,17 +32,16 @@
 #ifndef IOB_TAGGER_MOD_H
 #define IOB_TAGGER_MOD_H
 
-class IOBTagger {
+#include "frog/pos_tagger_mod.h"
+
+class IOBTagger: public POSTagger {
  public:
-  explicit IOBTagger( TiCC::LogStream *l );
-  ~IOBTagger();
-  bool init( const TiCC::Configuration& );
+  explicit IOBTagger( TiCC::LogStream *l ): POSTagger( l, "iob" ){};
+  bool init( const TiCC::Configuration&, const std::string& );
   void addDeclaration( folia::Document& ) const;
   void Classify( const std::vector<folia::Word *>& );
   std::string getTagset() const { return tagset; };
   std::string set_eos_mark( const std::string& );
-  std::string extract_sentence( const std::vector<folia::Word*>&,
-				std::vector<std::string>& );
  private:
   void addChunk( folia::ChunkingLayer *,
 		 const std::vector<folia::Word*>&,
@@ -51,13 +50,6 @@ class IOBTagger {
   void addIOBTags( const std::vector<folia::Word*>&,
 		   const std::vector<std::string>&,
 		   const std::vector<double>& );
-  MbtAPI *tagger;
-  TiCC::LogStream *iobLog;
-  int debug;
-  std::string version;
-  std::string tagset;
-  std::string textclass;
-  Tokenizer::UnicodeFilter *filter;
 };
 
 #endif // IOB_TAGGER_MOD_H

@@ -203,7 +203,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	myPoSTagger->set_eos_mark( options.uttmark );
 	if ( options.doIOB ){
 	  myIOBTagger = new IOBTagger(theErrLog);
-	  stat = myIOBTagger->init( configuration );
+	  stat = myIOBTagger->init( configuration, "IOB" );
 	  if ( stat ){
 	    myIOBTagger->set_eos_mark( options.uttmark );
 	  }
@@ -310,7 +310,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       {
 	if ( options.doIOB ){
 	  myIOBTagger = new IOBTagger(theErrLog);
-	  iobStat = myIOBTagger->init( configuration );
+	  iobStat = myIOBTagger->init( configuration, "IOB" );
 	}
       }
 #pragma omp section

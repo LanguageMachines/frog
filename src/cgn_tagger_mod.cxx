@@ -167,13 +167,13 @@ void CGNTagger::fillSubSetTable(){
 
 
 bool CGNTagger::init( const Configuration& config, const string& label ){
-  if ( debug ){
+  if (  debug ){
     LOG << "INIT CGN Tagger." << endl;
   }
   if ( POSTagger::init( config, label ) ){
     fillSubSetTable();
     if ( debug ){
-      LOG << "DONE CGN Tagger." << endl;
+      LOG << "DONE Init CGN Tagger." << endl;
     }
     return true;
   }

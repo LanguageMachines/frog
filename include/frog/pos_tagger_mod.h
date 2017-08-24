@@ -52,7 +52,6 @@ class POSTagger {
   int debug;
   std::string tagset;
   TiCC::LogStream *tag_log;
- private:
   MbtAPI *tagger;
   std::string version;
   std::string textclass;
