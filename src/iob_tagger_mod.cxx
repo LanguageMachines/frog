@@ -42,7 +42,7 @@ using namespace Tagger;
 #define LOG *Log(tag_log)
 
 bool IOBTagger::init( const Configuration& config ){
-  return POSTagger::init( config );
+  return BaseTagger::init( config );
 }
 
 void IOBTagger::addChunk( ChunkingLayer *chunks,

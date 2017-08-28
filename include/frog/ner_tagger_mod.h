@@ -32,11 +32,11 @@
 #ifndef NER_TAGGER_MOD_H
 #define NER_TAGGER_MOD_H
 
-#include "frog/pos_tagger_mod.h"
+#include "frog/tagger_base.h"
 
-class NERTagger: public POSTagger {
+class NERTagger: public BaseTagger {
  public:
-  explicit NERTagger( TiCC::LogStream *l ): POSTagger( l,  "NER" ){};
+  explicit NERTagger( TiCC::LogStream *l ): BaseTagger( l,  "NER" ){};
   bool init( const TiCC::Configuration& );
   void Classify( const std::vector<folia::Word *>& );
   void addDeclaration( folia::Document& ) const;

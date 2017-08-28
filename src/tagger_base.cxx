@@ -33,7 +33,7 @@
 #include "ucto/unicode.h"
 #include "frog/Frog.h"
 #include "frog/ucto_tokenizer_mod.h"
-#include "frog/pos_tagger_mod.h"
+#include "frog/tagger_base.h"
 
 using namespace std;
 using namespace TiCC;
@@ -42,7 +42,7 @@ using namespace Tagger;
 
 #define LOG *Log(tag_log)
 
-POSTagger::POSTagger( TiCC::LogStream *logstream, const string& label ){
+BaseTagger::BaseTagger( TiCC::LogStream *logstream, const string& label ){
   debug = 0;
   tagger = 0;
   filter = 0;
@@ -50,7 +50,7 @@ POSTagger::POSTagger( TiCC::LogStream *logstream, const string& label ){
   tag_log = new LogStream( logstream, _label + "-tagger-" );
 }
 
-POSTagger::~POSTagger(){
+BaseTagger::~BaseTagger(){
   delete tagger;
   delete filter;
   delete tag_log;
@@ -71,7 +71,7 @@ bool fill_set( const string& file, set<string>& st ){
   return true;
 }
 
-bool POSTagger::fill_map( const string& file, map<string,string>& mp ){
+bool BaseTagger::fill_map( const string& file, map<string,string>& mp ){
   ifstream is( file );
   if ( !is ){
     return false;
@@ -93,7 +93,7 @@ bool POSTagger::fill_map( const string& file, map<string,string>& mp ){
   return true;
 }
 
-bool POSTagger::init( const Configuration& config ){
+bool BaseTagger::init( const Configuration& config ){
   debug = 0;
   if ( tagger != 0 ){
     LOG << "POS-Tagger is already initialized!" << endl;
@@ -193,7 +193,7 @@ bool POSTagger::init( const Configuration& config ){
   return tagger->isInit();
 }
 
-void POSTagger::addTag( folia::Word *word,
+void BaseTagger::addTag( folia::Word *word,
 			const string& inputTag,
 			double confidence,
 			bool /*known NOT USED yet*/ ){
@@ -236,7 +236,7 @@ void POSTagger::addTag( folia::Word *word,
   // }
 }
 
-void POSTagger::addDeclaration( folia::Document& doc ) const {
+void BaseTagger::addDeclaration( folia::Document& doc ) const {
 #pragma omp critical (foliaupdate)
   {
     doc.declare( folia::AnnotationType::POS,
@@ -246,21 +246,21 @@ void POSTagger::addDeclaration( folia::Document& doc ) const {
   }
 }
 
-vector<TagResult> POSTagger::tagLine( const string& line ){
+vector<TagResult> BaseTagger::tagLine( const string& line ){
   if ( tagger )
     return tagger->TagLine(line);
   else
-    throw runtime_error( "POSTagger is not initialized" );
+    throw runtime_error( "BaseTagger is not initialized" );
 }
 
-string POSTagger::set_eos_mark( const std::string& eos ){
+string BaseTagger::set_eos_mark( const std::string& eos ){
   if ( tagger )
     return tagger->set_eos_mark( eos );
   else
-    throw runtime_error( "POSTagger is not initialized" );
+    throw runtime_error( "BaseTagger is not initialized" );
 }
 
-string POSTagger::extract_sentence( const vector<folia::Word*>& swords,
+string BaseTagger::extract_sentence( const vector<folia::Word*>& swords,
 				    vector<string>& words ){
   words.clear();
   string sentence;
@@ -288,7 +288,7 @@ string POSTagger::extract_sentence( const vector<folia::Word*>& swords,
   return sentence;
 }
 
-void POSTagger::Classify( const vector<folia::Word*>& swords ){
+void BaseTagger::Classify( const vector<folia::Word*>& swords ){
   if ( !swords.empty() ) {
     vector<string> words; // not used here
     string sentence = extract_sentence( swords, words );

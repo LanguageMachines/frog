@@ -32,11 +32,11 @@
 #ifndef IOB_TAGGER_MOD_H
 #define IOB_TAGGER_MOD_H
 
-#include "frog/pos_tagger_mod.h"
+#include "frog/tagger_base.h"
 
-class IOBTagger: public POSTagger {
+class IOBTagger: public BaseTagger {
  public:
-  explicit IOBTagger( TiCC::LogStream *l ): POSTagger( l, "IOB" ){};
+  explicit IOBTagger( TiCC::LogStream *l ): BaseTagger( l, "IOB" ){};
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
   void Classify( const std::vector<folia::Word *>& );

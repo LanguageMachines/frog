@@ -170,7 +170,7 @@ bool CGNTagger::init( const Configuration& config ){
   if (  debug ){
     LOG << "INIT CGN Tagger." << endl;
   }
-  if ( POSTagger::init( config ) ){
+  if ( BaseTagger::init( config ) ){
     fillSubSetTable();
     if ( debug ){
       LOG << "DONE Init CGN Tagger." << endl;
@@ -246,7 +246,7 @@ void CGNTagger::post_process( const vector<folia::Word *>& words ){
 }
 
 void CGNTagger::Classify( const vector<folia::Word*>& swords ){
-  POSTagger::Classify( swords );
+  BaseTagger::Classify( swords );
   if ( debug ){
     LOG << "POS Classify done:" << endl;
   }

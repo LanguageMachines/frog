@@ -32,11 +32,11 @@
 #ifndef CGN_TAGGER_MOD_H
 #define CGN_TAGGER_MOD_H
 
-#include "frog/pos_tagger_mod.h"
+#include "frog/tagger_base.h"
 
-class CGNTagger: public POSTagger {
+class CGNTagger: public BaseTagger {
  public:
-  explicit CGNTagger( TiCC::LogStream *l ): POSTagger( l, "tagger" ){};
+  explicit CGNTagger( TiCC::LogStream *l ): BaseTagger( l, "tagger" ){};
   bool init( const TiCC::Configuration& );
   void Classify( const std::vector<folia::Word *>& );
   void post_process( const std::vector<folia::Word *>& words );

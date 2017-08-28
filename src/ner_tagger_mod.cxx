@@ -42,7 +42,7 @@ using namespace Tagger;
 #define LOG *Log(tag_log)
 
 bool NERTagger::init( const Configuration& config ){
-  if ( !POSTagger::init( config ) ){
+  if ( !BaseTagger::init( config ) ){
     return false;
   }
   string val = config.lookUp( "max_ner_size", _label );

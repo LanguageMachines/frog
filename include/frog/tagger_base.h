@@ -29,15 +29,15 @@
 
 */
 
-#ifndef POS_TAGGER_MOD_H
-#define POS_TAGGER_MOD_H
+#ifndef TAGGER_BASE_H
+#define TAGGER_BASE_H
 
 #include "mbt/MbtAPI.h"
 
-class POSTagger {
+class BaseTagger {
  public:
-  explicit POSTagger( TiCC::LogStream *, const std::string& );
-  virtual ~POSTagger();
+  explicit BaseTagger( TiCC::LogStream *, const std::string& );
+  virtual ~BaseTagger();
   virtual bool init( const TiCC::Configuration& );
   std::string extract_sentence( const std::vector<folia::Word*>&,
 				std::vector<std::string>& );
@@ -59,7 +59,7 @@ class POSTagger {
   Tokenizer::UnicodeFilter *filter;
   std::map<std::string,std::string> token_tag_map;
   std::set<std::string> valid_tags;
-  POSTagger( const POSTagger& ){} // inhibit copies
+  BaseTagger( const BaseTagger& ){} // inhibit copies
 };
 
-#endif // POS_TAGGER_MOD_H
+#endif // TAGGER_BASE_H
