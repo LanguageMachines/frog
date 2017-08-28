@@ -250,14 +250,14 @@ vector<TagResult> BaseTagger::tagLine( const string& line ){
   if ( tagger )
     return tagger->TagLine(line);
   else
-    throw runtime_error( "BaseTagger is not initialized" );
+    throw runtime_error( _label + "-tagger is not initialized" );
 }
 
 string BaseTagger::set_eos_mark( const std::string& eos ){
   if ( tagger )
     return tagger->set_eos_mark( eos );
   else
-    throw runtime_error( "BaseTagger is not initialized" );
+    throw runtime_error( _label + "-tagger is not initialized" );
 }
 
 string BaseTagger::extract_sentence( const vector<folia::Word*>& swords,

@@ -396,10 +396,3 @@ void NERTagger::Classify( const vector<folia::Word *>& swords ){
     addNERTags( swords, tags, conf );
   }
 }
-
-vector<TagResult> NERTagger::tagLine( const string& line ){
-  if ( tagger ){
-    return tagger->TagLine(line);
-  }
-  throw runtime_error( "NERTagger is not initialized" );
-}
