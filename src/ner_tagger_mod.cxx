@@ -364,35 +364,15 @@ void NERTagger::addDeclaration( folia::Document& doc ) const {
   }
 }
 
-void NERTagger::Classify( const vector<folia::Word *>& swords ){
-  if ( !swords.empty() ) {
-    vector<string> words;
-    string sentence = extract_sentence( swords, words );
-    if (debug){
-      LOG << "NER in: " << sentence << endl;
-    }
-    vector<TagResult> tagv = tagger->TagLine(sentence);
-    if ( tagv.size() != swords.size() ){
-      LOG << "NER tagger is confused" << endl;
-      throw runtime_error( "NER is confused" );
-    }
-    if ( debug ){
-      LOG << "NER tagger out: " << endl;
-      for ( size_t i=0; i < tagv.size(); ++i ){
-	LOG << "[" << i << "] : word=" << tagv[i].word()
-	    << " tag=" << tagv[i].assignedTag()
-	    << " confidence=" << tagv[i].confidence() << endl;
-      }
-    }
-    vector<double> conf;
-    vector<string> tags;
-    for ( const auto& tag : tagv ){
-      tags.push_back( tag.assignedTag() );
-      conf.push_back( tag.confidence() );
-    }
-    vector<string> ktags( tagv.size(), "O" );
-    handle_known_ners( words, ktags );
-    merge( ktags, tags, conf );
-    addNERTags( swords, tags, conf );
+void NERTagger::post_process( const std::vector<folia::Word*>& swords ){
+  vector<double> conf;
+  vector<string> tags;
+  for ( const auto& tag : _tag_result ){
+    tags.push_back( tag.assignedTag() );
+    conf.push_back( tag.confidence() );
   }
+  vector<string> ktags( _tag_result.size(), "O" );
+  handle_known_ners( _words, ktags );
+  merge( ktags, tags, conf );
+  addNERTags( swords, tags, conf );
 }

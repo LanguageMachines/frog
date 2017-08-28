@@ -38,9 +38,10 @@ class CGNTagger: public BaseTagger {
  public:
   explicit CGNTagger( TiCC::LogStream *l ): BaseTagger( l, "tagger" ){};
   bool init( const TiCC::Configuration& );
-  void Classify( const std::vector<folia::Word *>& );
-  void post_process( const std::vector<folia::Word *>& words );
+  void addDeclaration( folia::Document& ) const;
+  void post_process( const std::vector<folia::Word*>& );
  private:
+  void addTag( folia::Word *, const std::string&, double );
   void fillSubSetTable();
   std::string getSubSet( const std::string& , const std::string& );
   std::multimap<std::string,std::string> cgnSubSets;

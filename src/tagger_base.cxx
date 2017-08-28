@@ -96,7 +96,7 @@ bool BaseTagger::fill_map( const string& file, map<string,string>& mp ){
 bool BaseTagger::init( const Configuration& config ){
   debug = 0;
   if ( tagger != 0 ){
-    LOG << "POS-Tagger is already initialized!" << endl;
+    LOG << _label << "-tagger is already initialized!" << endl;
     return false;
   }
   string val = config.lookUp( "debug", _label );
@@ -167,17 +167,6 @@ bool BaseTagger::init( const Configuration& config ){
       return false;
     }
   }
-  string tagsFile = config.lookUp( "tags_file", _label );
-  if ( tagsFile.empty() )
-    tagsFile = config.lookUp( "tags_file" );
-  if ( !tagsFile.empty() ){
-    tagsFile = prefix( config.configDir(), tagsFile );
-    if ( !fill_set( tagsFile, valid_tags ) ){
-      LOG << "failed to load a tags file from: '"
-		   << tagsFile << "'"<< endl;
-      return false;
-    }
-  }
   string cls = config.lookUp( "outputclass" );
   if ( !cls.empty() ){
     textclass = cls;
@@ -186,64 +175,11 @@ bool BaseTagger::init( const Configuration& config ){
     textclass = "current";
   }
   if ( debug ){
-    LOG << "POS taggger textclass= " << textclass << endl;
+    LOG << _label << "-taggger textclass= " << textclass << endl;
   }
   string init = "-s " + settings + " -vcf";
   tagger = new MbtAPI( init, *tag_log );
   return tagger->isInit();
-}
-
-void BaseTagger::addTag( folia::Word *word,
-			const string& inputTag,
-			double confidence,
-			bool /*known NOT USED yet*/ ){
-  string pos_tag = inputTag;
-  string ucto_class = word->cls();
-  if ( debug ){
-    LOG << "lookup ucto class= " << ucto_class << endl;
-  }
-  auto const tt = token_tag_map.find( ucto_class );
-  if ( tt != token_tag_map.end() ){
-    if ( debug ){
-      LOG << "found translation ucto class= " << ucto_class
-	  << " to POS-Tag=" << tt->second << endl;
-    }
-    pos_tag = tt->second;
-    confidence = 1.0;
-  }
-  folia::KWargs args;
-  args["set"]  = tagset;
-  args["class"]  = pos_tag;
-  args["confidence"]= toString(confidence);
-  if ( textclass != "current" ){
-    args["textclass"] = textclass;
-  }
-#pragma omp critical (foliaupdate)
-  {
-    word->addPosAnnotation( args );
-  }
-  //  folia::FoliaElement *pos = 0;
-  //#pragma omp critical (foliaupdate)
-  //  {
-  //    pos = word->addPosAnnotation( args );
-  //  }
-  // if ( !known ){
-  //   args.clear();
-  //   args["class"] = "yes";
-  //   args["subset"] = "unknown_word";
-  //   folia::Feature *feat = new folia::Feature( args );
-  //   pos->append( feat );
-  // }
-}
-
-void BaseTagger::addDeclaration( folia::Document& doc ) const {
-#pragma omp critical (foliaupdate)
-  {
-    doc.declare( folia::AnnotationType::POS,
-		 tagset,
-		 "annotator='frog-mbpos-" + version
-		 + "', annotatortype='auto', datetime='" + getTime() + "'");
-  }
 }
 
 vector<TagResult> BaseTagger::tagLine( const string& line ){
@@ -290,37 +226,31 @@ string BaseTagger::extract_sentence( const vector<folia::Word*>& swords,
 
 void BaseTagger::Classify( const vector<folia::Word*>& swords ){
   if ( !swords.empty() ) {
-    vector<string> words; // not used here
-    string sentence = extract_sentence( swords, words );
+    string sentence = extract_sentence( swords, _words );
     if (debug){
-      LOG << "POS tagger in: " << sentence << endl;
+      LOG << _label << "-tagger in: " << sentence << endl;
     }
-    vector<TagResult> tagv = tagger->TagLine(sentence);
-    if ( tagv.size() != swords.size() ){
-      LOG << "mismatch between number of <w> tags and the tagger result." << endl;
+    _tag_result = tagger->TagLine(sentence);
+    if ( _tag_result.size() != swords.size() ){
+      LOG << _label << "-tagger mismatch between number of <w> tags and the tagger result." << endl;
       LOG << "words according to <w> tags: " << endl;
       for ( size_t w = 0; w < swords.size(); ++w ) {
 	LOG << "w[" << w << "]= " << swords[w]->str( textclass ) << endl;
       }
-      LOG << "words according to POS tagger: " << endl;
-      for ( size_t i=0; i < tagv.size(); ++i ){
-	LOG << "word[" << i << "]=" << tagv[i].word() << endl;
+      LOG << "words according to " << _label << "-tagger: " << endl;
+      for ( size_t i=0; i < _tag_result.size(); ++i ){
+	LOG << "word[" << i << "]=" << _tag_result[i].word() << endl;
       }
-      throw runtime_error( "POS tagger is confused" );
+      throw runtime_error( _label + "-tagger is confused" );
     }
     if ( debug ){
-      LOG << "POS tagger out: " << endl;
-      for ( size_t i=0; i < tagv.size(); ++i ){
-	LOG << "[" << i << "] : word=" << tagv[i].word()
-	    << " tag=" << tagv[i].assignedTag()
-	    << " confidence=" << tagv[i].confidence() << endl;
+      LOG << _label + "-tagger out: " << endl;
+      for ( size_t i=0; i < _tag_result.size(); ++i ){
+	LOG << "[" << i << "] : word=" << _tag_result[i].word()
+	    << " tag=" << _tag_result[i].assignedTag()
+	    << " confidence=" << _tag_result[i].confidence() << endl;
       }
     }
-    for ( size_t i=0; i < tagv.size(); ++i ){
-      addTag( swords[i],
-	      tagv[i].assignedTag(),
-	      tagv[i].confidence(),
-	      tagv[i].isKnown() );
-    }
+    post_process( swords );
   }
 }

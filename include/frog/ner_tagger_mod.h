@@ -38,12 +38,11 @@ class NERTagger: public BaseTagger {
  public:
   explicit NERTagger( TiCC::LogStream *l ): BaseTagger( l,  "NER" ){};
   bool init( const TiCC::Configuration& );
-  void Classify( const std::vector<folia::Word *>& );
+  void post_process( const std::vector<folia::Word*>& );
   void addDeclaration( folia::Document& ) const;
   void addNERTags( const std::vector<folia::Word*>&,
 		   const std::vector<std::string>&,
 		   const std::vector<double>& );
-  std::string getTagset() const { return tagset; };
   bool fill_known_ners( const std::string&, const std::string& );
   void handle_known_ners( const std::vector<std::string>&,
 			  std::vector<std::string>& );

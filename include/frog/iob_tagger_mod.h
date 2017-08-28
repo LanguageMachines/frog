@@ -39,8 +39,7 @@ class IOBTagger: public BaseTagger {
   explicit IOBTagger( TiCC::LogStream *l ): BaseTagger( l, "IOB" ){};
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
-  void Classify( const std::vector<folia::Word *>& );
-  std::string getTagset() const { return tagset; };
+  void post_process( const std::vector<folia::Word*>& );
  private:
   void addChunk( folia::ChunkingLayer *,
 		 const std::vector<folia::Word*>&,

@@ -39,15 +39,16 @@ class BaseTagger {
   explicit BaseTagger( TiCC::LogStream *, const std::string& );
   virtual ~BaseTagger();
   virtual bool init( const TiCC::Configuration& );
+  virtual void post_process( const std::vector<folia::Word*>& ) = 0;
+  void Classify( const std::vector<folia::Word*>& );
+  void addDeclaration( folia::Document& ) const;
+  std::string getTagset() const { return tagset; };
+  std::string set_eos_mark( const std::string& );
+  bool fill_map( const std::string&, std::map<std::string,std::string>& );
+  std::vector<Tagger::TagResult> tagLine( const std::string& );
+ private:
   std::string extract_sentence( const std::vector<folia::Word*>&,
 				std::vector<std::string>& );
-  virtual void Classify( const std::vector<folia::Word *>& );
-  void addDeclaration( folia::Document& ) const;
-  void addTag( folia::Word *, const std::string&, double, bool );
-  std::vector<Tagger::TagResult> tagLine( const std::string& );
-  std::string getTagset() const { return tagset; };
-  bool fill_map( const std::string&, std::map<std::string,std::string>& );
-  std::string set_eos_mark( const std::string& );
  protected:
   int debug;
   std::string _label;
@@ -57,8 +58,9 @@ class BaseTagger {
   TiCC::LogStream *tag_log;
   MbtAPI *tagger;
   Tokenizer::UnicodeFilter *filter;
+  std::vector<std::string> _words;
+  std::vector<Tagger::TagResult> _tag_result;
   std::map<std::string,std::string> token_tag_map;
-  std::set<std::string> valid_tags;
   BaseTagger( const BaseTagger& ){} // inhibit copies
 };
 
