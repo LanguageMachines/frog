@@ -29,6 +29,7 @@
 
 */
 
+#include <algorithm>
 #include "mbt/MbtAPI.h"
 #include "ucto/unicode.h"
 #include "frog/Frog.h"
@@ -209,13 +210,8 @@ string BaseTagger::extract_sentence( const vector<folia::Word*>& swords,
     if ( filter )
       word = filter->filter( word );
     string word_s = folia::UnicodeToUTF8( word );
-    vector<string> parts;
-    TiCC::split( word_s, parts );
-    word_s.clear();
-    for ( const auto& p : parts ){
-      word_s += p;
-    }
-    words.push_back( word_s );
+    // the word may contain spaces, remove them all!
+    word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
     sentence += word_s;
     if ( &sword != &swords.back() ){
       sentence += " ";
