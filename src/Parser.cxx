@@ -35,6 +35,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 #include "config.h"
 #include "ticcutils/Configuration.h"
@@ -846,6 +847,8 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
 	if ( filter )
 	  tmp = filter->filter( tmp );
 	string ms = UnicodeToUTF8( tmp );
+	// the word may contain spaces, remove them all!
+	ms.erase(remove_if(ms.begin(), ms.end(), ::isspace), ms.end());
 	multi_word += ms;
 	PosAnnotation *postag = mwu->annotation<PosAnnotation>( POS_tagset );
 	head += postag->feat("head");
@@ -877,6 +880,8 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
       if ( filter )
 	tmp = filter->filter( tmp );
       string ms = UnicodeToUTF8( tmp );
+      // the word may contain spaces, remove them all!
+      ms.erase(remove_if(ms.begin(), ms.end(), ::isspace), ms.end());
       pd.words.push_back( ms );
       PosAnnotation *postag = word->annotation<PosAnnotation>( POS_tagset );
       string head = postag->feat("head");
