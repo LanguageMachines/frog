@@ -210,7 +210,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	}
 	if ( stat && options.doNER ){
 	  myNERTagger = new NERTagger(theErrLog);
-	  stat = myNERTagger->init( configuration );
+	  stat = myNERTagger->init( configuration, "NER" );
 	  if ( stat ){
 	    myNERTagger->set_eos_mark( options.uttmark );
 	  }
@@ -317,7 +317,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       {
 	if ( options.doNER ){
 	  myNERTagger = new NERTagger(theErrLog);
-	  nerStat = myNERTagger->init( configuration );
+	  nerStat = myNERTagger->init( configuration, "NER" );
 	}
       }
 #pragma omp section

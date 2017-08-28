@@ -32,11 +32,12 @@
 #ifndef NER_TAGGER_MOD_H
 #define NER_TAGGER_MOD_H
 
-class NERTagger {
+#include "frog/pos_tagger_mod.h"
+
+class NERTagger: public POSTagger {
  public:
-  explicit NERTagger( TiCC::LogStream * );
-  ~NERTagger();
-  bool init( const TiCC::Configuration& );
+  explicit NERTagger( TiCC::LogStream *l ): POSTagger( l,  "NER" ){};
+  bool init( const TiCC::Configuration&, const std::string& );
   void Classify( const std::vector<folia::Word *>& );
   void addDeclaration( folia::Document& ) const;
   void addNERTags( const std::vector<folia::Word*>&,
@@ -52,16 +53,8 @@ class NERTagger {
 	      std::vector<double>& );
   std::string set_eos_mark( const std::string& );
  private:
-  MbtAPI *tagger;
-  TiCC::LogStream *nerLog;
-  int debug;
-  std::string version;
-  std::string tagset;
-  std::string textclass;
   std::vector<std::map<std::string,std::string>> known_ners;
-  Tokenizer::UnicodeFilter *filter;
   int max_ner_size;
-  NERTagger( const NERTagger& ){}; //inhibit copy
 };
 
 #endif // NER_TAGGER_MOD_H
