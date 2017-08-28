@@ -37,7 +37,7 @@
 class NERTagger: public POSTagger {
  public:
   explicit NERTagger( TiCC::LogStream *l ): POSTagger( l,  "NER" ){};
-  bool init( const TiCC::Configuration&, const std::string& );
+  bool init( const TiCC::Configuration& );
   void Classify( const std::vector<folia::Word *>& );
   void addDeclaration( folia::Document& ) const;
   void addNERTags( const std::vector<folia::Word*>&,
@@ -51,7 +51,6 @@ class NERTagger: public POSTagger {
   void merge( const std::vector<std::string>&,
 	      std::vector<std::string>& tags,
 	      std::vector<double>& );
-  std::string set_eos_mark( const std::string& );
  private:
   std::vector<std::map<std::string,std::string>> known_ners;
   int max_ner_size;

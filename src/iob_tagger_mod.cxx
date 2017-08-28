@@ -41,8 +41,8 @@ using namespace Tagger;
 
 #define LOG *Log(tag_log)
 
-bool IOBTagger::init( const Configuration& config, const string& label ){
-  return POSTagger::init( config, label );
+bool IOBTagger::init( const Configuration& config ){
+  return POSTagger::init( config );
 }
 
 void IOBTagger::addChunk( ChunkingLayer *chunks,
@@ -207,14 +207,5 @@ void IOBTagger::Classify( const vector<Word *>& swords ){
       conf.push_back( tag.confidence() );
     }
     addIOBTags( swords, tags, conf );
-  }
-}
-
-string IOBTagger::set_eos_mark( const string& eos ){
-  if ( tagger ){
-    return tagger->set_eos_mark(eos);
-  }
-  else {
-    throw runtime_error( "IOBTagger is not initialized" );
   }
 }

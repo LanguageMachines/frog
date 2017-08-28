@@ -145,7 +145,7 @@ bool init(){
     }
   }
   if ( useTagger ){
-    if ( !tagger.init( configuration, "tagger" ) ){
+    if ( !tagger.init( configuration ) ){
       cerr << "Tagger Initialization failed." << endl;
       return false;
     }

@@ -197,20 +197,20 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       tokenizer->setUttMarker( options.uttmark );
       tokenizer->setInputClass( options.inputclass );
       tokenizer->setOutputClass( options.outputclass );
-      myPoSTagger = new CGNTagger(theErrLog);
-      stat = myPoSTagger->init( configuration, "tagger" );
+      myPoSTagger = new CGNTagger( theErrLog );
+      stat = myPoSTagger->init( configuration );
       if ( stat ){
 	myPoSTagger->set_eos_mark( options.uttmark );
 	if ( options.doIOB ){
-	  myIOBTagger = new IOBTagger(theErrLog);
-	  stat = myIOBTagger->init( configuration, "IOB" );
+	  myIOBTagger = new IOBTagger( theErrLog );
+	  stat = myIOBTagger->init( configuration );
 	  if ( stat ){
 	    myIOBTagger->set_eos_mark( options.uttmark );
 	  }
 	}
 	if ( stat && options.doNER ){
-	  myNERTagger = new NERTagger(theErrLog);
-	  stat = myNERTagger->init( configuration, "NER" );
+	  myNERTagger = new NERTagger( theErrLog );
+	  stat = myNERTagger->init( configuration );
 	  if ( stat ){
 	    myNERTagger->set_eos_mark( options.uttmark );
 	  }
@@ -303,21 +303,21 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       }
 #pragma omp section
       {
-	myPoSTagger = new CGNTagger(theErrLog);
-	tagStat = myPoSTagger->init( configuration, "tagger" );
+	myPoSTagger = new CGNTagger( theErrLog );
+	tagStat = myPoSTagger->init( configuration );
       }
 #pragma omp section
       {
 	if ( options.doIOB ){
-	  myIOBTagger = new IOBTagger(theErrLog);
-	  iobStat = myIOBTagger->init( configuration, "IOB" );
+	  myIOBTagger = new IOBTagger( theErrLog );
+	  iobStat = myIOBTagger->init( configuration );
 	}
       }
 #pragma omp section
       {
 	if ( options.doNER ){
-	  myNERTagger = new NERTagger(theErrLog);
-	  nerStat = myNERTagger->init( configuration, "NER" );
+	  myNERTagger = new NERTagger( theErrLog );
+	  nerStat = myNERTagger->init( configuration );
 	}
       }
 #pragma omp section

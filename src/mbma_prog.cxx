@@ -157,7 +157,7 @@ bool init(){
     }
   }
   if ( useTagger ){
-    if ( !tagger.init( configuration, "tagger" ) ){
+    if ( !tagger.init( configuration ) ){
       cerr << "CGN Initialization failed." << endl;
       return false;
     }

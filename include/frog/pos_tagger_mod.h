@@ -38,7 +38,7 @@ class POSTagger {
  public:
   explicit POSTagger( TiCC::LogStream *, const std::string& );
   virtual ~POSTagger();
-  virtual bool init( const TiCC::Configuration&, const std::string& );
+  virtual bool init( const TiCC::Configuration& );
   std::string extract_sentence( const std::vector<folia::Word*>&,
 				std::vector<std::string>& );
   virtual void Classify( const std::vector<folia::Word *>& );
@@ -50,11 +50,12 @@ class POSTagger {
   std::string set_eos_mark( const std::string& );
  protected:
   int debug;
+  std::string _label;
   std::string tagset;
-  TiCC::LogStream *tag_log;
-  MbtAPI *tagger;
   std::string version;
   std::string textclass;
+  TiCC::LogStream *tag_log;
+  MbtAPI *tagger;
   Tokenizer::UnicodeFilter *filter;
   std::map<std::string,std::string> token_tag_map;
   std::set<std::string> valid_tags;

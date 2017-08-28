@@ -41,16 +41,16 @@ using namespace Tagger;
 
 #define LOG *Log(tag_log)
 
-bool NERTagger::init( const Configuration& config, const string& label ){
-  if ( !POSTagger::init( config, label ) ){
+bool NERTagger::init( const Configuration& config ){
+  if ( !POSTagger::init( config ) ){
     return false;
   }
-  string val = config.lookUp( "max_ner_size", "NER" );
+  string val = config.lookUp( "max_ner_size", _label );
   if ( !val.empty() ){
     max_ner_size = TiCC::stringTo<int>( val );
   }
   known_ners.resize( max_ner_size + 1 );
-  val = config.lookUp( "known_ners", "NER" );
+  val = config.lookUp( "known_ners", _label );
   if ( !val.empty() ){
     if ( !fill_known_ners( val, config.configDir() ) ){
       return false;
@@ -400,13 +400,6 @@ void NERTagger::Classify( const vector<folia::Word *>& swords ){
 vector<TagResult> NERTagger::tagLine( const string& line ){
   if ( tagger ){
     return tagger->TagLine(line);
-  }
-  throw runtime_error( "NERTagger is not initialized" );
-}
-
-string NERTagger::set_eos_mark( const string& eos ){
-  if ( tagger ){
-    return tagger->set_eos_mark(eos);
   }
   throw runtime_error( "NERTagger is not initialized" );
 }

@@ -36,12 +36,11 @@
 
 class IOBTagger: public POSTagger {
  public:
-  explicit IOBTagger( TiCC::LogStream *l ): POSTagger( l, "iob" ){};
-  bool init( const TiCC::Configuration&, const std::string& );
+  explicit IOBTagger( TiCC::LogStream *l ): POSTagger( l, "IOB" ){};
+  bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
   void Classify( const std::vector<folia::Word *>& );
   std::string getTagset() const { return tagset; };
-  std::string set_eos_mark( const std::string& );
  private:
   void addChunk( folia::ChunkingLayer *,
 		 const std::vector<folia::Word*>&,

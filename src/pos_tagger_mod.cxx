@@ -46,7 +46,8 @@ POSTagger::POSTagger( TiCC::LogStream *logstream, const string& label ){
   debug = 0;
   tagger = 0;
   filter = 0;
-  tag_log = new LogStream( logstream, label+"-tagger-" );
+  _label = label;
+  tag_log = new LogStream( logstream, _label + "-tagger-" );
 }
 
 POSTagger::~POSTagger(){
@@ -92,13 +93,13 @@ bool POSTagger::fill_map( const string& file, map<string,string>& mp ){
   return true;
 }
 
-bool POSTagger::init( const Configuration& config, const string& label ){
+bool POSTagger::init( const Configuration& config ){
   debug = 0;
   if ( tagger != 0 ){
     LOG << "POS-Tagger is already initialized!" << endl;
     return false;
   }
-  string val = config.lookUp( "debug", label );
+  string val = config.lookUp( "debug", _label );
   if ( val.empty() ){
     val = config.lookUp( "debug" );
   }
@@ -122,9 +123,9 @@ bool POSTagger::init( const Configuration& config, const string& label ){
   default:
     tag_log->setlevel(LogExtreme);
   }
-  val = config.lookUp( "settings", label );
+  val = config.lookUp( "settings", _label );
   if ( val.empty() ){
-    LOG << "Unable to find settings for: " << label << endl;
+    LOG << "Unable to find settings for: " << _label << endl;
     return false;
   }
   string settings;
@@ -133,13 +134,13 @@ bool POSTagger::init( const Configuration& config, const string& label ){
   else
     settings =  config.configDir() + val;
 
-  val = config.lookUp( "version", label );
+  val = config.lookUp( "version", _label );
   if ( val.empty() ){
     version = "1.0";
   }
   else
     version = val;
-  val = config.lookUp( "set", label );
+  val = config.lookUp( "set", _label );
   if ( val.empty() ){
     LOG << "missing 'set' declaration in config" << endl;
     return false;
@@ -147,7 +148,7 @@ bool POSTagger::init( const Configuration& config, const string& label ){
   else {
     tagset = val;
   }
-  string charFile = config.lookUp( "char_filter_file", label );
+  string charFile = config.lookUp( "char_filter_file", _label );
   if ( charFile.empty() )
     charFile = config.lookUp( "char_filter_file" );
   if ( !charFile.empty() ){
@@ -155,7 +156,7 @@ bool POSTagger::init( const Configuration& config, const string& label ){
     filter = new Tokenizer::UnicodeFilter();
     filter->fill( charFile );
   }
-  string tokFile = config.lookUp( "token_trans_file", label );
+  string tokFile = config.lookUp( "token_trans_file", _label );
   if ( tokFile.empty() )
     tokFile = config.lookUp( "token_trans_file" );
   if ( !tokFile.empty() ){
@@ -166,7 +167,7 @@ bool POSTagger::init( const Configuration& config, const string& label ){
       return false;
     }
   }
-  string tagsFile = config.lookUp( "tags_file", label );
+  string tagsFile = config.lookUp( "tags_file", _label );
   if ( tagsFile.empty() )
     tagsFile = config.lookUp( "tags_file" );
   if ( !tagsFile.empty() ){

@@ -36,8 +36,8 @@
 
 class CGNTagger: public POSTagger {
  public:
-  explicit CGNTagger( TiCC::LogStream *l ): POSTagger( l, "cgn" ){};
-  bool init( const TiCC::Configuration&, const std::string&label );
+  explicit CGNTagger( TiCC::LogStream *l ): POSTagger( l, "tagger" ){};
+  bool init( const TiCC::Configuration& );
   void Classify( const std::vector<folia::Word *>& );
   void post_process( const std::vector<folia::Word *>& words );
  private:

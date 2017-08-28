@@ -127,7 +127,7 @@ bool init(){
     cerr << "UCTO Initialization failed." << endl;
     return false;
   }
-  if ( !tagger.init( configuration, "NER" ) ){
+  if ( !tagger.init( configuration ) ){
     cerr << "NER Initialization failed." << endl;
     return false;
   }
