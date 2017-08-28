@@ -32,36 +32,26 @@
 #ifndef NER_TAGGER_MOD_H
 #define NER_TAGGER_MOD_H
 
-class NERTagger {
+#include "frog/tagger_base.h"
+
+class NERTagger: public BaseTagger {
  public:
-  explicit NERTagger( TiCC::LogStream * );
-  ~NERTagger();
+  explicit NERTagger( TiCC::LogStream *l ): BaseTagger( l,  "NER" ){};
   bool init( const TiCC::Configuration& );
-  void Classify( const std::vector<folia::Word *>& );
+  void post_process( const std::vector<folia::Word*>& );
   void addDeclaration( folia::Document& ) const;
   void addNERTags( const std::vector<folia::Word*>&,
 		   const std::vector<std::string>&,
 		   const std::vector<double>& );
-  std::string getTagset() const { return tagset; };
-  std::vector<Tagger::TagResult> tagLine( const std::string& );
   bool fill_known_ners( const std::string&, const std::string& );
   void handle_known_ners( const std::vector<std::string>&,
 			  std::vector<std::string>& );
   void merge( const std::vector<std::string>&,
 	      std::vector<std::string>& tags,
 	      std::vector<double>& );
-  std::string set_eos_mark( const std::string& );
  private:
-  MbtAPI *tagger;
-  TiCC::LogStream *nerLog;
-  int debug;
-  std::string version;
-  std::string tagset;
-  std::string textclass;
   std::vector<std::map<std::string,std::string>> known_ners;
-  Tokenizer::UnicodeFilter *filter;
   int max_ner_size;
-  NERTagger( const NERTagger& ){}; //inhibit copy
 };
 
 #endif // NER_TAGGER_MOD_H

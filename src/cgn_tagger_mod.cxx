@@ -167,17 +167,27 @@ void CGNTagger::fillSubSetTable(){
 
 
 bool CGNTagger::init( const Configuration& config ){
-  if ( debug ){
+  if (  debug ){
     LOG << "INIT CGN Tagger." << endl;
   }
-  if ( POSTagger::init( config ) ){
+  if ( BaseTagger::init( config ) ){
     fillSubSetTable();
     if ( debug ){
-      LOG << "DONE CGN Tagger." << endl;
+      LOG << "DONE Init CGN Tagger." << endl;
     }
     return true;
   }
   return false;
+}
+
+void CGNTagger::addDeclaration( folia::Document& doc ) const {
+#pragma omp critical (foliaupdate)
+  {
+    doc.declare( folia::AnnotationType::POS,
+		 tagset,
+		 "annotator='frog-mbpos-" + version
+		 + "', annotatortype='auto', datetime='" + getTime() + "'");
+  }
 }
 
 string CGNTagger::getSubSet( const string& val, const string& head ){
@@ -208,7 +218,43 @@ string CGNTagger::getSubSet( const string& val, const string& head ){
 			   "' whithin the constraints for '" + head + "'" );
 }
 
+void CGNTagger::addTag( folia::Word *word,
+			const string& inputTag,
+			double confidence ){
+  string pos_tag = inputTag;
+  string ucto_class = word->cls();
+  if ( debug ){
+    LOG << "lookup ucto class= " << ucto_class << endl;
+  }
+  auto const tt = token_tag_map.find( ucto_class );
+  if ( tt != token_tag_map.end() ){
+    if ( debug ){
+      LOG << "found translation ucto class= " << ucto_class
+	  << " to POS-Tag=" << tt->second << endl;
+    }
+    pos_tag = tt->second;
+    confidence = 1.0;
+  }
+  folia::KWargs args;
+  args["set"]  = tagset;
+  args["class"]  = pos_tag;
+  args["confidence"]= toString(confidence);
+  if ( textclass != "current" ){
+    args["textclass"] = textclass;
+  }
+#pragma omp critical (foliaupdate)
+  {
+    word->addPosAnnotation( args );
+  }
+}
+
+
 void CGNTagger::post_process( const vector<folia::Word *>& words ){
+  for ( size_t i=0; i < _tag_result.size(); ++i ){
+    addTag( words[i],
+	    _tag_result[i].assignedTag(),
+	    _tag_result[i].confidence() );
+  }
   for ( auto const& word : words ){
     folia::PosAnnotation *postag = 0;
 #pragma omp critical (foliaupdate)
@@ -243,12 +289,4 @@ void CGNTagger::post_process( const vector<folia::Word *>& words ){
       }
     }
   }
-}
-
-void CGNTagger::Classify( const vector<folia::Word*>& swords ){
-  POSTagger::Classify( swords );
-  if ( debug ){
-    LOG << "POS Classify done:" << endl;
-  }
-  post_process( swords );
 }

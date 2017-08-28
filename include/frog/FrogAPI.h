@@ -46,7 +46,7 @@ class Mbma;
 class Mblem;
 class Mwu;
 class Parser;
-class POSTagger;
+class CGNTagger;
 class IOBTagger;
 class NERTagger;
 
@@ -130,7 +130,7 @@ class FrogAPI {
   Mblem *myMblem;
   Mwu *myMwu;
   Parser *myParser;
-  POSTagger *myPoSTagger;
+  CGNTagger *myCGNTagger;
   IOBTagger *myIOBTagger;
   NERTagger *myNERTagger;
   UctoTokenizer *tokenizer;

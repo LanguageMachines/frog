@@ -140,7 +140,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
   myMblem(0),
   myMwu(0),
   myParser(0),
-  myPoSTagger(0),
+  myCGNTagger(0),
   myIOBTagger(0),
   myNERTagger(0),
   tokenizer(0)
@@ -197,19 +197,19 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       tokenizer->setUttMarker( options.uttmark );
       tokenizer->setInputClass( options.inputclass );
       tokenizer->setOutputClass( options.outputclass );
-      myPoSTagger = new CGNTagger(theErrLog);
-      stat = myPoSTagger->init( configuration );
+      myCGNTagger = new CGNTagger( theErrLog );
+      stat = myCGNTagger->init( configuration );
       if ( stat ){
-	myPoSTagger->set_eos_mark( options.uttmark );
+	myCGNTagger->set_eos_mark( options.uttmark );
 	if ( options.doIOB ){
-	  myIOBTagger = new IOBTagger(theErrLog);
+	  myIOBTagger = new IOBTagger( theErrLog );
 	  stat = myIOBTagger->init( configuration );
 	  if ( stat ){
 	    myIOBTagger->set_eos_mark( options.uttmark );
 	  }
 	}
 	if ( stat && options.doNER ){
-	  myNERTagger = new NERTagger(theErrLog);
+	  myNERTagger = new NERTagger( theErrLog );
 	  stat = myNERTagger->init( configuration );
 	  if ( stat ){
 	    myNERTagger->set_eos_mark( options.uttmark );
@@ -303,20 +303,20 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       }
 #pragma omp section
       {
-	myPoSTagger = new CGNTagger(theErrLog);
-	tagStat = myPoSTagger->init( configuration );
+	myCGNTagger = new CGNTagger( theErrLog );
+	tagStat = myCGNTagger->init( configuration );
       }
 #pragma omp section
       {
 	if ( options.doIOB ){
-	  myIOBTagger = new IOBTagger(theErrLog);
+	  myIOBTagger = new IOBTagger( theErrLog );
 	  iobStat = myIOBTagger->init( configuration );
 	}
       }
 #pragma omp section
       {
 	if ( options.doNER ){
-	  myNERTagger = new NERTagger(theErrLog);
+	  myNERTagger = new NERTagger( theErrLog );
 	  nerStat = myNERTagger->init( configuration );
 	}
       }
@@ -374,7 +374,7 @@ FrogAPI::~FrogAPI() {
   delete myMbma;
   delete myMblem;
   delete myMwu;
-  delete myPoSTagger;
+  delete myCGNTagger;
   delete myIOBTagger;
   delete myNERTagger;
   delete myParser;
@@ -399,7 +399,7 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
       {
 	timers.tagTimer.start();
 	try {
-	  myPoSTagger->Classify( swords );
+	  myCGNTagger->Classify( swords );
 	}
 	catch ( exception&e ){
 	  all_well = false;
@@ -1000,7 +1000,7 @@ void FrogAPI::displayMWU( ostream& os,
   for ( const auto& word : mwu ){
     try {
       wrd += word->str( options.outputclass );
-      PosAnnotation *postag = word->annotation<PosAnnotation>( myPoSTagger->getTagset() );
+      PosAnnotation *postag = word->annotation<PosAnnotation>( myCGNTagger->getTagset() );
       pos += postag->cls();
       if ( &word != &mwu.back() ){
 	wrd += "_";
@@ -1217,8 +1217,8 @@ void FrogAPI::FrogDoc( Document& doc,
   timers.frogTimer.start();
   // first we make sure that the doc will accept our annotations, by
   // declaring them in the doc
-  if (myPoSTagger){
-    myPoSTagger->addDeclaration( doc );
+  if (myCGNTagger){
+    myCGNTagger->addDeclaration( doc );
   }
   if ( options.doLemma && myMblem ) {
     myMblem->addDeclaration( doc );

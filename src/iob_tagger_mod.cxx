@@ -39,104 +39,10 @@ using namespace folia;
 using namespace TiCC;
 using namespace Tagger;
 
-#define LOG *Log(iobLog)
-
-IOBTagger::IOBTagger(TiCC::LogStream * logstream):
-  tagger( 0 ),
-  debug( 0 ),
-  filter( 0 )
-{
-  iobLog = new LogStream( logstream, "iob-" );
-}
-
-IOBTagger::~IOBTagger(){
-  delete tagger;
-  delete iobLog;
-  delete filter;
-}
+#define LOG *Log(tag_log)
 
 bool IOBTagger::init( const Configuration& config ){
-  debug = 0;
-  string val = config.lookUp( "debug", "IOB" );
-  if ( val.empty() ){
-    val = config.lookUp( "debug" );
-  }
-  if ( !val.empty() ){
-    debug = TiCC::stringTo<int>( val );
-  }
-  switch ( debug ){
-  case 0:
-  case 1:
-    iobLog->setlevel(LogNormal);
-    break;
-  case 2:
-  case 3:
-  case 4:
-    iobLog->setlevel(LogDebug);
-    break;
-  case 5:
-  case 6:
-  case 7:
-    iobLog->setlevel(LogHeavy);
-    break;
-  default:
-    iobLog->setlevel(LogExtreme);
-  }
-  if (debug) {
-    LOG << "IOB Chunker Init" << endl;
-  }
-  if ( tagger != 0 ){
-    LOG << "IOBTagger is already initialized!" << endl;
-    return false;
-  }
-  val = config.lookUp( "settings", "IOB" );
-  if ( val.empty() ){
-    LOG << "Unable to find settings for IOB" << endl;
-    return false;
-  }
-  string settings;
-  if ( val[0] == '/' ) {
-    // an absolute path
-    settings = val;
-  }
-  else {
-    settings = config.configDir() + val;
-  }
-
-  val = config.lookUp( "version", "IOB" );
-  if ( val.empty() ){
-    version = "1.0";
-  }
-  else {
-    version = val;
-  }
-  val = config.lookUp( "set", "IOB" );
-  if ( val.empty() ){
-    tagset = "http://ilk.uvt.nl/folia/sets/frog-chunker-nl";
-  }
-  else {
-    tagset = val;
-  }
-  string charFile = config.lookUp( "char_filter_file", "IOB" );
-  if ( charFile.empty() )
-    charFile = config.lookUp( "char_filter_file" );
-  if ( !charFile.empty() ){
-    charFile = prefix( config.configDir(), charFile );
-    filter = new Tokenizer::UnicodeFilter();
-    filter->fill( charFile );
-  }
-
-  string cls = config.lookUp( "outputclass" );
-  if ( !cls.empty() ){
-    textclass = cls;
-  }
-  else {
-    textclass = "current";
-  }
-
-  string init = "-s " + settings + " -vcf";
-  tagger = new MbtAPI( init, *iobLog );
-  return tagger->isInit();
+  return BaseTagger::init( config );
 }
 
 void IOBTagger::addChunk( ChunkingLayer *chunks,
@@ -275,52 +181,12 @@ void IOBTagger::addDeclaration( Document& doc ) const {
   }
 }
 
-void IOBTagger::Classify( const vector<Word *>& swords ){
-  if ( !swords.empty() ) {
-    string sentence; // the tagger needs the whole sentence
-    for ( const auto& sword : swords ){
-      UnicodeString word;
-#pragma omp critical (foliaupdate)
-      {
-	word = sword->text( textclass );
-      }
-      if ( filter )
-	word = filter->filter( word );
-      sentence += UnicodeToUTF8(word);
-      if ( &sword != &swords.back() ){
-	sentence += " ";
-      }
-    }
-    if (debug){
-      LOG << "IOB in: " << sentence << endl;
-    }
-    vector<TagResult> tagv = tagger->TagLine(sentence);
-    if ( tagv.size() != swords.size() ){
-      throw runtime_error( "IOB tagger is confused" );
-    }
-    if ( debug ){
-      LOG << "IOB tagger out: " << endl;
-      for ( size_t i=0; i < tagv.size(); ++i ){
-	LOG << "[" << i << "] : word=" << tagv[i].word()
-	    << " tag=" << tagv[i].assignedTag()
-	    << " confidence=" << tagv[i].confidence() << endl;
-      }
-    }
-    vector<double> conf;
-    vector<string> tags;
-    for ( const auto& tag : tagv ){
-      tags.push_back( tag.assignedTag() );
-      conf.push_back( tag.confidence() );
-    }
-    addIOBTags( swords, tags, conf );
+void IOBTagger::post_process( const std::vector<folia::Word*>& swords ){
+  vector<double> conf;
+  vector<string> tags;
+  for ( const auto& tag : _tag_result ){
+    tags.push_back( tag.assignedTag() );
+    conf.push_back( tag.confidence() );
   }
-}
-
-string IOBTagger::set_eos_mark( const string& eos ){
-  if ( tagger ){
-    return tagger->set_eos_mark(eos);
-  }
-  else {
-    throw runtime_error( "IOBTagger is not initialized" );
-  }
+  addIOBTags( swords, tags, conf );
 }

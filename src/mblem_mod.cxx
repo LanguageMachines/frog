@@ -163,7 +163,7 @@ bool Mblem::init( const Configuration& config ) {
   if ( opts.empty() )
     opts = "-a1";
   //make it silent
-  opts += " +vs -vf";
+  opts += " +vs -vf -F TABBED";
   //Read in (igtree) data
   myLex = new Timbl::TimblAPI(opts);
   return myLex->GetInstanceBase(treeName);
@@ -187,10 +187,10 @@ string Mblem::make_instance( const UnicodeString& in ) {
     size_t j = length - history + i;
     if (( i < history - length ) &&
 	(length<history))
-      instance += "= ";
+      instance += "=\t";
     else {
       instance += in[j];
-      instance += ' ';
+      instance += '\t';
     }
   }
   instance += "?";
@@ -363,7 +363,7 @@ void Mblem::Classify( const UnicodeString& uWord ){
   string inst = make_instance(uWord);
   string classString;
   myLex->Classify( inst, classString );
-  if (debug){
+  if ( debug){
     LOG << "class: " << classString  << endl;
   }
   // 1st find all alternatives

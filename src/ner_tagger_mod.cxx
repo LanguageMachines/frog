@@ -39,113 +39,24 @@ using namespace std;
 using namespace TiCC;
 using namespace Tagger;
 
-#define LOG *Log(nerLog)
-
-NERTagger::NERTagger(TiCC::LogStream * logstream):
-  tagger(0),
-  debug(0),
-  filter(0),
-  max_ner_size(10)
-{
-  nerLog = new LogStream( logstream, "ner-" );
-}
-
-NERTagger::~NERTagger(){
-  delete tagger;
-  delete nerLog;
-  delete filter;
-}
+#define LOG *Log(tag_log)
 
 bool NERTagger::init( const Configuration& config ){
-  debug = 0;
-  string val = config.lookUp( "debug", "NER" );
-  if ( val.empty() ){
-    val = config.lookUp( "debug" );
-  }
-  if ( !val.empty() ){
-    debug = TiCC::stringTo<int>( val );
-  }
-  switch ( debug ){
-  case 0:
-  case 1:
-    nerLog->setlevel(LogNormal);
-    break;
-  case 2:
-  case 3:
-  case 4:
-    nerLog->setlevel(LogDebug);
-    break;
-  case 5:
-  case 6:
-  case 7:
-    nerLog->setlevel(LogHeavy);
-    break;
-  default:
-    nerLog->setlevel(LogExtreme);
-  }
-  if (debug){
-    LOG << "NER Tagger Init" << endl;
-  }
-  if ( tagger != 0 ){
-    LOG << "NER Tagger is already initialized!" << endl;
+  if ( !BaseTagger::init( config ) ){
     return false;
   }
-  val = config.lookUp( "settings", "NER" );
-  if ( val.empty() ){
-    LOG << "Unable to find settings for NER" << endl;
-    return false;
-  }
-  string settings;
-  if ( val[0] == '/' ){
-    // an absolute path
-    settings = val;
-  }
-  else {
-    settings = config.configDir() + val;
-  }
-  val = config.lookUp( "version", "NER" );
-  if ( val.empty() ){
-    version = "1.0";
-  }
-  else {
-    version = val;
-  }
-  val = config.lookUp( "set", "NER" );
-  if ( val.empty() ){
-    tagset = "http://ilk.uvt.nl/folia/sets/frog-ner-nl";
-  }
-  else {
-    tagset = val;
-  }
-  string charFile = config.lookUp( "char_filter_file", "NER" );
-  if ( charFile.empty() )
-    charFile = config.lookUp( "char_filter_file" );
-  if ( !charFile.empty() ){
-    charFile = prefix( config.configDir(), charFile );
-    filter = new Tokenizer::UnicodeFilter();
-    filter->fill( charFile );
-  }
-  val = config.lookUp( "max_ner_size", "NER" );
+  string val = config.lookUp( "max_ner_size", _label );
   if ( !val.empty() ){
     max_ner_size = TiCC::stringTo<int>( val );
   }
   known_ners.resize( max_ner_size + 1 );
-  val = config.lookUp( "known_ners", "NER" );
+  val = config.lookUp( "known_ners", _label );
   if ( !val.empty() ){
     if ( !fill_known_ners( val, config.configDir() ) ){
       return false;
     }
   }
-  string cls = config.lookUp( "outputclass" );
-  if ( !cls.empty() ){
-    textclass = cls;
-  }
-  else {
-    textclass = "current";
-  }
-  string init = "-s " + settings + " -vcf";
-  tagger = new MbtAPI( init, *nerLog );
-  return tagger->isInit();
+  return true;
 }
 
 bool NERTagger::fill_known_ners( const string& name, const string& config_dir ){
@@ -453,72 +364,15 @@ void NERTagger::addDeclaration( folia::Document& doc ) const {
   }
 }
 
-void NERTagger::Classify( const vector<folia::Word *>& swords ){
-  if ( !swords.empty() ) {
-    vector<string> words;
-    string sentence; // the tagger needs the whole sentence
-    for ( const auto& sw : swords ){
-      UnicodeString word;
-#pragma omp critical (foliaupdate)
-      {
-	word = sw->text( textclass );
-      }
-      if ( filter )
-	word = filter->filter( word );
-      sentence += folia::UnicodeToUTF8(word);
-      words.push_back( folia::UnicodeToUTF8(word) );
-      if ( &sw != &swords.back() ){
-	sentence += " ";
-      }
-    }
-    if (debug){
-      LOG << "NER in: " << sentence << endl;
-    }
-    vector<TagResult> tagv = tagger->TagLine(sentence);
-    if ( tagv.size() != swords.size() ){
-      string out;
-      for ( const auto& val : tagv ){
-	out += val.word() + "//" + val.assignedTag() + " ";
-      }
-      if ( debug ){
-	LOG << "NER tagger is confused" << endl;
-	LOG << "sentences was: '" << sentence << "'" << endl;
-	LOG << "but tagged:" << endl;
-	LOG << out << endl;
-      }
-      throw runtime_error( "NER failed: '" + sentence + "' ==> '" + out + "'" );
-    }
-    if ( debug ){
-      LOG << "NER tagger out: " << endl;
-      for ( size_t i=0; i < tagv.size(); ++i ){
-	LOG << "[" << i << "] : word=" << tagv[i].word()
-	    << " tag=" << tagv[i].assignedTag()
-	    << " confidence=" << tagv[i].confidence() << endl;
-      }
-    }
-    vector<double> conf;
-    vector<string> tags;
-    for ( const auto& tag : tagv ){
-      tags.push_back( tag.assignedTag() );
-      conf.push_back( tag.confidence() );
-    }
-    vector<string> ktags( tagv.size(), "O" );
-    handle_known_ners( words, ktags );
-    merge( ktags, tags, conf );
-    addNERTags( swords, tags, conf );
+void NERTagger::post_process( const std::vector<folia::Word*>& swords ){
+  vector<double> conf;
+  vector<string> tags;
+  for ( const auto& tag : _tag_result ){
+    tags.push_back( tag.assignedTag() );
+    conf.push_back( tag.confidence() );
   }
-}
-
-vector<TagResult> NERTagger::tagLine( const string& line ){
-  if ( tagger ){
-    return tagger->TagLine(line);
-  }
-  throw runtime_error( "NERTagger is not initialized" );
-}
-
-string NERTagger::set_eos_mark( const string& eos ){
-  if ( tagger ){
-    return tagger->set_eos_mark(eos);
-  }
-  throw runtime_error( "NERTagger is not initialized" );
+  vector<string> ktags( _tag_result.size(), "O" );
+  handle_known_ners( _words, ktags );
+  merge( ktags, tags, conf );
+  addNERTags( swords, tags, conf );
 }
