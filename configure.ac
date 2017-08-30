@@ -67,90 +67,44 @@ if test $prefix = "NONE"; then
 fi
 
 PKG_PROG_PKG_CONFIG
-AC_PATH_PROG(pkgconfigpath, pkg-config, NONE)
-if test "$pkgconfigpath" != "NONE"; then
-# ugly hack when PKG_CONFIG_PATH isn't defined.
-# couldn't get it to work otherwise
-  if test "x$PKG_CONFIG_PATH" = x; then
-     export PKG_CONFIG_PATH=""
-  fi
+if test "x$PKG_CONFIG_PATH" = x; then
+    export PKG_CONFIG_PATH="$prefix/lib/pkgconfig"
+else
+    export PKG_CONFIG_PATH="$prefix/lib/pkgconfig:$PKG_CONFIG_PATH"
 fi
+
 PKG_CHECK_MODULES([XML2], [libxml-2.0 >= 2.6.16] )
 CXXFLAGS="$CXXFLAGS $XML2_CFLAGS"
 LIBS="$XML2_LIBS $LIBS"
 
-PKG_CHECK_MODULES([ICU], [icu-uc >= 52 icu-io] )
+PKG_CHECK_MODULES([ICU], [icu-uc >= 50 icu-io] )
 CXXFLAGS="$CXXFLAGS $ICU_CFLAGS"
 LIBS="$ICU_LIBS $LIBS"
 
 AX_LIB_READLINE
 
-
-##check for needed dependencies
-#useICU=1;
-## inspired by feh-1.3.4/configure.ac. Tnx Tom Gilbert and feh hackers.
-#AC_ARG_WITH(icu,
-# [ --with-icu=DIR use ICU installed in <DIR>],
-# [if test "$with_icu" = "no"; then
-# useICU=0
-# else
-# CXXFLAGS="$CXXFLAGS -I$withval/include"
-# LIBS="-L$withval/lib $LIBS"
-# fi] )
-
-#if test "$useICU" = "1"; then
-# AX_ICU_CHECK( [4.2],
-# [CXXFLAGS="$CXXFLAGS $ICU_CPPSEARCHPATH"
-# LIBS="$ICU_LIBPATH $ICU_LIBS $ICU_IOLIBS $LIBS"],
-# [AC_MSG_FAILURE( "No ICU development environment found. Please check if libicu-ev or the like is installed" )] )
-# AC_DEFINE(HAVE_ICU, 1, we want to use ICU )
-#else
-# AC_MSG_ERROR("ICU support is required")
-#fi
-
-AC_ARG_WITH(ticcutils,
-       [  --with-ticcutils=DIR       use ticcutils installed in <DIR>],
-       [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
-       [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
 PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.9] )
 CXXFLAGS="$CXXFLAGS $ticcutils_CFLAGS"
 LIBS="$ticcutils_LIBS $LIBS"
 
-AC_ARG_WITH(timbl,
-       [  --with-timbl=DIR       use timbl installed in <DIR>],
-       [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
-       [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
 PKG_CHECK_MODULES([timbl], [timbl >= 6.4.4] )
 CXXFLAGS="$CXXFLAGS $timbl_CFLAGS"
 LIBS="$timbl_LIBS $LIBS"
 
-AC_ARG_WITH(mbt,
-       [  --with-mbt=DIR       use mbt installed in <DIR>],
-       [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
-       [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
 PKG_CHECK_MODULES([mbt], [mbt >= 3.2.14] )
 CXXFLAGS="$CXXFLAGS $mbt_CFLAGS"
 LIBS="$mbt_LIBS $LIBS"
 
-AC_ARG_WITH(folia,
-       [  --with-folia=DIR       use libfolia installed in <DIR>],
-       [PKG_CONFIG_PATH="$withval/lib/pkgconfig:$PKG_CONFIG_PATH"],
-       [PKG_CONFIG_PATH="$prefix/lib/pkgconfig:$PKG_CONFIG_PATH"])
-AC_MSG_NOTICE( [pkg-config search path: $PKG_CONFIG_PATH] )
 PKG_CHECK_MODULES([folia],[folia >= 1.8])
 CXXFLAGS="$CXXFLAGS $folia_CFLAGS"
 LIBS="$folia_LIBS $LIBS"
 
-AC_ARG_WITH(ucto,
-       [  --with-ucto=DIR       use ucto installed in <DIR>],
-       [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
-       [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
 PKG_CHECK_MODULES([ucto], [ucto >= 0.9.6] )
 CXXFLAGS="$CXXFLAGS $ucto_CFLAGS"
 LIBS="$ucto_LIBS $LIBS"
 
 PKG_CHECK_MODULES([frogdata], [frogdata >= 0.13] )
-#
+
 
 AC_OUTPUT([
   Makefile
