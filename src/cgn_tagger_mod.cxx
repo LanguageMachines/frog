@@ -269,9 +269,12 @@ void CGNTagger::post_process( const vector<folia::Word *>& words ){
     args["class"]  = head;
     args["set"]    = tagset;
     folia::Feature *feat = new folia::HeadFeature( args );
-    postag->append( feat );
-    if ( head == "SPEC" ){
-      postag->confidence(1.0);
+#pragma omp critical (foliaupdate)
+    {
+      postag->append( feat );
+      if ( head == "SPEC" ){
+	postag->confidence(1.0);
+      }
     }
     if ( parts.size() > 1 ){
       vector<string> tagParts;
