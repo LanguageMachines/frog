@@ -796,7 +796,12 @@ void Mbma::Classify( Word* sword ){
     uWord = sword->text( textclass );
     pos = sword->annotation<PosAnnotation>( cgn_tagset );
     head = pos->feat("head");
-    token_class = sword->cls();
+    string txtcls = sword->textclass();
+    if ( txtcls == textclass ){
+      // so only use the word class is the textclass of the word
+      // matches the wanted text
+      token_class = sword->cls();
+    }
   }
   if (debugFlag ){
     LOG << "Classify " << uWord << "(" << pos << ") ["

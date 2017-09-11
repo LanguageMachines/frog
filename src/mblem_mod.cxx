@@ -313,7 +313,12 @@ void Mblem::Classify( Word *sword ){
   {
     uword = sword->text( textclass );
     pos = sword->pos();
-    token_class = sword->cls();
+    string txtcls = sword->textclass();
+    if ( txtcls == textclass ){
+      // so only use the word class is the textclass of the word
+      // matches the wanted text
+      token_class = sword->cls();
+    }
   }
   if (debug){
     LOG << "Classify " << uword << "(" << pos << ") ["
