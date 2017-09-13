@@ -48,7 +48,9 @@ class Mwu;
 class Parser;
 class CGNTagger;
 class IOBTagger;
+class EIOBTagger;
 class NERTagger;
+class ENERTagger;
 
 class FrogOptions {
  public:
@@ -131,8 +133,16 @@ class FrogAPI {
   Mwu *myMwu;
   Parser *myParser;
   CGNTagger *myCGNTagger;
+#ifdef ENR_IOB
+  EIOBTagger *myIOBTagger;
+#else
   IOBTagger *myIOBTagger;
+#endif
+#ifdef ENR_NER
+  ENERTagger *myNERTagger;
+#else
   NERTagger *myNERTagger;
+#endif
   UctoTokenizer *tokenizer;
 };
 

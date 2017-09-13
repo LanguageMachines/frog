@@ -40,7 +40,7 @@ class BaseTagger {
   virtual ~BaseTagger();
   virtual bool init( const TiCC::Configuration& );
   virtual void post_process( const std::vector<folia::Word*>& ) = 0;
-  void Classify( const std::vector<folia::Word*>& );
+  virtual void Classify( const std::vector<folia::Word*>& );
   void addDeclaration( folia::Document& ) const;
   std::string getTagset() const { return tagset; };
   std::string set_eos_mark( const std::string& );

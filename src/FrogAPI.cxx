@@ -65,6 +65,9 @@
 #endif /* HAVE_READLINE_HISTORY */
 
 
+//#define ENR_NER
+//#define ENR_IOB
+
 // individual module headers
 #include "frog/FrogAPI.h" //will also include Frog.h (internals), FrogAPI.h is for public  interface
 #include "frog/ucto_tokenizer_mod.h"
@@ -72,8 +75,16 @@
 #include "frog/mbma_mod.h"
 #include "frog/mwu_chunker_mod.h"
 #include "frog/cgn_tagger_mod.h"
+#ifdef ENR_IOB
+#include "frog/enr_iob_tagger_mod.h"
+#else
 #include "frog/iob_tagger_mod.h"
+#endif
+#ifdef ENR_NER
+#include "frog/enr_ner_tagger_mod.h"
+#else
 #include "frog/ner_tagger_mod.h"
+#endif
 #include "frog/Parser.h"
 
 
@@ -202,14 +213,22 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       if ( stat ){
 	myCGNTagger->set_eos_mark( options.uttmark );
 	if ( options.doIOB ){
+#ifdef ENR_IOB
+	  myIOBTagger = new EIOBTagger( theErrLog );
+#else
 	  myIOBTagger = new IOBTagger( theErrLog );
+#endif
 	  stat = myIOBTagger->init( configuration );
 	  if ( stat ){
 	    myIOBTagger->set_eos_mark( options.uttmark );
 	  }
 	}
 	if ( stat && options.doNER ){
+#ifdef ENR_NER
+	  myNERTagger = new ENERTagger( theErrLog );
+#else
 	  myNERTagger = new NERTagger( theErrLog );
+#endif
 	  stat = myNERTagger->init( configuration );
 	  if ( stat ){
 	    myNERTagger->set_eos_mark( options.uttmark );
@@ -309,14 +328,22 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 #pragma omp section
       {
 	if ( options.doIOB ){
+#ifdef ENR_IOB
+	  myIOBTagger = new EIOBTagger( theErrLog );
+#else
 	  myIOBTagger = new IOBTagger( theErrLog );
+#endif
 	  iobStat = myIOBTagger->init( configuration );
 	}
       }
 #pragma omp section
       {
 	if ( options.doNER ){
+#ifdef ENR_NER
+	  myNERTagger = new ENERTagger( theErrLog );
+#else
 	  myNERTagger = new NERTagger( theErrLog );
+#endif
 	  nerStat = myNERTagger->init( configuration );
 	}
       }
@@ -407,6 +434,7 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
 	}
 	timers.tagTimer.stop();
       }
+#ifndef ENR_IOB
 #pragma omp section
       {
 	if ( options.doIOB ){
@@ -421,6 +449,8 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
 	  timers.iobTimer.stop();
 	}
       }
+#endif
+#ifndef ENR_NER
 #pragma omp section
       {
 	if ( options.doNER ){
@@ -435,6 +465,7 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
 	  timers.nerTimer.stop();
 	}
       }
+#endif
     } // parallel sections
     if ( !all_well ){
       throw runtime_error( exs );
@@ -481,21 +512,61 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
     if ( !all_well ){
       throw runtime_error( exs );
     }
-
-    if ( options.doMwu ){
-      if ( swords.size() > 0 ){
-	timers.mwuTimer.start();
-	myMwu->Classify( swords );
-	timers.mwuTimer.stop();
+#pragma omp parallel sections
+    {
+#ifdef ENR_NER
+#pragma omp section
+      {
+	if ( options.doNER ){
+	  timers.nerTimer.start();
+	  if (options.debugFlag) {
+	    LOG << "Calling NER..." << endl;
+	  }
+	  try {
+	    myNERTagger->Classify( swords );
+	  }
+	  catch ( exception&e ){
+	    all_well = false;
+	    exs += string(e.what()) + " ";
+	  }
+	  timers.nerTimer.stop();
+	}
       }
-    }
-    if ( options.doParse ){
-      if ( options.maxParserTokens != 0
-	   && swords.size() > options.maxParserTokens ){
-	showParse = false;
+#endif
+#ifdef ENR_IOB
+#pragma omp section
+      {
+	if ( options.doIOB ){
+	  timers.iobTimer.start();
+	  try {
+	    myIOBTagger->Classify( swords );
+	  }
+	  catch ( exception&e ){
+	    all_well = false;
+	    exs += string(e.what()) + " ";
+	  }
+	  timers.iobTimer.stop();
+	}
       }
-      else {
-        myParser->Parse( swords, timers );
+#endif
+#pragma omp section
+      {
+	if ( options.doMwu ){
+	  if ( swords.size() > 0 ){
+	    timers.mwuTimer.start();
+	    myMwu->Classify( swords );
+	    timers.mwuTimer.stop();
+	  }
+	}
+	if ( options.doParse ){
+	  if ( options.maxParserTokens != 0
+	       && swords.size() > options.maxParserTokens ){
+	    showParse = false;
+	  }
+	  else {
+	    myParser->Parse( swords, timers );
+	  }
+	}
       }
     }
   }
