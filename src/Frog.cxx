@@ -477,11 +477,11 @@ bool parse_args( TiCC::CL_Options& Opts,
     if ( num == 2 ) {
         vector<string> module_param;
         const int num2 = split_at(values[0], module_param, "." );
-        string module = "";
-        string param;
         if (num2 == 2) {
+            LOG << "Overriding configuration parameter " << module_param[0] << "." << module_param[1] << " with " << values[1] << endl;
             configuration.setatt( module_param[1] , values[1], module_param[0] );
         } else if (num2 == 1) {
+            LOG << "Overriding configuration parameter " << module_param[0] << " with " << values[1] << endl;
             configuration.setatt( module_param[0] , values[1]);
         } else {
             LOG << "Invalid syntax for --override option" << endl;
@@ -530,7 +530,7 @@ int main(int argc, char *argv[]) {
 			  "uttmarker:,max-parser-tokens:,"
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
 			  "help,language:,retry,nostdout,"
-			  "debug:,keep-parser-files,version,threads:,KANON");
+			  "debug:,keep-parser-files,version,threads:,override:,KANON");
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
       // we already did show what we wanted.
