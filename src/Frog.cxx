@@ -99,9 +99,9 @@ void usage( ) {
        << "\t -e <encoding>          specify encoding of the input (default UTF-8)\n"
        << "\t -t <testfile>          Run frog on this file\n"
        << "\t -x <testfile>          Run frog on this FoLiA XML file. Or the files from 'testdir'\n"
-       << "\t --textclass=<cls>      use the specified class to search for text in the the FoLia docs. (default 'current').\n"
+       << "\t --textclass=<cls>      use the specified class to search for text in the the FoLiA docs. (default 'current').\n"
        << "\t\t\t the same value is used for output too.\n"
-       << "\t --inputclass=<cls>     use the specified class to search for text in the the FoLia docs. (default 'current') \n"
+       << "\t --inputclass=<cls>     use the specified class to search for text in the the FoLiA docs. (default 'current') \n"
        << "\t --outputclass=<cls>    use the specified class to output text in the the FoLia docs. (default 'inputclass') \n"
        << "\t --testdir=<directory>  All files in this dir will be tested\n"
        << "\t --uttmarker=<mark>     utterances are separated by 'mark' symbols"
@@ -114,8 +114,8 @@ void usage( ) {
        << "\t============= MODULE SELECTION ==========================================\n"
        << "\t --skip=[mptncla]    Skip Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"
        << "\t============= CONFIGURATION OPTIONS =====================================\n"
-       << "\t -c <filename>    Set configuration file (default "
-       << FrogAPI::defaultConfigFile() << ")\n"
+       << "\t -c <filename>    Set configuration file (default " << FrogAPI::defaultConfigFile() << ")\n"
+       << "\t --override <section>.<parameter>=<value>    Override a configuration option, can be used multiple times\n"
        << "\t --language <language-list>  Set the languages. e.g. --language=nld,eng,por"
        << "\t\t The first language in the list will be the default. (default dutch).\n"
        << "\t============= OUTPUT OPTIONS ============================================\n"
@@ -132,11 +132,11 @@ void usage( ) {
        << "\t -d <debug level>  (for more verbosity)\n"
        << "\t --debug=<module><level>,<module><level>... (eg --debug=l5,n3) \n"
        << "\t\t Set debug value for Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"
-       << "\t -S <port>              Run as server instead of reading from testfile\n"
+       << "\t -S <port>             Run as server instead of reading from testfile\n"
 #ifdef HAVE_OPENMP
-       << "\t --threads=<n>       Use a maximum of 'n' threads. Default: 8. \n"
+       << "\t --threads=<n>         Use a maximum of 'n' threads. Default: 8. \n"
 #endif
-       << "\t                     (but always 1 for server mode)\n";
+       << "\t                       (but always 1 for server mode)\n";
 }
 
 bool parse_args( TiCC::CL_Options& Opts,
@@ -468,6 +468,26 @@ bool parse_args( TiCC::CL_Options& Opts,
       LOG << "'-X " << XMLoutFileName
 		      << "' is invalid for multiple inputfiles." << endl;
       return false;
+    }
+  }
+  string overridestatement;
+  while ( Opts.extract("override", overridestatement )) {
+    vector<string> values;
+    const int num = split_at( overridestatement,values,  "=" );
+    if ( num == 2 ) {
+        vector<string> module_param;
+        const int num2 = split_at(values[0], module_param, "." );
+        string module = "";
+        string param;
+        if (num2 == 2) {
+            configuration.setatt( module_param[1] , values[1], module_param[0] );
+        } else if (num2 == 1) {
+            configuration.setatt( module_param[0] , values[1]);
+        } else {
+            LOG << "Invalid syntax for --override option" << endl;
+        }
+    } else {
+        LOG << "Invalid syntax for --override option" << endl;
     }
   }
   if ( !Opts.empty() ){
