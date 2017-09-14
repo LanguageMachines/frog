@@ -141,6 +141,38 @@ FrogOptions::FrogOptions() {
   debugFlag = 0;
 }
 
+void FrogAPI::test_version( const string& where, double minimum ){
+  string version = configuration.lookUp( "version", where );
+  double v = 0.0;
+  if ( !version.empty() ){
+    if ( !stringTo( version, v ) ){
+      v = 0.5;
+    }
+  }
+#ifdef ENR_IOB
+  if ( v < minimum ){
+    LOG << "[[" << where << "]] Wrong FrogData!. "
+	<< "Expected version " << minimum << " or higher for module: "
+	<< where << endl;
+    if ( version.empty() ) {
+      LOG << "but no version info was found!." << endl;
+    }
+    else {
+      LOG << "but found version " << v << endl;
+    }
+    throw runtime_error( "Frog initialization failed" );
+  }
+#else
+  if ( !version.empty() && v >= 2 ){
+    LOG << "[[" << where << "]] Wrong FrogData!. "
+	<< "Expected version lower then " << minimum << " for module: "
+	<< where << endl;
+    LOG << "but found version " << v << endl;
+    throw runtime_error( "Frog initialization failed" );
+  }
+#endif
+}
+
 FrogAPI::FrogAPI( FrogOptions &opt,
 		  const Configuration &conf,
 		  LogStream *log ):
@@ -169,15 +201,25 @@ FrogAPI::FrogAPI( FrogOptions &opt,
     LOG << "Disabled the Morhological analyzer." << endl;
     options.doMorph = false;
   }
-  if ( options.doIOB && !configuration.hasSection("IOB") ){
-    LOG << "Missing [[IOB]] section in config file." << endl;
-    LOG << "Disabled the IOB Chunker." << endl;
-    options.doIOB = false;
+  if ( options.doIOB ){
+    if ( !configuration.hasSection("IOB") ){
+      LOG << "Missing [[IOB]] section in config file." << endl;
+      LOG << "Disabled the IOB Chunker." << endl;
+      options.doIOB = false;
+    }
+    else {
+      test_version( "IOB", 2.0 );
+    }
   }
-  if ( options.doNER && !configuration.hasSection("NER") ){
-    LOG << "Missing [[NER]] section in config file." << endl;
-    LOG << "Disabled the NER." << endl;
-    options.doNER = false;
+  if ( options.doNER ) {
+    if ( !configuration.hasSection("NER") ){
+      LOG << "Missing [[NER]] section in config file." << endl;
+      LOG << "Disabled the NER." << endl;
+      options.doNER = false;
+    }
+    else {
+      test_version( "NER", 2.0 );
+    }
   }
   if ( options.doMwu && !configuration.hasSection("mwu") ){
     LOG << "Missing [[mwu]] section in config file." << endl;

@@ -198,7 +198,7 @@ string BaseTagger::set_eos_mark( const std::string& eos ){
 }
 
 string BaseTagger::extract_sentence( const vector<folia::Word*>& swords,
-				    vector<string>& words ){
+				     vector<string>& words ){
   words.clear();
   string sentence;
   for ( const auto& sword : swords ){
@@ -218,6 +218,30 @@ string BaseTagger::extract_sentence( const vector<folia::Word*>& swords,
     }
   }
   return sentence;
+}
+
+void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
+				      const string& tagset,
+				      vector<string>& words,
+				      vector<string>& ptags ){
+  for ( size_t i=0; i < swords.size(); ++i ){
+    folia::Word *sw = swords[i];
+    folia::PosAnnotation *postag = 0;
+    UnicodeString word;
+#pragma omp critical(foliaupdate)
+    {
+      word = sw->text( textclass );
+      postag = sw->annotation<folia::PosAnnotation>( tagset );
+    }
+    if ( filter ){
+      word = filter->filter( word );
+    }
+    // the word may contain spaces, remove them all!
+    string word_s = folia::UnicodeToUTF8( word );
+    word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
+    words.push_back( word_s );
+    ptags.push_back( postag->cls() );
+  }
 }
 
 void BaseTagger::Classify( const vector<folia::Word*>& swords ){

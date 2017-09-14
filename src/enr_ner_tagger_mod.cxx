@@ -39,97 +39,16 @@ using namespace std;
 using namespace TiCC;
 using namespace Tagger;
 
-#define LOG *Log(nerLog)
+#define LOG *Log(tag_log)
 
 // should come from the config!
 const string cgn_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
 
-ENERTagger::ENERTagger(TiCC::LogStream * logstream):
-  tagger(0),
-  debug(0),
-  filter(0),
-  max_ner_size(10)
-{
-  nerLog = new LogStream( logstream, "ner-" );
-  known_ners.resize( max_ner_size + 1 );
-}
-
-ENERTagger::~ENERTagger(){
-  delete tagger;
-  delete nerLog;
-  delete filter;
-}
-
 bool ENERTagger::init( const Configuration& config ){
-  debug = 0;
-  string val = config.lookUp( "debug", "NER" );
-  if ( val.empty() ){
-    val = config.lookUp( "debug" );
-  }
-  if ( !val.empty() ){
-    debug = TiCC::stringTo<int>( val );
-  }
-  switch ( debug ){
-  case 0:
-  case 1:
-    nerLog->setlevel(LogNormal);
-    break;
-  case 2:
-  case 3:
-  case 4:
-    nerLog->setlevel(LogDebug);
-    break;
-  case 5:
-  case 6:
-  case 7:
-    nerLog->setlevel(LogHeavy);
-    break;
-  default:
-    nerLog->setlevel(LogExtreme);
-  }
-  if (debug){
-    LOG << "NER Tagger Init" << endl;
-  }
-  if ( tagger != 0 ){
-    LOG << "NER Tagger is already initialized!" << endl;
+  if ( !BaseTagger::init( config ) ){
     return false;
   }
-  val = config.lookUp( "settings", "NER" );
-  if ( val.empty() ){
-    LOG << "Unable to find settings for NER" << endl;
-    return false;
-  }
-  string settings;
-  if ( val[0] == '/' ){
-    // an absolute path
-    settings = val;
-  }
-  else {
-    settings = config.configDir() + val;
-  }
-  val = config.lookUp( "version", "NER" );
-  if ( val.empty() ){
-    version = "1.0";
-  }
-  else {
-    version = val;
-  }
-  val = config.lookUp( "set", "NER" );
-  if ( val.empty() ){
-    tagset = "http://ilk.uvt.nl/folia/sets/frog-ner-nl";
-  }
-  else {
-    tagset = val;
-  }
-  string charFile = config.lookUp( "char_filter_file", "NER" );
-  if ( charFile.empty() )
-    charFile = config.lookUp( "char_filter_file" );
-  if ( !charFile.empty() ){
-    charFile = prefix( config.configDir(), charFile );
-    filter = new Tokenizer::UnicodeFilter();
-    filter->fill( charFile );
-  }
-  val = config.lookUp( "max_ner_size", "NER" );
+  string val = config.lookUp( "max_ner_size", "NER" );
   if ( !val.empty() ){
     max_ner_size = TiCC::stringTo<int>( val );
   }
@@ -140,21 +59,12 @@ bool ENERTagger::init( const Configuration& config ){
       return false;
     }
   }
-  string cls = config.lookUp( "outputclass" );
-  if ( !cls.empty() ){
-    textclass = cls;
-  }
-  else {
-    textclass = "current";
-  }
-  string init = "-s " + settings + " -vcf";
-  tagger = new MbtAPI( init, *nerLog );
-  return tagger->isInit();
+  return true;
 }
 
 bool ENERTagger::fill_ners( const string& cat,
-			   const string& name,
-			   const string& config_dir ){
+			    const string& name,
+			    const string& config_dir ){
   string file_name = name;
   if ( !TiCC::isFile( file_name ) ){
     file_name = config_dir + "/" + name;
@@ -447,21 +357,7 @@ void ENERTagger::Classify( const vector<folia::Word *>& swords ){
   if ( !swords.empty() ) {
     vector<string> words;
     vector<string> ptags;
-    for ( size_t i=0; i < swords.size(); ++i ){
-      folia::Word *sw = swords[i];
-      folia::PosAnnotation *postag = 0;
-      UnicodeString word;
-#pragma omp critical(foliaupdate)
-      {
-	word = sw->text( textclass );
-	postag = sw->annotation<folia::PosAnnotation>( cgn_tagset );
-      }
-      if ( filter ){
-	word = filter->filter( word );
-      }
-      words.push_back( folia::UnicodeToUTF8(word) );
-      ptags.push_back( postag->cls() );
-    }
+    extract_words_tags( swords, cgn_tagset, words, ptags );
     vector<string> ktags;
     create_ner_list( words, ktags );
     string text_block;
@@ -493,37 +389,27 @@ void ENERTagger::Classify( const vector<folia::Word *>& swords ){
     if ( debug ){
       LOG << "TAGGING TEXT_BLOCK\n" << text_block << endl;
     }
-    vector<TagResult> tagv = tagger->TagLine( text_block );
+    _tag_result = tagger->TagLine( text_block );
     if ( debug ){
       LOG << "NER tagger out: " << endl;
-      for ( size_t i=0; i < tagv.size(); ++i ){
-	LOG << "[" << i << "] : word=" << tagv[i].word()
-	    << " tag=" << tagv[i].assignedTag()
-	    << " confidence=" << tagv[i].confidence() << endl;
+      for ( size_t i=0; i < _tag_result.size(); ++i ){
+	LOG << "[" << i << "] : word=" << _tag_result[i].word()
+	    << " tag=" << _tag_result[i].assignedTag()
+	    << " confidence=" << _tag_result[i].confidence() << endl;
       }
     }
-    vector<string> tags;
-    vector<double> conf;
-    for ( const auto& tag : tagv ){
-      tags.push_back( tag.assignedTag() );
-      conf.push_back( tag.confidence() );
-    }
-    addNERTags( swords, tags, conf );
   }
+  post_process( swords );
 }
 
-vector<TagResult> ENERTagger::tagLine( const string& line ){
-  if ( tagger ){
-    return tagger->TagLine(line);
+void ENERTagger::post_process( const std::vector<folia::Word*>& swords ){
+  vector<string> tags;
+  vector<double> conf;
+  for ( const auto& tag : _tag_result ){
+    tags.push_back( tag.assignedTag() );
+    conf.push_back( tag.confidence() );
   }
-  throw runtime_error( "ENERTagger is not initialized" );
-}
-
-string ENERTagger::set_eos_mark( const string& eos ){
-  if ( tagger ){
-    return tagger->set_eos_mark(eos);
-  }
-  throw runtime_error( "ENERTagger is not initialized" );
+  addNERTags( swords, tags, conf );
 }
 
 bool ENERTagger::Generate( const std::string& opt_line ){

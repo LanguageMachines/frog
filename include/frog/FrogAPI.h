@@ -108,6 +108,7 @@ class FrogAPI {
   std::string Frogtostringfromfile( const std::string& );
 
  private:
+  void test_version( const std::string&, double );
   // functions
   bool TestSentence( folia::Sentence*, TimerBlock&);
   void FrogStdin( bool prompt );

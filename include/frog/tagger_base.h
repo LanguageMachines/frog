@@ -50,6 +50,10 @@ class BaseTagger {
   std::string extract_sentence( const std::vector<folia::Word*>&,
 				std::vector<std::string>& );
  protected:
+  void extract_words_tags(  const std::vector<folia::Word *>&,
+			    const std::string&,
+			    std::vector<std::string>&,
+			    std::vector<std::string>& );
   int debug;
   std::string _label;
   std::string tagset;

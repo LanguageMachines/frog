@@ -178,21 +178,7 @@ void EIOBTagger::Classify( const vector<Word *>& swords ){
   if ( !swords.empty() ) {
     vector<string> words;
     vector<string> ptags;
-    for ( size_t i=0; i < swords.size(); ++i ){
-      folia::Word *sw = swords[i];
-      folia::PosAnnotation *postag = 0;
-      UnicodeString word;
-#pragma omp critical(foliaupdate)
-      {
-	word = sw->text( textclass );
-	postag = sw->annotation<folia::PosAnnotation>( cgn_tagset );
-      }
-      if ( filter ){
-	word = filter->filter( word );
-      }
-      words.push_back( folia::UnicodeToUTF8(word) );
-      ptags.push_back( postag->cls() );
-    }
+    extract_words_tags( swords, cgn_tagset, words, ptags );
     string text_block;
     string prev = "_";
     for ( size_t i=0; i < swords.size(); ++i ){
@@ -225,7 +211,9 @@ void EIOBTagger::Classify( const vector<Word *>& swords ){
 }
 
 void EIOBTagger::post_process( const std::vector<folia::Word*>& swords ){
-  LOG << "EIOB postprocess...." << endl;
+  if ( debug ){
+    LOG << "EIOB postprocess...." << endl;
+  }
   vector<double> conf;
   vector<string> tags;
   for ( const auto& tag : _tag_result ){
