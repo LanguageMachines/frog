@@ -138,7 +138,7 @@ FrogOptions::FrogOptions() {
   docid = "untitled";
   inputclass="current";
   outputclass="current";
-  textredundancy="full";
+  textredundancy="minimal";
   debugFlag = 0;
 }
 
