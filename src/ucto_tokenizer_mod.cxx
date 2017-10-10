@@ -111,7 +111,10 @@ bool UctoTokenizer::init( const Configuration& config ){
       }
     }
   }
-
+  string textredundancy = config.lookUp( "textredundancy", "tokenizer" );
+  if ( !textredundancy.empty() ){
+    tokenizer->setTextRedundancy( textredundancy );
+  }
   tokenizer->setEosMarker( "" );
   tokenizer->setVerbose( false );
   tokenizer->setSentenceDetection( true ); //detection of sentences
@@ -182,6 +185,14 @@ void UctoTokenizer::setDocID( const std::string& id ){
 void UctoTokenizer::setInputXml( bool b ){
   if ( tokenizer ){
     tokenizer->setXMLInput( b );
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initialized" );
+}
+
+void UctoTokenizer::setTextRedundancy( const string& tr ) {
+  if ( tokenizer ){
+    tokenizer->setTextRedundancy( tr );
   }
   else
     throw runtime_error( "ucto tokenizer not initialized" );

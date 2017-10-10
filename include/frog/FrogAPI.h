@@ -83,6 +83,7 @@ class FrogOptions {
   std::string inputclass;
   std::string outputclass;
   std::string language;
+  std::string textredundancy;
 
   unsigned int maxParserTokens;
 

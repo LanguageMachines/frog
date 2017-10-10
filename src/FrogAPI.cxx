@@ -138,6 +138,7 @@ FrogOptions::FrogOptions() {
   docid = "untitled";
   inputclass="current";
   outputclass="current";
+  textredundancy="full";
   debugFlag = 0;
 }
 
@@ -250,6 +251,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       tokenizer->setUttMarker( options.uttmark );
       tokenizer->setInputClass( options.inputclass );
       tokenizer->setOutputClass( options.outputclass );
+      tokenizer->setTextRedundancy( options.textredundancy );
       myCGNTagger = new CGNTagger( theErrLog );
       stat = myCGNTagger->init( configuration );
       if ( stat ){
@@ -320,20 +322,34 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 #endif
 
     bool tokStat = true;
+    string tokWhat;
     bool lemStat = true;
+    string lemWhat;
     bool mwuStat = true;
+    string mwuWhat;
     bool mbaStat = true;
+    string mbaWhat;
     bool parStat = true;
+    string parWhat;
     bool tagStat = true;
+    string tagWhat;
     bool iobStat = true;
+    string iobWhat;
     bool nerStat = true;
+    string nerWhat;
 
 #pragma omp parallel sections
     {
 #pragma omp section
       {
-	tokenizer = new UctoTokenizer(theErrLog);
-	tokStat = tokenizer->init( configuration );
+	try {
+	  tokenizer = new UctoTokenizer(theErrLog);
+	  tokStat = tokenizer->init( configuration );
+	}
+	catch ( const exception& e ){
+	  tokWhat = e.what();
+	  tokStat = false;
+	}
 	if ( tokStat ){
 	  tokenizer->setPassThru( !options.doTok );
 	  tokenizer->setDocID( options.docid );
@@ -344,63 +360,106 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	  tokenizer->setUttMarker( options.uttmark );
 	  tokenizer->setInputClass( options.inputclass );
 	  tokenizer->setOutputClass( options.outputclass );
+	  tokenizer->setTextRedundancy( options.textredundancy );
 	}
       }
 #pragma omp section
       {
 	if ( options.doLemma ){
-	  myMblem = new Mblem(theErrLog);
-	  lemStat = myMblem->init( configuration );
+	  try {
+	    myMblem = new Mblem(theErrLog);
+	    lemStat = myMblem->init( configuration );
+	  }
+	  catch ( const exception& e ){
+	    lemWhat = e.what();
+	    lemStat = false;
+	  }
 	}
       }
 #pragma omp section
       {
 	if ( options.doMorph ){
-	  myMbma = new Mbma(theErrLog);
-	  mbaStat = myMbma->init( configuration );
-	  if ( options.doDeepMorph )
-	    myMbma->setDeepMorph(true);
+	  try {
+	    myMbma = new Mbma(theErrLog);
+	    mbaStat = myMbma->init( configuration );
+	    if ( options.doDeepMorph )
+	      myMbma->setDeepMorph(true);
+	  }
+	  catch ( const exception& e ){
+	    mbaWhat = e.what();
+	    mbaStat = false;
+	  }
 	}
       }
 #pragma omp section
       {
-	myCGNTagger = new CGNTagger( theErrLog );
-	tagStat = myCGNTagger->init( configuration );
+	try {
+	  myCGNTagger = new CGNTagger( theErrLog );
+	  tagStat = myCGNTagger->init( configuration );
+	}
+	catch ( const exception& e ){
+	  tagWhat = e.what();
+	  tagStat = false;
+	}
       }
 #pragma omp section
       {
 	if ( options.doIOB ){
+	  try {
 #ifdef ENR_IOB
-	  myIOBTagger = new EIOBTagger( theErrLog );
+	    myIOBTagger = new EIOBTagger( theErrLog );
 #else
-	  myIOBTagger = new IOBTagger( theErrLog );
+	    myIOBTagger = new IOBTagger( theErrLog );
 #endif
-	  iobStat = myIOBTagger->init( configuration );
+	    iobStat = myIOBTagger->init( configuration );
+	  }
+	  catch ( const exception& e ){
+	    iobWhat = e.what();
+	    iobStat = false;
+	  }
 	}
       }
 #pragma omp section
       {
 	if ( options.doNER ){
+	  try {
 #ifdef ENR_NER
-	  myNERTagger = new ENERTagger( theErrLog );
+	    myNERTagger = new ENERTagger( theErrLog );
 #else
-	  myNERTagger = new NERTagger( theErrLog );
+	    myNERTagger = new NERTagger( theErrLog );
 #endif
-	  nerStat = myNERTagger->init( configuration );
+	    nerStat = myNERTagger->init( configuration );
+	  }
+	  catch ( const exception& e ){
+	    nerWhat = e.what();
+	    nerStat = false;
+	  }
 	}
       }
 #pragma omp section
       {
 	if ( options.doMwu ){
-	  myMwu = new Mwu(theErrLog);
-	  mwuStat = myMwu->init( configuration );
-	  if ( mwuStat && options.doParse ){
-	    Timer initTimer;
-	    initTimer.start();
-	    myParser = new Parser(theErrLog);
-	    parStat = myParser->init( configuration );
-	    initTimer.stop();
-	    LOG << "init Parse took: " << initTimer << endl;
+	  try {
+	    myMwu = new Mwu(theErrLog);
+	    mwuStat = myMwu->init( configuration );
+	    if ( mwuStat && options.doParse ){
+	      Timer initTimer;
+	      initTimer.start();
+	      try {
+		myParser = new Parser(theErrLog);
+		parStat = myParser->init( configuration );
+		initTimer.stop();
+		LOG << "init Parse took: " << initTimer << endl;
+	      }
+	      catch ( const exception& e ){
+		parWhat = e.what();
+		parStat = false;
+	      }
+	    }
+	  }
+	  catch ( const exception& e ){
+	    mwuWhat = e.what();
+	    mwuStat = false;
 	  }
 	}
       }
@@ -409,28 +468,28 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	     && mbaStat && mwuStat && parStat ) ){
       string out = "Initialization failed for: ";
       if ( !tokStat ){
-	out += "[tokenizer] ";
+	out += "[tokenizer] " + tokWhat;
       }
       if ( !tagStat ){
-	out += "[tagger] ";
+	out += "[tagger] " + tagWhat;
       }
       if ( !iobStat ){
-	out += "[IOB] ";
+	out += "[IOB] " + iobWhat;
       }
       if ( !nerStat ){
-	out += "[NER] ";
+	out += "[NER] " + nerWhat;
       }
       if ( !lemStat ){
-	out += "[lemmatizer] ";
+	out += "[lemmatizer] " + lemWhat;
       }
       if ( !mbaStat ){
-	out += "[morphology] ";
+	out += "[morphology] " + mbaWhat;
       }
       if ( !mwuStat ){
-	out += "[multiword unit] ";
+	out += "[multiword unit] " + mwuWhat;
       }
       if ( !parStat ){
-	out += "[parser] ";
+	out += "[parser] " + parWhat;
       }
       LOG << out << endl;
       throw runtime_error( "Frog init failed" );

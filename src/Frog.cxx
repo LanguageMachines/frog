@@ -111,6 +111,10 @@ void usage( ) {
        << "\t                        already done files are skipped. (detected on the basis of already existing output files)\n"
        << "\t --max-parser-tokens=<n> inhibit parsing when a sentence contains over 'n' tokens. (default: 500, needs already 16Gb of memory!)\n"
        << "\t -Q                   Enable quote detection in tokeniser.\n"
+       << "\t-T or --textredundancy=[full|minimal|none]  - set text redundancy level in the tokenizer for text nodes in FoLiA output: " << endl
+       << "\t                    'full' - add text to all levels: <p> <s> <w> etc." << endl
+       << "\t                    'minimal' - don't introduce text on higher levels, but retain what is already there." << endl
+       << "\t                    'none' - only introduce text on <w>, AND remove all text from higher levels" << endl
        << "\t============= MODULE SELECTION ==========================================\n"
        << "\t --skip=[mptncla]    Skip Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"
        << "\t============= CONFIGURATION OPTIONS =====================================\n"
@@ -253,7 +257,18 @@ bool parse_args( TiCC::CL_Options& Opts,
       }
     }
   }
-
+  string redundancy;
+  Opts.extract( 'T', redundancy );
+  Opts.extract( "textredundancy", redundancy );
+  if ( !redundancy.empty() ){
+    if ( redundancy != "full"
+	 && redundancy != "minimal"
+	 && redundancy != "none" ){
+      LOG << "unknown textredundancy level: " << redundancy << endl;
+      return false;
+    }
+    options.textredundancy = redundancy;
+  }
   options.doSentencePerLine = Opts.extract( 'n' );
   options.doQuoteDetection = Opts.extract( 'Q' );
   if ( Opts.extract( "skip", value )) {
@@ -525,12 +540,13 @@ int main(int argc, char *argv[]) {
   FrogOptions options;
 
   try {
-    TiCC::CL_Options Opts("c:e:o:t:x::X::nQhVd:S:",
+    TiCC::CL_Options Opts("c:e:o:t:T:x::X::nQhVd:S:",
 			  "textclass:,inputclass:,outputclass:,testdir:,"
-			  "uttmarker:,max-parser-tokens:,"
+			  "uttmarker:,max-parser-tokens:,textredundancy:,"
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
 			  "help,language:,retry,nostdout,"
-			  "debug:,keep-parser-files,version,threads:,override:,KANON");
+			  "debug:,keep-parser-files,version,threads:,"
+			  "override:,KANON");
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
       // we already did show what we wanted.
