@@ -36,7 +36,7 @@
 
 class ENERTagger: public BaseTagger {
  public:
-  explicit ENERTagger( TiCC::LogStream *l ): BaseTagger( l, "NER" ){};
+  explicit ENERTagger( TiCC::LogStream * );
   bool init( const TiCC::Configuration& );
   void Classify( const std::vector<folia::Word *>& );
   void post_process( const std::vector<folia::Word*>& );

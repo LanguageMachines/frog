@@ -140,11 +140,7 @@ class FrogAPI {
 #else
   IOBTagger *myIOBTagger;
 #endif
-#ifdef ENR_NER
   ENERTagger *myNERTagger;
-#else
-  NERTagger *myNERTagger;
-#endif
   UctoTokenizer *tokenizer;
 };
 

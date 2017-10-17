@@ -65,7 +65,6 @@
 #endif /* HAVE_READLINE_HISTORY */
 
 
-//#define ENR_NER
 //#define ENR_IOB
 
 // individual module headers
@@ -80,11 +79,7 @@
 #else
 #include "frog/iob_tagger_mod.h"
 #endif
-#ifdef ENR_NER
 #include "frog/enr_ner_tagger_mod.h"
-#else
-#include "frog/ner_tagger_mod.h"
-#endif
 #include "frog/Parser.h"
 
 
@@ -150,28 +145,47 @@ void FrogAPI::test_version( const string& where, double minimum ){
       v = 0.5;
     }
   }
+  if ( where == "IOB" ){
 #ifdef ENR_IOB
-  if ( v < minimum ){
-    LOG << "[[" << where << "]] Wrong FrogData!. "
-	<< "Expected version " << minimum << " or higher for module: "
-	<< where << endl;
-    if ( version.empty() ) {
-      LOG << "but no version info was found!." << endl;
+    if ( v < minimum ){
+      LOG << "[[" << where << "]] Wrong FrogData!. "
+	  << "Expected version " << minimum << " or higher for module: "
+	  << where << endl;
+      if ( version.empty() ) {
+	LOG << "but no version info was found!." << endl;
+      }
+      else {
+	LOG << "but found version " << v << endl;
+      }
+      throw runtime_error( "Frog initialization failed" );
     }
-    else {
-      LOG << "but found version " << v << endl;
-    }
-    throw runtime_error( "Frog initialization failed" );
-  }
 #else
-  if ( !version.empty() && v >= 2 ){
-    LOG << "[[" << where << "]] Wrong FrogData!. "
-	<< "Expected version lower then " << minimum << " for module: "
-	<< where << endl;
-    LOG << "but found version " << v << endl;
-    throw runtime_error( "Frog initialization failed" );
-  }
+    if ( !version.empty() && v >= 2 ){
+      LOG << "[[" << where << "]] Wrong FrogData!. "
+	  << "Expected version lower then " << minimum << " for module: "
+	  << where << endl;
+      LOG << "but found version " << v << endl;
+      throw runtime_error( "Frog initialization failed" );
+    }
 #endif
+  }
+  else if ( where == "NER" ){
+    if ( v < minimum ){
+      LOG << "[[" << where << "]] Wrong FrogData!. "
+	  << "Expected version " << minimum << " or higher for module: "
+	  << where << endl;
+      if ( version.empty() ) {
+	LOG << "but no version info was found!." << endl;
+      }
+      else {
+	LOG << "but found version " << v << endl;
+      }
+      throw runtime_error( "Frog initialization failed" );
+    }
+  }
+  else {
+    throw logic_error( "unknown where:" + where );
+  }
 }
 
 FrogAPI::FrogAPI( FrogOptions &opt,
@@ -268,11 +282,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	  }
 	}
 	if ( stat && options.doNER ){
-#ifdef ENR_NER
 	  myNERTagger = new ENERTagger( theErrLog );
-#else
-	  myNERTagger = new NERTagger( theErrLog );
-#endif
 	  stat = myNERTagger->init( configuration );
 	  if ( stat ){
 	    myNERTagger->set_eos_mark( options.uttmark );
@@ -423,11 +433,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       {
 	if ( options.doNER ){
 	  try {
-#ifdef ENR_NER
 	    myNERTagger = new ENERTagger( theErrLog );
-#else
-	    myNERTagger = new NERTagger( theErrLog );
-#endif
 	    nerStat = myNERTagger->init( configuration );
 	  }
 	  catch ( const exception& e ){
@@ -551,22 +557,6 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
 	}
       }
 #endif
-#ifndef ENR_NER
-#pragma omp section
-      {
-	if ( options.doNER ){
-	  timers.nerTimer.start();
-	  try {
-	    myNERTagger->Classify( swords );
-	  }
-	  catch ( exception&e ){
-	    all_well = false;
-	    exs += string(e.what()) + " ";
-	  }
-	  timers.nerTimer.stop();
-	}
-      }
-#endif
     } // parallel sections
     if ( !all_well ){
       throw runtime_error( exs );
@@ -615,7 +605,6 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
     }
 #pragma omp parallel sections
     {
-#ifdef ENR_NER
 #pragma omp section
       {
 	if ( options.doNER ){
@@ -633,7 +622,6 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
 	  timers.nerTimer.stop();
 	}
       }
-#endif
 #ifdef ENR_IOB
 #pragma omp section
       {

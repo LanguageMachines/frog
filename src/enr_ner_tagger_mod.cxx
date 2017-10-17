@@ -44,6 +44,12 @@ using namespace Tagger;
 // should come from the config!
 const string cgn_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
 
+ENERTagger::ENERTagger( TiCC::LogStream *l ):
+  BaseTagger( l, "NER" ),
+  max_ner_size(20)
+{  known_ners.resize( max_ner_size + 1 );
+};
+
 bool ENERTagger::init( const Configuration& config ){
   if ( !BaseTagger::init( config ) ){
     return false;
@@ -52,7 +58,6 @@ bool ENERTagger::init( const Configuration& config ){
   if ( !val.empty() ){
     max_ner_size = TiCC::stringTo<int>( val );
   }
-  known_ners.resize( max_ner_size + 1 );
   val = config.lookUp( "known_ners", "NER" );
   if ( !val.empty() ){
     if ( !read_gazets( val, config.configDir() ) ){

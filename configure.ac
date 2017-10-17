@@ -103,7 +103,7 @@ PKG_CHECK_MODULES([ucto], [ucto >= 0.9.7] )
 CXXFLAGS="$CXXFLAGS $ucto_CFLAGS"
 LIBS="$ucto_LIBS $LIBS"
 
-PKG_CHECK_MODULES([frogdata], [frogdata >= 0.13] )
+PKG_CHECK_MODULES([frogdata], [frogdata >= 0.15] )
 
 
 AC_OUTPUT([
