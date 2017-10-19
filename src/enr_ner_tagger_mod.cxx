@@ -248,7 +248,10 @@ static void addEntity( folia::Sentence *sent,
   args["class"] = NER;
   args["confidence"] =  toString(c);
   args["set"] = tagset;
-  args["generate_id"] = el->id();
+  string parent_id = el->id();
+  if ( !parent_id.empty() ){
+    args["generate_id"] = el->id();
+  }
   if ( textclass != "current" ){
     args["textclass"] = textclass;
   }

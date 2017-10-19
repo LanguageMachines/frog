@@ -58,7 +58,10 @@ void EIOBTagger::addChunk( ChunkingLayer *chunks,
   args["class"] = IOB;
   args["set"] = tagset;
   args["confidence"] = toString(conf);
-  args["generate_id"] = chunks->id();
+  string parent_id = chunks->id();
+  if ( !parent_id.empty() ){
+    args["generate_id"] = chunks->id();
+  }
   Chunk *chunk = 0;
 #pragma omp critical(foliaupdate)
   {
