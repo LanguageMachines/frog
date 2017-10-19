@@ -168,16 +168,6 @@ bool ENERTagger::read_gazets( const string& name, const string& config_dir ){
   }
 }
 
-static size_t count_sp( const string& sentence, string::size_type pos ){
-  int sp = 0;
-  for ( string::size_type i=0; i < pos; ++i ){
-    if ( sentence[i] == ' ' ){
-      ++sp;
-    }
-  }
-  return sp;
-}
-
 static vector<string> serialize( const vector<set<string>>& stags ){
   // for every non empty set {el1,el2,..}, we compose a string like: el1+el2+...
   vector<string> ambitags( stags.size(), "O" );
@@ -189,6 +179,7 @@ static vector<string> serialize( const vector<set<string>>& stags ){
 	res += s + "+";
       }
       ambitags[pos] = res;
+      //      cerr << "set ambi[" << pos << " to " << res << endl;
     }
     ++pos;
   }
@@ -200,42 +191,30 @@ vector<string> ENERTagger::create_ner_list( const vector<string>& words ){
   if ( debug ){
     LOG << "search for known NER's" << endl;
   }
-  string sentence = " ";
-  for ( const auto& w : words ){
-    sentence += w + " ";
-  }
-  // so sentence starts AND ends with a space!
-  if ( debug ){
-    LOG << "Sentence = " << sentence << endl;
-  }
-  for ( size_t i = max_ner_size; i > 0; --i ){
-    // start with the longest Entities first
-    auto const& mp = known_ners[i];
-    if ( mp.empty() ){
-      continue;
-    }
-    for( auto const& it : mp ){
-      // we try to mach the entity in the sentence
-      string blub = " " + it.first + " ";
+  for ( size_t j=0; j < words.size(); ++j ){
+    // cycle through the words
+    string seq;
+    size_t len = 1;
+    for ( size_t i = 0; i < min( words.size() - j, (size_t)max_ner_size); ++i ){
+      // start looking for sequences of length len
+      auto const& mp = known_ners[len++];
+      if ( mp.empty() ){
+	continue;
+      }
+      seq += words[j+i];
       if ( debug ){
-	LOG << "blub = " << blub << endl;
+	LOG << "sequence = '" << seq << "'" << endl;
       }
-      string::size_type pos = sentence.find( blub );
-      while ( pos != string::npos ){
-	// a match found
-	// how deep in the sentence are we? count word position (spaces)
-	size_t sp = count_sp( sentence, pos );
+      auto const& tags = mp.find(seq);
+      if ( tags != mp.end() ){
 	if ( debug ){
-	  LOG << "matched '" << it.first << "' to '"
-	      << sentence << "' at position " << sp
-	      << " : " << it.second << endl;
+	  LOG << "FOUND tags " << tags->first << "-" << tags->second << endl;
 	}
-	for ( size_t j=0; j < i; ++j ){
-	  // create for every position a set of matched NER tags
-	  stags[sp+j].insert( it.second.begin(), it.second.end() );
+	for ( size_t k = 0; k <= i; ++k ){
+	  stags[k+j].insert( tags->second.begin(), tags->second.end() );
 	}
-	pos = sentence.find( blub, pos + blub.length() );
       }
+      seq += " ";
     }
   }
   return serialize( stags );
