@@ -178,27 +178,24 @@ static size_t count_sp( const string& sentence, string::size_type pos ){
   return sp;
 }
 
-static void serialize( const vector<set<string>>& stags, vector<string>& tags ){
+static vector<string> serialize( const vector<set<string>>& stags ){
+  // for every non empty set {el1,el2,..}, we compose a string like: el1+el2+...
+  vector<string> ambitags( stags.size(), "O" );
   size_t pos = 0;
   for ( const auto& it : stags ){
-    // using TiCC::operator<<;
-    // cerr << "stag[" << pos << "] =" << it << endl;
     if ( !it.empty() ){
       string res;
       for ( const auto& s : it ){
 	res += s + "+";
       }
-      //      cerr << "res=" << res << endl;
-      tags[pos] = res;
+      ambitags[pos] = res;
     }
     ++pos;
   }
+  return ambitags;
 }
 
-void ENERTagger::create_ner_list( const vector<string>& words,
-				 vector<string>& tags ){
-  tags.clear();
-  tags.resize( words.size(), "O" );
+vector<string> ENERTagger::create_ner_list( const vector<string>& words ){
   vector<set<string>> stags( words.size() );
   if ( debug ){
     LOG << "search for known NER's" << endl;
@@ -212,17 +209,21 @@ void ENERTagger::create_ner_list( const vector<string>& words,
     LOG << "Sentence = " << sentence << endl;
   }
   for ( size_t i = max_ner_size; i > 0; --i ){
+    // start with the longest Entities first
     auto const& mp = known_ners[i];
     if ( mp.empty() ){
       continue;
     }
     for( auto const& it : mp ){
+      // we try to mach the entity in the sentence
       string blub = " " + it.first + " ";
       if ( debug ){
 	LOG << "blub = " << blub << endl;
       }
       string::size_type pos = sentence.find( blub );
       while ( pos != string::npos ){
+	// a match found
+	// how deep in the sentence are we? count word position (spaces)
 	size_t sp = count_sp( sentence, pos );
 	if ( debug ){
 	  LOG << "matched '" << it.first << "' to '"
@@ -230,13 +231,14 @@ void ENERTagger::create_ner_list( const vector<string>& words,
 	      << " : " << it.second << endl;
 	}
 	for ( size_t j=0; j < i; ++j ){
+	  // create for every position a set of matched NER tags
 	  stags[sp+j].insert( it.second.begin(), it.second.end() );
 	}
 	pos = sentence.find( blub, pos + blub.length() );
       }
     }
   }
-  serialize( stags, tags );
+  return serialize( stags );
 }
 
 static void addEntity( folia::Sentence *sent,
@@ -367,8 +369,7 @@ void ENERTagger::Classify( const vector<folia::Word *>& swords ){
     vector<string> words;
     vector<string> ptags;
     extract_words_tags( swords, cgn_tagset, words, ptags );
-    vector<string> ktags;
-    create_ner_list( words, ktags );
+    vector<string> ktags = create_ner_list( words );
     string text_block;
     string prev = "_";
     string prevN = "_";

@@ -45,8 +45,7 @@ class ENERTagger: public BaseTagger {
 		   const std::vector<std::string>&,
 		   const std::vector<double>& );
   bool read_gazets( const std::string&, const std::string& );
-  void create_ner_list( const std::vector<std::string>&,
-			std::vector<std::string>& );
+  std::vector<std::string> create_ner_list( const std::vector<std::string>& );
   bool Generate( const std::string& );
  private:
   bool fill_ners( const std::string&, const std::string&, const std::string& );
