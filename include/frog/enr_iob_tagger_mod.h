@@ -45,6 +45,7 @@ class EIOBTagger: public BaseTagger {
   void addChunk( folia::ChunkingLayer *,
 		 const std::vector<folia::Word*>&,
 		 const std::vector<double>&,
+		 const std::string&,
 		 const std::string& );
   void addIOBTags( const std::vector<folia::Word*>&,
 		   const std::vector<std::string>&,

@@ -65,8 +65,6 @@
 #endif /* HAVE_READLINE_HISTORY */
 
 
-//#define ENR_IOB
-
 // individual module headers
 #include "frog/FrogAPI.h" //will also include Frog.h (internals), FrogAPI.h is for public  interface
 #include "frog/ucto_tokenizer_mod.h"
@@ -74,11 +72,7 @@
 #include "frog/mbma_mod.h"
 #include "frog/mwu_chunker_mod.h"
 #include "frog/cgn_tagger_mod.h"
-#ifdef ENR_IOB
 #include "frog/enr_iob_tagger_mod.h"
-#else
-#include "frog/iob_tagger_mod.h"
-#endif
 #include "frog/enr_ner_tagger_mod.h"
 #include "frog/Parser.h"
 
@@ -146,7 +140,6 @@ void FrogAPI::test_version( const string& where, double minimum ){
     }
   }
   if ( where == "IOB" ){
-#ifdef ENR_IOB
     if ( v < minimum ){
       LOG << "[[" << where << "]] Wrong FrogData!. "
 	  << "Expected version " << minimum << " or higher for module: "
@@ -159,15 +152,6 @@ void FrogAPI::test_version( const string& where, double minimum ){
       }
       throw runtime_error( "Frog initialization failed" );
     }
-#else
-    if ( !version.empty() && v >= 2 ){
-      LOG << "[[" << where << "]] Wrong FrogData!. "
-	  << "Expected version lower then " << minimum << " for module: "
-	  << where << endl;
-      LOG << "but found version " << v << endl;
-      throw runtime_error( "Frog initialization failed" );
-    }
-#endif
   }
   else if ( where == "NER" ){
     if ( v < minimum ){
@@ -271,11 +255,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       if ( stat ){
 	myCGNTagger->set_eos_mark( options.uttmark );
 	if ( options.doIOB ){
-#ifdef ENR_IOB
 	  myIOBTagger = new EIOBTagger( theErrLog );
-#else
-	  myIOBTagger = new IOBTagger( theErrLog );
-#endif
 	  stat = myIOBTagger->init( configuration );
 	  if ( stat ){
 	    myIOBTagger->set_eos_mark( options.uttmark );
@@ -416,11 +396,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       {
 	if ( options.doIOB ){
 	  try {
-#ifdef ENR_IOB
 	    myIOBTagger = new EIOBTagger( theErrLog );
-#else
-	    myIOBTagger = new IOBTagger( theErrLog );
-#endif
 	    iobStat = myIOBTagger->init( configuration );
 	  }
 	  catch ( const exception& e ){
@@ -541,22 +517,6 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
 	}
 	timers.tagTimer.stop();
       }
-#ifndef ENR_IOB
-#pragma omp section
-      {
-	if ( options.doIOB ){
-	  timers.iobTimer.start();
-	  try {
-	    myIOBTagger->Classify( swords );
-	  }
-	  catch ( exception&e ){
-	    all_well = false;
-	    exs += string(e.what()) + " ";
-	  }
-	  timers.iobTimer.stop();
-	}
-      }
-#endif
     } // parallel sections
     if ( !all_well ){
       throw runtime_error( exs );
@@ -622,7 +582,6 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
 	  timers.nerTimer.stop();
 	}
       }
-#ifdef ENR_IOB
 #pragma omp section
       {
 	if ( options.doIOB ){
@@ -637,7 +596,6 @@ bool FrogAPI::TestSentence( Sentence* sent, TimerBlock& timers){
 	  timers.iobTimer.stop();
 	}
       }
-#endif
 #pragma omp section
       {
 	if ( options.doMwu ){

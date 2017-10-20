@@ -135,11 +135,7 @@ class FrogAPI {
   Mwu *myMwu;
   Parser *myParser;
   CGNTagger *myCGNTagger;
-#ifdef ENR_IOB
   EIOBTagger *myIOBTagger;
-#else
-  IOBTagger *myIOBTagger;
-#endif
   ENERTagger *myNERTagger;
   UctoTokenizer *tokenizer;
 };

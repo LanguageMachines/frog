@@ -48,9 +48,10 @@ bool EIOBTagger::init( const Configuration& config ){
 }
 
 void EIOBTagger::addChunk( ChunkingLayer *chunks,
-			  const vector<Word*>& words,
-			  const vector<double>& confs,
-			  const string& IOB ){
+			   const vector<Word*>& words,
+			   const vector<double>& confs,
+			   const string& IOB,
+			   const string& textclass ){
   double conf = 1;
   for ( auto const& val : confs )
     conf *= val;
@@ -61,6 +62,9 @@ void EIOBTagger::addChunk( ChunkingLayer *chunks,
   string parent_id = chunks->id();
   if ( !parent_id.empty() ){
     args["generate_id"] = chunks->id();
+  }
+  if ( textclass != "current" ){
+    args["textclass"] = textclass;
   }
   Chunk *chunk = 0;
 #pragma omp critical(foliaupdate)
@@ -122,7 +126,7 @@ void EIOBTagger::addIOBTags( const vector<Word*>& words,
 	  using TiCC::operator<<;
 	  LOG << "spit out " << stack << endl;
 	}
-	addChunk( el, stack, dstack, curIOB );
+	addChunk( el, stack, dstack, curIOB, textclass );
 	dstack.clear();
 	stack.clear();
       }
@@ -147,7 +151,7 @@ void EIOBTagger::addIOBTags( const vector<Word*>& words,
 	  using TiCC::operator<<;
 	  LOG << "spit out " << stack << endl;
 	}
-	addChunk( el, stack, dstack, curIOB );
+	addChunk( el, stack, dstack, curIOB, textclass );
 	dstack.clear();
 	stack.clear();
       }
@@ -163,7 +167,7 @@ void EIOBTagger::addIOBTags( const vector<Word*>& words,
       using TiCC::operator<<;
       LOG << "spit out " << stack << endl;
     }
-    addChunk( el, stack, dstack, curIOB );
+    addChunk( el, stack, dstack, curIOB, textclass );
   }
 }
 
