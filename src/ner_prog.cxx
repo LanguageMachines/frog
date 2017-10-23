@@ -44,7 +44,7 @@
 #include "libfolia/folia.h"
 #include "frog/ucto_tokenizer_mod.h"
 #include "mbt/MbtAPI.h"
-#include "frog/ner_tagger_mod.h"
+#include "frog/enr_ner_tagger_mod.h"
 
 using namespace std;
 using namespace Timbl;
@@ -73,7 +73,7 @@ void usage( ) {
        << "\t -d <debug level>    (for more verbosity)\n";
 }
 
-static NERTagger tagger(theErrLog);
+static ENERTagger tagger(theErrLog);
 
 bool parse_args( TiCC::CL_Options& Opts ) {
   if ( Opts.is_present( 'V' ) || Opts.is_present("version") ){

@@ -16,8 +16,8 @@ libfrog_la_SOURCES = FrogAPI.cxx \
 	mblem_mod.cxx csidp.cxx ckyparser.cxx \
 	Frog-util.cxx mwu_chunker_mod.cxx Parser.cxx \
 	tagger_base.cxx cgn_tagger_mod.cxx \
-	iob_tagger_mod.cxx enr_iob_tagger_mod.cxx \
-	ner_tagger_mod.cxx enr_ner_tagger_mod.cxx \
+	enr_iob_tagger_mod.cxx \
+	enr_ner_tagger_mod.cxx \
 	ucto_tokenizer_mod.cxx
 
 
