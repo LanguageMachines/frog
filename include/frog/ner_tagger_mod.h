@@ -29,28 +29,27 @@
 
 */
 
-#ifndef NER_TAGGER_MOD_H
-#define NER_TAGGER_MOD_H
+#ifndef ENER_TAGGER_MOD_H
+#define ENER_TAGGER_MOD_H
 
 #include "frog/tagger_base.h"
 
-class NERTagger: public BaseTagger {
+class ENERTagger: public BaseTagger {
  public:
-  explicit NERTagger( TiCC::LogStream *l ): BaseTagger( l,  "NER" ){};
+  explicit ENERTagger( TiCC::LogStream * );
   bool init( const TiCC::Configuration& );
+  void Classify( const std::vector<folia::Word *>& );
   void post_process( const std::vector<folia::Word*>& );
   void addDeclaration( folia::Document& ) const;
   void addNERTags( const std::vector<folia::Word*>&,
 		   const std::vector<std::string>&,
 		   const std::vector<double>& );
-  bool fill_known_ners( const std::string&, const std::string& );
-  void handle_known_ners( const std::vector<std::string>&,
-			  std::vector<std::string>& );
-  void merge( const std::vector<std::string>&,
-	      std::vector<std::string>& tags,
-	      std::vector<double>& );
+  bool read_gazets( const std::string&, const std::string& );
+  std::vector<std::string> create_ner_list( const std::vector<std::string>& );
+  bool Generate( const std::string& );
  private:
-  std::vector<std::map<std::string,std::string>> known_ners;
+  bool fill_ners( const std::string&, const std::string&, const std::string& );
+  std::vector<std::map<std::string,std::set<std::string>>> known_ners;
   int max_ner_size;
 };
 

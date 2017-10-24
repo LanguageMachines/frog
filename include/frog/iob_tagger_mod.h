@@ -29,21 +29,23 @@
 
 */
 
-#ifndef IOB_TAGGER_MOD_H
-#define IOB_TAGGER_MOD_H
+#ifndef EIOB_TAGGER_MOD_H
+#define EIOB_TAGGER_MOD_H
 
 #include "frog/tagger_base.h"
 
-class IOBTagger: public BaseTagger {
+class EIOBTagger: public BaseTagger {
  public:
-  explicit IOBTagger( TiCC::LogStream *l ): BaseTagger( l, "IOB" ){};
+  explicit EIOBTagger( TiCC::LogStream *l ): BaseTagger( l, "IOB" ){};
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
+  void Classify( const std::vector<folia::Word*>& );
   void post_process( const std::vector<folia::Word*>& );
  private:
   void addChunk( folia::ChunkingLayer *,
 		 const std::vector<folia::Word*>&,
 		 const std::vector<double>&,
+		 const std::string&,
 		 const std::string& );
   void addIOBTags( const std::vector<folia::Word*>&,
 		   const std::vector<std::string>&,

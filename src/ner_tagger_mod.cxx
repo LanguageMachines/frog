@@ -33,7 +33,7 @@
 #include "frog/Frog.h"
 #include "ucto/unicode.h"
 #include "ticcutils/FileUtils.h"
-#include "frog/ner_tagger_mod.h"
+#include "frog/enr_ner_tagger_mod.h"
 
 using namespace std;
 using namespace TiCC;
@@ -41,35 +41,44 @@ using namespace Tagger;
 
 #define LOG *Log(tag_log)
 
-bool NERTagger::init( const Configuration& config ){
+// should come from the config!
+const string cgn_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
+
+ENERTagger::ENERTagger( TiCC::LogStream *l ):
+  BaseTagger( l, "NER" ),
+  max_ner_size(20)
+{  known_ners.resize( max_ner_size + 1 );
+}
+
+bool ENERTagger::init( const Configuration& config ){
   if ( !BaseTagger::init( config ) ){
     return false;
   }
-  string val = config.lookUp( "max_ner_size", _label );
+  string val = config.lookUp( "max_ner_size", "NER" );
   if ( !val.empty() ){
     max_ner_size = TiCC::stringTo<int>( val );
   }
-  known_ners.resize( max_ner_size + 1 );
-  val = config.lookUp( "known_ners", _label );
+  val = config.lookUp( "known_ners", "NER" );
   if ( !val.empty() ){
-    if ( !fill_known_ners( val, config.configDir() ) ){
+    if ( !read_gazets( val, config.configDir() ) ){
       return false;
     }
   }
   return true;
 }
 
-bool NERTagger::fill_known_ners( const string& name, const string& config_dir ){
+bool ENERTagger::fill_ners( const string& cat,
+			    const string& name,
+			    const string& config_dir ){
   string file_name = name;
-  if ( name[0] != '/' ) {
-    file_name = config_dir + file_name;
+  if ( !TiCC::isFile( file_name ) ){
+    file_name = config_dir + "/" + name;
+    if ( !TiCC::isFile( file_name ) ){
+      LOG << "unable to load additional NE from file: " << file_name << endl;
+      return false;
+    }
   }
   ifstream is( file_name );
-  if ( !is ){
-    LOG << "unable to load additional NE from " << file_name << endl;
-    return false;
-  }
-  int err_cnt = 0;
   int long_err_cnt = 0;
   size_t ner_cnt = 0;
   string line;
@@ -77,41 +86,10 @@ bool NERTagger::fill_known_ners( const string& name, const string& config_dir ){
     if ( line.empty() || line[0] == '#' ){
       continue;
     }
-    if ( TiCC::isFile( line ) ){
-      if ( !fill_known_ners( line, "" ) ){
-	LOG << "unable to load additional NE from included file: "
-	    << line << endl;
-	return false;
-      }
-    }
-    else if ( TiCC::isFile( config_dir + line ) ){
-      if ( !fill_known_ners( line, config_dir ) ){
-	LOG << "unable to load additional NE from include file: "
-	    << config_dir + line << endl;
-	return false;
-      }
-    }
     else {
       vector<string> parts;
-      if ( TiCC::split_at( line, parts, "\t" ) != 2 ){
-	LOG << "expected 2 TAB-separated parts in line: '" << line << "'" << endl;
-	if ( ++err_cnt > 50 ){
-	  LOG << "too many errors in additional wordlist file: " << file_name << endl;
-	  return false;
-	}
-	else {
-	  LOG << "ignoring entry" << endl;
-	  continue;
-	}
-      }
-      line = parts[0];
-      string ner_value = parts[1];
       size_t num = TiCC::split( line, parts );
-      if ( num == 1 ){
-	// ignore single word NE's
-	continue;
-      }
-      if ( num < 1 || num > (unsigned)max_ner_size ){
+      if ( num > (unsigned)max_ner_size ){
 	// LOG << "expected 1 to " << max_ner_size
 	// 		   << " SPACE-separated parts in line: '" << line
 	// 		   << "'" << endl;
@@ -126,6 +104,7 @@ bool NERTagger::fill_known_ners( const string& name, const string& config_dir ){
 	  continue;
 	}
       }
+      // reconstruct the NER with single spaces
       line = "";
       for ( const auto& part : parts ){
 	line += part;
@@ -133,112 +112,112 @@ bool NERTagger::fill_known_ners( const string& name, const string& config_dir ){
 	  line += " ";
 	}
       }
-      known_ners[num][line] = ner_value;
+      known_ners[num][line].insert( cat );
       ++ner_cnt;
     }
   }
-  LOG << "loaded " << ner_cnt << " additional Named Entities from"
-      << file_name << endl;
+  LOG << "loaded " << ner_cnt << " additional " << cat
+      << " Named Entities from: " << file_name << endl;
   return true;
 }
 
-size_t count_sp( const string& sentence, string::size_type pos ){
-  int sp = 0;
-  for ( string::size_type i=0; i < pos; ++i ){
-    if ( sentence[i] == ' ' ){
-      ++sp;
+bool ENERTagger::read_gazets( const string& name, const string& config_dir ){
+  string file_name = name;
+  if ( name[0] != '/' ) {
+    file_name = config_dir + "/" + file_name;
+  }
+  ifstream is( file_name );
+  if ( !is ){
+    LOG << "Unable to find Named Enties file " << file_name << endl;
+    return false;
+  }
+  LOG << "READ  " << file_name << endl;
+  int err_cnt = 0;
+  size_t file_cnt = 0;
+  string line;
+  while ( getline( is, line ) ){
+    if ( line.empty() || line[0] == '#' ){
+      continue;
+    }
+    // we search for entries of the form 'category\tfilename'
+    vector<string> parts;
+    if ( TiCC::split_at( line, parts, "\t" ) != 2 ){
+      LOG << "expected 2 TAB-separated parts in line: '" << line << "'" << endl;
+      if ( ++err_cnt > 50 ){
+	LOG << "too many errors in additional wordlist file: " << file_name << endl;
+	return false;
+      }
+      else {
+	LOG << "ignoring entry" << endl;
+	continue;
+      }
+    }
+    string cat  = parts[0];
+    string file = parts[1];
+    if ( fill_ners( cat, file, config_dir ) ){
+      ++file_cnt;
     }
   }
-  return sp;
+  if ( file_cnt < 1 ){
+    LOG << "unable to load any additional Named Enties." << endl;
+    return false;
+  }
+  else {
+    LOG << "loaded " << file_cnt << " additional Named Entities files" << endl;
+    return true;
+  }
 }
 
-void NERTagger::handle_known_ners( const vector<string>& words,
-				   vector<string>& tags ){
+static vector<string> serialize( const vector<set<string>>& stags ){
+  // for every non empty set {el1,el2,..}, we compose a string like: el1+el2+...
+  vector<string> ambitags( stags.size(), "O" );
+  size_t pos = 0;
+  for ( const auto& it : stags ){
+    if ( !it.empty() ){
+      string res;
+      for ( const auto& s : it ){
+	res += s + "+";
+      }
+      ambitags[pos] = res;
+      //      cerr << "set ambi[" << pos << " to " << res << endl;
+    }
+    ++pos;
+  }
+  return ambitags;
+}
+
+vector<string> ENERTagger::create_ner_list( const vector<string>& words ){
+  vector<set<string>> stags( words.size() );
   if ( debug ){
     LOG << "search for known NER's" << endl;
   }
-  string sentence = " ";
-  for ( const auto& w : words ){
-    sentence += w + " ";
-  }
-  // so sentence starts AND ends with a space!
-  if ( debug ){
-    LOG << "Sentence = " << sentence << endl;
-  }
-  for ( size_t i = max_ner_size; i > 0; --i ){
-    auto const& mp = known_ners[i];
-    if ( mp.empty() ){
-      continue;
-    }
-    for( auto const& it : mp ){
-      string blub = " " + it.first + " ";
-      string::size_type pos = sentence.find( blub );
-      while ( pos != string::npos ){
-	size_t sp = count_sp( sentence, pos );
+  for ( size_t j=0; j < words.size(); ++j ){
+    // cycle through the words
+    string seq;
+    size_t len = 1;
+    for ( size_t i = 0; i < min( words.size() - j, (size_t)max_ner_size); ++i ){
+      // start looking for sequences of length len
+      auto const& mp = known_ners[len++];
+      if ( mp.empty() ){
+	continue;
+      }
+      seq += words[j+i];
+      if ( debug ){
+	LOG << "sequence = '" << seq << "'" << endl;
+      }
+      auto const& tags = mp.find(seq);
+      if ( tags != mp.end() ){
 	if ( debug ){
-	  LOG << "matched '" << it.first << "' to '"
-	      << sentence << "' at position " << sp
-	      << " : " << it.second << endl;
+	  LOG << "FOUND tags " << tags->first << "-" << tags->second << endl;
 	}
-	bool safe = true;
-	for ( size_t j=0; j < i && safe; ++j ){
-	  safe = ( tags[sp+j] == "O" );
-	}
-	if ( safe ){
-	  // we can safely change the tag (don't trample upon hits of longer known ners!)
-	  tags[sp] = "B-" + it.second;
-	  for ( size_t j=1; j < i; ++j ){
-	    tags[sp+j] = "I-" + it.second;
-	  }
-	}
-	pos = sentence.find( blub, pos + blub.length() );
-      }
-    }
-  }
-}
-
-void NERTagger::merge( const vector<string>& ktags, vector<string>& tags,
-		       vector<double>& conf ){
-  if ( debug ){
-    using TiCC::operator<<;
-    LOG << "merge " << ktags << endl << "with  " << tags << endl;
-  }
-  for ( size_t i=0; i < ktags.size(); ++i ){
-    if ( ktags[i] == "O" ){
-      if ( i > 0 && ktags[i-1] != "O" ){
-	// so we did some merging.  check that we aren't in the middle of some tag now
-	size_t j = i;
-	while ( j < tags.size() && tags[j][0] == 'I' ) {
-	  tags[j] = "O";
-	  ++j;
+	for ( size_t k = 0; k <= i; ++k ){
+	  stags[k+j].insert( tags->second.begin(), tags->second.end() );
 	}
       }
-      continue;
-    }
-    else if ( ktags[i][0] == 'B' ){
-      // maybe we landed in the middle of some tag.
-      if ( i > 0 && tags[i][0] == 'I' ){
-	// indeed, so erase it backwards
-	// except when at the start. then an 'I' should be a 'B' anyway
-	size_t j = i;
-	while ( tags[j][0] == 'I' ){
-	  tags[j] = "O";
-	  --j;
-	}
-	tags[j] = "O";
-      }
-      // now copy
-      tags[i] = ktags[i];
-      conf[i] = 1.0;
-    }
-    else {
-      tags[i] = ktags[i];
-      conf[i] = 1.0;
+      seq += " ";
     }
   }
-  if ( debug ){
-    LOG << "Merge gave " << tags << endl;
-  }
+  return serialize( stags );
 }
 
 static void addEntity( folia::Sentence *sent,
@@ -248,7 +227,7 @@ static void addEntity( folia::Sentence *sent,
 		       const string& NER,
 		       const string& textclass ){
   folia::EntitiesLayer *el = 0;
-#pragma omp critical (foliaupdate)
+#pragma omp critical(foliaupdate)
   {
     try {
       el = sent->annotation<folia::EntitiesLayer>();
@@ -269,25 +248,28 @@ static void addEntity( folia::Sentence *sent,
   args["class"] = NER;
   args["confidence"] =  toString(c);
   args["set"] = tagset;
-  args["generate_id"] = el->id();
+  string parent_id = el->id();
+  if ( !parent_id.empty() ){
+    args["generate_id"] = el->id();
+  }
   if ( textclass != "current" ){
     args["textclass"] = textclass;
   }
   folia::Entity *e = 0;
-#pragma omp critical (foliaupdate)
+#pragma omp critical(foliaupdate)
   {
     e = new folia::Entity( args, el->doc() );
     el->append( e );
   }
   for ( const auto& word : words ){
-#pragma omp critical (foliaupdate)
+#pragma omp critical(foliaupdate)
     {
       e->append( word );
     }
   }
 }
 
-void NERTagger::addNERTags( const vector<folia::Word*>& words,
+void ENERTagger::addNERTags( const vector<folia::Word*>& words,
 			    const vector<string>& tags,
 			    const vector<double>& confs ){
   if ( words.empty() ) {
@@ -354,8 +336,8 @@ void NERTagger::addNERTags( const vector<folia::Word*>& words,
   }
 }
 
-void NERTagger::addDeclaration( folia::Document& doc ) const {
-#pragma omp critical (foliaupdate)
+void ENERTagger::addDeclaration( folia::Document& doc ) const {
+#pragma omp critical(foliaupdate)
   {
     doc.declare( folia::AnnotationType::ENTITY,
 		 tagset,
@@ -364,15 +346,64 @@ void NERTagger::addDeclaration( folia::Document& doc ) const {
   }
 }
 
-void NERTagger::post_process( const std::vector<folia::Word*>& swords ){
-  vector<double> conf;
+void ENERTagger::Classify( const vector<folia::Word *>& swords ){
+  if ( !swords.empty() ) {
+    vector<string> words;
+    vector<string> ptags;
+    extract_words_tags( swords, cgn_tagset, words, ptags );
+    vector<string> ktags = create_ner_list( words );
+    string text_block;
+    string prev = "_";
+    string prevN = "_";
+    for ( size_t i=0; i < swords.size(); ++i ){
+      string word = words[i];
+      string pos = ptags[i];
+      text_block += word + "\t" + prev + "\t" + pos + "\t";
+      prev = pos;
+      if ( i < swords.size() - 1 ){
+	text_block += ptags[i+1];
+      }
+      else {
+	text_block += "_";
+      }
+      string ktag = ktags[i];
+      text_block += "\t" + prevN + "\t" + ktag + "\t";
+      prevN = ktag;
+      if ( i < swords.size() - 1 ){
+	text_block += ktags[i+1];
+      }
+      else {
+	text_block += "_";
+      }
+
+      text_block += "\t??\n";
+    }
+    if ( debug ){
+      LOG << "TAGGING TEXT_BLOCK\n" << text_block << endl;
+    }
+    _tag_result = tagger->TagLine( text_block );
+    if ( debug ){
+      LOG << "NER tagger out: " << endl;
+      for ( size_t i=0; i < _tag_result.size(); ++i ){
+	LOG << "[" << i << "] : word=" << _tag_result[i].word()
+	    << " tag=" << _tag_result[i].assignedTag()
+	    << " confidence=" << _tag_result[i].confidence() << endl;
+      }
+    }
+  }
+  post_process( swords );
+}
+
+void ENERTagger::post_process( const std::vector<folia::Word*>& swords ){
   vector<string> tags;
+  vector<double> conf;
   for ( const auto& tag : _tag_result ){
     tags.push_back( tag.assignedTag() );
     conf.push_back( tag.confidence() );
   }
-  vector<string> ktags( _tag_result.size(), "O" );
-  handle_known_ners( _words, ktags );
-  merge( ktags, tags, conf );
   addNERTags( swords, tags, conf );
+}
+
+bool ENERTagger::Generate( const std::string& opt_line ){
+  return tagger->GenerateTagger( opt_line );
 }
