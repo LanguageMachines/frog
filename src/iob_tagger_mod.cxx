@@ -32,7 +32,7 @@
 #include "mbt/MbtAPI.h"
 #include "frog/Frog.h"
 #include "ucto/unicode.h"
-#include "frog/enr_iob_tagger_mod.h"
+#include "frog/iob_tagger_mod.h"
 
 using namespace std;
 using namespace folia;

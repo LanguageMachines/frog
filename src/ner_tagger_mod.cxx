@@ -33,7 +33,7 @@
 #include "frog/Frog.h"
 #include "ucto/unicode.h"
 #include "ticcutils/FileUtils.h"
-#include "frog/enr_ner_tagger_mod.h"
+#include "frog/ner_tagger_mod.h"
 
 using namespace std;
 using namespace TiCC;

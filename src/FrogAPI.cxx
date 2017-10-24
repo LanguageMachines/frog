@@ -72,8 +72,8 @@
 #include "frog/mbma_mod.h"
 #include "frog/mwu_chunker_mod.h"
 #include "frog/cgn_tagger_mod.h"
-#include "frog/enr_iob_tagger_mod.h"
-#include "frog/enr_ner_tagger_mod.h"
+#include "frog/iob_tagger_mod.h"
+#include "frog/ner_tagger_mod.h"
 #include "frog/Parser.h"
 
 

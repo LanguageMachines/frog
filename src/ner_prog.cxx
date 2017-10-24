@@ -44,7 +44,7 @@
 #include "libfolia/folia.h"
 #include "frog/ucto_tokenizer_mod.h"
 #include "mbt/MbtAPI.h"
-#include "frog/enr_ner_tagger_mod.h"
+#include "frog/ner_tagger_mod.h"
 
 using namespace std;
 using namespace Timbl;
