@@ -41,12 +41,10 @@
 #include "frog/mblem_mod.h"
 
 using namespace std;
-using namespace TiCC;
-using namespace folia;
 
-#define LOG *Log(mblemLog)
+#define LOG *TiCC::Log(mblemLog)
 
-Mblem::Mblem( LogStream *logstream ):
+Mblem::Mblem( TiCC::LogStream *logstream ):
   myLex(0),
   punctuation( "?...,:;\\'`(){}[]%#+-_=/!" ),
   history(20),
@@ -54,7 +52,7 @@ Mblem::Mblem( LogStream *logstream ):
   keep_case( false ),
   filter(0)
 {
-  mblemLog = new LogStream( logstream, "mblem" );
+  mblemLog = new TiCC::LogStream( logstream, "mblem" );
 }
 
 bool Mblem::fill_ts_map( const string& file ){
@@ -80,7 +78,7 @@ bool Mblem::fill_ts_map( const string& file ){
   return true;
 }
 
-bool Mblem::init( const Configuration& config ) {
+bool Mblem::init( const TiCC::Configuration& config ) {
   LOG << "Initiating lemmatizer..." << endl;
   debug = 0;
   string val = config.lookUp( "debug", "mblem" );
@@ -139,8 +137,7 @@ bool Mblem::init( const Configuration& config ) {
 
   string one_one_tagS = config.lookUp( "one_one_tags", "mblem" );
   if ( !one_one_tagS.empty() ){
-    vector<string> tags;
-    TiCC::split_at( one_one_tagS, tags, "," );
+    vector<string> tags = TiCC::split_at( one_one_tagS, "," );
     for ( auto const& t : tags ){
       one_one_tags.insert( t );
     }
@@ -148,7 +145,7 @@ bool Mblem::init( const Configuration& config ) {
 
   string par = config.lookUp( "keep_case", "mblem" );
   if ( !par.empty() ){
-    keep_case = stringTo<bool>( par );
+    keep_case = TiCC::stringTo<bool>( par );
   }
 
   string cls = config.lookUp( "outputclass" );
@@ -194,15 +191,15 @@ string Mblem::make_instance( const UnicodeString& in ) {
     }
   }
   instance += "?";
-  string result = UnicodeToUTF8(instance);
+  string result = folia::UnicodeToUTF8(instance);
   if ( debug ){
     LOG << "inst: " << instance << endl;
   }
   return result;
 }
 
-void Mblem::addLemma( Word *word, const string& cls ){
-  KWargs args;
+void Mblem::addLemma( folia::Word *word, const string& cls ){
+  folia::KWargs args;
   args["set"]=tagset;
   args["class"]=cls;
   if ( textclass != "current" ){
@@ -278,10 +275,10 @@ void Mblem::makeUnique( ){
   }
 }
 
-void Mblem::getFoLiAResult( Word *word, const UnicodeString& uWord ){
+void Mblem::getFoLiAResult( folia::Word *word, const UnicodeString& uWord ){
   if ( mblemResult.empty() ){
     // just return the word as a lemma
-    string result = UnicodeToUTF8( uWord );
+    string result = folia::UnicodeToUTF8( uWord );
     addLemma( word, result );
   }
   else {
@@ -293,18 +290,18 @@ void Mblem::getFoLiAResult( Word *word, const UnicodeString& uWord ){
 }
 
 
-void Mblem::addDeclaration( Document& doc ) const {
+void Mblem::addDeclaration( folia::Document& doc ) const {
 #pragma omp critical (foliaupdate)
   {
-    doc.declare( AnnotationType::LEMMA,
+    doc.declare( folia::AnnotationType::LEMMA,
 		 tagset,
 		 "annotator='frog-mblem-" + version
 		 + "', annotatortype='auto', datetime='" + getTime() + "'");
   }
 }
 
-void Mblem::Classify( Word *sword ){
-  if ( sword->isinstance(PlaceHolder_t ) )
+void Mblem::Classify( folia::Word *sword ){
+  if ( sword->isinstance( folia::PlaceHolder_t ) )
     return;
   UnicodeString uword;
   string pos;
@@ -329,7 +326,7 @@ void Mblem::Classify( Word *sword ){
 
   if ( token_class == "ABBREVIATION" ){
     // We dont handle ABBREVIATION's so just take the word as such
-    string word = UnicodeToUTF8(uword);
+    string word = folia::UnicodeToUTF8(uword);
     addLemma( sword, word );
     return;
   }
@@ -343,14 +340,14 @@ void Mblem::Classify( Word *sword ){
       if ( uword2.isEmpty() ){
 	uword2 = uword;
       }
-      string word = UnicodeToUTF8(uword2);
+      string word = folia::UnicodeToUTF8(uword2);
       addLemma( sword, word );
       return;
     }
   }
   if ( one_one_tags.find(pos) != one_one_tags.end() ){
     // some tags are just taken as such
-    string word = UnicodeToUTF8(uword);
+    string word = folia::UnicodeToUTF8(uword);
     addLemma( sword, word );
     return;
   }
@@ -373,7 +370,7 @@ void Mblem::Classify( const UnicodeString& uWord ){
   }
   // 1st find all alternatives
   vector<string> parts;
-  int numParts = split_at( classString, parts, "|" );
+  int numParts = TiCC::split_at( classString, parts, "|" );
   if ( numParts < 1 ){
     LOG << "no alternatives found" << endl;
   }
@@ -391,7 +388,7 @@ void Mblem::Classify( const UnicodeString& uWord ){
     else {
       // some edit info available, like: WW(27)+Dgekomen+Ikomen
       vector<string> edits;
-      size_t n = split_at( partS, edits, "+" );
+      size_t n = TiCC::split_at( partS, edits, "+" );
       if ( n < 1 )
 	throw runtime_error( "invalid editstring: " + partS );
       restag = edits[0]; // the first one is the POS tag
@@ -405,13 +402,13 @@ void Mblem::Classify( const UnicodeString& uWord ){
 	}
 	switch ( edit[0] ){
 	case 'P':
-	  prefix = UTF8ToUnicode( edit.substr( 1 ) );
+	  prefix = folia::UTF8ToUnicode( edit.substr( 1 ) );
 	  break;
 	case 'I':
-	  insstr = UTF8ToUnicode( edit.substr( 1 ) );
+	  insstr = folia::UTF8ToUnicode( edit.substr( 1 ) );
 	  break;
 	case 'D':
-	  delstr =  UTF8ToUnicode( edit.substr( 1 ) );
+	  delstr = folia::UTF8ToUnicode( edit.substr( 1 ) );
 	  break;
 	default:
 	  LOG << "Error: strange value in editstring: " << edit
@@ -498,7 +495,7 @@ void Mblem::Classify( const UnicodeString& uWord ){
     if ( debug ){
       LOG << "appending lemma " << lemma << " and tag " << restag << endl;
     }
-    mblemResult.push_back( mblemData( UnicodeToUTF8(lemma), restag ) );
+    mblemResult.push_back( mblemData( folia::UnicodeToUTF8(lemma), restag ) );
   } // while
   if ( debug ) {
     LOG << "stored lemma and tag options: " << mblemResult.size()

@@ -35,10 +35,9 @@
 #include "frog/cgn_tagger_mod.h"
 
 using namespace std;
-using namespace TiCC;
 using namespace Tagger;
 
-#define LOG *Log(tag_log)
+#define LOG *TiCC::Log(tag_log)
 
 void CGNTagger::fillSubSetTable(){
   // should become a config file!
@@ -166,7 +165,7 @@ void CGNTagger::fillSubSetTable(){
 }
 
 
-bool CGNTagger::init( const Configuration& config ){
+bool CGNTagger::init( const TiCC::Configuration& config ){
   if (  debug ){
     LOG << "INIT CGN Tagger." << endl;
   }
@@ -238,7 +237,7 @@ void CGNTagger::addTag( folia::Word *word,
   folia::KWargs args;
   args["set"]  = tagset;
   args["class"]  = pos_tag;
-  args["confidence"]= toString(confidence);
+  args["confidence"]= TiCC::toString(confidence);
   if ( textclass != "current" ){
     args["textclass"] = textclass;
   }

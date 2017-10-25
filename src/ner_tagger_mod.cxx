@@ -33,24 +33,25 @@
 #include "frog/Frog.h"
 #include "ucto/unicode.h"
 #include "ticcutils/FileUtils.h"
+#include "ticcutils/StringOps.h"
 #include "frog/ner_tagger_mod.h"
 
 using namespace std;
-using namespace TiCC;
 using namespace Tagger;
+using TiCC::operator<<;
 
-#define LOG *Log(tag_log)
+#define LOG *TiCC::Log(tag_log)
 
 // should come from the config!
 const string cgn_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
 
-ENERTagger::ENERTagger( TiCC::LogStream *l ):
+NERTagger::NERTagger( TiCC::LogStream *l ):
   BaseTagger( l, "NER" ),
   max_ner_size(20)
 {  known_ners.resize( max_ner_size + 1 );
 }
 
-bool ENERTagger::init( const Configuration& config ){
+bool NERTagger::init( const TiCC::Configuration& config ){
   if ( !BaseTagger::init( config ) ){
     return false;
   }
@@ -67,9 +68,9 @@ bool ENERTagger::init( const Configuration& config ){
   return true;
 }
 
-bool ENERTagger::fill_ners( const string& cat,
-			    const string& name,
-			    const string& config_dir ){
+bool NERTagger::fill_ners( const string& cat,
+			   const string& name,
+			   const string& config_dir ){
   string file_name = name;
   if ( !TiCC::isFile( file_name ) ){
     file_name = config_dir + "/" + name;
@@ -121,7 +122,7 @@ bool ENERTagger::fill_ners( const string& cat,
   return true;
 }
 
-bool ENERTagger::read_gazets( const string& name, const string& config_dir ){
+bool NERTagger::read_gazets( const string& name, const string& config_dir ){
   string file_name = name;
   if ( name[0] != '/' ) {
     file_name = config_dir + "/" + file_name;
@@ -186,7 +187,7 @@ static vector<string> serialize( const vector<set<string>>& stags ){
   return ambitags;
 }
 
-vector<string> ENERTagger::create_ner_list( const vector<string>& words ){
+vector<string> NERTagger::create_ner_list( const vector<string>& words ){
   vector<set<string>> stags( words.size() );
   if ( debug ){
     LOG << "search for known NER's" << endl;
@@ -246,7 +247,7 @@ static void addEntity( folia::Sentence *sent,
   c /= confs.size();
   folia::KWargs args;
   args["class"] = NER;
-  args["confidence"] =  toString(c);
+  args["confidence"] = TiCC::toString(c);
   args["set"] = tagset;
   string parent_id = el->id();
   if ( !parent_id.empty() ){
@@ -269,7 +270,7 @@ static void addEntity( folia::Sentence *sent,
   }
 }
 
-void ENERTagger::addNERTags( const vector<folia::Word*>& words,
+void NERTagger::addNERTags( const vector<folia::Word*>& words,
 			    const vector<string>& tags,
 			    const vector<double>& confs ){
   if ( words.empty() ) {
@@ -336,7 +337,7 @@ void ENERTagger::addNERTags( const vector<folia::Word*>& words,
   }
 }
 
-void ENERTagger::addDeclaration( folia::Document& doc ) const {
+void NERTagger::addDeclaration( folia::Document& doc ) const {
 #pragma omp critical(foliaupdate)
   {
     doc.declare( folia::AnnotationType::ENTITY,
@@ -346,7 +347,7 @@ void ENERTagger::addDeclaration( folia::Document& doc ) const {
   }
 }
 
-void ENERTagger::Classify( const vector<folia::Word *>& swords ){
+void NERTagger::Classify( const vector<folia::Word *>& swords ){
   if ( !swords.empty() ) {
     vector<string> words;
     vector<string> ptags;
@@ -394,7 +395,7 @@ void ENERTagger::Classify( const vector<folia::Word *>& swords ){
   post_process( swords );
 }
 
-void ENERTagger::post_process( const std::vector<folia::Word*>& swords ){
+void NERTagger::post_process( const std::vector<folia::Word*>& swords ){
   vector<string> tags;
   vector<double> conf;
   for ( const auto& tag : _tag_result ){
@@ -404,6 +405,6 @@ void ENERTagger::post_process( const std::vector<folia::Word*>& swords ){
   addNERTags( swords, tags, conf );
 }
 
-bool ENERTagger::Generate( const std::string& opt_line ){
+bool NERTagger::Generate( const std::string& opt_line ){
   return tagger->GenerateTagger( opt_line );
 }

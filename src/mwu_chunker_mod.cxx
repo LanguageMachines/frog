@@ -44,18 +44,16 @@
 #include "frog/mwu_chunker_mod.h"
 
 using namespace std;
-using namespace TiCC;
-using namespace folia;
 
-#define LOG *Log(mwuLog)
+#define LOG *TiCC::Log(mwuLog)
 
-mwuAna::mwuAna( Word *fwrd, const string& txt, const string& glue_tag ){
+mwuAna::mwuAna( folia::Word *fwrd, const string& txt, const string& glue_tag ){
   spec = false;
   word = txt;
   string tag;
 #pragma omp critical (foliaupdate)
   {
-    tag = fwrd->annotation<PosAnnotation>()->cls();
+    tag = fwrd->annotation<folia::PosAnnotation>()->cls();
   }
   spec = ( tag == glue_tag );
   fwords.push_back( fwrd );
@@ -66,30 +64,30 @@ void mwuAna::merge( const mwuAna *add ){
   delete add;
 }
 
-EntitiesLayer *mwuAna::addEntity( const string& tagset,
-				  const string& textclass,
-				  Sentence *sent,
-				  EntitiesLayer *el ){
+folia::EntitiesLayer *mwuAna::addEntity( const string& tagset,
+					 const string& textclass,
+					 folia::Sentence *sent,
+					 folia::EntitiesLayer *el ){
   if ( fwords.size() > 1 ){
     if ( el == 0 ){
 #pragma omp critical (foliaupdate)
       {
-	KWargs args;
+	folia::KWargs args;
 	args["generate_id"] = sent->id();
-	el = new EntitiesLayer( args, sent->doc() );
+	el = new folia::EntitiesLayer( args, sent->doc() );
 	sent->append( el );
       }
     }
-    KWargs args;
+    folia::KWargs args;
     args["set"] = tagset;
     args["generate_id"] = el->id();
     if ( textclass != "current" ){
       args["textclass"] = textclass;
     }
-    Entity *e=0;
+    folia::Entity *e=0;
 #pragma omp critical (foliaupdate)
     {
-      e = new Entity( args, el->doc() );
+      e = new folia::Entity( args, el->doc() );
       el->append( e );
     }
     for ( const auto& fw : fwords ){
@@ -102,8 +100,8 @@ EntitiesLayer *mwuAna::addEntity( const string& tagset,
   return el;
 }
 
-Mwu::Mwu(LogStream * logstream){
-  mwuLog = new LogStream( logstream, "mwu-" );
+Mwu::Mwu( TiCC::LogStream * logstream ){
+  mwuLog = new TiCC::LogStream( logstream, "mwu-" );
   filter = 0;
 }
 
@@ -120,7 +118,7 @@ void Mwu::reset(){
   mWords.clear();
 }
 
-void Mwu::add( Word *word ){
+void Mwu::add( folia::Word *word ){
   UnicodeString tmp;
 #pragma omp critical (foliaupdate)
   {
@@ -128,7 +126,7 @@ void Mwu::add( Word *word ){
   }
   if ( filter )
     tmp = filter->filter( tmp );
-  string txt = UnicodeToUTF8( tmp );
+  string txt = folia::UnicodeToUTF8( tmp );
   mWords.push_back( new mwuAna( word, txt, glue_tag ) );
 }
 
@@ -142,8 +140,8 @@ bool Mwu::read_mwus( const string& fname) {
   string line;
   while( getline( mwufile, line ) ) {
     vector<string> res1, res2; //res1 has mwus and tags, res2 has ind. words
-    if ( ( split_at(line, res1, " ") == 2 ) &&
-	 ( split_at(res1[0], res2, "_") >= 2 ) ){
+    if ( ( TiCC::split_at(line, res1, " ") == 2 ) &&
+	 ( TiCC::split_at(res1[0], res2, "_") >= 2 ) ){
       string key = res2[0];
       res2.erase(res2.begin());
       MWUs.insert( make_pair( key, res2 ) );
@@ -156,7 +154,7 @@ bool Mwu::read_mwus( const string& fname) {
   return true;
 }
 
-bool Mwu::init( const Configuration& config ) {
+bool Mwu::init( const TiCC::Configuration& config ) {
   LOG << "initiating mwuChunker..." << endl;
   debug = 0;
   string val = config.lookUp( "debug", "mwu" );
@@ -223,17 +221,17 @@ ostream &operator<<( ostream& os, const Mwu& mwu ){
   return os;
 }
 
-void Mwu::addDeclaration( Document& doc ) const {
+void Mwu::addDeclaration( folia::Document& doc ) const {
 #pragma omp critical (foliaupdate)
   {
-    doc.declare( AnnotationType::ENTITY,
+    doc.declare( folia::AnnotationType::ENTITY,
 		 mwu_tagset,
 		 "annotator='frog-mwu-" + version
 		 + "', annotatortype='auto', datetime='" + getTime() + "'");
   }
 }
 
-void Mwu::Classify( const vector<Word*>& words ){
+void Mwu::Classify( const vector<folia::Word*>& words ){
   if ( words.empty() ){
     return;
   }
@@ -242,8 +240,8 @@ void Mwu::Classify( const vector<Word*>& words ){
     add( word );
   }
   Classify();
-  EntitiesLayer *el = 0;
-  Sentence *sent;
+  folia::EntitiesLayer *el = 0;
+  folia::Sentence *sent;
 #pragma omp critical (foliaupdate)
   {
     sent = words[0]->sentence();

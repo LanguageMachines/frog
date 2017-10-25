@@ -29,14 +29,14 @@
 
 */
 
-#ifndef ENER_TAGGER_MOD_H
-#define ENER_TAGGER_MOD_H
+#ifndef NER_TAGGER_MOD_H
+#define NER_TAGGER_MOD_H
 
 #include "frog/tagger_base.h"
 
-class ENERTagger: public BaseTagger {
+class NERTagger: public BaseTagger {
  public:
-  explicit ENERTagger( TiCC::LogStream * );
+  explicit NERTagger( TiCC::LogStream * );
   bool init( const TiCC::Configuration& );
   void Classify( const std::vector<folia::Word *>& );
   void post_process( const std::vector<folia::Word*>& );

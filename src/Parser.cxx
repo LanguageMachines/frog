@@ -46,7 +46,6 @@
 #include "frog/csidp.h"
 
 using namespace std;
-using namespace folia;
 
 using TiCC::operator<<;
 
@@ -63,7 +62,7 @@ struct parseData {
   vector<string> words;
   vector<string> heads;
   vector<string> mods;
-  vector<vector<Word*> > mwus;
+  vector<vector<folia::Word*> > mwus;
 };
 
 ostream& operator<<( ostream& os, const parseData& pd ){
@@ -244,11 +243,11 @@ Parser::~Parser(){
   delete filter;
 }
 
-static vector<Word *> lookup( Word *word,
-			      const vector<Entity*>& entities ){
-  vector<Word*> vec;
+static vector<folia::Word *> lookup( folia::Word *word,
+				     const vector<folia::Entity*>& entities ){
+  vector<folia::Word*> vec;
   for ( const auto& ent : entities ){
-    vec = ent->select<Word>();
+    vec = ent->select<folia::Word>();
     if ( !vec.empty() ){
       if ( vec[0]->id() == word->id() ) {
 	// cerr << "found " << vec << endl;
@@ -813,27 +812,27 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
 }
 
 
-void Parser::addDeclaration( Document& doc ) const {
+void Parser::addDeclaration( folia::Document& doc ) const {
 #pragma omp critical (foliaupdate)
   {
-    doc.declare( AnnotationType::DEPENDENCY, dep_tagset,
+    doc.declare( folia::AnnotationType::DEPENDENCY, dep_tagset,
 		 "annotator='frog-depparse-" + version
 		 + "', annotatortype='auto'");
   }
 }
 
-parseData Parser::prepareParse( const vector<Word *>& fwords ){
+parseData Parser::prepareParse( const vector<folia::Word *>& fwords ){
   parseData pd;
-  Sentence *sent = 0;
-  vector<Entity*> entities;
+  folia::Sentence *sent = 0;
+  vector<folia::Entity*> entities;
 #pragma omp critical (foliaupdate)
   {
     sent = fwords[0]->sentence();
-    entities = sent->select<Entity>(MWU_tagset);
+    entities = sent->select<folia::Entity>(MWU_tagset);
   }
   for ( size_t i=0; i < fwords.size(); ++i ){
-    Word *word = fwords[i];
-    vector<Word*> mwuv = lookup( word, entities );
+    folia::Word *word = fwords[i];
+    vector<folia::Word*> mwuv = lookup( word, entities );
     if ( !mwuv.empty() ){
       string multi_word;
       string head;
@@ -846,13 +845,14 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
 	}
 	if ( filter )
 	  tmp = filter->filter( tmp );
-	string ms = UnicodeToUTF8( tmp );
+	string ms = folia::UnicodeToUTF8( tmp );
 	// the word may contain spaces, remove them all!
 	ms.erase(remove_if(ms.begin(), ms.end(), ::isspace), ms.end());
 	multi_word += ms;
-	PosAnnotation *postag = mwu->annotation<PosAnnotation>( POS_tagset );
+	folia::PosAnnotation *postag
+	  = mwu->annotation<folia::PosAnnotation>( POS_tagset );
 	head += postag->feat("head");
-	vector<Feature*> feats = postag->select<Feature>();
+	vector<folia::Feature*> feats = postag->select<folia::Feature>();
 	for ( const auto& feat : feats ){
 	  mod += feat->cls();
 	  if ( &feat != &feats.back() ){
@@ -879,15 +879,16 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
       }
       if ( filter )
 	tmp = filter->filter( tmp );
-      string ms = UnicodeToUTF8( tmp );
+      string ms = folia::UnicodeToUTF8( tmp );
       // the word may contain spaces, remove them all!
       ms.erase(remove_if(ms.begin(), ms.end(), ::isspace), ms.end());
       pd.words.push_back( ms );
-      PosAnnotation *postag = word->annotation<PosAnnotation>( POS_tagset );
+      folia::PosAnnotation *postag
+	= word->annotation<folia::PosAnnotation>( POS_tagset );
       string head = postag->feat("head");
       pd.heads.push_back( head );
       string mod;
-      vector<Feature*> feats = postag->select<Feature>();
+      vector<folia::Feature*> feats = postag->select<folia::Feature>();
       if ( feats.empty() ){
 	mod = "__";
       }
@@ -900,7 +901,7 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
 	}
       }
       pd.mods.push_back( mod );
-      vector<Word*> vec;
+      vector<folia::Word*> vec;
       vec.push_back(word);
       pd.mwus.push_back( vec );
     }
@@ -908,29 +909,29 @@ parseData Parser::prepareParse( const vector<Word *>& fwords ){
   return pd;
 }
 
-void appendResult( const vector<Word *>& words,
+void appendResult( const vector<folia::Word *>& words,
 		   parseData& pd,
 		   const string& tagset,
 		   const string& textclass,
 		   const vector<int>& nums,
 		   const vector<string>& roles ){
-  Sentence *sent = 0;
+  folia::Sentence *sent = 0;
 #pragma omp critical (foliaupdate)
   {
     sent = words[0]->sentence();
   }
-  DependenciesLayer *dl = 0;
-  KWargs args;
+  folia::DependenciesLayer *dl = 0;
+  folia::KWargs args;
   args["generate_id"] = sent->id();
   args["set"] = tagset;
 #pragma omp critical (foliaupdate)
   {
-    dl = new DependenciesLayer( args, sent->doc() );
+    dl = new folia::DependenciesLayer( args, sent->doc() );
     sent->append( dl );
   }
   for ( size_t i=0; i < nums.size(); ++i ){
     if ( nums[i] != 0 ){
-      KWargs args;
+      folia::KWargs args;
       args["generate_id"] = dl->id();
       args["class"] = roles[i];
       args["set"] = tagset;
@@ -939,14 +940,14 @@ void appendResult( const vector<Word *>& words,
       }
 #pragma omp critical (foliaupdate)
       {
-	Dependency *d = new Dependency( args, sent->doc() );
+	folia::Dependency *d = new folia::Dependency( args, sent->doc() );
 	dl->append( d );
-	Headspan *dh = new Headspan();
+	folia::Headspan *dh = new folia::Headspan();
 	for ( const auto& wrd : pd.mwus[nums[i]-1] ){
 	  dh->append( wrd );
 	}
 	d->append( dh );
-	DependencyDependent *dd = new DependencyDependent();
+	folia::DependencyDependent *dd = new folia::DependencyDependent();
 	for ( const auto& it : pd.mwus[i] ){
 	  dd->append( it );
 	}
@@ -956,7 +957,7 @@ void appendResult( const vector<Word *>& words,
   }
 }
 
-void appendParseResult( const vector<Word *>& words,
+void appendParseResult( const vector<folia::Word *>& words,
 			parseData& pd,
 			const string& tagset,
 			const string& textclass,
@@ -981,7 +982,7 @@ void timbl( Timbl::TimblAPI* tim,
   }
 }
 
-void Parser::Parse( const vector<Word*>& words,
+void Parser::Parse( const vector<folia::Word*>& words,
 		    TimerBlock& timers ){
   timers.parseTimer.start();
   if ( !isInit ){

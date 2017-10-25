@@ -48,15 +48,14 @@
 
 using namespace std;
 using namespace Timbl;
-using namespace TiCC;
 using namespace Tagger;
 
-LogStream my_default_log( cerr, "", StampMessage ); // fall-back
-LogStream *theErrLog = &my_default_log;  // fill the externals
+TiCC::LogStream my_default_log( cerr, "", StampMessage ); // fall-back
+TiCC::LogStream *theErrLog = &my_default_log;  // fill the externals
 
 vector<string> fileNames;
 
-Configuration configuration;
+TiCC::Configuration configuration;
 static string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
 static string configFileName = configDir + "frog.cfg";
 
@@ -73,7 +72,7 @@ void usage( ) {
        << "\t -d <debug level>    (for more verbosity)\n";
 }
 
-static ENERTagger tagger(theErrLog);
+static NERTagger tagger(theErrLog);
 
 bool parse_args( TiCC::CL_Options& Opts ) {
   if ( Opts.is_present( 'V' ) || Opts.is_present("version") ){

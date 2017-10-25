@@ -38,13 +38,13 @@
 #include "frog/ucto_tokenizer_mod.h"
 
 using namespace std;
-using namespace TiCC;
+using TiCC::operator<<;
 
-#define LOG *Log(uctoLog)
+#define LOG *TiCC::Log(uctoLog)
 
-UctoTokenizer::UctoTokenizer(LogStream * logstream) {
+UctoTokenizer::UctoTokenizer( TiCC::LogStream * logstream ) {
   tokenizer = 0;
-  uctoLog = new LogStream( logstream, "tok-" );
+  uctoLog = new TiCC::LogStream( logstream, "tok-" );
 }
 
 string resolve_configdir( const string& rules_name, const string& dir ){
@@ -59,7 +59,7 @@ string resolve_configdir( const string& rules_name, const string& dir ){
   return rules_name;
 }
 
-bool UctoTokenizer::init( const Configuration& config ){
+bool UctoTokenizer::init( const TiCC::Configuration& config ){
   if ( tokenizer )
     throw runtime_error( "ucto tokenizer is already initialized" );
   tokenizer = new Tokenizer::TokenizerClass();
@@ -78,8 +78,7 @@ bool UctoTokenizer::init( const Configuration& config ){
   string languages = config.lookUp( "languages", "tokenizer" );
   vector<string> language_list;
   if ( !languages.empty() ){
-    split_at( languages, language_list, "," );
-    using TiCC::operator<<;
+    language_list = TiCC::split_at( languages, "," );
     LOG << "Language List ="  << language_list << endl;
   }
   if ( tokenizer->getPassThru() ){

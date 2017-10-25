@@ -37,18 +37,17 @@
 #include "frog/tagger_base.h"
 
 using namespace std;
-using namespace TiCC;
 using namespace Tagger;
 
 
-#define LOG *Log(tag_log)
+#define LOG *TiCC::Log(tag_log)
 
 BaseTagger::BaseTagger( TiCC::LogStream *logstream, const string& label ){
   debug = 0;
   tagger = 0;
   filter = 0;
   _label = label;
-  tag_log = new LogStream( logstream, _label + "-tagger-" );
+  tag_log = new TiCC::LogStream( logstream, _label + "-tagger-" );
 }
 
 BaseTagger::~BaseTagger(){
@@ -94,7 +93,7 @@ bool BaseTagger::fill_map( const string& file, map<string,string>& mp ){
   return true;
 }
 
-bool BaseTagger::init( const Configuration& config ){
+bool BaseTagger::init( const TiCC::Configuration& config ){
   debug = 0;
   if ( tagger != 0 ){
     LOG << _label << "-tagger is already initialized!" << endl;

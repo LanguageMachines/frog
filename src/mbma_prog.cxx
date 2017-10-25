@@ -48,11 +48,10 @@
 
 using namespace std;
 using namespace Timbl;
-using namespace TiCC;
 using namespace Tagger;
 
-LogStream my_default_log( cerr, "", StampMessage ); // fall-back
-LogStream *theErrLog = &my_default_log;  // fill the externals
+TiCC::LogStream my_default_log( cerr, "", StampMessage ); // fall-back
+TiCC::LogStream *theErrLog = &my_default_log;  // fill the externals
 
 vector<string> fileNames;
 bool useTagger = true;
@@ -60,7 +59,7 @@ bool useTokenizer = true;
 bool bulk = false;
 bool verbose = false;
 
-Configuration configuration;
+TiCC::Configuration configuration;
 static string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/nld/";
 static string configFileName = configDir + "frog.cfg";
 
@@ -222,8 +221,7 @@ void Test( istream& in ){
 	}
       }
       else {
-	vector<string> parts;
-	TiCC::split( s, parts );
+	vector<string> parts = TiCC::split( s );
 	for ( auto const& w : parts ){
 	  UnicodeString uWord = folia::UTF8ToUnicode(w);
 	  uWord.toLower();

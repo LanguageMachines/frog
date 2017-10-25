@@ -59,10 +59,8 @@
 #include "ticcutils/FileUtils.h"
 
 using namespace std;
-using namespace folia;
-using namespace TiCC;
 
-#define LOG *Log(theErrLog)
+#define LOG *TiCC::Log(theErrLog)
 
 string testDirName;
 string outputFileName;
@@ -91,7 +89,7 @@ set<string> fileNames;
 
 */
 
-Configuration configuration;
+TiCC::Configuration configuration;
 
 void usage( ) {
   cout << endl << "Options:\n";
@@ -145,7 +143,7 @@ void usage( ) {
 
 bool parse_args( TiCC::CL_Options& Opts,
 		 FrogOptions& options,
-		 LogStream* theErrLog ) {
+		 TiCC::LogStream* theErrLog ) {
   // process the command line and fill FrogOptions to initialize the API
   // also fill some globals we use for our own main.
 
@@ -162,7 +160,7 @@ bool parse_args( TiCC::CL_Options& Opts,
   }
   else {
     vector<string> lang;
-    int num = split_at( languages, lang, "," );
+    int num = TiCC::split_at( languages, lang, "," );
     if ( num < 0 ){
       cerr<< "invalid value in --languages=" << languages
 	  << " option. " << endl;
@@ -208,7 +206,7 @@ bool parse_args( TiCC::CL_Options& Opts,
   string value;
   // debug opts
   if ( Opts.extract ('d', value) ) {
-    if ( !stringTo<int>( value, options.debugFlag ) ){
+    if ( !TiCC::stringTo<int>( value, options.debugFlag ) ){
       LOG << "-d value should be an integer" << endl;
       return false;
     }
@@ -225,7 +223,7 @@ bool parse_args( TiCC::CL_Options& Opts,
       char mod = val[0];
       string value = val.substr(1);
       int dbval = 0;
-      if ( !stringTo<int>( value, dbval ) ){
+      if ( !TiCC::stringTo<int>( value, dbval ) ){
 	cerr << "expected integer value for --debug=" << mod << value << endl;
 	return false;
       }
@@ -303,7 +301,7 @@ bool parse_args( TiCC::CL_Options& Opts,
   Opts.extract( 'e', options.encoding );
 
   if ( Opts.extract( "max-parser-tokens", value ) ){
-    if ( !stringTo<unsigned int>( value, options.maxParserTokens ) ){
+    if ( !TiCC::stringTo<unsigned int>( value, options.maxParserTokens ) ){
       LOG << "max-parser-tokens value should be an integer" << endl;
       return false;
     }
@@ -319,7 +317,7 @@ bool parse_args( TiCC::CL_Options& Opts,
   }
   else if ( Opts.extract( "threads", value ) ){
     int num;
-    if ( !stringTo<int>( value, num ) || num < 1 ){
+    if ( !TiCC::stringTo<int>( value, num ) || num < 1 ){
       LOG << "threads value should be a positive integer" << endl;
       return false;
     }
@@ -488,10 +486,10 @@ bool parse_args( TiCC::CL_Options& Opts,
   string overridestatement;
   while ( Opts.extract("override", overridestatement )) {
     vector<string> values;
-    const int num = split_at( overridestatement,values,  "=" );
+    const int num = TiCC::split_at( overridestatement,values,  "=" );
     if ( num == 2 ) {
         vector<string> module_param;
-        const int num2 = split_at(values[0], module_param, "." );
+        const int num2 = TiCC::split_at(values[0], module_param, "." );
         if (num2 == 2) {
             LOG << "Overriding configuration parameter " << module_param[0] << "." << module_param[1] << " with " << values[1] << endl;
             configuration.setatt( module_param[1] , values[1], module_param[0] );
@@ -517,7 +515,7 @@ static bool StillRunning = true;
 
 void KillServerFun( int Signal ){
   if ( Signal == SIGTERM ){
-    cerr << Timer::now() << " KillServerFun caught a signal SIGTERM" << endl;
+    cerr << TiCC::Timer::now() << " KillServerFun caught a signal SIGTERM" << endl;
     sleep(5); // give children some spare time...
     StillRunning = false;
   }
@@ -535,7 +533,8 @@ int main(int argc, char *argv[]) {
        << Timbl::VersionName() << ", "
        << TimblServer::VersionName() << ", "
        << Tagger::VersionName() << "]" << endl;
-  LogStream *theErrLog = new LogStream( cerr, "frog-", StampMessage );
+  TiCC::LogStream *theErrLog
+    = new TiCC::LogStream( cerr, "frog-", StampMessage );
   std::ios_base::sync_with_stdio(false);
   FrogOptions options;
 
@@ -709,9 +708,9 @@ int main(int argc, char *argv[]) {
 	    throw( runtime_error( "Accept failed" ) );
 	  }
 	}
-	LOG << Timer::now() << " server terminated by SIGTERM" << endl;
+	LOG << TiCC::Timer::now() << " server terminated by SIGTERM" << endl;
       }
-      catch ( std::exception& e ) {
+      catch ( exception& e ) {
 	LOG << "Server error:" << e.what() << " Exiting." << endl;
 	throw;
       }

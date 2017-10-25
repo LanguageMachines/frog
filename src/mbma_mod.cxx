@@ -40,26 +40,26 @@
 
 #include "ucto/unicode.h"
 #include "ticcutils/Configuration.h"
+#include "ticcutils/StringOps.h"
 #include "frog/Frog.h"
 #include "frog/mbma_mod.h"
 
 using namespace std;
-using namespace folia;
-using namespace TiCC;
+using TiCC::operator<<;
 
 const long int LEFT =  6; // left context
 const long int RIGHT = 6; // right context
 
-#define LOG *Log(mbmaLog)
+#define LOG *TiCC::Log(mbmaLog)
 
-Mbma::Mbma(LogStream * logstream):
+Mbma::Mbma( TiCC::LogStream * logstream):
   MTreeFilename( "dm.igtree" ),
   MTree(0),
   transliterator(0),
   filter(0),
   doDeepMorph(false)
 {
-  mbmaLog = new LogStream( logstream, "mbma-" );
+  mbmaLog = new TiCC::LogStream( logstream, "mbma-" );
 }
 
 // define the statics
@@ -82,7 +82,7 @@ void Mbma::init_cgn( const string& main, const string& sub ) {
     string line;
     while( getline( tc, line) ) {
       vector<string> tmp;
-      size_t num = split_at(line, tmp, " ");
+      size_t num = TiCC::split_at(line, tmp, " ");
       if ( num < 2 ){
 	LOG << "splitting '" << line << "' failed" << endl;
 	throw ( runtime_error("panic") );
@@ -98,7 +98,7 @@ void Mbma::init_cgn( const string& main, const string& sub ) {
     string line;
     while( getline(tc1, line) ) {
       vector<string> tmp;
-      size_t num = split_at(line, tmp, " ");
+      size_t num = TiCC::split_at(line, tmp, " ");
       if ( num == 2 ){
 	TAGconv.insert( make_pair( tmp[0], tmp[1] ) );
       }
@@ -120,7 +120,7 @@ Transliterator *Mbma::init_trans( ){
   return t;
 }
 
-bool Mbma::init( const Configuration& config ) {
+bool Mbma::init( const TiCC::Configuration& config ) {
   LOG << "Initiating morphological analyzer..." << endl;
   debugFlag = 0;
   string val = config.lookUp( "debug", "mbma" );
@@ -191,7 +191,7 @@ bool Mbma::init( const Configuration& config ) {
   MTreeFilename = prefix( config.configDir(), tfName );
   string dof = config.lookUp( "filter_diacritics", "mbma" );
   if ( !dof.empty() ){
-    bool b = stringTo<bool>( dof );
+    bool b = TiCC::stringTo<bool>( dof );
     if ( b ){
       transliterator = init_trans();
     }
@@ -251,7 +251,7 @@ vector<string> Mbma::make_instances( const UnicodeString& word ){
       }
     }
     inst += "?";
-    insts.push_back( UnicodeToUTF8(inst) );
+    insts.push_back( folia::UnicodeToUTF8(inst) );
   }
   return insts;
 }
@@ -281,7 +281,7 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
   classParts.reserve( classes.size() );
   for ( const auto& cl : classes ){
     vector<string> parts;
-    int num = split_at( cl, parts, "|" );
+    int num = TiCC::split_at( cl, parts, "|" );
     if ( num > 0 ){
       classParts.push_back( parts );
       if ( num > largest_anal ){
@@ -348,7 +348,8 @@ vector<Rule*> Mbma::execute( const UnicodeString& word,
 			     const vector<string>& classes ){
   vector<vector<string> > allParts = generate_all_perms( classes );
   if ( debugFlag ){
-    string out = "alternatives: word=" + UnicodeToUTF8(word) + ", classes=<";
+    string out = "alternatives: word="
+      + folia::UnicodeToUTF8(word) + ", classes=<";
     for ( const auto& cls : classes ){
       out += cls + ",";
     }
@@ -368,11 +369,11 @@ vector<Rule*> Mbma::execute( const UnicodeString& word,
   return accepted;
 }
 
-void Mbma::addMorph( Word *word,
+void Mbma::addMorph( folia::Word *word,
 		     const vector<string>& morphs ) const {
-  KWargs args;
+  folia::KWargs args;
   args["set"] = mbma_tagset;
-  MorphologyLayer *ml;
+  folia::MorphologyLayer *ml;
 #pragma omp critical (foliaupdate)
   {
     try {
@@ -386,7 +387,7 @@ void Mbma::addMorph( Word *word,
   addMorph( ml, morphs );
 }
 
-void Mbma::addBracketMorph( Word *word,
+void Mbma::addBracketMorph( folia::Word *word,
 			    const string& wrd,
 			    const string& tag ) const {
   if (debugFlag){
@@ -401,7 +402,7 @@ void Mbma::addBracketMorph( Word *word,
     // unanalysed, so trust the TAGGER
 #pragma omp critical (foliaupdate)
     {
-      const auto pos = word->annotation<PosAnnotation>( cgn_tagset );
+      const auto pos = word->annotation<folia::PosAnnotation>( cgn_tagset );
       head = pos->feat("head");
     }
     if (debugFlag){
@@ -410,7 +411,7 @@ void Mbma::addBracketMorph( Word *word,
     const auto tagIt = TAGconv.find( head );
     if ( tagIt == TAGconv.end() ) {
       // this should never happen
-      throw ValueError( "unknown head feature '" + head + "'" );
+      throw folia::ValueError( "unknown head feature '" + head + "'" );
     }
     celex_tag = tagIt->second;
     head = CLEX::get_tDescr(CLEX::toCLEX(tagIt->second));
@@ -419,9 +420,9 @@ void Mbma::addBracketMorph( Word *word,
     }
   }
 
-  KWargs args;
+  folia::KWargs args;
   args["set"] = mbma_tagset;
-  MorphologyLayer *ml;
+  folia::MorphologyLayer *ml;
 #pragma omp critical (foliaupdate)
   {
     try {
@@ -436,7 +437,7 @@ void Mbma::addBracketMorph( Word *word,
   folia::Morpheme *result = 0;
 #pragma omp critical (foliaupdate)
   {
-    result = new Morpheme( args, word->doc() );
+    result = new folia::Morpheme( args, word->doc() );
     result->settext( wrd, textclass );
   }
   args.clear();
@@ -460,15 +461,15 @@ void Mbma::addBracketMorph( Word *word,
   }
 }
 
-void Mbma::addBracketMorph( Word *word,
+void Mbma::addBracketMorph( folia::Word *word,
 			    const string& orig_word,
 			    const BracketNest *brackets ) const {
   if (debugFlag){
     LOG << "addBracketMorph(" << word << "," << orig_word << "," << brackets << ")" << endl;
   }
-  KWargs args;
+  folia::KWargs args;
   args["set"] = mbma_tagset;
-  MorphologyLayer *ml;
+  folia::MorphologyLayer *ml;
 #pragma omp critical (foliaupdate)
   {
     try {
@@ -479,7 +480,7 @@ void Mbma::addBracketMorph( Word *word,
       throw;
     }
   }
-  Morpheme *m = 0;
+  folia::Morpheme *m = 0;
   try {
     m = brackets->createMorpheme( word->doc() );
   }
@@ -496,14 +497,14 @@ void Mbma::addBracketMorph( Word *word,
   }
 }
 
-void Mbma::addMorph( MorphologyLayer *ml,
+void Mbma::addMorph( folia::MorphologyLayer *ml,
 		     const vector<string>& morphs ) const {
   for ( const auto& mor : morphs ){
-    KWargs args;
+    folia::KWargs args;
     args["set"] = mbma_tagset;
 #pragma omp critical (foliaupdate)
     {
-      Morpheme *m = new Morpheme( args, ml->doc() );
+      folia::Morpheme *m = new folia::Morpheme( args, ml->doc() );
       m->settext( mor, textclass );
       ml->append( m );
     }
@@ -527,7 +528,7 @@ void Mbma::filterHeadTag( const string& head ){
   map<string,string>::const_iterator tagIt = TAGconv.find( head );
   if ( tagIt == TAGconv.end() ) {
     // this should never happen
-    throw ValueError( "unknown head feature '" + head + "'" );
+    throw folia::ValueError( "unknown head feature '" + head + "'" );
   }
   string celex_tag = tagIt->second;
   if (debugFlag){
@@ -730,7 +731,8 @@ void Mbma::assign_compounds(){
   }
 }
 
-void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
+void Mbma::getFoLiAResult( folia::Word *fword,
+			   const UnicodeString& uword ) const {
   if ( analysis.size() == 0 ){
     // fallback option: use the word and pretend it's a morpheme ;-)
     if ( debugFlag ){
@@ -738,18 +740,18 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
 		    << uword << endl;
     }
     if ( doDeepMorph ){
-      addBracketMorph( fword, UnicodeToUTF8(uword), "X" );
+      addBracketMorph( fword, folia::UnicodeToUTF8(uword), "X" );
     }
     else {
       vector<string> tmp;
-      tmp.push_back( UnicodeToUTF8(uword) );
+      tmp.push_back( folia::UnicodeToUTF8(uword) );
       addMorph( fword, tmp );
     }
   }
   else {
     for ( auto const& sit : analysis ){
       if ( doDeepMorph ){
-	addBracketMorph( fword, UnicodeToUTF8(uword), sit->brackets );
+	addBracketMorph( fword, folia::UnicodeToUTF8(uword), sit->brackets );
       }
       else {
 	addMorph( fword, sit->extract_morphemes() );
@@ -758,14 +760,14 @@ void Mbma::getFoLiAResult( Word *fword, const UnicodeString& uword ) const {
   }
 }
 
-void Mbma::addDeclaration( Document& doc ) const {
+void Mbma::addDeclaration( folia::Document& doc ) const {
 #pragma omp critical (foliaupdate)
   {
-    doc.declare( AnnotationType::MORPHOLOGICAL, mbma_tagset,
+    doc.declare( folia::AnnotationType::MORPHOLOGICAL, mbma_tagset,
 		 "annotator='frog-mbma-" +  version +
 		 + "', annotatortype='auto', datetime='" + getTime() + "'");
     if ( doDeepMorph ){
-      doc.declare( AnnotationType::POS, clex_tagset,
+      doc.declare( folia::AnnotationType::POS, clex_tagset,
 		   "annotator='frog-mbma-" +  version +
 		   + "', annotatortype='auto', datetime='" + getTime() + "'");
     }
@@ -783,18 +785,18 @@ UnicodeString Mbma::filterDiacritics( const UnicodeString& in ) const {
   }
 }
 
-void Mbma::Classify( Word* sword ){
-  if ( sword->isinstance(PlaceHolder_t) ){
+void Mbma::Classify( folia::Word* sword ){
+  if ( sword->isinstance(folia::PlaceHolder_t) ){
     return;
   }
   UnicodeString uWord;
-  PosAnnotation *pos;
+  folia::PosAnnotation *pos;
   string head;
   string token_class;
 #pragma omp critical (foliaupdate)
   {
     uWord = sword->text( textclass );
-    pos = sword->annotation<PosAnnotation>( cgn_tagset );
+    pos = sword->annotation<folia::PosAnnotation>( cgn_tagset );
     head = pos->feat("head");
     string txtcls = sword->textclass();
     if ( txtcls == textclass ){
@@ -810,18 +812,18 @@ void Mbma::Classify( Word* sword ){
   if ( filter ){
     uWord = filter->filter( uWord );
   }
-  string word_s = UnicodeToUTF8( uWord );
+  string word_s = folia::UnicodeToUTF8( uWord );
   vector<string> parts;
   TiCC::split( word_s, parts );
   word_s.clear();
   for ( const auto& p : parts ){
     word_s += p;
   }
-  uWord = UTF8ToUnicode( word_s );
+  uWord = folia::UTF8ToUnicode( word_s );
   if ( head == "LET" || head == "SPEC" || token_class == "ABBREVIATION" ){
     // take over the letter/word 'as-is'.
     //  also ABBREVIATION's aren't handled bij mbma-rules
-    string word = UnicodeToUTF8( uWord );
+    string word = folia::UnicodeToUTF8( uWord );
     if ( doDeepMorph ){
       addBracketMorph( sword, word, head );
     }

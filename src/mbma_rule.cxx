@@ -42,7 +42,6 @@
 #include "frog/mbma_rule.h"
 
 using namespace std;
-using namespace folia;
 using TiCC::operator<<;
 
 #define LOG *TiCC::Log(myLog)
@@ -100,22 +99,22 @@ ostream& operator<<( ostream& os, const RulePart *r ){
 void RulePart::get_edits( const string& edit ){
   if (edit[0]=='D') { // delete operation
     string s = edit.substr(1);
-    ins = UTF8ToUnicode( s );
+    ins = folia::UTF8ToUnicode( s );
   }
   else if ( edit[0]=='I') {  // insert operation
     string s = edit.substr(1);
-    del = UTF8ToUnicode( s );
+    del = folia::UTF8ToUnicode( s );
   }
   else if ( edit[0]=='H') {  // hidden morpheme
     string s = edit.substr(1);
-    hide = UTF8ToUnicode( s );
+    hide = folia::UTF8ToUnicode( s );
   }
   else if ( edit[0]=='R') { // replace operation
     string::size_type pos = edit.find( ">" );
     string s = edit.substr( 1, pos-1 );
-    ins = UTF8ToUnicode( s );
+    ins = folia::UTF8ToUnicode( s );
     s = edit.substr( pos+1 );
-    del = UTF8ToUnicode( s );
+    del = folia::UTF8ToUnicode( s );
   }
 }
 
@@ -303,7 +302,7 @@ vector<string> Rule::extract_morphemes( ) const {
   for ( const auto& it : rules ){
     UnicodeString morpheme = it.morpheme;
     if ( !morpheme.isEmpty() ){
-      morphemes.push_back( UnicodeToUTF8(morpheme) );
+      morphemes.push_back( folia::UnicodeToUTF8(morpheme) );
     }
   }
   return morphemes;
@@ -313,7 +312,7 @@ string Rule::morpheme_string( bool structured ) const {
   string result;
   if ( structured ){
     UnicodeString us = brackets->put(true);
-    result = UnicodeToUTF8( us );
+    result = folia::UnicodeToUTF8( us );
   }
   else {
     vector<string> vec = extract_morphemes();
@@ -496,7 +495,7 @@ UnicodeString Rule::getKey( bool deep ){
       UnicodeString tmp;
       stringstream ss;
       ss << brackets << endl;
-      tmp = UTF8ToUnicode(ss.str());
+      tmp = folia::UTF8ToUnicode(ss.str());
       sortkey = tmp;
     }
     return sortkey;
@@ -506,7 +505,7 @@ UnicodeString Rule::getKey( bool deep ){
     UnicodeString tmp;
     // create an unique string
     for ( auto const& mor : morphs ){
-      tmp += UTF8ToUnicode(mor) + "++";
+      tmp += folia::UTF8ToUnicode(mor) + "++";
     }
     return tmp;
   }

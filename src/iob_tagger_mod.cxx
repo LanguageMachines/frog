@@ -35,30 +35,28 @@
 #include "frog/iob_tagger_mod.h"
 
 using namespace std;
-using namespace folia;
-using namespace TiCC;
 using namespace Tagger;
 
-#define LOG *Log(tag_log)
+#define LOG *TiCC::Log(tag_log)
 
 const string cgn_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
 
-bool EIOBTagger::init( const Configuration& config ){
+bool IOBTagger::init( const TiCC::Configuration& config ){
   return BaseTagger::init( config );
 }
 
-void EIOBTagger::addChunk( ChunkingLayer *chunks,
-			   const vector<Word*>& words,
-			   const vector<double>& confs,
-			   const string& IOB,
-			   const string& textclass ){
+void IOBTagger::addChunk( folia::ChunkingLayer *chunks,
+			  const vector<folia::Word*>& words,
+			  const vector<double>& confs,
+			  const string& IOB,
+			  const string& textclass ){
   double conf = 1;
   for ( auto const& val : confs )
     conf *= val;
-  KWargs args;
+  folia::KWargs args;
   args["class"] = IOB;
   args["set"] = tagset;
-  args["confidence"] = toString(conf);
+  args["confidence"] = TiCC::toString(conf);
   string parent_id = chunks->id();
   if ( !parent_id.empty() ){
     args["generate_id"] = chunks->id();
@@ -66,11 +64,11 @@ void EIOBTagger::addChunk( ChunkingLayer *chunks,
   if ( textclass != "current" ){
     args["textclass"] = textclass;
   }
-  Chunk *chunk = 0;
+  folia::Chunk *chunk = 0;
 #pragma omp critical(foliaupdate)
   {
     try {
-      chunk = new Chunk( args, chunks->doc() );
+      chunk = new folia::Chunk( args, chunks->doc() );
       chunks->append( chunk );
     }
     catch ( exception& e ){
@@ -79,7 +77,7 @@ void EIOBTagger::addChunk( ChunkingLayer *chunks,
     }
   }
   for ( const auto& word : words ){
-    if ( word->isinstance(PlaceHolder_t) ){
+    if ( word->isinstance(folia::PlaceHolder_t) ){
       continue;
     }
 #pragma omp critical(foliaupdate)
@@ -89,28 +87,28 @@ void EIOBTagger::addChunk( ChunkingLayer *chunks,
   }
 }
 
-void EIOBTagger::addIOBTags( const vector<Word*>& words,
+void IOBTagger::addIOBTags( const vector<folia::Word*>& words,
 			    const vector<string>& tags,
 			    const vector<double>& confs ){
   if ( words.empty() ){
     return;
   }
-  ChunkingLayer *el = 0;
+  folia::ChunkingLayer *el = 0;
 #pragma omp critical(foliaupdate)
   {
-    Sentence *sent = words[0]->sentence();
+    folia::Sentence *sent = words[0]->sentence();
     try {
-      el = sent->annotation<ChunkingLayer>(tagset);
+      el = sent->annotation<folia::ChunkingLayer>(tagset);
     }
     catch(...){
-      KWargs args;
+      folia::KWargs args;
       args["generate_id"] = sent->id();
       args["set"] = tagset;
-      el = new ChunkingLayer( args, sent->doc() );
+      el = new folia::ChunkingLayer( args, sent->doc() );
       sent->append( el );
     }
   }
-  vector<Word*> stack;
+  vector<folia::Word*> stack;
   vector<double> dstack;
   string curIOB;
   int i = 0;
@@ -171,17 +169,17 @@ void EIOBTagger::addIOBTags( const vector<Word*>& words,
   }
 }
 
-void EIOBTagger::addDeclaration( Document& doc ) const {
+void IOBTagger::addDeclaration( folia::Document& doc ) const {
 #pragma omp critical(foliaupdate)
   {
-    doc.declare( AnnotationType::CHUNKING,
+    doc.declare( folia::AnnotationType::CHUNKING,
 		 tagset,
 		 "annotator='frog-chunker-" + version
 		 + "', annotatortype='auto', datetime='" + getTime() + "'");
   }
 }
 
-void EIOBTagger::Classify( const vector<Word *>& swords ){
+void IOBTagger::Classify( const vector<folia::Word *>& swords ){
   if ( !swords.empty() ) {
     vector<string> words;
     vector<string> ptags;
@@ -217,9 +215,9 @@ void EIOBTagger::Classify( const vector<Word *>& swords ){
   post_process( swords );
 }
 
-void EIOBTagger::post_process( const std::vector<folia::Word*>& swords ){
+void IOBTagger::post_process( const std::vector<folia::Word*>& swords ){
   if ( debug ){
-    LOG << "EIOB postprocess...." << endl;
+    LOG << "IOB postprocess...." << endl;
   }
   vector<double> conf;
   vector<string> tags;

@@ -29,14 +29,14 @@
 
 */
 
-#ifndef EIOB_TAGGER_MOD_H
-#define EIOB_TAGGER_MOD_H
+#ifndef IOB_TAGGER_MOD_H
+#define IOB_TAGGER_MOD_H
 
 #include "frog/tagger_base.h"
 
-class EIOBTagger: public BaseTagger {
+class IOBTagger: public BaseTagger {
  public:
-  explicit EIOBTagger( TiCC::LogStream *l ): BaseTagger( l, "IOB" ){};
+  explicit IOBTagger( TiCC::LogStream *l ): BaseTagger( l, "IOB" ){};
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
   void Classify( const std::vector<folia::Word*>& );
