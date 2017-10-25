@@ -159,15 +159,14 @@ bool parse_args( TiCC::CL_Options& Opts,
     language = "none";
   }
   else {
-    vector<string> lang;
-    int num = TiCC::split_at( languages, lang, "," );
-    if ( num < 0 ){
+    vector<string> lang_v = TiCC::split_at( languages, "," );
+    if ( lang_v.empty() ){
       cerr<< "invalid value in --languages=" << languages
 	  << " option. " << endl;
       return false;
     }
-    language = lang[0]; // the first mentioned is the default.
-    if ( num > 1 ){
+    language = lang_v[0]; // the first mentioned is the default.
+    if ( lang_v.size() > 1 ){
       cerr << "WARNING: you used the --language=" << languages << " option"
 	   << " with more then one language " << endl
 	   << "\t specified. These values will be handled to the tokenizer,"
@@ -217,8 +216,7 @@ bool parse_args( TiCC::CL_Options& Opts,
   }
   if ( Opts.extract( "debug", value ) ) {
     value = TiCC::lowercase( value );
-    vector<string> vec;
-    TiCC::split_at( value, vec, "," );
+    vector<string> vec = TiCC::split_at( value, "," );
     for ( const auto& val : vec ){
       char mod = val[0];
       string value = val.substr(1);

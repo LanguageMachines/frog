@@ -32,7 +32,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
 
 #include "ticcutils/StringOps.h"
 #include "ticcutils/PrettyPrint.h"
@@ -44,17 +44,16 @@ using namespace std;
 #define LOG *TiCC::Log(log)
 #define DBG *TiCC::Dbg(log)
 
-void split_dist( const vector< pair<string,double>>& dist,
-		 map<string,double>& result ){
-  result.clear();
+unordered_map<string,double> split_dist( const vector< pair<string,double>>& dist ){
+  unordered_map<string,double> result;
   for( const auto& it : dist ){
     double d = it.second;
-    vector<string> tags;
-    TiCC::split_at( it.first, tags, "|" );
+    vector<string> tags = TiCC::split_at( it.first, "|" );
     for( const auto& t : tags ){
       result[t] += d;
     }
   }
+  return result;
 }
 
 vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
@@ -119,10 +118,8 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
       }
       string top_class = rit->cls();
       if ( top_class != "__" ){
-	map<string,double> splits;
-	split_dist( rit->dist(), splits );
-	vector<string> clss;
-	TiCC::split_at( top_class, clss, "|" );
+	unordered_map<string,double> splits = split_dist( rit->dist() );
+	vector<string> clss = TiCC::split_at( top_class, "|" );
 	for( const auto& rel : clss ){
 	  constraints.push_back( new HasIncomingRel( rel_id, rel, splits[rel] ) );
 	}

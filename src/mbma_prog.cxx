@@ -187,10 +187,8 @@ void Test( istream& in ){
 	vector<TagResult> tagv = tagger.tagLine( s );
 	for ( const auto& tr : tagv ){
 	  UnicodeString uWord = folia::UTF8ToUnicode( tr.word() );
-	  vector<string> v;
-	  size_t num = TiCC::split_at_first_of( tr.assignedTag(),
-						v, "(,)" );
-	  if ( num < 1 ){
+	  vector<string> v = TiCC::split_at_first_of( tr.assignedTag(), "(,)" );
+	  if ( v.empty() ){
 	    throw runtime_error( "error: tag not in right format " );
 	  }
 	  string head = v[0];

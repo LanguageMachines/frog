@@ -261,8 +261,7 @@ void CGNTagger::post_process( const vector<folia::Word *>& words ){
       postag = word->annotation<folia::PosAnnotation>( );
     }
     string cls = postag->cls();
-    vector<string> parts;
-    TiCC::split_at_first_of( cls, parts, "()" );
+    vector<string> parts = TiCC::split_at_first_of( cls, "()" );
     string head = parts[0];
     folia::KWargs args;
     args["class"]  = head;
@@ -276,8 +275,7 @@ void CGNTagger::post_process( const vector<folia::Word *>& words ){
       }
     }
     if ( parts.size() > 1 ){
-      vector<string> tagParts;
-      TiCC::split_at( parts[1], tagParts, "," );
+      vector<string> tagParts = TiCC::split_at( parts[1], "," );
       for ( auto const& part : tagParts ){
 	folia::KWargs args;
 	args["set"]    = tagset;

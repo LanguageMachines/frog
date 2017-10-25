@@ -180,8 +180,7 @@ void Test( istream& in ){
 	}
       }
       else {
-	vector<string> parts;
-	TiCC::split( s, parts );
+	vector<string> parts = TiCC::split( s );
 	for ( const auto& w : parts ){
 	  UnicodeString uWord = folia::UTF8ToUnicode(w);
 	  myMblem.Classify( uWord );

@@ -65,8 +65,8 @@ bool Mblem::fill_ts_map( const string& file ){
   while ( getline( is, line ) ){
     if ( line.empty() || line[0] == '#' )
       continue;
-    vector<string> parts;
-    if ( TiCC::split( line, parts ) != 3 ){
+    vector<string> parts = TiCC::split( line );
+    if ( parts.size() != 3 ){
       LOG << "invalid line in: '" << file << "' (expected 3 parts)" << endl;
       return false;
     }
@@ -387,10 +387,10 @@ void Mblem::Classify( const UnicodeString& uWord ){
     }
     else {
       // some edit info available, like: WW(27)+Dgekomen+Ikomen
-      vector<string> edits;
-      size_t n = TiCC::split_at( partS, edits, "+" );
-      if ( n < 1 )
+      vector<string> edits = TiCC::split_at( partS, "+" );
+      if ( edits.empty() ){
 	throw runtime_error( "invalid editstring: " + partS );
+      }
       restag = edits[0]; // the first one is the POS tag
 
       UnicodeString insstr;

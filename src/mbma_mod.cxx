@@ -276,13 +276,13 @@ string find_class( unsigned int step,
 vector<vector<string> > generate_all_perms( const vector<string>& classes ){
   // determine all alternative analyses, remember the largest
   // and store every part in a vector of string vectors
-  int largest_anal=1;
+  size_t largest_anal=1;
   vector<vector<string> > classParts;
   classParts.reserve( classes.size() );
   for ( const auto& cl : classes ){
-    vector<string> parts;
-    int num = TiCC::split_at( cl, parts, "|" );
-    if ( num > 0 ){
+    vector<string> parts = TiCC::split_at( cl, "|" );
+    size_t num = parts.size();
+    if ( num > 1 ){
       classParts.push_back( parts );
       if ( num > largest_anal ){
 	largest_anal = num;
@@ -299,7 +299,7 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
   // now expand the result
   vector<vector<string> > result;
   result.reserve( largest_anal );
-  for ( int step=0; step < largest_anal; ++step ){
+  for ( size_t step=0; step < largest_anal; ++step ){
     vector<string> item;
     for ( const auto& cp : classParts ){
       item.push_back( find_class( step, cp, largest_anal ) );
@@ -813,8 +813,7 @@ void Mbma::Classify( folia::Word* sword ){
     uWord = filter->filter( uWord );
   }
   string word_s = folia::UnicodeToUTF8( uWord );
-  vector<string> parts;
-  TiCC::split( word_s, parts );
+  vector<string> parts = TiCC::split( word_s );
   word_s.clear();
   for ( const auto& p : parts ){
     word_s += p;
