@@ -3,7 +3,7 @@
 3	een	een	[een]	LID(onbep,stan,agr)	0.999113	O	B-NP		
 4	test	test	[test]	N(soort,ev,basis,zijd,stan)	0.991304	O	I-NP		
 5	van	van	[van]	VZ(init)	0.959310	O	B-PP		
-6	Frog	Frog	[Frog]	SPEC(deeleigen)	1.000000	B-LOC	B-NP		
+6	Frog	Frog	[Frog]	SPEC(deeleigen)	1.000000	B-PER	B-NP		
 7	op	op	[op]	VZ(init)	0.997760	O	B-PP		
 8	de	de	[de]	LID(bep,stan,rest)	0.999964	O	B-NP		
 9	datum	datum	[datum]	N(soort,ev,basis,zijd,stan)	0.997691	O	I-NP		
