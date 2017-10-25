@@ -31,10 +31,7 @@
 
 #include <string>
 #include <iostream>
-#include <sstream>
-#include <fstream>
 #include <vector>
-#include <map>
 
 #include "config.h"
 #include "ticcutils/LogStream.h"

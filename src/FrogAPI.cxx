@@ -39,6 +39,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <unordered_map>
 #include "config.h"
 #ifdef HAVE_OPENMP
 #include <omp.h>
@@ -1245,7 +1246,7 @@ ostream& FrogAPI::showResults( ostream& os,
     }
 
     size_t index = 1;
-    map<folia::FoliaElement*, int> enumeration;
+    unordered_map<folia::FoliaElement*, int> enumeration;
     vector<vector<folia::Word*> > mwus;
     for ( size_t i=0; i < words.size(); ++i ){
       folia::Word *word = words[i];

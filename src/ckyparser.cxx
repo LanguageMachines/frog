@@ -30,7 +30,6 @@
 */
 #include <iostream>
 #include <vector>
-#include <map>
 #include <string>
 
 #include "ticcutils/PrettyPrint.h"

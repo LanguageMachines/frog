@@ -29,7 +29,6 @@
 
 */
 
-#include <map>
 #include <string>
 #include "timbl/TimblAPI.h"
 #include "frog/Frog.h"

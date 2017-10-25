@@ -35,7 +35,6 @@
 #include <iostream>
 #include <algorithm>
 #include <fstream>
-#include <sstream>
 #include "timbl/TimblAPI.h"
 
 #include "ucto/unicode.h"

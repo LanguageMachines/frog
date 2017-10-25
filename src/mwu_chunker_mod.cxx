@@ -278,7 +278,6 @@ void Mwu::Classify(){
     if ( debug ){
       LOG << "checking word[" << i <<"]: " << word << endl;
     }
-    //    pair<mymap2::iterator, mymap2::iterator> matches = MWUs.equal_range(word);
     const auto matches = MWUs.equal_range(word);
     if ( matches.first != MWUs.end() ) {
       //match

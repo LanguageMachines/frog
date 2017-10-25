@@ -31,10 +31,7 @@
 
 #include <string>
 #include <iostream>
-#include <sstream>
-#include <fstream>
 #include <vector>
-#include <map>
 
 #include "config.h"
 #include "ticcutils/LogStream.h"
@@ -42,8 +39,8 @@
 #include "ticcutils/CommandLine.h"
 #include "ticcutils/PrettyPrint.h"
 #include "libfolia/folia.h"
-#include "frog/ucto_tokenizer_mod.h"
 #include "mbt/MbtAPI.h"
+#include "frog/ucto_tokenizer_mod.h"
 #include "frog/ner_tagger_mod.h"
 
 using namespace std;
