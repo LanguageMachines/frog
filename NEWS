@@ -6,10 +6,10 @@
 * better textclass handling in general
 * multiple types of entities (setnames) are stored in different layers
 * some small provisions for 'multi word' words added. mblem may use them
-   other miodules just ignore them (seeing a multiword as multi words)
+   other modules just ignore them (seeing a multiword as multi words)
 * added --inpuclass and --outputclass options. (prefer over textclass)
 * added a --retry option, to redo complete directories, skipping what is done.
-* added a --nostdout option to suppres the tabbed output to stdout
+* added a --nostdout option to suppress the tabbed output to stdout
 * refactoring and small fixes
 
 [Maarten van Gompel]
