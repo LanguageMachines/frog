@@ -74,6 +74,7 @@ folia::EntitiesLayer *mwuAna::addEntity( const string& tagset,
       {
 	folia::KWargs args;
 	args["generate_id"] = sent->id();
+	args["set"] = tagset;
 	el = new folia::EntitiesLayer( args, sent->doc() );
 	sent->append( el );
       }

@@ -32,6 +32,7 @@
 #ifndef NER_TAGGER_MOD_H
 #define NER_TAGGER_MOD_H
 
+#include <unordered_map>
 #include "frog/tagger_base.h"
 
 class NERTagger: public BaseTagger {
@@ -49,7 +50,7 @@ class NERTagger: public BaseTagger {
   bool Generate( const std::string& );
  private:
   bool fill_ners( const std::string&, const std::string&, const std::string& );
-  std::vector<std::map<std::string,std::set<std::string>>> known_ners;
+  std::vector<std::unordered_map<std::string,std::set<std::string>>> known_ners;
   int max_ner_size;
 };
 

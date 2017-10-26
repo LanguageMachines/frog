@@ -231,11 +231,12 @@ static void addEntity( folia::Sentence *sent,
 #pragma omp critical(foliaupdate)
   {
     try {
-      el = sent->annotation<folia::EntitiesLayer>();
+      el = sent->annotation<folia::EntitiesLayer>(tagset);
     }
     catch(...){
       folia::KWargs args;
       args["generate_id"] = sent->id();
+      args["set"] = tagset;
       el = new folia::EntitiesLayer( args, sent->doc() );
       sent->append( el );
     }
