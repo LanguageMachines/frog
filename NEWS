@@ -1,9 +1,10 @@
-0.13.6 - 2017-10-24
+0.13.8 - 2017-10-26
 [Ko vd Sloot]
 * Now with new and enhanced NER and IOB chunker. (needs Frogdata >0.15)
 * added -t / --textredundancy option, which is passed to ucto
 * set textclass attributes on entities (folia 1.5 feature)
 * better textclass handling in general
+* multiple types of entities (setnames) are stored in different layers
 * some small provisions for 'multi word' words added. mblem may use them
    other miodules just ignore them (seeing a multiword as multi words)
 * added --inpuclass and --outputclass options. (prefer over textclass)
@@ -14,8 +15,10 @@
 [Maarten van Gompel]
 * new --override option
 
+0.13.7 - 2017-01-23
+* Data files are now in share/ rather than etc/ (requires frogdata >= v0.13)
 
-0.13.5 - 2017-01-05
+0.13.6 - 2017-01-05
 [Ko van der Sloot]
 * rework done on compounding in MBMA. (still work in progress)
 * lots of improvement in MBMA rule handling. (but still work in progress)
@@ -28,7 +31,12 @@
   - detect multiple languages
   - handle a selected language an ignore the rest
 
-- some minor code refactoring. )logging etc.)
+0.13.5 - 2016-09-13
+* Added safeguards against faulty data
+* Added manpage for ner tool (issue #8)
+* Added some more compounding rules
+* Read and display frogdata version
+
 0.13.4 - 2016-07-11
 [Ko van der Sloot]
 - added long options --help and --version
