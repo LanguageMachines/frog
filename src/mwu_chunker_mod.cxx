@@ -29,6 +29,8 @@
 
 */
 
+#include "frog/mwu_chunker_mod.h"
+
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -41,7 +43,6 @@
 
 #include "frog/Frog-util.h" // defines etc.
 #include "ucto/unicode.h"
-#include "frog/mwu_chunker_mod.h"
 
 using namespace std;
 

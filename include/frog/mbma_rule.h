@@ -33,6 +33,8 @@
 #define MBMA_RULE_H
 
 #include <map>
+#include <vector>
+#include <string>
 #include "unicode/unistr.h"
 #include "ticcutils/LogStream.h"
 #include "frog/clex.h"

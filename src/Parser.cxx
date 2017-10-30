@@ -29,6 +29,8 @@
 
 */
 
+#include "frog/Parser.h"
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <cstdlib>
@@ -43,7 +45,6 @@
 #include "timbl/TimblAPI.h"
 #include "ucto/unicode.h"
 #include "frog/Frog-util.h"
-#include "frog/Parser.h"
 #include "frog/csidp.h"
 
 using namespace std;

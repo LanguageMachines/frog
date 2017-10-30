@@ -34,10 +34,15 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include "ticcutils/LogStream.h"
+#include "ticcutils/Configuration.h"
 #include "libfolia/folia.h"
+#include "ucto/tokenize.h"
+#include "timbl/TimblAPI.h"
 
 struct parseData;
+class TimerBlock;
 
 class Parser {
  public:

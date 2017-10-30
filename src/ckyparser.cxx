@@ -28,13 +28,15 @@
       lamasoftware (at ) science.ru.nl
 
 */
+
+#include "frog/ckyparser.h"
+
 #include <iostream>
 #include <vector>
 #include <string>
 
 #include "ticcutils/PrettyPrint.h"
 #include "ticcutils/LogStream.h"
-#include "frog/ckyparser.h"
 
 using namespace std;
 

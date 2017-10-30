@@ -29,6 +29,8 @@
 
 */
 
+#include "frog/mblem_mod.h"
+
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -42,7 +44,6 @@
 #include "libfolia/folia.h"
 #include "frog/ucto_tokenizer_mod.h"
 #include "frog/cgn_tagger_mod.h"
-#include "frog/mblem_mod.h"
 
 using namespace std;
 using namespace Timbl;

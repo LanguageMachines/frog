@@ -29,10 +29,11 @@
 
 */
 
+#include "frog/mbma_rule.h"
+
 #include <string>
 #include <vector>
 #include <iostream>
-#include "frog/mbma_rule.h"
 #include "ticcutils/StringOps.h"
 #include "ticcutils/PrettyPrint.h"
 #include "libfolia/folia.h"

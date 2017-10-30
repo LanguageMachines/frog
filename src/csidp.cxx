@@ -28,6 +28,9 @@
       lamasoftware (at ) science.ru.nl
 
 */
+
+#include "frog/csidp.h"
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -37,7 +40,7 @@
 #include "ticcutils/StringOps.h"
 #include "ticcutils/PrettyPrint.h"
 #include "ticcutils/LogStream.h"
-#include "frog/csidp.h"
+
 
 using namespace std;
 

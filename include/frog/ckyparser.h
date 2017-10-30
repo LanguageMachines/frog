@@ -2,6 +2,9 @@
 #define CKYPARSER_H
 
 #include <set>
+#include <vector>
+#include <ostream>
+#include "ticcutils/LogStream.h"
 
 enum dirType { ROOT, LEFT, RIGHT, ERROR };
 

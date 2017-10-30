@@ -30,6 +30,7 @@
 
 #include "libfolia/folia.h"
 #include "ucto/tokenize.h"
+#include "ticcutils/Configuration.h"
 
 class UctoTokenizer {
  public:

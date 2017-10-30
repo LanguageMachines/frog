@@ -29,6 +29,8 @@
 
 */
 
+#include "frog/ner_tagger_mod.h"
+
 #include <string>
 #include <iostream>
 #include <vector>
@@ -41,7 +43,6 @@
 #include "libfolia/folia.h"
 #include "mbt/MbtAPI.h"
 #include "frog/ucto_tokenizer_mod.h"
-#include "frog/ner_tagger_mod.h"
 
 using namespace std;
 using namespace Timbl;

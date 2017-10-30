@@ -29,13 +29,14 @@
 
 */
 
+#include "frog/ucto_tokenizer_mod.h"
+
 #include <string>
 #include "timbl/TimblAPI.h"
 #include "frog/Frog-util.h"
 #include "ticcutils/Configuration.h"
 #include "ticcutils/FileUtils.h"
 #include "ticcutils/PrettyPrint.h"
-#include "frog/ucto_tokenizer_mod.h"
 
 using namespace std;
 using TiCC::operator<<;

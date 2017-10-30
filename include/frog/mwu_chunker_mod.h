@@ -37,6 +37,7 @@
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Configuration.h"
 #include "libfolia/folia.h"
+#include "ucto/unicode.h"
 
 class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );

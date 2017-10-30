@@ -33,6 +33,10 @@
 #define MBLEM_MOD_H
 
 #include "libfolia/folia.h"
+#include "ticcutils/LogStream.h"
+#include "ticcutils/Configuration.h"
+#include "ucto/tokenize.h"
+#include "timbl/TimblAPI.h"
 
 class mblemData {
  public:

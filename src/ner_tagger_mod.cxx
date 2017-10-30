@@ -30,6 +30,7 @@
 */
 
 #include "frog/ner_tagger_mod.h"
+
 #include "mbt/MbtAPI.h"
 #include "frog/Frog-util.h"
 #include "ucto/unicode.h"
