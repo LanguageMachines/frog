@@ -29,10 +29,9 @@
 
 */
 
-#include "mbt/MbtAPI.h"
-#include "frog/Frog.h"
-#include "ucto/unicode.h"
 #include "frog/iob_tagger_mod.h"
+
+#include "frog/Frog.h"
 
 using namespace std;
 using namespace Tagger;

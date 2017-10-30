@@ -33,6 +33,10 @@
 #define NER_TAGGER_MOD_H
 
 #include <unordered_map>
+#include <vector>
+#include "ticcutils/LogStream.h"
+#include "ticcutils/Configuration.h"
+#include "libfolia/folia.h"
 #include "frog/tagger_base.h"
 
 class NERTagger: public BaseTagger {

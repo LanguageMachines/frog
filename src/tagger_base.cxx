@@ -29,12 +29,10 @@
 
 */
 
-#include <algorithm>
-#include "mbt/MbtAPI.h"
-#include "ucto/unicode.h"
-#include "frog/Frog.h"
-#include "frog/ucto_tokenizer_mod.h"
 #include "frog/tagger_base.h"
+
+#include <algorithm>
+#include "frog/Frog.h"
 
 using namespace std;
 using namespace Tagger;

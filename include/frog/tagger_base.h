@@ -32,7 +32,12 @@
 #ifndef TAGGER_BASE_H
 #define TAGGER_BASE_H
 
+#include <vector>
+#include "ticcutils/LogStream.h"
+#include "ticcutils/Configuration.h"
 #include "mbt/MbtAPI.h"
+#include "libfolia/folia.h"
+#include "ucto/tokenize.h"
 
 class BaseTagger {
  public:

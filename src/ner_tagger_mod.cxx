@@ -29,12 +29,13 @@
 
 */
 
+#include "frog/ner_tagger_mod.h"
 #include "mbt/MbtAPI.h"
 #include "frog/Frog.h"
 #include "ucto/unicode.h"
 #include "ticcutils/FileUtils.h"
 #include "ticcutils/StringOps.h"
-#include "frog/ner_tagger_mod.h"
+
 
 using namespace std;
 using namespace Tagger;
