@@ -50,7 +50,7 @@
 
 // individual module headers
 
-#include "frog/Frog.h" //internal interface, included by all modules
+#include "frog/Frog-util.h"
 #include "frog/FrogAPI.h" //public API interface
 #include "frog/ucto_tokenizer_mod.h"
 #include "frog/tagger_base.h"

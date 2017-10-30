@@ -28,6 +28,7 @@
 #ifndef UCTO_TOKENIZER_MOD_H
 #define UCTO_TOKENIZER_MOD_H
 
+#include "libfolia/folia.h"
 #include "ucto/tokenize.h"
 
 class UctoTokenizer {

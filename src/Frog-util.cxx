@@ -29,10 +29,13 @@
 
 */
 
+#include "frog/Frog-util.h"
+
 #include <set>
 #include <string>
+#include <ostream>
+
 #include "config.h"
-#include "frog/Frog.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>

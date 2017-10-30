@@ -32,6 +32,12 @@
 #ifndef MWU_CHUNKER_H
 #define MWU_CHUNKER_H
 
+#include <ostream>
+#include <string>
+#include "ticcutils/LogStream.h"
+#include "ticcutils/Configuration.h"
+#include "libfolia/folia.h"
+
 class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );
  public:

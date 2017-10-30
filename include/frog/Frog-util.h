@@ -33,15 +33,11 @@
 #define FROG_H
 
 #include <set>
-#include "ticcutils/LogStream.h"
-#include "ticcutils/Configuration.h"
+#include <ostream>
+#include <string>
+
 #include "ticcutils/Timer.h"
-#include "ticcutils/PrettyPrint.h"
-#include "ticcutils/StringOps.h"
-#include "libfolia/folia.h"
 
-
-//declared here and defined in Frog-util.cxx (bit messy)
 std::string prefix( const std::string&, const std::string& );
 std::string getTime();
 void getFileNames( const std::string&, const std::string&, std::set<std::string>& );

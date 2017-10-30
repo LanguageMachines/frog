@@ -28,10 +28,11 @@
       lamasoftware (at ) science.ru.nl
 */
 
+#include "frog/FrogAPI.h"
+
 #include <cstdlib>
 #include <cstdio>
 #include <unistd.h>
-#include <sys/wait.h>
 #include <signal.h>
 #include <string>
 #include <cstring>
@@ -65,9 +66,10 @@
 #  endif /* defined(HAVE_READLINE_HISTORY_H) */
 #endif /* HAVE_READLINE_HISTORY */
 
+#include "ticcutils/PrettyPrint.h"
 
 // individual module headers
-#include "frog/FrogAPI.h" //will also include Frog.h (internals), FrogAPI.h is for public  interface
+#include "frog/Frog-util.h"
 #include "frog/ucto_tokenizer_mod.h"
 #include "frog/mblem_mod.h"
 #include "frog/mbma_mod.h"

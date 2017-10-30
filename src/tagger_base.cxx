@@ -32,7 +32,7 @@
 #include "frog/tagger_base.h"
 
 #include <algorithm>
-#include "frog/Frog.h"
+#include "frog/Frog-util.h"
 
 using namespace std;
 using namespace Tagger;

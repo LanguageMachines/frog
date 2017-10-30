@@ -29,17 +29,20 @@
 #ifndef FROGAPI_H
 #define FROGAPI_H
 
+#include <vector>
+#include <string>
+#include <iostream>
+
 #include "timbl/TimblAPI.h"
 
-#include "frog/Frog.h" //internals
 #include "ticcutils/Configuration.h"
 #include "ticcutils/LogStream.h"
 #include "ticcutils/FdStream.h"
 #include "ticcutils/ServerBase.h"
 
-#include <vector>
-#include <string>
-#include <iostream>
+#include "libfolia/folia.h"
+
+#include "frog/Frog-util.h"
 
 class UctoTokenizer;
 class Mbma;
@@ -109,7 +112,7 @@ class FrogAPI {
  private:
   void test_version( const std::string&, double );
   // functions
-  bool TestSentence( folia::Sentence*, TimerBlock&);
+  bool TestSentence( folia::Sentence*, TimerBlock& );
   void FrogStdin( bool prompt );
   std::vector<folia::Word*> lookup( folia::Word *,
 				    const std::vector<folia::Entity*>& ) const;

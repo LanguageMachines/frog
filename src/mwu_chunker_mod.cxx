@@ -39,7 +39,7 @@
 
 #include "timbl/TimblAPI.h"
 
-#include "frog/Frog.h" // defines etc.
+#include "frog/Frog-util.h" // defines etc.
 #include "ucto/unicode.h"
 #include "frog/mwu_chunker_mod.h"
 

@@ -30,7 +30,7 @@
 */
 
 #include "frog/cgn_tagger_mod.h"
-#include "frog/Frog.h"
+#include "frog/Frog-util.h"
 
 using namespace std;
 using namespace Tagger;

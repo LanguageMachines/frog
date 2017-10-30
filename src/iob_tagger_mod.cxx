@@ -31,7 +31,8 @@
 
 #include "frog/iob_tagger_mod.h"
 
-#include "frog/Frog.h"
+#include "ticcutils/PrettyPrint.h"
+#include "frog/Frog-util.h"
 
 using namespace std;
 using namespace Tagger;

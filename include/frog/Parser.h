@@ -32,6 +32,11 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include <string>
+#include <vector>
+#include "ticcutils/LogStream.h"
+#include "libfolia/folia.h"
+
 struct parseData;
 
 class Parser {

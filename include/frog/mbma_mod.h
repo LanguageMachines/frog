@@ -37,6 +37,8 @@
 #include <list>
 #include <unicode/translit.h>
 #include "ticcutils/LogStream.h"
+#include "ticcutils/Configuration.h"
+#include "libfolia/folia.h"
 #include "frog/clex.h"
 #include "frog/mbma_rule.h"
 #include "frog/mbma_brackets.h"
@@ -48,17 +50,6 @@ namespace Timbl{
 
 namespace Tokenizer {
   class UnicodeFilter;
-}
-
-namespace TiCC {
-  class Configuration;
-}
-
-namespace folia {
-  class Word;
-  class Document;
-  class MorphologyLayer;
-  class Morpheme;
 }
 
 class Mbma {

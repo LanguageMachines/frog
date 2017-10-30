@@ -42,7 +42,8 @@
 #include "ucto/unicode.h"
 #include "ticcutils/Configuration.h"
 #include "ticcutils/StringOps.h"
-#include "frog/Frog.h"
+#include "ticcutils/PrettyPrint.h"
+#include "frog/Frog-util.h"
 
 using namespace std;
 using TiCC::operator<<;

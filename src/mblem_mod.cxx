@@ -36,7 +36,7 @@
 #include "ucto/unicode.h"
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Configuration.h"
-#include "frog/Frog.h"
+#include "frog/Frog-util.h"
 #include "frog/mblem_mod.h"
 
 using namespace std;

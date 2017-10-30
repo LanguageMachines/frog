@@ -31,11 +31,11 @@
 
 #include "frog/ner_tagger_mod.h"
 #include "mbt/MbtAPI.h"
-#include "frog/Frog.h"
+#include "frog/Frog-util.h"
 #include "ucto/unicode.h"
 #include "ticcutils/FileUtils.h"
 #include "ticcutils/StringOps.h"
-
+#include "ticcutils/PrettyPrint.h"
 
 using namespace std;
 using namespace Tagger;

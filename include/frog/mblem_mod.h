@@ -32,6 +32,8 @@
 #ifndef MBLEM_MOD_H
 #define MBLEM_MOD_H
 
+#include "libfolia/folia.h"
+
 class mblemData {
  public:
  mblemData( const std::string& l, const std::string& t ):
