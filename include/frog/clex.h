@@ -32,6 +32,8 @@
 #ifndef CLEX_H
 #define CLEX_H
 
+#include <map>
+
 namespace CLEX {
   enum Type { UNASS, N, A, Q, V, D, O, B, P, C, I, X, Z, PN, AFFIX, XAFFIX,
 	      GLUE, NEUTRAL };

@@ -32,6 +32,11 @@
 #ifndef MBMA_RULE_H
 #define MBMA_RULE_H
 
+#include <map>
+#include "unicode/unistr.h"
+#include "ticcutils/LogStream.h"
+#include "frog/clex.h"
+
 namespace Compound {
   enum Type : int;
 }

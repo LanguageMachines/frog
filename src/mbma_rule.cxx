@@ -32,13 +32,11 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include "ticcutils/LogStream.h"
+#include "frog/mbma_rule.h"
 #include "ticcutils/StringOps.h"
 #include "ticcutils/PrettyPrint.h"
 #include "libfolia/folia.h"
-#include "frog/clex.h"
 #include "frog/mbma_brackets.h"
-#include "frog/mbma_rule.h"
 
 using namespace std;
 using TiCC::operator<<;

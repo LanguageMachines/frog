@@ -35,13 +35,14 @@
 #include <iostream>
 #include <algorithm>
 #include <fstream>
+#include "frog/mbma_mod.h"
+
 #include "timbl/TimblAPI.h"
 
 #include "ucto/unicode.h"
 #include "ticcutils/Configuration.h"
 #include "ticcutils/StringOps.h"
 #include "frog/Frog.h"
-#include "frog/mbma_mod.h"
 
 using namespace std;
 using TiCC::operator<<;
@@ -682,7 +683,7 @@ void Mbma::filterSubTags( const vector<string>& feats ){
     unique[tmp] = ait;
   }
   // so now we have map of 'equal' analysis.
-  // create a set for revers lookup.
+  // create a set for reverse lookup.
   set<Rule*> uniqueAna;
   for ( auto const& uit : unique ){
     uniqueAna.insert( uit.second );

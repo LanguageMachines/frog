@@ -29,6 +29,8 @@
 
 */
 
+#include "frog/mbma_brackets.h"
+
 #include <cassert>
 #include <string>
 #include <vector>
@@ -36,14 +38,12 @@
 #include <iostream>
 #include "ucto/unicode.h"
 #include "ticcutils/Configuration.h"
-#include "ticcutils/LogStream.h"
 #include "ticcutils/StringOps.h"
 #include "ticcutils/PrettyPrint.h"
 #include "libfolia/folia.h"
 #include "frog/clex.h"
 #include "frog/mbma_rule.h"
 #include "frog/mbma_mod.h"
-#include "frog/mbma_brackets.h"
 
 using namespace std;
 using TiCC::operator<<;

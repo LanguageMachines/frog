@@ -32,6 +32,9 @@
 #ifndef MBMA_MOD_H
 #define MBMA_MOD_H
 
+#include <map>
+#include <vector>
+#include <list>
 #include <unicode/translit.h>
 #include "ticcutils/LogStream.h"
 #include "frog/clex.h"

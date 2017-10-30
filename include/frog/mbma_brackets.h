@@ -32,6 +32,12 @@
 #ifndef MBMA_BRACKETS_H
 #define MBMA_BRACKETS_H
 
+#include <vector>
+#include <list>
+#include "unicode/unistr.h"
+#include "ticcutils/LogStream.h"
+#include "frog/clex.h"
+
 enum Status { INFO, PARTICLE, PARTICIPLE, STEM, COMPLEX, INFLECTION,
 	      DERIVATIONAL, FAILED };
 
