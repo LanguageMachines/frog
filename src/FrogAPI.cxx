@@ -192,6 +192,11 @@ FrogAPI::FrogAPI( FrogOptions &opt,
   // for some modules init can take a long time
   // so first make sure it will not fail on some trivialities
   //
+  if ( options.doTok && !configuration.hasSection("tagger") ){
+    LOG << "Missing [[tagger]] section in config file." << endl;
+    LOG << "cannot run without a tagger!" << endl;
+    throw runtime_error( "Frog initialization failed" );
+  }
   if ( options.doTok && !configuration.hasSection("tokenizer") ){
     LOG << "Missing [[tokenizer]] section in config file." << endl;
     LOG << "Disabled the tokenizer." << endl;
