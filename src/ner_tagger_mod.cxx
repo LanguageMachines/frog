@@ -126,8 +126,12 @@ bool NERTagger::fill_ners( const string& cat,
 
 bool NERTagger::read_gazets( const string& name, const string& config_dir ){
   string file_name = name;
+  string lookup_dir = config_dir;
   if ( name[0] != '/' ) {
     file_name = config_dir + "/" + file_name;
+  }
+  else {
+    lookup_dir = TiCC::dirname( file_name );
   }
   ifstream is( file_name );
   if ( !is ){
@@ -157,7 +161,7 @@ bool NERTagger::read_gazets( const string& name, const string& config_dir ){
     }
     string cat  = parts[0];
     string file = parts[1];
-    if ( fill_ners( cat, file, config_dir ) ){
+    if ( fill_ners( cat, file, lookup_dir ) ){
       ++file_cnt;
     }
   }
