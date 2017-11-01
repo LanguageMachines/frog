@@ -93,7 +93,7 @@ void Mbma::init_cgn( const string& main, const string& sub ) {
     }
   }
   else {
-    throw ( runtime_error( "unable to open:" + sub ) );
+    throw ( runtime_error( "unable to open: " + main ) );
   }
   ifstream tc1( sub );
   if ( tc1 ){
