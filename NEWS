@@ -1,3 +1,8 @@
+0.13.9 - 2017-11-07
+[Ko vd Sloot]
+Bug fix relase, to get all our releases into balance. (Toad release
+requires 0.13.9)
+
 0.13.8 - 2017-10-26
 [Ko vd Sloot]
 * Now with new and enhanced NER and IOB chunker. (needs Frogdata >0.15)
