@@ -510,21 +510,15 @@ bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers){
   bool all_well = true;
   string exs;
   if ( !swords.empty() ) {
-#pragma omp parallel sections shared(all_well,exs,swords)
-    {
-#pragma omp section
-      {
-	timers.tagTimer.start();
-	try {
-	  myCGNTagger->Classify( swords );
-	}
-	catch ( exception&e ){
-	  all_well = false;
-	  exs += string(e.what()) + " ";
-	}
-	timers.tagTimer.stop();
-      }
-    } // parallel sections
+    timers.tagTimer.start();
+    try {
+      myCGNTagger->Classify( swords );
+    }
+    catch ( exception&e ){
+      all_well = false;
+      exs += string(e.what()) + " ";
+    }
+    timers.tagTimer.stop();
     if ( !all_well ){
       throw runtime_error( exs );
     }
