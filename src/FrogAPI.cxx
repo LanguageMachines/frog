@@ -1390,8 +1390,8 @@ void FrogAPI::FrogDoc( folia::Document& doc,
       if ( options.doParse && !showParse ){
 	LOG << "WARNING!" << endl;
 	LOG << "Sentence " << i+1
-			<< " isn't parsed because it contains more tokens then set with the --max-parser-tokens="
-			<< options.maxParserTokens << " option." << endl;
+	    << " isn't parsed because it contains more tokens then set with the --max-parser-tokens="
+	    << options.maxParserTokens << " option." << endl;
       }
     }
   }
