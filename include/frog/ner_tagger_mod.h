@@ -49,12 +49,24 @@ class NERTagger: public BaseTagger {
   void addNERTags( const std::vector<folia::Word*>&,
 		   const std::vector<std::string>&,
 		   const std::vector<double>& );
-  bool read_gazets( const std::string&, const std::string& );
+  bool read_gazets( const std::string& f, const std::string& p ){
+    return read_gazets( f, p, known_ners );
+  }
+  bool read_overrides( const std::string& f, const std::string& p ){
+    return read_gazets( f, p, override_ners );
+  }
   std::vector<std::string> create_ner_list( const std::vector<std::string>& );
   bool Generate( const std::string& );
  private:
-  bool fill_ners( const std::string&, const std::string&, const std::string& );
+  bool read_gazets( const std::string&,
+		    const std::string&,
+		    std::vector<std::unordered_map<std::string,std::set<std::string>>>& );
+  bool fill_ners( const std::string&,
+		  const std::string&,
+		  const std::string&,
+		  std::vector<std::unordered_map<std::string,std::set<std::string>>>& );
   std::vector<std::unordered_map<std::string,std::set<std::string>>> known_ners;
+  std::vector<std::unordered_map<std::string,std::set<std::string>>> override_ners;
   int max_ner_size;
 };
 

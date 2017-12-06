@@ -50,7 +50,8 @@ const string cgn_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
 NERTagger::NERTagger( TiCC::LogStream *l ):
   BaseTagger( l, "NER" ),
   max_ner_size(20)
-{  known_ners.resize( max_ner_size + 1 );
+{ known_ners.resize( max_ner_size + 1 );
+  override_ners.resize( max_ner_size + 1 );
 }
 
 bool NERTagger::init( const TiCC::Configuration& config ){
@@ -67,12 +68,19 @@ bool NERTagger::init( const TiCC::Configuration& config ){
       return false;
     }
   }
+  val = config.lookUp( "ner_override", "NER" );
+  if ( !val.empty() ){
+    if ( !read_overrides( val, config.configDir() ) ){
+      return false;
+    }
+  }
   return true;
 }
 
 bool NERTagger::fill_ners( const string& cat,
 			   const string& name,
-			   const string& config_dir ){
+			   const string& config_dir,
+			   vector<unordered_map<string,set<string>>>& ners ){
   string file_name = name;
   if ( !TiCC::isFile( file_name ) ){
     file_name = config_dir + "/" + name;
@@ -90,9 +98,8 @@ bool NERTagger::fill_ners( const string& cat,
       continue;
     }
     else {
-      vector<string> parts;
-      size_t num = TiCC::split( line, parts );
-      if ( num > (unsigned)max_ner_size ){
+      vector<string> parts = TiCC::split( line );
+      if ( parts.size() > (unsigned)max_ner_size ){
 	// LOG << "expected 1 to " << max_ner_size
 	// 		   << " SPACE-separated parts in line: '" << line
 	// 		   << "'" << endl;
@@ -115,7 +122,7 @@ bool NERTagger::fill_ners( const string& cat,
 	  line += " ";
 	}
       }
-      known_ners[num][line].insert( cat );
+      ners[parts.size()][line].insert( cat );
       ++ner_cnt;
     }
   }
@@ -124,7 +131,9 @@ bool NERTagger::fill_ners( const string& cat,
   return true;
 }
 
-bool NERTagger::read_gazets( const string& name, const string& config_dir ){
+bool NERTagger::read_gazets( const string& name,
+			     const string& config_dir,
+			     vector<unordered_map<string,set<string>>>& ners ){
   string file_name = name;
   string lookup_dir = config_dir;
   if ( name[0] != '/' ) {
@@ -161,7 +170,7 @@ bool NERTagger::read_gazets( const string& name, const string& config_dir ){
     }
     string cat  = parts[0];
     string file = parts[1];
-    if ( fill_ners( cat, file, lookup_dir ) ){
+    if ( fill_ners( cat, file, lookup_dir, ners ) ){
       ++file_cnt;
     }
   }
@@ -186,7 +195,6 @@ static vector<string> serialize( const vector<set<string>>& stags ){
 	res += s + "+";
       }
       ambitags[pos] = res;
-      //      cerr << "set ambi[" << pos << " to " << res << endl;
     }
     ++pos;
   }

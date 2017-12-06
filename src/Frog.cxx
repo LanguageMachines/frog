@@ -305,6 +305,10 @@ bool parse_args( TiCC::CL_Options& Opts,
     }
   }
 
+  if ( Opts.extract( "ner-override", value ) ){
+    configuration.setatt( "ner_override", value, "NER" );
+  }
+
   options.doServer = Opts.extract('S', options.listenport );
 
 #ifdef HAVE_OPENMP
@@ -541,7 +545,7 @@ int main(int argc, char *argv[]) {
 			  "textclass:,inputclass:,outputclass:,testdir:,"
 			  "uttmarker:,max-parser-tokens:,textredundancy:,"
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
-			  "help,language:,retry,nostdout,"
+			  "help,language:,retry,nostdout,ner-override:,"
 			  "debug:,keep-parser-files,version,threads:,"
 			  "override:,KANON");
     Opts.init(argc, argv);
