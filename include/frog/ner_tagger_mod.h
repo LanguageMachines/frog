@@ -45,6 +45,8 @@ class NERTagger: public BaseTagger {
   bool init( const TiCC::Configuration& );
   void Classify( const std::vector<folia::Word *>& );
   void post_process( const std::vector<folia::Word*>& );
+  void post_process( const std::vector<folia::Word*>&,
+		     const std::vector<std::string>& );
   void addDeclaration( folia::Document& ) const;
   void addNERTags( const std::vector<folia::Word*>&,
 		   const std::vector<std::string>&,
@@ -55,7 +57,8 @@ class NERTagger: public BaseTagger {
   bool read_overrides( const std::string& f, const std::string& p ){
     return read_gazets( f, p, override_ners );
   }
-  std::vector<std::string> create_ner_list( const std::vector<std::string>& );
+  std::vector<std::string> create_ner_list( const std::vector<std::string>&,
+					    std::vector<std::unordered_map<std::string,std::set<std::string>>>& );
   bool Generate( const std::string& );
  private:
   bool read_gazets( const std::string&,

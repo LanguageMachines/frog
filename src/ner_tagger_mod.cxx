@@ -201,7 +201,8 @@ static vector<string> serialize( const vector<set<string>>& stags ){
   return ambitags;
 }
 
-vector<string> NERTagger::create_ner_list( const vector<string>& words ){
+vector<string> NERTagger::create_ner_list( const vector<string>& words,
+					   std::vector<std::unordered_map<std::string,std::set<std::string>>>& ners ){
   vector<set<string>> stags( words.size() );
   if ( debug ){
     LOG << "search for known NER's" << endl;
@@ -212,7 +213,7 @@ vector<string> NERTagger::create_ner_list( const vector<string>& words ){
     size_t len = 1;
     for ( size_t i = 0; i < min( words.size() - j, (size_t)max_ner_size); ++i ){
       // start looking for sequences of length len
-      auto const& mp = known_ners[len++];
+      auto const& mp = ners[len++];
       if ( mp.empty() ){
 	continue;
       }
@@ -367,7 +368,8 @@ void NERTagger::Classify( const vector<folia::Word *>& swords ){
     vector<string> words;
     vector<string> ptags;
     extract_words_tags( swords, cgn_tagset, words, ptags );
-    vector<string> ktags = create_ner_list( words );
+    vector<string> ktags = create_ner_list( words, known_ners );
+    vector<string> override_tags = create_ner_list( words, override_ners );
     string text_block;
     string prev = "_";
     string prevN = "_";
@@ -406,16 +408,64 @@ void NERTagger::Classify( const vector<folia::Word *>& swords ){
 	    << " confidence=" << _tag_result[i].confidence() << endl;
       }
     }
+    post_process( swords, override_tags );
   }
-  post_process( swords );
 }
 
-void NERTagger::post_process( const std::vector<folia::Word*>& swords ){
+void NERTagger::post_process( const vector<folia::Word*>& ){
+  throw logic_error( "NER tagger call undefined postprocess() member" );
+}
+
+string to_tag( const string& label, bool inside ){
+  vector<string> parts = TiCC::split_at( label, "+" );
+  if ( parts.size() > 1 ){
+    // undecided
+    return "O";
+  }
+  else {
+    string result;
+    if ( inside ){
+      result += "I-";
+    }
+    else {
+      result += "B-";
+    }
+    result += parts[0];
+    return result;
+  }
+}
+
+void NERTagger::post_process( const vector<folia::Word*>& swords,
+			      const vector<string>& override ){
+  using TiCC::operator<<;
+  cerr << "override = " << override << endl;
   vector<string> tags;
   vector<double> conf;
   for ( const auto& tag : _tag_result ){
     tags.push_back( tag.assignedTag() );
     conf.push_back( tag.confidence() );
+  }
+  if ( !override.empty() ){
+    bool inside = false;
+    string label;
+    for ( size_t i=0; i < tags.size(); ++i ){
+      if ( tags[i] == "O" ) {
+	// may be overridden
+	if ( override[i] != "O" ){
+	  inside = (label == override[i] );
+	  // cerr << "REPLACE " << tags[i] << " by "
+	  //      << to_tag(override[i], inside ) << endl;
+	  tags[i] = to_tag(override[i], inside );
+	  if ( !inside ){
+	    label = override[i];
+	  }
+	}
+	else {
+	  inside = false;
+	  label = "";
+	}
+      }
+    }
   }
   addNERTags( swords, tags, conf );
 }
