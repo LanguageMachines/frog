@@ -64,6 +64,10 @@ class NERTagger: public BaseTagger {
     return create_ner_list( s, override_ners );
   }
   bool Generate( const std::string& );
+  void merge_override( std::vector<std::string>&,
+		       std::vector<double>&,
+		       const std::vector<std::string>& ) const;
+
  private:
   bool read_gazets( const std::string&,
 		    const std::string&,

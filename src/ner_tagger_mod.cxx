@@ -435,6 +435,54 @@ string to_tag( const string& label, bool inside ){
   }
 }
 
+void NERTagger::merge_override( vector<string>& tags,
+				vector<double>& conf,
+				const vector<string>& override ) const{
+  using TiCC::operator<<;
+  cerr << "override = " << override << endl;
+  cerr << "ner tags = " << tags << endl;
+  bool inside = false;
+  string label;
+  for ( size_t i=0; i < tags.size(); ++i ){
+    if ( override[i] != "O" ){
+      // there is something to override
+      if ( tags[i][0] == 'I' && !inside ){
+	//oops, inside a NER tag, and now a new override
+	// whipe previous I tags, and one B
+	for ( size_t j = i-1; j > 0; --j ){
+	  if ( tags[j][0] == 'B' ){
+	    // we are done
+	    tags[j] = "O";
+	    break;
+	  }
+	  tags[j] = "O";
+	}
+	// whipe next I tags too, to be sure
+	for ( size_t j = i+1; j < tags.size(); ++j ){
+	  if ( tags[j][0] != 'I' ){
+	    // a B or O
+	    break;
+	  }
+	  // still inside
+	  tags[j] = "O";
+	}
+      }
+      inside = (label == override[i] );
+      // cerr << "REPLACE " << tags[i] << " by "
+      //      << to_tag(override[i], inside ) << endl;
+      tags[i] = to_tag(override[i], inside );
+      conf[i] = 1;
+      if ( !inside ){
+	label = override[i];
+      }
+    }
+    else {
+      inside = false;
+      label = "";
+    }
+  }
+}
+
 void NERTagger::post_process( const vector<folia::Word*>& swords,
 			      const vector<string>& override ){
   vector<string> tags;
@@ -444,49 +492,7 @@ void NERTagger::post_process( const vector<folia::Word*>& swords,
     conf.push_back( tag.confidence() );
   }
   if ( !override.empty() ){
-    using TiCC::operator<<;
-    cerr << "override = " << override << endl;
-    cerr << "ner tags = " << tags << endl;
-    bool inside = false;
-    string label;
-    for ( size_t i=0; i < tags.size(); ++i ){
-      if ( override[i] != "O" ){
-	// there is something to override
-	if ( tags[i][0] == 'I' && !inside ){
-	  //oops, inside a NER tag, and now a new override
-	  // whipe previous I tags, and one B
-	  for ( size_t j = i-1; j > 0; --j ){
-	    if ( tags[j][0] == 'B' ){
-	      // we are done
-	      tags[j] = "O";
-	      break;
-	    }
-	    tags[j] = "O";
-	  }
-	  // whipe next I tags too, to be sure
-	  for ( size_t j = i+1; j < tags.size(); ++j ){
-	    if ( tags[j][0] != 'I' ){
-	      // a B or O
-	      break;
-	    }
-	    // still inside
-	    tags[j] = "O";
-	  }
-	}
-	inside = (label == override[i] );
-	// cerr << "REPLACE " << tags[i] << " by "
-	//      << to_tag(override[i], inside ) << endl;
-	tags[i] = to_tag(override[i], inside );
-	conf[i] = 1;
-	if ( !inside ){
-	  label = override[i];
-	}
-      }
-      else {
-	inside = false;
-	label = "";
-      }
-    }
+    merge_override( tags, conf, override );
   }
   addNERTags( swords, tags, conf );
 }
