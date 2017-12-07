@@ -438,47 +438,53 @@ string to_tag( const string& label, bool inside ){
 void NERTagger::merge_override( vector<string>& tags,
 				vector<double>& conf,
 				const vector<string>& override ) const{
-  // using TiCC::operator<<;
-  // cerr << "override = " << override << endl;
-  // cerr << "ner tags = " << tags << endl;
   bool inside = false;
   string label;
   for ( size_t i=0; i < tags.size(); ++i ){
     if ( override[i] != "O" ){
-      // there is something to override
-      if ( tags[i][0] == 'I' && !inside ){
-	//oops, inside a NER tag, and now a new override
-	// whipe previous I tags, and one B
-	if ( i == 0 ){
-	  // strange exception, in fact starting with an I tag is impossible
-	  tags[i][0] = 'B'; // fix it on the fly
-	  continue; // next i
-	}
-	for ( size_t j = i-1; j > 0; --j ){
-	  if ( tags[j][0] == 'B' ){
-	    // we are done
-	    tags[j] = "O";
-	    break;
-	  }
-	  tags[j] = "O";
-	}
-	// whipe next I tags too, to be sure
-	for ( size_t j = i+1; j < tags.size(); ++j ){
-	  if ( tags[j][0] != 'I' ){
-	    // a B or O
-	    break;
-	  }
-	  // still inside
-	  tags[j] = "O";
-	}
-      }
+      // if ( i == 0 ){
+      // 	 using TiCC::operator<<;
+      // 	 cerr << "override = " << override << endl;
+      // 	 cerr << "ner tags = " << tags << endl;
+      // }
       inside = (label == override[i] );
-      // cerr << "REPLACE " << tags[i] << " by "
-      //      << to_tag(override[i], inside ) << endl;
-      tags[i] = to_tag(override[i], inside );
-      conf[i] = 1;
-      if ( !inside ){
-	label = override[i];
+      //      cerr << "step i=" << i << " override=" << override[i] << endl;
+      string replace = to_tag(override[i], inside );
+      //      cerr << "replace=" << replace << endl;
+      if ( replace != "O" ){
+	// there is something to override
+	if ( tags[i][0] == 'I' && !inside ){
+	  //	  cerr << "before  whiping tags = " << tags << endl;
+	  //oops, inside a NER tag, and now a new override
+	  // whipe previous I tags, and one B
+	  if ( i == 0 ){
+	    // strange exception, in fact starting with an I tag is impossible
+	    tags[i][0] = 'B'; // fix it on the fly
+	    continue; // next i
+	  }
+	  for ( size_t j = i-1; j > 0; --j ){
+	    if ( tags[j][0] == 'B' ){
+	      // we are done
+	      tags[j] = "O";
+	      break;
+	    }
+	    tags[j] = "O";
+	  }
+	  // whipe next I tags too, to be sure
+	  for ( size_t j = i+1; j < tags.size(); ++j ){
+	    if ( tags[j][0] != 'I' ){
+	      // a B or O
+	      break;
+	    }
+	    // still inside
+	    tags[j] = "O";
+	  }
+	}
+	tags[i] = replace;
+	conf[i] = 1;
+	if ( !inside ){
+	  label = override[i];
+	}
       }
     }
     else {
