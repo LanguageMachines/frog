@@ -57,8 +57,12 @@ class NERTagger: public BaseTagger {
   bool read_overrides( const std::string& f, const std::string& p ){
     return read_gazets( f, p, override_ners );
   }
-  std::vector<std::string> create_ner_list( const std::vector<std::string>&,
-					    std::vector<std::unordered_map<std::string,std::set<std::string>>>& );
+  std::vector<std::string> create_ner_list( const std::vector<std::string>& s ){
+    return create_ner_list( s, known_ners );
+  }
+  std::vector<std::string> create_override_list( const std::vector<std::string>& s ){
+    return create_ner_list( s, override_ners );
+  }
   bool Generate( const std::string& );
  private:
   bool read_gazets( const std::string&,
@@ -68,6 +72,8 @@ class NERTagger: public BaseTagger {
 		  const std::string&,
 		  const std::string&,
 		  std::vector<std::unordered_map<std::string,std::set<std::string>>>& );
+  std::vector<std::string> create_ner_list( const std::vector<std::string>&,
+					    std::vector<std::unordered_map<std::string,std::set<std::string>>>& );
   std::vector<std::unordered_map<std::string,std::set<std::string>>> known_ners;
   std::vector<std::unordered_map<std::string,std::set<std::string>>> override_ners;
   int max_ner_size;
