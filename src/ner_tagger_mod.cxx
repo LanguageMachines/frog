@@ -438,9 +438,9 @@ string to_tag( const string& label, bool inside ){
 void NERTagger::merge_override( vector<string>& tags,
 				vector<double>& conf,
 				const vector<string>& override ) const{
-  using TiCC::operator<<;
-  cerr << "override = " << override << endl;
-  cerr << "ner tags = " << tags << endl;
+  // using TiCC::operator<<;
+  // cerr << "override = " << override << endl;
+  // cerr << "ner tags = " << tags << endl;
   bool inside = false;
   string label;
   for ( size_t i=0; i < tags.size(); ++i ){
@@ -449,6 +449,11 @@ void NERTagger::merge_override( vector<string>& tags,
       if ( tags[i][0] == 'I' && !inside ){
 	//oops, inside a NER tag, and now a new override
 	// whipe previous I tags, and one B
+	if ( i == 0 ){
+	  // strange exception, in fact starting with an I tag is impossible
+	  tags[i][0] = 'B'; // fix it on the fly
+	  continue; // next i
+	}
 	for ( size_t j = i-1; j > 0; --j ){
 	  if ( tags[j][0] == 'B' ){
 	    // we are done
