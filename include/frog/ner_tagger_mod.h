@@ -66,6 +66,7 @@ class NERTagger: public BaseTagger {
   bool Generate( const std::string& );
   void merge_override( std::vector<std::string>&,
 		       std::vector<double>&,
+		       const std::vector<std::string>&,
 		       const std::vector<std::string>& ) const;
 
  private:

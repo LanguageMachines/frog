@@ -437,11 +437,15 @@ string to_tag( const string& label, bool inside ){
 
 void NERTagger::merge_override( vector<string>& tags,
 				vector<double>& conf,
-				const vector<string>& override ) const{
+				const vector<string>& override,
+				const vector<string>& POS_tags ) const{
   bool inside = false;
   string label;
   for ( size_t i=0; i < tags.size(); ++i ){
-    if ( override[i] != "O" ){
+    if ( override[i] != "O"
+	 && ( POS_tags.empty()
+	      || POS_tags[i].find("SPEC") != string::npos
+	      || POS_tags[i].find("N") != string::npos ) ){
       // if ( i == 0 ){
       // 	 using TiCC::operator<<;
       // 	 cerr << "override = " << override << endl;
@@ -503,7 +507,8 @@ void NERTagger::post_process( const vector<folia::Word*>& swords,
     conf.push_back( tag.confidence() );
   }
   if ( !override.empty() ){
-    merge_override( tags, conf, override );
+    vector<string> empty;
+    merge_override( tags, conf, override, empty );
   }
   addNERTags( swords, tags, conf );
 }
