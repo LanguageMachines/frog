@@ -32,6 +32,8 @@
 #ifndef CLEX_H
 #define CLEX_H
 
+#include <iostream>
+#include <string>
 #include <map>
 
 namespace CLEX {
@@ -44,8 +46,8 @@ namespace CLEX {
   Type toCLEX( const char );
   extern std::map<CLEX::Type,std::string> tagNames;
   extern std::map<char,std::string> iNames;
-  inline std::string get_iDescr( char c ) { return iNames[c]; }
-  inline std::string get_tDescr( CLEX::Type t ) {  return tagNames[t]; }
+  inline const std::string& get_iDescr( char c ) { return iNames[c]; }
+  inline const std::string& get_tDescr( CLEX::Type t ) {  return tagNames[t]; }
 }
 
 std::ostream& operator<<( std::ostream&, const CLEX::Type& );
