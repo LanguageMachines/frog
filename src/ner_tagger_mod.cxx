@@ -1,6 +1,6 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  Copyright (c) 2006 - 2017
+  Copyright (c) 2006 - 2018
   CLST  - Radboud University
   ILK   - Tilburg University
 
@@ -438,25 +438,33 @@ string to_tag( const string& label, bool inside ){
 void NERTagger::merge_override( vector<string>& tags,
 				vector<double>& conf,
 				const vector<string>& override,
+				bool unconditional,
 				const vector<string>& POS_tags ) const{
   bool inside = false;
   string label;
   for ( size_t i=0; i < tags.size(); ++i ){
     if ( override[i] != "O"
 	 && ( POS_tags.empty()
-	      || POS_tags[i].find("SPEC") != string::npos
-	      || POS_tags[i].find("N") != string::npos ) ){
+	      || POS_tags[i].find("SPEC(") != string::npos
+	      || POS_tags[i].find("N(") != string::npos ) ){
       // if ( i == 0 ){
-      // 	 using TiCC::operator<<;
-      // 	 cerr << "override = " << override << endl;
-      // 	 cerr << "ner tags = " << tags << endl;
+      // 	using TiCC::operator<<;
+      //  	 cerr << "override = " << override << endl;
+      //  	 cerr << "ner tags = " << tags << endl;
+      //  	 cerr << "POS tags = " << POS_tags << endl;
       // }
+      if ( tags[i][0] != 'O'
+	   && !unconditional ){
+	// don't tamper with existing tags
+	continue;
+      }
       inside = (label == override[i] );
       //      cerr << "step i=" << i << " override=" << override[i] << endl;
       string replace = to_tag(override[i], inside );
       //      cerr << "replace=" << replace << endl;
       if ( replace != "O" ){
-	// there is something to override
+	// there is something to override.
+	// NB: replace wil return "O" for ambi tags too!
 	if ( tags[i][0] == 'I' && !inside ){
 	  //	  cerr << "before  whiping tags = " << tags << endl;
 	  //oops, inside a NER tag, and now a new override
@@ -484,6 +492,7 @@ void NERTagger::merge_override( vector<string>& tags,
 	    tags[j] = "O";
 	  }
 	}
+	//	cerr << POS_tags[i] << "REPLACE " << tags[i] << " by " << replace << endl;
 	tags[i] = replace;
 	conf[i] = 1;
 	if ( !inside ){
@@ -508,7 +517,7 @@ void NERTagger::post_process( const vector<folia::Word*>& swords,
   }
   if ( !override.empty() ){
     vector<string> empty;
-    merge_override( tags, conf, override, empty );
+    merge_override( tags, conf, override, true, empty );
   }
   addNERTags( swords, tags, conf );
 }
