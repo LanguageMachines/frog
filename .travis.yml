@@ -30,7 +30,11 @@ matrix:
         - frog_bin=/usr/local/bin ./testall >&2
 
     - os: linux
-      env:
+      addons:
+        apt:
+          packages:
+            - libomp-dev
+     env:
         - MATRIX_EVAL='CC=clang && CXX=clang++'
       script:
         - git clone https://github.com/LanguageMachines/frogtests.git
