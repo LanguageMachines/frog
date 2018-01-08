@@ -40,7 +40,7 @@ matrix:
 
 before_install:
     - sudo apt-get update
-    - sudo apt-get install pkg-config autoconf-archive autotools-dev libicu-dev libxml2-dev libbz2-dev zlib1g-dev libtar-dev libboost-dev libboost-regex-dev expect libextextcat-dev
+    - sudo apt-get install pkg-config autoconf-archive autotools-dev libicu-dev libxml2-dev libbz2-dev zlib1g-dev libtar-dev libboost-dev libboost-regex-dev expect libexrtextcat-dev
     - eval "${MATRIX_EVAL}"
     - echo $CC
     - echo $CXX
