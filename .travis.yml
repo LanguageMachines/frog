@@ -34,7 +34,7 @@ matrix:
         apt:
           packages:
             - libomp-dev
-     env:
+      env:
         - MATRIX_EVAL='CC=clang && CXX=clang++'
       script:
         - git clone https://github.com/LanguageMachines/frogtests.git
