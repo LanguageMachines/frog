@@ -96,8 +96,6 @@ before_install:
     - cd ..
 install:
     - bash bootstrap.sh
-    - if [ "$CXX" == "clang++" ]; then export CXXFLAGS="-O3 -fopenmp=libiomp5"; fi
-    - echo $CXXFLAGS
     - ./configure
     - make
     - sudo make install
