@@ -35,7 +35,7 @@ matrix:
           packages:
             - libiomp-dev
       env:
-        - MATRIX_EVAL='CC=clang && CXX=clang++ && CXXFLAGS="-fopenmp=libiomp5"
+        - MATRIX_EVAL='CC=clang && CXX=clang++ && CXXFLAGS="-fopenmp=libiomp"'
 
       script:
         - git clone https://github.com/LanguageMachines/frogtests.git
