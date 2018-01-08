@@ -34,7 +34,7 @@ matrix:
         apt:
           packages:
             - libiomp-dev
-            - libomp5
+            - libiomp5
       env:
         - MATRIX_EVAL='CC=clang && CXX=clang++'
 
