@@ -30,29 +30,13 @@ matrix:
         - frog_bin=/usr/local/bin ./testall >&2
 
     - os: linux
-      addons:
-        apt:
-          packages:
-            - libiomp-dev
       env:
         - MATRIX_EVAL='CC=clang && CXX=clang++'
-        - CXXFLAGS="-fopenmp=libiomp5"
-# libiomp is a very strange abberation in trusty
-# changed to libomp in newer Ubuntu versions.
-
-
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-trusty-4.0
-            - ubuntu-toolchain-r-test
-          packages:
-            - clang++-4.0
-            - libiomp-dev
-      env:
-        - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
-        - CXXFLAGS="-fopenmp=libiomp5"
+      script:
+        - git clone https://github.com/LanguageMachines/frogtests.git
+        - cd frogtests
+        - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+        - frog_bin=/usr/local/bin ./testall >&2
 
 before_install:
     - sudo apt-get update
