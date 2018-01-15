@@ -93,6 +93,7 @@ install:
 
 script:
     - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+    - make CXX=$COMPILER check
     - git clone https://github.com/LanguageMachines/frogtests.git
     - cd frogtests
     - frog_bin=/usr/local/bin ./testall >&2
