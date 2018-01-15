@@ -23,26 +23,14 @@ matrix:
     - os: linux
       env:
         - MATRIX_EVAL="CC=gcc && CXX=g++"
-      script:
-        - git clone https://github.com/LanguageMachines/frogtests.git
-        - cd frogtests
-        - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
-        - frog_bin=/usr/local/bin ./testall >&2
 
     - os: linux
       addons:
         apt:
           packages:
             - libiomp-dev
-            - libiomp5
       env:
-        - MATRIX_EVAL='CC=clang && CXX=clang++'
-
-      script:
-        - git clone https://github.com/LanguageMachines/frogtests.git
-        - cd frogtests
-        - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
-        - frog_bin=/usr/local/bin ./testall >&2
+        - MATRIX_EVAL='CC=clang && CXX=clang++ && CXXFLAGS=-fopenmp=libiomp5'
 
 before_install:
     - sudo apt-get update
@@ -105,9 +93,15 @@ install:
     - ./configure
     - make
     - sudo make install
-    - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib make check || cat src/test-suite.log
+
+script:
+    - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+    - git clone https://github.com/LanguageMachines/frogtests.git
+    - cd frogtests
+    - make check
+    - frog_bin=/usr/local/bin ./testall >&2
 
 after_failure:
-    - for file in *.diff; do echo DIFF in $file; cat $file; done
     - for file in *.err; do echo ERRORS in $file; cat $file; done
+    - for file in *.diff; do echo DIFF in $file; head -100 $file; done
     - for file in *.log; do echo SERVER LOGS in $file; cat $file; done
