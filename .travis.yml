@@ -22,7 +22,7 @@ matrix:
   include:
     - os: linux
       env:
-        - MATRIX_EVAL="CC=gcc && CXX=g++"
+        - COMPILER=g++
 
     - os: linux
       addons:
@@ -30,75 +30,71 @@ matrix:
           packages:
             - libiomp-dev
       env:
-        - MATRIX_EVAL='CC=clang && CXX=clang++ && CXXFLAGS=-fopenmp=libiomp5'
+        - COMPILER=clang++
+	- CXXFLAGS="-fopenmp=libiomp5"
 
 before_install:
     - sudo apt-get update
     - sudo apt-get install pkg-config autoconf-archive autotools-dev libicu-dev libxml2-dev libbz2-dev zlib1g-dev libtar-dev libboost-dev libboost-regex-dev expect libexttextcat-dev
-    - eval "${MATRIX_EVAL}"
-    - echo $CC
-    - echo $CXX
-    - echo $CXXFLAGS
     - git clone https://github.com/LanguageMachines/ticcutils
     - cd ticcutils
     - bash bootstrap.sh
     - ./configure
-    - make
-    - sudo make install
+    - make CXX=$COMPILER
+    - sudo make CXX=$COMPILER install
     - cd ..
     - git clone https://github.com/LanguageMachines/libfolia
     - cd libfolia
     - bash bootstrap.sh
     - ./configure
-    - make
-    - sudo make install
+    - make CXX=$COMPILER
+    - sudo make CXX=$COMPILER install
     - cd ..
     - git clone https://github.com/LanguageMachines/uctodata
     - cd uctodata
     - bash bootstrap.sh
     - ./configure
-    - make
-    - sudo make install
+    - make CXX=$COMPILER
+    - sudo make CXX=$COMPILER install
     - cd ..
     - git clone https://github.com/LanguageMachines/ucto
     - cd ucto
     - bash bootstrap.sh
     - ./configure
-    - make
-    - sudo make install
+    - make CXX=$COMPILER
+    - sudo make CXX=$COMPILER install
     - cd ..
     - git clone https://github.com/LanguageMachines/timbl
     - cd timbl
     - bash bootstrap.sh
     - ./configure
-    - make
-    - sudo make install
+    - make CXX=$COMPILER
+    - sudo make CXX=$COMPILER install
     - cd ..
     - git clone https://github.com/LanguageMachines/mbt
     - cd mbt
     - bash bootstrap.sh
     - ./configure
-    - make
-    - sudo make install
+    - make CXX=$COMPILER
+    - sudo make CXX=$COMPILER install
     - cd ..
     - git clone https://github.com/LanguageMachines/frogdata
     - cd frogdata
     - bash bootstrap.sh
     - ./configure
-    - make
-    - sudo make install
+    - make CXX=$COMPILER
+    - sudo make CXX=$COMPILER install
     - cd ..
 install:
     - bash bootstrap.sh
     - ./configure
-    - make
-    - sudo make install
+    - make CXX=$COMPILER
+    - sudo make CXX=$COMPILER install
 
 script:
     - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
     - git clone https://github.com/LanguageMachines/frogtests.git
     - cd frogtests
-    - make check
     - frog_bin=/usr/local/bin ./testall >&2
 
 after_failure:
