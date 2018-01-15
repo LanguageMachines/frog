@@ -21,10 +21,11 @@ language: cpp
 matrix:
   include:
     - os: linux
-      env:
-        - COMPILER=g++
+      compile: gcc
+      env: COMPILER=g++
 
     - os: linux
+      compiler: clang
       addons:
         apt:
           packages:
