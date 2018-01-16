@@ -629,7 +629,6 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
         string result;
         string s;
         while ( conn.read(s) ){
-	  LOG << "part: " << s << endl;
 	  result += s + "\n";
 
 	  if ( s.empty() )
@@ -688,9 +687,12 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
         istringstream inputstream(data,istringstream::in);
 	timers.reset();
 	timers.tokTimer.start();
+        LOG << TiCC::Timer::now() << " for tokenize... " << endl;
 	folia::Document *doc = tokenizer->tokenize( inputstream );
 	timers.tokTimer.stop();
+        LOG << TiCC::Timer::now() << " after tokenize... " << endl;
         FrogDoc( *doc );
+	LOG << TiCC::Timer::now() << " after FrogDoc... " << endl;
 	if ( options.doXMLout ){
 	  doc->save( outputstream, options.doKanon );
 	}
