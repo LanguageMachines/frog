@@ -511,6 +511,7 @@ bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers){
   string exs;
   if ( !swords.empty() ) {
     timers.tagTimer.start();
+    LOG << TiCC::Timer::now() << " start tagger " << endl;
     try {
       myCGNTagger->Classify( swords );
     }
@@ -518,11 +519,14 @@ bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers){
       all_well = false;
       exs += string(e.what()) + " ";
     }
+    LOG << TiCC::Timer::now() << " done with tagger " << endl;
     timers.tagTimer.stop();
     if ( !all_well ){
       throw runtime_error( exs );
     }
+    LOG << TiCC::Timer::now() << " processing " << swords.size() << " Words " << endl;
     for ( const auto& sword : swords ) {
+      LOG << TiCC::Timer::now() << " processing " << sword << endl;
 #pragma omp parallel sections
       {
 #pragma omp section
@@ -689,9 +693,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	timers.tokTimer.start();
 	folia::Document *doc = tokenizer->tokenize( inputstream );
 	timers.tokTimer.stop();
-        LOG << TiCC::Timer::now() << " before FrogDoc... " << endl;
         FrogDoc( *doc );
-	LOG << TiCC::Timer::now() << " after FrogDoc... " << endl;
 	if ( options.doXMLout ){
 	  doc->save( outputstream, options.doKanon );
 	}
@@ -1336,37 +1338,27 @@ void FrogAPI::FrogDoc( folia::Document& doc,
   timers.frogTimer.start();
   // first we make sure that the doc will accept our annotations, by
   // declaring them in the doc
-  LOG << TiCC::Timer::now() << " start FrogDoc... 1" << endl;
-  LOG << "myCGNTagger pointer: " << (void*)myCGNTagger << endl;
   if (myCGNTagger){
-    LOG << "myCGNTagger is er, tagset=" << myCGNTagger->getTagset() << endl;
     myCGNTagger->addDeclaration( doc );
   }
-  LOG << TiCC::Timer::now() << " start FrogDoc... 2" << endl;
   if ( options.doLemma && myMblem ) {
     myMblem->addDeclaration( doc );
   }
-  LOG << TiCC::Timer::now() << " start FrogDoc... 3" << endl;
   if ( options.doMorph && myMbma ) {
     myMbma->addDeclaration( doc );
   }
-  LOG << TiCC::Timer::now() << " start FrogDoc... 4" << endl;
   if ( options.doIOB && myIOBTagger ){
     myIOBTagger->addDeclaration( doc );
   }
-  LOG << TiCC::Timer::now() << " start FrogDoc... 5" << endl;
   if ( options.doNER && myNERTagger ){
     myNERTagger->addDeclaration( doc );
   }
-  LOG << TiCC::Timer::now() << " start FrogDoc... 6" << endl;
   if ( options.doMwu && myMwu ){
     myMwu->addDeclaration( doc );
   }
-  LOG << TiCC::Timer::now() << " start FrogDoc... 7" << endl;
   if ( options.doParse && myParser ){
     myParser->addDeclaration( doc );
   }
-  LOG << TiCC::Timer::now() << " done start FrogDoc... " << endl;
   if ( options.debugFlag > 5 ){
     LOG << "Testing document :" << doc << endl;
   }
@@ -1400,6 +1392,7 @@ void FrogAPI::FrogDoc( folia::Document& doc,
       }
       LOG << TiCC::Timer::now() << " Before TestSentence(" << i << ")" << endl;
       bool showParse = TestSentence( sentences[i], timers );
+      LOG << TiCC::Timer::now() << " After TestSentence(" << i << ")" << endl;
       if ( options.doParse && !showParse ){
 	LOG << "WARNING!" << endl;
 	LOG << "Sentence " << i+1
