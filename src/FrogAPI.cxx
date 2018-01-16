@@ -687,10 +687,9 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
         istringstream inputstream(data,istringstream::in);
 	timers.reset();
 	timers.tokTimer.start();
-        LOG << TiCC::Timer::now() << " for tokenize... " << endl;
 	folia::Document *doc = tokenizer->tokenize( inputstream );
 	timers.tokTimer.stop();
-        LOG << TiCC::Timer::now() << " after tokenize... " << endl;
+        LOG << TiCC::Timer::now() << " before FrogDoc... " << endl;
         FrogDoc( *doc );
 	LOG << TiCC::Timer::now() << " after FrogDoc... " << endl;
 	if ( options.doXMLout ){
@@ -1337,6 +1336,7 @@ void FrogAPI::FrogDoc( folia::Document& doc,
   timers.frogTimer.start();
   // first we make sure that the doc will accept our annotations, by
   // declaring them in the doc
+  LOG << TiCC::Timer::now() << " start FrogDoc... " << endl;
   if (myCGNTagger){
     myCGNTagger->addDeclaration( doc );
   }
@@ -1358,6 +1358,7 @@ void FrogAPI::FrogDoc( folia::Document& doc,
   if ( options.doParse && myParser ){
     myParser->addDeclaration( doc );
   }
+  LOG << TiCC::Timer::now() << " done start FrogDoc... " << endl;
   if ( options.debugFlag > 5 ){
     LOG << "Testing document :" << doc << endl;
   }
@@ -1369,6 +1370,7 @@ void FrogAPI::FrogDoc( folia::Document& doc,
     sentences = doc.sentences();
   }
   size_t numS = sentences.size();
+  LOG << TiCC::Timer::now() << " process " << numS << " sentences" << endl;
   if ( numS > 0 ) { //process sentences
     if  (options.debugFlag > 0) {
       LOG << "found " << numS
