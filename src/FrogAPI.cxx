@@ -622,7 +622,6 @@ bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers){
 }
 
 void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
-  LOG << "FrogServer( " << conn.getSockId() << ")" << endl;
   try {
     while (true) {
       ostringstream outputstream;
@@ -630,9 +629,11 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
         string result;
         string s;
         while ( conn.read(s) ){
-            result += s + "\n";
-            if ( s.empty() )
-                break;
+	  LOG << "part: " << s << endl;
+	  result += s + "\n";
+
+	  if ( s.empty() )
+	    break;
         }
         if ( result.size() < 50 ){
             // a FoLia doc must be at least a few 100 bytes
