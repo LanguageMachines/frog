@@ -1337,7 +1337,9 @@ void FrogAPI::FrogDoc( folia::Document& doc,
   // first we make sure that the doc will accept our annotations, by
   // declaring them in the doc
   LOG << TiCC::Timer::now() << " start FrogDoc... 1" << endl;
+  LOG << "myCGNTagger pointer: " << (void*)myCGNTagger << endl;
   if (myCGNTagger){
+    LOG << "myCGNTagger is er, tagset=" << myCGNTagger->getTagset() << endl;
     myCGNTagger->addDeclaration( doc );
   }
   LOG << TiCC::Timer::now() << " start FrogDoc... 2" << endl;
