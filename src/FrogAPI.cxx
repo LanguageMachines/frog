@@ -622,6 +622,7 @@ bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers){
 }
 
 void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
+  LOG << "FrogServer( " << conn.getSockId() << ")" << endl;
   try {
     while (true) {
       ostringstream outputstream;
@@ -707,9 +708,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
     }
   }
   catch ( std::exception& e ) {
-    if (options.debugFlag){
-      LOG << "connection lost: " << e.what() << endl;
-    }
+    LOG << "connection lost unexpected : " << e.what() << endl;
   }
   LOG << "Connection closed.\n";
 }
