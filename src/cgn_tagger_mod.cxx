@@ -178,13 +178,16 @@ bool CGNTagger::init( const TiCC::Configuration& config ){
 }
 
 void CGNTagger::addDeclaration( folia::Document& doc ) const {
+  LOG << "Before omp critical!" << endl;
 #pragma omp critical (foliaupdate)
   {
+    LOG << "inside omp critical!" << endl;
     doc.declare( folia::AnnotationType::POS,
 		 tagset,
 		 "annotator='frog-mbpos-" + version
 		 + "', annotatortype='auto', datetime='" + getTime() + "'");
   }
+  LOG << "after omp critical!" << endl;
 }
 
 string CGNTagger::getSubSet( const string& val, const string& head ){
