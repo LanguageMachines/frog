@@ -224,13 +224,10 @@ ostream &operator<<( ostream& os, const Mwu& mwu ){
 }
 
 void Mwu::addDeclaration( folia::Document& doc ) const {
-#pragma omp critical (foliaupdate)
-  {
-    doc.declare( folia::AnnotationType::ENTITY,
-		 mwu_tagset,
-		 "annotator='frog-mwu-" + version
-		 + "', annotatortype='auto', datetime='" + getTime() + "'");
-  }
+  doc.declare( folia::AnnotationType::ENTITY,
+	       mwu_tagset,
+	       "annotator='frog-mwu-" + version
+	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
 void Mwu::Classify( const vector<folia::Word*>& words ){

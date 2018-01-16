@@ -815,12 +815,9 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
 
 
 void Parser::addDeclaration( folia::Document& doc ) const {
-#pragma omp critical (foliaupdate)
-  {
-    doc.declare( folia::AnnotationType::DEPENDENCY, dep_tagset,
-		 "annotator='frog-depparse-" + version
-		 + "', annotatortype='auto'");
-  }
+  doc.declare( folia::AnnotationType::DEPENDENCY, dep_tagset,
+	       "annotator='frog-depparse-" + version
+	       + "', annotatortype='auto'");
 }
 
 parseData Parser::prepareParse( const vector<folia::Word *>& fwords ){

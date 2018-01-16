@@ -354,13 +354,10 @@ void NERTagger::addNERTags( const vector<folia::Word*>& words,
 }
 
 void NERTagger::addDeclaration( folia::Document& doc ) const {
-#pragma omp critical(foliaupdate)
-  {
-    doc.declare( folia::AnnotationType::ENTITY,
-		 tagset,
-		 "annotator='frog-ner-" + version
-		 + "', annotatortype='auto', datetime='" + getTime() + "'");
-  }
+  doc.declare( folia::AnnotationType::ENTITY,
+	       tagset,
+	       "annotator='frog-ner-" + version
+	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
 void NERTagger::Classify( const vector<folia::Word *>& swords ){
