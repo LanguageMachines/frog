@@ -164,6 +164,7 @@ void CGNTagger::fillSubSetTable(){
 
 
 bool CGNTagger::init( const TiCC::Configuration& config ){
+  debug = 5;
   if (  debug ){
     LOG << "INIT CGN Tagger." << endl;
   }
