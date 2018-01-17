@@ -243,7 +243,7 @@ static void addEntity( folia::Sentence *sent,
 		       const string& NER,
 		       const string& textclass ){
   folia::EntitiesLayer *el = 0;
-#pragma omp critical(foliaupdate)
+#pragma omp critical
   {
     try {
       el = sent->annotation<folia::EntitiesLayer>(tagset);
@@ -273,13 +273,13 @@ static void addEntity( folia::Sentence *sent,
     args["textclass"] = textclass;
   }
   folia::Entity *e = 0;
-#pragma omp critical(foliaupdate)
+#pragma omp critical
   {
     e = new folia::Entity( args, el->doc() );
     el->append( e );
   }
   for ( const auto& word : words ){
-#pragma omp critical(foliaupdate)
+#pragma omp critical
     {
       e->append( word );
     }
