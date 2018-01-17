@@ -65,7 +65,7 @@ void IOBTagger::addChunk( folia::ChunkingLayer *chunks,
     args["textclass"] = textclass;
   }
   folia::Chunk *chunk = 0;
-#pragma omp critical
+#pragma omp critical (foliaupdate)
   {
     try {
       chunk = new folia::Chunk( args, chunks->doc() );
@@ -80,7 +80,7 @@ void IOBTagger::addChunk( folia::ChunkingLayer *chunks,
     if ( word->isinstance(folia::PlaceHolder_t) ){
       continue;
     }
-#pragma omp critical
+#pragma omp critical (foliaupdate)
     {
       chunk->append( word );
     }
@@ -94,7 +94,7 @@ void IOBTagger::addIOBTags( const vector<folia::Word*>& words,
     return;
   }
   folia::ChunkingLayer *el = 0;
-#pragma omp critical
+#pragma omp critical (foliaupdate)
   {
     folia::Sentence *sent = words[0]->sentence();
     try {

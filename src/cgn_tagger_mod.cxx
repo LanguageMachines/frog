@@ -236,7 +236,7 @@ void CGNTagger::addTag( folia::Word *word,
   if ( textclass != "current" ){
     args["textclass"] = textclass;
   }
-#pragma omp critical
+#pragma omp critical (foliaupdate)
   {
     word->addPosAnnotation( args );
   }
@@ -251,7 +251,7 @@ void CGNTagger::post_process( const vector<folia::Word *>& words ){
   }
   for ( auto const& word : words ){
     folia::PosAnnotation *postag = 0;
-#pragma omp critical
+#pragma omp critical (foliaupdate)
     {
       postag = word->annotation<folia::PosAnnotation>( );
     }
@@ -262,7 +262,7 @@ void CGNTagger::post_process( const vector<folia::Word *>& words ){
     args["class"]  = head;
     args["set"]    = tagset;
     folia::Feature *feat = new folia::HeadFeature( args );
-#pragma omp critical
+#pragma omp critical (foliaupdate)
     {
       postag->append( feat );
       if ( head == "SPEC" ){
@@ -276,7 +276,7 @@ void CGNTagger::post_process( const vector<folia::Word *>& words ){
 	args["set"]    = tagset;
 	args["subset"] = getSubSet( part, head );
 	args["class"]  = part;
-#pragma omp critical
+#pragma omp critical (foliaupdate)
 	{
 	  folia::Feature *feat = new folia::Feature( args );
 	  postag->append( feat );

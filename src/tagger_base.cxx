@@ -197,11 +197,9 @@ string BaseTagger::extract_sentence( const vector<folia::Word*>& swords,
 				     vector<string>& words ){
   words.clear();
   string sentence;
-  LOG << _label << "-extract_sentence() " << endl;
   for ( const auto& sword : swords ){
     UnicodeString word;
-    LOG << _label << "-get a text from " << sword << endl;
-#pragma omp critical
+#pragma omp critical (foliaupdate)
     {
       word = sword->text( textclass );
     }
@@ -226,7 +224,7 @@ void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
     folia::Word *sw = swords[i];
     folia::PosAnnotation *postag = 0;
     UnicodeString word;
-#pragma omp critical
+#pragma omp critical (foliaupdate)
     {
       word = sw->text( textclass );
       postag = sw->annotation<folia::PosAnnotation>( tagset );
@@ -243,7 +241,6 @@ void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
 }
 
 void BaseTagger::Classify( const vector<folia::Word*>& swords ){
-  LOG << _label << "-Classify() " << endl;
   if ( !swords.empty() ) {
     string sentence = extract_sentence( swords, _words );
     if (debug){

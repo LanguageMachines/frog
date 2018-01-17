@@ -1374,6 +1374,7 @@ void FrogAPI::FrogDoc( folia::Document& doc,
     if  (options.debugFlag > 0) {
       LOG << TiCC::Timer::now() << " process " << numS << " sentences" << endl;
     }
+
     for ( size_t i = 0; i < numS; ++i ) {
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)
       string lan = sentences[i]->language();

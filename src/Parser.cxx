@@ -824,7 +824,7 @@ parseData Parser::prepareParse( const vector<folia::Word *>& fwords ){
   parseData pd;
   folia::Sentence *sent = 0;
   vector<folia::Entity*> entities;
-#pragma omp critical
+#pragma omp critical (foliaupdate)
   {
     sent = fwords[0]->sentence();
     entities = sent->select<folia::Entity>(MWU_tagset);
@@ -838,7 +838,7 @@ parseData Parser::prepareParse( const vector<folia::Word *>& fwords ){
       string mod;
       for ( const auto& mwu : mwuv ){
 	UnicodeString tmp;
-#pragma omp critical
+#pragma omp critical (foliaupdate)
 	{
 	  tmp = mwu->text( textclass );
 	}
@@ -872,7 +872,7 @@ parseData Parser::prepareParse( const vector<folia::Word *>& fwords ){
     }
     else {
       UnicodeString tmp;
-#pragma omp critical
+#pragma omp critical (foliaupdate)
       {
 	tmp = word->text( textclass );
       }
@@ -915,7 +915,7 @@ void appendResult( const vector<folia::Word *>& words,
 		   const vector<int>& nums,
 		   const vector<string>& roles ){
   folia::Sentence *sent = 0;
-#pragma omp critical
+#pragma omp critical (foliaupdate)
   {
     sent = words[0]->sentence();
   }
@@ -923,7 +923,7 @@ void appendResult( const vector<folia::Word *>& words,
   folia::KWargs args;
   args["generate_id"] = sent->id();
   args["set"] = tagset;
-#pragma omp critical
+#pragma omp critical (foliaupdate)
   {
     dl = new folia::DependenciesLayer( args, sent->doc() );
     sent->append( dl );
@@ -937,7 +937,7 @@ void appendResult( const vector<folia::Word *>& words,
       if ( textclass != "current" ){
 	args["textclass"] = textclass;
       }
-#pragma omp critical
+#pragma omp critical (foliaupdate)
       {
 	folia::Dependency *d = new folia::Dependency( args, sent->doc() );
 	dl->append( d );
