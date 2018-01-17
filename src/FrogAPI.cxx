@@ -511,7 +511,6 @@ bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers){
   string exs;
   if ( !swords.empty() ) {
     timers.tagTimer.start();
-    LOG << TiCC::Timer::now() << " start tagger " << endl;
     try {
       myCGNTagger->Classify( swords );
     }
@@ -519,14 +518,11 @@ bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers){
       all_well = false;
       exs += string(e.what()) + " ";
     }
-    LOG << TiCC::Timer::now() << " done with tagger " << endl;
     timers.tagTimer.stop();
     if ( !all_well ){
       throw runtime_error( exs );
     }
-    LOG << TiCC::Timer::now() << " processing " << swords.size() << " Words " << endl;
     for ( const auto& sword : swords ) {
-      LOG << TiCC::Timer::now() << " processing " << sword << endl;
 #pragma omp parallel sections
       {
 #pragma omp section
@@ -1389,9 +1385,7 @@ void FrogAPI::FrogDoc( folia::Document& doc,
 	}
 	continue;
       }
-      LOG << TiCC::Timer::now() << " Before TestSentence(" << i << ")" << endl;
       bool showParse = TestSentence( sentences[i], timers );
-      LOG << TiCC::Timer::now() << " After TestSentence(" << i << ")" << endl;
       if ( options.doParse && !showParse ){
 	LOG << "WARNING!" << endl;
 	LOG << "Sentence " << i+1
