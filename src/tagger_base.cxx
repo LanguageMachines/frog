@@ -92,7 +92,6 @@ bool BaseTagger::fill_map( const string& file, map<string,string>& mp ){
 }
 
 bool BaseTagger::init( const TiCC::Configuration& config ){
-  debug = 0;
   if ( tagger != 0 ){
     LOG << _label << "-tagger is already initialized!" << endl;
     return false;
@@ -242,6 +241,7 @@ void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
 }
 
 void BaseTagger::Classify( const vector<folia::Word*>& swords ){
+  debug = 5;
   if ( !swords.empty() ) {
     string sentence = extract_sentence( swords, _words );
     if (debug){
