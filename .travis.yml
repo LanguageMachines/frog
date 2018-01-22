@@ -21,7 +21,7 @@ language: cpp
 matrix:
   include:
     - os: linux
-      compile: gcc
+      compiler: gcc
       env: COMPILER=g++
 
     - os: linux
