@@ -291,13 +291,10 @@ void Mblem::getFoLiAResult( folia::Word *word, const UnicodeString& uWord ){
 
 
 void Mblem::addDeclaration( folia::Document& doc ) const {
-#pragma omp critical (foliaupdate)
-  {
-    doc.declare( folia::AnnotationType::LEMMA,
-		 tagset,
-		 "annotator='frog-mblem-" + version
-		 + "', annotatortype='auto', datetime='" + getTime() + "'");
-  }
+  doc.declare( folia::AnnotationType::LEMMA,
+	       tagset,
+	       "annotator='frog-mblem-" + version
+	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
 void Mblem::Classify( folia::Word *sword ){

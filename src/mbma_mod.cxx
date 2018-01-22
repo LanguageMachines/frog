@@ -763,16 +763,13 @@ void Mbma::getFoLiAResult( folia::Word *fword,
 }
 
 void Mbma::addDeclaration( folia::Document& doc ) const {
-#pragma omp critical (foliaupdate)
-  {
-    doc.declare( folia::AnnotationType::MORPHOLOGICAL, mbma_tagset,
+  doc.declare( folia::AnnotationType::MORPHOLOGICAL, mbma_tagset,
+	       "annotator='frog-mbma-" +  version +
+	       + "', annotatortype='auto', datetime='" + getTime() + "'");
+  if ( doDeepMorph ){
+    doc.declare( folia::AnnotationType::POS, clex_tagset,
 		 "annotator='frog-mbma-" +  version +
 		 + "', annotatortype='auto', datetime='" + getTime() + "'");
-    if ( doDeepMorph ){
-      doc.declare( folia::AnnotationType::POS, clex_tagset,
-		   "annotator='frog-mbma-" +  version +
-		   + "', annotatortype='auto', datetime='" + getTime() + "'");
-    }
   }
 }
 

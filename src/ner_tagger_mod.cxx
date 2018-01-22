@@ -243,7 +243,7 @@ static void addEntity( folia::Sentence *sent,
 		       const string& NER,
 		       const string& textclass ){
   folia::EntitiesLayer *el = 0;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     try {
       el = sent->annotation<folia::EntitiesLayer>(tagset);
@@ -273,13 +273,13 @@ static void addEntity( folia::Sentence *sent,
     args["textclass"] = textclass;
   }
   folia::Entity *e = 0;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
   {
     e = new folia::Entity( args, el->doc() );
     el->append( e );
   }
   for ( const auto& word : words ){
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
     {
       e->append( word );
     }
@@ -354,13 +354,10 @@ void NERTagger::addNERTags( const vector<folia::Word*>& words,
 }
 
 void NERTagger::addDeclaration( folia::Document& doc ) const {
-#pragma omp critical(foliaupdate)
-  {
-    doc.declare( folia::AnnotationType::ENTITY,
-		 tagset,
-		 "annotator='frog-ner-" + version
-		 + "', annotatortype='auto', datetime='" + getTime() + "'");
-  }
+  doc.declare( folia::AnnotationType::ENTITY,
+	       tagset,
+	       "annotator='frog-ner-" + version
+	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
 void NERTagger::Classify( const vector<folia::Word *>& swords ){

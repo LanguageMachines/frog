@@ -92,7 +92,6 @@ bool BaseTagger::fill_map( const string& file, map<string,string>& mp ){
 }
 
 bool BaseTagger::init( const TiCC::Configuration& config ){
-  debug = 0;
   if ( tagger != 0 ){
     LOG << _label << "-tagger is already initialized!" << endl;
     return false;
@@ -225,7 +224,7 @@ void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
     folia::Word *sw = swords[i];
     folia::PosAnnotation *postag = 0;
     UnicodeString word;
-#pragma omp critical(foliaupdate)
+#pragma omp critical (foliaupdate)
     {
       word = sw->text( textclass );
       postag = sw->annotation<folia::PosAnnotation>( tagset );

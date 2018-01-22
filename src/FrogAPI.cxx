@@ -629,9 +629,10 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
         string result;
         string s;
         while ( conn.read(s) ){
-            result += s + "\n";
-            if ( s.empty() )
-                break;
+	  result += s + "\n";
+
+	  if ( s.empty() )
+	    break;
         }
         if ( result.size() < 50 ){
             // a FoLia doc must be at least a few 100 bytes
@@ -707,9 +708,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
     }
   }
   catch ( std::exception& e ) {
-    if (options.debugFlag){
-      LOG << "connection lost: " << e.what() << endl;
-    }
+    LOG << "connection lost unexpected : " << e.what() << endl;
   }
   LOG << "Connection closed.\n";
 }
@@ -1369,9 +1368,9 @@ void FrogAPI::FrogDoc( folia::Document& doc,
   size_t numS = sentences.size();
   if ( numS > 0 ) { //process sentences
     if  (options.debugFlag > 0) {
-      LOG << "found " << numS
-		      << " sentence(s) in document." << endl;
+      LOG << TiCC::Timer::now() << " process " << numS << " sentences" << endl;
     }
+
     for ( size_t i = 0; i < numS; ++i ) {
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)
       string lan = sentences[i]->language();
