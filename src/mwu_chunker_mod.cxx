@@ -282,7 +282,7 @@ void Mwu::Classify(){
       //match
       auto current_match = matches.first;
       if (  debug  ) {
-	LOG << "MWU: match found!\t" << current_match->first << endl;
+	LOG << "MWU: match found for " << word << endl;
       }
       while( current_match != matches.second
 	     && current_match != MWUs.end() ){
