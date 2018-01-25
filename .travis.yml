@@ -21,17 +21,11 @@ matrix:
   include:
     - os: linux
       compiler: gcc
-      env: COMPILER=g++
 
     - os: linux
-      compiler: clang
-      addons:
-        apt:
-          packages:
-            - libiomp-dev
+      compiler: clang++
       env:
-        - COMPILER=clang++
-        - CXXFLAGS="-fopenmp=libiomp5"
+        - OPENMPFLAG=--disable-openmp
 
 before_install:
     - sudo apt-get update
@@ -40,60 +34,60 @@ before_install:
     - cd ticcutils
     - bash bootstrap.sh
     - ./configure
-    - make CXX=$COMPILER
-    - sudo make CXX=$COMPILER install
+    - make
+    - sudo make install
     - cd ..
     - git clone https://github.com/LanguageMachines/libfolia
     - cd libfolia
     - bash bootstrap.sh
     - ./configure
-    - make CXX=$COMPILER
-    - sudo make CXX=$COMPILER install
+    - make
+    - sudo make install
     - cd ..
     - git clone https://github.com/LanguageMachines/uctodata
     - cd uctodata
     - bash bootstrap.sh
     - ./configure
-    - make CXX=$COMPILER
-    - sudo make CXX=$COMPILER install
+    - make
+    - sudo make install
     - cd ..
     - git clone https://github.com/LanguageMachines/ucto
     - cd ucto
     - bash bootstrap.sh
     - ./configure
-    - make CXX=$COMPILER
-    - sudo make CXX=$COMPILER install
+    - make
+    - sudo make install
     - cd ..
     - git clone https://github.com/LanguageMachines/timbl
     - cd timbl
     - bash bootstrap.sh
     - ./configure
-    - make CXX=$COMPILER
-    - sudo make CXX=$COMPILER install
+    - make
+    - sudo make install
     - cd ..
     - git clone https://github.com/LanguageMachines/mbt
     - cd mbt
     - bash bootstrap.sh
     - ./configure
-    - make CXX=$COMPILER
-    - sudo make CXX=$COMPILER install
+    - make
+    - sudo make install
     - cd ..
     - git clone https://github.com/LanguageMachines/frogdata
     - cd frogdata
     - bash bootstrap.sh
     - ./configure
-    - make CXX=$COMPILER
-    - sudo make CXX=$COMPILER install
+    - make
+    - sudo make install
     - cd ..
 install:
     - bash bootstrap.sh
-    - ./configure
-    - make CXX=$COMPILER
-    - sudo make CXX=$COMPILER install
+    - ./configure $OPENMPFLAG
+    - make
+    - sudo make install
 
 script:
     - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
-    - make CXX=$COMPILER check
+    - make check
     - git clone https://github.com/LanguageMachines/frogtests.git
     - cd frogtests
     - frog_bin=/usr/local/bin ./testall >&2
