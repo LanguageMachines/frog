@@ -50,16 +50,13 @@ fi
 
 # check OpenMP support
 AC_OPENMP
-if test "x$ac_cv_prog_cxx_openmp" != "xunsupported"; then
-   CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
-   AC_DEFINE(HAVE_OPENMP, 1 , Define to 1 if you have OpenMP )
-else
-   if test "$CXX" = "clang++-4.0"; then
-      CXXFLAGS="$CXXFLAGS -fopenmp"
-      AC_DEFINE(HAVE_OPENMP, 1 , Define to 1 if you have OpenMP )
-   else
-      AC_MSG_NOTICE(We don't have OpenMP. Multithreaded operation is disabled)
-   fi
+if test "x$ac_cv_prog_cxx_openmp" != "x"; then
+  if test "x$ac_cv_prog_cxx_openmp" != "xunsupported"; then
+    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+    AC_DEFINE([HAVE_OPENMP], [1] , [Define to 1 if you have OpenMP] )
+  else
+    AC_MSG_NOTICE([We don't have OpenMP. Multithreaded operation is disabled])
+  fi
 fi
 
 if test $prefix = "NONE"; then
@@ -72,6 +69,8 @@ if test "x$PKG_CONFIG_PATH" = x; then
 else
     export PKG_CONFIG_PATH="$prefix/lib/pkgconfig:$PKG_CONFIG_PATH"
 fi
+
+AC_OSX_PKG( [icu4c] )
 
 PKG_CHECK_MODULES([XML2], [libxml-2.0 >= 2.6.16] )
 CXXFLAGS="$CXXFLAGS $XML2_CFLAGS"
