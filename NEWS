@@ -1,6 +1,10 @@
+0.13.10 - 2018-01-29
+[Ko vd Sloot]
+Bug fix release to fix a compilation problem on Max OSX
+
 0.13.9 - 2017-11-07
 [Ko vd Sloot]
-Bug fix relase, to get all our releases into balance. (Toad release
+Bug fix release, to get all our releases into balance. (Toad release
 requires 0.13.9)
 
 0.13.8 - 2017-10-26
