@@ -1367,10 +1367,7 @@ void FrogAPI::FrogDoc( folia::Document& doc,
   }
   size_t numS = sentences.size();
   if ( numS > 0 ) { //process sentences
-    if  (options.debugFlag > 0) {
-      LOG << TiCC::Timer::now() << " process " << numS << " sentences" << endl;
-    }
-
+    LOG << TiCC::Timer::now() << " process " << numS << " sentences" << endl;
     for ( size_t i = 0; i < numS; ++i ) {
       //NOTE- full sentences are passed (which may span multiple lines) (MvG)
       string lan = sentences[i]->language();
@@ -1391,6 +1388,9 @@ void FrogAPI::FrogDoc( folia::Document& doc,
 	LOG << "Sentence " << i+1
 	    << " isn't parsed because it contains more tokens then set with the --max-parser-tokens="
 	    << options.maxParserTokens << " option." << endl;
+      }
+      else {
+	LOG << TiCC::Timer::now() << "done with sentence[" << i+1 << "]" << endl;
       }
     }
   }
