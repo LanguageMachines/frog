@@ -563,7 +563,6 @@ int main(int argc, char *argv[]) {
       throw runtime_error( "init failed" );
     }
     FrogAPI frog( options, configuration, theErrLog );
-    LOG << "Frog starting:" << TiCC::Timer::now() << endl;
     if ( !fileNames.empty() ) {
       string outPath = outputDirName;
       string xmlPath = xmlDirName;
@@ -643,7 +642,7 @@ int main(int argc, char *argv[]) {
 	    remove( xmlOutName.c_str() );
 	  }
 	}
-	LOG << TiCC::Timer::now() << "Frogging " << testName << endl;
+	LOG << TiCC::Timer::now() << " Frogging " << testName << endl;
 	try {
 	  frog.FrogFile( testName, *outS, xmlOutName );
 	}
@@ -662,7 +661,7 @@ int main(int argc, char *argv[]) {
 	LOG << "results stored in " << outputFileName << endl;
 	delete outS;
       }
-      LOG << "Frog finished:" << TiCC::Timer::now() << endl;
+      LOG << TiCC::Timer::now() << " Frog finished" << endl;
     }
     else if ( options.doServer ) {
       //first set up some things to deal with zombies
