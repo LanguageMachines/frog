@@ -33,49 +33,49 @@ before_install:
     - git clone https://github.com/LanguageMachines/ticcutils
     - cd ticcutils
     - bash bootstrap.sh
-    - ./configure
+    - ./configure $OPENMPFLAG
     - make
     - sudo make install
     - cd ..
     - git clone https://github.com/LanguageMachines/libfolia
     - cd libfolia
     - bash bootstrap.sh
-    - ./configure
+    - ./configure $OPENMPFLAG
     - make
     - sudo make install
     - cd ..
     - git clone https://github.com/LanguageMachines/uctodata
     - cd uctodata
     - bash bootstrap.sh
-    - ./configure
+    - ./configure $OPENMPFLAG
     - make
     - sudo make install
     - cd ..
     - git clone https://github.com/LanguageMachines/ucto
     - cd ucto
     - bash bootstrap.sh
-    - ./configure
+    - ./configure $OPENMPFLAG
     - make
     - sudo make install
     - cd ..
     - git clone https://github.com/LanguageMachines/timbl
     - cd timbl
     - bash bootstrap.sh
-    - ./configure
+    - ./configure $OPENMPFLAG
     - make
     - sudo make install
     - cd ..
     - git clone https://github.com/LanguageMachines/mbt
     - cd mbt
     - bash bootstrap.sh
-    - ./configure
+    - ./configure $OPENMPFLAG
     - make
     - sudo make install
     - cd ..
     - git clone https://github.com/LanguageMachines/frogdata
     - cd frogdata
     - bash bootstrap.sh
-    - ./configure
+    - ./configure $OPENMPFLAG
     - make
     - sudo make install
     - cd ..
