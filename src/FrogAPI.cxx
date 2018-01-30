@@ -484,7 +484,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       throw runtime_error( "Frog init failed" );
     }
   }
-  LOG << "Initialization done." << endl;
+  LOG << TiCC::Timer::now() <<  " Initialization done." << endl;
 }
 
 FrogAPI::~FrogAPI() {
