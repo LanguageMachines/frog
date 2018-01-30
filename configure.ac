@@ -32,6 +32,17 @@ AC_LANG([C++])
 # Checks for libraries.
 
 # Checks for typedefs, structures, and compiler characteristics.
+# check OpenMP support
+AC_OPENMP
+if test "x$ac_cv_prog_cxx_openmp" != "x"; then
+  if test "x$ac_cv_prog_cxx_openmp" != "xunsupported"; then
+    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+    AC_DEFINE([HAVE_OPENMP], [1] , [Define to 1 if you have OpenMP] )
+  else
+    AC_MSG_NOTICE([We don't have OpenMP. Multithreaded operation is disabled])
+  fi
+fi
+
 AC_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_SIZE_T
@@ -46,17 +57,6 @@ ACX_PTHREAD([],[AC_MSG_ERROR([We need pthread support!])])
 if test x"$acx_pthread_ok" = xyes; then
    LIBS="$PTHREAD_LIBS $LIBS" \
    CXXFLAGS="$CXXFLAGS $PTHREAD_CFLAGS"
-fi
-
-# check OpenMP support
-AC_OPENMP
-if test "x$ac_cv_prog_cxx_openmp" != "x"; then
-  if test "x$ac_cv_prog_cxx_openmp" != "xunsupported"; then
-    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
-    AC_DEFINE([HAVE_OPENMP], [1] , [Define to 1 if you have OpenMP] )
-  else
-    AC_MSG_NOTICE([We don't have OpenMP. Multithreaded operation is disabled])
-  fi
 fi
 
 if test $prefix = "NONE"; then
