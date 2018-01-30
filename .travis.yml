@@ -79,9 +79,11 @@ before_install:
     - make
     - sudo make install
     - cd ..
+
 install:
     - bash bootstrap.sh
     - ./configure $OPENMPFLAG
+    - cat config.log
     - make
     - sudo make install
 
