@@ -1390,7 +1390,7 @@ void FrogAPI::FrogDoc( folia::Document& doc,
 	    << options.maxParserTokens << " option." << endl;
       }
       else {
-	LOG << TiCC::Timer::now() << "done with sentence[" << i+1 << "]" << endl;
+	LOG << TiCC::Timer::now() << " done with sentence[" << i+1 << "]" << endl;
       }
     }
   }
@@ -1449,6 +1449,8 @@ void FrogAPI::FrogFile( const string& infilename,
     }
   }
   if ( options.doXMLin ){
+    timers.reset();
+    timers.tokTimer.start();
     folia::Document doc;
     try {
       doc.readFromFile( infilename );
@@ -1458,8 +1460,6 @@ void FrogAPI::FrogFile( const string& infilename,
       LOG << e.what() << endl;
       throw ( runtime_error( "read failed" ) );
     }
-    timers.reset();
-    timers.tokTimer.start();
     tokenizer->tokenize( doc );
     timers.tokTimer.stop();
     FrogDoc( doc );
