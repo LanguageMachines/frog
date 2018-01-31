@@ -27,9 +27,28 @@ matrix:
       env:
         - OPENMPFLAG=--disable-openmp
 
+    - os: osx
+      compiler: clang++
+
 before_install:
-    - sudo apt-get update
-    - sudo apt-get install pkg-config autoconf-archive autotools-dev libicu-dev libxml2-dev libbz2-dev zlib1g-dev libtar-dev libboost-dev libboost-regex-dev expect libexttextcat-dev
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      sudo apt-get update;
+      sudo apt-get install pkg-config autoconf-archive autotools-dev libicu-dev libxml2-dev libbz2-dev zlib1g-dev libtar-dev libboost-dev libboost-regex-dev expect libexttextcat-dev;
+      fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        brew update;
+        brew install pkg-config;
+        brew install autoconf-archive;
+        brew outdated || brew upgrade icu4c;
+        brew outdated || brew upgrade libxml2;
+        brew outdated || brew install bzip2;
+        brew outdated || brew install zlib;
+        brew install libtar;
+        brew install libtextcat;
+        brew outdated boost || brew upgrade boost;
+        brew outdated icu4c || brew install icu4c;
+        brew install libtextcat;
+      fi
     - git clone https://github.com/LanguageMachines/ticcutils
     - cd ticcutils
     - bash bootstrap.sh
