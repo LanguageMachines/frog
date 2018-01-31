@@ -1438,7 +1438,13 @@ void FrogAPI::FrogFile( const string& infilename,
   // stuff the whole input into one FoLiA document.
   // This is not a good idea on the long term, I think (agreed [proycon] )
   string xmlOutFile = xmlOutF;
-  if ( options.doXMLin && !xmlOutFile.empty() ){
+  bool xml_in = options.doXMLin;
+  if ( TiCC::match_back( infilename, ".xml.gz" )
+       || TiCC::match_back( infilename, ".xml.bz2" )
+       || TiCC::match_back( infilename, ".xml" ) ){
+    xml_in = true;
+  }
+  if ( xml_in && !xmlOutFile.empty() ){
     if ( TiCC::match_back( infilename, ".gz" ) ){
       if ( !TiCC::match_back( xmlOutFile, ".gz" ) )
 	xmlOutFile += ".gz";
@@ -1448,7 +1454,7 @@ void FrogAPI::FrogFile( const string& infilename,
 	xmlOutFile += ".bz2";
     }
   }
-  if ( options.doXMLin ){
+  if ( xml_in ){
     timers.reset();
     timers.tokTimer.start();
     folia::Document doc;
