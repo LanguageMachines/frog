@@ -410,44 +410,28 @@ bool parse_args( TiCC::CL_Options& Opts,
   Opts.extract( "textclass", textclass );
   Opts.extract( "inputclass", inputclass );
   Opts.extract( "outputclass", outputclass );
-  if ( !options.doXMLin ){
-    if ( !textclass.empty() ){
-      LOG << "--textclass is only valid when -x is also present" << endl;
+  if ( !textclass.empty() ){
+    if ( !inputclass.empty() || !outputclass.empty() ){
+      LOG << "when --textclass is specified, --inputclass or --outputclass may NOT be present." << endl;
       return false;
     }
+    options.inputclass = textclass;
+    options.outputclass = textclass;
+    configuration.setatt( "inputclass", textclass );
+    configuration.setatt( "outputclass", textclass );
+  }
+  else {
     if ( !inputclass.empty() ){
-      LOG << "--inputclass is only valid when -x is also present" << endl;
-      return false;
+      options.inputclass = inputclass;
+      configuration.setatt( "inputclass", inputclass );
+      if ( outputclass.empty() ){
+	options.outputclass = inputclass;
+	configuration.setatt( "outputclass", inputclass );
+      }
     }
     if ( !outputclass.empty() ){
-      LOG << "--outputclass is only valid when -x is also present" << endl;
-      return false;
-    }
-  }
-  else { // FoLiA files...
-    if ( !textclass.empty() ){
-      if ( !inputclass.empty() || !outputclass.empty() ){
-	LOG << "when --textclass is specified, --inputclass or --outputclass may NOT be present." << endl;
-	return false;
-      }
-      options.inputclass = textclass;
-      options.outputclass = textclass;
-      configuration.setatt( "inputclass", textclass );
-      configuration.setatt( "outputclass", textclass );
-    }
-    else {
-      if ( !inputclass.empty() ){
-	options.inputclass = inputclass;
-	configuration.setatt( "inputclass", inputclass );
-	if ( outputclass.empty() ){
-	  options.outputclass = inputclass;
-	  configuration.setatt( "outputclass", inputclass );
-	}
-      }
-      if ( !outputclass.empty() ){
-	options.outputclass = outputclass;
-	configuration.setatt( "outputclass", outputclass );
-      }
+      options.outputclass = outputclass;
+      configuration.setatt( "outputclass", outputclass );
     }
   }
   if ( !XMLoutFileName.empty() && !testDirName.empty() ){
