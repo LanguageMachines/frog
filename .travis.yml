@@ -114,6 +114,6 @@ script:
     - frog_bin=/usr/local/bin ./testall >&2
 
 after_failure:
-    - for file in *.err; do echo ERRORS in $file; cat $file; done
+    - for file in *.err; do echo ERRORS in $file; cat $file; cat $(echo $file | cut -f -d '.').out; done
     - for file in *.diff; do echo DIFF in $file; head -100 $file; done
     - for file in *.log; do echo SERVER LOGS in $file; cat $file; done
