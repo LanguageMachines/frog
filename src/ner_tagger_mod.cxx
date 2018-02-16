@@ -33,7 +33,6 @@
 
 #include "mbt/MbtAPI.h"
 #include "frog/Frog-util.h"
-#include "ucto/unicode.h"
 #include "ticcutils/FileUtils.h"
 #include "ticcutils/StringOps.h"
 #include "ticcutils/PrettyPrint.h"

@@ -43,7 +43,6 @@
 #include "ticcutils/Configuration.h"
 #include "ticcutils/PrettyPrint.h"
 #include "timbl/TimblAPI.h"
-#include "ucto/unicode.h"
 #include "frog/Frog-util.h"
 #include "frog/csidp.h"
 
@@ -136,7 +135,7 @@ bool Parser::init( const TiCC::Configuration& configuration ){
     charFile = configuration.lookUp( "char_filter_file" );
   if ( !charFile.empty() ){
     charFile = prefix( configuration.configDir(), charFile );
-    filter = new Tokenizer::UnicodeFilter();
+    filter = new TiCC::UniFilter();
     filter->fill( charFile );
   }
   val = configuration.lookUp( "maxDepSpan", "parser" );

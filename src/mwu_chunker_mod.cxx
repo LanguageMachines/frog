@@ -42,7 +42,6 @@
 #include "timbl/TimblAPI.h"
 
 #include "frog/Frog-util.h" // defines etc.
-#include "ucto/unicode.h"
 
 using namespace std;
 
@@ -195,7 +194,7 @@ bool Mwu::init( const TiCC::Configuration& config ) {
     charFile = config.lookUp( "char_filter_file" );
   if ( !charFile.empty() ){
     charFile = prefix( config.configDir(), charFile );
-    filter = new Tokenizer::UnicodeFilter();
+    filter = new TiCC::UniFilter();
     filter->fill( charFile );
   }
   val = config.lookUp( "gluetag", "mwu" );

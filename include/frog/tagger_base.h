@@ -35,6 +35,7 @@
 #include <vector>
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Configuration.h"
+#include "ticcutils/Unicode.h"
 #include "mbt/MbtAPI.h"
 #include "libfolia/folia.h"
 #include "ucto/tokenize.h"
@@ -66,7 +67,7 @@ class BaseTagger {
   std::string textclass;
   TiCC::LogStream *tag_log;
   MbtAPI *tagger;
-  Tokenizer::UnicodeFilter *filter;
+  TiCC::UniFilter *filter;
   std::vector<std::string> _words;
   std::vector<Tagger::TagResult> _tag_result;
   std::map<std::string,std::string> token_tag_map;

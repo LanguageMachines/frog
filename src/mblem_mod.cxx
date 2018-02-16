@@ -35,7 +35,6 @@
 #include <iostream>
 #include <fstream>
 #include "timbl/TimblAPI.h"
-#include "ucto/unicode.h"
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Configuration.h"
 #include "frog/Frog-util.h"
@@ -124,7 +123,7 @@ bool Mblem::init( const TiCC::Configuration& config ) {
     charFile = config.lookUp( "char_filter_file" );
   if ( !charFile.empty() ){
     charFile = prefix( config.configDir(), charFile );
-    filter = new Tokenizer::UnicodeFilter();
+    filter = new TiCC::UniFilter();
     filter->fill( charFile );
   }
 

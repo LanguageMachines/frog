@@ -40,10 +40,10 @@
 
 #include "timbl/TimblAPI.h"
 
-#include "ucto/unicode.h"
 #include "ticcutils/Configuration.h"
 #include "ticcutils/StringOps.h"
 #include "ticcutils/PrettyPrint.h"
+#include "ticcutils/Unicode.h"
 #include "frog/Frog-util.h"
 
 using namespace std;
@@ -183,7 +183,7 @@ bool Mbma::init( const TiCC::Configuration& config ) {
   }
   if ( !charFile.empty() ){
     charFile = prefix( config.configDir(), charFile );
-    filter = new Tokenizer::UnicodeFilter();
+    filter = new TiCC::UniFilter();
     filter->fill( charFile );
   }
   string tfName = config.lookUp( "treeFile", "mbma" );

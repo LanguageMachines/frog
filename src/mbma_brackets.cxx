@@ -36,7 +36,6 @@
 #include <vector>
 #include <list>
 #include <iostream>
-#include "ucto/unicode.h"
 #include "ticcutils/Configuration.h"
 #include "ticcutils/StringOps.h"
 #include "ticcutils/PrettyPrint.h"

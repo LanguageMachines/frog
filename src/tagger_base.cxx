@@ -150,7 +150,7 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
     charFile = config.lookUp( "char_filter_file" );
   if ( !charFile.empty() ){
     charFile = prefix( config.configDir(), charFile );
-    filter = new Tokenizer::UnicodeFilter();
+    filter = new TiCC::UniFilter();
     filter->fill( charFile );
   }
   string tokFile = config.lookUp( "token_trans_file", _label );

@@ -35,7 +35,7 @@
 #include "libfolia/folia.h"
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Configuration.h"
-#include "ucto/tokenize.h"
+#include "ticcutils/Unicode.h"
 #include "timbl/TimblAPI.h"
 
 class mblemData {
@@ -85,7 +85,7 @@ class Mblem {
   std::string POS_tagset;
   std::string textclass;
   TiCC::LogStream *mblemLog;
-  Tokenizer::UnicodeFilter *filter;
+  TiCC::UniFilter *filter;
 };
 
 #endif

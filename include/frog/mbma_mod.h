@@ -37,6 +37,7 @@
 #include <list>
 #include <unicode/translit.h>
 #include "ticcutils/LogStream.h"
+#include "ticcutils/Unicode.h"
 #include "ticcutils/Configuration.h"
 #include "libfolia/folia.h"
 #include "frog/clex.h"
@@ -46,10 +47,6 @@
 class MBMAana;
 namespace Timbl{
   class TimblAPI;
-}
-
-namespace Tokenizer {
-  class UnicodeFilter;
 }
 
 class Mbma {
@@ -101,7 +98,7 @@ class Mbma {
   std::string textclass;
   TiCC::LogStream *mbmaLog;
   Transliterator *transliterator;
-  Tokenizer::UnicodeFilter *filter;
+  TiCC::UniFilter *filter;
   bool doDeepMorph;
 };
 

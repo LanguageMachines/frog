@@ -37,6 +37,7 @@
 #include <set>
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Configuration.h"
+#include "ticcutils/Unicode.h"
 #include "libfolia/folia.h"
 #include "ucto/tokenize.h"
 #include "timbl/TimblAPI.h"
@@ -81,7 +82,7 @@ class Parser {
   std::string POS_tagset;
   std::string MWU_tagset;
   std::string textclass;
-  Tokenizer::UnicodeFilter *filter;
+  TiCC::UniFilter *filter;
   Parser( const Parser& ){}; // inhibit copies
 };
 

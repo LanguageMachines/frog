@@ -36,8 +36,8 @@
 #include <string>
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Configuration.h"
+#include "ticcutils/Unicode.h"
 #include "libfolia/folia.h"
-#include "ucto/unicode.h"
 
 class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );
@@ -91,7 +91,7 @@ class Mwu {
   std::string textclass;
   std::string mwu_tagset;
   std::string glue_tag;
-  Tokenizer::UnicodeFilter *filter;
+  TiCC::UniFilter *filter;
 };
 
 #endif
