@@ -57,8 +57,8 @@ const long int RIGHT = 6; // right context
 Mbma::Mbma( TiCC::LogStream * logstream):
   MTreeFilename( "dm.igtree" ),
   MTree(0),
-  transliterator(0),
   filter(0),
+  filter_diac(false),
   doDeepMorph(false)
 {
   mbmaLog = new TiCC::LogStream( logstream, "mbma-" );
@@ -72,7 +72,6 @@ string Mbma::clex_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-clex";
 
 Mbma::~Mbma() {
   cleanUp();
-  delete transliterator;
   delete filter;
   delete mbmaLog;
 }
@@ -109,17 +108,6 @@ void Mbma::init_cgn( const string& main, const string& sub ) {
   else {
     throw ( runtime_error( "unable to open:" + sub ) );
   }
-}
-
-Transliterator *Mbma::init_trans( ){
-  UErrorCode stat = U_ZERO_ERROR;
-  Transliterator *t = Transliterator::createInstance( "NFD; [:M:] Remove; NFC",
-						      UTRANS_FORWARD,
-						      stat );
-  if ( U_FAILURE( stat ) ){
-    throw runtime_error( "initFilter FAILED !" );
-  }
-  return t;
 }
 
 bool Mbma::init( const TiCC::Configuration& config ) {
@@ -193,10 +181,7 @@ bool Mbma::init( const TiCC::Configuration& config ) {
   MTreeFilename = prefix( config.configDir(), tfName );
   string dof = config.lookUp( "filter_diacritics", "mbma" );
   if ( !dof.empty() ){
-    bool b = TiCC::stringTo<bool>( dof );
-    if ( b ){
-      transliterator = init_trans();
-    }
+    filter_diac = TiCC::stringTo<bool>( dof );
   }
 
   string cls = config.lookUp( "outputclass" );
@@ -773,17 +758,6 @@ void Mbma::addDeclaration( folia::Document& doc ) const {
   }
 }
 
-UnicodeString Mbma::filterDiacritics( const UnicodeString& in ) const {
-  if ( transliterator ){
-    UnicodeString result = in;
-    transliterator->transliterate( result );
-    return result;
-  }
-  else {
-    return in;
-  }
-}
-
 void Mbma::Classify( folia::Word* sword ){
   if ( sword->isinstance(folia::PlaceHolder_t) ){
     return;
@@ -854,7 +828,10 @@ void Mbma::Classify( folia::Word* sword ){
 
 void Mbma::Classify( const UnicodeString& word ){
   clearAnalysis();
-  UnicodeString uWord = filterDiacritics( word );
+  UnicodeString uWord = word;
+  if ( filter_diac ){
+    uWord = TiCC::filter_diacritics( uWord );
+  }
   vector<string> insts = make_instances( uWord );
   vector<string> classes;
   classes.reserve( insts.size() );
