@@ -1,6 +1,15 @@
+0.14 - 2018-02-19
+[Ko vd Sloot]
+* use TiCC::UniFilter now
+* use TiCC::diacritics_filter now
+* configuration modernized. OSX build supported too
+* XML (FoLiA) files are autodetected
+* some more logging and time stamps added
+* added code to NER module to override original tags (e.g. from gazeteer)
+
 0.13.9 - 2017-11-07
 [Ko vd Sloot]
-Bug fix relase, to get all our releases into balance. (Toad release
+Bug fix release, to get all our releases into balance. (Toad release
 requires 0.13.9)
 
 0.13.8 - 2017-10-26
