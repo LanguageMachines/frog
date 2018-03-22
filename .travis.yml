@@ -20,20 +20,29 @@ language: cpp
 matrix:
   include:
     - os: linux
-      compiler: gcc
+      compiler: g++
+      cache: ccache
+      env:
+        - SCAN=echo
 
     - os: linux
       compiler: clang++
+      cache: ccache
       env:
+        - SCAN=scan-build
         - OPENMPFLAG=--disable-openmp
 
     - os: osx
       compiler: clang++
+      cache: ccache
+      env:
+        - SCAN=echo
+
 
 before_install:
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       sudo apt-get update;
-      sudo apt-get install pkg-config autoconf-archive autotools-dev libicu-dev libxml2-dev libbz2-dev zlib1g-dev libtar-dev libboost-dev libboost-regex-dev expect libexttextcat-dev;
+      sudo apt-get install pkg-config autoconf-archive autotools-dev ccache cppcheck libicu-dev libxml2-dev libbz2-dev zlib1g-dev libtar-dev libboost-dev libboost-regex-dev expect libexttextcat-dev;
       fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
         brew update;
@@ -43,6 +52,8 @@ before_install:
         brew outdated || brew install bzip2;
         brew outdated || brew install zlib;
         brew install libtar;
+        brew install cppcheck;
+        brew install ccache;
         brew install libtextcat;
         brew outdated boost || brew upgrade boost;
         brew outdated icu4c || brew install icu4c;
@@ -51,6 +62,9 @@ before_install:
         export LDFLAGS="-L/usr/local/opt/llvm/lib";
         export CXXFLAGS="-I/usr/local/opt/llvm/include";
       fi
+
+    - export PATH="/usr/lib/ccache/bin/:$PATH"
+
     - git clone https://github.com/LanguageMachines/ticcutils
     - cd ticcutils
     - bash bootstrap.sh
@@ -104,7 +118,9 @@ before_install:
 install:
     - bash bootstrap.sh
     - ./configure $OPENMPFLAG
-    - cat config.log
+#    - cat config.log
+    - cppcheck --enable=all --quiet --error-exitcode=0 .
+    - $SCAN --status-bugs make
     - make
     - sudo make install
 
