@@ -133,7 +133,6 @@ bool init(){
 }
 
 void Test( istream& in ){
-  string line;
   while ( in.good() ){
     string sentence = tokenizer.tokenizeStream( in );
     if ( sentence.empty() ){

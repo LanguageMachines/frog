@@ -438,7 +438,6 @@ void NERTagger::merge_override( vector<string>& tags,
 				const vector<string>& POS_tags ) const{
   string label;
   for ( size_t i=0; i < tags.size(); ++i ){
-    bool inside;
     if ( override[i] != "O"
 	 && ( POS_tags.empty()
 	      || POS_tags[i].find("SPEC(") != string::npos
@@ -454,7 +453,7 @@ void NERTagger::merge_override( vector<string>& tags,
 	// don't tamper with existing tags
 	continue;
       }
-      inside = (label == override[i] );
+      bool inside = (label == override[i] );
       //      cerr << "step i=" << i << " override=" << override[i] << endl;
       string replace = to_tag(override[i], inside );
       //      cerr << "replace=" << replace << endl;

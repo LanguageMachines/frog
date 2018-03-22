@@ -87,7 +87,6 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
 	  ++headId ){
       size_t diff = ( headId > dependent_id ) ? headId - dependent_id : dependent_id - headId;
       if ( diff != 0 && diff <= maxDist ){
-	string line;
 	if ( pit == p_res.end() ){
 	  LOG << "OEPS p_res leeg? " << endl;
 	  break;

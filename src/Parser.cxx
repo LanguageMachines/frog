@@ -532,13 +532,13 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
   }
   else {
     for ( size_t i=0 ; i < words.size(); ++i ){
-      string word_0, word_1, word_2;
-      string tag_0, tag_1, tag_2;
-      string mod_0, mod_1, mod_2;
+      string word_1, word_2;
+      string tag_1, tag_2;
+      string mod_1;
       if ( i == 0 ){
 	word_2 = "__";
 	tag_2 = "__";
-	mod_2 = "__";
+	//	mod_2 = "__";
 	word_1 = "__";
 	tag_1 = "__";
 	mod_1 = "__";
@@ -546,7 +546,7 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
       else if ( i == 1 ){
 	word_2 = "__";
 	tag_2 = "__";
-	mod_2 = "__";
+	//	mod_2 = "__";
 	word_1 = words[i-1];
 	tag_1 = heads[i-1];
 	mod_1 = mods[i-1];
@@ -554,7 +554,7 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
       else {
 	word_2 = words[i-2];
 	tag_2 = heads[i-2];
-	mod_2 = mods[i-2];
+	//	mod_2 = mods[i-2];
 	word_1 = words[i-1];
 	tag_1 = heads[i-1];
 	mod_1 = mods[i-1];
@@ -564,14 +564,14 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
       string tag0 = heads[i];
       string tag1, tag2;
       string mod0 = mods[i];
-      string mod1, mod2;
+      string mod1;
       if ( i < words.size() - 2 ){
 	word1 = words[i+1];
 	tag1 = heads[i+1];
 	mod1 = mods[i+1];
 	word2 = words[i+2];
 	tag2 = heads[i+2];
-	mod2 = mods[i+2];
+	//	mod2 = mods[i+2];
       }
       else if ( i == words.size() - 2 ){
 	word1 = words[i+1];
@@ -579,7 +579,7 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
 	mod1 = mods[i+1];
 	word2 = "__";
 	tag2 = "__";
-	mod2 = "__";
+	//	mod2 = "__";
       }
       else {
 	word1 = "__";
@@ -587,7 +587,7 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
 	mod1 = "__";
 	word2 = "__";
 	tag2 = "__";
-	mod2 = "__";
+	//	mod2 = "__";
       }
       string inst = word_2
 	+ " " + word_1
@@ -732,62 +732,48 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
   }
   else {
     for ( size_t i=0 ; i < words.size(); ++i ){
-      string word_0, word_1, word_2;
-      string tag_0, tag_1, tag_2;
-      string mod_0, mod_1, mod_2;
+      string word_1, word_2;
+      string tag_1, tag_2;
       if ( i == 0 ){
 	word_2 = "__";
 	tag_2 = "__";
-	mod_2 = "__";
 	word_1 = "__";
 	tag_1 = "__";
-	mod_1 = "__";
       }
       else if ( i == 1 ){
 	word_2 = "__";
 	tag_2 = "__";
-	mod_2 = "__";
 	word_1 = words[i-1];
 	tag_1 = heads[i-1];
-	mod_1 = mods[i-1];
       }
       else {
 	word_2 = words[i-2];
 	tag_2 = heads[i-2];
-	mod_2 = mods[i-2];
 	word_1 = words[i-1];
 	tag_1 = heads[i-1];
-	mod_1 = mods[i-1];
       }
       string word0 = words[i];
       string word1, word2;
       string tag0 = heads[i];
       string tag1, tag2;
       string mod0 = mods[i];
-      string mod1, mod2;
       if ( i < words.size() - 2 ){
 	word1 = words[i+1];
 	tag1 = heads[i+1];
-	mod1 = mods[i+1];
 	word2 = words[i+2];
 	tag2 = heads[i+2];
-	mod2 = mods[i+2];
       }
       else if ( i == words.size() - 2 ){
 	word1 = words[i+1];
 	tag1 = heads[i+1];
-	mod1 = mods[i+1];
 	word2 = "__";
 	tag2 = "__";
-	mod2 = "__";
       }
       else {
 	word1 = "__";
 	tag1 = "__";
-	mod1 = "__";
 	word2 = "__";
 	tag2 = "__";
-	mod2 = "__";
       }
       //
       string inst = word_2

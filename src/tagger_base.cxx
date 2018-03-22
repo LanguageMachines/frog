@@ -54,20 +54,20 @@ BaseTagger::~BaseTagger(){
   delete tag_log;
 }
 
-bool fill_set( const string& file, set<string>& st ){
-  ifstream is( file );
-  if ( !is ){
-    return false;
-  }
-  string line;
-  while( getline( is, line ) ){
-    if ( line.empty() || line[0] == '#' )
-      continue;
-    line = TiCC::trim( line );
-    st.insert( line );
-  }
-  return true;
-}
+// bool fill_set( const string& file, set<string>& st ){
+//   ifstream is( file );
+//   if ( !is ){
+//     return false;
+//   }
+//   string line;
+//   while( getline( is, line ) ){
+//     if ( line.empty() || line[0] == '#' )
+//       continue;
+//     line = TiCC::trim( line );
+//     st.insert( line );
+//   }
+//   return true;
+// }
 
 bool BaseTagger::fill_map( const string& file, map<string,string>& mp ){
   ifstream is( file );

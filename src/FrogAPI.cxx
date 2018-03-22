@@ -507,9 +507,9 @@ bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers){
     swords = sent->words();
   }
   bool showParse = options.doParse;
-  bool all_well = true;
-  string exs;
   if ( !swords.empty() ) {
+    bool all_well = true;
+    string exs;
     timers.tagTimer.start();
     try {
       myCGNTagger->Classify( swords );
@@ -617,6 +617,9 @@ bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers){
 	}
       }
     }
+    if ( !all_well ){
+      throw runtime_error( exs );
+    }
   }
   return showParse;
 }
@@ -718,7 +721,6 @@ void FrogAPI::FrogStdin( bool prompt ) {
     cout << "frog>"; cout.flush();
   }
   string line;
-  string data;
   while ( getline( cin, line ) ){
     string data = line;
     if ( options.doSentencePerLine ){
@@ -1026,10 +1028,9 @@ vector<string> get_compound_analysis( folia::Word* word ){
       layer->select<folia::Morpheme>( Mbma::mbma_tagset, false );
     if ( m.size() == 1 ) {
       // check for top layer compound
-      folia::PosAnnotation *postag = 0;
       try {
-	postag = m[0]->annotation<folia::PosAnnotation>( Mbma::clex_tagset );
-	result.push_back( postag->feat( "compound" ) ); // might be empty
+	folia::PosAnnotation *tag = m[0]->annotation<folia::PosAnnotation>( Mbma::clex_tagset );
+	result.push_back( tag->feat( "compound" ) ); // might be empty
       }
       catch (...){
 	result.push_back( "" ); // pad with empty strings
@@ -1261,7 +1262,6 @@ ostream& FrogAPI::showResults( ostream& os,
     for ( const auto& mwu : mwus ){
       displayMWU( os, ++index, mwu );
       if ( options.doNER ){
-	string cls;
 	string s = lookupNEREntity( mwu, ner_entities );
 	os << "\t" << s;
       }
@@ -1269,7 +1269,6 @@ ostream& FrogAPI::showResults( ostream& os,
 	os << "\t\t";
       }
       if ( options.doIOB ){
-	string cls;
 	string s = lookupIOBChunk( mwu, iob_chunking);
 	os << "\t" << s;
       }
@@ -1277,7 +1276,6 @@ ostream& FrogAPI::showResults( ostream& os,
 	os << "\t\t";
       }
       if ( options.doParse ){
-	string cls;
 	folia::Dependency *dep = lookupDep( mwu[0], dependencies);
 	if ( dep ){
 	  vector<folia::Headspan*> w = dep->select<folia::Headspan>();
