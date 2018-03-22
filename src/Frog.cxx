@@ -637,13 +637,18 @@ int main(int argc, char *argv[]) {
 	}
 	if ( !outName.empty() ){
 	  LOG << "results stored in " << outName << endl;
-	  delete outS;
-	  outS = 0;
+	  if ( outS != &cout ){
+	    delete outS;
+	    outS = 0;
+	  }
 	}
       }
       if ( !outputFileName.empty() ){
 	LOG << "results stored in " << outputFileName << endl;
-	delete outS;
+	if ( outS != &cout ){
+	  delete outS;
+	  outS = 0;
+	}
       }
       LOG << TiCC::Timer::now() << " Frog finished" << endl;
     }

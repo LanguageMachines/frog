@@ -785,7 +785,6 @@ void FrogAPI::FrogInteractive(){
       string data;
       char *input = readline( prompt );
       if ( !input ){
-	eof = true;
 	break;
       }
       line = input;
