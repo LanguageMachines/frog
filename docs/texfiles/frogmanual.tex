@@ -687,7 +687,7 @@ The Python 3 example below illustrates how to parse text with Frog:
 \begin{verbatim}
 from frog import Frog, FrogOptions
 
-frog = Frog(FrogOptions(parser=False), "/etc/frog/frog.cfg")
+frog = Frog(FrogOptions(parser=False))
 
 output = frog.process_raw("Dit is een test")
 print("RAW OUTPUT=",output)
@@ -697,9 +697,7 @@ print("PARSED OUTPUT=",output)
 
 To instantiate the \texttt{Frog} class, two arguments are needed. The first is a
 \texttt{FrogOptions} instance that specifies the configuration options you want to
-pass to Frog. The second is a string pointing to the Frog configuration file to
-use; \texttt{frog.cfg} is the default shipped with Frog. You need to ensure to
-specify the full path to where it is installed on your system though.
+pass to Frog.
 
 The \texttt{Frog} instance offers two methods: \texttt{process\_raw(text)} and
 \texttt{process(text)}. The former just returns a string containing the usual
