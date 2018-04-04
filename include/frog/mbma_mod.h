@@ -56,7 +56,7 @@ class Mbma {
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;
   void Classify( folia::Word * );
-  void Classify( const UnicodeString& );
+  void Classify( const icu::UnicodeString& );
   void filterHeadTag( const std::string& );
   void filterSubTags( const std::vector<std::string>& );
   void assign_compounds();
@@ -64,8 +64,8 @@ class Mbma {
   std::vector<std::pair<std::string,std::string>> getResults( ) const;
   void setDeepMorph( bool b ){ doDeepMorph = b; };
   void clearAnalysis();
-  Rule* matchRule( const std::vector<std::string>&, const UnicodeString& );
-  std::vector<Rule*> execute( const UnicodeString& ,
+  Rule* matchRule( const std::vector<std::string>&, const icu::UnicodeString& );
+  std::vector<Rule*> execute( const icu::UnicodeString& ,
 			      const std::vector<std::string>& );
   static std::map<std::string,std::string> TAGconv;
   static std::string mbma_tagset;
@@ -76,8 +76,8 @@ class Mbma {
   bool readsettings( const std::string&, const std::string& );
   void fillMaps();
   void init_cgn( const std::string&, const std::string& );
-  void getFoLiAResult( folia::Word *, const UnicodeString& ) const;
-  std::vector<std::string> make_instances( const UnicodeString& word );
+  void getFoLiAResult( folia::Word *, const icu::UnicodeString& ) const;
+  std::vector<std::string> make_instances( const icu::UnicodeString& word );
   CLEX::Type getFinalTag( const std::list<BaseBracket*>& );
   int debugFlag;
   void addMorph( folia::MorphologyLayer *,

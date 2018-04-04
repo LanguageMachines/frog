@@ -166,7 +166,7 @@ void Test( istream& in ){
       if ( useTagger ){
 	vector<TagResult> tagrv = tagger.tagLine( s );
 	for ( const auto& tr : tagrv ){
-	  UnicodeString uWord = folia::UTF8ToUnicode(tr.word());
+	  icu::UnicodeString uWord = TiCC::UnicodeFromUTF8(tr.word());
 	  myMblem.Classify( uWord );
 	  myMblem.filterTag( tr.assignedTag() );
 	  vector<pair<string,string> > res = myMblem.getResult();
@@ -181,7 +181,7 @@ void Test( istream& in ){
       else {
 	vector<string> parts = TiCC::split( s );
 	for ( const auto& w : parts ){
-	  UnicodeString uWord = folia::UTF8ToUnicode(w);
+	  icu::UnicodeString uWord = TiCC::UnicodeFromUTF8(w);
 	  myMblem.Classify( uWord );
 	  vector<pair<string,string> > res = myMblem.getResult();
 	  string line = w + "\t";

@@ -282,7 +282,7 @@ BracketLeaf::BracketLeaf( const RulePart& p, int flag, TiCC::LogStream& l ):
 }
 
 BracketLeaf::BracketLeaf( CLEX::Type t,
-			  const UnicodeString& us,
+			  const icu::UnicodeString& us,
 			  int flag,
 			  TiCC::LogStream& l ):
   BaseBracket( t, vector<CLEX::Type>(), flag, l ),
@@ -314,17 +314,17 @@ BracketNest::~BracketNest(){
   }
 }
 
-UnicodeString BaseBracket::put( bool full ) const {
-  UnicodeString result = "[err?]";
+icu::UnicodeString BaseBracket::put( bool full ) const {
+  icu::UnicodeString result = "[err?]";
   if ( full ){
-    UnicodeString s = folia::UTF8ToUnicode(toString(cls));
+    icu::UnicodeString s = TiCC::UnicodeFromUTF8(toString(cls));
     result += s;
   }
   return result;
 }
 
-UnicodeString BracketLeaf::put( bool full ) const {
-  UnicodeString result;
+icu::UnicodeString BracketLeaf::put( bool full ) const {
+  icu::UnicodeString result;
   if ( !morph.isEmpty() ){
     result += "[";
     result += morph;
@@ -332,25 +332,25 @@ UnicodeString BracketLeaf::put( bool full ) const {
   }
   if ( full ){
     if ( orig.empty() ){
-      UnicodeString s = folia::UTF8ToUnicode(toString(cls));
+      icu::UnicodeString s = TiCC::UnicodeFromUTF8(toString(cls));
       if ( s == "/" ){
-	result += s + folia::UTF8ToUnicode(inflect);
+	result += s + TiCC::UnicodeFromUTF8(inflect);
       }
       else {
-	result += s + "/" + folia::UTF8ToUnicode(inflect);
+	result += s + "/" + TiCC::UnicodeFromUTF8(inflect);
       }
     }
     else {
-      result += folia::UTF8ToUnicode(orig);
+      result += TiCC::UnicodeFromUTF8(orig);
     }
   }
   return result;
 }
 
-UnicodeString BracketNest::put( bool full ) const {
-  UnicodeString result = "[ ";
+icu::UnicodeString BracketNest::put( bool full ) const {
+  icu::UnicodeString result = "[ ";
   for ( auto const& it : parts ){
-    UnicodeString m = it->put( full );
+    icu::UnicodeString m = it->put( full );
     if ( !m.isEmpty() ){
       result += m + " ";
       // if (&it != &parts.back() ){
@@ -361,10 +361,10 @@ UnicodeString BracketNest::put( bool full ) const {
   result += "]";
   if ( full ){
     if ( cls != CLEX::UNASS ){
-      result += folia::UTF8ToUnicode(toString(cls));
+      result += TiCC::UnicodeFromUTF8(toString(cls));
     }
     if ( _compound != Compound::Type::NONE ){
-      result += " " + folia::UTF8ToUnicode(toString(_compound)) + "-compound";
+      result += " " + TiCC::UnicodeFromUTF8(toString(_compound)) + "-compound";
     }
   }
   return result;
@@ -702,7 +702,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   }
   else if ( _status == Status::STEM
 	    || ( _status == Status::DERIVATIONAL && glue ) ){
-    string out = folia::UnicodeToUTF8(morph);
+    string out = TiCC::UnicodeToUTF8(morph);
     if ( out.empty() ){
       throw logic_error( "stem has empty morpheme" );
     }
@@ -734,7 +734,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     }
   }
   else if ( _status == Status::PARTICLE ){
-    string out = folia::UnicodeToUTF8(morph);
+    string out = TiCC::UnicodeToUTF8(morph);
     if ( out.empty() ){
       throw logic_error( "particle has empty morpheme" );
     }
@@ -757,7 +757,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     desc = "[" + out + "]"; // spread the word upwards! maybe add 'part' ??
   }
   else if ( _status == Status::INFLECTION ){
-    string out = folia::UnicodeToUTF8(morph);
+    string out = TiCC::UnicodeToUTF8(morph);
     if ( !out.empty() ){
       desc = "[" + out + "]";
     }
@@ -793,7 +793,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   else if ( _status == Status::DERIVATIONAL
 	    || _status == Status::PARTICIPLE
 	    || _status == Status::FAILED ){
-    string out = folia::UnicodeToUTF8(morph);
+    string out = TiCC::UnicodeToUTF8(morph);
     if ( out.empty() ){
       throw logic_error( "Derivation with empty morpheme" );
     }

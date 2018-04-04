@@ -36,6 +36,7 @@
 #include <iostream>
 #include "ticcutils/StringOps.h"
 #include "ticcutils/PrettyPrint.h"
+#include "ticcutils/Unicode.h"
 #include "libfolia/folia.h"
 #include "frog/mbma_brackets.h"
 
@@ -97,22 +98,22 @@ ostream& operator<<( ostream& os, const RulePart *r ){
 void RulePart::get_edits( const string& edit ){
   if (edit[0]=='D') { // delete operation
     string s = edit.substr(1);
-    ins = folia::UTF8ToUnicode( s );
+    ins = TiCC::UnicodeFromUTF8( s );
   }
   else if ( edit[0]=='I') {  // insert operation
     string s = edit.substr(1);
-    del = folia::UTF8ToUnicode( s );
+    del = TiCC::UnicodeFromUTF8( s );
   }
   else if ( edit[0]=='H') {  // hidden morpheme
     string s = edit.substr(1);
-    hide = folia::UTF8ToUnicode( s );
+    hide = TiCC::UnicodeFromUTF8( s );
   }
   else if ( edit[0]=='R') { // replace operation
     string::size_type pos = edit.find( ">" );
     string s = edit.substr( 1, pos-1 );
-    ins = folia::UTF8ToUnicode( s );
+    ins = TiCC::UnicodeFromUTF8( s );
     s = edit.substr( pos+1 );
-    del = folia::UTF8ToUnicode( s );
+    del = TiCC::UnicodeFromUTF8( s );
   }
 }
 
@@ -233,7 +234,7 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
 }
 
 Rule::Rule( const vector<string>& parts,
-	    const UnicodeString& s,
+	    const icu::UnicodeString& s,
 	    TiCC::LogStream& ls,
 	    int flag ):
   debugFlag( flag ),
@@ -298,9 +299,9 @@ vector<string> Rule::extract_morphemes( ) const {
   vector<string> morphemes;
   morphemes.reserve( rules.size() );
   for ( const auto& it : rules ){
-    UnicodeString morpheme = it.morpheme;
+    icu::UnicodeString morpheme = it.morpheme;
     if ( !morpheme.isEmpty() ){
-      morphemes.push_back( folia::UnicodeToUTF8(morpheme) );
+      morphemes.push_back( TiCC::UnicodeToUTF8(morpheme) );
     }
   }
   return morphemes;
@@ -309,8 +310,8 @@ vector<string> Rule::extract_morphemes( ) const {
 string Rule::morpheme_string( bool structured ) const {
   string result;
   if ( structured ){
-    UnicodeString us = brackets->put(true);
-    result = folia::UnicodeToUTF8( us );
+    icu::UnicodeString us = brackets->put(true);
+    result = TiCC::UnicodeToUTF8( us );
   }
   else {
     vector<string> vec = extract_morphemes();
@@ -340,7 +341,7 @@ bool Rule::performEdits(){
       for ( int j=0; j < cur->del.length(); ++j ){
 	if ( (k + j) < rules.size() ){
 	  if ( rules[k+j].uchar != cur->del[j] ){
-	    UnicodeString tmp(cur->del[j]);
+	    icu::UnicodeString tmp(cur->del[j]);
 	    LOG << "Hmm: deleting " << cur->del << " is impossible. ("
 			      << rules[k+j].uchar << " != " << tmp
 			      << ")." << endl;
@@ -349,7 +350,7 @@ bool Rule::performEdits(){
 	  }
 	}
 	else {
-	  UnicodeString tmp(cur->del[j]);
+	  icu::UnicodeString tmp(cur->del[j]);
 	  LOG << "Hmm: deleting " << cur->del
 			    << " is impossible. (beyond end of the rule)"
 			    << endl;
@@ -367,7 +368,7 @@ bool Rule::performEdits(){
     }
 
     bool inserted = false;
-    UnicodeString part; // store to-be-inserted particles here!
+    icu::UnicodeString part; // store to-be-inserted particles here!
     if ( !cur->hide.isEmpty() ){
       last->morpheme += cur->uchar; // add to prevvoius morheme
       cur->uchar = "";
@@ -487,23 +488,23 @@ void Rule::resolve_inflections(){
   }
 }
 
-UnicodeString Rule::getKey( bool deep ){
+icu::UnicodeString Rule::getKey( bool deep ){
   if ( deep ){
     if ( sortkey.isEmpty() ){
-      UnicodeString tmp;
+      icu::UnicodeString tmp;
       stringstream ss;
       ss << brackets << endl;
-      tmp = folia::UTF8ToUnicode(ss.str());
+      tmp = TiCC::UnicodeFromUTF8(ss.str());
       sortkey = tmp;
     }
     return sortkey;
   }
   else {
     vector<string> morphs = extract_morphemes();
-    UnicodeString tmp;
+    icu::UnicodeString tmp;
     // create an unique string
     for ( auto const& mor : morphs ){
-      tmp += folia::UTF8ToUnicode(mor) + "++";
+      tmp += TiCC::UnicodeFromUTF8(mor) + "++";
     }
     return tmp;
   }

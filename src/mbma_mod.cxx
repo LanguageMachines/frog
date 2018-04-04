@@ -209,14 +209,14 @@ void Mbma::cleanUp(){
   clearAnalysis();
 }
 
-vector<string> Mbma::make_instances( const UnicodeString& word ){
+vector<string> Mbma::make_instances( const icu::UnicodeString& word ){
   vector<string> insts;
   insts.reserve( word.length() );
   for ( long i=0; i < word.length(); ++i ) {
     if (debugFlag > 10){
       LOG << "itt #:" << i << endl;
     }
-    UnicodeString inst;
+    icu::UnicodeString inst;
     for ( long j=i ; j <= i + RIGHT + LEFT; ++j ) {
       if (debugFlag > 10){
 	LOG << " " << j-LEFT << ": ";
@@ -238,7 +238,7 @@ vector<string> Mbma::make_instances( const UnicodeString& word ){
       }
     }
     inst += "?";
-    insts.push_back( folia::UnicodeToUTF8(inst) );
+    insts.push_back( TiCC::UnicodeToUTF8(inst) );
   }
   return insts;
 }
@@ -304,7 +304,7 @@ void Mbma::clearAnalysis(){
 }
 
 Rule* Mbma::matchRule( const std::vector<std::string>& ana,
-		       const UnicodeString& word ){
+		       const icu::UnicodeString& word ){
   Rule *rule = new Rule( ana, word, *mbmaLog, debugFlag );
   if ( rule->performEdits() ){
     rule->reduceZeroNodes();
@@ -331,12 +331,12 @@ Rule* Mbma::matchRule( const std::vector<std::string>& ana,
   }
 }
 
-vector<Rule*> Mbma::execute( const UnicodeString& word,
+vector<Rule*> Mbma::execute( const icu::UnicodeString& word,
 			     const vector<string>& classes ){
   vector<vector<string> > allParts = generate_all_perms( classes );
   if ( debugFlag ){
     string out = "alternatives: word="
-      + folia::UnicodeToUTF8(word) + ", classes=<";
+      + TiCC::UnicodeToUTF8(word) + ", classes=<";
     for ( const auto& cls : classes ){
       out += cls + ",";
     }
@@ -664,9 +664,9 @@ void Mbma::filterSubTags( const vector<string>& feats ){
   // we still might have doubles. (different Rule's yielding the same result)
   // reduce these
   //
-  map<UnicodeString, Rule*> unique;
+  map<icu::UnicodeString, Rule*> unique;
   for ( const auto& ait : highConf ){
-    UnicodeString tmp = ait->getKey( doDeepMorph );
+    icu::UnicodeString tmp = ait->getKey( doDeepMorph );
     unique[tmp] = ait;
   }
   // so now we have map of 'equal' analysis.
@@ -719,7 +719,7 @@ void Mbma::assign_compounds(){
 }
 
 void Mbma::getFoLiAResult( folia::Word *fword,
-			   const UnicodeString& uword ) const {
+			   const icu::UnicodeString& uword ) const {
   if ( analysis.size() == 0 ){
     // fallback option: use the word and pretend it's a morpheme ;-)
     if ( debugFlag ){
@@ -727,18 +727,18 @@ void Mbma::getFoLiAResult( folia::Word *fword,
 		    << uword << endl;
     }
     if ( doDeepMorph ){
-      addBracketMorph( fword, folia::UnicodeToUTF8(uword), "X" );
+      addBracketMorph( fword, TiCC::UnicodeToUTF8(uword), "X" );
     }
     else {
       vector<string> tmp;
-      tmp.push_back( folia::UnicodeToUTF8(uword) );
+      tmp.push_back( TiCC::UnicodeToUTF8(uword) );
       addMorph( fword, tmp );
     }
   }
   else {
     for ( auto const& sit : analysis ){
       if ( doDeepMorph ){
-	addBracketMorph( fword, folia::UnicodeToUTF8(uword), sit->brackets );
+	addBracketMorph( fword, TiCC::UnicodeToUTF8(uword), sit->brackets );
       }
       else {
 	addMorph( fword, sit->extract_morphemes() );
@@ -762,7 +762,7 @@ void Mbma::Classify( folia::Word* sword ){
   if ( sword->isinstance(folia::PlaceHolder_t) ){
     return;
   }
-  UnicodeString uWord;
+  icu::UnicodeString uWord;
   folia::PosAnnotation *pos;
   string head;
   string token_class;
@@ -785,17 +785,17 @@ void Mbma::Classify( folia::Word* sword ){
   if ( filter ){
     uWord = filter->filter( uWord );
   }
-  string word_s = folia::UnicodeToUTF8( uWord );
+  string word_s = TiCC::UnicodeToUTF8( uWord );
   vector<string> parts = TiCC::split( word_s );
   word_s.clear();
   for ( const auto& p : parts ){
     word_s += p;
   }
-  uWord = folia::UTF8ToUnicode( word_s );
+  uWord = TiCC::UnicodeFromUTF8( word_s );
   if ( head == "LET" || head == "SPEC" || token_class == "ABBREVIATION" ){
     // take over the letter/word 'as-is'.
     //  also ABBREVIATION's aren't handled bij mbma-rules
-    string word = folia::UnicodeToUTF8( uWord );
+    string word = TiCC::UnicodeToUTF8( uWord );
     if ( doDeepMorph ){
       addBracketMorph( sword, word, head );
     }
@@ -806,7 +806,7 @@ void Mbma::Classify( folia::Word* sword ){
     }
   }
   else {
-    UnicodeString lWord = uWord;
+    icu::UnicodeString lWord = uWord;
     if ( head != "SPEC" ){
       lWord.toLower();
     }
@@ -826,9 +826,9 @@ void Mbma::Classify( folia::Word* sword ){
   }
 }
 
-void Mbma::Classify( const UnicodeString& word ){
+void Mbma::Classify( const icu::UnicodeString& word ){
   clearAnalysis();
-  UnicodeString uWord = word;
+  icu::UnicodeString uWord = word;
   if ( filter_diac ){
     uWord = TiCC::filter_diacritics( uWord );
   }

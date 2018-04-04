@@ -173,11 +173,11 @@ Mblem::~Mblem(){
   delete mblemLog;
 }
 
-string Mblem::make_instance( const UnicodeString& in ) {
+string Mblem::make_instance( const icu::UnicodeString& in ) {
   if (debug) {
     LOG << "making instance from: " << in << endl;
   }
-  UnicodeString instance = "";
+  icu::UnicodeString instance = "";
   size_t length = in.length();
   for ( size_t i=0; i < history; i++) {
     size_t j = length - history + i;
@@ -190,7 +190,7 @@ string Mblem::make_instance( const UnicodeString& in ) {
     }
   }
   instance += "?";
-  string result = folia::UnicodeToUTF8(instance);
+  string result = TiCC::UnicodeToUTF8(instance);
   if ( debug ){
     LOG << "inst: " << instance << endl;
   }
@@ -274,10 +274,10 @@ void Mblem::makeUnique( ){
   }
 }
 
-void Mblem::getFoLiAResult( folia::Word *word, const UnicodeString& uWord ){
+void Mblem::getFoLiAResult( folia::Word *word, const icu::UnicodeString& uWord ){
   if ( mblemResult.empty() ){
     // just return the word as a lemma
-    string result = folia::UnicodeToUTF8( uWord );
+    string result = TiCC::UnicodeToUTF8( uWord );
     addLemma( word, result );
   }
   else {
@@ -299,7 +299,7 @@ void Mblem::addDeclaration( folia::Document& doc ) const {
 void Mblem::Classify( folia::Word *sword ){
   if ( sword->isinstance( folia::PlaceHolder_t ) )
     return;
-  UnicodeString uword;
+  icu::UnicodeString uword;
   string pos;
   string token_class;
 #pragma omp critical (foliaupdate)
@@ -322,7 +322,7 @@ void Mblem::Classify( folia::Word *sword ){
 
   if ( token_class == "ABBREVIATION" ){
     // We dont handle ABBREVIATION's so just take the word as such
-    string word = folia::UnicodeToUTF8(uword);
+    string word = TiCC::UnicodeToUTF8(uword);
     addLemma( sword, word );
     return;
   }
@@ -332,18 +332,18 @@ void Mblem::Classify( folia::Word *sword ){
     // we have to strip a few letters to get a lemma
     auto const& it2 = it1->second.find( token_class );
     if ( it2 != it1->second.end() ){
-      UnicodeString uword2 = UnicodeString( uword, 0, uword.length() - it2->second );
+      icu::UnicodeString uword2 = icu::UnicodeString( uword, 0, uword.length() - it2->second );
       if ( uword2.isEmpty() ){
 	uword2 = uword;
       }
-      string word = folia::UnicodeToUTF8(uword2);
+      string word = TiCC::UnicodeToUTF8(uword2);
       addLemma( sword, word );
       return;
     }
   }
   if ( one_one_tags.find(pos) != one_one_tags.end() ){
     // some tags are just taken as such
-    string word = folia::UnicodeToUTF8(uword);
+    string word = TiCC::UnicodeToUTF8(uword);
     addLemma( sword, word );
     return;
   }
@@ -356,7 +356,7 @@ void Mblem::Classify( folia::Word *sword ){
   getFoLiAResult( sword, uword );
 }
 
-void Mblem::Classify( const UnicodeString& uWord ){
+void Mblem::Classify( const icu::UnicodeString& uWord ){
   mblemResult.clear();
   string inst = make_instance(uWord);
   string classString;
@@ -373,7 +373,7 @@ void Mblem::Classify( const UnicodeString& uWord ){
   int index = 0;
   while ( index < numParts ) {
     string partS = parts[index++];
-    UnicodeString lemma;
+    icu::UnicodeString lemma;
     string restag;
     string::size_type pos = partS.find("+");
     if ( pos == string::npos ){
@@ -389,22 +389,22 @@ void Mblem::Classify( const UnicodeString& uWord ){
       }
       restag = edits[0]; // the first one is the POS tag
 
-      UnicodeString insstr;
-      UnicodeString delstr;
-      UnicodeString prefix;
+      icu::UnicodeString insstr;
+      icu::UnicodeString delstr;
+      icu::UnicodeString prefix;
       for ( const auto& edit : edits ){
 	if ( edit == edits.front() ){
 	  continue;
 	}
 	switch ( edit[0] ){
 	case 'P':
-	  prefix = folia::UTF8ToUnicode( edit.substr( 1 ) );
+	  prefix = TiCC::UnicodeFromUTF8( edit.substr( 1 ) );
 	  break;
 	case 'I':
-	  insstr = folia::UTF8ToUnicode( edit.substr( 1 ) );
+	  insstr = TiCC::UnicodeFromUTF8( edit.substr( 1 ) );
 	  break;
 	case 'D':
-	  delstr = folia::UTF8ToUnicode( edit.substr( 1 ) );
+	  delstr = TiCC::UnicodeFromUTF8( edit.substr( 1 ) );
 	  break;
 	default:
 	  LOG << "Error: strange value in editstring: " << edit
@@ -435,7 +435,7 @@ void Mblem::Classify( const UnicodeString& uWord ){
 	LOG << "prefixpos = " << prefixpos << endl;
       }
       if (prefixpos >= 0) {
-	lemma = UnicodeString( uWord, 0L, prefixpos );
+	lemma = icu::UnicodeString( uWord, 0L, prefixpos );
 	prefixpos = prefixpos + prefix.length();
       }
       if (debug){
@@ -454,13 +454,13 @@ void Mblem::Classify( const UnicodeString& uWord ){
 	    lemma += uWord;
 	  }
 	  else {
-	    UnicodeString part = UnicodeString( uWord, prefixpos, uWord.length() - delstr.length() - prefixpos );
+	    icu::UnicodeString part = icu::UnicodeString( uWord, prefixpos, uWord.length() - delstr.length() - prefixpos );
 	    lemma += part + insstr;
 	  }
 	}
 	else if ( insstr.isEmpty() ){
 	  // no replacement, just take part after the prefix
-	  lemma += UnicodeString( uWord, prefixpos, uWord.length() ); // uWord;
+	  lemma += icu::UnicodeString( uWord, prefixpos, uWord.length() ); // uWord;
 	}
 	else {
 	  // but replace if possible
@@ -491,7 +491,7 @@ void Mblem::Classify( const UnicodeString& uWord ){
     if ( debug ){
       LOG << "appending lemma " << lemma << " and tag " << restag << endl;
     }
-    mblemResult.push_back( mblemData( folia::UnicodeToUTF8(lemma), restag ) );
+    mblemResult.push_back( mblemData( TiCC::UnicodeToUTF8(lemma), restag ) );
   } // while
   if ( debug ) {
     LOG << "stored lemma and tag options: " << mblemResult.size()

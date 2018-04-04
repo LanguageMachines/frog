@@ -198,14 +198,14 @@ string BaseTagger::extract_sentence( const vector<folia::Word*>& swords,
   words.clear();
   string sentence;
   for ( const auto& sword : swords ){
-    UnicodeString word;
+    icu::UnicodeString word;
 #pragma omp critical (foliaupdate)
     {
       word = sword->text( textclass );
     }
     if ( filter )
       word = filter->filter( word );
-    string word_s = folia::UnicodeToUTF8( word );
+    string word_s = TiCC::UnicodeToUTF8( word );
     // the word may contain spaces, remove them all!
     word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
     sentence += word_s;
@@ -223,7 +223,7 @@ void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
   for ( size_t i=0; i < swords.size(); ++i ){
     folia::Word *sw = swords[i];
     folia::PosAnnotation *postag = 0;
-    UnicodeString word;
+    icu::UnicodeString word;
 #pragma omp critical (foliaupdate)
     {
       word = sw->text( textclass );
@@ -233,7 +233,7 @@ void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
       word = filter->filter( word );
     }
     // the word may contain spaces, remove them all!
-    string word_s = folia::UnicodeToUTF8( word );
+    string word_s = TiCC::UnicodeToUTF8( word );
     word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
     words.push_back( word_s );
     ptags.push_back( postag->cls() );

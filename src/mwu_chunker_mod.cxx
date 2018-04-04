@@ -120,14 +120,14 @@ void Mwu::reset(){
 }
 
 void Mwu::add( folia::Word *word ){
-  UnicodeString tmp;
+  icu::UnicodeString tmp;
 #pragma omp critical (foliaupdate)
   {
     tmp = word->text( textclass );
   }
   if ( filter )
     tmp = filter->filter( tmp );
-  string txt = folia::UnicodeToUTF8( tmp );
+  string txt = TiCC::UnicodeToUTF8( tmp );
   mWords.push_back( new mwuAna( word, txt, glue_tag ) );
 }
 

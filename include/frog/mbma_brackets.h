@@ -80,12 +80,12 @@ class BaseBracket {
 
   Status status() const { return _status; };
   void set_status( const Status s ) { _status = s; };
-  virtual UnicodeString morpheme() const { return "";};
+  virtual icu::UnicodeString morpheme() const { return "";};
   virtual std::string inflection() const { return ""; };
   virtual std::string original() const { return ""; };
   virtual int infixpos() const { return -1; };
   virtual bool isglue() const { return false; };
-  virtual UnicodeString put( bool = true ) const;
+  virtual icu::UnicodeString put( bool = true ) const;
   virtual BaseBracket *append( BaseBracket * ){ abort(); };
   virtual bool isNested() { return false; };
   virtual void resolveGlue(){ abort(); };
@@ -111,9 +111,9 @@ class BaseBracket {
 class BracketLeaf: public BaseBracket {
 public:
   BracketLeaf( const RulePart&, int, TiCC::LogStream& );
-  BracketLeaf( CLEX::Type, const UnicodeString&, int, TiCC::LogStream& );
-  UnicodeString put( bool = true ) const;
-  UnicodeString morpheme() const { return morph; };
+  BracketLeaf( CLEX::Type, const icu::UnicodeString&, int, TiCC::LogStream& );
+  icu::UnicodeString put( bool = true ) const;
+  icu::UnicodeString morpheme() const { return morph; };
   std::string inflection() const { return inflect; };
   std::string original() const { return orig; };
   int infixpos() const { return ifpos; };
@@ -124,7 +124,7 @@ public:
 private:
   int ifpos;
   bool glue;
-  UnicodeString morph;
+  icu::UnicodeString morph;
   std::string orig;
   std::string inflect;
 };
@@ -136,7 +136,7 @@ class BracketNest: public BaseBracket {
   ~BracketNest();
   bool isNested() { return true; };
   void clearEmptyNodes();
-  UnicodeString put( bool = true ) const;
+  icu::UnicodeString put( bool = true ) const;
   bool testMatch( std::list<BaseBracket*>& result,
 		  const std::list<BaseBracket*>::iterator& rpos,
 		  std::list<BaseBracket*>::iterator& bpos );

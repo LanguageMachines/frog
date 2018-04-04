@@ -822,14 +822,14 @@ parseData Parser::prepareParse( const vector<folia::Word *>& fwords ){
       string head;
       string mod;
       for ( const auto& mwu : mwuv ){
-	UnicodeString tmp;
+	icu::UnicodeString tmp;
 #pragma omp critical (foliaupdate)
 	{
 	  tmp = mwu->text( textclass );
 	}
 	if ( filter )
 	  tmp = filter->filter( tmp );
-	string ms = folia::UnicodeToUTF8( tmp );
+	string ms = TiCC::UnicodeToUTF8( tmp );
 	// the word may contain spaces, remove them all!
 	ms.erase(remove_if(ms.begin(), ms.end(), ::isspace), ms.end());
 	multi_word += ms;
@@ -856,14 +856,14 @@ parseData Parser::prepareParse( const vector<folia::Word *>& fwords ){
       i += mwuv.size()-1;
     }
     else {
-      UnicodeString tmp;
+      icu::UnicodeString tmp;
 #pragma omp critical (foliaupdate)
       {
 	tmp = word->text( textclass );
       }
       if ( filter )
 	tmp = filter->filter( tmp );
-      string ms = folia::UnicodeToUTF8( tmp );
+      string ms = TiCC::UnicodeToUTF8( tmp );
       // the word may contain spaces, remove them all!
       ms.erase(remove_if(ms.begin(), ms.end(), ::isspace), ms.end());
       pd.words.push_back( ms );

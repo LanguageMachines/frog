@@ -50,11 +50,11 @@ public:
   void get_edits( const std::string& );
   CLEX::Type ResultClass;
   std::vector<CLEX::Type> RightHand;
-  UnicodeString ins;
-  UnicodeString del;
-  UnicodeString hide;
-  UnicodeString uchar;
-  UnicodeString morpheme;
+  icu::UnicodeString ins;
+  icu::UnicodeString del;
+  icu::UnicodeString hide;
+  icu::UnicodeString uchar;
+  icu::UnicodeString morpheme;
   std::string inflect;
   bool is_affix;
   bool is_glue;
@@ -69,13 +69,13 @@ class BracketNest;
 class Rule {
 public:
   Rule( const std::vector<std::string>&,
-	const UnicodeString&,
+	const icu::UnicodeString&,
 	TiCC::LogStream&,
 	int );
   ~Rule();
   std::vector<std::string> extract_morphemes() const;
   std::string morpheme_string( bool = false ) const;
-  UnicodeString getKey( bool );
+  icu::UnicodeString getKey( bool );
   bool performEdits();
   void getCleanInflect();
   void reduceZeroNodes();
@@ -84,8 +84,8 @@ public:
   std::vector<RulePart> rules;
   int debugFlag;
   CLEX::Type tag;
-  UnicodeString sortkey;
-  UnicodeString orig_word;
+  icu::UnicodeString sortkey;
+  icu::UnicodeString orig_word;
   std::string description;
   std::string inflection;
   Compound::Type compound;

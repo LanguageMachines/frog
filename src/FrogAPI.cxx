@@ -1095,7 +1095,7 @@ vector<string> get_full_morph_analysis( folia::Word* w,
       vector<folia::Morpheme*> m
 	= layer->select<folia::Morpheme>( Mbma::mbma_tagset );
       for ( const auto& mor : m ){
-	string txt = folia::UnicodeToUTF8( mor->text( cls ) );
+	string txt = TiCC::UnicodeToUTF8( mor->text( cls ) );
 	morph += "[" + txt + "]";
       }
       result.push_back( morph );

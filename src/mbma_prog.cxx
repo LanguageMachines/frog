@@ -184,7 +184,7 @@ void Test( istream& in ){
       if ( useTagger ){
 	vector<TagResult> tagv = tagger.tagLine( s );
 	for ( const auto& tr : tagv ){
-	  UnicodeString uWord = folia::UTF8ToUnicode( tr.word() );
+	  icu::UnicodeString uWord = TiCC::UnicodeFromUTF8( tr.word() );
 	  vector<string> v = TiCC::split_at_first_of( tr.assignedTag(), "(,)" );
 	  if ( v.empty() ){
 	    throw runtime_error( "error: tag not in right format " );
@@ -219,7 +219,7 @@ void Test( istream& in ){
       else {
 	vector<string> parts = TiCC::split( s );
 	for ( auto const& w : parts ){
-	  UnicodeString uWord = folia::UTF8ToUnicode(w);
+	  icu::UnicodeString uWord = TiCC::UnicodeFromUTF8(w);
 	  uWord.toLower();
 	  myMbma.Classify( uWord );
 	  myMbma.assign_compounds();

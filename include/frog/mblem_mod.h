@@ -57,7 +57,7 @@ class Mblem {
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;
   void Classify( folia::Word * );
-  void Classify( const UnicodeString& );
+  void Classify( const icu::UnicodeString& );
   std::vector<std::pair<std::string,std::string> > getResult() const;
   void filterTag( const std::string&  );
   void makeUnique();
@@ -69,8 +69,8 @@ class Mblem {
   void create_MBlem_defaults();
   bool readsettings( const std::string& dir, const std::string& fname );
   void addLemma( folia::Word *, const std::string&) ;
-  std::string make_instance( const UnicodeString& in );
-  void getFoLiAResult( folia::Word *, const UnicodeString& );
+  std::string make_instance( const icu::UnicodeString& in );
+  void getFoLiAResult( folia::Word *, const icu::UnicodeString& );
   Timbl::TimblAPI *myLex;
   std::string punctuation;
   size_t history;
