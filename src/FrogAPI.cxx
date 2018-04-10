@@ -1429,6 +1429,37 @@ void FrogAPI::FrogDoc( folia::Document& doc,
   return;
 }
 
+string filter_non_NC( const string& filename ){
+  string result;
+  bool at_start = true;
+  for ( size_t i=0; i < filename.length(); ++i ){
+    if ( at_start ){
+      if ( isdigit( filename[i] ) ){
+	continue; //ditch numerics!
+      }
+      else {
+	at_start = false;
+      }
+    }
+    if ( filename[i] == ':' ){
+      if ( at_start ){
+	result += "C";
+      }
+      else {
+	result += "-";
+      }
+    }
+    else {
+      result += filename[i];
+    }
+  }
+  if ( result.empty() ){
+    // ouch, only numbers?
+    return filter_non_NC( "N" + filename );
+  }
+  return result;
+}
+
 void FrogAPI::FrogFile( const string& infilename,
 			ostream& os,
 			const string& xmlOutF ) {
@@ -1478,6 +1509,10 @@ void FrogAPI::FrogFile( const string& infilename,
     ifstream IN( infilename );
     timers.reset();
     timers.tokTimer.start();
+    if ( options.docid == "untitled" ){
+      string id = filter_non_NC( TiCC::basename(infilename) );
+      tokenizer->setDocID( id );
+    }
     folia::Document *doc = tokenizer->tokenize( IN );
     timers.tokTimer.stop();
     FrogDoc( *doc );
