@@ -1,6 +1,5 @@
-[![Build Status](https://travis-ci.org/LanguageMachines/frog.svg?branch=master)](https://travis-ci.org/LanguageMachines/frog) [![Language Machines Badge](http://applejack.science.ru.nl/lamabadge.php/frog)](http://applejack.science.ru.nl/languagemachines/) 
+[![Build Status](https://travis-ci.org/LanguageMachines/frog.svg?branch=master)](https://travis-ci.org/LanguageMachines/frog) [![Language Machines Badge](http://applejack.science.ru.nl/lamabadge.php/frog)](http://applejack.science.ru.nl/languagemachines/)
 
-==============================================================================
 Frog - A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
 ==============================================================================
 
@@ -64,7 +63,7 @@ Contents of this distribution:
 To install Frog, first consult whether your distribution's package manager has
 an up-to-date package.  If not, for easy installation of Frog and its many
 dependencies, it is included as part of our software distribution
-**LaMachine**: https://proycon.github.io/LaMachine . 
+**LaMachine**: https://proycon.github.io/LaMachine .
 
 To be able to succesfully build Frog from source instead, you need the following dependencies:
 - A sane C++ build enviroment with autoconf, automake, autoconf-archive, pkg-config, gcc or clang,  libtool
@@ -92,7 +91,6 @@ and optionally:
     $ make check
 
 
--------------------------------------------------------------------------------
 Credits
 -------------------------------------------------------------------------------
 
