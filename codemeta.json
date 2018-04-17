@@ -1,0 +1,128 @@
+{
+    "@context": [
+        "https://doi.org/10.5063/schema/codemeta-2.0",
+        "http://schema.org"
+    ],
+    "@type": "SoftwareSourceCode",
+    "identifier": "frog",
+    "name": "Frog",
+    "version": "0.15",
+    "description": "Frog is an integration of memory-based natural language processing (NLP) modules developed for Dutch. All NLP modules are based on Timbl, the Tilburg memory-based learning software package.",
+    "license": "https://spdx.org/licenses/GPL-3.0",
+	"url": "https://languagemachines.github.io/frog",
+    "author": [
+		{
+			"@type": "Person",
+			"givenName": "Ko",
+			"familyName": "van der Sloot",
+			"email": "ko.vandersloot@let.ru.nl",
+			"affiliation": {
+				"@id": "https://www.ru.nl/clst",
+				"@type": "Organization",
+				"name": "Centre for Language and Speech Technology",
+				"url": "https://www.ru.nl/clst",
+				"parentOrganization": {
+					"@id": "https://www.ru.nl/cls",
+					"@type": "Organization",
+					"name": "Centre for Language Studies",
+					"url": "https://www.ru.nl/cls",
+					"parentOrganization": {
+						"@id": "https://www.ru.nl",
+						"name": "Radboud University",
+						"@type": "Organization",
+						"url": "https://www.ru.nl",
+						"location": {
+							"@type": "Place",
+							"name": "Nijmegen"
+						}
+					}
+
+				}
+			}
+		},
+		{
+			"@id": "https://orcid.org/0000-0003-2493-656X",
+			"@type": "Person",
+			"givenName": "Antal",
+			"familyName": "van den Bosch",
+			"email": "antal.vandenbosch@let.ru.nl",
+			"affiliation": { "@id": "https://cls.ru.nl" }
+		},
+		{
+			"@id": "https://orcid.org/0000-0002-1046-0006",
+			"@type": "Person",
+			"givenName": "Maarten",
+			"familyName": "van Gompel",
+			"email": "proycon@anaproy.nl",
+			"affiliation": { "@id": "https://www.ru.nl/clst" }
+		}
+	],
+	"publisher": { "@id": "https://www.ru.nl/clst" },
+	"programmingLanguage": {
+		"@type": "ComputerLanguage",
+		"identifier": "c++",
+		"name": "C++"
+	},
+	"operatingSystem": "POSIX",
+	"codeRepository": "https://github.com/LanguageMachines/frog",
+    "softwareRequirements": [
+        {
+			"@type": "SoftwareApplication",
+			"identifier": "icu",
+			"name": "icu"
+		},
+        {
+			"@type": "SoftwareApplication",
+			"identifier": "libxml2",
+			"name": "libxml2"
+		},
+        {
+			"@type": "SoftwareApplication",
+			"identifier": "ticcutils",
+			"name": "ticcutils"
+		},
+        {
+			"@type": "SoftwareApplication",
+			"identifier": "timbl",
+			"name": "timbl"
+		},
+        {
+			"@type": "SoftwareApplication",
+			"identifier": "libfolia",
+			"name": "libfolia"
+		},
+        {
+			"@type": "SoftwareApplication",
+			"identifier": "mbt",
+			"name": "mbt"
+		},
+        {
+			"@type": "SoftwareApplication",
+			"identifier": "ucto",
+			"name": "ucto"
+		},
+        {
+			"@type": "SoftwareApplication",
+			"identifier": "frogdata",
+			"name": "frogdata"
+		}
+	],
+	"funder": [
+		{
+			"@type": "Organization",
+			"name": "CLARIN-NL"
+		},
+		{
+			"@type": "Organization",
+			"name": "CLARIAH",
+			"url": "https://www.clariah.nl"
+		}
+	],
+	"readme": "https://github.com/LanguageMachines/frog/blob/master/README.md",
+	"issueTracker": "https://github.com/LanguageMachines/frog/issues",
+	"contIntegration": "https://travis-ci.org/LanguageMachines/frog",
+	"releaseNotes": "https://github.com/LanguageMachines/frog/releases",
+	"developmentStatus": "active",
+	"keywords":  [ "nlp", "natural language processing", "pos", "lemma", "ner", "parser", "tagger", "part-of-speech tagging", "lemmatisation", "dependency parsing", "shallow parsing", "dutch" ],
+	"dateCreated": "2011-03-27"
+}
