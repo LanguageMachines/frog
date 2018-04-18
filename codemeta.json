@@ -57,7 +57,7 @@
 			"affiliation": { "@id": "https://www.ru.nl/clst" }
 		}
 	],
-	"publisher": { "@id": "https://www.ru.nl/clst" },
+	"sourceOrganization": { "@id": "https://www.ru.nl/clst" },
 	"programmingLanguage": {
 		"@type": "ComputerLanguage",
 		"identifier": "c++",
@@ -124,5 +124,36 @@
 	"releaseNotes": "https://github.com/LanguageMachines/frog/releases",
 	"developmentStatus": "active",
 	"keywords":  [ "nlp", "natural language processing", "pos", "lemma", "ner", "parser", "tagger", "part-of-speech tagging", "lemmatisation", "dependency parsing", "shallow parsing", "dutch" ],
+    "referencePublication": [
+		{
+			"@type": "TechArticle",
+			"name": "An efficient memory-based morphosyntactic tagger and parser for Dutch",
+			"author": [ "Iris Hendrickx", "Antal van den Bosch", "Maarten van Gompel", "Ko van der Sloot", "Walter Daelemans" ],
+			"pageStart": "99",
+			"pageEnd": 114,
+			"isPartOf": {
+				"@type": "PublicationIssue",
+				"datePublised": "2016",
+				"name": "CLST Technical Report",
+				"issue": "16-02",
+				"location": "Nijmegen, the Netherlands"
+			},
+			"url": "https://github.com/LanguageMachines/frog/blob/master/docs/frogmanual.pdf"
+		},
+		{
+			"@type": "ScholarlyArticle",
+			"name": "An efficient memory-based morphosyntactic tagger and parser for Dutch",
+			"author": [ "Antal van den Bosch", "Bertjan Busser", "Sander Canisius", "Walter Daelemans" ],
+			"pageStart": "99",
+			"pageEnd": 114,
+			"isPartOf": {
+				"@type": "PublicationIssue",
+				"datePublised": "2007",
+				"name": "Selected Papers of the 17th Computational Linguistics in the Netherlands Meeting",
+				"location": "Leuven, Belgium"
+			},
+			"url": "http://ilk.uvt.nl/downloads/pub/papers/tadpole-final.pdf"
+		}
+	],
 	"dateCreated": "2011-03-27"
 }
