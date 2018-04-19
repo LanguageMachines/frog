@@ -626,7 +626,7 @@ bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers){
 
 void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
   try {
-    while (true) {
+    while ( conn.isValid() ) {
       ostringstream outputstream;
       if ( options.doXMLin ){
         string result;
