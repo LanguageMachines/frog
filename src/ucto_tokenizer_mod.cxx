@@ -117,7 +117,6 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
   }
   tokenizer->setEosMarker( "" );
   tokenizer->setVerbose( false );
-  tokenizer->setSentenceDetection( true ); //detection of sentences
   tokenizer->setParagraphDetection( false ); //detection of paragraphs
   tokenizer->setXMLOutput( true );
   return true;
