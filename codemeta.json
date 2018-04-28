@@ -2,8 +2,10 @@
     "@context": [
         "https://doi.org/10.5063/schema/codemeta-2.0",
         "http://schema.org",
-        "entryPoints": { "@reverse": "schema:actionApplication" },
-        "interfaceType": { "@id": "codemeta:interfaceType" }
+        {
+            "entryPoints": { "@reverse": "schema:actionApplication" },
+            "interfaceType": { "@id": "codemeta:interfaceType" }
+        }
     ],
     "@type": "SoftwareSourceCode",
     "identifier": "frog",
@@ -161,22 +163,27 @@
     "entryPoints": [
         {
             "@type": "EntryPoint",
+            "name": "Frog",
             "urlTemplate": "file:///frog",
+            "description": "Command-line interface to the full NLP suite",
             "interfaceType": "CLI"
         },
         {
             "@type": "EntryPoint",
             "urlTemplate": "file:///mbma",
+            "description": "Memory-based Morphological Analysi (standalone)",
             "interfaceType": "CLI"
         },
         {
             "@type": "EntryPoint",
             "urlTemplate": "file:///mblem",
+            "description": "Memory-based Lemmatiser (standalone)",
             "interfaceType": "CLI"
         },
         {
             "@type": "EntryPoint",
             "urlTemplate": "file:///ner",
+            "description": "Named Entity Recogniser (standalone)",
             "interfaceType": "CLI"
         }
     ]
