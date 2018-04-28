@@ -1,7 +1,9 @@
 {
     "@context": [
         "https://doi.org/10.5063/schema/codemeta-2.0",
-        "http://schema.org"
+        "http://schema.org",
+        "entryPoints": { "@reverse": "schema:actionApplication" },
+        "interfaceType": { "@id": "codemeta:interfaceType" }
     ],
     "@type": "SoftwareSourceCode",
     "identifier": "frog",
@@ -155,5 +157,27 @@
 			"url": "http://ilk.uvt.nl/downloads/pub/papers/tadpole-final.pdf"
 		}
 	],
-	"dateCreated": "2011-03-27"
+	"dateCreated": "2011-03-27",
+    "entryPoints": [
+        {
+            "@type": "EntryPoint",
+            "urlTemplate": "file:///frog",
+            "interfaceType": "CLI"
+        },
+        {
+            "@type": "EntryPoint",
+            "urlTemplate": "file:///mbma",
+            "interfaceType": "CLI"
+        },
+        {
+            "@type": "EntryPoint",
+            "urlTemplate": "file:///mblem",
+            "interfaceType": "CLI"
+        },
+        {
+            "@type": "EntryPoint",
+            "urlTemplate": "file:///ner",
+            "interfaceType": "CLI"
+        }
+    ]
 }
