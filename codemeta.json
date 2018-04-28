@@ -163,25 +163,28 @@
     "entryPoints": [
         {
             "@type": "EntryPoint",
-            "name": "Frog",
+            "name": "frog",
             "urlTemplate": "file:///frog",
             "description": "Command-line interface to the full NLP suite",
             "interfaceType": "CLI"
         },
         {
             "@type": "EntryPoint",
+            "name": "mbma",
             "urlTemplate": "file:///mbma",
-            "description": "Memory-based Morphological Analysi (standalone)",
+            "description": "Memory-based Morphological Analysis (standalone)",
             "interfaceType": "CLI"
         },
         {
             "@type": "EntryPoint",
+            "name": "mblem",
             "urlTemplate": "file:///mblem",
             "description": "Memory-based Lemmatiser (standalone)",
             "interfaceType": "CLI"
         },
         {
             "@type": "EntryPoint",
+            "name": "ner",
             "urlTemplate": "file:///ner",
             "description": "Named Entity Recogniser (standalone)",
             "interfaceType": "CLI"
