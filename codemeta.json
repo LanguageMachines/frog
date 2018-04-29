@@ -14,35 +14,36 @@
     "description": "Frog is an integration of memory-based natural language processing (NLP) modules developed for Dutch. All NLP modules are based on Timbl, the Tilburg memory-based learning software package.",
     "license": "https://spdx.org/licenses/GPL-3.0",
 	"url": "https://languagemachines.github.io/frog",
+    "producer": {
+        "@id": "https://www.ru.nl/clst",
+        "@type": "Organization",
+        "name": "Centre for Language and Speech Technology",
+        "url": "https://www.ru.nl/clst",
+        "parentOrganization": {
+            "@id": "https://www.ru.nl/cls",
+            "@type": "Organization",
+            "name": "Centre for Language Studies",
+            "url": "https://www.ru.nl/cls",
+            "parentOrganization": {
+                "@id": "https://www.ru.nl",
+                "name": "Radboud University",
+                "@type": "Organization",
+                "url": "https://www.ru.nl",
+                "location": {
+                    "@type": "Place",
+                    "name": "Nijmegen"
+                }
+            }
+
+        }
+    },
     "author": [
 		{
 			"@type": "Person",
 			"givenName": "Ko",
 			"familyName": "van der Sloot",
 			"email": "ko.vandersloot@let.ru.nl",
-			"affiliation": {
-				"@id": "https://www.ru.nl/clst",
-				"@type": "Organization",
-				"name": "Centre for Language and Speech Technology",
-				"url": "https://www.ru.nl/clst",
-				"parentOrganization": {
-					"@id": "https://www.ru.nl/cls",
-					"@type": "Organization",
-					"name": "Centre for Language Studies",
-					"url": "https://www.ru.nl/cls",
-					"parentOrganization": {
-						"@id": "https://www.ru.nl",
-						"name": "Radboud University",
-						"@type": "Organization",
-						"url": "https://www.ru.nl",
-						"location": {
-							"@type": "Place",
-							"name": "Nijmegen"
-						}
-					}
-
-				}
-			}
+			"affiliation": { "@id": "https://www.ru.nl/clst" }
 		},
 		{
 			"@id": "https://orcid.org/0000-0003-2493-656X",
