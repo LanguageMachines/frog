@@ -138,7 +138,7 @@
 			"pageEnd": 114,
 			"isPartOf": {
 				"@type": "PublicationIssue",
-				"datePublised": "2016",
+				"datePublished": "2016",
 				"name": "CLST Technical Report",
 				"issue": "16-02",
 				"location": "Nijmegen, the Netherlands"
@@ -153,7 +153,7 @@
 			"pageEnd": 114,
 			"isPartOf": {
 				"@type": "PublicationIssue",
-				"datePublised": "2007",
+				"datePublished": "2007",
 				"name": "Selected Papers of the 17th Computational Linguistics in the Netherlands Meeting",
 				"location": "Leuven, Belgium"
 			},
