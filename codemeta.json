@@ -132,7 +132,7 @@
     "referencePublication": [
 		{
 			"@type": "TechArticle",
-			"name": "An efficient memory-based morphosyntactic tagger and parser for Dutch",
+			"name": "Frog: A Natural Language Processing Suite for Dutch",
 			"author": [ "Iris Hendrickx", "Antal van den Bosch", "Maarten van Gompel", "Ko van der Sloot", "Walter Daelemans" ],
 			"pageStart": "99",
 			"pageEnd": 114,
