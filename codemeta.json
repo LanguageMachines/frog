@@ -51,7 +51,7 @@
 			"givenName": "Antal",
 			"familyName": "van den Bosch",
 			"email": "antal.vandenbosch@let.ru.nl",
-			"affiliation": { "@id": "https://cls.ru.nl" }
+			"affiliation": { "@id": "https://www.ru.nl/cls" }
 		},
 		{
 			"@id": "https://orcid.org/0000-0002-1046-0006",
