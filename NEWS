@@ -1,3 +1,16 @@
+0.15 - 2018-05-16
+[Ko vd Sloot]
+* ucto_tokenizer_mod: removed call of (useless) ucto:setSentenceDetection(true)
+* fix to close the server when a socket fails
+* when frogging a file, and the docID is NOT specified, use the filename as
+  the docID (filtering out non-NCName characters)
+* fix building the documentation from TeX files
+* a lot of small code improvements
+
+[Maarten van Gompel]
+* added codemeta.json
+* Fixed python-frog example in documentation (closes #48)
+
 0.14 - 2018-02-19
 [Ko vd Sloot]
 * use TiCC::UniFilter now
