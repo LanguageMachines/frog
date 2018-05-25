@@ -55,6 +55,7 @@ TiCC::LogStream *theErrLog = &my_default_log;  // fill the externals
 vector<string> fileNames;
 bool useTagger = true;
 bool useTokenizer = true;
+string output_name;
 
 TiCC::Configuration configuration;
 static string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/nld/";
@@ -112,6 +113,15 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     configuration.setatt( "debug", value, "mblem" );
   };
 
+  if ( Opts.extract( 'o', value ) ){
+    ofstream os( value );
+    if ( !os ){
+      cerr << "output stream " << value << " is not writeable" << endl;
+      return false;
+    }
+    output_name = value;
+  }
+
   if ( Opts.extract( 't', value ) ){
     ifstream is( value );
     if ( !is ){
@@ -152,7 +162,7 @@ bool init(){
   return true;
 }
 
-void Test( istream& in ){
+void Test( istream& in, ostream& os ){
   string line;
   while ( getline( in, line ) ){
     vector<string> sentences;
@@ -175,7 +185,7 @@ void Test( istream& in ){
 	    line += p.first + "[" + p.second + "]/";
 	  }
 	  line.erase(line.length()-1);
-	  cout << line << endl;
+	  os << line << endl;
 	}
       }
       else {
@@ -189,12 +199,12 @@ void Test( istream& in ){
 	    line += p.first + "[" + p.second + "]/";
 	  }
 	  line.erase(line.length()-1);
-	  cout << line << endl;
+	  os << line << endl;
 	}
       }
-      cout << "<utt>" << endl << endl;
+      os << "<utt>" << endl << endl;
     }
-    cout << endl;
+    os << endl;
   }
   return;
 }
@@ -207,7 +217,7 @@ int main(int argc, char *argv[]) {
        << "Radboud University" << endl
        << "ILK   - Induction of Linguistic Knowledge Research Group,"
        << "Tilburg University" << endl;
-  TiCC::CL_Options Opts("c:t:hVd:", "version,notagger,notokenizer");
+  TiCC::CL_Options Opts("c:t:hVd:o:", "version,notagger,notokenizer");
   try {
     Opts.init(argc, argv);
   }
@@ -217,20 +227,31 @@ int main(int argc, char *argv[]) {
   }
   cerr << "based on [" << Timbl::VersionName() << "]" << endl;
   cerr << "configdir: " << configDir << endl;
+
   if ( parse_args(Opts) ){
     if (  !init() ){
       cerr << "terminated." << endl;
       return EXIT_FAILURE;
     }
+    ostream *os;
+    if ( !output_name.empty() ){
+      os = new ofstream( output_name );
+    }
+    else {
+      os = &cout;
+    }
     for ( const auto& TestFileName : fileNames ){
       ifstream in(TestFileName);
       if ( in.good() ){
-	Test( in );
+	Test( in, *os );
       }
       else {
 	cerr << "unable to open: " << TestFileName << endl;
 	continue;
       }
+    }
+    if ( !output_name.empty() ){
+      //      delete os;
     }
   }
   else {
