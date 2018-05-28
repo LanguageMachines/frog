@@ -253,7 +253,7 @@ int main(int argc, char *argv[]) {
 	continue;
       }
     }
-    if ( !output_name.empty() ){
+    if ( os != &cout ){
       delete os;
     }
   }
