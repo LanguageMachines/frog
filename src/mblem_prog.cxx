@@ -185,7 +185,8 @@ void Test( istream& in, ostream& os ){
 	    line += p.first + "[" + p.second + "]/";
 	  }
 	  line.erase(line.length()-1);
-	  os << line << endl;
+	  line += "\n";
+	  os << line;
 	}
       }
       else {
@@ -199,13 +200,15 @@ void Test( istream& in, ostream& os ){
 	    line += p.first + "[" + p.second + "]/";
 	  }
 	  line.erase(line.length()-1);
-	  os << line << endl;
+	  line += "\n";
+	  os << line;
 	}
       }
-      os << "<utt>" << endl << endl;
+      os << "<utt>\n\n";
     }
-    os << endl;
+    os << "\n";
   }
+  os.flush();
   return;
 }
 
@@ -251,7 +254,7 @@ int main(int argc, char *argv[]) {
       }
     }
     if ( !output_name.empty() ){
-      //      delete os;
+      delete os;
     }
   }
   else {
