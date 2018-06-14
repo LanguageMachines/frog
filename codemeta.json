@@ -2,9 +2,12 @@
     "@context": [
         "https://doi.org/10.5063/schema/codemeta-2.0",
         "http://schema.org",
+        "https://github.com/CLARIAH/tool-metadata",
         {
             "entryPoints": { "@reverse": "schema:actionApplication" },
-            "interfaceType": { "@id": "codemeta:interfaceType" }
+            "interfaceType": { "@id": "codemeta:interfaceType" },
+            "inputLanguage": { "@id": "codemeta:inputLanguage" },
+            "inputFormat": { "@id": "codemeta:inputFormat" }
         }
     ],
     "@type": "SoftwareSourceCode",
@@ -190,5 +193,17 @@
             "description": "Named Entity Recogniser (standalone)",
             "interfaceType": "CLI"
         }
-    ]
+    ],
+    "inputFormat": [ "text/plain", "application/folia+xml" ],
+    "inputLanguage": {
+        "@type": "Language",
+        "name": "Dutch",
+        "alternateName": "nld",
+        "sameAs": "http://www.lexvo.org/data/iso639-3/nld"
+    },
+    "outputFormat": [ "application/folia+xml" ],
+    "researchDomain": "Linguistics",
+    "linguisticsSubject": [ "general linguistics", "syntax" ],
+    "toolTask": [ "lemmatisation", "morphological analysis", "named entity recognition", "part of speech tagging", "tokenisation", "dependency parsing" ],
+    "researchPhase": "Enriching Data"
 }
