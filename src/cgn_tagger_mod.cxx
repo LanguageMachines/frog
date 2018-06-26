@@ -39,6 +39,7 @@ using namespace Tagger;
 
 void CGNTagger::fillSubSetTable(){
   // should become a config file!
+  // [proycon] Should ideally be automatically derived from the folia set definition
   cgnSubSets.insert( make_pair("soort", "ntype" ));
   cgnSubSets.insert( make_pair("eigen", "ntype" ));
 
