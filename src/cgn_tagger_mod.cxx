@@ -38,7 +38,7 @@ using namespace Tagger;
 #define LOG *TiCC::Log(tag_log)
 
 
-static string subset_file = "subsets.cgn";
+static string subsets_file = "subsets.cgn";
 static string constraints_file = "constraints.cgn";
 
 bool CGNTagger::fillSubSetTable( const string& sub_file,
@@ -48,11 +48,7 @@ bool CGNTagger::fillSubSetTable( const string& sub_file,
     LOG << "unable to open subsets file: " << sub_file << endl;
     return false;
   }
-  ifstream cis( const_file );
-  if ( !cis ){
-    LOG << "unable to open constraints file: " << const_file << endl;
-    return false;
-  }
+  LOG << "reading subsets from " << sub_file << endl;
   string line;
   while ( getline( sis, line ) ){
     if ( line.empty() || line[0] == '#' )
@@ -68,18 +64,26 @@ bool CGNTagger::fillSubSetTable( const string& sub_file,
       cgnSubSets.insert( make_pair( TiCC::trim(val), at ) );
     }
   }
-  while ( getline( cis, line ) ){
-    if ( line.empty() || line[0] == '#' )
-      continue;
-    vector<string> att_val = TiCC::split_at( line, "=", 2 );
-    if ( att_val.size() != 2 ){
-      LOG << "invalid line in:'" << sub_file << "' : " << line << endl;
+  if ( !const_file.empty() ){
+    ifstream cis( const_file );
+    if ( !cis ){
+      LOG << "unable to open constraints file: " << const_file << endl;
       return false;
     }
-    string at = TiCC::trim(att_val[0]);
-    vector<string> vals = TiCC::split_at( att_val[1], "," );
-    for ( const auto& val : vals ){
-      cgnConstraints.insert( make_pair( at, TiCC::trim(val) ) );
+    LOG << "reading constraints from " << const_file << endl;
+    while ( getline( cis, line ) ){
+      if ( line.empty() || line[0] == '#' )
+	continue;
+      vector<string> att_val = TiCC::split_at( line, "=", 2 );
+      if ( att_val.size() != 2 ){
+	LOG << "invalid line in:'" << sub_file << "' : " << line << endl;
+	return false;
+      }
+      string at = TiCC::trim(att_val[0]);
+      vector<string> vals = TiCC::split_at( att_val[1], "," );
+      for ( const auto& val : vals ){
+	cgnConstraints.insert( make_pair( at, TiCC::trim(val) ) );
+      }
     }
   }
   return true;
@@ -92,18 +96,32 @@ bool CGNTagger::init( const TiCC::Configuration& config ){
   if ( !BaseTagger::init( config ) ){
     return false;
   }
-  string val = config.lookUp( "subset_file", "tagger" );
+  string val = config.lookUp( "subsets_file", "tagger" );
   if ( !val.empty() ){
-    subset_file = val;
+    subsets_file = val;
   }
-  subset_file = prefix( config.configDir(), subset_file );
+  if ( subsets_file != "none" ){
+    subsets_file = prefix( config.configDir(), subsets_file );
+  }
   val = config.lookUp( "constraints_file", "tagger" );
   if ( !val.empty() ){
     constraints_file = val;
   }
-  constraints_file = prefix( config.configDir(), constraints_file );
-  if ( !fillSubSetTable( subset_file, constraints_file ) ){
+  if ( constraints_file != "none" && subsets_file == "none" ){
+    LOG << "ERROR: when using a constraints file, you NEED a subsets file"
+	<< endl;
     return false;
+  }
+  if ( constraints_file == "none" ){
+    constraints_file.clear();
+  }
+  else {
+    constraints_file = prefix( config.configDir(), constraints_file );
+  }
+  if ( subsets_file != "none" ){
+    if ( !fillSubSetTable( subsets_file, constraints_file ) ){
+      return false;
+    }
   }
   if ( debug ){
     LOG << "DONE Init CGN Tagger." << endl;
