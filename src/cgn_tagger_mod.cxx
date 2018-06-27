@@ -37,145 +37,78 @@ using namespace Tagger;
 
 #define LOG *TiCC::Log(tag_log)
 
-void CGNTagger::fillSubSetTable(){
-  // should become a config file!
-  // [proycon] Should ideally be automatically derived from the folia set definition
-  cgnSubSets.insert( make_pair("soort", "ntype" ));
-  cgnSubSets.insert( make_pair("eigen", "ntype" ));
 
-  cgnSubSets.insert( make_pair("ev", "getal" ));
-  cgnSubSets.insert( make_pair("mv", "getal" ));
-  cgnSubSets.insert( make_pair("getal", "getal" ));
+static string subset_file = "subsets.cgn";
+static string constraints_file = "constraints.cgn";
 
-  cgnSubSets.insert( make_pair("zijd", "genus" ));
-  cgnSubSets.insert( make_pair("onz", "genus" ));
-  cgnSubSets.insert( make_pair("masc", "genus" ));
-  cgnSubSets.insert( make_pair("fem", "genus" ));
-  cgnSubSets.insert( make_pair("genus", "genus" ) );
-
-  cgnSubSets.insert( make_pair("stan", "naamval" ));
-  cgnSubSets.insert( make_pair("gen", "naamval" ));
-  cgnSubSets.insert( make_pair("dat", "naamval" ));
-  cgnSubSets.insert( make_pair("nomin", "naamval" ));
-  cgnSubSets.insert( make_pair("obl", "naamval" ));
-  cgnSubSets.insert( make_pair("bijz", "naamval" ));
-
-  cgnSubSets.insert( make_pair("afgebr", "spectype" ));
-  cgnSubSets.insert( make_pair("afk", "spectype" ));
-  cgnSubSets.insert( make_pair("deeleigen", "spectype" ));
-  cgnSubSets.insert( make_pair("symb", "spectype" ));
-  cgnSubSets.insert( make_pair("vreemd", "spectype" ));
-  cgnSubSets.insert( make_pair("enof", "spectype" ));
-  cgnSubSets.insert( make_pair("meta", "spectype" ));
-  cgnSubSets.insert( make_pair("achter", "spectype" ));
-  cgnSubSets.insert( make_pair("comment", "spectype" ));
-  cgnSubSets.insert( make_pair("onverst", "spectype" ));
-
-  cgnSubSets.insert( make_pair("neven", "conjtype" ));
-  cgnSubSets.insert( make_pair("onder", "conjtype" ));
-
-  cgnSubSets.insert( make_pair("init", "vztype" ));
-  cgnSubSets.insert( make_pair("versm", "vztype" ));
-  cgnSubSets.insert( make_pair("fin", "vztype" ));
-
-  cgnSubSets.insert( make_pair("agr", "npagr" ));
-  cgnSubSets.insert( make_pair("evon", "npagr" ));
-  cgnSubSets.insert( make_pair("rest", "npagr" ));
-  cgnSubSets.insert( make_pair("evz", "npagr" ));
-  cgnSubSets.insert( make_pair( "agr3", "npagr" ));
-  cgnSubSets.insert( make_pair( "evmo", "npagr" ));
-  cgnSubSets.insert( make_pair( "rest3", "npagr" ));
-  cgnSubSets.insert( make_pair("evf", "npagr" ));
-
-  cgnSubSets.insert( make_pair("bep", "lwtype" ));
-  cgnSubSets.insert( make_pair("onbep", "lwtype" ));
-
-  cgnSubSets.insert( make_pair("pers", "vwtype" ));
-  cgnSubSets.insert( make_pair("pr", "vwtype" ));
-  cgnSubSets.insert( make_pair("refl", "vwtype" ));
-  cgnSubSets.insert( make_pair("recip", "vwtype" ));
-  cgnSubSets.insert( make_pair("bez", "vwtype" ));
-  cgnSubSets.insert( make_pair("vb", "vwtype" ));
-  cgnSubSets.insert( make_pair("vrag", "vwtype" ));
-  cgnSubSets.insert( make_pair("betr", "vwtype" ));
-  cgnSubSets.insert( make_pair("excl", "vwtype" ));
-  cgnSubSets.insert( make_pair("aanw", "vwtype" ));
-  cgnSubSets.insert( make_pair("onbep", "vwtype" ));
-
-  cgnSubSets.insert( make_pair("adv-pron", "pdtype" ));
-  cgnSubSets.insert( make_pair("pron", "pdtype" ));
-  cgnSubSets.insert( make_pair("det", "pdtype" ));
-  cgnSubSets.insert( make_pair("grad", "pdtype" ));
-
-  cgnSubSets.insert( make_pair("vol", "status" ));
-  cgnSubSets.insert( make_pair("red", "status" ));
-  cgnSubSets.insert( make_pair("nadr", "status" ));
-
-  cgnSubSets.insert( make_pair("1", "persoon" ));
-  cgnSubSets.insert( make_pair("2", "persoon" ));
-  cgnSubSets.insert( make_pair("2v", "persoon" ));
-  cgnSubSets.insert( make_pair("2b", "persoon" ));
-  cgnSubSets.insert( make_pair("3", "persoon" ));
-  cgnSubSets.insert( make_pair("3p", "persoon" ));
-  cgnSubSets.insert( make_pair("3m", "persoon" ));
-  cgnSubSets.insert( make_pair("3v", "persoon" ));
-  cgnSubSets.insert( make_pair("3o", "persoon" ));
-  cgnSubSets.insert( make_pair("persoon", "persoon" ));
-
-  cgnSubSets.insert( make_pair("prenom", "positie" ));
-  cgnSubSets.insert( make_pair("postnom", "positie" ));
-  cgnSubSets.insert( make_pair("nom", "positie" ));
-  cgnSubSets.insert( make_pair("vrij", "positie" ));
-
-  cgnSubSets.insert( make_pair("zonder", "buiging" ));
-  cgnSubSets.insert( make_pair("met-e", "buiging" ));
-  cgnSubSets.insert( make_pair("met-s", "buiging" ));
-
-  cgnSubSets.insert( make_pair("zonder-v", "getal-n" ));
-  cgnSubSets.insert( make_pair("mv-n", "getal-n" ));
-  cgnSubSets.insert( make_pair("zonder-n", "getal-n" ));
-
-  cgnSubSets.insert( make_pair("basis", "graad" ));
-  cgnSubSets.insert( make_pair("comp", "graad" ));
-  cgnSubSets.insert( make_pair("sup", "graad" ));
-  cgnSubSets.insert( make_pair("dim", "graad" ));
-
-  cgnSubSets.insert( make_pair("pv", "wvorm" ));
-  cgnSubSets.insert( make_pair("inf", "wvorm" ));
-  cgnSubSets.insert( make_pair("vd", "wvorm" ));
-  cgnSubSets.insert( make_pair("od", "wvorm" ));
-
-  cgnSubSets.insert( make_pair("tgw", "pvtijd" ));
-  cgnSubSets.insert( make_pair("verl", "pvtijd" ));
-  cgnSubSets.insert( make_pair("conj", "pvtijd" ));
-
-  cgnSubSets.insert( make_pair("ev", "pvagr" ));
-  cgnSubSets.insert( make_pair("mv", "pvagr" ));
-  cgnSubSets.insert( make_pair( "met-t", "pvagr" ));
-
-  cgnSubSets.insert( make_pair("hoofd", "numtype" ));
-  cgnSubSets.insert( make_pair("rang", "numtype" ));
-
-  cgnSubSets.insert( make_pair("dial", "dial" ));
-
-  cgnConstraints.insert( make_pair( "getal", "N" ) );
-  cgnConstraints.insert( make_pair( "getal", "VNW" ) );
-  cgnConstraints.insert( make_pair( "pvagr", "WW" ) );
+bool CGNTagger::fillSubSetTable( const string& sub_file,
+				 const string& const_file ){
+  ifstream sis( sub_file );
+  if ( !sis ){
+    LOG << "unable to open subsets file: " << sub_file << endl;
+    return false;
+  }
+  ifstream cis( const_file );
+  if ( !cis ){
+    LOG << "unable to open constraints file: " << const_file << endl;
+    return false;
+  }
+  string line;
+  while ( getline( sis, line ) ){
+    if ( line.empty() || line[0] == '#' )
+      continue;
+    vector<string> att_val = TiCC::split_at( line, "=", 2 );
+    if ( att_val.size() != 2 ){
+      LOG << "invalid line in:'" << sub_file << "' : " << line << endl;
+      return false;
+    }
+    string at = TiCC::trim(att_val[0]);
+    vector<string> vals = TiCC::split_at( att_val[1], "," );
+    for ( const auto& val : vals ){
+      cgnSubSets.insert( make_pair( TiCC::trim(val), at ) );
+    }
+  }
+  while ( getline( cis, line ) ){
+    if ( line.empty() || line[0] == '#' )
+      continue;
+    vector<string> att_val = TiCC::split_at( line, "=", 2 );
+    if ( att_val.size() != 2 ){
+      LOG << "invalid line in:'" << sub_file << "' : " << line << endl;
+      return false;
+    }
+    string at = TiCC::trim(att_val[0]);
+    vector<string> vals = TiCC::split_at( att_val[1], "," );
+    for ( const auto& val : vals ){
+      cgnConstraints.insert( make_pair( at, TiCC::trim(val) ) );
+    }
+  }
+  return true;
 }
-
 
 bool CGNTagger::init( const TiCC::Configuration& config ){
   if (  debug ){
     LOG << "INIT CGN Tagger." << endl;
   }
-  if ( BaseTagger::init( config ) ){
-    fillSubSetTable();
-    if ( debug ){
-      LOG << "DONE Init CGN Tagger." << endl;
-    }
-    return true;
+  if ( !BaseTagger::init( config ) ){
+    return false;
   }
-  return false;
+  string val = config.lookUp( "subset_file", "tagger" );
+  if ( !val.empty() ){
+    subset_file = val;
+  }
+  subset_file = prefix( config.configDir(), subset_file );
+  val = config.lookUp( "constraints_file", "tagger" );
+  if ( !val.empty() ){
+    constraints_file = val;
+  }
+  constraints_file = prefix( config.configDir(), constraints_file );
+  if ( !fillSubSetTable( subset_file, constraints_file ) ){
+    return false;
+  }
+  if ( debug ){
+    LOG << "DONE Init CGN Tagger." << endl;
+  }
+  return true;
 }
 
 void CGNTagger::addDeclaration( folia::Document& doc ) const {
