@@ -100,25 +100,25 @@ bool CGNTagger::init( const TiCC::Configuration& config ){
   if ( !val.empty() ){
     subsets_file = val;
   }
-  if ( subsets_file != "none" ){
+  if ( subsets_file != "ignore" ){
     subsets_file = prefix( config.configDir(), subsets_file );
   }
   val = config.lookUp( "constraints_file", "tagger" );
   if ( !val.empty() ){
     constraints_file = val;
   }
-  if ( constraints_file != "none" && subsets_file == "none" ){
+  if ( constraints_file != "ignore" && subsets_file == "ignore" ){
     LOG << "ERROR: when using a constraints file, you NEED a subsets file"
 	<< endl;
     return false;
   }
-  if ( constraints_file == "none" ){
+  if ( constraints_file == "ignore" ){
     constraints_file.clear();
   }
   else {
     constraints_file = prefix( config.configDir(), constraints_file );
   }
-  if ( subsets_file != "none" ){
+  if ( subsets_file != "ignore" ){
     if ( !fillSubSetTable( subsets_file, constraints_file ) ){
       return false;
     }
@@ -221,7 +221,8 @@ void CGNTagger::post_process( const vector<folia::Word *>& words ){
 	postag->confidence(1.0);
       }
     }
-    if ( parts.size() > 1 ){
+    if ( parts.size() > 1
+	 && !cgnSubSets.empty() ){
       vector<string> tagParts = TiCC::split_at( parts[1], "," );
       for ( auto const& part : tagParts ){
 	folia::KWargs args;
