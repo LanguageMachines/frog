@@ -67,7 +67,7 @@ Mbma::Mbma( TiCC::LogStream * logstream):
 // define the statics
 map<string,string> Mbma::TAGconv;
 string Mbma::mbma_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbma-nl";
-string Mbma::cgn_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
+string Mbma::pos_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
 string Mbma::clex_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-clex";
 
 Mbma::~Mbma() {
@@ -138,7 +138,7 @@ bool Mbma::init( const TiCC::Configuration& config ) {
 
   val = config.lookUp( "set", "tagger" );
   if ( !val.empty() ){
-    cgn_tagset = val;
+    pos_tagset = val;
   }
   val = config.lookUp( "clex_set", "mbma" );
   if ( !val.empty() ){
@@ -389,7 +389,7 @@ void Mbma::addBracketMorph( folia::Word *word,
     // unanalysed, so trust the TAGGER
 #pragma omp critical (foliaupdate)
     {
-      const auto pos = word->annotation<folia::PosAnnotation>( cgn_tagset );
+      const auto pos = word->annotation<folia::PosAnnotation>( pos_tagset );
       head = pos->feat("head");
     }
     if (debugFlag){
@@ -769,7 +769,7 @@ void Mbma::Classify( folia::Word* sword ){
 #pragma omp critical (foliaupdate)
   {
     uWord = sword->text( textclass );
-    pos = sword->annotation<folia::PosAnnotation>( cgn_tagset );
+    pos = sword->annotation<folia::PosAnnotation>( pos_tagset );
     head = pos->feat("head");
     string txtcls = sword->textclass();
     if ( txtcls == textclass ){

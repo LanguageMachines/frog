@@ -43,8 +43,7 @@ using TiCC::operator<<;
 
 #define LOG *TiCC::Log(tag_log)
 
-// should come from the config!
-const string cgn_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
+static string POS_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
 
 NERTagger::NERTagger( TiCC::LogStream *l ):
   BaseTagger( l, "NER" ),
@@ -72,6 +71,10 @@ bool NERTagger::init( const TiCC::Configuration& config ){
     if ( !read_overrides( val, config.configDir() ) ){
       return false;
     }
+  }
+  val = config.lookUp( "set", "tagger" );
+  if ( !val.empty() ){
+    POS_tagset = val;
   }
   return true;
 }
@@ -363,7 +366,7 @@ void NERTagger::Classify( const vector<folia::Word *>& swords ){
   if ( !swords.empty() ) {
     vector<string> words;
     vector<string> ptags;
-    extract_words_tags( swords, cgn_tagset, words, ptags );
+    extract_words_tags( swords, POS_tagset, words, ptags );
     vector<string> ktags = create_ner_list( words, known_ners );
     vector<string> override_tags = create_ner_list( words, override_ners );
     string text_block;

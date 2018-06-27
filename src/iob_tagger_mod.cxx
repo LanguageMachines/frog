@@ -39,10 +39,17 @@ using namespace Tagger;
 
 #define LOG *TiCC::Log(tag_log)
 
-const string cgn_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
+static string POS_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
 
 bool IOBTagger::init( const TiCC::Configuration& config ){
-  return BaseTagger::init( config );
+  if ( !BaseTagger::init( config ) ){
+    return false;
+  }
+  string val = config.lookUp( "set", "tagger" );
+  if ( !val.empty() ){
+    POS_tagset = val;
+  }
+  return true;
 }
 
 void IOBTagger::addChunk( folia::ChunkingLayer *chunks,
@@ -180,7 +187,7 @@ void IOBTagger::Classify( const vector<folia::Word *>& swords ){
   if ( !swords.empty() ) {
     vector<string> words;
     vector<string> ptags;
-    extract_words_tags( swords, cgn_tagset, words, ptags );
+    extract_words_tags( swords, POS_tagset, words, ptags );
     string text_block;
     string prev = "_";
     for ( size_t i=0; i < swords.size(); ++i ){

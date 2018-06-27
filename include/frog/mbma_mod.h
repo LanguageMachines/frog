@@ -69,7 +69,7 @@ class Mbma {
 			      const std::vector<std::string>& );
   static std::map<std::string,std::string> TAGconv;
   static std::string mbma_tagset;
-  static std::string cgn_tagset;
+  static std::string pos_tagset;
   static std::string clex_tagset;
  private:
   void cleanUp();
