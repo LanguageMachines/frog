@@ -44,7 +44,7 @@ class CGNTagger: public BaseTagger {
   void addTag( folia::Word *, const std::string&, double );
   void fillSubSetTable();
   bool fillSubSetTable( const std::string&, const std::string& );
-  std::string getSubSet( const std::string& , const std::string& );
+  std::string getSubSet( const std::string& , const std::string&, const std::string& );
   std::multimap<std::string,std::string> cgnSubSets;
   std::multimap<std::string,std::string> cgnConstraints;
 };

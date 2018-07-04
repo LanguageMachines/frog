@@ -136,10 +136,10 @@ void CGNTagger::addDeclaration( folia::Document& doc ) const {
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
-string CGNTagger::getSubSet( const string& val, const string& head ){
+string CGNTagger::getSubSet( const string& val, const string& head, const string& fullclass ){
   auto it = cgnSubSets.find( val );
   if ( it == cgnSubSets.end() ){
-    throw folia::ValueError( "unknown cgn subset for class: '" + val + "'" );
+    throw folia::ValueError( "unknown cgn subset for class: '" + val + "', full class is: '" + fullclass + "'" );
   }
   string result;
   while ( it != cgnSubSets.upper_bound(val) ){
@@ -161,7 +161,7 @@ string CGNTagger::getSubSet( const string& val, const string& head ){
     ++it;
   }
   throw folia::ValueError( "unable to find cgn subset for class: '" + val +
-			   "' within the constraints for '" + head + "'" );
+			   "' within the constraints for '" + head + "', full class is: '" + fullclass + "'" );
 }
 
 void CGNTagger::addTag( folia::Word *word,
@@ -227,7 +227,7 @@ void CGNTagger::post_process( const vector<folia::Word *>& words ){
       for ( auto const& part : tagParts ){
 	folia::KWargs args;
 	args["set"]    = tagset;
-	args["subset"] = getSubSet( part, head );
+	args["subset"] = getSubSet( part, head, cls );
 	args["class"]  = part;
 #pragma omp critical (foliaupdate)
 	{
