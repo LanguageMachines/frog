@@ -161,7 +161,7 @@ string CGNTagger::getSubSet( const string& val, const string& head ){
     ++it;
   }
   throw folia::ValueError( "unable to find cgn subset for class: '" + val +
-			   "' whithin the constraints for '" + head + "'" );
+			   "' within the constraints for '" + head + "'" );
 }
 
 void CGNTagger::addTag( folia::Word *word,
