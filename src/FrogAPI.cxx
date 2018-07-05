@@ -1379,6 +1379,7 @@ void FrogAPI::FrogDoc( folia::Document& doc,
 	}
 	continue;
       }
+      //      LOG << sentences[i]->text() << endl;
       bool showParse = TestSentence( sentences[i], timers );
       if ( options.doParse && !showParse ){
 	LOG << "WARNING!" << endl;
@@ -1497,12 +1498,12 @@ void FrogAPI::FrogFile( const string& infilename,
     tokenizer->tokenize( doc );
     timers.tokTimer.stop();
     FrogDoc( doc );
+    if ( !options.noStdOut ){
+      showResults( os, doc );
+    }
     if ( !xmlOutFile.empty() ){
       doc.save( xmlOutFile, options.doKanon );
       LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
-    }
-    if ( !options.noStdOut ){
-      showResults( os, doc );
     }
   }
   else {
@@ -1516,12 +1517,12 @@ void FrogAPI::FrogFile( const string& infilename,
     folia::Document *doc = tokenizer->tokenize( IN );
     timers.tokTimer.stop();
     FrogDoc( *doc );
+    if ( !options.noStdOut ){
+      showResults( os, *doc );
+    }
     if ( !xmlOutFile.empty() ){
       doc->save( xmlOutFile, options.doKanon );
       LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
-    }
-    if ( !options.noStdOut ){
-      showResults( os, *doc );
     }
     delete doc;
   }
