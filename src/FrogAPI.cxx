@@ -529,7 +529,7 @@ bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers){
 	{
 	  if ( options.doMorph ){
 	    timers.mbmaTimer.start();
-	    if (options.debugFlag){
+	    if (options.debugFlag > 1){
 	      LOG << "Calling mbma..." << endl;
 	    }
 	    try {
@@ -546,7 +546,7 @@ bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers){
 	{
 	  if ( options.doLemma ){
 	    timers.mblemTimer.start();
-	    if (options.debugFlag) {
+	    if (options.debugFlag > 1) {
 	      LOG << "Calling mblem..." << endl;
 	    }
 	    try {
@@ -570,7 +570,7 @@ bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers){
       {
 	if ( options.doNER ){
 	  timers.nerTimer.start();
-	  if (options.debugFlag) {
+	  if (options.debugFlag > 1) {
 	    LOG << "Calling NER..." << endl;
 	  }
 	  try {
@@ -642,7 +642,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
             // so this is wrong. Just bail out
             throw( runtime_error( "read garbage" ) );
         }
-        if ( options.debugFlag ){
+        if ( options.debugFlag > 5 ){
 	  LOG << "received data [" << result << "]" << endl;
 	}
 	folia::Document doc;
@@ -683,7 +683,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	    data += line + "\n";
 	  }
         }
-        if ( options.debugFlag ){
+        if ( options.debugFlag > 5 ){
 	  LOG << "Received: [" << data << "]" << endl;
 	}
         LOG << TiCC::Timer::now() << " Processing... " << endl;
@@ -703,7 +703,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	//	LOG << "Done Processing... " << endl;
       }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
-	if (options.debugFlag) {
+	if (options.debugFlag > 5 ) {
 	  LOG << "socket " << conn.getMessage() << endl;
 	}
 	throw( runtime_error( "write to client failed" ) );
@@ -867,11 +867,11 @@ folia::Dependency *FrogAPI::lookupDep( const folia::Word *word,
   catch (exception & e) {
     dbFlag = 0;
   }
-  if ( dbFlag ){
+  if ( dbFlag > 1){
     LOG << endl << "Dependency-lookup "<< word << " in " << dependencies << endl;
   }
   for ( const auto& dep : dependencies ){
-    if ( dbFlag ){
+    if ( dbFlag > 1) {
       LOG << "Dependency try: " << dep << endl;
     }
     try {
@@ -881,7 +881,7 @@ folia::Dependency *FrogAPI::lookupDep( const folia::Word *word,
 	vector<folia::Word*> wv = dv[0]->select<folia::Word>();
 	for ( const auto& w : wv ){
 	  if ( w == word ){
-	    if ( dbFlag ){
+	    if ( dbFlag > 1 ){
 	      LOG << "Dependency found word " << w << endl;
 	    }
 	    return dep;
@@ -909,12 +909,12 @@ string FrogAPI::lookupNEREntity( const vector<folia::Word *>& mwus,
     dbFlag = 0;
   }
   for ( const auto& mwu : mwus ){
-    if ( dbFlag ){
+    if ( dbFlag > 1 ){
       LOG << endl << "NER: lookup "<< mwu << " in " << entities << endl;
     }
     string result;
     for ( const auto& entity :entities ){
-      if ( dbFlag ){
+      if ( dbFlag > 1 ){
 	LOG << "NER: try: " << entity << endl;
       }
       try {
@@ -922,7 +922,7 @@ string FrogAPI::lookupNEREntity( const vector<folia::Word *>& mwus,
 	bool first = true;
 	for ( const auto& word : wv ){
 	  if ( word == mwu ){
-	    if (dbFlag){
+	    if (dbFlag > 1){
 	      LOG << "NER found word " << word << endl;
 	    }
 	    if ( first ){
@@ -970,12 +970,12 @@ string FrogAPI::lookupIOBChunk( const vector<folia::Word *>& mwus,
     dbFlag = 0;
   }
   for ( const auto& mwu : mwus ){
-    if ( dbFlag ){
+    if ( dbFlag > 1 ){
       LOG << "IOB lookup "<< mwu << " in " << chunks << endl;
     }
     string result;
     for ( const auto& chunk : chunks ){
-      if ( dbFlag ){
+      if ( dbFlag > 1){
 	LOG << "IOB try: " << chunk << endl;
       }
       try {
@@ -983,7 +983,7 @@ string FrogAPI::lookupIOBChunk( const vector<folia::Word *>& mwus,
 	bool first = true;
 	for ( const auto& word : wv ){
 	  if ( word == mwu ){
-	    if (dbFlag){
+	    if (dbFlag > 1){
 	      LOG << "IOB found word " << word << endl;
 	    }
 	    if ( first ) {
@@ -1000,7 +1000,7 @@ string FrogAPI::lookupIOBChunk( const vector<folia::Word *>& mwus,
 	}
       }
       catch ( exception& e ){
-	if  (dbFlag > 0) {
+	if  (dbFlag > 0 ) {
 	  LOG << "get Chunks results failed: "
 			  << e.what() << endl;
 	}
@@ -1126,7 +1126,7 @@ void FrogAPI::displayMWU( ostream& os,
       conf *= postag->confidence();
     }
     catch ( exception& e ){
-      if  (options.debugFlag > 0){
+      if ( options.debugFlag > 2 ){
 	LOG << "get Postag results failed: "
 			<< e.what() << endl;
       }
@@ -1139,7 +1139,7 @@ void FrogAPI::displayMWU( ostream& os,
 	}
       }
       catch ( exception& e ){
-	if  (options.debugFlag > 0){
+	if ( options.debugFlag > 2 ){
 	  LOG << "get Lemma results failed: "
 			  << e.what() << endl;
 	}
@@ -1160,7 +1160,7 @@ void FrogAPI::displayMWU( ostream& os,
 	}
       }
       catch ( exception& e ){
-	if  (options.debugFlag > 0){
+	if  (options.debugFlag > 2){
 	  LOG << "get Morph results failed: "
 			  << e.what() << endl;
 	}
@@ -1185,7 +1185,7 @@ void FrogAPI::displayMWU( ostream& os,
 	}
       }
       catch ( exception& e ){
-	if  (options.debugFlag > 0){
+	if  (options.debugFlag > 2){
 	  LOG << "get Morph results failed: "
 			  << e.what() << endl;
 	}
@@ -1388,7 +1388,9 @@ void FrogAPI::FrogDoc( folia::Document& doc,
 	    << options.maxParserTokens << " option." << endl;
       }
       else {
-	LOG << TiCC::Timer::now() << " done with sentence[" << i+1 << "]" << endl;
+	if  (options.debugFlag > 0){
+	  LOG << TiCC::Timer::now() << " done with sentence[" << i+1 << "]" << endl;
+	}
       }
     }
   }

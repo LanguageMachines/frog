@@ -323,7 +323,7 @@ string Rule::morpheme_string( bool structured ) const {
 }
 
 bool Rule::performEdits(){
-  if ( debugFlag ){
+  if ( debugFlag > 1 ){
     LOG << "FOUND rule " << this << endl;
   }
   RulePart *last = 0;
@@ -332,7 +332,7 @@ bool Rule::performEdits(){
     if ( last == 0 ){
       last = cur;
     }
-    if ( debugFlag){
+    if ( debugFlag > 1){
       LOG << "edit::act=" << cur << endl;
     }
     bool is_replace = false;
@@ -378,7 +378,7 @@ bool Rule::performEdits(){
       // encountering real POS tag
       // start a new morpheme, BUT: inserts are appended to the previous one
       // except in case of Replace edits
-      if ( debugFlag ){
+      if ( debugFlag >1 ){
 	LOG << "FOUND a (basic) tag " << cur->ResultClass << endl;
       }
       if ( !is_replace ){
@@ -399,14 +399,14 @@ bool Rule::performEdits(){
     }
     if ( !inserted || !cur->hide.isEmpty() ){
       // insert the deletestring :-)
-      if ( debugFlag ){
+      if ( debugFlag > 1){
 	LOG << "add to morpheme: '" << cur->ins
 			  << cur->hide<< "'" << endl;
       }
       last->morpheme += cur->ins + cur->hide;
     }
     else if ( !part.isEmpty() ){
-      if ( debugFlag ){
+      if ( debugFlag > 1){
 	LOG << "a part to add: " << part << endl;
       }
       last->morpheme += part;
@@ -414,7 +414,7 @@ bool Rule::performEdits(){
     }
     last->morpheme += cur->uchar; // might be empty because of deletion
   }
-  if ( debugFlag ){
+  if ( debugFlag > 1 ){
     LOG << "edited rule " << this << endl;
   }
   return true;
@@ -429,7 +429,7 @@ void Rule::resolve_inflections(){
     string inf = rules[i].inflect;
     if ( !inf.empty() && !rules[i].is_participle ){
       // it is an inflection tag
-      if (debugFlag){
+      if (debugFlag > 1){
 	LOG << " inflection: >" << inf << "<" << endl;
       }
       // given the specific selections of certain inflections,
@@ -438,7 +438,7 @@ void Rule::resolve_inflections(){
       for ( size_t i=0; i < inf.size(); ++i ){
 	new_tag = CLEX::select_tag( inf[i] );
 	if ( new_tag != CLEX::UNASS ){
-	  if ( debugFlag  ){
+	  if ( debugFlag > 1 ){
 	    LOG << inf[i] << " selects " << new_tag << endl;
 	  }
 	  break;
@@ -459,12 +459,12 @@ void Rule::resolve_inflections(){
 	    // now see if we can replace this class for a better one
 	    if ( rules[k].ResultClass == CLEX::PN &&
 		 new_tag == CLEX::N ){
-	      if ( debugFlag  ){
+	      if ( debugFlag > 1 ){
 		LOG << "Don't replace PN by N" << endl;
 	      }
 	    }
 	    else {
-	      if ( debugFlag  ){
+	      if ( debugFlag > 1 ){
 		LOG << " replace " << rules[k].ResultClass
 				  << " by " << new_tag << endl;
 	      }

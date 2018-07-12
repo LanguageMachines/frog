@@ -106,8 +106,11 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   switch ( debug ){
   case 0:
   case 1:
+    tag_log->setlevel(LogSilent);
     break;
   case 2:
+    tag_log->setlevel(LogNormal);
+    break;
   case 3:
   case 4:
     tag_log->setlevel(LogDebug);
@@ -171,7 +174,7 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   else {
     textclass = "current";
   }
-  if ( debug ){
+  if ( debug > 1 ){
     LOG << _label << "-taggger textclass= " << textclass << endl;
   }
   string init = "-s " + settings + " -vcf";
@@ -243,7 +246,7 @@ void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
 void BaseTagger::Classify( const vector<folia::Word*>& swords ){
   if ( !swords.empty() ) {
     string sentence = extract_sentence( swords, _words );
-    if (debug){
+    if (debug > 1){
       LOG << _label << "-tagger in: " << sentence << endl;
     }
     _tag_result = tagger->TagLine(sentence);
@@ -259,7 +262,7 @@ void BaseTagger::Classify( const vector<folia::Word*>& swords ){
       }
       throw runtime_error( _label + "-tagger is confused" );
     }
-    if ( debug ){
+    if ( debug > 1 ){
       LOG << _label + "-tagger out: " << endl;
       for ( size_t i=0; i < _tag_result.size(); ++i ){
 	LOG << "[" << i << "] : word=" << _tag_result[i].word()

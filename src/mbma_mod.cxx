@@ -308,22 +308,22 @@ Rule* Mbma::matchRule( const std::vector<std::string>& ana,
   Rule *rule = new Rule( ana, word, *mbmaLog, debugFlag );
   if ( rule->performEdits() ){
     rule->reduceZeroNodes();
-    if ( debugFlag ){
+    if ( debugFlag > 1 ){
       LOG << "after reduction: " << rule << endl;
     }
     rule->resolve_inflections();
-    if ( debugFlag ){
+    if ( debugFlag > 1 ){
       LOG << "after resolving: " << rule << endl;
     }
     rule->resolveBrackets( doDeepMorph );
     rule->getCleanInflect();
-    if ( debugFlag ){
+    if ( debugFlag > 1 ){
       LOG << "1 added Inflection: " << rule << endl;
     }
     return rule;
   }
   else {
-    if ( debugFlag ){
+    if ( debugFlag > 1 ){
       LOG << "rejected rule: " << rule << endl;
     }
     delete rule;
@@ -334,7 +334,7 @@ Rule* Mbma::matchRule( const std::vector<std::string>& ana,
 vector<Rule*> Mbma::execute( const icu::UnicodeString& word,
 			     const vector<string>& classes ){
   vector<vector<string> > allParts = generate_all_perms( classes );
-  if ( debugFlag ){
+  if ( debugFlag > 1 ){
     string out = "alternatives: word="
       + TiCC::UnicodeToUTF8(word) + ", classes=<";
     for ( const auto& cls : classes ){
@@ -377,7 +377,7 @@ void Mbma::addMorph( folia::Word *word,
 void Mbma::addBracketMorph( folia::Word *word,
 			    const string& wrd,
 			    const string& tag ) const {
-  if (debugFlag){
+  if (debugFlag > 1){
     LOG << "addBracketMorph(" << wrd << "," << tag << ")" << endl;
   }
   string celex_tag = tag;
@@ -392,7 +392,7 @@ void Mbma::addBracketMorph( folia::Word *word,
       const auto pos = word->annotation<folia::PosAnnotation>( pos_tagset );
       head = pos->feat("head");
     }
-    if (debugFlag){
+    if (debugFlag > 1){
       LOG << "head was X, tagger gives :" << head << endl;
     }
     const auto tagIt = TAGconv.find( head );
@@ -402,7 +402,7 @@ void Mbma::addBracketMorph( folia::Word *word,
     }
     celex_tag = tagIt->second;
     head = CLEX::get_tDescr(CLEX::toCLEX(tagIt->second));
-    if (debugFlag){
+    if (debugFlag > 1){
       LOG << "replaced X by: " << head << endl;
     }
   }
@@ -451,7 +451,7 @@ void Mbma::addBracketMorph( folia::Word *word,
 void Mbma::addBracketMorph( folia::Word *word,
 			    const string& orig_word,
 			    const BracketNest *brackets ) const {
-  if (debugFlag){
+  if (debugFlag > 1){
     LOG << "addBracketMorph(" << word << "," << orig_word << "," << brackets << ")" << endl;
   }
   folia::KWargs args;
@@ -504,7 +504,7 @@ bool mbmacmp( Rule *m1, Rule *m2 ){
 
 void Mbma::filterHeadTag( const string& head ){
   // first we select only the matching heads
-  if (debugFlag){
+  if (debugFlag > 1){
     LOG << "filter with head: " << head << endl;
     LOG << "filter: analysis is:" << endl;
     int i=0;
@@ -518,14 +518,14 @@ void Mbma::filterHeadTag( const string& head ){
     throw folia::ValueError( "unknown head feature '" + head + "'" );
   }
   string celex_tag = tagIt->second;
-  if (debugFlag){
+  if (debugFlag > 1){
     LOG << "#matches: CGN:" << head << " CELEX " << celex_tag << endl;
   }
   auto ait = analysis.begin();
   while ( ait != analysis.end() ){
     string mbma_tag = CLEX::toString((*ait)->tag);
     if ( celex_tag == mbma_tag ){
-      if (debugFlag){
+      if (debugFlag > 1){
 	LOG << "comparing " << celex_tag << " with "
 		      << mbma_tag << " (OK)" << endl;
       }
@@ -533,7 +533,7 @@ void Mbma::filterHeadTag( const string& head ){
       ++ait;
     }
     else if ( celex_tag == "N" && mbma_tag == "PN" ){
-      if (debugFlag){
+      if (debugFlag > 1){
 	LOG << "comparing " << celex_tag << " with "
 		      << mbma_tag << " (OK)" << endl;
       }
@@ -542,7 +542,7 @@ void Mbma::filterHeadTag( const string& head ){
     }
     else if ( ( celex_tag == "B" && mbma_tag == "A" )
 	      || ( celex_tag == "A" && mbma_tag == "B" ) ){
-      if (debugFlag){
+      if (debugFlag > 1){
 	LOG << "comparing " << celex_tag << " with "
 		      << mbma_tag << " (OK)" << endl;
       }
@@ -550,7 +550,7 @@ void Mbma::filterHeadTag( const string& head ){
       ++ait;
     }
     else if ( celex_tag == "A" && mbma_tag == "V" ){
-      if (debugFlag){
+      if (debugFlag > 1){
 	LOG << "comparing " << celex_tag << " with "
 		      << mbma_tag << " (OK)" << endl;
       }
@@ -558,7 +558,7 @@ void Mbma::filterHeadTag( const string& head ){
       ++ait;
     }
     else {
-      if (debugFlag){
+      if (debugFlag > 1){
 	LOG << "comparing " << celex_tag << " with "
 		      << mbma_tag << " (rejected)" << endl;
       }
@@ -566,7 +566,7 @@ void Mbma::filterHeadTag( const string& head ){
       ait = analysis.erase( ait );
     }
   }
-  if (debugFlag){
+  if (debugFlag > 1){
     LOG << "filter: analysis after head filter:" << endl;
     int i=0;
     for ( const auto& it : analysis ){
@@ -577,7 +577,7 @@ void Mbma::filterHeadTag( const string& head ){
 
 void Mbma::filterSubTags( const vector<string>& feats ){
   if ( analysis.size() < 1 ){
-    if (debugFlag ){
+    if (debugFlag > 1){
       LOG << "analysis is empty so skip next filter" << endl;
     }
     return;
@@ -597,25 +597,25 @@ void Mbma::filterSubTags( const vector<string>& feats ){
       bestMatches.insert(q);
       continue;
     }
-    if (debugFlag){
+    if (debugFlag>1){
       LOG << "matching " << inflection << " with " << feats << endl;
     }
     for ( const auto& feat : feats ){
       map<string,string>::const_iterator conv_tag_p = TAGconv.find( feat );
       if (conv_tag_p != TAGconv.end()) {
 	string c = conv_tag_p->second;
-	if (debugFlag){
+	if (debugFlag > 1){
 	  LOG << "found " << feat << " ==> " << c << endl;
 	}
 	if ( inflection.find( c ) != string::npos ){
-	  if (debugFlag){
+	  if (debugFlag >1){
 	    LOG << "it is in the inflection " << endl;
 	  }
 	  match_count++;
 	}
       }
     }
-    if (debugFlag){
+    if (debugFlag > 1 ){
       LOG << "score: " << match_count << " max was " << max_count << endl;
     }
     if (match_count >= max_count) {
@@ -629,7 +629,7 @@ void Mbma::filterSubTags( const vector<string>& feats ){
   //
   // now filter on confidence:
   //
-  if ( debugFlag ){
+  if ( debugFlag > 1){
     LOG << "filter: best matches before sort on confidence:" << endl;
     int i=0;
     for ( const auto& it : bestMatches ){
@@ -686,7 +686,7 @@ void Mbma::filterSubTags( const vector<string>& feats ){
       ++it;
     }
   }
-  if ( debugFlag ){
+  if ( debugFlag > 1){
     LOG << "filter: analysis before sort on length:" << endl;
     int i=0;
     for ( const auto& it : analysis ){
@@ -701,7 +701,7 @@ void Mbma::filterSubTags( const vector<string>& feats ){
   // Therefor we sort on (unicode) string length
   sort( analysis.begin(), analysis.end(), mbmacmp );
 
-  if ( debugFlag){
+  if ( debugFlag > 1){
     LOG << "filter: definitive analysis:" << endl;
     int i=0;
     for ( auto const& it : analysis ){
@@ -722,7 +722,7 @@ void Mbma::getFoLiAResult( folia::Word *fword,
 			   const icu::UnicodeString& uword ) const {
   if ( analysis.size() == 0 ){
     // fallback option: use the word and pretend it's a morpheme ;-)
-    if ( debugFlag ){
+    if ( debugFlag > 1){
       LOG << "no matches found, use the word instead: "
 		    << uword << endl;
     }
@@ -778,7 +778,7 @@ void Mbma::Classify( folia::Word* sword ){
       token_class = sword->cls();
     }
   }
-  if (debugFlag ){
+  if (debugFlag >1 ){
     LOG << "Classify " << uWord << "(" << pos << ") ["
 		  << token_class << "]" << endl;
   }
@@ -839,7 +839,7 @@ void Mbma::Classify( const icu::UnicodeString& word ){
   for ( auto const& inst : insts ) {
     string ans;
     MTree->Classify( inst, ans );
-    if ( debugFlag ){
+    if ( debugFlag > 1){
       LOG << "itt #" << i+1 << " " << insts[i] << " ==> " << ans
 		    << ", depth=" << MTree->matchDepth() << endl;
       ++i;
@@ -860,7 +860,7 @@ vector<string> Mbma::getResult() const {
     string tmp = it->morpheme_string( doDeepMorph );
     result.push_back( tmp );
   }
-  if ( debugFlag ){
+  if ( debugFlag > 1 ){
     LOG << "result of morph analyses: " << result << endl;
   }
   return result;
@@ -873,7 +873,7 @@ vector<pair<string,string>> Mbma::getResults( ) const {
     string cmp = toString( it->compound );
     result.push_back( make_pair(tmp,cmp) );
   }
-  if ( debugFlag ){
+  if ( debugFlag > 1 ){
     LOG << "result of morph analyses: ";
     for ( const auto& r : result ){
       LOG << " " << r.first << "/" << r.second << "," << endl;

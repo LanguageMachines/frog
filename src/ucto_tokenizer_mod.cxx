@@ -75,7 +75,9 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
   if ( !config.hasSection("tokenizer") ){
     tokenizer->setPassThru();
   }
-  tokenizer->setDebug( debug );
+  if ( debug > 1 ){
+    tokenizer->setDebug( debug );
+  }
   string languages = config.lookUp( "languages", "tokenizer" );
   vector<string> language_list;
   if ( !languages.empty() ){

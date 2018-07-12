@@ -206,7 +206,7 @@ static vector<string> serialize( const vector<set<string>>& stags ){
 vector<string> NERTagger::create_ner_list( const vector<string>& words,
 					   std::vector<std::unordered_map<std::string,std::set<std::string>>>& ners ){
   vector<set<string>> stags( words.size() );
-  if ( debug ){
+  if ( debug > 1 ){
     LOG << "search for known NER's" << endl;
   }
   for ( size_t j=0; j < words.size(); ++j ){
@@ -220,12 +220,12 @@ vector<string> NERTagger::create_ner_list( const vector<string>& words,
 	continue;
       }
       seq += words[j+i];
-      if ( debug ){
+      if ( debug > 1 ){
 	LOG << "sequence = '" << seq << "'" << endl;
       }
       auto const& tags = mp.find(seq);
       if ( tags != mp.end() ){
-	if ( debug ){
+	if ( debug > 1 ){
 	  LOG << "FOUND tags " << tags->first << "-" << tags->second << endl;
 	}
 	for ( size_t k = 0; k <= i; ++k ){
@@ -299,13 +299,13 @@ void NERTagger::addNERTags( const vector<folia::Word*>& words,
   vector<double> dstack;
   string curNER;
   for ( size_t i=0; i < tags.size(); ++i ){
-    if (debug){
+    if (debug > 1){
       LOG << "NER = " << tags[i] << endl;
     }
     vector<string> ner;
     if ( tags[i] == "O" ){
       if ( !stack.empty() ){
-	if (debug) {
+	if (debug > 1) {
 	  LOG << "O spit out " << curNER << endl;
 	  using TiCC::operator<<;
 	  LOG << "ners  " << stack << endl;
@@ -331,7 +331,7 @@ void NERTagger::addNERTags( const vector<folia::Word*>& words,
       // an I without preceding B is handled as a B
       // an I with a different TAG is also handled as a B
       if ( !stack.empty() ){
-	if ( debug ){
+	if ( debug > 1 ){
 	  LOG << "B spit out " << curNER << endl;
 	  using TiCC::operator<<;
 	  LOG << "spit out " << stack << endl;
@@ -346,7 +346,7 @@ void NERTagger::addNERTags( const vector<folia::Word*>& words,
     stack.push_back( words[i] );
   }
   if ( !stack.empty() ){
-    if ( debug ){
+    if ( debug > 1 ){
       LOG << "END spit out " << curNER << endl;
       using TiCC::operator<<;
       LOG << "spit out " << stack << endl;
@@ -395,11 +395,11 @@ void NERTagger::Classify( const vector<folia::Word *>& swords ){
 
       text_block += "\t??\n";
     }
-    if ( debug ){
+    if ( debug > 1 ){
       LOG << "TAGGING TEXT_BLOCK\n" << text_block << endl;
     }
     _tag_result = tagger->TagLine( text_block );
-    if ( debug ){
+    if ( debug > 1 ){
       LOG << "NER tagger out: " << endl;
       for ( size_t i=0; i < _tag_result.size(); ++i ){
 	LOG << "[" << i << "] : word=" << _tag_result[i].word()
