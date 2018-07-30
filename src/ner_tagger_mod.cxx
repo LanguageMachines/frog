@@ -243,21 +243,31 @@ void NERTagger::addEntity( folia::Sentence *sent,
 			   const vector<double>& confs,
 			   const string& NER ){
   folia::EntitiesLayer *el = 0;
+  if ( debug > 8 ){
+    LOG << "add NER " << NER << " to entities layer" << endl;
+  }
+
 #pragma omp critical (foliaupdate)
   {
     try {
       el = sent->annotation<folia::EntitiesLayer>(tagset);
+      if ( debug > 8 ){
+	LOG << "GOT existing layer " << el << endl;
+      }
     }
     catch(...){
       folia::KWargs args;
-      args["generate_id"] = sent->id();
+      string s_id = sent->id();
+      if ( !s_id.empty() ){
+	args["generate_id"] = s_id;
+      }
       args["set"] = tagset;
       el = new folia::EntitiesLayer( args, sent->doc() );
+      if ( debug > 8 ){
+	LOG << "CREATED layer " << el << endl;
+      }
       sent->append( el );
     }
-  }
-  if ( debug > 8 ){
-    LOG << "using layer " << el << endl;
   }
   double c = 0;
   for ( auto const& val : confs ){
