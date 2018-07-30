@@ -906,17 +906,23 @@ void appendResult( const vector<folia::Word *>& words,
   }
   folia::DependenciesLayer *dl = 0;
   folia::KWargs args;
-  args["generate_id"] = sent->id();
+  string s_id = sent->id();
+  if ( !s_id.empty() ){
+    args["generate_id"] = s_id;
+  }
   args["set"] = tagset;
 #pragma omp critical (foliaupdate)
   {
     dl = new folia::DependenciesLayer( args, sent->doc() );
     sent->append( dl );
   }
+  string dl_id = dl->id();
   for ( size_t i=0; i < nums.size(); ++i ){
     if ( nums[i] != 0 ){
       folia::KWargs args;
-      args["generate_id"] = dl->id();
+      if ( !dl_id.empty() ){
+	args["generate_id"] = dl_id;
+      }
       args["class"] = roles[i];
       args["set"] = tagset;
       if ( textclass != "current" ){

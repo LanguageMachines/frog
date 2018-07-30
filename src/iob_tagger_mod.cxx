@@ -64,9 +64,9 @@ void IOBTagger::addChunk( folia::ChunkingLayer *chunks,
   args["class"] = IOB;
   args["set"] = tagset;
   args["confidence"] = TiCC::toString(conf);
-  string parent_id = chunks->id();
-  if ( !parent_id.empty() ){
-    args["generate_id"] = chunks->id();
+  string c_id = chunks->id();
+  if ( !c_id.empty() ){
+    args["generate_id"] = c_id;
   }
   if ( textclass != "current" ){
     args["textclass"] = textclass;
@@ -109,7 +109,10 @@ void IOBTagger::addIOBTags( const vector<folia::Word*>& words,
     }
     catch(...){
       folia::KWargs args;
-      args["generate_id"] = sent->id();
+      string s_id = sent->id();
+      if ( !s_id.empty() ){
+	args["generate_id"] = s_id;
+      }
       args["set"] = tagset;
       el = new folia::ChunkingLayer( args, sent->doc() );
       sent->append( el );

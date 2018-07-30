@@ -278,9 +278,9 @@ void NERTagger::addEntity( folia::Sentence *sent,
   args["class"] = NER;
   args["confidence"] = TiCC::toString(c);
   args["set"] = tagset;
-  string parent_id = el->id();
-  if ( !parent_id.empty() ){
-    args["generate_id"] = el->id();
+  string el_id = el->id();
+  if ( !el_id.empty() ){
+    args["generate_id"] = el_id;
   }
   if ( textclass != "current" ){
     args["textclass"] = textclass;

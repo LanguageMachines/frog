@@ -73,7 +73,10 @@ folia::EntitiesLayer *mwuAna::addEntity( const string& tagset,
 #pragma omp critical (foliaupdate)
       {
 	folia::KWargs args;
-	args["generate_id"] = sent->id();
+	string s_id = sent->id();
+	if ( ! s_id.empty() ){
+	  args["generate_id"] = s_id;
+	}
 	args["set"] = tagset;
 	el = new folia::EntitiesLayer( args, sent->doc() );
 	sent->append( el );
@@ -81,7 +84,10 @@ folia::EntitiesLayer *mwuAna::addEntity( const string& tagset,
     }
     folia::KWargs args;
     args["set"] = tagset;
-    args["generate_id"] = el->id();
+    string el_id = el->id();
+    if ( ! el_id.empty() ){
+      args["generate_id"] = el_id;
+    }
     if ( textclass != "current" ){
       args["textclass"] = textclass;
     }
