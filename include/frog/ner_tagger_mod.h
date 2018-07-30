@@ -82,6 +82,10 @@ class NERTagger: public BaseTagger {
 					    std::vector<std::unordered_map<std::string,std::set<std::string>>>& );
   std::vector<std::unordered_map<std::string,std::set<std::string>>> known_ners;
   std::vector<std::unordered_map<std::string,std::set<std::string>>> override_ners;
+  void addEntity( folia::Sentence *sent,
+		  const std::vector<folia::Word*>& words,
+		  const std::vector<double>& confs,
+		  const std::string& NER );
   int max_ner_size;
 };
 

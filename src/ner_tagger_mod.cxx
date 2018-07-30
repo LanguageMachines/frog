@@ -238,12 +238,10 @@ vector<string> NERTagger::create_ner_list( const vector<string>& words,
   return serialize( stags );
 }
 
-static void addEntity( folia::Sentence *sent,
-		       const string& tagset,
-		       const vector<folia::Word*>& words,
-		       const vector<double>& confs,
-		       const string& NER,
-		       const string& textclass ){
+void NERTagger::addEntity( folia::Sentence *sent,
+			   const vector<folia::Word*>& words,
+			   const vector<double>& confs,
+			   const string& NER ){
   folia::EntitiesLayer *el = 0;
 #pragma omp critical (foliaupdate)
   {
@@ -257,6 +255,9 @@ static void addEntity( folia::Sentence *sent,
       el = new folia::EntitiesLayer( args, sent->doc() );
       sent->append( el );
     }
+  }
+  if ( debug > 8 ){
+    LOG << "using layer " << el << endl;
   }
   double c = 0;
   for ( auto const& val : confs ){
@@ -311,7 +312,7 @@ void NERTagger::addNERTags( const vector<folia::Word*>& words,
 	  LOG << "ners  " << stack << endl;
 	  LOG << "confs " << dstack << endl;
 	}
-	addEntity( sent, tagset, stack, dstack, curNER, textclass );
+	addEntity( sent, stack, dstack, curNER );
 	dstack.clear();
 	stack.clear();
       }
@@ -336,7 +337,7 @@ void NERTagger::addNERTags( const vector<folia::Word*>& words,
 	  using TiCC::operator<<;
 	  LOG << "spit out " << stack << endl;
 	}
-	addEntity( sent, tagset, stack, dstack, curNER, textclass );
+	addEntity( sent, stack, dstack, curNER );
 	dstack.clear();
 	stack.clear();
       }
@@ -351,7 +352,7 @@ void NERTagger::addNERTags( const vector<folia::Word*>& words,
       using TiCC::operator<<;
       LOG << "spit out " << stack << endl;
     }
-    addEntity( sent, tagset, stack, dstack, curNER, textclass );
+    addEntity( sent, stack, dstack, curNER );
   }
 }
 
