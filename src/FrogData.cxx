@@ -29,27 +29,13 @@
 
 */
 
-#ifndef CGN_TAGGER_MOD_H
-#define CGN_TAGGER_MOD_H
-
+#include <ostream>
 #include "frog/FrogData.h"
-#include "frog/tagger_base.h"
 
-class CGNTagger: public BaseTagger {
- public:
-  explicit CGNTagger( TiCC::LogStream *l ): BaseTagger( l, "tagger" ){};
-  bool init( const TiCC::Configuration& );
-  void addDeclaration( folia::Document& ) const;
-  void post_process( const std::vector<folia::Word*>& );
-  void post_process( std::vector<frog_data>& );
- private:
-  void addTag( frog_data&, const std::string&, double );
-  void addTag( folia::Word *, const std::string&, double );
-  void fillSubSetTable();
-  bool fillSubSetTable( const std::string&, const std::string& );
-  std::string getSubSet( const std::string& , const std::string&, const std::string& );
-  std::multimap<std::string,std::string> cgnSubSets;
-  std::multimap<std::string,std::string> cgnConstraints;
-};
+using namespace std;
 
-#endif // CGN_TAGGER_MOD_H
+const string TAB = "\t";
+ostream& operator<<( ostream& os, const frog_data& fd ){
+  os << fd.word << TAB << fd.tag << TAB << fd.tag_confidence;
+  return os;
+}

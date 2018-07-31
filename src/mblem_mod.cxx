@@ -308,7 +308,7 @@ void Mblem::Classify( folia::Word *sword ){
     pos = sword->pos();
     string txtcls = sword->textclass();
     if ( txtcls == textclass ){
-      // so only use the word class is the textclass of the word
+      // so only use the word class if the textclass of the word
       // matches the wanted text
       token_class = sword->cls();
     }

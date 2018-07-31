@@ -43,6 +43,7 @@
 #include "libfolia/folia.h"
 
 #include "frog/Frog-util.h"
+#include "frog/FrogData.h"
 
 class UctoTokenizer;
 class Mbma;
@@ -105,6 +106,7 @@ class FrogAPI {
   void FrogDoc( folia::Document&, bool=false );
   void FrogServer( Sockets::ServerSocket &conn );
   void FrogInteractive();
+  void frog_sentence( std::vector<frog_data>& );
   std::string Frogtostring( const std::string& );
   std::string Frogtostringfromfile( const std::string& );
 

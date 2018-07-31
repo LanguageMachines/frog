@@ -426,6 +426,10 @@ void NERTagger::post_process( const vector<folia::Word*>& ){
   throw logic_error( "NER tagger call undefined postprocess() member" );
 }
 
+void NERTagger::post_process( vector<frog_data>& ){
+  throw logic_error( "NER tagger call undefined postprocess() member" );
+}
+
 string to_tag( const string& label, bool inside ){
   vector<string> parts = TiCC::split_at( label, "+" );
   if ( parts.size() > 1 ){

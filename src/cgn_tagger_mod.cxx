@@ -30,6 +30,7 @@
 */
 
 #include "frog/cgn_tagger_mod.h"
+#include "frog/FrogData.h"
 #include "frog/Frog-util.h"
 
 using namespace std;
@@ -195,7 +196,36 @@ void CGNTagger::addTag( folia::Word *word,
 }
 
 
-void CGNTagger::post_process( const vector<folia::Word *>& words ){
+void CGNTagger::post_process( vector<frog_data>& words ){
+  cerr << "voor post_process" << endl;
+  for ( size_t i=0; i < _tag_result.size(); ++i ){
+    addTag( words[i],
+	    _tag_result[i].assignedTag(),
+	    _tag_result[i].confidence() );
+  }
+}
+
+void CGNTagger::addTag( frog_data& fd,
+			const string& inputTag,
+			double confidence ){
+  fd.tag = inputTag;
+  fd.tag_confidence = confidence;
+  string ucto_class = fd.token_class;
+  if ( debug > 1 ){
+    LOG << "lookup ucto class= " << ucto_class << endl;
+  }
+  auto const tt = token_tag_map.find( ucto_class );
+  if ( tt != token_tag_map.end() ){
+    if ( debug > 1 ){
+      LOG << "found translation ucto class= " << ucto_class
+	  << " to POS-Tag=" << tt->second << endl;
+    }
+    fd.tag = tt->second;
+    fd.tag_confidence = 1.0;
+  }
+}
+
+void CGNTagger::post_process( const vector<folia::Word*>& words ){
   for ( size_t i=0; i < _tag_result.size(); ++i ){
     addTag( words[i],
 	    _tag_result[i].assignedTag(),

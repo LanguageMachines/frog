@@ -34,8 +34,10 @@
 #include <string>
 #include "timbl/TimblAPI.h"
 #include "frog/Frog-util.h"
+#include "frog/FrogData.h"
 #include "ticcutils/Configuration.h"
 #include "ticcutils/FileUtils.h"
+#include "ticcutils/Unicode.h"
 #include "ticcutils/PrettyPrint.h"
 
 using namespace std;
@@ -250,6 +252,38 @@ folia::Document *UctoTokenizer::tokenizestring( const string& s){
   if ( tokenizer) {
     istringstream is(s);
     return tokenizer->tokenize( is);
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initialized" );
+}
+
+vector<frog_data> UctoTokenizer::tokenize_stream( istream& is ){
+  // this is non greedy. Might be called multiple times to consume
+  // the whole stream
+  static vector<Tokenizer::Token> stack; // NOT THREAD SAFE!!!
+  if ( tokenizer) {
+    vector<frog_data> result;
+    vector<Tokenizer::Token> toks = stack;
+    stack.clear();
+    vector<Tokenizer::Token> new_toks = tokenizer->tokenizeStream( is );
+    toks.insert( toks.end(), new_toks.begin(), new_toks.end() );
+    bool skip = false;
+    for ( const auto tok : toks ){
+      if ( skip ){
+	stack.push_back( tok );
+      }
+      else {
+	frog_data tmp;
+	tmp.word = TiCC::UnicodeToUTF8(tok.us);
+	tmp.token_class = TiCC::UnicodeToUTF8(tok.type);
+	tmp.no_space = (tok.role & Tokenizer::TokenRole::NOSPACE);
+	result.push_back( tmp );
+	if ( (tok.role & Tokenizer::TokenRole::ENDOFSENTENCE) ){
+	  skip = true;
+	}
+      }
+    }
+    return result;
   }
   else
     throw runtime_error( "ucto tokenizer not initialized" );

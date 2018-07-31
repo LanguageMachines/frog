@@ -234,3 +234,7 @@ void IOBTagger::post_process( const std::vector<folia::Word*>& swords ){
   }
   addIOBTags( swords, tags, conf );
 }
+
+void IOBTagger::post_process( vector<frog_data>& ){
+  throw logic_error( "IOB tagger call undefined postprocess() member" );
+}

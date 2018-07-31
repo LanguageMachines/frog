@@ -30,6 +30,7 @@
 
 #include "libfolia/folia.h"
 #include "ucto/tokenize.h"
+#include "frog/FrogData.h"
 #include "ticcutils/Configuration.h"
 
 class UctoTokenizer {
@@ -52,6 +53,7 @@ class UctoTokenizer {
   folia::Document *tokenize( std::istream& );
   bool tokenize( folia::Document& );
   std::vector<std::string> tokenize( const std::string&  );
+  std::vector<frog_data> tokenize_stream( std::istream& is );
   std::string tokenizeStream( std::istream& );
  private:
   Tokenizer::TokenizerClass *tokenizer;

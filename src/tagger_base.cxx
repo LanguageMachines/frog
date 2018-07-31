@@ -273,3 +273,52 @@ void BaseTagger::Classify( const vector<folia::Word*>& swords ){
     post_process( swords );
   }
 }
+
+string BaseTagger::extract_sentence( const vector<frog_data>& sent,
+				     vector<string>& words ){
+  words.clear();
+  string sentence;
+  for ( const auto& sword : sent ){
+    icu::UnicodeString word = TiCC::UnicodeFromUTF8(sword.word);
+    if ( filter ){
+      word = filter->filter( word );
+    }
+    string word_s = TiCC::UnicodeToUTF8( word );
+    // the word may contain spaces, remove them all!
+    word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
+    sentence += word_s;
+    sentence += " ";
+  }
+  return sentence;
+}
+
+void BaseTagger::Classify( vector<frog_data>& sent ){
+  string sentence = extract_sentence( sent, _words );
+  cerr << "CLASSIFY IN: " << sentence << endl;
+  if ( debug > 1 ){
+    LOG << _label << "-tagger in: " << sentence << endl;
+  }
+  _tag_result = tagger->TagLine(sentence);
+  if ( _tag_result.size() != sent.size() ){
+    LOG << _label << "-tagger mismatch between number of words and the tagger result." << endl;
+    LOG << "words according to sentence: " << endl;
+    for ( size_t w = 0; w < sent.size(); ++w ) {
+      LOG << "w[" << w << "]= " << sent[w].word << endl;
+    }
+    LOG << "words according to " << _label << "-tagger: " << endl;
+    for ( size_t i=0; i < _tag_result.size(); ++i ){
+      LOG << "word[" << i << "]=" << _tag_result[i].word() << endl;
+    }
+    throw runtime_error( _label + "-tagger is confused" );
+  }
+  if ( debug > 1 ){
+    LOG << _label + "-tagger out: " << endl;
+    for ( size_t i=0; i < _tag_result.size(); ++i ){
+      LOG << "[" << i << "] : word=" << _tag_result[i].word()
+	  << " tag=" << _tag_result[i].assignedTag()
+	  << " confidence=" << _tag_result[i].confidence() << endl;
+    }
+  }
+  post_process( sent );
+  cerr << "CLASSIFY DONE: " << endl;
+}

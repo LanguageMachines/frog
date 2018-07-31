@@ -29,27 +29,24 @@
 
 */
 
-#ifndef CGN_TAGGER_MOD_H
-#define CGN_TAGGER_MOD_H
+#ifndef FROGDATA_H
+#define FROGDATA_H
 
-#include "frog/FrogData.h"
-#include "frog/tagger_base.h"
+#include <string>
 
-class CGNTagger: public BaseTagger {
+class frog_data {
  public:
-  explicit CGNTagger( TiCC::LogStream *l ): BaseTagger( l, "tagger" ){};
-  bool init( const TiCC::Configuration& );
-  void addDeclaration( folia::Document& ) const;
-  void post_process( const std::vector<folia::Word*>& );
-  void post_process( std::vector<frog_data>& );
- private:
-  void addTag( frog_data&, const std::string&, double );
-  void addTag( folia::Word *, const std::string&, double );
-  void fillSubSetTable();
-  bool fillSubSetTable( const std::string&, const std::string& );
-  std::string getSubSet( const std::string& , const std::string&, const std::string& );
-  std::multimap<std::string,std::string> cgnSubSets;
-  std::multimap<std::string,std::string> cgnConstraints;
+ frog_data():no_space(false),tag_confidence(0.0){};
+  std::string word;
+  std::string token_class;
+  bool no_space;
+  std::string tag;
+  double tag_confidence;
+  std::string lemma;
+  std::string morph;
+  std::string morph_nested;
 };
 
-#endif // CGN_TAGGER_MOD_H
+std::ostream& operator<<( std::ostream&, const frog_data& );
+
+#endif

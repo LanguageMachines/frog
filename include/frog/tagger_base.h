@@ -39,6 +39,7 @@
 #include "mbt/MbtAPI.h"
 #include "libfolia/folia.h"
 #include "ucto/tokenize.h"
+#include "frog/FrogData.h"
 
 class BaseTagger {
  public:
@@ -46,7 +47,9 @@ class BaseTagger {
   virtual ~BaseTagger();
   virtual bool init( const TiCC::Configuration& );
   virtual void post_process( const std::vector<folia::Word*>& ) = 0;
+  virtual void post_process( std::vector<frog_data>& ) = 0;
   virtual void Classify( const std::vector<folia::Word*>& );
+  virtual void Classify( std::vector<frog_data>& );
   void addDeclaration( folia::Document& ) const;
   std::string getTagset() const { return tagset; };
   std::string set_eos_mark( const std::string& );
@@ -54,6 +57,8 @@ class BaseTagger {
   std::vector<Tagger::TagResult> tagLine( const std::string& );
  private:
   std::string extract_sentence( const std::vector<folia::Word*>&,
+				std::vector<std::string>& );
+  std::string extract_sentence( const std::vector<frog_data>&,
 				std::vector<std::string>& );
  protected:
   void extract_words_tags(  const std::vector<folia::Word *>&,

@@ -1432,6 +1432,133 @@ void FrogAPI::FrogDoc( folia::Document& doc,
   return;
 }
 
+void FrogAPI::frog_sentence( vector<frog_data>& sent ){
+  //  timers.frogTimer.start();
+  if ( options.debugFlag > 5 ){
+    LOG << "Frogging sentence:" << sent << endl;
+  }
+  bool all_well = true;
+  string exs;
+  // timers.tagTimer.start();
+  try {
+    myCGNTagger->Classify( sent );
+    int cnt = 0;
+    for ( const auto& it : sent ){
+      cout << ++cnt <<"\t" << it << endl;
+    }
+  }
+  catch ( exception&e ){
+    all_well = false;
+    exs += string(e.what()) + " ";
+  }
+  //  timers.tagTimer.stop();
+  if ( !all_well ){
+    throw runtime_error( exs );
+  }
+#ifdef SKIP
+  for ( const auto& sword : swords ) {
+#pragma omp parallel sections
+    {
+#pragma omp section
+      {
+	if ( options.doMorph ){
+	  timers.mbmaTimer.start();
+	  if (options.debugFlag > 1){
+	    LOG << "Calling mbma..." << endl;
+	  }
+	  try {
+	    myMbma->Classify( sword );
+	  }
+	  catch ( exception& e ){
+	    all_well = false;
+	    exs += string(e.what()) + " ";
+	  }
+	  timers.mbmaTimer.stop();
+	}
+      }
+#pragma omp section
+      {
+	if ( options.doLemma ){
+	  timers.mblemTimer.start();
+	  if (options.debugFlag > 1) {
+	    LOG << "Calling mblem..." << endl;
+	  }
+	  try {
+	    myMblem->Classify( sword );
+	  }
+	  catch ( exception&e ){
+	    all_well = false;
+	    exs += string(e.what()) + " ";
+	  }
+	  timers.mblemTimer.stop();
+	}
+      }
+    } // omp parallel sections
+  } //for all words
+  if ( !all_well ){
+    throw runtime_error( exs );
+  }
+#pragma omp parallel sections
+  {
+#pragma omp section
+    {
+      if ( options.doNER ){
+	timers.nerTimer.start();
+	if (options.debugFlag > 1) {
+	  LOG << "Calling NER..." << endl;
+	}
+	try {
+	  myNERTagger->Classify( swords );
+	}
+	catch ( exception&e ){
+	  all_well = false;
+	  exs += string(e.what()) + " ";
+	}
+	timers.nerTimer.stop();
+      }
+    }
+#pragma omp section
+    {
+      if ( options.doIOB ){
+	timers.iobTimer.start();
+	try {
+	  myIOBTagger->Classify( swords );
+	}
+	catch ( exception&e ){
+	  all_well = false;
+	  exs += string(e.what()) + " ";
+	}
+	timers.iobTimer.stop();
+      }
+    }
+#pragma omp section
+    {
+      if ( options.doMwu ){
+	if ( swords.size() > 0 ){
+	  timers.mwuTimer.start();
+	  myMwu->Classify( swords );
+	  timers.mwuTimer.stop();
+	}
+      }
+      if ( options.doParse ){
+	if ( options.maxParserTokens != 0
+	     && swords.size() > options.maxParserTokens ){
+	  showParse = false;
+	}
+	else {
+	  myParser->Parse( swords, timers );
+	}
+      }
+    }
+  }
+  if ( !all_well ){
+    throw runtime_error( exs );
+  }
+#endif
+  // timers.frogTimer.stop();
+  return;
+}
+
 string filter_non_NC( const string& filename ){
   string result;
   bool at_start = true;
@@ -1509,6 +1636,12 @@ void FrogAPI::FrogFile( const string& infilename,
     }
   }
   else {
+    ifstream TEST( infilename );
+    vector<frog_data> res = tokenizer->tokenize_stream( TEST );
+    while ( !res.empty() ){
+      frog_sentence( res );
+      res = tokenizer->tokenize_stream( TEST );
+    }
     ifstream IN( infilename );
     timers.reset();
     timers.tokTimer.start();
