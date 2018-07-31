@@ -197,7 +197,6 @@ void CGNTagger::addTag( folia::Word *word,
 
 
 void CGNTagger::post_process( vector<frog_data>& words ){
-  cerr << "voor post_process" << endl;
   for ( size_t i=0; i < _tag_result.size(); ++i ){
     addTag( words[i],
 	    _tag_result[i].assignedTag(),

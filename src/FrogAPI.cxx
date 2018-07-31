@@ -1442,10 +1442,6 @@ void FrogAPI::frog_sentence( vector<frog_data>& sent ){
   // timers.tagTimer.start();
   try {
     myCGNTagger->Classify( sent );
-    int cnt = 0;
-    for ( const auto& it : sent ){
-      cout << ++cnt <<"\t" << it << endl;
-    }
   }
   catch ( exception&e ){
     all_well = false;
@@ -1455,10 +1451,10 @@ void FrogAPI::frog_sentence( vector<frog_data>& sent ){
   if ( !all_well ){
     throw runtime_error( exs );
   }
-#ifdef SKIP
-  for ( const auto& sword : swords ) {
+  for ( auto& word : sent ) {
 #pragma omp parallel sections
     {
+#ifdef SKIP
 #pragma omp section
       {
 	if ( options.doMorph ){
@@ -1476,6 +1472,7 @@ void FrogAPI::frog_sentence( vector<frog_data>& sent ){
 	  timers.mbmaTimer.stop();
 	}
       }
+#endif
 #pragma omp section
       {
 	if ( options.doLemma ){
@@ -1484,7 +1481,7 @@ void FrogAPI::frog_sentence( vector<frog_data>& sent ){
 	    LOG << "Calling mblem..." << endl;
 	  }
 	  try {
-	    myMblem->Classify( sword );
+	    myMblem->Classify( word );
 	  }
 	  catch ( exception&e ){
 	    all_well = false;
@@ -1498,6 +1495,12 @@ void FrogAPI::frog_sentence( vector<frog_data>& sent ){
   if ( !all_well ){
     throw runtime_error( exs );
   }
+  cout << endl;
+  int cnt = 0;
+  for ( const auto& it : sent ){
+    cout << ++cnt <<"\t" << it << endl;
+  }
+#ifdef SKIP
 #pragma omp parallel sections
   {
 #pragma omp section

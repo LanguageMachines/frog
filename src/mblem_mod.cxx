@@ -356,6 +356,62 @@ void Mblem::Classify( folia::Word *sword ){
   getFoLiAResult( sword, uword );
 }
 
+void Mblem::Classify( frog_data& fd ){
+  icu::UnicodeString uword = TiCC::UnicodeFromUTF8(fd.word);
+  string pos = fd.tag;
+  string token_class = fd.token_class;
+  if (debug > 1 ){
+    LOG << "Classify " << uword << "(" << pos << ") ["
+	<< token_class << "]" << endl;
+  }
+  if ( filter )
+    uword = filter->filter( uword );
+
+  if ( token_class == "ABBREVIATION" ){
+    // We dont handle ABBREVIATION's so just take the word as such
+    fd.lemma = fd.word;
+    return;
+  }
+  auto const& it1 = token_strip_map.find( pos );
+  if ( it1 != token_strip_map.end() ){
+    // some tag/tokenizer_class combinations are special
+    // we have to strip a few letters to get a lemma
+    auto const& it2 = it1->second.find( token_class );
+    if ( it2 != it1->second.end() ){
+      icu::UnicodeString uword2 = icu::UnicodeString( uword, 0, uword.length() - it2->second );
+      if ( uword2.isEmpty() ){
+	uword2 = uword;
+      }
+      string word = TiCC::UnicodeToUTF8(uword2);
+      fd.lemma = word;
+      return;
+    }
+  }
+  if ( one_one_tags.find(pos) != one_one_tags.end() ){
+    // some tags are just taken as such
+    fd.lemma = fd.word;
+    return;
+  }
+  if ( !keep_case ){
+    uword.toLower();
+  }
+  Classify( uword );
+  filterTag( pos );
+  makeUnique();
+  if ( mblemResult.empty() ){
+    // just return the word as a lemma
+    fd.lemma = TiCC::UnicodeToUTF8( uword );
+  }
+  else {
+    for ( auto const& it : mblemResult ){
+      string result = it.getLemma();
+      fd.lemma = result;
+      // for now only the first variant!
+      break;
+    }
+  }
+}
+
 void Mblem::Classify( const icu::UnicodeString& uWord ){
   mblemResult.clear();
   string inst = make_instance(uWord);

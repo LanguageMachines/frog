@@ -37,6 +37,7 @@
 #include "ticcutils/Configuration.h"
 #include "ticcutils/Unicode.h"
 #include "timbl/TimblAPI.h"
+#include "frog/FrogData.h"
 
 class mblemData {
  public:
@@ -57,6 +58,7 @@ class Mblem {
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;
   void Classify( folia::Word * );
+  void Classify( frog_data& );
   void Classify( const icu::UnicodeString& );
   std::vector<std::pair<std::string,std::string> > getResult() const;
   void filterTag( const std::string&  );

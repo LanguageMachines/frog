@@ -36,6 +36,6 @@ using namespace std;
 
 const string TAB = "\t";
 ostream& operator<<( ostream& os, const frog_data& fd ){
-  os << fd.word << TAB << fd.tag << TAB << fd.tag_confidence;
+  os << fd.word << TAB << fd.lemma << TAB << fd.tag << TAB << fd.tag_confidence;
   return os;
 }

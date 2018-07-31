@@ -294,7 +294,6 @@ string BaseTagger::extract_sentence( const vector<frog_data>& sent,
 
 void BaseTagger::Classify( vector<frog_data>& sent ){
   string sentence = extract_sentence( sent, _words );
-  cerr << "CLASSIFY IN: " << sentence << endl;
   if ( debug > 1 ){
     LOG << _label << "-tagger in: " << sentence << endl;
   }
@@ -320,5 +319,4 @@ void BaseTagger::Classify( vector<frog_data>& sent ){
     }
   }
   post_process( sent );
-  cerr << "CLASSIFY DONE: " << endl;
 }
