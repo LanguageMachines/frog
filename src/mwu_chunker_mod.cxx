@@ -40,6 +40,7 @@
 #include <map>
 
 #include "timbl/TimblAPI.h"
+#include "ticcutils/PrettyPrint.h"
 
 #include "frog/Frog-util.h" // defines etc.
 
@@ -47,20 +48,27 @@ using namespace std;
 
 #define LOG *TiCC::Log(mwuLog)
 
-mwuAna::mwuAna( folia::Word *fwrd, const string& txt, const string& glue_tag ){
+mwuAna::mwuAna( folia::Word *fwrd,
+		const string& txt,
+		const string& glue_tag,
+		size_t index ){
   spec = false;
   word = txt;
   string tag;
+  if ( fwrd ){
 #pragma omp critical (foliaupdate)
-  {
-    tag = fwrd->annotation<folia::PosAnnotation>()->cls();
+    {
+      tag = fwrd->annotation<folia::PosAnnotation>()->cls();
+    }
   }
   spec = ( tag == glue_tag );
   fwords.push_back( fwrd );
+  mwu_start = mwu_end = index;
 }
 
 void mwuAna::merge( const mwuAna *add ){
   fwords.push_back( add->fwords[0] );
+  mwu_end = add->mwu_end;;;
   delete add;
 }
 
@@ -125,7 +133,7 @@ void Mwu::reset(){
   mWords.clear();
 }
 
-void Mwu::add( folia::Word *word ){
+void Mwu::add( folia::Word *word, size_t index ){
   icu::UnicodeString tmp;
 #pragma omp critical (foliaupdate)
   {
@@ -134,9 +142,20 @@ void Mwu::add( folia::Word *word ){
   if ( filter )
     tmp = filter->filter( tmp );
   string txt = TiCC::UnicodeToUTF8( tmp );
-  mWords.push_back( new mwuAna( word, txt, glue_tag ) );
+  mWords.push_back( new mwuAna( word, txt, glue_tag, index ) );
 }
 
+void Mwu::add( frog_data& fd, size_t index ){
+  icu::UnicodeString tmp;
+#pragma omp critical (foliaupdate)
+  {
+    tmp = TiCC::UnicodeFromUTF8(fd.word);
+  }
+  if ( filter )
+    tmp = filter->filter( tmp );
+  string txt = TiCC::UnicodeToUTF8( tmp );
+  mWords.push_back( new mwuAna( 0, txt, glue_tag, index ) );
+}
 
 bool Mwu::read_mwus( const string& fname) {
   LOG << "read mwus " + fname << endl;
@@ -222,9 +241,13 @@ bool Mwu::init( const TiCC::Configuration& config ) {
   return true;
 }
 
+using TiCC::operator<<;
+
 ostream &operator<<( ostream& os, const Mwu& mwu ){
   for ( size_t i = 0; i < mwu.mWords.size(); ++i )
-    os << i+1 << "\t" << mwu.mWords[i]->getWord() << endl;
+    os << i+1 << "\t" << mwu.mWords[i]->getWord()
+       <<  "(" << mwu.mWords[i]->mwu_start << "," << mwu.mWords[i]->mwu_end
+       << ")" << endl;
   return os;
 }
 
@@ -235,13 +258,26 @@ void Mwu::addDeclaration( folia::Document& doc ) const {
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
+void Mwu::Classify( vector<frog_data>& sent ){
+  reset();
+  size_t id=0;
+  for ( auto& word : sent ){
+    add( word, id++ );
+  }
+  Classify();
+  for ( const auto& mword : mWords ){
+    LOG << "mwu van " << mword->mwu_start << " tot " << mword->mwu_end << endl;
+  }
+}
+
 void Mwu::Classify( const vector<folia::Word*>& words ){
   if ( words.empty() ){
     return;
   }
   reset();
+  size_t id=0;
   for ( const auto& word : words ){
-    add( word );
+    add( word, id++  );
   }
   Classify();
   folia::EntitiesLayer *el = 0;

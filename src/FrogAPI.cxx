@@ -1527,16 +1527,16 @@ void FrogAPI::frog_sentence( vector<frog_data>& sent ){
 	timers.iobTimer.stop();
       }
     }
-#ifdef SKIP
 #pragma omp section
     {
       if ( options.doMwu ){
-	if ( swords.size() > 0 ){
+	if ( sent.size() > 0 ){
 	  timers.mwuTimer.start();
-	  myMwu->Classify( swords );
+	  myMwu->Classify( sent );
 	  timers.mwuTimer.stop();
 	}
       }
+#ifdef SKIP
       if ( options.doParse ){
 	if ( options.maxParserTokens != 0
 	     && swords.size() > options.maxParserTokens ){
@@ -1546,8 +1546,8 @@ void FrogAPI::frog_sentence( vector<frog_data>& sent ){
 	  myParser->Parse( swords, timers );
 	}
       }
-    }
 #endif
+    }
   }
   if ( !all_well ){
     throw runtime_error( exs );

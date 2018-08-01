@@ -38,11 +38,12 @@
 #include "ticcutils/Configuration.h"
 #include "ticcutils/Unicode.h"
 #include "libfolia/folia.h"
+#include "frog/FrogData.h"
 
 class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );
  public:
-  mwuAna( folia::Word *, const std::string&, const std::string& );
+  mwuAna( folia::Word *, const std::string&, const std::string&, size_t );
   virtual ~mwuAna() {};
 
   void merge( const mwuAna * );
@@ -56,6 +57,9 @@ class mwuAna {
 				   const std::string&,
 				   folia::Sentence *,
 				   folia::EntitiesLayer * );
+
+  size_t mwu_start;
+  size_t mwu_end;
 
  protected:
     mwuAna(){};
@@ -75,7 +79,9 @@ class Mwu {
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
   void Classify( const std::vector<folia::Word *>& );
-  void add( folia::Word * );
+  void Classify( std::vector<frog_data>& );
+  void add( folia::Word *, size_t );
+  void add( frog_data&, size_t );
   std::string getTagset() const { return mwu_tagset; };
   std::vector<mwuAna*>& getAna(){ return mWords; };
  private:
