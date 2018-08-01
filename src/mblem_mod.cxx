@@ -369,7 +369,7 @@ void Mblem::Classify( frog_data& fd ){
 
   if ( token_class == "ABBREVIATION" ){
     // We dont handle ABBREVIATION's so just take the word as such
-    fd.lemma = fd.word;
+    fd.lemmas.push_back( fd.word );
     return;
   }
   auto const& it1 = token_strip_map.find( pos );
@@ -383,13 +383,13 @@ void Mblem::Classify( frog_data& fd ){
 	uword2 = uword;
       }
       string word = TiCC::UnicodeToUTF8(uword2);
-      fd.lemma = word;
+      fd.lemmas.push_back( word );
       return;
     }
   }
   if ( one_one_tags.find(pos) != one_one_tags.end() ){
     // some tags are just taken as such
-    fd.lemma = fd.word;
+    fd.lemmas.push_back( fd.word );
     return;
   }
   if ( !keep_case ){
@@ -400,14 +400,12 @@ void Mblem::Classify( frog_data& fd ){
   makeUnique();
   if ( mblemResult.empty() ){
     // just return the word as a lemma
-    fd.lemma = TiCC::UnicodeToUTF8( uword );
+    fd.lemmas.push_back( TiCC::UnicodeToUTF8( uword ) );
   }
   else {
     for ( auto const& it : mblemResult ){
       string result = it.getLemma();
-      fd.lemma = result;
-      // for now only the first variant!
-      break;
+      fd.lemmas.push_back( result );
     }
   }
 }

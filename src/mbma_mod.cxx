@@ -45,6 +45,7 @@
 #include "ticcutils/PrettyPrint.h"
 #include "ticcutils/Unicode.h"
 #include "frog/Frog-util.h"
+#include "frog/FrogData.h"
 
 using namespace std;
 using TiCC::operator<<;
@@ -398,7 +399,7 @@ void Mbma::addBracketMorph( folia::Word *word,
     const auto tagIt = TAGconv.find( head );
     if ( tagIt == TAGconv.end() ) {
       // this should never happen
-      throw folia::ValueError( "unknown head feature '" + head + "'" );
+      throw folia::ValueError( "0 unknown head feature '" + head + "'" );
     }
     celex_tag = tagIt->second;
     head = CLEX::get_tDescr(CLEX::toCLEX(tagIt->second));
@@ -515,7 +516,7 @@ void Mbma::filterHeadTag( const string& head ){
   map<string,string>::const_iterator tagIt = TAGconv.find( head );
   if ( tagIt == TAGconv.end() ) {
     // this should never happen
-    throw folia::ValueError( "unknown head feature '" + head + "'" );
+    throw folia::ValueError( "1 unknown head feature '" + head + "'" );
   }
   string celex_tag = tagIt->second;
   if (debugFlag > 1){
@@ -823,6 +824,151 @@ void Mbma::Classify( folia::Word* sword ){
     filterSubTags( featVals );
     assign_compounds();
     getFoLiAResult( sword, lWord );
+  }
+}
+
+void Mbma::addMorph( frog_data& fd,
+		     const vector<string>& morphs ) const {
+#pragma omp critical (dataupdate)
+  {
+    fd.morphs = morphs;
+  }
+}
+
+void Mbma::addBracketMorph( frog_data& fd,
+			    const string& wrd,
+			    const string& pos_tag,
+			    const string& c_tag ) const {
+  if (debugFlag > 1){
+    LOG << "addBracketMorph(" << wrd << "," << pos_tag << ")" << endl;
+  }
+  string head = c_tag;
+  string clex_tag = c_tag;
+  if ( head == "LET" || head == "SPEC" ){
+    head.clear();
+  }
+  else if ( head == "X" ) {
+    // unanalysed, so trust the TAGGER
+    head = pos_tag;
+    if (debugFlag > 1){
+      LOG << "head was X, tagger gives :" << head << endl;
+    }
+    const auto tagIt = TAGconv.find( head );
+    if ( tagIt == TAGconv.end() ) {
+      // this should never happen
+      throw logic_error( "2 unknown head feature '" + head + "'" );
+    }
+    clex_tag = tagIt->second;
+    head = CLEX::get_tDescr(CLEX::toCLEX(clex_tag));
+    if (debugFlag > 1){
+      LOG << "replaced X by: " << head << endl;
+    }
+  }
+
+  string str = "[" + wrd + "]" + head;
+#pragma omp critical (dataupdate)
+  {
+    fd.morphs_nested.push_back( str );
+  }
+}
+
+void Mbma::addBracketMorph( frog_data& fd,
+			    const string& orig_word,
+			    const BracketNest *brackets ) const {
+  if (debugFlag > 1){
+    LOG << "addBracketMorph(" << fd.word << "," << orig_word << "," << brackets << ")" << endl;
+  }
+  vector<string> v = getResult();
+#pragma omp critical (dataupdate)
+  {
+    fd.morphs_nested = v;
+  }
+}
+
+void Mbma::getResult( frog_data& fd,
+		      const icu::UnicodeString& uword,
+		      const string& head ) const {
+  if ( analysis.size() == 0 ){
+    // fallback option: use the word and pretend it's a morpheme ;-)
+    if ( debugFlag > 1){
+      LOG << "no matches found, use the word instead: "
+		    << uword << endl;
+    }
+    if ( doDeepMorph ){
+      addBracketMorph( fd, TiCC::UnicodeToUTF8(uword), head, "X" );
+    }
+    else {
+      vector<string> tmp;
+      tmp.push_back( TiCC::UnicodeToUTF8(uword) );
+      addMorph( fd, tmp );
+    }
+  }
+  else {
+    for ( auto const& sit : analysis ){
+      if ( doDeepMorph ){
+	addBracketMorph( fd, TiCC::UnicodeToUTF8(uword), sit->brackets );
+      }
+      else {
+	addMorph( fd, sit->extract_morphemes() );
+      }
+    }
+  }
+}
+
+void Mbma::Classify( frog_data& fd ){
+  string word_s;
+  string tag;
+  string token_class;
+#pragma omp critical (dataupdate)
+  {
+    word_s = fd.word;
+    tag = fd.tag;
+    token_class = fd.token_class;
+  }
+  icu::UnicodeString uWord = TiCC::UnicodeFromUTF8( word_s );
+  vector<string> v = TiCC::split_at_first_of( tag, "()" );
+  string head = v[0];
+  if (debugFlag >1 ){
+    LOG << "Classify " << uWord << "(" << head << ") ["
+	<< token_class << "]" << endl;
+  }
+  if ( filter ){
+    uWord = filter->filter( uWord );
+  }
+  // HACK! for now remove any whitespace!
+  vector<string> parts = TiCC::split( word_s );
+  word_s.clear();
+  for ( const auto& p : parts ){
+    word_s += p;
+  }
+  uWord = TiCC::UnicodeFromUTF8( word_s );
+  if ( head == "LET" || head == "SPEC" || token_class == "ABBREVIATION" ){
+    // take over the letter/word 'as-is'.
+    //  also ABBREVIATION's aren't handled bij mbma-rules
+    string word = TiCC::UnicodeToUTF8( uWord );
+    if ( doDeepMorph ){
+      addBracketMorph( fd, word, head, head );
+    }
+    else {
+      vector<string> tmp;
+      tmp.push_back( word );
+      addMorph( fd, tmp );
+    }
+  }
+  else {
+    icu::UnicodeString lWord = uWord;
+    if ( head != "SPEC" ){
+      lWord.toLower();
+    }
+    Classify( lWord );
+    vector<string> featVals;
+    if( v.size() > 1 ){
+      featVals = TiCC::split_at( v[1], "," );
+    }
+    filterHeadTag( head );
+    filterSubTags( featVals );
+    assign_compounds();
+    getResult( fd, lWord, head );
   }
 }
 

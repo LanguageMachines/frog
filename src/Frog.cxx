@@ -711,6 +711,10 @@ int main(int argc, char *argv[]) {
       frog.FrogInteractive();
     }
   }
+  catch ( const TiCC::OptionError& e ){
+    usage();
+    return EXIT_FAILURE;
+  }
   catch ( const exception& e ){
     LOG << "fatal error: " << e.what() << endl;
     return EXIT_FAILURE;

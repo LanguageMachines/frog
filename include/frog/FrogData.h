@@ -33,6 +33,7 @@
 #define FROGDATA_H
 
 #include <string>
+#include <vector>
 
 class frog_data {
  public:
@@ -42,9 +43,9 @@ class frog_data {
   bool no_space;
   std::string tag;
   double tag_confidence;
-  std::string lemma;
-  std::string morph;
-  std::string morph_nested;
+  std::vector<std::string> lemmas;
+  std::vector<std::string> morphs;
+  std::vector<std::string> morphs_nested;
 };
 
 std::ostream& operator<<( std::ostream&, const frog_data& );

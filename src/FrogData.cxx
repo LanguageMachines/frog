@@ -30,12 +30,33 @@
 */
 
 #include <ostream>
+#include "ticcutils/PrettyPrint.h"
 #include "frog/FrogData.h"
 
 using namespace std;
+using TiCC::operator<<;
 
 const string TAB = "\t";
 ostream& operator<<( ostream& os, const frog_data& fd ){
-  os << fd.word << TAB << fd.lemma << TAB << fd.tag << TAB << fd.tag_confidence;
+  os << fd.word << TAB;
+  if ( fd.lemmas.empty() ){
+    os << TAB;
+  }
+  else {
+    os << fd.lemmas[0];
+  }
+  os << TAB;
+  if ( fd.morphs.empty() ){
+    if ( fd.morphs_nested.empty() ){
+      os << TAB;
+    }
+    else {
+      os << fd.morphs_nested[0];
+    }
+  }
+  else {
+    os << fd.morphs;
+  }
+  os << TAB <<fd.tag << TAB << fd.tag_confidence;
   return os;
 }

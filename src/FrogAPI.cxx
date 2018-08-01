@@ -1454,7 +1454,6 @@ void FrogAPI::frog_sentence( vector<frog_data>& sent ){
   for ( auto& word : sent ) {
 #pragma omp parallel sections
     {
-#ifdef SKIP
 #pragma omp section
       {
 	if ( options.doMorph ){
@@ -1463,7 +1462,7 @@ void FrogAPI::frog_sentence( vector<frog_data>& sent ){
 	    LOG << "Calling mbma..." << endl;
 	  }
 	  try {
-	    myMbma->Classify( sword );
+	    myMbma->Classify( word );
 	  }
 	  catch ( exception& e ){
 	    all_well = false;
@@ -1472,7 +1471,6 @@ void FrogAPI::frog_sentence( vector<frog_data>& sent ){
 	  timers.mbmaTimer.stop();
 	}
       }
-#endif
 #pragma omp section
       {
 	if ( options.doLemma ){
