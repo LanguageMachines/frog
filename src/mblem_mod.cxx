@@ -357,9 +357,15 @@ void Mblem::Classify( folia::Word *sword ){
 }
 
 void Mblem::Classify( frog_data& fd ){
-  icu::UnicodeString uword = TiCC::UnicodeFromUTF8(fd.word);
-  string pos = fd.tag;
-  string token_class = fd.token_class;
+  icu::UnicodeString uword;
+  string pos;
+  string token_class;
+#pragma omp critical (dataupdate)
+  {
+    uword = TiCC::UnicodeFromUTF8(fd.word);
+    pos = fd.tag;
+    token_class = fd.token_class;
+  }
   if (debug > 1 ){
     LOG << "Classify " << uword << "(" << pos << ") ["
 	<< token_class << "]" << endl;
@@ -369,7 +375,10 @@ void Mblem::Classify( frog_data& fd ){
 
   if ( token_class == "ABBREVIATION" ){
     // We dont handle ABBREVIATION's so just take the word as such
-    fd.lemmas.push_back( fd.word );
+#pragma omp critical (dataupdate)
+    {
+      fd.lemmas.push_back( fd.word );
+    }
     return;
   }
   auto const& it1 = token_strip_map.find( pos );
@@ -383,13 +392,19 @@ void Mblem::Classify( frog_data& fd ){
 	uword2 = uword;
       }
       string word = TiCC::UnicodeToUTF8(uword2);
-      fd.lemmas.push_back( word );
+#pragma omp critical (dataupdate)
+      {
+	fd.lemmas.push_back( word );
+      }
       return;
     }
   }
   if ( one_one_tags.find(pos) != one_one_tags.end() ){
     // some tags are just taken as such
-    fd.lemmas.push_back( fd.word );
+#pragma omp critical (dataupdate)
+    {
+      fd.lemmas.push_back( fd.word );
+    }
     return;
   }
   if ( !keep_case ){
@@ -400,12 +415,18 @@ void Mblem::Classify( frog_data& fd ){
   makeUnique();
   if ( mblemResult.empty() ){
     // just return the word as a lemma
-    fd.lemmas.push_back( TiCC::UnicodeToUTF8( uword ) );
+#pragma omp critical (dataupdate)
+    {
+      fd.lemmas.push_back( TiCC::UnicodeToUTF8( uword ) );
+    }
   }
   else {
-    for ( auto const& it : mblemResult ){
-      string result = it.getLemma();
-      fd.lemmas.push_back( result );
+#pragma omp critical (dataupdate)
+    {
+      for ( auto const& it : mblemResult ){
+	string result = it.getLemma();
+	fd.lemmas.push_back( result );
+      }
     }
   }
 }

@@ -36,27 +36,30 @@
 using namespace std;
 using TiCC::operator<<;
 
+frog_data::frog_data():
+  no_space(false),
+  tag_confidence(0.0),
+  iob_confidence(0.0),
+  ner_confidence(0.0)
+{}
+
 const string TAB = "\t";
 ostream& operator<<( ostream& os, const frog_data& fd ){
   os << fd.word << TAB;
-  if ( fd.lemmas.empty() ){
-    os << TAB;
-  }
-  else {
+  if ( !fd.lemmas.empty() ){
     os << fd.lemmas[0];
   }
   os << TAB;
   if ( fd.morphs.empty() ){
-    if ( fd.morphs_nested.empty() ){
-      os << TAB;
-    }
-    else {
+    if ( !fd.morphs_nested.empty() ){
       os << fd.morphs_nested[0];
     }
   }
   else {
     os << fd.morphs;
   }
-  os << TAB <<fd.tag << TAB << fd.tag_confidence;
+  os << TAB << fd.tag << TAB << fd.tag_confidence;
+  os << TAB << fd.iob_tag << TAB << fd.iob_confidence;
+  os << TAB << fd.ner_tag << TAB << fd.ner_confidence;
   return os;
 }

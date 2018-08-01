@@ -207,8 +207,11 @@ void CGNTagger::post_process( vector<frog_data>& words ){
 void CGNTagger::addTag( frog_data& fd,
 			const string& inputTag,
 			double confidence ){
-  fd.tag = inputTag;
-  fd.tag_confidence = confidence;
+#pragma omp critical (dataupdate)
+  {
+    fd.tag = inputTag;
+    fd.tag_confidence = confidence;
+  }
   string ucto_class = fd.token_class;
   if ( debug > 1 ){
     LOG << "lookup ucto class= " << ucto_class << endl;
@@ -219,8 +222,11 @@ void CGNTagger::addTag( frog_data& fd,
       LOG << "found translation ucto class= " << ucto_class
 	  << " to POS-Tag=" << tt->second << endl;
     }
-    fd.tag = tt->second;
-    fd.tag_confidence = 1.0;
+#pragma omp critical (dataupdate)
+    {
+      fd.tag = tt->second;
+      fd.tag_confidence = 1.0;
+    }
   }
 }
 

@@ -37,12 +37,16 @@
 
 class frog_data {
  public:
- frog_data():no_space(false),tag_confidence(0.0){};
+  frog_data();
   std::string word;
   std::string token_class;
   bool no_space;
   std::string tag;
   double tag_confidence;
+  std::string iob_tag;
+  double iob_confidence;
+  std::string ner_tag;
+  double ner_confidence;
   std::vector<std::string> lemmas;
   std::vector<std::string> morphs;
   std::vector<std::string> morphs_nested;

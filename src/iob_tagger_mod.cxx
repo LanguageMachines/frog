@@ -235,6 +235,63 @@ void IOBTagger::post_process( const std::vector<folia::Word*>& swords ){
   addIOBTags( swords, tags, conf );
 }
 
-void IOBTagger::post_process( vector<frog_data>& ){
-  throw logic_error( "IOB tagger call undefined postprocess() member" );
+void IOBTagger::Classify( vector<frog_data>& swords ){
+  vector<string> words;
+  vector<string> ptags;
+#pragma omp critical (dataupdate)
+  {
+    for ( const auto& w : swords ){
+      words.push_back( w.word );
+      ptags.push_back( w.tag );
+    }
+  }
+  string text_block;
+  string prev = "_";
+  for ( size_t i=0; i < swords.size(); ++i ){
+    string word = words[i];
+    string pos = ptags[i];
+    text_block += word + "\t" + prev + "\t" + pos + "\t";
+    prev = pos;
+    if ( i < swords.size() - 1 ){
+      text_block += ptags[i+1];
+    }
+    else {
+      text_block += "_";
+    }
+    text_block += "\t??\n";
+  }
+  if ( debug ){
+    LOG << "TAGGING TEXT_BLOCK\n" << text_block << endl;
+  }
+  _tag_result = tagger->TagLine( text_block );
+  if ( debug ){
+    LOG << "IOB tagger out: " << endl;
+    for ( size_t i=0; i < _tag_result.size(); ++i ){
+      LOG << "[" << i << "] : word=" << _tag_result[i].word()
+	  << " tag=" << _tag_result[i].assignedTag()
+	  << " confidence=" << _tag_result[i].confidence() << endl;
+    }
+  }
+  post_process( swords );
+}
+
+void IOBTagger::post_process( vector<frog_data>& words ){
+  if ( debug ){
+    LOG << "IOB postprocess...." << endl;
+  }
+  for ( size_t i=0; i < _tag_result.size(); ++i ){
+    addTag( words[i],
+	    _tag_result[i].assignedTag(),
+	    _tag_result[i].confidence() );
+  }
+}
+
+void IOBTagger::addTag( frog_data& fd,
+			const string& tag,
+			double confidence ){
+#pragma omp critical (dataupdate)
+  {
+    fd.iob_tag = tag;
+    fd.iob_confidence = confidence;
+  }
 }

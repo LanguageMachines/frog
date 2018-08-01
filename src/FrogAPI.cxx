@@ -1494,11 +1494,6 @@ void FrogAPI::frog_sentence( vector<frog_data>& sent ){
     throw runtime_error( exs );
   }
   cout << endl;
-  int cnt = 0;
-  for ( const auto& it : sent ){
-    cout << ++cnt <<"\t" << it << endl;
-  }
-#ifdef SKIP
 #pragma omp parallel sections
   {
 #pragma omp section
@@ -1509,7 +1504,7 @@ void FrogAPI::frog_sentence( vector<frog_data>& sent ){
 	  LOG << "Calling NER..." << endl;
 	}
 	try {
-	  myNERTagger->Classify( swords );
+	  myNERTagger->Classify( sent );
 	}
 	catch ( exception&e ){
 	  all_well = false;
@@ -1523,7 +1518,7 @@ void FrogAPI::frog_sentence( vector<frog_data>& sent ){
       if ( options.doIOB ){
 	timers.iobTimer.start();
 	try {
-	  myIOBTagger->Classify( swords );
+	  myIOBTagger->Classify( sent );
 	}
 	catch ( exception&e ){
 	  all_well = false;
@@ -1532,6 +1527,7 @@ void FrogAPI::frog_sentence( vector<frog_data>& sent ){
 	timers.iobTimer.stop();
       }
     }
+#ifdef SKIP
 #pragma omp section
     {
       if ( options.doMwu ){
@@ -1551,11 +1547,15 @@ void FrogAPI::frog_sentence( vector<frog_data>& sent ){
 	}
       }
     }
+#endif
   }
   if ( !all_well ){
     throw runtime_error( exs );
   }
-#endif
+  int cnt = 0;
+  for ( const auto& it : sent ){
+    cout << ++cnt <<"\t" << it << endl;
+  }
   // timers.frogTimer.stop();
   return;
 }

@@ -426,6 +426,162 @@ void NERTagger::post_process( const vector<folia::Word*>& ){
   throw logic_error( "NER tagger call undefined postprocess() member" );
 }
 
+void NERTagger::Classify( vector<frog_data>& swords ){
+  if ( debug ){
+    LOG << "classify from DATA" << endl;
+  }
+  vector<string> words;
+  vector<string> ptags;
+#pragma omp critical (dataupdate)
+  {
+    for ( const auto& w : swords ){
+      words.push_back( w.word );
+      ptags.push_back( w.tag );
+    }
+  }
+  vector<string> ktags = create_ner_list( words, known_ners );
+  vector<string> override_tags = create_ner_list( words, override_ners );
+  string text_block;
+  string prev = "_";
+  string prevN = "_";
+  for ( size_t i=0; i < swords.size(); ++i ){
+    string word = words[i];
+    string pos = ptags[i];
+    text_block += word + "\t" + prev + "\t" + pos + "\t";
+    prev = pos;
+    if ( i < swords.size() - 1 ){
+      text_block += ptags[i+1];
+    }
+    else {
+      text_block += "_";
+    }
+    string ktag = ktags[i];
+    text_block += "\t" + prevN + "\t" + ktag + "\t";
+    prevN = ktag;
+    if ( i < swords.size() - 1 ){
+      text_block += ktags[i+1];
+    }
+    else {
+      text_block += "_";
+    }
+
+    text_block += "\t??\n";
+  }
+  if ( debug > 1 ){
+    LOG << "TAGGING TEXT_BLOCK\n" << text_block << endl;
+  }
+  _tag_result = tagger->TagLine( text_block );
+  if ( debug > 1 ){
+    LOG << "NER tagger out: " << endl;
+    for ( size_t i=0; i < _tag_result.size(); ++i ){
+      LOG << "[" << i << "] : word=" << _tag_result[i].word()
+	  << " tag=" << _tag_result[i].assignedTag()
+	  << " confidence=" << _tag_result[i].confidence() << endl;
+    }
+  }
+  post_process( swords, override_tags );
+}
+
+void NERTagger::post_process( vector<frog_data>& swords,
+			      const vector<string>& override ){
+  vector<string> tags;
+  vector<double> conf;
+  for ( const auto& tag : _tag_result ){
+    tags.push_back( tag.assignedTag() );
+    conf.push_back( tag.confidence() );
+  }
+  if ( !override.empty() ){
+    vector<string> empty;
+    merge_override( tags, conf, override, true, empty );
+  }
+  addNERTags( swords, tags, conf );
+}
+
+void NERTagger::addNERTags( vector<frog_data>& words,
+			    const vector<string>& tags,
+			    const vector<double>& confs ){
+  if ( words.empty() ) {
+    return;
+  }
+  vector<string> stack;
+  vector<double> dstack;
+  string curNER;
+  for ( size_t i=0; i < tags.size(); ++i ){
+    if (debug > 1){
+      LOG << "NER = " << tags[i] << endl;
+    }
+    vector<string> ner;
+    if ( tags[i] == "O" ){
+      if ( !stack.empty() ){
+	if (debug > 1) {
+	  LOG << "O spit out " << curNER << endl;
+	  using TiCC::operator<<;
+	  LOG << "ners  " << stack << endl;
+	  LOG << "confs " << dstack << endl;
+	}
+	addEntity( words, i, stack, dstack );
+	dstack.clear();
+	stack.clear();
+      }
+      continue;
+    }
+    else {
+      size_t num_words = TiCC::split_at( tags[i], ner, "-" );
+      if ( num_words != 2 ){
+	LOG << "expected <NER>-tag, got: " << tags[i] << endl;
+	throw runtime_error( "NER: unable to retrieve a NER tag from: "
+			     + tags[i] );
+      }
+    }
+    if ( ner[0] == "B" ||
+	 ( ner[0] == "I" && stack.empty() ) ||
+	 ( ner[0] == "I" && ner[1] != curNER ) ){
+      // an I without preceding B is handled as a B
+      // an I with a different TAG is also handled as a B
+      if ( !stack.empty() ){
+	if ( debug > 1 ){
+	  LOG << "B spit out " << curNER << endl;
+	  using TiCC::operator<<;
+	  LOG << "spit out " << stack << endl;
+	}
+	addEntity( words, i, stack, dstack );
+	dstack.clear();
+	stack.clear();
+      }
+      curNER = ner[1];
+    }
+    dstack.push_back( confs[i] );
+    stack.push_back( tags[i] );
+  }
+  if ( !stack.empty() ){
+    if ( debug > 1 ){
+      LOG << "END spit out " << curNER << endl;
+      using TiCC::operator<<;
+      LOG << "spit out " << stack << endl;
+    }
+    addEntity( words, words.size(), stack, dstack );
+  }
+}
+
+void NERTagger::addEntity( vector<frog_data>& sent,
+			   const size_t pos,
+			   const vector<string>& words,
+			   const vector<double>& confs ){
+  double c = 0;
+  for ( auto const& val : confs ){
+    c += val;
+  }
+  c /= confs.size();
+  for ( size_t i = 0; i < words.size(); ++i ){
+#pragma omp critical (foliaupdate)
+    {
+      sent[pos-words.size()+i].ner_tag = words[i];
+      sent[pos-words.size()+i].ner_confidence = c;
+    }
+  }
+}
+
+
 void NERTagger::post_process( vector<frog_data>& ){
   throw logic_error( "NER tagger call undefined postprocess() member" );
 }
