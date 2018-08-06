@@ -145,7 +145,7 @@ void Mwu::add( folia::Word *word, size_t index ){
   mWords.push_back( new mwuAna( word, txt, glue_tag, index ) );
 }
 
-void Mwu::add( frog_data& fd, size_t index ){
+void Mwu::add( frog_record& fd, size_t index ){
   icu::UnicodeString tmp;
 #pragma omp critical (foliaupdate)
   {
@@ -258,15 +258,17 @@ void Mwu::addDeclaration( folia::Document& doc ) const {
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
-void Mwu::Classify( vector<frog_data>& sent ){
+void Mwu::Classify( frog_data& sent ){
   reset();
   size_t id=0;
-  for ( auto& word : sent ){
+  for ( auto& word : sent.units ){
     add( word, id++ );
   }
   Classify();
   for ( const auto& mword : mWords ){
-    LOG << "mwu van " << mword->mwu_start << " tot " << mword->mwu_end << endl;
+    if ( mword->mwu_start != mword->mwu_end ){
+      LOG << "MWU van " << mword->mwu_start << " tot " << mword->mwu_end << endl;
+    }
   }
 }
 

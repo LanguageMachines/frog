@@ -196,15 +196,15 @@ void CGNTagger::addTag( folia::Word *word,
 }
 
 
-void CGNTagger::post_process( vector<frog_data>& words ){
+void CGNTagger::post_process( frog_data& words ){
   for ( size_t i=0; i < _tag_result.size(); ++i ){
-    addTag( words[i],
+    addTag( words.units[i],
 	    _tag_result[i].assignedTag(),
 	    _tag_result[i].confidence() );
   }
 }
 
-void CGNTagger::addTag( frog_data& fd,
+void CGNTagger::addTag( frog_record& fd,
 			const string& inputTag,
 			double confidence ){
 #pragma omp critical (dataupdate)

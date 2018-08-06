@@ -235,12 +235,12 @@ void IOBTagger::post_process( const std::vector<folia::Word*>& swords ){
   addIOBTags( swords, tags, conf );
 }
 
-void IOBTagger::Classify( vector<frog_data>& swords ){
+void IOBTagger::Classify( frog_data& swords ){
   vector<string> words;
   vector<string> ptags;
 #pragma omp critical (dataupdate)
   {
-    for ( const auto& w : swords ){
+    for ( const auto& w : swords.units ){
       words.push_back( w.word );
       ptags.push_back( w.tag );
     }
@@ -275,18 +275,18 @@ void IOBTagger::Classify( vector<frog_data>& swords ){
   post_process( swords );
 }
 
-void IOBTagger::post_process( vector<frog_data>& words ){
+void IOBTagger::post_process( frog_data& words ){
   if ( debug ){
     LOG << "IOB postprocess...." << endl;
   }
   for ( size_t i=0; i < _tag_result.size(); ++i ){
-    addTag( words[i],
+    addTag( words.units[i],
 	    _tag_result[i].assignedTag(),
 	    _tag_result[i].confidence() );
   }
 }
 
-void IOBTagger::addTag( frog_data& fd,
+void IOBTagger::addTag( frog_record& fd,
 			const string& tag,
 			double confidence ){
 #pragma omp critical (dataupdate)

@@ -827,7 +827,7 @@ void Mbma::Classify( folia::Word* sword ){
   }
 }
 
-void Mbma::addMorph( frog_data& fd,
+void Mbma::addMorph( frog_record& fd,
 		     const vector<string>& morphs ) const {
 #pragma omp critical (dataupdate)
   {
@@ -835,7 +835,7 @@ void Mbma::addMorph( frog_data& fd,
   }
 }
 
-void Mbma::addBracketMorph( frog_data& fd,
+void Mbma::addBracketMorph( frog_record& fd,
 			    const string& wrd,
 			    const string& pos_tag,
 			    const string& c_tag ) const {
@@ -872,7 +872,7 @@ void Mbma::addBracketMorph( frog_data& fd,
   }
 }
 
-void Mbma::addBracketMorph( frog_data& fd,
+void Mbma::addBracketMorph( frog_record& fd,
 			    const string& orig_word,
 			    const BracketNest *brackets ) const {
   if (debugFlag > 1){
@@ -885,7 +885,7 @@ void Mbma::addBracketMorph( frog_data& fd,
   }
 }
 
-void Mbma::getResult( frog_data& fd,
+void Mbma::getResult( frog_record& fd,
 		      const icu::UnicodeString& uword,
 		      const string& head ) const {
   if ( analysis.size() == 0 ){
@@ -915,7 +915,7 @@ void Mbma::getResult( frog_data& fd,
   }
 }
 
-void Mbma::Classify( frog_data& fd ){
+void Mbma::Classify( frog_record& fd ){
   string word_s;
   string tag;
   string token_class;

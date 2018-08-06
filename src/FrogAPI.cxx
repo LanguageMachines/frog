@@ -1432,7 +1432,7 @@ void FrogAPI::FrogDoc( folia::Document& doc,
   return;
 }
 
-void FrogAPI::frog_sentence( vector<frog_data>& sent ){
+void FrogAPI::frog_sentence( frog_data& sent ){
   //  timers.frogTimer.start();
   if ( options.debugFlag > 5 ){
     LOG << "Frogging sentence:" << sent << endl;
@@ -1451,7 +1451,7 @@ void FrogAPI::frog_sentence( vector<frog_data>& sent ){
   if ( !all_well ){
     throw runtime_error( exs );
   }
-  for ( auto& word : sent ) {
+  for ( auto& word : sent.units ) {
 #pragma omp parallel sections
     {
 #pragma omp section
@@ -1552,10 +1552,8 @@ void FrogAPI::frog_sentence( vector<frog_data>& sent ){
   if ( !all_well ){
     throw runtime_error( exs );
   }
-  int cnt = 0;
-  for ( const auto& it : sent ){
-    cout << ++cnt <<"\t" << it << endl;
-  }
+  cout << "NEW Frog result:" << endl;
+  cout << sent << endl;
   // timers.frogTimer.stop();
   return;
 }
@@ -1638,8 +1636,8 @@ void FrogAPI::FrogFile( const string& infilename,
   }
   else {
     ifstream TEST( infilename );
-    vector<frog_data> res = tokenizer->tokenize_stream( TEST );
-    while ( !res.empty() ){
+    frog_data res = tokenizer->tokenize_stream( TEST );
+    while ( res.size() > 0 ){
       frog_sentence( res );
       res = tokenizer->tokenize_stream( TEST );
     }

@@ -35,9 +35,9 @@
 #include <string>
 #include <vector>
 
-class frog_data {
+class frog_record {
  public:
-  frog_data();
+  frog_record();
   std::string word;
   std::string token_class;
   bool no_space;
@@ -52,6 +52,14 @@ class frog_data {
   std::vector<std::string> morphs_nested;
 };
 
+class frog_data {
+ public:
+  size_t size() const { return units.size(); };
+  std::vector<frog_record> units;
+  std::vector<std::pair<size_t,size_t>> mwus;
+};
+
+std::ostream& operator<<( std::ostream&, const frog_record& );
 std::ostream& operator<<( std::ostream&, const frog_data& );
 
 #endif

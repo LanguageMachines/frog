@@ -356,7 +356,7 @@ void Mblem::Classify( folia::Word *sword ){
   getFoLiAResult( sword, uword );
 }
 
-void Mblem::Classify( frog_data& fd ){
+void Mblem::Classify( frog_record& fd ){
   icu::UnicodeString uword;
   string pos;
   string token_class;

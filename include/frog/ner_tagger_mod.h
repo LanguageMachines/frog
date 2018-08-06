@@ -44,18 +44,18 @@ class NERTagger: public BaseTagger {
   explicit NERTagger( TiCC::LogStream * );
   bool init( const TiCC::Configuration& );
   void Classify( const std::vector<folia::Word *>& );
-  void Classify( std::vector<frog_data>& );
+  void Classify( frog_data& );
   void post_process( const std::vector<folia::Word*>& );
   void post_process( const std::vector<folia::Word*>&,
 		     const std::vector<std::string>& );
-  void post_process( std::vector<frog_data>& );
-  void post_process( std::vector<frog_data>&,
+  void post_process( frog_data& );
+  void post_process( frog_data&,
 		     const std::vector<std::string>& );
   void addDeclaration( folia::Document& ) const;
   void addNERTags( const std::vector<folia::Word*>&,
 		   const std::vector<std::string>&,
 		   const std::vector<double>& );
-  void addNERTags( std::vector<frog_data>&,
+  void addNERTags( frog_data&,
 		   const std::vector<std::string>&,
 		   const std::vector<double>& );
   bool read_gazets( const std::string& f, const std::string& p ){
@@ -93,7 +93,7 @@ class NERTagger: public BaseTagger {
 		  const std::vector<folia::Word*>&,
 		  const std::vector<double>&,
 		  const std::string& );
-  void addEntity( std::vector<frog_data>&,
+  void addEntity( frog_data&,
 		  size_t,
 		  const std::vector<std::string>&,
 		  const std::vector<double>& );

@@ -40,9 +40,9 @@ class IOBTagger: public BaseTagger {
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
   void Classify( const std::vector<folia::Word*>& );
-  void Classify( std::vector<frog_data>& );
+  void Classify( frog_data& );
   void post_process( const std::vector<folia::Word*>& );
-  void post_process( std::vector<frog_data>& );
+  void post_process( frog_data& );
  private:
   void addChunk( folia::ChunkingLayer *,
 		 const std::vector<folia::Word*>&,
@@ -52,7 +52,7 @@ class IOBTagger: public BaseTagger {
   void addIOBTags( const std::vector<folia::Word*>&,
 		   const std::vector<std::string>&,
 		   const std::vector<double>& );
-  void addTag( frog_data&,
+  void addTag( frog_record&,
 	       const std::string&,
 	       double );
 };

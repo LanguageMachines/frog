@@ -257,12 +257,12 @@ folia::Document *UctoTokenizer::tokenizestring( const string& s){
     throw runtime_error( "ucto tokenizer not initialized" );
 }
 
-vector<frog_data> UctoTokenizer::tokenize_stream( istream& is ){
+frog_data UctoTokenizer::tokenize_stream( istream& is ){
   // this is non greedy. Might be called multiple times to consume
   // the whole stream
   static vector<Tokenizer::Token> stack; // NOT THREAD SAFE!!!
   if ( tokenizer) {
-    vector<frog_data> result;
+    frog_data result;
     vector<Tokenizer::Token> toks = stack;
     stack.clear();
     vector<Tokenizer::Token> new_toks = tokenizer->tokenizeStream( is );
@@ -273,11 +273,11 @@ vector<frog_data> UctoTokenizer::tokenize_stream( istream& is ){
 	stack.push_back( tok );
       }
       else {
-	frog_data tmp;
+	frog_record tmp;
 	tmp.word = TiCC::UnicodeToUTF8(tok.us);
 	tmp.token_class = TiCC::UnicodeToUTF8(tok.type);
 	tmp.no_space = (tok.role & Tokenizer::TokenRole::NOSPACE);
-	result.push_back( tmp );
+	result.units.push_back( tmp );
 	if ( (tok.role & Tokenizer::TokenRole::ENDOFSENTENCE) ){
 	  skip = true;
 	}

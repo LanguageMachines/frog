@@ -274,11 +274,11 @@ void BaseTagger::Classify( const vector<folia::Word*>& swords ){
   }
 }
 
-string BaseTagger::extract_sentence( const vector<frog_data>& sent,
+string BaseTagger::extract_sentence( const frog_data& sent,
 				     vector<string>& words ){
   words.clear();
   string sentence;
-  for ( const auto& sword : sent ){
+  for ( const auto& sword : sent.units ){
     icu::UnicodeString word = TiCC::UnicodeFromUTF8(sword.word);
     if ( filter ){
       word = filter->filter( word );
@@ -292,7 +292,7 @@ string BaseTagger::extract_sentence( const vector<frog_data>& sent,
   return sentence;
 }
 
-void BaseTagger::Classify( vector<frog_data>& sent ){
+void BaseTagger::Classify( frog_data& sent ){
   string sentence = extract_sentence( sent, _words );
   if ( debug > 1 ){
     LOG << _label << "-tagger in: " << sentence << endl;
@@ -302,7 +302,7 @@ void BaseTagger::Classify( vector<frog_data>& sent ){
     LOG << _label << "-tagger mismatch between number of words and the tagger result." << endl;
     LOG << "words according to sentence: " << endl;
     for ( size_t w = 0; w < sent.size(); ++w ) {
-      LOG << "w[" << w << "]= " << sent[w].word << endl;
+      LOG << "w[" << w << "]= " << sent.units[w].word << endl;
     }
     LOG << "words according to " << _label << "-tagger: " << endl;
     for ( size_t i=0; i < _tag_result.size(); ++i ){

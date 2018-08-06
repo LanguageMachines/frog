@@ -79,9 +79,9 @@ class Mwu {
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
   void Classify( const std::vector<folia::Word *>& );
-  void Classify( std::vector<frog_data>& );
+  void Classify( frog_data& );
   void add( folia::Word *, size_t );
-  void add( frog_data&, size_t );
+  void add( frog_record&, size_t );
   std::string getTagset() const { return mwu_tagset; };
   std::vector<mwuAna*>& getAna(){ return mWords; };
  private:

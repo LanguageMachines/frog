@@ -58,7 +58,7 @@ class Mblem {
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;
   void Classify( folia::Word * );
-  void Classify( frog_data& );
+  void Classify( frog_record& );
   void Classify( const icu::UnicodeString& );
   std::vector<std::pair<std::string,std::string> > getResult() const;
   void filterTag( const std::string&  );

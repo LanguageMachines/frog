@@ -36,7 +36,7 @@
 using namespace std;
 using TiCC::operator<<;
 
-frog_data::frog_data():
+frog_record::frog_record():
   no_space(false),
   tag_confidence(0.0),
   iob_confidence(0.0),
@@ -44,7 +44,8 @@ frog_data::frog_data():
 {}
 
 const string TAB = "\t";
-ostream& operator<<( ostream& os, const frog_data& fd ){
+
+ostream& operator<<( ostream& os, const frog_record& fd ){
   os << fd.word << TAB;
   if ( !fd.lemmas.empty() ){
     os << fd.lemmas[0];
@@ -61,5 +62,13 @@ ostream& operator<<( ostream& os, const frog_data& fd ){
   os << TAB << fd.tag << TAB << fd.tag_confidence;
   os << TAB << fd.iob_tag << TAB << fd.iob_confidence;
   os << TAB << fd.ner_tag << TAB << fd.ner_confidence;
+  return os;
+}
+
+ostream& operator<<( ostream& os, const frog_data& fd ){
+  int cnt = 0;
+  for ( auto it : fd.units ){
+    os << ++cnt << TAB << it << endl;
+  }
   return os;
 }

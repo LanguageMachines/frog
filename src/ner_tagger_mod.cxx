@@ -426,7 +426,7 @@ void NERTagger::post_process( const vector<folia::Word*>& ){
   throw logic_error( "NER tagger call undefined postprocess() member" );
 }
 
-void NERTagger::Classify( vector<frog_data>& swords ){
+void NERTagger::Classify( frog_data& swords ){
   if ( debug ){
     LOG << "classify from DATA" << endl;
   }
@@ -434,7 +434,7 @@ void NERTagger::Classify( vector<frog_data>& swords ){
   vector<string> ptags;
 #pragma omp critical (dataupdate)
   {
-    for ( const auto& w : swords ){
+    for ( const auto& w : swords.units ){
       words.push_back( w.word );
       ptags.push_back( w.tag );
     }
@@ -482,7 +482,7 @@ void NERTagger::Classify( vector<frog_data>& swords ){
   post_process( swords, override_tags );
 }
 
-void NERTagger::post_process( vector<frog_data>& swords,
+void NERTagger::post_process( frog_data& swords,
 			      const vector<string>& override ){
   vector<string> tags;
   vector<double> conf;
@@ -497,10 +497,10 @@ void NERTagger::post_process( vector<frog_data>& swords,
   addNERTags( swords, tags, conf );
 }
 
-void NERTagger::addNERTags( vector<frog_data>& words,
+void NERTagger::addNERTags( frog_data& words,
 			    const vector<string>& tags,
 			    const vector<double>& confs ){
-  if ( words.empty() ) {
+  if ( words.size() == 0 ) {
     return;
   }
   vector<string> stack;
@@ -563,7 +563,7 @@ void NERTagger::addNERTags( vector<frog_data>& words,
   }
 }
 
-void NERTagger::addEntity( vector<frog_data>& sent,
+void NERTagger::addEntity( frog_data& sent,
 			   const size_t pos,
 			   const vector<string>& words,
 			   const vector<double>& confs ){
@@ -575,14 +575,14 @@ void NERTagger::addEntity( vector<frog_data>& sent,
   for ( size_t i = 0; i < words.size(); ++i ){
 #pragma omp critical (foliaupdate)
     {
-      sent[pos-words.size()+i].ner_tag = words[i];
-      sent[pos-words.size()+i].ner_confidence = c;
+      sent.units[pos-words.size()+i].ner_tag = words[i];
+      sent.units[pos-words.size()+i].ner_confidence = c;
     }
   }
 }
 
 
-void NERTagger::post_process( vector<frog_data>& ){
+void NERTagger::post_process( frog_data& ){
   throw logic_error( "NER tagger call undefined postprocess() member" );
 }
 
