@@ -65,6 +65,8 @@ ostream& operator<<( ostream& os, const frog_record& fd ){
   os << TAB << fd.tag << TAB << fixed << showpoint << std::setprecision(6) << fd.tag_confidence;
   os << TAB << fd.ner_tag; // << TAB << fd.ner_confidence;
   os << TAB << fd.iob_tag; // << TAB << fd.iob_confidence;
+  os << TAB << fd.parse_index;
+  os << TAB << fd.parse_role;
   return os;
 }
 
@@ -87,16 +89,23 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
   return result;
 }
 
-ostream& operator<<( ostream& os, const frog_data& fd ){
-  for ( size_t pos=0; pos < fd.units.size(); ++pos ){
-    if ( fd.mwus.find( pos ) == fd.mwus.end() ){
-      os << pos+1 << TAB << fd.units[pos] << endl;
+void frog_data::resolve_mwus(){
+  mw_units.clear();
+  for ( size_t pos=0; pos < units.size(); ++pos ){
+    if ( mwus.find( pos ) == mwus.end() ){
+      mw_units.push_back( units[pos] );
     }
     else {
-      frog_record merged = merge( fd, pos, fd.mwus.find( pos )->second );
-      os << pos+1 << TAB << merged << endl;
-      pos = fd.mwus.find( pos )->second;
+      frog_record merged = merge( *this, pos, mwus.find( pos )->second );
+      mw_units.push_back( merged );
+      pos = mwus.find( pos )->second;
     }
+  }
+}
+
+ostream& operator<<( ostream& os, frog_data& fd ){
+  for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
+    os << pos+1 << TAB << fd.mw_units[pos] << endl;
   }
   return os;
 }

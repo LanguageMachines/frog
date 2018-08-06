@@ -41,6 +41,7 @@
 #include "libfolia/folia.h"
 #include "ucto/tokenize.h"
 #include "timbl/TimblAPI.h"
+#include "frog/FrogData.h"
 
 struct parseData;
 class TimerBlock;
@@ -61,7 +62,9 @@ class Parser {
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;
   void Parse( const std::vector<folia::Word *>&, TimerBlock& );
+  void Parse( frog_data&, TimerBlock& );
   parseData prepareParse( const std::vector<folia::Word *>& );
+  parseData prepareParse( frog_data& );
 
   std::vector<std::string> createParserInstances( const parseData& );
   std::string getTagset() const { return dep_tagset; };

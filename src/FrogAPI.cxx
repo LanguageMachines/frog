@@ -1433,6 +1433,7 @@ void FrogAPI::FrogDoc( folia::Document& doc,
 }
 
 void FrogAPI::frog_sentence( frog_data& sent ){
+  bool showParse = options.doParse;
   //  timers.frogTimer.start();
   if ( options.debugFlag > 5 ){
     LOG << "Frogging sentence:" << sent << endl;
@@ -1530,23 +1531,21 @@ void FrogAPI::frog_sentence( frog_data& sent ){
 #pragma omp section
     {
       if ( options.doMwu ){
-	if ( sent.size() > 0 ){
+	if ( !sent.empty() ){
 	  timers.mwuTimer.start();
 	  myMwu->Classify( sent );
 	  timers.mwuTimer.stop();
 	}
       }
-#ifdef SKIP
       if ( options.doParse ){
 	if ( options.maxParserTokens != 0
-	     && swords.size() > options.maxParserTokens ){
+	     && sent.size() > options.maxParserTokens ){
 	  showParse = false;
 	}
 	else {
-	  myParser->Parse( swords, timers );
+	  myParser->Parse( sent, timers );
 	}
       }
-#endif
     }
   }
   if ( !all_well ){

@@ -271,6 +271,7 @@ void Mwu::Classify( frog_data& sent ){
       sent.mwus[mword->mwu_start] = mword->mwu_end;
     }
   }
+  sent.resolve_mwus();
 }
 
 void Mwu::Classify( const vector<folia::Word*>& words ){

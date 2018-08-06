@@ -893,6 +893,69 @@ parseData Parser::prepareParse( const vector<folia::Word *>& fwords ){
   return pd;
 }
 
+
+void extract( const string& tv, string& head, string& mods ){
+  vector<string> v = TiCC::split_at_first_of( tv, "()" );
+  head = v[0];
+  mods.clear();
+  if ( v.size() > 1 ){
+    vector<string> mv = TiCC::split_at( v[1], "," );
+    mods = mv[0];
+    for ( size_t i=1; i < mv.size(); ++i ){
+      mods += "|" + mv[i];
+    }
+  }
+  if ( mods.empty() ){
+    mods = "__";
+  }
+}
+
+parseData Parser::prepareParse( frog_data& fd ){
+  parseData pd;
+  for ( size_t i = 0; i < fd.units.size(); ++i ){
+    if ( fd.mwus.find( i ) == fd.mwus.end() ){
+      string head;
+      string mods;
+      extract( fd.units[i].tag, head, mods );
+      pd.words.push_back( fd.units[i].word );
+      pd.heads.push_back( head );
+      pd.mods.push_back( mods );
+    }
+    else {
+      string multi_word;
+      string multi_head;
+      string multi_mods;
+      for ( size_t k = i; k <= fd.mwus[i]; ++k ){
+	icu::UnicodeString tmp = TiCC::UnicodeFromUTF8( fd.units[k].word );
+	if ( filter )
+	  tmp = filter->filter( tmp );
+	string ms = TiCC::UnicodeToUTF8( tmp );
+	// the word may contain spaces, remove them all!
+	ms.erase(remove_if(ms.begin(), ms.end(), ::isspace), ms.end());
+	string head;
+	string mods;
+	extract( fd.units[k].tag, head, mods );
+	if ( k == i ){
+	  multi_word = ms;
+	  multi_head = head;
+	  multi_mods = mods;
+	}
+	else {
+	  multi_word += "_" + ms;
+	  multi_head += "_" + head;
+	  multi_mods += "_" + mods;
+	}
+      }
+      pd.words.push_back( multi_word );
+      pd.heads.push_back( multi_head );
+      pd.mods.push_back( multi_mods );
+      i = fd.mwus[i];
+    }
+  }
+  fd.resolve_mwus(); // make sure fd.mw_units is ready to receive
+  return pd;
+}
+
 void appendResult( const vector<folia::Word *>& words,
 		   parseData& pd,
 		   const string& tagset,
@@ -1023,5 +1086,78 @@ void Parser::Parse( const vector<folia::Word*>& words,
 			       parseLog );
   timers.csiTimer.stop();
   appendParseResult( words, pd, dep_tagset, textclass, res );
+  timers.parseTimer.stop();
+}
+
+void appendResult( frog_data& fd,
+		   const vector<int>& nums,
+		   const vector<string>& roles ){
+  for ( size_t i = 0; i < nums.size(); ++i ){
+    fd.mw_units[i].parse_index = nums[i];
+    fd.mw_units[i].parse_role = roles[i];
+  }
+}
+
+void appendParseResult( frog_data& fd,
+			const vector<parsrel>& res ){
+  vector<int> nums;
+  vector<string> roles;
+  for ( const auto& it : res ){
+    nums.push_back( it.head );
+    roles.push_back( it.deprel );
+  }
+  appendResult( fd, nums, roles );
+}
+
+void Parser::Parse( frog_data& fd, TimerBlock& timers ){
+  timers.parseTimer.start();
+  if ( !isInit ){
+    LOG << "Parser is not initialized! EXIT!" << endl;
+    throw runtime_error( "Parser is not initialized!" );
+  }
+  if ( fd.empty() ){
+    LOG << "unable to parse an analisis without words" << endl;
+    return;
+  }
+  timers.prepareTimer.start();
+  parseData pd = prepareParse( fd );
+  timers.prepareTimer.stop();
+  vector<timbl_result> p_results;
+  vector<timbl_result> d_results;
+  vector<timbl_result> r_results;
+#pragma omp parallel sections
+  {
+#pragma omp section
+      {
+	timers.pairsTimer.start();
+	vector<string> instances = createPairInstances( pd );
+	timbl( pairs, instances, p_results );
+	timers.pairsTimer.stop();
+      }
+#pragma omp section
+      {
+	timers.dirTimer.start();
+	vector<string> instances = createDirInstances( pd );
+	timbl( dir, instances, d_results );
+	timers.dirTimer.stop();
+      }
+#pragma omp section
+      {
+	timers.relsTimer.start();
+	vector<string> instances = createRelInstances( pd );
+	timbl( rels, instances, r_results );
+	timers.relsTimer.stop();
+      }
+  }
+
+  timers.csiTimer.start();
+  vector<parsrel> res = parse( p_results,
+			       r_results,
+			       d_results,
+			       pd.words.size(),
+			       maxDepSpan,
+			       parseLog );
+  timers.csiTimer.stop();
+  appendParseResult( fd, res );
   timers.parseTimer.stop();
 }

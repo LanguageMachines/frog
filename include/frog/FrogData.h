@@ -51,16 +51,21 @@ class frog_record {
   std::vector<std::string> lemmas;
   std::vector<std::string> morphs;
   std::vector<std::string> morphs_nested;
+  int parse_index;
+  std::string parse_role;
 };
 
 class frog_data {
  public:
   size_t size() const { return units.size(); };
+  bool empty() const { return units.size() == 0; };
+  void resolve_mwus();
   std::vector<frog_record> units;
+  std::vector<frog_record> mw_units;
   std::map<size_t,size_t> mwus; // start pos to end pos
 };
 
 std::ostream& operator<<( std::ostream&, const frog_record& );
-std::ostream& operator<<( std::ostream&, const frog_data& );
+std::ostream& operator<<( std::ostream&, frog_data& );
 
 #endif
