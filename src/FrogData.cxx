@@ -30,6 +30,7 @@
 */
 
 #include <ostream>
+#include <iomanip>
 #include "ticcutils/PrettyPrint.h"
 #include "frog/FrogData.h"
 
@@ -61,7 +62,7 @@ ostream& operator<<( ostream& os, const frog_record& fd ){
   else {
     os << fd.morphs;
   }
-  os << TAB << fd.tag << TAB << showpoint << fd.tag_confidence;
+  os << TAB << fd.tag << TAB << fixed << showpoint << std::setprecision(6) << fd.tag_confidence;
   os << TAB << fd.ner_tag; // << TAB << fd.ner_confidence;
   os << TAB << fd.iob_tag; // << TAB << fd.iob_confidence;
   return os;
