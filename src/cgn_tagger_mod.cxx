@@ -210,7 +210,12 @@ void CGNTagger::addTag( frog_record& fd,
 #pragma omp critical (dataupdate)
   {
     fd.tag = inputTag;
-    fd.tag_confidence = confidence;
+    if ( inputTag.find( "SPEC(" ) == 0 ){
+      fd.tag_confidence = 1;
+    }
+    else {
+      fd.tag_confidence = confidence;
+    }
   }
   string ucto_class = fd.token_class;
   if ( debug > 1 ){

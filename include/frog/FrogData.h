@@ -34,6 +34,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 class frog_record {
  public:
@@ -56,7 +57,7 @@ class frog_data {
  public:
   size_t size() const { return units.size(); };
   std::vector<frog_record> units;
-  std::vector<std::pair<size_t,size_t>> mwus;
+  std::map<size_t,size_t> mwus; // start pos to end pos
 };
 
 std::ostream& operator<<( std::ostream&, const frog_record& );

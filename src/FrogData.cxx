@@ -39,7 +39,9 @@ using TiCC::operator<<;
 frog_record::frog_record():
   no_space(false),
   tag_confidence(0.0),
+  iob_tag( "O" ),
   iob_confidence(0.0),
+  ner_tag( "O" ),
   ner_confidence(0.0)
 {}
 
@@ -59,16 +61,41 @@ ostream& operator<<( ostream& os, const frog_record& fd ){
   else {
     os << fd.morphs;
   }
-  os << TAB << fd.tag << TAB << fd.tag_confidence;
-  os << TAB << fd.iob_tag << TAB << fd.iob_confidence;
-  os << TAB << fd.ner_tag << TAB << fd.ner_confidence;
+  os << TAB << fd.tag << TAB << showpoint << fd.tag_confidence;
+  os << TAB << fd.ner_tag; // << TAB << fd.ner_confidence;
+  os << TAB << fd.iob_tag; // << TAB << fd.iob_confidence;
   return os;
 }
 
+frog_record merge( const frog_data& fd, size_t start, size_t finish ){
+  frog_record result = fd.units[start];
+  for ( size_t i = start+1; i <= finish; ++i ){
+    result.word += "_" + fd.units[i].word;
+    result.lemmas[0] += "_" + fd.units[i].lemmas[0];
+    if ( result.morphs.empty() ){
+      result.morphs_nested[0] += "_" + fd.units[i].morphs_nested[0];
+    }
+    else {
+      result.morphs[0] += "]_[" + fd.units[i].morphs[0];
+    }
+    result.tag += "_" + fd.units[i].tag;
+    result.tag_confidence *= fd.units[i].tag_confidence;
+    result.ner_tag += "_" + fd.units[i].ner_tag;
+    result.iob_tag += "_" + fd.units[i].iob_tag;
+  }
+  return result;
+}
+
 ostream& operator<<( ostream& os, const frog_data& fd ){
-  int cnt = 0;
-  for ( auto it : fd.units ){
-    os << ++cnt << TAB << it << endl;
+  for ( size_t pos=0; pos < fd.units.size(); ++pos ){
+    if ( fd.mwus.find( pos ) == fd.mwus.end() ){
+      os << pos+1 << TAB << fd.units[pos] << endl;
+    }
+    else {
+      frog_record merged = merge( fd, pos, fd.mwus.find( pos )->second );
+      os << pos+1 << TAB << merged << endl;
+      pos = fd.mwus.find( pos )->second;
+    }
   }
   return os;
 }

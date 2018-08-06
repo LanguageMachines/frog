@@ -48,6 +48,7 @@ before_install:
       brew update;
       brew install pkg-config;
       brew install autoconf-archive;
+      brew install telnet;
       brew outdated || brew upgrade libxml2;
       brew outdated || brew install bzip2;
       brew outdated || brew install zlib;
