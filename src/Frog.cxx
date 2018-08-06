@@ -453,11 +453,19 @@ bool parse_args( TiCC::CL_Options& Opts,
   }
   if ( fileNames.empty() ){
     if ( !TestFileName.empty() ){
+      if ( !TiCC::isFile( TestFileName ) ){
+	LOG << "Input file not found: " << TestFileName << endl;
+	return false;
+      }
       fileNames.insert( TestFileName );
     }
     else {
       vector<string> mass = Opts.getMassOpts();
       for ( const auto& name : mass ){
+	if ( !TiCC::isFile( name ) ){
+	  LOG << "Input file not found: " << name << endl;
+	  return false;
+	}
 	fileNames.insert( name );
       }
     }
