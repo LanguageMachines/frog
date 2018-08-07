@@ -41,6 +41,7 @@ class frog_record {
   frog_record();
   std::string word;
   std::string token_class;
+  std::string language;
   bool no_space;
   std::string tag;
   double tag_confidence;

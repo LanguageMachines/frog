@@ -277,6 +277,7 @@ frog_data UctoTokenizer::tokenize_stream( istream& is ){
 	tmp.word = TiCC::UnicodeToUTF8(tok.us);
 	tmp.token_class = TiCC::UnicodeToUTF8(tok.type);
 	tmp.no_space = (tok.role & Tokenizer::TokenRole::NOSPACE);
+	tmp.language = tok.lc;
 	result.units.push_back( tmp );
 	if ( (tok.role & Tokenizer::TokenRole::ENDOFSENTENCE) ){
 	  skip = true;
