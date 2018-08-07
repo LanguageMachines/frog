@@ -498,7 +498,7 @@ FrogAPI::~FrogAPI() {
   delete tokenizer;
 }
 
-bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers){
+bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers ){
   vector<folia::Word*> swords;
   if ( options.doQuoteDetection ){
     swords = sent->wordParts();
@@ -1432,7 +1432,7 @@ void FrogAPI::FrogDoc( folia::Document& doc,
   return;
 }
 
-void FrogAPI::frog_sentence( frog_data& sent ){
+bool FrogAPI::frog_sentence( frog_data& sent ){
   bool showParse = options.doParse;
   //  timers.frogTimer.start();
   if ( options.debugFlag > 5 ){
@@ -1528,33 +1528,30 @@ void FrogAPI::frog_sentence( frog_data& sent ){
 	timers.iobTimer.stop();
       }
     }
-#pragma omp section
-    {
-      if ( options.doMwu ){
-	if ( !sent.empty() ){
-	  timers.mwuTimer.start();
-	  myMwu->Classify( sent );
-	  timers.mwuTimer.stop();
-	}
-      }
-      if ( options.doParse ){
-	if ( options.maxParserTokens != 0
-	     && sent.size() > options.maxParserTokens ){
-	  showParse = false;
-	}
-	else {
-	  myParser->Parse( sent, timers );
-	}
-      }
-    }
   }
   if ( !all_well ){
     throw runtime_error( exs );
   }
+  if ( options.doMwu ){
+    if ( !sent.empty() ){
+      timers.mwuTimer.start();
+      myMwu->Classify( sent );
+      timers.mwuTimer.stop();
+    }
+  }
+  if ( options.doParse ){
+    if ( options.maxParserTokens != 0
+	 && sent.size() > options.maxParserTokens ){
+      showParse = false;
+    }
+    else {
+      myParser->Parse( sent, timers );
+    }
+  }
+  // timers.frogTimer.stop();
   cout << "NEW Frog result:" << endl;
   cout << sent << endl;
-  // timers.frogTimer.stop();
-  return;
+  return showParse;
 }
 
 string filter_non_NC( const string& filename ){
@@ -1635,9 +1632,22 @@ void FrogAPI::FrogFile( const string& infilename,
   }
   else {
     ifstream TEST( infilename );
+    int i = 0;
     frog_data res = tokenizer->tokenize_stream( TEST );
     while ( res.size() > 0 ){
-      frog_sentence( res );
+      ++i;
+      bool showParse = frog_sentence( res );
+      if ( options.doParse && !showParse ){
+	LOG << "WARNING!" << endl;
+	LOG << "Sentence " << i
+	    << " isn't parsed because it contains more tokens then set with the --max-parser-tokens="
+	    << options.maxParserTokens << " option." << endl;
+      }
+      else {
+	if  (options.debugFlag > 0){
+	  LOG << TiCC::Timer::now() << " done with sentence[" << i << "]" << endl;
+	}
+      }
       res = tokenizer->tokenize_stream( TEST );
     }
     ifstream IN( infilename );
