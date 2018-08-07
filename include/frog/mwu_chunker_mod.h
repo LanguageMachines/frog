@@ -44,6 +44,7 @@ class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );
  public:
   mwuAna( folia::Word *, const std::string&, const std::string&, size_t );
+  mwuAna( const std::string&, const std::string&, const std::string&, size_t );
   virtual ~mwuAna() {};
 
   void merge( const mwuAna * );

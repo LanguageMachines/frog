@@ -66,9 +66,21 @@ mwuAna::mwuAna( folia::Word *fwrd,
   mwu_start = mwu_end = index;
 }
 
+mwuAna::mwuAna( const string& txt,
+		const string& tag,
+		const string& glue_tag,
+		size_t index ){
+  spec = false;
+  word = txt;
+  spec = ( tag == glue_tag );
+  mwu_start = mwu_end = index;
+}
+
 void mwuAna::merge( const mwuAna *add ){
-  fwords.push_back( add->fwords[0] );
-  mwu_end = add->mwu_end;;;
+  if ( !add->fwords.empty() ){
+    fwords.push_back( add->fwords[0] );
+  }
+  mwu_end = add->mwu_end;
   delete add;
 }
 
@@ -147,14 +159,14 @@ void Mwu::add( folia::Word *word, size_t index ){
 
 void Mwu::add( frog_record& fd, size_t index ){
   icu::UnicodeString tmp;
-#pragma omp critical (foliaupdate)
+#pragma omp critical (dataupdate)
   {
     tmp = TiCC::UnicodeFromUTF8(fd.word);
   }
   if ( filter )
     tmp = filter->filter( tmp );
   string txt = TiCC::UnicodeToUTF8( tmp );
-  mWords.push_back( new mwuAna( 0, txt, glue_tag, index ) );
+  mWords.push_back( new mwuAna( txt, fd.tag, glue_tag, index ) );
 }
 
 bool Mwu::read_mwus( const string& fname) {
