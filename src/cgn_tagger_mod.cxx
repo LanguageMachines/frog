@@ -133,11 +133,11 @@ bool CGNTagger::init( const TiCC::Configuration& config ){
 void CGNTagger::addDeclaration( folia::Document& doc ) const {
   doc.declare( folia::AnnotationType::POS,
 	       tagset,
-	       "annotator='frog-mbpos-" + version
+	       "annotator='frog-mbpos-" + _version
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
-string CGNTagger::getSubSet( const string& val, const string& head, const string& fullclass ){
+string CGNTagger::getSubSet( const string& val, const string& head, const string& fullclass ) const {
   auto it = cgnSubSets.find( val );
   if ( it == cgnSubSets.end() ){
     throw folia::ValueError( "unknown cgn subset for class: '" + val + "', full class is: '" + fullclass + "'" );

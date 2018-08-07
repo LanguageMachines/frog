@@ -136,10 +136,10 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
 
   val = config.lookUp( "version", _label );
   if ( val.empty() ){
-    version = "1.0";
+    _version = "1.0";
   }
   else
-    version = val;
+    _version = val;
   val = config.lookUp( "set", _label );
   if ( val.empty() ){
     LOG << "missing 'set' declaration in config" << endl;

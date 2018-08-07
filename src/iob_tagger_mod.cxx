@@ -182,7 +182,7 @@ void IOBTagger::addIOBTags( const vector<folia::Word*>& words,
 void IOBTagger::addDeclaration( folia::Document& doc ) const {
   doc.declare( folia::AnnotationType::CHUNKING,
 	       tagset,
-	       "annotator='frog-chunker-" + version
+	       "annotator='frog-chunker-" + _version
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 

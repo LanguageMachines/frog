@@ -85,6 +85,7 @@ class Mwu {
   void add( frog_record&, size_t );
   std::string getTagset() const { return mwu_tagset; };
   std::vector<mwuAna*>& getAna(){ return mWords; };
+  std::string version() const { return _version; };
  private:
   bool readsettings( const std::string&, const std::string&);
   bool read_mwus( const std::string& );
@@ -94,7 +95,7 @@ class Mwu {
   std::vector<mwuAna*> mWords;
   mymap2 MWUs;
   TiCC::LogStream *mwuLog;
-  std::string version;
+  std::string _version;
   std::string textclass;
   std::string mwu_tagset;
   std::string glue_tag;

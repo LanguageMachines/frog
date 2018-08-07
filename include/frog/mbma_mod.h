@@ -69,6 +69,7 @@ class Mbma {
   Rule* matchRule( const std::vector<std::string>&, const icu::UnicodeString& );
   std::vector<Rule*> execute( const icu::UnicodeString& ,
 			      const std::vector<std::string>& );
+  std::string version() const { return _version; };
   static std::map<std::string,std::string> TAGconv;
   static std::string mbma_tagset;
   static std::string pos_tagset;
@@ -103,7 +104,7 @@ class Mbma {
   std::string MTreeFilename;
   Timbl::TimblAPI *MTree;
   std::vector<Rule*> analysis;
-  std::string version;
+  std::string _version;
   std::string textclass;
   TiCC::LogStream *mbmaLog;
   TiCC::UniFilter *filter;

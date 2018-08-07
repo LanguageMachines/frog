@@ -63,7 +63,7 @@ class frog_data {
   void resolve_mwus();
   std::vector<frog_record> units;
   std::vector<frog_record> mw_units;
-  std::map<size_t,size_t> mwus; // start pos to end pos
+  std::map<size_t,size_t> mwus; // maps a start pos to end pos
 };
 
 std::ostream& operator<<( std::ostream&, const frog_record& );

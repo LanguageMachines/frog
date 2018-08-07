@@ -42,12 +42,14 @@ class CGNTagger: public BaseTagger {
   void addDeclaration( folia::Document& ) const;
   void post_process( const std::vector<folia::Word*>& );
   void post_process( frog_data& );
+  std::string getSubSet( const std::string& ,
+			 const std::string&,
+			 const std::string& ) const;
  private:
   void addTag( frog_record&, const std::string&, double );
   void addTag( folia::Word *, const std::string&, double );
   void fillSubSetTable();
   bool fillSubSetTable( const std::string&, const std::string& );
-  std::string getSubSet( const std::string& , const std::string&, const std::string& );
   std::multimap<std::string,std::string> cgnSubSets;
   std::multimap<std::string,std::string> cgnConstraints;
 };

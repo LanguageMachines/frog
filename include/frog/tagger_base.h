@@ -55,6 +55,7 @@ class BaseTagger {
   std::string set_eos_mark( const std::string& );
   bool fill_map( const std::string&, std::map<std::string,std::string>& );
   std::vector<Tagger::TagResult> tagLine( const std::string& );
+  std::string version() const { return _version; };
  private:
   std::string extract_sentence( const std::vector<folia::Word*>&,
 				std::vector<std::string>& );
@@ -68,7 +69,7 @@ class BaseTagger {
   int debug;
   std::string _label;
   std::string tagset;
-  std::string version;
+  std::string _version;
   std::string textclass;
   TiCC::LogStream *tag_log;
   MbtAPI *tagger;

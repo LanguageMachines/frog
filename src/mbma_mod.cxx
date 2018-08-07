@@ -127,10 +127,10 @@ bool Mbma::init( const TiCC::Configuration& config ) {
   }
   val = config.lookUp( "version", "mbma" );
   if ( val.empty() ){
-    version = "1.0";
+    _version = "1.0";
   }
   else {
-    version = val;
+    _version = val;
   }
   val = config.lookUp( "set", "mbma" );
   if ( !val.empty() ){
@@ -750,11 +750,11 @@ void Mbma::getFoLiAResult( folia::Word *fword,
 
 void Mbma::addDeclaration( folia::Document& doc ) const {
   doc.declare( folia::AnnotationType::MORPHOLOGICAL, mbma_tagset,
-	       "annotator='frog-mbma-" +  version +
+	       "annotator='frog-mbma-" + _version +
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
   if ( doDeepMorph ){
     doc.declare( folia::AnnotationType::POS, clex_tagset,
-		 "annotator='frog-mbma-" +  version +
+		 "annotator='frog-mbma-" + _version +
 		 + "', annotatortype='auto', datetime='" + getTime() + "'");
   }
 }

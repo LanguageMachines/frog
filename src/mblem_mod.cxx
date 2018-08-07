@@ -89,10 +89,10 @@ bool Mblem::init( const TiCC::Configuration& config ) {
   }
   val = config.lookUp( "version", "mblem" );
   if ( val.empty() ){
-    version = "1.0";
+    _version = "1.0";
   }
   else
-    version = val;
+    _version = val;
   val = config.lookUp( "set", "mblem" );
   if ( val.empty() ){
     tagset = "http://ilk.uvt.nl/folia/sets/frog-mblem-nl";
@@ -292,7 +292,7 @@ void Mblem::getFoLiAResult( folia::Word *word, const icu::UnicodeString& uWord )
 void Mblem::addDeclaration( folia::Document& doc ) const {
   doc.declare( folia::AnnotationType::LEMMA,
 	       tagset,
-	       "annotator='frog-mblem-" + version
+	       "annotator='frog-mblem-" + _version
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 

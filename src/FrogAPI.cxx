@@ -498,6 +498,137 @@ FrogAPI::~FrogAPI() {
   delete tokenizer;
 }
 
+folia::Document* FrogAPI::create_folia( const frog_data& fd,
+					const string& id ) const {
+  folia::Document *result = new folia::Document( "id='" + id + "'" );
+  if ( options.language != "none" ){
+    result->set_metadata( "language", options.language );
+  }
+  result->addStyle( "text/xsl", "folia.xsl" );
+  if ( !options.doTok ){
+    result->declare( folia::AnnotationType::TOKEN, "passthru", "annotator='ucto', annotatortype='auto', datetime='now()'" );
+  }
+  else {
+    result->declare( folia::AnnotationType::TOKEN,
+		    configuration.lookUp( "rulesFile", "tokenizer" ),
+		    "annotator='ucto', annotatortype='auto', datetime='now()'");
+  }
+  result->declare( folia::AnnotationType::POS,
+		   myCGNTagger->getTagset(),
+		   "annotator='frog-mbpos-" + myCGNTagger->version()
+		   + "', annotatortype='auto', datetime='" + getTime() + "'");
+  if ( options.doLemma ){
+    result->declare( folia::AnnotationType::LEMMA,
+		     myMblem->getTagset(),
+		     "annotator='frog-mblem-" + myMblem->version()
+		     + "', annotatortype='auto', datetime='" + getTime() + "'");
+  }
+  if ( options.doMorph ){
+    result->declare( folia::AnnotationType::MORPHOLOGICAL,
+		     myMbma->mbma_tagset,
+		     "annotator='frog-mbma-" + myMbma->version()
+		     + "', annotatortype='auto', datetime='" + getTime() + "'");
+    if ( options.doDeepMorph ){
+      result->declare( folia::AnnotationType::POS,
+		       myMbma->clex_tagset,
+		       "annotator='frog-mbma-" + myMbma->version()
+		       + "', annotatortype='auto', datetime='"
+		       + getTime() + "'");
+    }
+  }
+  if ( options.doMwu ){
+    result->declare( folia::AnnotationType::ENTITY,
+		     myMwu->getTagset(),
+		     "annotator='frog-mwu-" + myMwu->version()
+		     + "', annotatortype='auto', datetime='" + getTime() + "'");
+  }
+  folia::KWargs args;
+  args["id"] = id + ".text";
+  folia::Text *text = new folia::Text( args );
+  result->append( text );
+  args.clear();
+  args["generate_id"] = text->id();
+  folia::Sentence *s = new folia::Sentence( args, result );
+  text->append( s );
+  vector<folia::Word*> wv; // used for easy word lookup
+  for ( const auto& word : fd.units ){
+    folia::KWargs args;
+    args["generate_id"] = s->id();
+    args["class"] = word.token_class;
+    if ( word.no_space ){
+      args["space"] = "no";
+    }
+    folia::Word *w = new folia::Word( args, result );
+    w->settext( word.word );
+    s->append( w );
+    wv.push_back( w );
+    args.clear();
+    args["set"]   = myCGNTagger->getTagset();
+    args["class"] = word.tag;
+    args["confidence"]= TiCC::toString(word.tag_confidence);
+    folia::FoliaElement *postag = w->addPosAnnotation( args );
+    vector<string> hv = TiCC::split_at_first_of( word.tag, "()" );
+    string head = hv[0];
+    args["class"] = head;
+    folia::Feature *feat = new folia::HeadFeature( args );
+    postag->append( feat );
+    if ( head == "SPEC" ){
+      postag->confidence(1.0);
+    }
+    vector<string> feats;
+    if ( hv.size() > 1 ){
+      feats = TiCC::split_at( hv[1], "," );
+    }
+    for ( const auto& f : feats ){
+      folia::KWargs args;
+      args["set"] =  myCGNTagger->getTagset();
+      args["subset"] = myCGNTagger->getSubSet( f, head, word.tag );
+      args["class"]  = f;
+      folia::Feature *feat = new folia::Feature( args, result );
+      postag->append( feat );
+    }
+    if ( options.doLemma ){
+      folia::KWargs args;
+      args["set"] = myMblem->getTagset();
+      for ( const auto& lemma : word.lemmas ){
+	args["class"] = lemma;
+	w->addLemmaAnnotation( args );
+      }
+    }
+    if ( options.doMorph ){
+      folia::KWargs args;
+      args["set"] = myMbma->mbma_tagset;
+      folia::MorphologyLayer *ml = w->addMorphologyLayer( args );
+      if ( !options.doDeepMorph ){
+	for ( const auto& mt : word.morphs ) {
+	  folia::Morpheme *m = new folia::Morpheme( args, result );
+	  m->settext( mt );
+	  ml->append( m );
+	}
+      }
+      else {
+	LOG << "deep morpheme XML output not implemented!" << endl;
+      }
+    }
+  }
+  if ( options.doMwu && !fd.mwus.empty() ){
+    folia::KWargs args;
+    args["generate_id"] = s->id();
+    args["set"] = myMwu->getTagset();
+    folia::EntitiesLayer *el = new folia::EntitiesLayer( args, result );
+    s->append( el );
+    for ( const auto& mwu : fd.mwus ){
+      args["generate_id"] = el->id();
+      folia::Entity *e = new folia::Entity( args, result );
+      el->append( e );
+      for ( size_t pos = mwu.first; pos <= mwu.second; ++pos ){
+	e->append( wv[pos] );
+      }
+    }
+  }
+  return result;
+}
+
 bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers ){
   vector<folia::Word*> swords;
   if ( options.doQuoteDetection ){
@@ -1646,6 +1777,16 @@ void FrogAPI::FrogFile( const string& infilename,
       else {
 	if  (options.debugFlag > 0){
 	  LOG << TiCC::Timer::now() << " done with sentence[" << i << "]" << endl;
+	}
+	if ( !xmlOutFile.empty() ){
+	  string file_name = xmlOutFile;
+	  string::size_type pos = file_name.rfind( ".xml" );
+	  file_name = file_name.substr( 0, pos ) + "-" + TiCC::toString(i)
+	    + file_name.substr( pos );
+	  LOG << "file_name=" << file_name << endl;
+	  folia::Document *doc = create_folia( res, file_name );
+	  doc->save( file_name );
+	  LOG << "stored sentence " << i << " in file: " << file_name << endl;
 	}
       }
       res = tokenizer->tokenize_stream( TEST );

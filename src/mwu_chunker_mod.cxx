@@ -214,10 +214,10 @@ bool Mwu::init( const TiCC::Configuration& config ) {
   }
   val = config.lookUp( "version", "mwu" );
   if ( val.empty() ){
-    version = "1.0";
+    _version = "1.0";
   }
   else {
-    version = val;
+    _version = val;
   }
   val = config.lookUp( "set", "mwu" );
   if ( val.empty() ){
@@ -266,7 +266,7 @@ ostream &operator<<( ostream& os, const Mwu& mwu ){
 void Mwu::addDeclaration( folia::Document& doc ) const {
   doc.declare( folia::AnnotationType::ENTITY,
 	       mwu_tagset,
-	       "annotator='frog-mwu-" + version
+	       "annotator='frog-mwu-" + _version
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 

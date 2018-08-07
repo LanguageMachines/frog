@@ -369,7 +369,7 @@ void NERTagger::addNERTags( const vector<folia::Word*>& words,
 void NERTagger::addDeclaration( folia::Document& doc ) const {
   doc.declare( folia::AnnotationType::ENTITY,
 	       tagset,
-	       "annotator='frog-ner-" + version
+	       "annotator='frog-ner-" + _version
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
