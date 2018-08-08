@@ -688,9 +688,7 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
     folia::Chunk *iob = 0;
     size_t i = 0;
     for ( const auto& word : fd.units ){
-      LOG << "examine tag: " <<  word.iob_tag[0] << endl;
       if ( word.iob_tag[0] == 'B' ){
-	LOG << " a B!" << endl;
 	if ( el == 0 ){
 	  // create a layer, we need it
 	  folia::KWargs args;
