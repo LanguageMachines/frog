@@ -708,6 +708,71 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
     }
   }
   if ( options.doParse ){
+    folia::KWargs args;
+    args["generate_id"] = s->id();
+    args["set"] = myParser->getTagset();
+    folia::DependenciesLayer *el = new folia::DependenciesLayer( args, result );
+    s->append( el );
+    size_t mwu_index = 0;
+    LOG << "the MWUS: " << fd.mwus << endl;
+    for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
+      LOG << "mwu-index = " << mwu_index << endl;
+      if ( fd.mwus.find(pos) != fd.mwus.end() ){
+	// a true MWU
+	string cls = fd.mw_units[pos].parse_role;
+	LOG << "MWU ROLE: " << cls << " index=" << fd.mw_units[pos].parse_index << endl;
+	if ( cls != "ROOT" ){
+	  args["generate_id"] = el->id();
+	  args["class"] = cls;
+	  folia::Dependency *e = new folia::Dependency( args, result );
+	  el->append( e );
+	  folia::Headspan *dh = new folia::Headspan();
+	  dh->append( wv[fd.mw_units[pos].parse_index-1] );
+	  e->append( dh );
+	  folia::DependencyDependent *dd = new folia::DependencyDependent();
+	  auto pnt = fd.mwus.find(pos);
+	  for ( size_t i = pos; i <= pnt->second; ++i ){
+	    dd->append( wv[i] );
+	  }
+	  e->append( dd );
+	}
+	mwu_index = fd.mwus.find(pos)->second;
+      }
+      else {
+	// just 1 word
+	string cls = fd.mw_units[pos].parse_role;
+	LOG << "pos=" << pos <<" SINGLE WU ROLE: " << cls << " index=" << fd.mw_units[pos].parse_index << endl;
+	if ( cls != "ROOT" ){
+	  args["generate_id"] = el->id();
+	  args["class"] = cls;
+	  folia::Dependency *e = new folia::Dependency( args, result );
+	  el->append( e );
+	  folia::Headspan *dh = new folia::Headspan();
+	  LOG << "fd.mw_units[pos].parse_index = " << fd.mw_units[pos].parse_index << endl;
+	  size_t start = fd.mw_units[pos].parse_index-1;
+	  size_t stop = start;
+	  if ( fd.mwus.find(start) != fd.mwus.end() ){
+	    stop = fd.mwus.find(start)->second;
+	  }
+	  for ( size_t i=start; i <= stop; ++i){
+	    dh->append( wv[i] );
+	  }
+	  e->append( dh );
+	  folia::DependencyDependent *dd = new folia::DependencyDependent();
+	  start = mwu_index;
+	  stop = start;
+	  if ( fd.mwus.find(start) != fd.mwus.end() ){
+	    stop = fd.mwus.find(start)->second;
+	  }
+	  for ( size_t i=start; i <= stop; ++i){
+	    dd->append( wv[i] );
+	  }
+	  e->append( dd );
+	  mwu_index = stop;
+	}
+      }
+      ++mwu_index;
+    }
   }
   return result;
 }
