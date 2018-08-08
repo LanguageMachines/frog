@@ -715,6 +715,7 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
     s->append( el );
     size_t mwu_index = 0;
     LOG << "the MWUS: " << fd.mwus << endl;
+    LOG << "the MWUS-POS: " << fd.mwu_pos << endl;
     for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
       LOG << "mwu-index = " << mwu_index << endl;
       if ( fd.mwus.find(pos) != fd.mwus.end() ){
@@ -749,8 +750,13 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
 	  el->append( e );
 	  folia::Headspan *dh = new folia::Headspan();
 	  LOG << "fd.mw_units[pos].parse_index = " << fd.mw_units[pos].parse_index << endl;
-	  size_t start = fd.mw_units[pos].parse_index-1;
+	  size_t pi = fd.mw_units[pos].parse_index-1;
+	  size_t start = pi;
+	  if ( fd.mwu_pos.find(pi) != fd.mwu_pos.end() ){
+	    start = fd.mwu_pos.find(pi)->second-1;
+	  }
 	  size_t stop = start;
+	  LOG << "start=" << start << " stop = " << stop << endl;
 	  if ( fd.mwus.find(start) != fd.mwus.end() ){
 	    stop = fd.mwus.find(start)->second;
 	  }

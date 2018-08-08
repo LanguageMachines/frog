@@ -96,6 +96,7 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
 
 void frog_data::resolve_mwus(){
   mw_units.clear();
+  size_t mw_cnt = 0;
   for ( size_t pos=0; pos < units.size(); ++pos ){
     if ( mwus.find( pos ) == mwus.end() ){
       mw_units.push_back( units[pos] );
@@ -103,8 +104,10 @@ void frog_data::resolve_mwus(){
     else {
       frog_record merged = merge( *this, pos, mwus.find( pos )->second );
       mw_units.push_back( merged );
-      pos = mwus.find( pos )->second;
+      pos = mwus[pos];
     }
+    mwu_pos[mw_cnt] = pos;
+    ++mw_cnt;
   }
 }
 
