@@ -513,46 +513,24 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
 		    configuration.lookUp( "rulesFile", "tokenizer" ),
 		    "annotator='ucto', annotatortype='auto', datetime='now()'");
   }
-  result->declare( folia::AnnotationType::POS,
-		   myCGNTagger->getTagset(),
-		   "annotator='frog-mbpos-" + myCGNTagger->version()
-		   + "', annotatortype='auto', datetime='" + getTime() + "'");
+  myCGNTagger->addDeclaration( *result );
   if ( options.doLemma ){
-    result->declare( folia::AnnotationType::LEMMA,
-		     myMblem->getTagset(),
-		     "annotator='frog-mblem-" + myMblem->version()
-		     + "', annotatortype='auto', datetime='" + getTime() + "'");
+    myMblem->addDeclaration( *result );
   }
   if ( options.doMorph ){
-    result->declare( folia::AnnotationType::MORPHOLOGICAL,
-		     myMbma->mbma_tagset,
-		     "annotator='frog-mbma-" + myMbma->version()
-		     + "', annotatortype='auto', datetime='" + getTime() + "'");
-    if ( options.doDeepMorph ){
-      result->declare( folia::AnnotationType::POS,
-		       myMbma->clex_tagset,
-		       "annotator='frog-mbma-" + myMbma->version()
-		       + "', annotatortype='auto', datetime='"
-		       + getTime() + "'");
-    }
-  }
-  if ( options.doMwu ){
-    result->declare( folia::AnnotationType::ENTITY,
-		     myMwu->getTagset(),
-		     "annotator='frog-mwu-" + myMwu->version()
-		     + "', annotatortype='auto', datetime='" + getTime() + "'");
-  }
-  if ( options.doNER ){
-    result->declare( folia::AnnotationType::ENTITY,
-		     myNERTagger->getTagset(),
-		     "annotator='frog-ner-" + myNERTagger->version()
-		     + "', annotatortype='auto', datetime='" + getTime() + "'");
+    myMbma->addDeclaration( *result );
   }
   if ( options.doIOB ){
-    result->declare( folia::AnnotationType::CHUNKING,
-		     myIOBTagger->getTagset(),
-		     "annotator='frog-chunker-" + myIOBTagger->version()
-		     + "', annotatortype='auto', datetime='" + getTime() + "'");
+    myIOBTagger->addDeclaration( *result );
+  }
+  if ( options.doNER ){
+    myNERTagger->addDeclaration( *result );
+  }
+  if ( options.doMwu ){
+    myMwu->addDeclaration( *result );
+  }
+  if ( options.doParse ){
+    myParser->addDeclaration( *result );
   }
   folia::KWargs args;
   args["id"] = id + ".text";
@@ -620,21 +598,6 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
       }
       else {
 	LOG << "deep morpheme XML output not implemented!" << endl;
-      }
-    }
-  }
-  if ( options.doMwu && !fd.mwus.empty() ){
-    folia::KWargs args;
-    args["generate_id"] = s->id();
-    args["set"] = myMwu->getTagset();
-    folia::EntitiesLayer *el = new folia::EntitiesLayer( args, result );
-    s->append( el );
-    for ( const auto& mwu : fd.mwus ){
-      args["generate_id"] = el->id();
-      folia::Entity *e = new folia::Entity( args, result );
-      el->append( e );
-      for ( size_t pos = mwu.first; pos <= mwu.second; ++pos ){
-	e->append( wv[pos] );
       }
     }
   }
@@ -728,6 +691,23 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
       // some leftovers
       el->append( iob );
     }
+  }
+  if ( options.doMwu && !fd.mwus.empty() ){
+    folia::KWargs args;
+    args["generate_id"] = s->id();
+    args["set"] = myMwu->getTagset();
+    folia::EntitiesLayer *el = new folia::EntitiesLayer( args, result );
+    s->append( el );
+    for ( const auto& mwu : fd.mwus ){
+      args["generate_id"] = el->id();
+      folia::Entity *e = new folia::Entity( args, result );
+      el->append( e );
+      for ( size_t pos = mwu.first; pos <= mwu.second; ++pos ){
+	e->append( wv[pos] );
+      }
+    }
+  }
+  if ( options.doParse ){
   }
   return result;
 }

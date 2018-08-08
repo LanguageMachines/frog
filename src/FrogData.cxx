@@ -76,7 +76,12 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
     result.word += "_" + fd.units[i].word;
     result.lemmas[0] += "_" + fd.units[i].lemmas[0];
     if ( result.morphs.empty() ){
-      result.morphs_nested[0] += "_" + fd.units[i].morphs_nested[0];
+      if ( result.morphs_nested.empty() ){
+	// no morphemes
+      }
+      else {
+	result.morphs_nested[0] += "_" + fd.units[i].morphs_nested[0];
+      }
     }
     else {
       result.morphs[0] += "]_[" + fd.units[i].morphs[0];
