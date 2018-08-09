@@ -72,7 +72,9 @@ ostream& operator<<( ostream& os, const frog_record& fd ){
 
 frog_record merge( const frog_data& fd, size_t start, size_t finish ){
   frog_record result = fd.units[start];
+  result.parts.insert( start );
   for ( size_t i = start+1; i <= finish; ++i ){
+    result.parts.insert( i );
     result.word += "_" + fd.units[i].word;
     result.lemmas[0] += "_" + fd.units[i].lemmas[0];
     if ( result.morphs.empty() ){
@@ -100,13 +102,13 @@ void frog_data::resolve_mwus(){
   for ( size_t pos=0; pos < units.size(); ++pos ){
     if ( mwus.find( pos ) == mwus.end() ){
       mw_units.push_back( units[pos] );
+      mw_units.back().parts.insert( pos );
     }
     else {
       frog_record merged = merge( *this, pos, mwus.find( pos )->second );
       mw_units.push_back( merged );
       pos = mwus[pos];
     }
-    mwu_pos[mw_cnt] = pos;
     ++mw_cnt;
   }
 }

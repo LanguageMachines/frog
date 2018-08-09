@@ -35,10 +35,12 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 
 class frog_record {
  public:
   frog_record();
+  frog_record( size_t );
   std::string word;
   std::string token_class;
   std::string language;
@@ -54,6 +56,7 @@ class frog_record {
   std::vector<std::string> morphs_nested;
   int parse_index;
   std::string parse_role;
+  std::set<size_t> parts;
 };
 
 class frog_data {
@@ -64,7 +67,6 @@ class frog_data {
   std::vector<frog_record> units;
   std::vector<frog_record> mw_units;
   std::map<size_t,size_t> mwus; // maps a start pos to end pos
-  std::map<size_t,size_t> mwu_pos; // maps a mwu index to a pos
 };
 
 std::ostream& operator<<( std::ostream&, const frog_record& );

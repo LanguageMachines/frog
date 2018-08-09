@@ -713,12 +713,10 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
     args["set"] = myParser->getTagset();
     folia::DependenciesLayer *el = new folia::DependenciesLayer( args, result );
     s->append( el );
-    size_t mwu_index = 0;
     LOG << "the MWUS: " << fd.mwus << endl;
-    LOG << "the MWUS-POS: " << fd.mwu_pos << endl;
     for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
-      LOG << "mwu-index = " << mwu_index << endl;
-      if ( fd.mwus.find(pos) != fd.mwus.end() ){
+      LOG << "muw parts: " << fd.mw_units[pos].parts << endl;
+      if ( fd.mw_units[pos].parts.size() > 1 ){
 	// a true MWU
 	string cls = fd.mw_units[pos].parse_role;
 	LOG << "MWU ROLE: " << cls << " index=" << fd.mw_units[pos].parse_index << endl;
@@ -728,16 +726,20 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
 	  folia::Dependency *e = new folia::Dependency( args, result );
 	  el->append( e );
 	  folia::Headspan *dh = new folia::Headspan();
-	  dh->append( wv[fd.mw_units[pos].parse_index-1] );
+	  size_t head_index = fd.mw_units[pos].parse_index-1;
+	  LOG << "HEAD index = " << head_index << " parts= " << fd.mw_units[head_index].parts << endl;
+	  for ( auto const& i : fd.mw_units[head_index].parts ){
+	    dh->append( wv[i] );
+	  }
 	  e->append( dh );
 	  folia::DependencyDependent *dd = new folia::DependencyDependent();
-	  auto pnt = fd.mwus.find(pos);
-	  for ( size_t i = pos; i <= pnt->second; ++i ){
+	  size_t dep_index = pos;
+	  LOG << "DEP index = " << dep_index << " parts= " << fd.mw_units[pos].parts << endl;
+	  for ( auto const& i : fd.mw_units[pos].parts ){
 	    dd->append( wv[i] );
 	  }
 	  e->append( dd );
 	}
-	mwu_index = fd.mwus.find(pos)->second;
       }
       else {
 	// just 1 word
@@ -749,35 +751,21 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
 	  folia::Dependency *e = new folia::Dependency( args, result );
 	  el->append( e );
 	  folia::Headspan *dh = new folia::Headspan();
-	  LOG << "fd.mw_units[pos].parse_index = " << fd.mw_units[pos].parse_index << endl;
-	  size_t pi = fd.mw_units[pos].parse_index-1;
-	  size_t start = pi;
-	  if ( fd.mwu_pos.find(pi) != fd.mwu_pos.end() ){
-	    start = fd.mwu_pos.find(pi)->second-1;
-	  }
-	  size_t stop = start;
-	  LOG << "start=" << start << " stop = " << stop << endl;
-	  if ( fd.mwus.find(start) != fd.mwus.end() ){
-	    stop = fd.mwus.find(start)->second;
-	  }
-	  for ( size_t i=start; i <= stop; ++i){
+	  size_t head_index = fd.mw_units[pos].parse_index-1;
+	  LOG << "HEAD index = " << head_index << " parts= " << fd.mw_units[head_index].parts << endl;
+	  for ( auto const& i : fd.mw_units[head_index].parts ){
 	    dh->append( wv[i] );
 	  }
 	  e->append( dh );
 	  folia::DependencyDependent *dd = new folia::DependencyDependent();
-	  start = mwu_index;
-	  stop = start;
-	  if ( fd.mwus.find(start) != fd.mwus.end() ){
-	    stop = fd.mwus.find(start)->second;
-	  }
-	  for ( size_t i=start; i <= stop; ++i){
+	  size_t dep_index = pos;
+	  LOG << "DEP index = " << dep_index << " parts= " << fd.mw_units[pos].parts << endl;
+	  for ( auto const& i : fd.mw_units[pos].parts ){
 	    dd->append( wv[i] );
 	  }
 	  e->append( dd );
-	  mwu_index = stop;
 	}
       }
-      ++mwu_index;
     }
   }
   return result;
