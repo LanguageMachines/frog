@@ -39,6 +39,7 @@ using TiCC::operator<<;
 
 frog_record::frog_record():
   no_space(false),
+  new_paragraph(false),
   tag_confidence(0.0),
   iob_tag( "O" ),
   iob_confidence(0.0),

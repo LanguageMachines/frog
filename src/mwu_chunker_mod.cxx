@@ -279,7 +279,6 @@ void Mwu::Classify( frog_data& sent ){
   Classify();
   for ( const auto& mword : mWords ){
     if ( mword->mwu_start != mword->mwu_end ){
-      LOG << "MWU van " << mword->mwu_start << " tot " << mword->mwu_end << endl;
       sent.mwus[mword->mwu_start] = mword->mwu_end;
     }
   }

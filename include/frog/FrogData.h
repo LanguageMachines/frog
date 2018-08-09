@@ -40,11 +40,11 @@
 class frog_record {
  public:
   frog_record();
-  frog_record( size_t );
   std::string word;
   std::string token_class;
   std::string language;
   bool no_space;
+  bool new_paragraph;
   std::string tag;
   double tag_confidence;
   std::string iob_tag;

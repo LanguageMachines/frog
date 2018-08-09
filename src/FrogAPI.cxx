@@ -498,8 +498,7 @@ FrogAPI::~FrogAPI() {
   delete tokenizer;
 }
 
-folia::Document* FrogAPI::create_folia( const frog_data& fd,
-					const string& id ) const {
+folia::Document* FrogAPI::start_document( const string& id ) const {
   folia::Document *result = new folia::Document( "id='" + id + "'" );
   if ( options.language != "none" ){
     result->set_metadata( "language", options.language );
@@ -510,8 +509,8 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
   }
   else {
     result->declare( folia::AnnotationType::TOKEN,
-		    configuration.lookUp( "rulesFile", "tokenizer" ),
-		    "annotator='ucto', annotatortype='auto', datetime='now()'");
+		     configuration.lookUp( "rulesFile", "tokenizer" ),
+		     "annotator='ucto', annotatortype='auto', datetime='now()'");
   }
   myCGNTagger->addDeclaration( *result );
   if ( options.doLemma ){
@@ -532,14 +531,22 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
   if ( options.doParse ){
     myParser->addDeclaration( *result );
   }
+  return result;
+}
+
+
+void FrogAPI::append_to_folia( folia::Document *result, const frog_data& fd ) const {
   folia::KWargs args;
-  args["id"] = id + ".text";
+  args["id"] = result->id() + ".text";
   folia::Text *text = new folia::Text( args );
   result->append( text );
   args.clear();
   args["generate_id"] = text->id();
+  folia::Paragraph *p = new folia::Paragraph( args, result );
+  text->append( p );
+  args["generate_id"] = p->id();
   folia::Sentence *s = new folia::Sentence( args, result );
-  text->append( s );
+  p->append( s );
   vector<folia::Word*> wv; // used for easy word lookup
   for ( const auto& word : fd.units ){
     folia::KWargs args;
@@ -593,7 +600,8 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
 	for ( const auto& mor : word.morphs ) {
 	  for ( const auto& mt : mor ) {
 	    folia::Morpheme *m = new folia::Morpheme( args, result );
-	    m->settext( mt );
+	    string stripped = mt.substr(1,mt.size()-2);
+	    m->settext( stripped );
 	    ml->append( m );
 	  }
 	}
@@ -760,7 +768,6 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
       }
     }
   }
-  return result;
 }
 
 bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers ){
@@ -1918,7 +1925,8 @@ void FrogAPI::FrogFile( const string& infilename,
 	  file_name = file_name.substr( 0, pos ) + "-" + TiCC::toString(i)
 	    + file_name.substr( pos );
 	  LOG << "file_name=" << file_name << endl;
-	  folia::Document *doc = create_folia( res, file_name );
+	  folia::Document *doc = start_document( file_name );
+	  append_to_folia( doc, res );
 	  doc->save( file_name );
 	  LOG << "stored sentence " << i << " in file: " << file_name << endl;
 	}

@@ -282,6 +282,7 @@ frog_data UctoTokenizer::tokenize_stream( istream& is ){
 	if ( (tok.role & Tokenizer::TokenRole::ENDOFSENTENCE) ){
 	  skip = true;
 	}
+	tmp.new_paragraph = (tok.role & Tokenizer::TokenRole::NEWPARAGRAPH);
       }
     }
     return result;
