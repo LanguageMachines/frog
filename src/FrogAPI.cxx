@@ -590,10 +590,12 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
       args["set"] = myMbma->mbma_tagset;
       folia::MorphologyLayer *ml = w->addMorphologyLayer( args );
       if ( !options.doDeepMorph ){
-	for ( const auto& mt : word.morphs ) {
-	  folia::Morpheme *m = new folia::Morpheme( args, result );
-	  m->settext( mt );
-	  ml->append( m );
+	for ( const auto& mor : word.morphs ) {
+	  for ( const auto& mt : mor ) {
+	    folia::Morpheme *m = new folia::Morpheme( args, result );
+	    m->settext( mt );
+	    ml->append( m );
+	  }
 	}
       }
       else {
@@ -713,13 +715,10 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
     args["set"] = myParser->getTagset();
     folia::DependenciesLayer *el = new folia::DependenciesLayer( args, result );
     s->append( el );
-    LOG << "the MWUS: " << fd.mwus << endl;
     for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
-      LOG << "muw parts: " << fd.mw_units[pos].parts << endl;
       if ( fd.mw_units[pos].parts.size() > 1 ){
 	// a true MWU
 	string cls = fd.mw_units[pos].parse_role;
-	LOG << "MWU ROLE: " << cls << " index=" << fd.mw_units[pos].parse_index << endl;
 	if ( cls != "ROOT" ){
 	  args["generate_id"] = el->id();
 	  args["class"] = cls;
@@ -727,14 +726,11 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
 	  el->append( e );
 	  folia::Headspan *dh = new folia::Headspan();
 	  size_t head_index = fd.mw_units[pos].parse_index-1;
-	  LOG << "HEAD index = " << head_index << " parts= " << fd.mw_units[head_index].parts << endl;
 	  for ( auto const& i : fd.mw_units[head_index].parts ){
 	    dh->append( wv[i] );
 	  }
 	  e->append( dh );
 	  folia::DependencyDependent *dd = new folia::DependencyDependent();
-	  size_t dep_index = pos;
-	  LOG << "DEP index = " << dep_index << " parts= " << fd.mw_units[pos].parts << endl;
 	  for ( auto const& i : fd.mw_units[pos].parts ){
 	    dd->append( wv[i] );
 	  }
@@ -744,7 +740,6 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
       else {
 	// just 1 word
 	string cls = fd.mw_units[pos].parse_role;
-	LOG << "pos=" << pos <<" SINGLE WU ROLE: " << cls << " index=" << fd.mw_units[pos].parse_index << endl;
 	if ( cls != "ROOT" ){
 	  args["generate_id"] = el->id();
 	  args["class"] = cls;
@@ -752,14 +747,11 @@ folia::Document* FrogAPI::create_folia( const frog_data& fd,
 	  el->append( e );
 	  folia::Headspan *dh = new folia::Headspan();
 	  size_t head_index = fd.mw_units[pos].parse_index-1;
-	  LOG << "HEAD index = " << head_index << " parts= " << fd.mw_units[head_index].parts << endl;
 	  for ( auto const& i : fd.mw_units[head_index].parts ){
 	    dh->append( wv[i] );
 	  }
 	  e->append( dh );
 	  folia::DependencyDependent *dd = new folia::DependencyDependent();
-	  size_t dep_index = pos;
-	  LOG << "DEP index = " << dep_index << " parts= " << fd.mw_units[pos].parts << endl;
 	  for ( auto const& i : fd.mw_units[pos].parts ){
 	    dd->append( wv[i] );
 	  }

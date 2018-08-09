@@ -29,7 +29,7 @@
 
 */
 
-#include <ostream>
+#include <iostream>
 #include <iomanip>
 #include "ticcutils/PrettyPrint.h"
 #include "frog/FrogData.h"
@@ -56,11 +56,25 @@ ostream& operator<<( ostream& os, const frog_record& fd ){
   os << TAB;
   if ( fd.morphs.empty() ){
     if ( !fd.morphs_nested.empty() ){
-      os << fd.morphs_nested[0];
+      for ( const auto nm : fd.morphs_nested ){
+	os << "[" << nm << "]";
+	break; // first alternative only!
+	if ( &nm != &fd.morphs_nested.back() ){
+	  os << "/";
+	}
+      }
     }
   }
   else {
-    os << fd.morphs;
+    for ( const auto nm : fd.morphs ){
+      for ( auto const& m : nm ){
+	os << m;
+      }
+      break; // first alternative only!
+      if ( &nm != &fd.morphs.back() ){
+	os << "/";
+      }
+    }
   }
   os << TAB << fd.tag << TAB << fixed << showpoint << std::setprecision(6) << fd.tag_confidence;
   os << TAB << fd.ner_tag; // << TAB << fd.ner_confidence;
@@ -82,11 +96,20 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
 	// no morphemes
       }
       else {
-	result.morphs_nested[0] += "_" + fd.units[i].morphs_nested[0];
+	for ( size_t pos=0; pos < fd.units[i].morphs_nested.size(); ++pos ){
+	  auto variant =  fd.units[i].morphs_nested[pos];
+	  result.morphs_nested[pos] += "]_[" + variant;
+	}
       }
     }
     else {
-      result.morphs[0] += "]_[" + fd.units[i].morphs[0];
+      for ( size_t pos=0; pos < fd.units[i].morphs.size(); ++pos ){
+	result.morphs[pos].back() += "_";
+	auto variant = fd.units[i].morphs[pos];
+	for ( size_t k=0; k < variant.size(); ++k ){
+	  result.morphs[pos].back() += variant[k];
+	}
+      }
     }
     result.tag += "_" + fd.units[i].tag;
     result.tag_confidence *= fd.units[i].tag_confidence;

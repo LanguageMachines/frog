@@ -829,9 +829,13 @@ void Mbma::Classify( folia::Word* sword ){
 
 void Mbma::addMorph( frog_record& fd,
 		     const vector<string>& morphs ) const {
+  vector<string> adapted;
+  for ( const auto& m : morphs ){
+    adapted.push_back( "[" + m + "]" );
+  }
 #pragma omp critical (dataupdate)
   {
-    fd.morphs = morphs;
+    fd.morphs.push_back( adapted );
   }
 }
 
@@ -866,9 +870,11 @@ void Mbma::addBracketMorph( frog_record& fd,
   }
 
   string str = "[" + wrd + "]" + head;
+  vector<string> tmp;
+  tmp.push_back( str );
 #pragma omp critical (dataupdate)
   {
-    fd.morphs_nested.push_back( str );
+    fd.morphs_nested = tmp;
   }
 }
 

@@ -52,7 +52,7 @@ class frog_record {
   std::string ner_tag;
   double ner_confidence;
   std::vector<std::string> lemmas;
-  std::vector<std::string> morphs;
+  std::vector<std::vector<std::string>> morphs;
   std::vector<std::string> morphs_nested;
   int parse_index;
   std::string parse_role;
