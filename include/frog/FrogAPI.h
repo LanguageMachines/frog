@@ -113,6 +113,18 @@ class FrogAPI {
   std::string Frogtostringfromfile( const std::string& );
 
  private:
+  void add_ner_result( folia::Sentence *,
+		       const frog_data&,
+		       const std::vector<folia::Word*>& ) const;
+  void add_iob_result( folia::Sentence *,
+		       const frog_data&,
+		       const std::vector<folia::Word*>& ) const;
+  void add_mwu_result( folia::Sentence *,
+		       const frog_data&,
+		       const std::vector<folia::Word*>& ) const;
+  void add_parse_result( folia::Sentence *,
+			 const frog_data&,
+			 const std::vector<folia::Word*>& ) const;
   void test_version( const std::string&, double );
   // functions
   bool TestSentence( folia::Sentence*, TimerBlock& );

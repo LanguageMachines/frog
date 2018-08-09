@@ -534,6 +534,150 @@ folia::Document* FrogAPI::start_document( const string& id ) const {
   return result;
 }
 
+void FrogAPI::add_ner_result( folia::Sentence *s,
+			      const frog_data& fd,
+			      const vector<folia::Word*>& wv ) const {
+  folia::EntitiesLayer *el = 0;
+  folia::Entity *ner = 0;
+  size_t i = 0;
+  for ( const auto& word : fd.units ){
+    if ( word.ner_tag[0] == 'B' ){
+      if ( el == 0 ){
+	// create a layer, we need it
+	folia::KWargs args;
+	args["set"] = myNERTagger->getTagset();
+	args["generate_id"] = s->id();
+	el = new folia::EntitiesLayer( args, s->doc() );
+	s->append(el);
+      }
+      // a new entity starts here
+      if ( ner != 0 ){
+	el->append( ner );
+      }
+      // now make new entity
+      folia::KWargs args;
+      args["set"] = myNERTagger->getTagset();
+      args["generate_id"] = el->id();
+      args["class"] = word.ner_tag.substr(2);
+      args["confidence"] = TiCC::toString(word.ner_confidence);
+      ner = new folia::Entity( args, s->doc() );
+      ner->append( wv[i] );
+    }
+    else if ( word.ner_tag[0] == 'I' ){
+      // continue in an entity
+      assert( ner != 0 );
+      ner->append( wv[i] );
+    }
+    else if ( word.ner_tag[0] == '0' ){
+      if ( ner != 0 ){
+	el->append( ner );
+	ner = 0;
+      }
+    }
+    ++i;
+  }
+  if ( ner != 0 ){
+    // some leftovers
+    el->append( ner );
+  }
+}
+
+void FrogAPI::add_iob_result( folia::Sentence* s,
+			      const frog_data& fd,
+			      const vector<folia::Word*>& wv ) const {
+  folia::ChunkingLayer *el = 0;
+  folia::Chunk *iob = 0;
+  size_t i = 0;
+  for ( const auto& word : fd.units ){
+    if ( word.iob_tag[0] == 'B' ){
+      if ( el == 0 ){
+	// create a layer, we need it
+	folia::KWargs args;
+	args["set"] = myIOBTagger->getTagset();
+	args["generate_id"] = s->id();
+	el = new folia::ChunkingLayer( args, s->doc() );
+	s->append(el);
+      }
+      // a new entity starts here
+      if ( iob != 0 ){
+	// add this iob to the layer
+	el->append( iob );
+      }
+      // now make new entity
+      folia::KWargs args;
+      args["set"] = myIOBTagger->getTagset();
+      args["generate_id"] = el->id();
+      args["class"] = word.iob_tag.substr(2);
+      args["confidence"] = TiCC::toString(word.iob_confidence);
+      iob = new folia::Chunk( args, s->doc() );
+      iob->append( wv[i] );
+    }
+    else if ( word.iob_tag[0] == 'I' ){
+      // continue in an entity
+      assert( iob != 0 );
+      iob->append( wv[i] );
+    }
+    else if ( word.iob_tag[0] == '0' ){
+      if ( iob != 0 ){
+	el->append( iob );
+	iob = 0;
+      }
+    }
+    ++i;
+  }
+  if ( iob != 0 ){
+    // some leftovers
+    el->append( iob );
+  }
+}
+
+void FrogAPI::add_mwu_result( folia::Sentence *s,
+			      const frog_data& fd,
+			      const vector<folia::Word*>& wv ) const {
+  folia::KWargs args;
+  args["generate_id"] = s->id();
+  args["set"] = myMwu->getTagset();
+  folia::EntitiesLayer *el = new folia::EntitiesLayer( args, s->doc() );
+  s->append( el );
+  for ( const auto& mwu : fd.mwus ){
+    args["generate_id"] = el->id();
+    folia::Entity *e = new folia::Entity( args, s->doc() );
+    el->append( e );
+    for ( size_t pos = mwu.first; pos <= mwu.second; ++pos ){
+      e->append( wv[pos] );
+    }
+  }
+}
+
+void FrogAPI::add_parse_result( folia::Sentence *s,
+				const frog_data& fd,
+				const vector<folia::Word*>& wv ) const{
+  folia::KWargs args;
+  args["generate_id"] = s->id();
+  args["set"] = myParser->getTagset();
+  folia::DependenciesLayer *el = new folia::DependenciesLayer( args, s->doc() );
+  s->append( el );
+  for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
+    string cls = fd.mw_units[pos].parse_role;
+    if ( cls != "ROOT" ){
+      args["generate_id"] = el->id();
+      args["class"] = cls;
+      folia::Dependency *e = new folia::Dependency( args, s->doc() );
+      el->append( e );
+      folia::Headspan *dh = new folia::Headspan();
+      size_t head_index = fd.mw_units[pos].parse_index-1;
+      for ( auto const& i : fd.mw_units[head_index].parts ){
+	dh->append( wv[i] );
+      }
+      e->append( dh );
+      folia::DependencyDependent *dd = new folia::DependencyDependent();
+      for ( auto const& i : fd.mw_units[pos].parts ){
+	dd->append( wv[i] );
+      }
+      e->append( dd );
+    }
+  }
+}
 
 void FrogAPI::append_to_folia( folia::Document *result, const frog_data& fd ) const {
   folia::KWargs args;
@@ -612,161 +756,16 @@ void FrogAPI::append_to_folia( folia::Document *result, const frog_data& fd ) co
     }
   }
   if ( options.doNER ){
-    folia::EntitiesLayer *el = 0;
-    folia::Entity *ner = 0;
-    size_t i = 0;
-    for ( const auto& word : fd.units ){
-      if ( word.ner_tag[0] == 'B' ){
-	if ( el == 0 ){
-	  // create a layer, we need it
-	  folia::KWargs args;
-	  args["set"] = myNERTagger->getTagset();
-	  args["generate_id"] = s->id();
-	  el = new folia::EntitiesLayer( args, result );
-	  s->append(el);
-	}
-	// a new entity starts here
-	if ( ner != 0 ){
-	  el->append( ner );
-	}
-	// now make new entity
-	folia::KWargs args;
-	args["set"] = myNERTagger->getTagset();
-	args["generate_id"] = el->id();
-	args["class"] = word.ner_tag.substr(2);
-	args["confidence"] = TiCC::toString(word.ner_confidence);
-	ner = new folia::Entity( args, result );
-	ner->append( wv[i] );
-      }
-      else if ( word.ner_tag[0] == 'I' ){
-	// continue in an entity
-	assert( ner != 0 );
-	ner->append( wv[i] );
-      }
-      else if ( word.ner_tag[0] == '0' ){
-	if ( ner != 0 ){
-	  el->append( ner );
-	  ner = 0;
-	}
-      }
-      ++i;
-    }
-    if ( ner != 0 ){
-      // some leftovers
-      el->append( ner );
-    }
+    add_ner_result( s, fd, wv );
   }
   if ( options.doIOB ){
-    folia::ChunkingLayer *el = 0;
-    folia::Chunk *iob = 0;
-    size_t i = 0;
-    for ( const auto& word : fd.units ){
-      if ( word.iob_tag[0] == 'B' ){
-	if ( el == 0 ){
-	  // create a layer, we need it
-	  folia::KWargs args;
-	  args["set"] = myIOBTagger->getTagset();
-	  args["generate_id"] = s->id();
-	  el = new folia::ChunkingLayer( args, result );
-	  s->append(el);
-	}
-	// a new entity starts here
-	if ( iob != 0 ){
-	  // add this iob to the layer
-	  el->append( iob );
-	}
-	// now make new entity
-	folia::KWargs args;
-	args["set"] = myIOBTagger->getTagset();
-	args["generate_id"] = el->id();
-	args["class"] = word.iob_tag.substr(2);
-	args["confidence"] = TiCC::toString(word.iob_confidence);
-	iob = new folia::Chunk( args, result );
-	iob->append( wv[i] );
-      }
-      else if ( word.iob_tag[0] == 'I' ){
-	// continue in an entity
-	assert( iob != 0 );
-	iob->append( wv[i] );
-      }
-      else if ( word.iob_tag[0] == '0' ){
-	if ( iob != 0 ){
-	  el->append( iob );
-	  iob = 0;
-	}
-      }
-      ++i;
-    }
-    if ( iob != 0 ){
-      // some leftovers
-      el->append( iob );
-    }
+    add_iob_result( s, fd, wv );
   }
   if ( options.doMwu && !fd.mwus.empty() ){
-    folia::KWargs args;
-    args["generate_id"] = s->id();
-    args["set"] = myMwu->getTagset();
-    folia::EntitiesLayer *el = new folia::EntitiesLayer( args, result );
-    s->append( el );
-    for ( const auto& mwu : fd.mwus ){
-      args["generate_id"] = el->id();
-      folia::Entity *e = new folia::Entity( args, result );
-      el->append( e );
-      for ( size_t pos = mwu.first; pos <= mwu.second; ++pos ){
-	e->append( wv[pos] );
-      }
-    }
+    add_mwu_result( s, fd, wv );
   }
   if ( options.doParse ){
-    folia::KWargs args;
-    args["generate_id"] = s->id();
-    args["set"] = myParser->getTagset();
-    folia::DependenciesLayer *el = new folia::DependenciesLayer( args, result );
-    s->append( el );
-    for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
-      if ( fd.mw_units[pos].parts.size() > 1 ){
-	// a true MWU
-	string cls = fd.mw_units[pos].parse_role;
-	if ( cls != "ROOT" ){
-	  args["generate_id"] = el->id();
-	  args["class"] = cls;
-	  folia::Dependency *e = new folia::Dependency( args, result );
-	  el->append( e );
-	  folia::Headspan *dh = new folia::Headspan();
-	  size_t head_index = fd.mw_units[pos].parse_index-1;
-	  for ( auto const& i : fd.mw_units[head_index].parts ){
-	    dh->append( wv[i] );
-	  }
-	  e->append( dh );
-	  folia::DependencyDependent *dd = new folia::DependencyDependent();
-	  for ( auto const& i : fd.mw_units[pos].parts ){
-	    dd->append( wv[i] );
-	  }
-	  e->append( dd );
-	}
-      }
-      else {
-	// just 1 word
-	string cls = fd.mw_units[pos].parse_role;
-	if ( cls != "ROOT" ){
-	  args["generate_id"] = el->id();
-	  args["class"] = cls;
-	  folia::Dependency *e = new folia::Dependency( args, result );
-	  el->append( e );
-	  folia::Headspan *dh = new folia::Headspan();
-	  size_t head_index = fd.mw_units[pos].parse_index-1;
-	  for ( auto const& i : fd.mw_units[head_index].parts ){
-	    dh->append( wv[i] );
-	  }
-	  e->append( dh );
-	  folia::DependencyDependent *dd = new folia::DependencyDependent();
-	  for ( auto const& i : fd.mw_units[pos].parts ){
-	    dd->append( wv[i] );
-	  }
-	  e->append( dd );
-	}
-      }
-    }
+    add_parse_result( s, fd, wv );
   }
 }
 
