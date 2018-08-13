@@ -301,6 +301,7 @@ void IOBTagger::add_result( folia::Sentence* s,
 			    const vector<folia::Word*>& wv ) const {
   folia::ChunkingLayer *el = 0;
   folia::Chunk *iob = 0;
+  double iob_conf = 0.0; //accummulated confidence
   size_t i = 0;
   for ( const auto& word : fd.units ){
     if ( word.iob_tag[0] == 'B' ){
@@ -315,6 +316,8 @@ void IOBTagger::add_result( folia::Sentence* s,
       // a new entity starts here
       if ( iob != 0 ){
 	// add this iob to the layer
+	iob->confidence( iob_conf );
+	iob_conf = 0.0;
 	el->append( iob );
       }
       // now make new entity
@@ -324,15 +327,19 @@ void IOBTagger::add_result( folia::Sentence* s,
       args["class"] = word.iob_tag.substr(2);
       args["confidence"] = TiCC::toString(word.iob_confidence);
       iob = new folia::Chunk( args, s->doc() );
+      iob_conf = word.iob_confidence;
       iob->append( wv[i] );
     }
     else if ( word.iob_tag[0] == 'I' ){
       // continue in an entity
       assert( iob != 0 );
+      iob_conf *= word.iob_confidence;
       iob->append( wv[i] );
     }
     else if ( word.iob_tag[0] == '0' ){
       if ( iob != 0 ){
+	iob->confidence( iob_conf );
+	iob_conf = 0.0;
 	el->append( iob );
 	iob = 0;
       }
@@ -341,6 +348,7 @@ void IOBTagger::add_result( folia::Sentence* s,
   }
   if ( iob != 0 ){
     // some leftovers
+    iob->confidence( iob_conf );
     el->append( iob );
   }
 }
