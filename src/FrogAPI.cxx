@@ -498,86 +498,75 @@ FrogAPI::~FrogAPI() {
   delete tokenizer;
 }
 
-folia::Document* FrogAPI::start_document( const string& id ) const {
-  folia::Document *result = new folia::Document( "id='" + id + "'" );
+folia::FoliaElement* FrogAPI::start_document( const string& id,
+					      folia::Document *& doc ) const {
+  LOG << "start document , id=" << id << endl;
+  doc = new folia::Document( "id='" + id + "'" );
   if ( options.language != "none" ){
-    result->set_metadata( "language", options.language );
+    doc->set_metadata( "language", options.language );
   }
-  result->addStyle( "text/xsl", "folia.xsl" );
+  doc->addStyle( "text/xsl", "folia.xsl" );
   if ( !options.doTok ){
-    result->declare( folia::AnnotationType::TOKEN, "passthru", "annotator='ucto', annotatortype='auto', datetime='now()'" );
+    doc->declare( folia::AnnotationType::TOKEN, "passthru", "annotator='ucto', annotatortype='auto', datetime='now()'" );
   }
   else {
-    result->declare( folia::AnnotationType::TOKEN,
-		     configuration.lookUp( "rulesFile", "tokenizer" ),
-		     "annotator='ucto', annotatortype='auto', datetime='now()'");
+    doc->declare( folia::AnnotationType::TOKEN,
+		  configuration.lookUp( "rulesFile", "tokenizer" ),
+		  "annotator='ucto', annotatortype='auto', datetime='now()'");
   }
-  myCGNTagger->addDeclaration( *result );
+  myCGNTagger->addDeclaration( *doc );
   if ( options.doLemma ){
-    myMblem->addDeclaration( *result );
+    myMblem->addDeclaration( *doc );
   }
   if ( options.doMorph ){
-    myMbma->addDeclaration( *result );
+    myMbma->addDeclaration( *doc );
   }
   if ( options.doIOB ){
-    myIOBTagger->addDeclaration( *result );
+    myIOBTagger->addDeclaration( *doc );
   }
   if ( options.doNER ){
-    myNERTagger->addDeclaration( *result );
+    myNERTagger->addDeclaration( *doc );
   }
   if ( options.doMwu ){
-    myMwu->addDeclaration( *result );
+    myMwu->addDeclaration( *doc );
   }
   if ( options.doParse ){
-    myParser->addDeclaration( *result );
+    myParser->addDeclaration( *doc );
   }
-  return result;
+  folia::KWargs args;
+  args["id"] = doc->id() + ".text";
+  folia::Text *text = new folia::Text( args );
+  doc->append( text );
+  return text;
 }
 
 
-void FrogAPI::append_to_folia( folia::Document *result, const frog_data& fd ) const {
+folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
+					       const frog_data& fd ) const {
+  static int p_count = 0;
+  folia::FoliaElement *result = root;
   folia::KWargs args;
-  args["id"] = result->id() + ".text";
-  folia::Text *text = new folia::Text( args );
-  result->append( text );
+  if ( fd.units[0].new_paragraph ){
+    args["id"] = root->doc()->id() + ".p." + TiCC::toString(++p_count);
+    folia::Paragraph *p = new folia::Paragraph( args, root->doc() );
+    if ( root->element_id() == folia::Text_t ){
+      root->append( p );
+    }
+    else {
+      root->parent()->append( p );
+    }
+    result = p;
+  }
   args.clear();
-  args["generate_id"] = text->id();
-  folia::Paragraph *p = new folia::Paragraph( args, result );
-  text->append( p );
-  args["generate_id"] = p->id();
-  folia::Sentence *s = new folia::Sentence( args, result );
-  p->append( s );
+  args["generate_id"] = result->id();
+  folia::Sentence *s = new folia::Sentence( args, root->doc() );
+  result->append( s );
   vector<folia::Word*> wv = myCGNTagger->add_result( s, fd );
   if ( options.doLemma ){
     myMblem->add_lemmas( wv, fd );
   }
-  for ( size_t i=0; i < wv.size(); ++i ){
-    if ( options.doLemma ){
-      folia::KWargs args;
-      args["set"] = myMblem->getTagset();
-      for ( const auto& lemma : fd.units[i].lemmas ){
-	args["class"] = lemma;
-	wv[i]->addLemmaAnnotation( args );
-      }
-    }
-    if ( options.doMorph ){
-      folia::KWargs args;
-      args["set"] = myMbma->mbma_tagset;
-      folia::MorphologyLayer *ml = wv[i]->addMorphologyLayer( args );
-      if ( !options.doDeepMorph ){
-	for ( const auto& mor : fd.units[i].morphs ) {
-	  for ( const auto& mt : mor ) {
-	    folia::Morpheme *m = new folia::Morpheme( args, result );
-	    string stripped = mt.substr(1,mt.size()-2);
-	    m->settext( stripped );
-	    ml->append( m );
-	  }
-	}
-      }
-      else {
-	LOG << "deep morpheme XML output not implemented!" << endl;
-      }
-    }
+  if ( options.doMorph ){
+    myMbma->add_morphemes( wv, fd );
   }
   if ( options.doNER ){
     myNERTagger->add_result( s, fd, wv );
@@ -591,6 +580,7 @@ void FrogAPI::append_to_folia( folia::Document *result, const frog_data& fd ) co
   if ( options.doParse ){
     myParser->add_result( s, fd, wv );
   }
+  return result;
 }
 
 bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers ){
@@ -1644,8 +1634,6 @@ bool FrogAPI::frog_sentence( frog_data& sent ){
     }
   }
   // timers.frogTimer.stop();
-  cout << "NEW Frog result:" << endl;
-  cout << sent << endl;
   return showParse;
 }
 
@@ -1728,10 +1716,24 @@ void FrogAPI::FrogFile( const string& infilename,
   else {
     ifstream TEST( infilename );
     int i = 0;
+    folia::Document *doc1 = 0;
+    folia::FoliaElement *root = 0;
+    string file_name;
+    if ( !xmlOutFile.empty() ){
+      file_name = xmlOutFile;
+      LOG << "file_name=" << file_name << endl;
+      file_name = file_name.substr( 0, file_name.find( ".xml" ) );
+      LOG << "file_name=" << file_name << endl;
+      LOG << "start document , file_name=" << file_name << endl;
+      root = start_document( file_name, doc1 );
+      file_name += ".fol";
+    }
     frog_data res = tokenizer->tokenize_stream( TEST );
     while ( res.size() > 0 ){
       ++i;
       bool showParse = frog_sentence( res );
+      cout << "NEW Frog result:" << endl;
+      cout << res << endl;
       if ( options.doParse && !showParse ){
 	LOG << "WARNING!" << endl;
 	LOG << "Sentence " << i
@@ -1743,18 +1745,14 @@ void FrogAPI::FrogFile( const string& infilename,
 	  LOG << TiCC::Timer::now() << " done with sentence[" << i << "]" << endl;
 	}
 	if ( !xmlOutFile.empty() ){
-	  string file_name = xmlOutFile;
-	  string::size_type pos = file_name.rfind( ".xml" );
-	  file_name = file_name.substr( 0, pos ) + "-" + TiCC::toString(i)
-	    + file_name.substr( pos );
-	  LOG << "file_name=" << file_name << endl;
-	  folia::Document *doc = start_document( file_name );
-	  append_to_folia( doc, res );
-	  doc->save( file_name );
-	  LOG << "stored sentence " << i << " in file: " << file_name << endl;
+	  root = append_to_folia( root, res );
 	}
       }
       res = tokenizer->tokenize_stream( TEST );
+    }
+    if ( !xmlOutFile.empty() ){
+      doc1->save( file_name );
+      LOG << "stored document in file: " << file_name << endl;
     }
     ifstream IN( infilename );
     timers.reset();

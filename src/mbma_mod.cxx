@@ -1033,3 +1033,25 @@ vector<pair<string,string>> Mbma::getResults( ) const {
   }
   return result;
 }
+
+void Mbma::add_morphemes( const vector<folia::Word*>& wv,
+			  const frog_data& fd ) const {
+  for ( size_t i=0; i < wv.size(); ++i ){
+    folia::KWargs args;
+    args["set"] = mbma_tagset;
+    folia::MorphologyLayer *ml = wv[i]->addMorphologyLayer( args );
+    if ( !doDeepMorph ){
+      for ( const auto& mor : fd.units[i].morphs ) {
+	for ( const auto& mt : mor ) {
+	  folia::Morpheme *m = new folia::Morpheme( args, wv[0]->doc() );
+	  string stripped = mt.substr(1,mt.size()-2);
+	  m->settext( stripped );
+	  ml->append( m );
+	}
+      }
+    }
+    else {
+      LOG << "deep morpheme XML output not implemented!" << endl;
+    }
+  }
+}

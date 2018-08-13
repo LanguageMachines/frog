@@ -107,8 +107,10 @@ class FrogAPI {
   void FrogServer( Sockets::ServerSocket &conn );
   void FrogInteractive();
   bool frog_sentence( frog_data& );
-  folia::Document* start_document( const std::string& ) const;
-  void append_to_folia( folia::Document *, const frog_data& ) const;
+  folia::FoliaElement* start_document( const std::string&,
+				  folia::Document *& ) const;
+  folia::FoliaElement *append_to_folia( folia::FoliaElement *,
+					const frog_data& ) const;
   std::string Frogtostring( const std::string& );
   std::string Frogtostringfromfile( const std::string& );
 

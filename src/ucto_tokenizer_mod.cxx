@@ -278,11 +278,11 @@ frog_data UctoTokenizer::tokenize_stream( istream& is ){
 	tmp.token_class = TiCC::UnicodeToUTF8(tok.type);
 	tmp.no_space = (tok.role & Tokenizer::TokenRole::NOSPACE);
 	tmp.language = tok.lc;
+	tmp.new_paragraph = (tok.role & Tokenizer::TokenRole::NEWPARAGRAPH);
 	result.units.push_back( tmp );
 	if ( (tok.role & Tokenizer::TokenRole::ENDOFSENTENCE) ){
 	  skip = true;
 	}
-	tmp.new_paragraph = (tok.role & Tokenizer::TokenRole::NEWPARAGRAPH);
       }
     }
     return result;
