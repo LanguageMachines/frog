@@ -586,3 +586,15 @@ vector<pair<string,string> > Mblem::getResult() const {
   }
   return result;
 }
+
+void Mblem::add_lemmas( const vector<folia::Word*>& wv,
+			const frog_data& fd ) const {
+  for ( size_t i=0; i < wv.size(); ++i ){
+    folia::KWargs args;
+    args["set"] = getTagset();
+    for ( const auto& lemma : fd.units[i].lemmas ){
+      args["class"] = lemma;
+      wv[i]->addLemmaAnnotation( args );
+    }
+  }
+}

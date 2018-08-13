@@ -278,3 +278,46 @@ void CGNTagger::post_process( const vector<folia::Word*>& words ){
     }
   }
 }
+
+vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
+					    const frog_data& fd ) const {
+  vector<folia::Word*> wv;
+  for ( const auto& word : fd.units ){
+    folia::KWargs args;
+    args["generate_id"] = s->id();
+    args["class"] = word.token_class;
+    if ( word.no_space ){
+      args["space"] = "no";
+    }
+    folia::Word *w = new folia::Word( args, s->doc() );
+    w->settext( word.word );
+    s->append( w );
+    wv.push_back( w );
+    args.clear();
+    args["set"]   = getTagset();
+    args["class"] = word.tag;
+    args["confidence"]= TiCC::toString(word.tag_confidence);
+    folia::FoliaElement *postag = w->addPosAnnotation( args );
+    vector<string> hv = TiCC::split_at_first_of( word.tag, "()" );
+    string head = hv[0];
+    args["class"] = head;
+    folia::Feature *feat = new folia::HeadFeature( args );
+    postag->append( feat );
+    if ( head == "SPEC" ){
+      postag->confidence(1.0);
+    }
+    vector<string> feats;
+    if ( hv.size() > 1 ){
+      feats = TiCC::split_at( hv[1], "," );
+    }
+    for ( const auto& f : feats ){
+      folia::KWargs args;
+      args["set"] =  getTagset();
+      args["subset"] = getSubSet( f, head, word.tag );
+      args["class"]  = f;
+      folia::Feature *feat = new folia::Feature( args, s->doc() );
+      postag->append( feat );
+    }
+  }
+  return wv;
+}

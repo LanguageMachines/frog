@@ -67,6 +67,8 @@ class Mblem {
   bool fill_ts_map( const std::string& );
   bool fill_eq_set( const std::string& );
   std::string version() const { return _version; };
+  void add_lemmas( const std::vector<folia::Word*>&,
+		   const frog_data& ) const;
  private:
   void read_transtable( const std::string& );
   void create_MBlem_defaults();

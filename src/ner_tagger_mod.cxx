@@ -693,3 +693,51 @@ void NERTagger::post_process( const vector<folia::Word*>& swords,
 bool NERTagger::Generate( const std::string& opt_line ){
   return tagger->GenerateTagger( opt_line );
 }
+
+void NERTagger::add_result( folia::Sentence *s,
+			    const frog_data& fd,
+			    const vector<folia::Word*>& wv ) const {
+  folia::EntitiesLayer *el = 0;
+  folia::Entity *ner = 0;
+  size_t i = 0;
+  for ( const auto& word : fd.units ){
+    if ( word.ner_tag[0] == 'B' ){
+      if ( el == 0 ){
+	// create a layer, we need it
+	folia::KWargs args;
+	args["set"] = getTagset();
+	args["generate_id"] = s->id();
+	el = new folia::EntitiesLayer( args, s->doc() );
+	s->append(el);
+      }
+      // a new entity starts here
+      if ( ner != 0 ){
+	el->append( ner );
+      }
+      // now make new entity
+      folia::KWargs args;
+      args["set"] = getTagset();
+      args["generate_id"] = el->id();
+      args["class"] = word.ner_tag.substr(2);
+      args["confidence"] = TiCC::toString(word.ner_confidence);
+      ner = new folia::Entity( args, s->doc() );
+      ner->append( wv[i] );
+    }
+    else if ( word.ner_tag[0] == 'I' ){
+      // continue in an entity
+      assert( ner != 0 );
+      ner->append( wv[i] );
+    }
+    else if ( word.ner_tag[0] == '0' ){
+      if ( ner != 0 ){
+	el->append( ner );
+	ner = 0;
+      }
+    }
+    ++i;
+  }
+  if ( ner != 0 ){
+    // some leftovers
+    el->append( ner );
+  }
+}

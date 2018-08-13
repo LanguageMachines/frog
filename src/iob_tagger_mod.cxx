@@ -295,3 +295,52 @@ void IOBTagger::addTag( frog_record& fd,
     fd.iob_confidence = confidence;
   }
 }
+
+void IOBTagger::add_result( folia::Sentence* s,
+			    const frog_data& fd,
+			    const vector<folia::Word*>& wv ) const {
+  folia::ChunkingLayer *el = 0;
+  folia::Chunk *iob = 0;
+  size_t i = 0;
+  for ( const auto& word : fd.units ){
+    if ( word.iob_tag[0] == 'B' ){
+      if ( el == 0 ){
+	// create a layer, we need it
+	folia::KWargs args;
+	args["set"] = getTagset();
+	args["generate_id"] = s->id();
+	el = new folia::ChunkingLayer( args, s->doc() );
+	s->append(el);
+      }
+      // a new entity starts here
+      if ( iob != 0 ){
+	// add this iob to the layer
+	el->append( iob );
+      }
+      // now make new entity
+      folia::KWargs args;
+      args["set"] = getTagset();
+      args["generate_id"] = el->id();
+      args["class"] = word.iob_tag.substr(2);
+      args["confidence"] = TiCC::toString(word.iob_confidence);
+      iob = new folia::Chunk( args, s->doc() );
+      iob->append( wv[i] );
+    }
+    else if ( word.iob_tag[0] == 'I' ){
+      // continue in an entity
+      assert( iob != 0 );
+      iob->append( wv[i] );
+    }
+    else if ( word.iob_tag[0] == '0' ){
+      if ( iob != 0 ){
+	el->append( iob );
+	iob = 0;
+      }
+    }
+    ++i;
+  }
+  if ( iob != 0 ){
+    // some leftovers
+    el->append( iob );
+  }
+}

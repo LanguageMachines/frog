@@ -1161,3 +1161,33 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
   appendParseResult( fd, res );
   timers.parseTimer.stop();
 }
+
+void Parser::add_result( folia::Sentence *s,
+			 const frog_data& fd,
+			 const vector<folia::Word*>& wv ) const {
+  folia::KWargs args;
+  args["generate_id"] = s->id();
+  args["set"] = getTagset();
+  folia::DependenciesLayer *el = new folia::DependenciesLayer( args, s->doc() );
+  s->append( el );
+  for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
+    string cls = fd.mw_units[pos].parse_role;
+    if ( cls != "ROOT" ){
+      args["generate_id"] = el->id();
+      args["class"] = cls;
+      folia::Dependency *e = new folia::Dependency( args, s->doc() );
+      el->append( e );
+      folia::Headspan *dh = new folia::Headspan();
+      size_t head_index = fd.mw_units[pos].parse_index-1;
+      for ( auto const& i : fd.mw_units[head_index].parts ){
+	dh->append( wv[i] );
+      }
+      e->append( dh );
+      folia::DependencyDependent *dd = new folia::DependencyDependent();
+      for ( auto const& i : fd.mw_units[pos].parts ){
+	dd->append( wv[i] );
+      }
+      e->append( dd );
+    }
+  }
+}

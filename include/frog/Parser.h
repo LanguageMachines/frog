@@ -65,6 +65,9 @@ class Parser {
   void Parse( frog_data&, TimerBlock& );
   parseData prepareParse( const std::vector<folia::Word *>& );
   parseData prepareParse( frog_data& );
+  void add_result( folia::Sentence *s,
+		   const frog_data& fd,
+		   const std::vector<folia::Word*>& wv ) const;
 
   std::vector<std::string> createParserInstances( const parseData& );
   std::string getTagset() const { return dep_tagset; };
