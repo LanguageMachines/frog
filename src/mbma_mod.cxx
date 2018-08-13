@@ -938,9 +938,6 @@ void Mbma::Classify( frog_record& fd ){
     LOG << "Classify " << uWord << "(" << head << ") ["
 	<< token_class << "]" << endl;
   }
-  if ( filter ){
-    uWord = filter->filter( uWord );
-  }
   // HACK! for now remove any whitespace!
   vector<string> parts = TiCC::split( word_s );
   word_s.clear();
@@ -948,6 +945,9 @@ void Mbma::Classify( frog_record& fd ){
     word_s += p;
   }
   uWord = TiCC::UnicodeFromUTF8( word_s );
+  if ( filter ){
+    uWord = filter->filter( uWord );
+  }
   if ( head == "LET" || head == "SPEC" || token_class == "ABBREVIATION" ){
     // take over the letter/word 'as-is'.
     //  also ABBREVIATION's aren't handled bij mbma-rules

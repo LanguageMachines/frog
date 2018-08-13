@@ -500,7 +500,6 @@ FrogAPI::~FrogAPI() {
 
 folia::FoliaElement* FrogAPI::start_document( const string& id,
 					      folia::Document *& doc ) const {
-  LOG << "start document , id=" << id << endl;
   doc = new folia::Document( "id='" + id + "'" );
   if ( options.language != "none" ){
     doc->set_metadata( "language", options.language );
@@ -1287,8 +1286,8 @@ void FrogAPI::displayMWU( ostream& os,
   os << "\t" << pos << "\t" << std::fixed << conf;
 }
 
-ostream& FrogAPI::showResults( ostream& os,
-			       folia::Document& doc ) const {
+void FrogAPI::showResults( ostream& os,
+			   folia::Document& doc ) const {
   vector<folia::Sentence*> sentences = doc.sentences();
   for ( auto const& sentence : sentences ){
     vector<folia::Word*> words = sentence->words();
@@ -1388,7 +1387,6 @@ ostream& FrogAPI::showResults( ostream& os,
       os << endl;
     }
   }
-  return os;
 }
 
 string FrogAPI::Frogtostring( const string& s ){
@@ -1519,13 +1517,13 @@ void FrogAPI::FrogDoc( folia::Document& doc,
 
 bool FrogAPI::frog_sentence( frog_data& sent ){
   bool showParse = options.doParse;
-  //  timers.frogTimer.start();
+  timers.frogTimer.start();
   if ( options.debugFlag > 5 ){
     LOG << "Frogging sentence:" << sent << endl;
   }
   bool all_well = true;
   string exs;
-  // timers.tagTimer.start();
+  timers.tagTimer.start();
   try {
     myCGNTagger->Classify( sent );
   }
@@ -1533,7 +1531,7 @@ bool FrogAPI::frog_sentence( frog_data& sent ){
     all_well = false;
     exs += string(e.what()) + " ";
   }
-  //  timers.tagTimer.stop();
+  timers.tagTimer.stop();
   if ( !all_well ){
     throw runtime_error( exs );
   }
@@ -1633,7 +1631,7 @@ bool FrogAPI::frog_sentence( frog_data& sent ){
       myParser->Parse( sent, timers );
     }
   }
-  // timers.frogTimer.stop();
+  timers.frogTimer.stop();
   return showParse;
 }
 
@@ -1666,6 +1664,86 @@ string filter_non_NC( const string& filename ){
     return filter_non_NC( "N" + filename );
   }
   return result;
+}
+
+void FrogAPI::show_record( ostream& os, const frog_record& fd ) const {
+  os << fd.word << TAB;
+  if ( options.doLemma ){
+    if ( !fd.lemmas.empty() ){
+      os << fd.lemmas[0];
+    }
+    else {
+      os << TAB;
+    }
+  }
+  else {
+    os << TAB;
+  }
+  os << TAB;
+  if ( options.doMorph ){
+    if ( fd.morphs.empty() ){
+      if ( !fd.morphs_nested.empty() ){
+	for ( const auto nm : fd.morphs_nested ){
+	  os << "[" << nm << "]";
+	  break; // first alternative only!
+	  if ( &nm != &fd.morphs_nested.back() ){
+	    os << "/";
+	  }
+	}
+      }
+    }
+    else {
+      for ( const auto nm : fd.morphs ){
+	for ( auto const& m : nm ){
+	  os << m;
+	}
+	break; // first alternative only!
+	if ( &nm != &fd.morphs.back() ){
+	  os << "/";
+	}
+      }
+    }
+  }
+  else {
+    os << TAB;
+  }
+  os << TAB << fd.tag << TAB << fixed << showpoint << std::setprecision(6) << fd.tag_confidence;
+  if ( options.doNER ){
+    os << TAB << TiCC::uppercase(fd.ner_tag);
+  }
+  else {
+    os << TAB << TAB;
+  }
+  if ( options.doIOB ){
+    os << TAB << fd.iob_tag;
+  }
+  else {
+    os << TAB << TAB;
+  }
+  if ( options.doParse ){
+    os << TAB << fd.parse_index << TAB << fd.parse_role;
+  }
+  else {
+    os << TAB << TAB << TAB << TAB;
+  }
+}
+
+void FrogAPI::showResults( ostream& os,
+			   const frog_data& fd ) const {
+  if ( fd.mw_units.empty() ){
+    for ( size_t pos=0; pos < fd.units.size(); ++pos ){
+      os << pos+1 << TAB;
+      show_record( os, fd.units[pos] );
+      os << endl;
+    }
+  }
+  else {
+    for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
+      os << pos+1 << TAB;
+      show_record( os, fd.mw_units[pos] );
+      os << endl;
+    }
+  }
 }
 
 void FrogAPI::FrogFile( const string& infilename,
@@ -1721,19 +1799,20 @@ void FrogAPI::FrogFile( const string& infilename,
     string file_name;
     if ( !xmlOutFile.empty() ){
       file_name = xmlOutFile;
-      LOG << "file_name=" << file_name << endl;
       file_name = file_name.substr( 0, file_name.find( ".xml" ) );
-      LOG << "file_name=" << file_name << endl;
-      LOG << "start document , file_name=" << file_name << endl;
       root = start_document( file_name, doc1 );
       file_name += ".fol";
     }
+    timers.reset();
+    timers.tokTimer.start();
     frog_data res = tokenizer->tokenize_stream( TEST );
+    timers.tokTimer.stop();
     while ( res.size() > 0 ){
       ++i;
       bool showParse = frog_sentence( res );
-      cout << "NEW Frog result:" << endl;
-      cout << res << endl;
+      if ( !options.noStdOut ){
+	showResults( os, res );
+      }
       if ( options.doParse && !showParse ){
 	LOG << "WARNING!" << endl;
 	LOG << "Sentence " << i
@@ -1748,12 +1827,44 @@ void FrogAPI::FrogFile( const string& infilename,
 	  root = append_to_folia( root, res );
 	}
       }
+      timers.tokTimer.start();
       res = tokenizer->tokenize_stream( TEST );
+      timers.tokTimer.stop();
     }
     if ( !xmlOutFile.empty() ){
       doc1->save( file_name );
-      LOG << "stored document in file: " << file_name << endl;
+      LOG << "resulting FoLiA doc saved in " << file_name << endl;
+      delete doc1;
     }
+    if ( true ){ //!hidetimers ){
+      LOG << "tokenisation took:  " << timers.tokTimer << endl;
+      LOG << "CGN tagging took:   " << timers.tagTimer << endl;
+      if ( options.doIOB){
+	LOG << "IOB chunking took:  " << timers.iobTimer << endl;
+      }
+      if ( options.doNER){
+	LOG << "NER took:           " << timers.nerTimer << endl;
+      }
+      if ( options.doMorph ){
+	LOG << "MBMA took:          " << timers.mbmaTimer << endl;
+      }
+      if ( options.doLemma ){
+	LOG << "Mblem took:         " << timers.mblemTimer << endl;
+      }
+      if ( options.doMwu ){
+	LOG << "MWU resolving took: " << timers.mwuTimer << endl;
+      }
+      if ( options.doParse ){
+	LOG << "Parsing (prepare) took: " << timers.prepareTimer << endl;
+	LOG << "Parsing (pairs)   took: " << timers.pairsTimer << endl;
+	LOG << "Parsing (rels)    took: " << timers.relsTimer << endl;
+	LOG << "Parsing (dir)     took: " << timers.dirTimer << endl;
+	LOG << "Parsing (csi)     took: " << timers.csiTimer << endl;
+	LOG << "Parsing (total)   took: " << timers.parseTimer << endl;
+      }
+      LOG << "Frogging in total took: " << timers.frogTimer << endl;
+    }
+#ifdef OLD
     ifstream IN( infilename );
     timers.reset();
     timers.tokTimer.start();
@@ -1772,5 +1883,6 @@ void FrogAPI::FrogFile( const string& infilename,
       LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
     }
     delete doc;
+#endif
   }
 }

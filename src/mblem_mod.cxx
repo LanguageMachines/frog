@@ -370,14 +370,14 @@ void Mblem::Classify( frog_record& fd ){
     LOG << "Classify " << uword << "(" << pos << ") ["
 	<< token_class << "]" << endl;
   }
-  if ( filter )
+  if ( filter ){
     uword = filter->filter( uword );
-
+  }
   if ( token_class == "ABBREVIATION" ){
     // We dont handle ABBREVIATION's so just take the word as such
 #pragma omp critical (dataupdate)
     {
-      fd.lemmas.push_back( fd.word );
+      fd.lemmas.push_back( TiCC::UnicodeToUTF8(uword) );
     }
     return;
   }
@@ -403,7 +403,7 @@ void Mblem::Classify( frog_record& fd ){
     // some tags are just taken as such
 #pragma omp critical (dataupdate)
     {
-      fd.lemmas.push_back( fd.word );
+      fd.lemmas.push_back( TiCC::UnicodeToUTF8(uword) );
     }
     return;
   }

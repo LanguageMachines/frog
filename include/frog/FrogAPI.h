@@ -140,7 +140,9 @@ class FrogAPI {
   std::string lookupIOBChunk( const std::vector<folia::Word *>&,
 			      const std::vector<folia::Chunk*>& ) const;
   void displayMWU( std::ostream&, size_t, const std::vector<folia::Word*>& ) const;
-  std::ostream& showResults( std::ostream&, folia::Document& ) const;
+  void showResults( std::ostream&, folia::Document& ) const;
+  void show_record( std::ostream&, const frog_record& ) const;
+  void showResults( std::ostream&, const frog_data& ) const;
 
   // data
   const TiCC::Configuration& configuration;
