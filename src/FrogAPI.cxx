@@ -539,10 +539,10 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
   return text;
 }
 
+static int p_count = 0;
 
 folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
 					       const frog_data& fd ) const {
-  static int p_count = 0;
   folia::FoliaElement *result = root;
   folia::KWargs args;
   if ( fd.units[0].new_paragraph ){
@@ -1796,12 +1796,15 @@ void FrogAPI::FrogFile( const string& infilename,
     int i = 0;
     folia::Document *doc1 = 0;
     folia::FoliaElement *root = 0;
-    string file_name;
     if ( !xmlOutFile.empty() ){
-      file_name = xmlOutFile;
-      file_name = file_name.substr( 0, file_name.find( ".xml" ) );
-      root = start_document( file_name, doc1 );
-      file_name += ".fol";
+      string doc_id = infilename;
+      if ( options.docid != "untitled" ){
+	doc_id = options.docid;
+      }
+      doc_id = doc_id.substr( 0, doc_id.find( ".xml" ) );
+      doc_id = filter_non_NC( TiCC::basename(doc_id) );
+      root = start_document( doc_id, doc1 );
+      p_count = 0;
     }
     timers.reset();
     timers.tokTimer.start();
@@ -1832,8 +1835,8 @@ void FrogAPI::FrogFile( const string& infilename,
       timers.tokTimer.stop();
     }
     if ( !xmlOutFile.empty() ){
-      doc1->save( file_name );
-      LOG << "resulting FoLiA doc saved in " << file_name << endl;
+      doc1->save( xmlOutFile );
+      LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
       delete doc1;
     }
     if ( true ){ //!hidetimers ){
