@@ -279,9 +279,29 @@ void IOBTagger::post_process( frog_data& words ){
   if ( debug ){
     LOG << "IOB postprocess...." << endl;
   }
+  string last_tag;
   for ( size_t i=0; i < _tag_result.size(); ++i ){
+    string tag = _tag_result[i].assignedTag();
+    if ( tag[0] == 'I' ){
+      // make sure that we start a new 'sequence' with a B
+      if ( last_tag.empty() ){
+	tag[0] = 'B';
+      }
+      else {
+	if ( last_tag.substr(2) != tag.substr( 2 ) ){
+	  tag[0] = 'B';
+	}
+      }
+      last_tag = tag;
+    }
+    else if ( tag[0] == 'O' ){
+      last_tag.clear();
+    }
+    else if ( tag[0] == 'B' ){
+      last_tag = tag;
+    }
     addTag( words.units[i],
-	    _tag_result[i].assignedTag(),
+	    tag,
 	    _tag_result[i].confidence() );
   }
 }
@@ -332,7 +352,6 @@ void IOBTagger::add_result( folia::Sentence* s,
     }
     else if ( word.iob_tag[0] == 'I' ){
       // continue in an entity
-      assert( iob != 0 );
       iob_conf *= word.iob_confidence;
       iob->append( wv[i] );
     }
