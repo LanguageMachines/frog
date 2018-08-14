@@ -261,6 +261,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       stat = myCGNTagger->init( configuration );
       if ( stat ){
 	myCGNTagger->set_eos_mark( options.uttmark );
+	myCGNTagger->set_text_redundancy( options.textredundancy );
 	if ( options.doIOB ){
 	  myIOBTagger = new IOBTagger( theErrLog );
 	  stat = myIOBTagger->init( configuration );
@@ -393,6 +394,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	try {
 	  myCGNTagger = new CGNTagger( theErrLog );
 	  tagStat = myCGNTagger->init( configuration );
+	  myCGNTagger->set_text_redundancy( options.textredundancy );
 	}
 	catch ( const exception& e ){
 	  tagWhat = e.what();
@@ -552,6 +554,10 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
       root->append( p );
     }
     else {
+      // root is a paragrpah, which is done now.
+      if ( options.textredundancy == "full" ){
+	root->settext( root->str(options.outputclass), options.outputclass);
+      }
       root->parent()->append( p );
     }
     result = p;

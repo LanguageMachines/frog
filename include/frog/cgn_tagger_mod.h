@@ -47,11 +47,13 @@ class CGNTagger: public BaseTagger {
   std::string getSubSet( const std::string& ,
 			 const std::string&,
 			 const std::string& ) const;
+  void set_text_redundancy( const std::string& tr ){ textredundancy = tr; };
  private:
   void addTag( frog_record&, const std::string&, double );
   void addTag( folia::Word *, const std::string&, double );
   void fillSubSetTable();
   bool fillSubSetTable( const std::string&, const std::string& );
+  std::string textredundancy;
   std::multimap<std::string,std::string> cgnSubSets;
   std::multimap<std::string,std::string> cgnConstraints;
 };

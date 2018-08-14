@@ -175,7 +175,7 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
     textclass = "current";
   }
   if ( debug > 1 ){
-    LOG << _label << "-taggger textclass= " << textclass << endl;
+    LOG << _label << "-tagger textclass= " << textclass << endl;
   }
   string init = "-s " + settings + " -vcf";
   tagger = new MbtAPI( init, *tag_log );

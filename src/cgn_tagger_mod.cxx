@@ -322,6 +322,8 @@ vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
       postag->append( feat );
     }
   }
-  s->settext( s->str(textclass), textclass );
+  if ( textredundancy == "full" ){
+    s->settext( s->str(textclass), textclass );
+  }
   return wv;
 }
