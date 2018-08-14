@@ -290,12 +290,15 @@ vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
       args["space"] = "no";
     }
     folia::Word *w = new folia::Word( args, s->doc() );
-    w->settext( word.word );
+    w->settext( word.word, textclass );
     s->append( w );
     wv.push_back( w );
     args.clear();
     args["set"]   = getTagset();
     args["class"] = word.tag;
+    if ( textclass != "current" ){
+      args["textclass"] = textclass;
+    }
     args["confidence"]= TiCC::toString(word.tag_confidence);
     folia::FoliaElement *postag = w->addPosAnnotation( args );
     vector<string> hv = TiCC::split_at_first_of( word.tag, "()" );
@@ -319,5 +322,6 @@ vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
       postag->append( feat );
     }
   }
+  s->settext( s->str(textclass), textclass );
   return wv;
 }
