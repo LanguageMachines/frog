@@ -268,6 +268,7 @@ frog_data UctoTokenizer::tokenize_stream( istream& is ){
     vector<Tokenizer::Token> new_toks = tokenizer->tokenizeStream( is );
     toks.insert( toks.end(), new_toks.begin(), new_toks.end() );
     bool skip = false;
+    int quotelevel = 0;
     for ( const auto tok : toks ){
       if ( skip ){
 	stack.push_back( tok );
@@ -280,8 +281,14 @@ frog_data UctoTokenizer::tokenize_stream( istream& is ){
 	tmp.language = tok.lc;
 	tmp.new_paragraph = (tok.role & Tokenizer::TokenRole::NEWPARAGRAPH);
 	result.units.push_back( tmp );
+	if ( (tok.role & Tokenizer::TokenRole::BEGINQUOTE) ){
+	  ++quotelevel;
+	}
+	if ( (tok.role & Tokenizer::TokenRole::ENDQUOTE) ){
+	  --quotelevel;
+	}
 	if ( (tok.role & Tokenizer::TokenRole::ENDOFSENTENCE) ){
-	  skip = true;
+	  skip = quotelevel == 0;
 	}
       }
     }
