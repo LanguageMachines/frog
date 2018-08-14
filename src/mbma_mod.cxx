@@ -298,9 +298,9 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
 }
 
 void Mbma::clearAnalysis(){
-  for ( const auto& a: analysis ){
-    delete a;
-  }
+  // for ( const auto& a: analysis ){
+  //   delete a;
+  // }
   analysis.clear();
 }
 
@@ -901,6 +901,10 @@ void Mbma::getResult( frog_record& fd,
 		    << uword << endl;
     }
     if ( doDeepMorph ){
+      BracketNest *brack = new BracketNest( CLEX::X, Compound::Type::NONE, debugFlag, *mbmaLog );
+      BaseBracket *leaf = new BracketLeaf( CLEX::X, uword, 0, *mbmaLog );
+      brack->append( leaf );
+      fd.deep_morphs.push_back( brack );
       addBracketMorph( fd, TiCC::UnicodeToUTF8(uword), head, "X" );
     }
     else {
@@ -912,6 +916,7 @@ void Mbma::getResult( frog_record& fd,
   else {
     for ( auto const& sit : analysis ){
       if ( doDeepMorph ){
+	fd.deep_morphs.push_back( sit->brackets );
 	addBracketMorph( fd, TiCC::UnicodeToUTF8(uword), sit->brackets );
       }
       else {
@@ -1051,7 +1056,9 @@ void Mbma::add_morphemes( const vector<folia::Word*>& wv,
       }
     }
     else {
-      LOG << "deep morpheme XML output not implemented!" << endl;
+      for ( const auto& mor : fd.units[i].deep_morphs ) {
+	addBracketMorph( wv[i], fd.units[i].word, mor );
+      }
     }
   }
 }

@@ -920,6 +920,9 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
   cnt = 1;
   args.clear();
   args["subset"] = "structure";
+  if ( desc.empty() ){
+    desc = "XYZ";
+  }
   args["class"]  = desc;
 #pragma omp critical (foliaupdate)
   {
