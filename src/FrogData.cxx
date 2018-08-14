@@ -56,11 +56,11 @@ ostream& operator<<( ostream& os, const frog_record& fd ){
   }
   os << TAB;
   if ( fd.morphs.empty() ){
-    if ( !fd.morphs_nested.empty() ){
-      for ( const auto nm : fd.morphs_nested ){
+    if ( !fd.deep_morphs.empty() ){
+      for ( const auto nm : fd.deep_morphs ){
 	os << "[" << nm << "]";
 	break; // first alternative only!
-	if ( &nm != &fd.morphs_nested.back() ){
+	if ( &nm != &fd.deep_morphs.back() ){
 	  os << "/";
 	}
       }
@@ -93,14 +93,11 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
     result.word += "_" + fd.units[i].word;
     result.lemmas[0] += "_" + fd.units[i].lemmas[0];
     if ( result.morphs.empty() ){
-      if ( result.morphs_nested.empty() ){
+      if ( result.deep_morphs.empty() ){
 	// no morphemes
       }
       else {
-	for ( size_t pos=0; pos < fd.units[i].morphs_nested.size(); ++pos ){
-	  auto variant =  fd.units[i].morphs_nested[pos];
-	  result.morphs_nested[pos] += "]_[" + variant;
-	}
+	// how to merge bracket structures???
       }
     }
     else {

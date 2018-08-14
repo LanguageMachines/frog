@@ -55,6 +55,8 @@ namespace CLEX {
     {CLEX::AFFIX, "affix"},
     {CLEX::XAFFIX,"x-affix"},
     {CLEX::NEUTRAL, "neutral"},
+    {CLEX::SPEC, "special"},
+    {CLEX::LET, "letter"},
     {CLEX::UNASS, "unassigned"}
   };
 
@@ -118,6 +120,10 @@ namespace CLEX {
       return GLUE;
     else if ( s == "0" )
       return NEUTRAL;
+    else if ( s == "SPEC" )
+      return SPEC;
+    else if ( s == "LET" )
+      return LET;
     else
       return UNASS;
   }
@@ -164,6 +170,10 @@ namespace CLEX {
       return "^";
     case NEUTRAL:
       return "0";
+    case SPEC:
+      return "SPEC";
+    case LET:
+      return "LET";
     default:
       return "/";
     }

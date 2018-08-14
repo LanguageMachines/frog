@@ -99,7 +99,7 @@ class Mbma {
 			const std::string& ) const;
   void addBracketMorph( folia::Word *,
 			const std::string&,
-			const BracketNest * ) const;
+			const BaseBracket * ) const;
   void addBracketMorph( frog_record&,
 			const std::string&,
 			const BracketNest * ) const;

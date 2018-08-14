@@ -37,7 +37,7 @@
 #include <map>
 #include <set>
 
-class BracketNest;
+class BaseBracket;
 
 class frog_record {
  public:
@@ -55,8 +55,7 @@ class frog_record {
   double ner_confidence;
   std::vector<std::string> lemmas;
   std::vector<std::vector<std::string>> morphs;
-  std::vector<BracketNest*> deep_morphs;
-  std::vector<std::string> morphs_nested;
+  std::vector<const BaseBracket*> deep_morphs;
   int parse_index;
   std::string parse_role;
   std::set<size_t> parts;

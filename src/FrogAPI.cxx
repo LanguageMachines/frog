@@ -1688,11 +1688,11 @@ void FrogAPI::show_record( ostream& os, const frog_record& fd ) const {
   os << TAB;
   if ( options.doMorph ){
     if ( fd.morphs.empty() ){
-      if ( !fd.morphs_nested.empty() ){
-	for ( const auto nm : fd.morphs_nested ){
+      if ( !fd.deep_morphs.empty() ){
+	for ( const auto nm : fd.deep_morphs ){
 	  os << "[" << nm << "]";
 	  break; // first alternative only!
-	  if ( &nm != &fd.morphs_nested.back() ){
+	  if ( &nm != &fd.deep_morphs.back() ){
 	    os << "/";
 	  }
 	}

@@ -451,7 +451,7 @@ void Mbma::addBracketMorph( folia::Word *word,
 
 void Mbma::addBracketMorph( folia::Word *word,
 			    const string& orig_word,
-			    const BracketNest *brackets ) const {
+			    const BaseBracket *brackets ) const {
   if (debugFlag > 1){
     LOG << "addBracketMorph(" << word << "," << orig_word << "," << brackets << ")" << endl;
   }
@@ -476,6 +476,15 @@ void Mbma::addBracketMorph( folia::Word *word,
     LOG << "createMorpheme failed: " << e.what() << endl;
     throw;
   }
+  args.clear();
+  args["subset"] = "structure";
+  args["class"]  = "[" + orig_word + "]";
+#pragma omp critical (foliaupdate)
+  {
+    folia::Feature *feat = new folia::Feature( args );
+    m->append( feat );
+  }
+
   if ( m ){
 #pragma omp critical (foliaupdate)
     {
@@ -848,10 +857,7 @@ void Mbma::addBracketMorph( frog_record& fd,
   }
   string head = c_tag;
   string clex_tag = c_tag;
-  if ( head == "LET" || head == "SPEC" ){
-    head.clear();
-  }
-  else if ( head == "X" ) {
+  if ( head == "X" ) {
     // unanalysed, so trust the TAGGER
     head = pos_tag;
     if (debugFlag > 1){
@@ -867,14 +873,21 @@ void Mbma::addBracketMorph( frog_record& fd,
     if (debugFlag > 1){
       LOG << "replaced X by: " << head << endl;
     }
+    BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(clex_tag),
+					 TiCC::UnicodeFromUTF8(wrd),
+					 debugFlag,
+					 *mbmaLog );
+    fd.deep_morphs.push_back( leaf );
+    return;
   }
-
-  string str = "[" + wrd + "]" + head;
-  vector<string> tmp;
-  tmp.push_back( str );
-#pragma omp critical (dataupdate)
-  {
-    fd.morphs_nested = tmp;
+  else {
+    BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(clex_tag),
+					 TiCC::UnicodeFromUTF8(wrd),
+					 debugFlag,
+					 *mbmaLog );
+    leaf->set_status( STEM );
+    fd.deep_morphs.push_back( leaf );
+    return;
   }
 }
 
@@ -884,11 +897,11 @@ void Mbma::addBracketMorph( frog_record& fd,
   if (debugFlag > 1){
     LOG << "addBracketMorph(" << fd.word << "," << orig_word << "," << brackets << ")" << endl;
   }
-  vector<string> v = getResult();
 #pragma omp critical (dataupdate)
   {
-    fd.morphs_nested = v;
+    fd.deep_morphs.push_back( brackets );
   }
+  return;
 }
 
 void Mbma::getResult( frog_record& fd,
@@ -901,10 +914,6 @@ void Mbma::getResult( frog_record& fd,
 		    << uword << endl;
     }
     if ( doDeepMorph ){
-      BracketNest *brack = new BracketNest( CLEX::X, Compound::Type::NONE, debugFlag, *mbmaLog );
-      BaseBracket *leaf = new BracketLeaf( CLEX::X, uword, 0, *mbmaLog );
-      brack->append( leaf );
-      fd.deep_morphs.push_back( brack );
       addBracketMorph( fd, TiCC::UnicodeToUTF8(uword), head, "X" );
     }
     else {
@@ -916,7 +925,6 @@ void Mbma::getResult( frog_record& fd,
   else {
     for ( auto const& sit : analysis ){
       if ( doDeepMorph ){
-	fd.deep_morphs.push_back( sit->brackets );
 	addBracketMorph( fd, TiCC::UnicodeToUTF8(uword), sit->brackets );
       }
       else {
@@ -1044,8 +1052,8 @@ void Mbma::add_morphemes( const vector<folia::Word*>& wv,
   for ( size_t i=0; i < wv.size(); ++i ){
     folia::KWargs args;
     args["set"] = mbma_tagset;
-    folia::MorphologyLayer *ml = wv[i]->addMorphologyLayer( args );
     if ( !doDeepMorph ){
+      folia::MorphologyLayer *ml = wv[i]->addMorphologyLayer( args );
       for ( const auto& mor : fd.units[i].morphs ) {
 	for ( const auto& mt : mor ) {
 	  folia::Morpheme *m = new folia::Morpheme( args, wv[0]->doc() );
