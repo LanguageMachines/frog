@@ -318,7 +318,6 @@ void NERTagger::addNERTags( const vector<folia::Word*>& words,
       if ( !stack.empty() ){
 	if (debug > 1) {
 	  LOG << "O spit out " << curNER << endl;
-	  using TiCC::operator<<;
 	  LOG << "ners  " << stack << endl;
 	  LOG << "confs " << dstack << endl;
 	}
@@ -344,7 +343,6 @@ void NERTagger::addNERTags( const vector<folia::Word*>& words,
       if ( !stack.empty() ){
 	if ( debug > 1 ){
 	  LOG << "B spit out " << curNER << endl;
-	  using TiCC::operator<<;
 	  LOG << "spit out " << stack << endl;
 	}
 	addEntity( sent, stack, dstack, curNER );
@@ -359,7 +357,6 @@ void NERTagger::addNERTags( const vector<folia::Word*>& words,
   if ( !stack.empty() ){
     if ( debug > 1 ){
       LOG << "END spit out " << curNER << endl;
-      using TiCC::operator<<;
       LOG << "spit out " << stack << endl;
     }
     addEntity( sent, stack, dstack, curNER );
@@ -486,8 +483,28 @@ void NERTagger::post_process( frog_data& swords,
 			      const vector<string>& override ){
   vector<string> tags;
   vector<double> conf;
+  string last_tag;
   for ( const auto& tag : _tag_result ){
-    tags.push_back( tag.assignedTag() );
+    string a_tag = tag.assignedTag();
+    if ( a_tag[0] == 'I' ){
+      // make sure that we start a new 'sequence' with a B
+      if ( last_tag.empty() ){
+	a_tag[0] = 'B';
+      }
+      else {
+	if ( last_tag.substr(2) != a_tag.substr( 2 ) ){
+	  a_tag[0] = 'B';
+	}
+      }
+      last_tag = a_tag;
+    }
+    else if ( a_tag[0] == 'O' ){
+      last_tag.clear();
+    }
+    else if ( a_tag[0] == 'B' ){
+      last_tag = a_tag;
+    }
+    tags.push_back( a_tag );
     conf.push_back( tag.confidence() );
   }
   if ( !override.empty() ){
@@ -515,7 +532,6 @@ void NERTagger::addNERTags( frog_data& words,
       if ( !stack.empty() ){
 	if (debug > 1) {
 	  LOG << "O spit out " << curNER << endl;
-	  using TiCC::operator<<;
 	  LOG << "ners  " << stack << endl;
 	  LOG << "confs " << dstack << endl;
 	}
@@ -541,7 +557,6 @@ void NERTagger::addNERTags( frog_data& words,
       if ( !stack.empty() ){
 	if ( debug > 1 ){
 	  LOG << "B spit out " << curNER << endl;
-	  using TiCC::operator<<;
 	  LOG << "spit out " << stack << endl;
 	}
 	addEntity( words, i, stack, dstack );
@@ -556,7 +571,6 @@ void NERTagger::addNERTags( frog_data& words,
   if ( !stack.empty() ){
     if ( debug > 1 ){
       LOG << "END spit out " << curNER << endl;
-      using TiCC::operator<<;
       LOG << "spit out " << stack << endl;
     }
     addEntity( words, words.size(), stack, dstack );
@@ -617,7 +631,6 @@ void NERTagger::merge_override( vector<string>& tags,
 	      || POS_tags[i].find("SPEC(") != string::npos
 	      || POS_tags[i].find("N(") != string::npos ) ){
       // if ( i == 0 ){
-      // 	using TiCC::operator<<;
       //  	 cerr << "override = " << override << endl;
       //  	 cerr << "ner tags = " << tags << endl;
       //  	 cerr << "POS tags = " << POS_tags << endl;
