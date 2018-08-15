@@ -361,7 +361,10 @@ icu::UnicodeString BracketLeaf::pretty_put() const {
     result += TiCC::UnicodeToUTF8(morph);
     result += "]";
   }
-  if ( cls != CLEX::UNASS && cls != CLEX::NEUTRAL ){
+  if ( status() != Status::PARTICIPLE
+       && cls != CLEX::UNASS
+       && cls != CLEX::NEUTRAL ){
+    LOG << this->status() << endl;
     string s = CLEX::get_tDescr(cls);
     if ( s != "/" ){
       result += s;
