@@ -56,24 +56,34 @@ ostream& operator<<( ostream& os, const frog_record& fd ){
   }
   os << TAB;
   if ( fd.morphs.empty() ){
-    if ( !fd.deep_morphs.empty() ){
-      for ( const auto nm : fd.deep_morphs ){
-	os << "[" << nm << "]";
-	break; // first alternative only!
-	if ( &nm != &fd.deep_morphs.back() ){
-	  os << "/";
+    if ( !fd.deep_morph_string.empty() ){
+      os << fd.deep_morph_string;
+    }
+    else {
+      if ( !fd.deep_morphs.empty() ){
+	for ( const auto nm : fd.deep_morphs ){
+	  os << "[" << nm << "]";
+	  break; // first alternative only!
+	  if ( &nm != &fd.deep_morphs.back() ){
+	    os << "/";
+	  }
 	}
       }
     }
   }
   else {
-    for ( const auto nm : fd.morphs ){
-      for ( auto const& m : nm ){
-	os << m;
-      }
-      break; // first alternative only!
-      if ( &nm != &fd.morphs.back() ){
-	os << "/";
+    if ( !fd.morph_string.empty() ){
+      os << fd.morph_string;
+    }
+    else {
+      for ( const auto nm : fd.morphs ){
+	for ( auto const& m : nm ){
+	  os << m;
+	}
+	break; // first alternative only!
+	if ( &nm != &fd.morphs.back() ){
+	  os << "/";
+	}
       }
     }
   }
@@ -91,16 +101,18 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
   for ( size_t i = start+1; i <= finish; ++i ){
     result.parts.insert( i );
     result.word += "_" + fd.units[i].word;
+    result.clean_word += "_" + fd.units[i].word;
     result.lemmas[0] += "_" + fd.units[i].lemmas[0];
     if ( result.morphs.empty() ){
-      if ( result.deep_morphs.empty() ){
+      if ( result.deep_morph_string.empty() ){
 	// no morphemes
       }
       else {
-	// how to merge bracket structures???
+	result.deep_morph_string += "_" + fd.units[i].deep_morph_string;
       }
     }
     else {
+      result.morph_string += "_" + fd.units[i].morph_string;
       for ( size_t pos=0; pos < fd.units[i].morphs.size(); ++pos ){
 	result.morphs[pos].back() += "_";
 	auto variant = fd.units[i].morphs[pos];

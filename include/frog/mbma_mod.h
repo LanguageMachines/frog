@@ -64,6 +64,7 @@ class Mbma {
   void assign_compounds();
   std::vector<std::string> getResult() const;
   std::vector<std::pair<std::string,std::string>> getResults( ) const;
+  std::vector<std::pair<std::string,std::string>> getPrettyResults( ) const;
   void setDeepMorph( bool b ){ doDeepMorph = b; };
   void clearAnalysis();
   Rule* matchRule( const std::vector<std::string>&, const icu::UnicodeString& );
@@ -89,20 +90,20 @@ class Mbma {
   void addMorph( folia::MorphologyLayer *,
 		 const std::vector<std::string>& ) const;
   void addMorph( folia::Word *, const std::vector<std::string>& ) const;
-  void addMorph( frog_record&, const std::vector<std::string>& ) const;
+  void add_morph( frog_record&, const std::vector<std::string>& ) const;
   void addBracketMorph( folia::Word *,
 			const std::string&,
 			const std::string& ) const;
-  void addBracketMorph( frog_record&,
-			const std::string&,
-			const std::string&,
-			const std::string& ) const;
+  void add_brackets( frog_record&,
+		     const std::string&,
+		     const std::string&,
+		     const std::string& ) const;
   void addBracketMorph( folia::Word *,
 			const std::string&,
 			const BaseBracket * ) const;
-  void addBracketMorph( frog_record&,
-			const std::string&,
-			const BracketNest * ) const;
+  void add_brackets( frog_record&,
+		     const std::string&,
+		     const BracketNest * ) const;
   std::string MTreeFilename;
   Timbl::TimblAPI *MTree;
   std::vector<Rule*> analysis;

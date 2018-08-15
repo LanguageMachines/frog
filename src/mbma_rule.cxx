@@ -322,6 +322,11 @@ string Rule::morpheme_string( bool structured ) const {
   return result;
 }
 
+string Rule::pretty_string() const {
+  icu::UnicodeString us = brackets->pretty_put();
+  return TiCC::UnicodeToUTF8( us );
+}
+
 bool Rule::performEdits(){
   if ( debugFlag > 1 ){
     LOG << "FOUND rule " << this << endl;

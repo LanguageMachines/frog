@@ -1688,26 +1688,18 @@ void FrogAPI::show_record( ostream& os, const frog_record& fd ) const {
   os << TAB;
   if ( options.doMorph ){
     if ( fd.morphs.empty() ){
-      if ( !fd.deep_morphs.empty() ){
-	for ( const auto nm : fd.deep_morphs ){
-	  os << "[" << nm << "]";
-	  break; // first alternative only!
-	  if ( &nm != &fd.deep_morphs.back() ){
-	    os << "/";
-	  }
+      if ( !fd.deep_morph_string.empty() ){
+	os << fd.deep_morph_string << TAB;
+	if ( !fd.compounds.empty() && fd.compounds[0] != "none" ){
+	  os << fd.compounds[0] + "-compound";
+	}
+	else {
+	  os << 0;
 	}
       }
     }
     else {
-      for ( const auto nm : fd.morphs ){
-	for ( auto const& m : nm ){
-	  os << m;
-	}
-	break; // first alternative only!
-	if ( &nm != &fd.morphs.back() ){
-	  os << "/";
-	}
-      }
+      os << fd.morph_string;
     }
   }
   else {
@@ -1750,6 +1742,7 @@ void FrogAPI::showResults( ostream& os,
       os << endl;
     }
   }
+  os << endl;
 }
 
 void FrogAPI::FrogFile( const string& infilename,
@@ -1873,25 +1866,5 @@ void FrogAPI::FrogFile( const string& infilename,
       }
       LOG << "Frogging in total took: " << timers.frogTimer << endl;
     }
-#ifdef OLD
-    ifstream IN( infilename );
-    timers.reset();
-    timers.tokTimer.start();
-    if ( options.docid == "untitled" ){
-      string id = filter_non_NC( TiCC::basename(infilename) );
-      tokenizer->setDocID( id );
-    }
-    folia::Document *doc = tokenizer->tokenize( IN );
-    timers.tokTimer.stop();
-    FrogDoc( *doc );
-    if ( !options.noStdOut ){
-      showResults( os, *doc );
-    }
-    if ( !xmlOutFile.empty() ){
-      doc->save( xmlOutFile, options.doKanon );
-      LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
-    }
-    delete doc;
-#endif
   }
 }

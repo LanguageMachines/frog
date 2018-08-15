@@ -323,6 +323,13 @@ icu::UnicodeString BaseBracket::put( bool full ) const {
   return result;
 }
 
+icu::UnicodeString BaseBracket::pretty_put() const {
+  icu::UnicodeString result = "[err?]";
+  icu::UnicodeString s = TiCC::UnicodeFromUTF8(CLEX::get_tDescr(cls));
+  result += s;
+  return result;
+}
+
 icu::UnicodeString BracketLeaf::put( bool full ) const {
   icu::UnicodeString result;
   if ( !morph.isEmpty() ){
@@ -347,15 +354,31 @@ icu::UnicodeString BracketLeaf::put( bool full ) const {
   return result;
 }
 
+icu::UnicodeString BracketLeaf::pretty_put() const {
+  string result;
+  if ( !morph.isEmpty() ){
+    result += "[";
+    result += TiCC::UnicodeToUTF8(morph);
+    result += "]";
+  }
+  if ( cls != CLEX::UNASS && cls != CLEX::NEUTRAL ){
+    string s = CLEX::get_tDescr(cls);
+    if ( s != "/" ){
+      result += s;
+    }
+  }
+  for ( const auto& i : inflect ){
+    result += "/" + CLEX::get_iDescr(i);
+  }
+  return TiCC::UnicodeFromUTF8(result);
+}
+
 icu::UnicodeString BracketNest::put( bool full ) const {
   icu::UnicodeString result = "[ ";
   for ( auto const& it : parts ){
     icu::UnicodeString m = it->put( full );
     if ( !m.isEmpty() ){
       result += m + " ";
-      // if (&it != &parts.back() ){
-      // 	result += " ";
-      // }
     }
   }
   result += "]";
@@ -365,6 +388,25 @@ icu::UnicodeString BracketNest::put( bool full ) const {
     }
     if ( _compound != Compound::Type::NONE ){
       result += " " + TiCC::UnicodeFromUTF8(toString(_compound)) + "-compound";
+    }
+  }
+  return result;
+}
+
+icu::UnicodeString BracketNest::pretty_put( ) const {
+  icu::UnicodeString result;
+  int cnt = 0;
+  for ( auto const& it : parts ){
+    icu::UnicodeString m = it->pretty_put();
+    if ( m[0] == '[' ){
+      ++cnt;
+    }
+    result += m;
+  }
+  if ( cnt > 1 ){
+    result = "[" + result + "]";
+    if ( cls != CLEX::UNASS && cls != CLEX::NEUTRAL ){
+      result += TiCC::UnicodeFromUTF8(CLEX::get_tDescr(cls));
     }
   }
   return result;
@@ -474,7 +516,6 @@ Compound::Type construct( const CLEX::Type tag1, const CLEX::Type tag2 ){
   return construct( v );
 }
 
-bool TEST = 1;
 Compound::Type BracketNest::getCompoundType(){
   if ( debugFlag > 5 ){
     LOG << "get compoundType: " << this << endl;

@@ -43,6 +43,7 @@ class frog_record {
  public:
   frog_record();
   std::string word;
+  std::string clean_word;
   std::string token_class;
   std::string language;
   bool no_space;
@@ -56,6 +57,9 @@ class frog_record {
   std::vector<std::string> lemmas;
   std::vector<std::vector<std::string>> morphs;
   std::vector<const BaseBracket*> deep_morphs;
+  std::vector<std::string> compounds; //
+  std::string morph_string;      // string representation of first morph
+  std::string deep_morph_string; // string representation of first deep_morph
   int parse_index;
   std::string parse_role;
   std::set<size_t> parts;

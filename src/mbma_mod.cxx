@@ -376,11 +376,12 @@ void Mbma::addMorph( folia::Word *word,
 }
 
 void Mbma::addBracketMorph( folia::Word *word,
-			    const string& wrd,
+			    const string& _wrd,
 			    const string& tag ) const {
   if (debugFlag > 1){
-    LOG << "addBracketMorph(" << wrd << "," << tag << ")" << endl;
+    LOG << "addBracketMorph(" << _wrd << "," << tag << ")" << endl;
   }
+  string wrd = _wrd;
   string celex_tag = tag;
   string head = tag;
   if ( head == "LET" || head == "SPEC" ){
@@ -407,7 +408,11 @@ void Mbma::addBracketMorph( folia::Word *word,
       LOG << "replaced X by: " << head << endl;
     }
   }
-
+  if ( head != "SPEC" ){
+    UnicodeString uword = TiCC::UnicodeFromUTF8(wrd);
+    uword.toLower();
+    wrd = TiCC::UnicodeToUTF8(uword);
+  }
   folia::KWargs args;
   args["set"] = mbma_tagset;
   folia::MorphologyLayer *ml;
@@ -476,14 +481,14 @@ void Mbma::addBracketMorph( folia::Word *word,
     LOG << "createMorpheme failed: " << e.what() << endl;
     throw;
   }
-  args.clear();
-  args["subset"] = "structure";
-  args["class"]  = "[" + orig_word + "]";
-#pragma omp critical (foliaupdate)
-  {
-    folia::Feature *feat = new folia::Feature( args );
-    m->append( feat );
-  }
+//   args.clear();
+//   args["subset"] = "structure";
+//   args["class"]  = "[" + orig_word + "]";
+// #pragma omp critical (foliaupdate)
+//   {
+//     folia::Feature *feat = new folia::Feature( args );
+//     m->append( feat );
+//   }
 
   if ( m ){
 #pragma omp critical (foliaupdate)
@@ -836,11 +841,16 @@ void Mbma::Classify( folia::Word* sword ){
   }
 }
 
-void Mbma::addMorph( frog_record& fd,
-		     const vector<string>& morphs ) const {
+void Mbma::add_morph( frog_record& fd,
+		      const vector<string>& morphs ) const {
   vector<string> adapted;
   for ( const auto& m : morphs ){
     adapted.push_back( "[" + m + "]" );
+  }
+  if ( fd.morph_string.empty() ){
+    for ( const auto& a : adapted ){
+      fd.morph_string += a;
+    }
   }
 #pragma omp critical (dataupdate)
   {
@@ -848,12 +858,12 @@ void Mbma::addMorph( frog_record& fd,
   }
 }
 
-void Mbma::addBracketMorph( frog_record& fd,
-			    const string& wrd,
-			    const string& pos_tag,
-			    const string& c_tag ) const {
+void Mbma::add_brackets( frog_record& fd,
+			 const string& wrd,
+			 const string& pos_tag,
+			 const string& c_tag ) const {
   if (debugFlag > 1){
-    LOG << "addBracketMorph(" << wrd << "," << pos_tag << ")" << endl;
+    LOG << "add_brackets(" << wrd << "," << pos_tag << ")" << endl;
   }
   string head = c_tag;
   string clex_tag = c_tag;
@@ -877,8 +887,21 @@ void Mbma::addBracketMorph( frog_record& fd,
 					 TiCC::UnicodeFromUTF8(wrd),
 					 debugFlag,
 					 *mbmaLog );
+    if ( fd.deep_morph_string.empty() ){
+      fd.deep_morph_string = "[" + wrd + "]" + head;
+    }
     fd.deep_morphs.push_back( leaf );
-    return;
+  }
+  else if ( head == "LET" || head == "SPEC" ){
+    BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(clex_tag),
+					 TiCC::UnicodeFromUTF8(wrd),
+					 debugFlag,
+					 *mbmaLog );
+    leaf->set_status( STEM );
+    if ( fd.deep_morph_string.empty() ){
+      fd.deep_morph_string = "[" + wrd + "]";
+    }
+    fd.deep_morphs.push_back( leaf );
   }
   else {
     BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(clex_tag),
@@ -886,16 +909,19 @@ void Mbma::addBracketMorph( frog_record& fd,
 					 debugFlag,
 					 *mbmaLog );
     leaf->set_status( STEM );
+    if ( fd.deep_morph_string.empty() ){
+      fd.deep_morph_string = "[" + wrd + "]" + c_tag;
+    }
     fd.deep_morphs.push_back( leaf );
-    return;
   }
+  return;
 }
 
-void Mbma::addBracketMorph( frog_record& fd,
-			    const string& orig_word,
-			    const BracketNest *brackets ) const {
+void Mbma::add_brackets( frog_record& fd,
+			 const string& orig_word,
+			 const BracketNest *brackets ) const {
   if (debugFlag > 1){
-    LOG << "addBracketMorph(" << fd.word << "," << orig_word << "," << brackets << ")" << endl;
+    LOG << "add_brackets(" << fd.word << "," << orig_word << "," << brackets << ")" << endl;
   }
 #pragma omp critical (dataupdate)
   {
@@ -913,22 +939,34 @@ void Mbma::getResult( frog_record& fd,
       LOG << "no matches found, use the word instead: "
 		    << uword << endl;
     }
+    string word = TiCC::UnicodeToUTF8(uword);
     if ( doDeepMorph ){
-      addBracketMorph( fd, TiCC::UnicodeToUTF8(uword), head, "X" );
+      add_brackets( fd, word, head, "X" );
     }
     else {
       vector<string> tmp;
-      tmp.push_back( TiCC::UnicodeToUTF8(uword) );
-      addMorph( fd, tmp );
+      tmp.push_back( word );
+      add_morph( fd, tmp );
     }
   }
   else {
+    if ( doDeepMorph ){
+      vector<pair<string,string>> pv = getPrettyResults();
+      fd.deep_morph_string = pv[0].first;
+      for ( const auto& p : pv ){
+	fd.compounds.push_back( p.second );
+      }
+    }
+    else {
+      vector<string> v = getResult();
+      fd.morph_string = v[0];
+    }
     for ( auto const& sit : analysis ){
       if ( doDeepMorph ){
-	addBracketMorph( fd, TiCC::UnicodeToUTF8(uword), sit->brackets );
+	add_brackets( fd, TiCC::UnicodeToUTF8(uword), sit->brackets );
       }
       else {
-	addMorph( fd, sit->extract_morphemes() );
+	add_morph( fd, sit->extract_morphemes() );
       }
     }
   }
@@ -965,13 +1003,14 @@ void Mbma::Classify( frog_record& fd ){
     // take over the letter/word 'as-is'.
     //  also ABBREVIATION's aren't handled bij mbma-rules
     string word = TiCC::UnicodeToUTF8( uWord );
+    fd.clean_word = word;
     if ( doDeepMorph ){
-      addBracketMorph( fd, word, head, head );
+      add_brackets( fd, word, head, head );
     }
     else {
       vector<string> tmp;
       tmp.push_back( word );
-      addMorph( fd, tmp );
+      add_morph( fd, tmp );
     }
   }
   else {
@@ -979,6 +1018,7 @@ void Mbma::Classify( frog_record& fd ){
     if ( head != "SPEC" ){
       lWord.toLower();
     }
+    fd.clean_word = TiCC::UnicodeToUTF8( lWord );
     Classify( lWord );
     vector<string> featVals;
     if( v.size() > 1 ){
@@ -1047,12 +1087,28 @@ vector<pair<string,string>> Mbma::getResults( ) const {
   return result;
 }
 
+vector<pair<string,string>> Mbma::getPrettyResults( ) const {
+  vector<pair<string,string>> result;
+  for ( const auto& it : analysis ){
+    string tmp = it->pretty_string();
+    string cmp = toString( it->compound );
+    result.push_back( make_pair(tmp,cmp) );
+  }
+  if ( debugFlag > 1 ){
+    LOG << "pretty result of morph analyses: ";
+    for ( const auto& r : result ){
+      LOG << " " << r.first << "/" << r.second << "," << endl;
+    }
+  }
+  return result;
+}
+
 void Mbma::add_morphemes( const vector<folia::Word*>& wv,
 			  const frog_data& fd ) const {
   for ( size_t i=0; i < wv.size(); ++i ){
-    folia::KWargs args;
-    args["set"] = mbma_tagset;
     if ( !doDeepMorph ){
+      folia::KWargs args;
+      args["set"] = mbma_tagset;
       folia::MorphologyLayer *ml = wv[i]->addMorphologyLayer( args );
       for ( const auto& mor : fd.units[i].morphs ) {
 	for ( const auto& mt : mor ) {
@@ -1065,7 +1121,7 @@ void Mbma::add_morphemes( const vector<folia::Word*>& wv,
     }
     else {
       for ( const auto& mor : fd.units[i].deep_morphs ) {
-	addBracketMorph( wv[i], fd.units[i].word, mor );
+	addBracketMorph( wv[i], fd.units[i].clean_word, mor );
       }
     }
   }
