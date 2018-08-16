@@ -777,19 +777,29 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	  LOG << "Received: [" << data << "]" << endl;
 	}
         LOG << TiCC::Timer::now() << " Processing... " << endl;
-        istringstream inputstream(data,istringstream::in);
-	timers.reset();
-	timers.tokTimer.start();
-	folia::Document *doc = tokenizer->tokenize( inputstream );
+	istringstream inputstream(data,istringstream::in);
+	frog_data res = tokenizer->tokenize_stream( inputstream );
 	timers.tokTimer.stop();
-        FrogDoc( *doc );
+	folia::Document *doc = 0;
+	folia::FoliaElement *root = 0;
+	if ( options.doXMLout ){
+	  string doc_id = "untitled";
+	  root = start_document( doc_id, doc );
+	}
+	while ( res.size() > 0 ){
+	  frog_sentence( res );
+	  if ( options.doXMLout ){
+	    root = append_to_folia( root, res );
+	  }
+	  else {
+	    showResults( outputstream, res );
+	  }
+	  res = tokenizer->tokenize_stream( inputstream );
+	}
 	if ( options.doXMLout ){
 	  doc->save( outputstream, options.doKanon );
+	  delete doc;
 	}
-	else {
-	  showResults( outputstream, *doc );
-	}
-	delete doc;
 	//	LOG << "Done Processing... " << endl;
       }
       if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
