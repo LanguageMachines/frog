@@ -251,7 +251,6 @@ static vector<folia::Word *> lookup( folia::Word *word,
     vec = ent->select<folia::Word>();
     if ( !vec.empty() ){
       if ( vec[0]->id() == word->id() ) {
-	// cerr << "found " << vec << endl;
 	return vec;
       }
     }
@@ -905,20 +904,27 @@ void extract( const string& tv, string& head, string& mods ){
       mods += "|" + mv[i];
     }
   }
-  if ( mods.empty() ){
-    mods = "__";
-  }
-}
-
-parseData Parser::prepareParse( frog_data& fd ){
-  parseData pd;
-  for ( size_t i = 0; i < fd.units.size(); ++i ){
-    if ( fd.mwus.find( i ) == fd.mwus.end() ){
-      string head;
-      string mods;
-      extract( fd.units[i].tag, head, mods );
-      pd.words.push_back( fd.units[i].word );
-      pd.heads.push_back( head );
+  else {
+    mods = ""; // HACK should be "__", but then there are differences!
+  }                                                      //     ^
+}                                                        //     |
+                                                         //     |
+parseData Parser::prepareParse( frog_data& fd ){         //     |
+  parseData pd;                                          //     |
+  for ( size_t i = 0; i < fd.units.size(); ++i ){        //     |
+    if ( fd.mwus.find( i ) == fd.mwus.end() ){           //     |
+      string head;                                       //     |
+      string mods;                                       //     |
+      extract( fd.units[i].tag, head, mods );            //     |
+      pd.words.push_back( fd.units[i].word );            //     |
+      pd.heads.push_back( head );                        //     |
+      if ( mods.empty() ){                               //    \/
+	// HACK: make this bug-to-bug compatible with older versions.
+	// But in fact this should also be done for the mwu's loop below!
+	// now sometimes empty mods get appended there.
+	// extract should return "__", I suppose  (see above)
+	mods = "__";
+      }
       pd.mods.push_back( mods );
     }
     else {
@@ -952,7 +958,6 @@ parseData Parser::prepareParse( frog_data& fd ){
       i = fd.mwus[i];
     }
   }
-  fd.resolve_mwus(); // make sure fd.mw_units is ready to receive
   return pd;
 }
 
