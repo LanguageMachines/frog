@@ -361,17 +361,29 @@ icu::UnicodeString BracketLeaf::pretty_put() const {
     result += TiCC::UnicodeToUTF8(morph);
     result += "]";
   }
+  if ( glue ){
+    string::size_type pos = orig.find( "^" );
+    string tag;
+    tag += orig[pos+1];
+    result += CLEX::get_tDescr(CLEX::toCLEX(tag));
+  }
   if ( status() != Status::PARTICIPLE
+       && status() != Status::PARTICLE
+       && status() != Status::DERIVATIONAL
+       &&  status() != Status::FAILED
        && cls != CLEX::UNASS
        && cls != CLEX::NEUTRAL ){
-    LOG << this->status() << endl;
+    LOG << this << " " << this->status() << endl;
     string s = CLEX::get_tDescr(cls);
     if ( s != "/" ){
       result += s;
     }
   }
   for ( const auto& i : inflect ){
-    result += "/" + CLEX::get_iDescr(i);
+    string id = CLEX::get_iDescr(i);
+    if ( !id.empty() ){
+      result += "/" + id;
+    }
   }
   return TiCC::UnicodeFromUTF8(result);
 }
