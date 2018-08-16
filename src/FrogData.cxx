@@ -44,7 +44,8 @@ frog_record::frog_record():
   iob_tag( "O" ),
   iob_confidence(0.0),
   ner_tag( "O" ),
-  ner_confidence(0.0)
+  ner_confidence(0.0),
+  compound_string( "0" )
 {}
 
 const string TAB = "\t";
@@ -122,6 +123,7 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
       }
     }
     result.tag += "_" + fd.units[i].tag;
+    result.compound_string += "_" + fd.units[i].compound_string;
     result.tag_confidence *= fd.units[i].tag_confidence;
     result.ner_tag += "_" + fd.units[i].ner_tag;
     result.iob_tag += "_" + fd.units[i].iob_tag;

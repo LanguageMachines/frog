@@ -783,6 +783,20 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     else {
       args["class"] = toString( tag() );
       desc = "[" + out + "]" + CLEX::get_tDescr( tag() ); // spread the word upwards!
+      folia::KWargs fargs;
+      fargs["subset"] = "structure";
+      if ( tag() == CLEX::SPEC
+	   || tag() == CLEX::LET ){
+	fargs["class"] = "[" + out + "]";
+      }
+      else {
+	fargs["class"] = desc;
+      }
+#pragma omp critical (foliaupdate)
+      {
+	folia::Feature *feat = new folia::Feature( fargs );
+	result->append( feat );
+      }
     }
 #pragma omp critical (foliaupdate)
     {

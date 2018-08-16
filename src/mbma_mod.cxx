@@ -481,21 +481,20 @@ void Mbma::addBracketMorph( folia::Word *word,
     LOG << "createMorpheme failed: " << e.what() << endl;
     throw;
   }
-//   args.clear();
-//   args["subset"] = "structure";
-//   args["class"]  = "[" + orig_word + "]";
+//   if ( brackets->status() == STEM ){
+//     args.clear();
+//     args["subset"] = "structure";
+//     args["class"]  = "[" + orig_word + "]";
 // #pragma omp critical (foliaupdate)
-//   {
-//     folia::Feature *feat = new folia::Feature( args );
-//     m->append( feat );
+//     {
+//       folia::Feature *feat = new folia::Feature( args );
+//       m->append( feat );
+//     }
 //   }
-
-  if ( m ){
 #pragma omp critical (foliaupdate)
-    {
-      m->settext( orig_word, textclass );
-      ml->append( m );
-    }
+  {
+    m->settext( orig_word, textclass );
+    ml->append( m );
   }
 }
 
@@ -953,13 +952,17 @@ void Mbma::getResult( frog_record& fd,
     if ( doDeepMorph ){
       vector<pair<string,string>> pv = getPrettyResults();
       fd.deep_morph_string = pv[0].first;
-      for ( const auto& p : pv ){
-	fd.compounds.push_back( p.second );
+      if ( pv[0].second == "none" ){
+	fd.compound_string = "0";
+      }
+      else {
+	fd.compound_string = pv[0].second;
       }
     }
     else {
       vector<string> v = getResult();
       fd.morph_string = v[0];
+      fd.compound_string = "0";
     }
     for ( auto const& sit : analysis ){
       if ( doDeepMorph ){

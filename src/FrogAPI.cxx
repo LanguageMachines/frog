@@ -1690,11 +1690,11 @@ void FrogAPI::show_record( ostream& os, const frog_record& fd ) const {
     if ( fd.morphs.empty() ){
       if ( !fd.deep_morph_string.empty() ){
 	os << fd.deep_morph_string << TAB;
-	if ( !fd.compounds.empty() && fd.compounds[0] != "none" ){
-	  os << fd.compounds[0] + "-compound";
+	if ( fd.compound_string == "0"  ){
+	  os << "0";
 	}
 	else {
-	  os << 0;
+	  os << fd.compound_string + "-compound";
 	}
       }
     }
