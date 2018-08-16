@@ -848,10 +848,11 @@ void FrogAPI::FrogStdin( bool prompt ) {
       cout << "Processing... " << endl;
     }
     istringstream inputstream(data,istringstream::in);
-    folia::Document *doc = tokenizer->tokenize( inputstream );
-    FrogDoc( *doc, true );
-    showResults( cout, *doc );
-    delete doc;
+    frog_data res = tokenizer->tokenize_stream( inputstream );
+    if ( res.size() > 0 ){
+      frog_sentence( res );
+      showResults( cout, res );
+    }
     if ( prompt ){
       cout << "frog>"; cout.flush();
     }
@@ -919,10 +920,9 @@ void FrogAPI::FrogInteractive(){
 	}
 	cout << "Processing... '" << data << "'" << endl;
 	istringstream inputstream(data,istringstream::in);
-	folia::Document *doc = tokenizer->tokenize( inputstream );
-	FrogDoc( *doc, true );
-	showResults( cout, *doc );
-	delete doc;
+	frog_data res = tokenizer->tokenize_stream( inputstream );
+	frog_sentence( res );
+	showResults( cout, res );
       }
     }
     cout << "Done.\n";
