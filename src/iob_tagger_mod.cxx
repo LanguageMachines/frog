@@ -186,6 +186,13 @@ void IOBTagger::addDeclaration( folia::Document& doc ) const {
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
+void IOBTagger::addDeclaration( folia::Processor& proc ) const {
+  proc.declare( folia::AnnotationType::CHUNKING,
+		tagset,
+		"annotator='frog-chunker-" + _version
+		+ "', annotatortype='auto', datetime='" + getTime() + "'");
+}
+
 void IOBTagger::Classify( const vector<folia::Word *>& swords ){
   if ( !swords.empty() ) {
     vector<string> words;

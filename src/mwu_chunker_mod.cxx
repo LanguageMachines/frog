@@ -270,6 +270,13 @@ void Mwu::addDeclaration( folia::Document& doc ) const {
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
+void Mwu::addDeclaration( folia::Processor& proc ) const {
+  proc.declare( folia::AnnotationType::ENTITY,
+	       mwu_tagset,
+	       "annotator='frog-mwu-" + _version
+	       + "', annotatortype='auto', datetime='" + getTime() + "'");
+}
+
 void Mwu::Classify( frog_data& sent ){
   reset();
   size_t id=0;

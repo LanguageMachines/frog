@@ -52,6 +52,7 @@ class NERTagger: public BaseTagger {
   void post_process( frog_data&,
 		     const std::vector<std::string>& );
   void addDeclaration( folia::Document& ) const;
+  void addDeclaration( folia::Processor& ) const;
   void add_result( folia::Sentence *s,
 		   const frog_data& fd,
 		   const std::vector<folia::Word*>& wv ) const;

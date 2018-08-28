@@ -111,6 +111,7 @@ class FrogAPI {
 				  folia::Document *& ) const;
   folia::FoliaElement *append_to_folia( folia::FoliaElement *,
 					const frog_data& ) const;
+  void append_to_sentence( folia::Sentence *, const frog_data& ) const;
   std::string Frogtostring( const std::string& );
   std::string Frogtostringfromfile( const std::string& );
 

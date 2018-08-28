@@ -79,6 +79,7 @@ class Mwu {
   void reset();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
+  void addDeclaration( folia::Processor& ) const;
   void Classify( const std::vector<folia::Word *>& );
   void Classify( frog_data& );
   void add( folia::Word *, size_t );

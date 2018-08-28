@@ -804,6 +804,12 @@ void Parser::addDeclaration( folia::Document& doc ) const {
 	       + "', annotatortype='auto'");
 }
 
+void Parser::addDeclaration( folia::Processor& proc ) const {
+  proc.declare( folia::AnnotationType::DEPENDENCY, dep_tagset,
+	       "annotator='frog-depparse-" + version
+	       + "', annotatortype='auto'");
+}
+
 parseData Parser::prepareParse( const vector<folia::Word *>& fwords ){
   parseData pd;
   folia::Sentence *sent = 0;

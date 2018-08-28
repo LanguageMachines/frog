@@ -296,6 +296,13 @@ void Mblem::addDeclaration( folia::Document& doc ) const {
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
+void Mblem::addDeclaration( folia::Processor& proc ) const {
+  proc.declare( folia::AnnotationType::LEMMA,
+		tagset,
+		"annotator='frog-mblem-" + _version
+		+ "', annotatortype='auto', datetime='" + getTime() + "'");
+}
+
 void Mblem::Classify( folia::Word *sword ){
   if ( sword->isinstance( folia::PlaceHolder_t ) )
     return;
@@ -594,6 +601,9 @@ void Mblem::add_lemmas( const vector<folia::Word*>& wv,
     args["set"] = getTagset();
     for ( const auto& lemma : fd.units[i].lemmas ){
       args["class"] = lemma;
+      if ( textclass != "current" ){
+	args["textclass"] = textclass;
+      }
       wv[i]->addLemmaAnnotation( args );
     }
   }

@@ -370,6 +370,13 @@ void NERTagger::addDeclaration( folia::Document& doc ) const {
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
+void NERTagger::addDeclaration( folia::Processor& proc ) const {
+  proc.declare( folia::AnnotationType::ENTITY,
+		tagset,
+		"annotator='frog-ner-" + _version
+		+ "', annotatortype='auto', datetime='" + getTime() + "'");
+}
+
 void NERTagger::Classify( const vector<folia::Word *>& swords ){
   if ( !swords.empty() ) {
     vector<string> words;

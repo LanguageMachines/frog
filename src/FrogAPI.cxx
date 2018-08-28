@@ -554,7 +554,7 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
       root->append( p );
     }
     else {
-      // root is a paragrpah, which is done now.
+      // root is a paragraph, which is done now.
       if ( options.textredundancy == "full" ){
 	root->settext( root->str(options.outputclass), options.outputclass);
       }
@@ -586,6 +586,29 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
     myParser->add_result( s, fd, wv );
   }
   return result;
+}
+
+void FrogAPI::append_to_sentence( folia::Sentence *sent,
+				  const frog_data& fd ) const {
+  vector<folia::Word*> wv = myCGNTagger->add_result( sent, fd );
+  if ( options.doLemma ){
+    myMblem->add_lemmas( wv, fd );
+  }
+  if ( options.doMorph ){
+    myMbma->add_morphemes( wv, fd );
+  }
+  if ( options.doNER ){
+    myNERTagger->add_result( sent, fd, wv );
+  }
+  if ( options.doIOB ){
+    myIOBTagger->add_result( sent, fd, wv );
+  }
+  if ( options.doMwu && !fd.mwus.empty() ){
+    myMwu->add_result( sent, fd, wv );
+  }
+  if ( options.doParse ){
+    myParser->add_result( sent, fd, wv );
+  }
 }
 
 bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers ){
@@ -1779,25 +1802,106 @@ void FrogAPI::FrogFile( const string& infilename,
   }
   if ( xml_in ){
     timers.reset();
-    timers.tokTimer.start();
-    folia::Document doc;
-    try {
-      doc.readFromFile( infilename );
+    if ( !TiCC::match_back( infilename, ".bz2" ) ){
+      folia::Processor proc( infilename );
+      if ( !options.doTok ){
+	proc.declare( folia::AnnotationType::TOKEN, "passthru",
+		      "annotator='ucto', annotatortype='auto', datetime='now()'" );
+      }
+      else {
+	proc.declare( folia::AnnotationType::TOKEN,
+		      configuration.lookUp( "rulesFile", "tokenizer" ),
+		      "annotator='ucto', annotatortype='auto', datetime='now()'");
+      }
+      myCGNTagger->addDeclaration( proc );
+      if ( options.doLemma ){
+	myMblem->addDeclaration( proc );
+      }
+      if ( options.doMorph ){
+	myMbma->addDeclaration( proc );
+      }
+      if ( options.doIOB ){
+	myIOBTagger->addDeclaration( proc );
+      }
+      if ( options.doNER ){
+	myNERTagger->addDeclaration( proc );
+      }
+      if ( options.doMwu ){
+	myMwu->addDeclaration( proc );
+      }
+      if ( options.doParse ){
+	myParser->addDeclaration( proc );
+      }
+      folia::FoliaElement *p = 0;
+      while ( (p = proc.get_node( "s|p" ) ) ){
+	if ( p->xmltag() == "s" ){
+	  cerr << "found sentence " << p << endl;
+	  string text = p->str(options.inputclass);
+	  cerr << "frog: " << text << endl;
+	  istringstream inputstream(text,istringstream::in);
+	  timers.tokTimer.start();
+	  frog_data res = tokenizer->tokenize_stream( inputstream );
+	  timers.tokTimer.stop();
+	  while ( res.size() > 0 ){
+	    frog_sentence( res );
+	    if ( !options.noStdOut ){
+	      showResults( os, res );
+	    }
+	    append_to_sentence( dynamic_cast<folia::Sentence*>(p), res );
+	    timers.tokTimer.start();
+	    res = tokenizer->tokenize_stream( inputstream );
+	    timers.tokTimer.stop();
+	  }
+	}
+	else {
+	  cerr << "found paragraph " << p << endl;
+	  vector<folia::Sentence*> sv = p->select<folia::Sentence>();
+	  cerr << "   with " << sv.size() << " sentences " << endl;
+	  for ( const auto& s : sv ){
+	    cerr << "found sentence " << s << endl;
+	    string text = s->str(options.inputclass);
+	    cerr << "frog: " << text << endl;
+	    istringstream inputstream(text,istringstream::in);
+	    timers.tokTimer.start();
+	    frog_data res = tokenizer->tokenize_stream( inputstream );
+	    timers.tokTimer.stop();
+	    while ( res.size() > 0 ){
+	      frog_sentence( res );
+	      if ( !options.noStdOut ){
+		showResults( os, res );
+	      }
+	      append_to_sentence( s, res );
+	      timers.tokTimer.start();
+	      res = tokenizer->tokenize_stream( inputstream );
+	      timers.tokTimer.stop();
+	    }
+	  }
+	}
+	proc.next();
+      }
+      proc.save( xmlOutFile);
     }
-    catch ( exception &e ){
-      LOG << "retrieving FoLiA from '" << infilename << "' failed with exception:" << endl;
-      LOG << e.what() << endl;
-      throw ( runtime_error( "read failed" ) );
-    }
-    tokenizer->tokenize( doc );
-    timers.tokTimer.stop();
-    FrogDoc( doc );
-    if ( !options.noStdOut ){
-      showResults( os, doc );
-    }
-    if ( !xmlOutFile.empty() ){
-      doc.save( xmlOutFile, options.doKanon );
-      LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
+    else {
+      folia::Document doc;
+      try {
+	doc.readFromFile( infilename );
+      }
+      catch ( exception &e ){
+	LOG << "retrieving FoLiA from '" << infilename << "' failed with exception:" << endl;
+	LOG << e.what() << endl;
+	throw ( runtime_error( "read failed" ) );
+      }
+      timers.tokTimer.start();
+      tokenizer->tokenize( doc );
+      timers.tokTimer.stop();
+      FrogDoc( doc );
+      if ( !options.noStdOut ){
+	showResults( os, doc );
+      }
+      if ( !xmlOutFile.empty() ){
+	doc.save( xmlOutFile, options.doKanon );
+	LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
+      }
     }
   }
   else {

@@ -772,6 +772,17 @@ void Mbma::addDeclaration( folia::Document& doc ) const {
   }
 }
 
+void Mbma::addDeclaration( folia::Processor& proc ) const {
+  proc.declare( folia::AnnotationType::MORPHOLOGICAL, mbma_tagset,
+	       "annotator='frog-mbma-" + _version +
+	       + "', annotatortype='auto', datetime='" + getTime() + "'");
+  if ( doDeepMorph ){
+    proc.declare( folia::AnnotationType::POS, clex_tagset,
+		 "annotator='frog-mbma-" + _version +
+		 + "', annotatortype='auto', datetime='" + getTime() + "'");
+  }
+}
+
 void Mbma::Classify( folia::Word* sword ){
   if ( sword->isinstance(folia::PlaceHolder_t) ){
     return;
@@ -1117,7 +1128,7 @@ void Mbma::add_morphemes( const vector<folia::Word*>& wv,
 	for ( const auto& mt : mor ) {
 	  folia::Morpheme *m = new folia::Morpheme( args, wv[0]->doc() );
 	  string stripped = mt.substr(1,mt.size()-2);
-	  m->settext( stripped );
+	  m->settext( stripped, textclass );
 	  ml->append( m );
 	}
       }
