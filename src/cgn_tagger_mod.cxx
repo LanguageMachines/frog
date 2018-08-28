@@ -296,6 +296,9 @@ vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
     if ( word.no_space ){
       args["space"] = "no";
     }
+    if ( textclass != "current" ){
+      args["textclass"] = textclass;
+    }
     folia::Word *w = new folia::Word( args, s->doc() );
     w->settext( word.word, textclass );
     s->append( w );

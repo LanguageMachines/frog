@@ -740,6 +740,9 @@ void NERTagger::add_result( folia::Sentence *s,
       args["generate_id"] = el->id();
       args["class"] = word.ner_tag.substr(2);
       args["confidence"] = TiCC::toString(word.ner_confidence);
+      if ( textclass != "current" ){
+	args["textclass"] = textclass;
+      }
       ner = new folia::Entity( args, s->doc() );
       ner->append( wv[i] );
     }

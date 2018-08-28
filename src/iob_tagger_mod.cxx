@@ -353,6 +353,9 @@ void IOBTagger::add_result( folia::Sentence* s,
       args["generate_id"] = el->id();
       args["class"] = word.iob_tag.substr(2);
       args["confidence"] = TiCC::toString(word.iob_confidence);
+      if ( textclass != "current" ){
+	args["textclass"] = textclass;
+      }
       iob = new folia::Chunk( args, s->doc() );
       iob_conf = word.iob_confidence;
       iob->append( wv[i] );
