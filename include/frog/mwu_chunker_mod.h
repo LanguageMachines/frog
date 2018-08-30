@@ -84,9 +84,11 @@ class Mwu {
   void Classify( frog_data& );
   void add( folia::Word *, size_t );
   void add( frog_record&, size_t );
-  void add_result( folia::Sentence *s,
-		   const frog_data& fd,
-		   const std::vector<folia::Word*>& wv ) const;
+  void add_result( folia::Sentence *,
+		   const frog_data&,
+		   const std::vector<folia::Word*>& ) const;
+  void add_result( const frog_data&,
+		   const std::vector<folia::Word*>& ) const;
   std::string getTagset() const { return mwu_tagset; };
   std::vector<mwuAna*>& getAna(){ return mWords; };
   std::string version() const { return _version; };

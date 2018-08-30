@@ -45,6 +45,8 @@ class CGNTagger: public BaseTagger {
   void post_process( frog_data& );
   std::vector<folia::Word*> add_result( folia::Sentence*,
 					const frog_data& ) const;
+  void add_result( const std::vector<folia::Word*>&,
+					const frog_data& ) const;
   std::string getSubSet( const std::string& ,
 			 const std::string&,
 			 const std::string& ) const;

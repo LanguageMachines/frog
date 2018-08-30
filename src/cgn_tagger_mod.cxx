@@ -337,3 +337,43 @@ vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
   }
   return wv;
 }
+
+void CGNTagger::add_result( const vector<folia::Word*>& wv,
+			    const frog_data& fd ) const {
+  assert( wv.size() == fd.size() );
+  size_t pos = 0;
+  for ( const auto& word : fd.units ){
+    folia::KWargs args;
+    args["set"]   = getTagset();
+    args["class"] = word.tag;
+    if ( textclass != "current" ){
+      args["textclass"] = textclass;
+    }
+    args["confidence"]= TiCC::toString(word.tag_confidence);
+    folia::FoliaElement *postag = wv[pos]->addPosAnnotation( args );
+    vector<string> hv = TiCC::split_at_first_of( word.tag, "()" );
+    string head = hv[0];
+    args["class"] = head;
+    folia::Feature *feat = new folia::HeadFeature( args );
+    postag->append( feat );
+    if ( head == "SPEC" ){
+      postag->confidence(1.0);
+    }
+    vector<string> feats;
+    if ( hv.size() > 1 ){
+      feats = TiCC::split_at( hv[1], "," );
+    }
+    for ( const auto& f : feats ){
+      folia::KWargs args;
+      args["set"] =  getTagset();
+      args["subset"] = getSubSet( f, head, word.tag );
+      args["class"]  = f;
+      folia::Feature *feat = new folia::Feature( args, wv[pos]->doc() );
+      postag->append( feat );
+    }
+    ++pos;
+  }
+  if ( textredundancy == "full" ){
+    wv[0]->sentence()->settext( wv[0]->str(textclass), textclass );
+  }
+}

@@ -437,3 +437,21 @@ void Mwu::add_result( folia::Sentence *s,
     }
   }
 }
+
+void Mwu::add_result( const frog_data& fd,
+		      const vector<folia::Word*>& wv ) const {
+  folia::Sentence *s = wv[0]->sentence();
+  folia::KWargs args;
+  args["generate_id"] = s->id();
+  args["set"] = getTagset();
+  folia::EntitiesLayer *el = new folia::EntitiesLayer( args, s->doc() );
+  s->append( el );
+  for ( const auto& mwu : fd.mwus ){
+    args["generate_id"] = el->id();
+    folia::Entity *e = new folia::Entity( args, s->doc() );
+    el->append( e );
+    for ( size_t pos = mwu.first; pos <= mwu.second; ++pos ){
+      e->append( wv[pos] );
+    }
+  }
+}

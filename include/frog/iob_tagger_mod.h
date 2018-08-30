@@ -47,6 +47,8 @@ class IOBTagger: public BaseTagger {
   void add_result( folia::Sentence *s,
 		   const frog_data& fd,
 		   const std::vector<folia::Word*>& wv ) const;
+  void add_result( const frog_data& fd,
+		   const std::vector<folia::Word*>& wv ) const;
  private:
   void addChunk( folia::ChunkingLayer *,
 		 const std::vector<folia::Word*>&,

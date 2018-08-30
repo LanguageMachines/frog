@@ -111,7 +111,6 @@ class FrogAPI {
 				  folia::Document *& ) const;
   folia::FoliaElement *append_to_folia( folia::FoliaElement *,
 					const frog_data& ) const;
-  void append_to_sentence( folia::Sentence *, const frog_data& ) const;
   std::string Frogtostring( const std::string& );
   std::string Frogtostringfromfile( const std::string& );
 
@@ -144,6 +143,11 @@ class FrogAPI {
   void showResults( std::ostream&, folia::Document& ) const;
   void show_record( std::ostream&, const frog_record& ) const;
   void showResults( std::ostream&, const frog_data& ) const;
+  void handle_one_paragraph( std::ostream&, folia::Paragraph * );
+  void handle_one_sentence( std::ostream&, folia::Sentence * );
+  void append_to_sentence( folia::Sentence *, const frog_data& ) const;
+  void append_to_words( const std::vector<folia::Word*>&,
+			const frog_data& ) const;
 
   // data
   const TiCC::Configuration& configuration;
