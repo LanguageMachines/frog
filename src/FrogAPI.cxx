@@ -86,6 +86,8 @@ using TiCC::operator<<;
 
 #define LOG *TiCC::Log(theErrLog)
 
+const string ISO_SET = "http://raw.github.com/proycon/folia/master/setdefinitions/iso639_3.foliaset";
+
 string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
 string configFileName = configDir + "frog.cfg";
 
@@ -514,6 +516,10 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
     doc->declare( folia::AnnotationType::TOKEN,
 		  configuration.lookUp( "rulesFile", "tokenizer" ),
 		  "annotator='ucto', annotatortype='auto', datetime='now()'");
+    if ( !doc->isDeclared( folia::AnnotationType::LANG ) ){
+      doc->declare( folia::AnnotationType::LANG,
+		    ISO_SET, "annotator='ucto'" );
+    }
   }
   myCGNTagger->addDeclaration( *doc );
   if ( options.doLemma ){
@@ -566,71 +572,126 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
   args["generate_id"] = result->id();
   folia::Sentence *s = new folia::Sentence( args, root->doc() );
   result->append( s );
-  vector<folia::Word*> wv = myCGNTagger->add_result( s, fd );
-  if ( options.doLemma ){
-    myMblem->add_lemmas( wv, fd );
+  if ( fd.language != "default"
+       && options.language != "none"
+       && fd.language != options.language ){
+    folia::KWargs args;
+    args["class"] = fd.language;
+    string sett = root->doc()->defaultset( folia::AnnotationType::LANG );
+    if ( !sett.empty() && sett != "default" ){
+      args["set"] = sett;
+    }
+    folia::LangAnnotation *la = new folia::LangAnnotation( args, root->doc() );
+    s->append( la );
   }
-  if ( options.doMorph ){
-    myMbma->add_morphemes( wv, fd );
-  }
-  if ( options.doNER ){
-    myNERTagger->add_result( s, fd, wv );
-  }
-  if ( options.doIOB ){
-    myIOBTagger->add_result( s, fd, wv );
-  }
-  if ( options.doMwu && !fd.mwus.empty() ){
-    myMwu->add_result( s, fd, wv );
-  }
-  if ( options.doParse ){
-    myParser->add_result( s, fd, wv );
+  else {
+    vector<folia::Word*> wv = myCGNTagger->add_result( s, fd );
+    if ( options.doLemma ){
+      myMblem->add_lemmas( wv, fd );
+    }
+    if ( options.doMorph ){
+      myMbma->add_morphemes( wv, fd );
+    }
+    if ( options.doNER ){
+      myNERTagger->add_result( s, fd, wv );
+    }
+    if ( options.doIOB ){
+      myIOBTagger->add_result( s, fd, wv );
+    }
+    if ( options.doMwu && !fd.mwus.empty() ){
+      myMwu->add_result( s, fd, wv );
+    }
+    if ( options.doParse ){
+      myParser->add_result( s, fd, wv );
+    }
   }
   return result;
 }
 
 void FrogAPI::append_to_sentence( folia::Sentence *sent,
 				  const frog_data& fd ) const {
-  vector<folia::Word*> wv = myCGNTagger->add_result( sent, fd );
-  if ( options.doLemma ){
-    myMblem->add_lemmas( wv, fd );
+  string la;
+  if ( sent->hasannotation<folia::LangAnnotation>() ){
+    la = sent->annotation<folia::LangAnnotation>()->cls();
   }
-  if ( options.doMorph ){
-    myMbma->add_morphemes( wv, fd );
+  if (options.debugFlag > 1){
+    LOG << "fd.language = " << fd.language << endl;
+    LOG << "options.language = " << options.language << endl;
+    LOG << "sentence language = " << la << endl;
   }
-  if ( options.doNER ){
-    myNERTagger->add_result( sent, fd, wv );
+  if ( !la.empty() && la != options.language
+       && options.language != "none" ){
+    // skip
   }
-  if ( options.doIOB ){
-    myIOBTagger->add_result( sent, fd, wv );
-  }
-  if ( options.doMwu && !fd.mwus.empty() ){
-    myMwu->add_result( sent, fd, wv );
-  }
-  if ( options.doParse ){
-    myParser->add_result( sent, fd, wv );
+  else {
+    if ( options.language != "none"
+	 && fd.language != "default"
+	 && fd.language != options.language ){
+      if (!sent->doc()->isDeclared( folia::AnnotationType::LANG ) ){
+	sent->doc()->declare( folia::AnnotationType::LANG,
+			      ISO_SET, "annotator='ucto'" );
+      }
+      folia::KWargs args;
+      args["class"] = fd.language;
+      string sett = sent->doc()->defaultset( folia::AnnotationType::LANG );
+      if ( !sett.empty() && sett != "default" ){
+	args["set"] = sett;
+      }
+      folia::LangAnnotation *la = new folia::LangAnnotation( args, sent->doc() );
+      sent->append( la );
+    }
+    vector<folia::Word*> wv = myCGNTagger->add_result( sent, fd );
+    if ( options.doLemma ){
+      myMblem->add_lemmas( wv, fd );
+    }
+    if ( options.doMorph ){
+      myMbma->add_morphemes( wv, fd );
+    }
+    if ( options.doNER ){
+      myNERTagger->add_result( sent, fd, wv );
+    }
+    if ( options.doIOB ){
+      myIOBTagger->add_result( sent, fd, wv );
+    }
+    if ( options.doMwu && !fd.mwus.empty() ){
+      myMwu->add_result( sent, fd, wv );
+    }
+    if ( options.doParse ){
+      myParser->add_result( sent, fd, wv );
+    }
   }
 }
 
 void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
 			       const frog_data& fd ) const {
-  myCGNTagger->add_result( wv, fd );
-  if ( options.doLemma ){
-    myMblem->add_lemmas( wv, fd );
+  if ( fd.language != "default"
+       && options.language != "none"
+       && fd.language != options.language ){
+    if ( options.debugFlag > 0 ){
+      LOG << "SKIP a setence: " << fd.language << endl;
+    }
   }
-  if ( options.doMorph ){
-    myMbma->add_morphemes( wv, fd );
-  }
-  if ( options.doNER ){
-    myNERTagger->add_result( fd, wv );
-  }
-  if ( options.doIOB ){
-    myIOBTagger->add_result( fd, wv );
-  }
-  if ( options.doMwu && !fd.mwus.empty() ){
-    myMwu->add_result( fd, wv );
-  }
-  if ( options.doParse ){
-    myParser->add_result( fd, wv );
+  else {
+    LOG << "in append_to_words() 1" << endl;
+    myCGNTagger->add_result( wv, fd );
+    if ( options.doLemma ){
+      myMblem->add_lemmas( wv, fd );
+    }
+    LOG << "in append_to_words() 2" << endl;    if ( options.doMorph ){
+      myMbma->add_morphemes( wv, fd );
+    }
+    if ( options.doNER ){
+      myNERTagger->add_result( fd, wv );
+    }
+    if ( options.doIOB ){
+      myIOBTagger->add_result( fd, wv );
+    }
+    if ( options.doMwu && !fd.mwus.empty() ){
+      myMwu->add_result( fd, wv );
+    }
+    if ( options.doParse ){
+      myParser->add_result( fd, wv );
+    }
   }
 }
 
@@ -1577,124 +1638,147 @@ void FrogAPI::FrogDoc( folia::Document& doc,
   return;
 }
 
+string get_language( frog_data& fd ){
+  fd.language = "none";
+  for ( const auto& r : fd.units ){
+    fd.language = r.language;
+    break;
+  }
+  return fd.language;
+}
+
 bool FrogAPI::frog_sentence( frog_data& sent ){
-  bool showParse = options.doParse;
-  timers.frogTimer.start();
-  if ( options.debugFlag > 5 ){
-    LOG << "Frogging sentence:" << sent << endl;
+  string lan = get_language( sent );
+  if ( !options.language.empty()
+       && options.language != "none"
+       && !lan.empty()
+       && lan != "default"
+       && lan != options.language ){
+    if  (options.debugFlag >= 0){
+       LOG << "skipping sentence (different language: " << lan
+	   << " --language=" << options.language << ")" << endl;
+    }
+    return false;
   }
-  bool all_well = true;
-  string exs;
-  timers.tagTimer.start();
-  try {
-    myCGNTagger->Classify( sent );
-  }
-  catch ( exception&e ){
-    all_well = false;
-    exs += string(e.what()) + " ";
-  }
-  timers.tagTimer.stop();
-  if ( !all_well ){
-    throw runtime_error( exs );
-  }
-  for ( auto& word : sent.units ) {
+  else {
+    bool showParse = options.doParse;
+    timers.frogTimer.start();
+    if ( options.debugFlag > 5 ){
+      LOG << "Frogging sentence:" << sent << endl;
+    }
+    bool all_well = true;
+    string exs;
+    timers.tagTimer.start();
+    try {
+      myCGNTagger->Classify( sent );
+    }
+    catch ( exception&e ){
+      all_well = false;
+      exs += string(e.what()) + " ";
+    }
+    timers.tagTimer.stop();
+    if ( !all_well ){
+      throw runtime_error( exs );
+    }
+    for ( auto& word : sent.units ) {
+#pragma omp parallel sections
+      {
+#pragma omp section
+	{
+	  if ( options.doMorph ){
+	    timers.mbmaTimer.start();
+	    if (options.debugFlag > 1){
+	      LOG << "Calling mbma..." << endl;
+	    }
+	    try {
+	      myMbma->Classify( word );
+	    }
+	    catch ( exception& e ){
+	      all_well = false;
+	      exs += string(e.what()) + " ";
+	    }
+	    timers.mbmaTimer.stop();
+	  }
+	}
+#pragma omp section
+	{
+	  if ( options.doLemma ){
+	    timers.mblemTimer.start();
+	    if (options.debugFlag > 1) {
+	      LOG << "Calling mblem..." << endl;
+	    }
+	    try {
+	      myMblem->Classify( word );
+	    }
+	    catch ( exception&e ){
+	      all_well = false;
+	      exs += string(e.what()) + " ";
+	    }
+	    timers.mblemTimer.stop();
+	  }
+	}
+      } // omp parallel sections
+    } //for all words
+    if ( !all_well ){
+      throw runtime_error( exs );
+    }
+    cout << endl;
 #pragma omp parallel sections
     {
 #pragma omp section
       {
-	if ( options.doMorph ){
-	  timers.mbmaTimer.start();
-	  if (options.debugFlag > 1){
-	    LOG << "Calling mbma..." << endl;
-	  }
-	  try {
-	    myMbma->Classify( word );
-	  }
-	  catch ( exception& e ){
-	    all_well = false;
-	    exs += string(e.what()) + " ";
-	  }
-	  timers.mbmaTimer.stop();
-	}
-      }
-#pragma omp section
-      {
-	if ( options.doLemma ){
-	  timers.mblemTimer.start();
+	if ( options.doNER ){
+	  timers.nerTimer.start();
 	  if (options.debugFlag > 1) {
-	    LOG << "Calling mblem..." << endl;
+	    LOG << "Calling NER..." << endl;
 	  }
 	  try {
-	    myMblem->Classify( word );
+	    myNERTagger->Classify( sent );
 	  }
 	  catch ( exception&e ){
 	    all_well = false;
 	    exs += string(e.what()) + " ";
 	  }
-	  timers.mblemTimer.stop();
+	  timers.nerTimer.stop();
 	}
       }
-    } // omp parallel sections
-  } //for all words
-  if ( !all_well ){
-    throw runtime_error( exs );
-  }
-  cout << endl;
-#pragma omp parallel sections
-  {
 #pragma omp section
-    {
-      if ( options.doNER ){
-	timers.nerTimer.start();
-	if (options.debugFlag > 1) {
-	  LOG << "Calling NER..." << endl;
+      {
+	if ( options.doIOB ){
+	  timers.iobTimer.start();
+	  try {
+	    myIOBTagger->Classify( sent );
+	  }
+	  catch ( exception&e ){
+	    all_well = false;
+	    exs += string(e.what()) + " ";
+	  }
+	  timers.iobTimer.stop();
 	}
-	try {
-	  myNERTagger->Classify( sent );
-	}
-	catch ( exception&e ){
-	  all_well = false;
-	  exs += string(e.what()) + " ";
-	}
-	timers.nerTimer.stop();
       }
     }
-#pragma omp section
-    {
-      if ( options.doIOB ){
-	timers.iobTimer.start();
-	try {
-	  myIOBTagger->Classify( sent );
-	}
-	catch ( exception&e ){
-	  all_well = false;
-	  exs += string(e.what()) + " ";
-	}
-	timers.iobTimer.stop();
+    if ( !all_well ){
+      throw runtime_error( exs );
+    }
+    if ( options.doMwu ){
+      if ( !sent.empty() ){
+	timers.mwuTimer.start();
+	myMwu->Classify( sent );
+	timers.mwuTimer.stop();
       }
     }
-  }
-  if ( !all_well ){
-    throw runtime_error( exs );
-  }
-  if ( options.doMwu ){
-    if ( !sent.empty() ){
-      timers.mwuTimer.start();
-      myMwu->Classify( sent );
-      timers.mwuTimer.stop();
+    if ( options.doParse ){
+      if ( options.maxParserTokens != 0
+	   && sent.size() > options.maxParserTokens ){
+	showParse = false;
+      }
+      else {
+	myParser->Parse( sent, timers );
+      }
     }
+    timers.frogTimer.stop();
+    return showParse;
   }
-  if ( options.doParse ){
-    if ( options.maxParserTokens != 0
-	 && sent.size() > options.maxParserTokens ){
-      showParse = false;
-    }
-    else {
-      myParser->Parse( sent, timers );
-    }
-  }
-  timers.frogTimer.stop();
-  return showParse;
 }
 
 string filter_non_NC( const string& filename ){
@@ -1826,11 +1910,20 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
       }
       res.units.push_back( rec );
     }
+    if  (options.debugFlag > 0){
+      LOG << "before frog_sentence() 1" << endl;
+    }
     frog_sentence( res );
     if ( !options.noStdOut ){
       showResults( os, res );
     }
+    if  (options.debugFlag > 0){
+      LOG << "before append_to_words()" << endl;
+    }
     append_to_words( wv, res );
+    if (options.debugFlag > 0){
+      LOG << "after append_to_words()" << endl;
+    }
   }
   else {
     string text = s->str(options.inputclass);
@@ -1840,11 +1933,20 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
     frog_data res = tokenizer->tokenize_stream( inputstream );
     timers.tokTimer.stop();
     while ( res.size() > 0 ){
+      if  (options.debugFlag > 0){
+	LOG << "before frog_sentence() LOOP" << endl;
+      }
       frog_sentence( res );
       if ( !options.noStdOut ){
 	showResults( os, res );
       }
+      if  (options.debugFlag > 0){
+	LOG << "before append_to_sentence() A" << endl;
+      }
       append_to_sentence( s, res );
+      if  (options.debugFlag > 0){
+	LOG << "after append_to_sentence() A" << endl;
+      }
       timers.tokTimer.start();
       res = tokenizer->tokenize_stream( inputstream );
       timers.tokTimer.stop();
@@ -1869,7 +1971,13 @@ void FrogAPI::handle_one_paragraph( ostream& os, folia::Paragraph *p ){
     args["generate_id"] = p->id();
     folia::Sentence *s = new folia::Sentence( args, p->doc() );
     p->append( s );
+    if  (options.debugFlag > 0){
+      LOG << "before append_to_sentence() B" << endl;
+    }
     append_to_sentence( s, res );
+    if  (options.debugFlag > 0){
+      LOG << "after append_to_sentence() B" << endl;
+    }
     timers.tokTimer.start();
     res = tokenizer->tokenize_stream( inputstream );
     timers.tokTimer.stop();
@@ -1902,6 +2010,19 @@ void FrogAPI::FrogFile( const string& infilename,
     timers.reset();
     if ( !TiCC::match_back( infilename, ".bz2" ) ){
       folia::Processor proc( infilename );
+      if ( options.language == "none" ){
+        string languages = configuration.lookUp( "languages", "tokenizer" );
+	vector<string> language_list;
+	if ( !languages.empty() ){
+	  language_list = TiCC::split_at( languages, "," );
+	  //	  LOG << "Language List ="  << language_list << endl;
+	  proc.set_metadata( "language", language_list[0] );
+	}
+      }
+      else {
+	proc.set_metadata( "language", options.language );
+      }
+      //      proc.set_debug( true );
       if ( !options.doTok ){
 	proc.declare( folia::AnnotationType::TOKEN, "passthru",
 		      "annotator='ucto', annotatortype='auto', datetime='now()'" );
@@ -1910,6 +2031,10 @@ void FrogAPI::FrogFile( const string& infilename,
 	proc.declare( folia::AnnotationType::TOKEN,
 		      configuration.lookUp( "rulesFile", "tokenizer" ),
 		      "annotator='ucto', annotatortype='auto', datetime='now()'");
+	if ( !proc.is_declared( folia::AnnotationType::LANG ) ){
+	  proc.declare( folia::AnnotationType::LANG,
+			ISO_SET, "annotator='ucto'" );
+	}
       }
       myCGNTagger->addDeclaration( proc );
       if ( options.doLemma ){
@@ -1933,28 +2058,41 @@ void FrogAPI::FrogFile( const string& infilename,
       folia::FoliaElement *p = 0;
       while ( (p = proc.get_node( "s|p" ) ) ){
 	if ( p->xmltag() == "s" ){
-	  cerr << "found sentence " << p << endl;
+	  if  (options.debugFlag > 0){
+	    LOG << "found sentence A " << p << endl;
+	  }
 	  handle_one_sentence( os, dynamic_cast<folia::Sentence*>(p) );
+	  if  (options.debugFlag > 0){
+	    LOG << "after handle_one_sentence() A" << endl;
+	  }
 	}
 	else {
-	  cerr << "found paragraph " << p << endl;
 	  vector<folia::Sentence*> sv = p->select<folia::Sentence>();
 	  if ( sv.empty() ){
 	    cerr << " No sentences!, take paragraph text" << endl;
 	    handle_one_paragraph( os, dynamic_cast<folia::Paragraph*>(p) );
 	  }
 	  else {
-	    cerr << "   with " << sv.size() << " sentences " << endl;
+	    if  (options.debugFlag > 0){
+	      LOG << "found paragraph " << p << "   with " << sv.size() << " sentences " << endl;
+	    }
 	    for ( const auto& s : sv ){
-	      cerr << "found sentence " << s << endl;
+	      if  (options.debugFlag > 0){
+		LOG << "found sentence B " << s << endl;
+	      }
 	      handle_one_sentence( os, s );
+	      if  (options.debugFlag > 0){
+		LOG << "after handle_one_sentence() B" << endl;
+	      }
 	    }
 	  }
 	}
 	proc.next();
+	if  (options.debugFlag > 0){
+	  LOG << "looping more ..." << endl;
+	}
       }
       proc.save( xmlOutFile );
-      LOG << "saved into " << xmlOutFile << endl;
     }
     else {
       folia::Document doc;

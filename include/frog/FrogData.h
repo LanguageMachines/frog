@@ -70,6 +70,7 @@ class frog_data {
   size_t size() const { return units.size(); };
   bool empty() const { return units.size() == 0; };
   void resolve_mwus();
+  std::string language; // the language of all units
   std::vector<frog_record> units;
   std::vector<frog_record> mw_units;
   std::map<size_t,size_t> mwus; // maps a start pos to end pos
