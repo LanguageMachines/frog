@@ -922,7 +922,10 @@ parseData Parser::prepareParse( frog_data& fd ){         //     |
       string head;                                       //     |
       string mods;                                       //     |
       extract( fd.units[i].tag, head, mods );            //     |
-      pd.words.push_back( fd.units[i].word );            //     |
+      string word_s = fd.units[i].word;                  //     |
+      // the word may contain spaces, remove them all!          |
+      word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
+      pd.words.push_back( word_s );                      //     |
       pd.heads.push_back( head );                        //     |
       if ( mods.empty() ){                               //    \/
 	// HACK: make this bug-to-bug compatible with older versions.

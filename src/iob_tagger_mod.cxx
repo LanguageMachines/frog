@@ -29,6 +29,7 @@
 
 */
 
+#include <algorithm>
 #include "frog/iob_tagger_mod.h"
 
 #include "ticcutils/PrettyPrint.h"
@@ -248,7 +249,10 @@ void IOBTagger::Classify( frog_data& swords ){
 #pragma omp critical (dataupdate)
   {
     for ( const auto& w : swords.units ){
-      words.push_back( w.word );
+      string word_s = w.word;
+      // the word may contain spaces, remove them all!
+      word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
+      words.push_back( word_s );
       ptags.push_back( w.tag );
     }
   }
