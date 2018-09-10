@@ -430,6 +430,9 @@ void Mwu::add_result( folia::Sentence *s,
   s->append( el );
   for ( const auto& mwu : fd.mwus ){
     args["generate_id"] = el->id();
+    if ( textclass != "current" ){
+      args["textclass"] = textclass;
+    }
     folia::Entity *e = new folia::Entity( args, s->doc() );
     el->append( e );
     for ( size_t pos = mwu.first; pos <= mwu.second; ++pos ){
@@ -448,6 +451,9 @@ void Mwu::add_result( const frog_data& fd,
   s->append( el );
   for ( const auto& mwu : fd.mwus ){
     args["generate_id"] = el->id();
+    if ( textclass != "current" ){
+      args["textclass"] = textclass;
+    }
     folia::Entity *e = new folia::Entity( args, s->doc() );
     el->append( e );
     for ( size_t pos = mwu.first; pos <= mwu.second; ++pos ){
