@@ -1186,6 +1186,9 @@ void Parser::add_result( folia::Sentence *s,
     if ( cls != "ROOT" ){
       args["generate_id"] = el->id();
       args["class"] = cls;
+      if ( textclass != "current" ){
+	args["textclass"] = textclass;
+      }
       folia::Dependency *e = new folia::Dependency( args, s->doc() );
       el->append( e );
       folia::Headspan *dh = new folia::Headspan();
@@ -1216,6 +1219,9 @@ void Parser::add_result( const frog_data& fd,
     if ( cls != "ROOT" ){
       args["generate_id"] = el->id();
       args["class"] = cls;
+      if ( textclass != "current" ){
+	args["textclass"] = textclass;
+      }
       folia::Dependency *e = new folia::Dependency( args, s->doc() );
       el->append( e );
       folia::Headspan *dh = new folia::Headspan();
