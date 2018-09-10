@@ -2097,12 +2097,15 @@ void FrogAPI::FrogFile( const string& infilename,
 	    }
 	  }
 	}
-	proc.next();
-	if  (options.debugFlag > 0){
-	  LOG << "looping more ..." << endl;
+	if ( proc.next() ){
+	  if  (options.debugFlag > 0){
+	    LOG << "looping for more ..." << endl;
+	  }
 	}
       }
-      proc.save( xmlOutFile );
+      if ( !xmlOutFile.empty() ){
+	proc.save( xmlOutFile, options.doKanon );
+      }
     }
     else {
       folia::Document doc;
@@ -2171,7 +2174,7 @@ void FrogAPI::FrogFile( const string& infilename,
       timers.tokTimer.stop();
     }
     if ( !xmlOutFile.empty() ){
-      doc1->save( xmlOutFile );
+      doc1->save( xmlOutFile, options.doKanon );
       LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
       delete doc1;
     }
