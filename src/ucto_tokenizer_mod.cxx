@@ -260,17 +260,20 @@ folia::Document *UctoTokenizer::tokenizestring( const string& s){
 frog_data UctoTokenizer::tokenize_stream( istream& is ){
   // this is non greedy. Might be called multiple times to consume
   // the whole stream
+  // will return tokens upto an ENDOFSENTENCE token or out of data
   static vector<Tokenizer::Token> stack; // NOT THREAD SAFE!!!
   if ( tokenizer) {
     frog_data result;
-    vector<Tokenizer::Token> toks = stack;
+    vector<Tokenizer::Token> toks = stack; // add tokens from previous visit
     stack.clear();
     vector<Tokenizer::Token> new_toks = tokenizer->tokenizeStream( is );
+    // now add new tokens
     toks.insert( toks.end(), new_toks.begin(), new_toks.end() );
     bool skip = false;
     int quotelevel = 0;
     for ( const auto tok : toks ){
       if ( skip ){
+	// save tokens for next visit.
 	stack.push_back( tok );
       }
       else {
@@ -288,6 +291,7 @@ frog_data UctoTokenizer::tokenize_stream( istream& is ){
 	  --quotelevel;
 	}
 	if ( (tok.role & Tokenizer::TokenRole::ENDOFSENTENCE) ){
+	  // we are at ENDOFSENTENCE. When more data is available, stack it.
 	  skip = quotelevel == 0;
 	}
       }

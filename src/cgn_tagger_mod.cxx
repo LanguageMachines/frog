@@ -299,6 +299,9 @@ vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
     if ( textclass != "current" ){
       args["textclass"] = textclass;
     }
+    if ( fd.language != "default" ){
+      args["set"] = "tokconfig-" + fd.language;
+    }
     folia::Word *w = new folia::Word( args, s->doc() );
     w->settext( word.word, textclass );
     s->append( w );

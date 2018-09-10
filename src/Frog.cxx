@@ -154,7 +154,7 @@ bool parse_args( TiCC::CL_Options& Opts,
   string configFileName;
   if ( languages.empty() ){
     // ok no languages parameter.
-    // us a (default) configfile. Dutch
+    // use a (default) configfile. Dutch
     configFileName = FrogAPI::defaultConfigFile("nld");
     language = "none";
   }

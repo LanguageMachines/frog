@@ -2010,32 +2010,52 @@ void FrogAPI::FrogFile( const string& infilename,
     timers.reset();
     if ( !TiCC::match_back( infilename, ".bz2" ) ){
       folia::Processor proc( infilename );
-      if ( options.language == "none" ){
-        string languages = configuration.lookUp( "languages", "tokenizer" );
-	vector<string> language_list;
-	if ( !languages.empty() ){
-	  language_list = TiCC::split_at( languages, "," );
-	  //	  LOG << "Language List ="  << language_list << endl;
-	  proc.set_metadata( "language", language_list[0] );
-	}
-      }
-      else {
-	proc.set_metadata( "language", options.language );
-      }
-      //      proc.set_debug( true );
       if ( !options.doTok ){
 	proc.declare( folia::AnnotationType::TOKEN, "passthru",
 		      "annotator='ucto', annotatortype='auto', datetime='now()'" );
       }
-      else {
-	proc.declare( folia::AnnotationType::TOKEN,
-		      configuration.lookUp( "rulesFile", "tokenizer" ),
-		      "annotator='ucto', annotatortype='auto', datetime='now()'");
+      else if ( options.language == "none" ){
+	cerr << "DEZE TAK!" << endl;
+	string languages = configuration.lookUp( "languages", "tokenizer" );
+	if ( !languages.empty() ){
+	  vector<string> language_list;
+	  language_list = TiCC::split_at( languages, "," );
+	  //	  LOG << "Language List ="  << language_list << endl;
+	  proc.set_metadata( "language", language_list[0] );
+	  for ( const auto& l : language_list ){
+	    proc.declare( folia::AnnotationType::TOKEN,
+			  "tokconfig-" + l,
+			  "annotator='ucto', annotatortype='auto', datetime='now()'");
+	  }
+	}
+	else {
+	  proc.declare( folia::AnnotationType::TOKEN,
+			"tokconfig-nld",
+			"annotator='ucto', annotatortype='auto', datetime='now()'");
+	}
 	if ( !proc.is_declared( folia::AnnotationType::LANG ) ){
 	  proc.declare( folia::AnnotationType::LANG,
 			ISO_SET, "annotator='ucto'" );
 	}
       }
+      else {
+	string languages = configuration.lookUp( "languages", "tokenizer" );
+	if ( !languages.empty() ){
+	  vector<string> language_list;
+	  language_list = TiCC::split_at( languages, "," );
+	  //	  LOG << "Language List ="  << language_list << endl;
+	  proc.set_metadata( "language", language_list[0] );
+	  for ( const auto& l : language_list ){
+	    proc.declare( folia::AnnotationType::TOKEN,
+			  "tokconfig-" + l,
+			  "annotator='ucto', annotatortype='auto', datetime='now()'");
+	  }
+	}
+	else {
+	  proc.set_metadata( "language", options.language );
+	}
+      }
+      //      proc.set_debug( true );
       myCGNTagger->addDeclaration( proc );
       if ( options.doLemma ){
 	myMblem->addDeclaration( proc );
