@@ -622,6 +622,9 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
   if ( !la.empty() && la != options.language
        && options.language != "none" ){
     // skip
+    if ( options.debugFlag > 0 ){
+      LOG << "append_to_sentence() SKIP a sentence: " << la << endl;
+    }
   }
   else {
     if ( options.language != "none"
@@ -668,7 +671,7 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
        && options.language != "none"
        && fd.language != options.language ){
     if ( options.debugFlag > 0 ){
-      LOG << "SKIP a setence: " << fd.language << endl;
+      LOG << "append_words() SKIP a sentence: " << fd.language << endl;
     }
   }
   else {
@@ -1654,7 +1657,7 @@ bool FrogAPI::frog_sentence( frog_data& sent ){
        && !lan.empty()
        && lan != "default"
        && lan != options.language ){
-    if  (options.debugFlag >= 0){
+    if ( options.debugFlag >= 0 ){
        LOG << "skipping sentence (different language: " << lan
 	   << " --language=" << options.language << ")" << endl;
     }
@@ -2014,36 +2017,15 @@ void FrogAPI::FrogFile( const string& infilename,
 	proc.declare( folia::AnnotationType::TOKEN, "passthru",
 		      "annotator='ucto', annotatortype='auto', datetime='now()'" );
       }
-      else if ( options.language == "none" ){
-	cerr << "DEZE TAK!" << endl;
-	string languages = configuration.lookUp( "languages", "tokenizer" );
-	if ( !languages.empty() ){
-	  vector<string> language_list;
-	  language_list = TiCC::split_at( languages, "," );
-	  //	  LOG << "Language List ="  << language_list << endl;
-	  proc.set_metadata( "language", language_list[0] );
-	  for ( const auto& l : language_list ){
-	    proc.declare( folia::AnnotationType::TOKEN,
-			  "tokconfig-" + l,
-			  "annotator='ucto', annotatortype='auto', datetime='now()'");
-	  }
-	}
-	else {
-	  proc.declare( folia::AnnotationType::TOKEN,
-			"tokconfig-nld",
-			"annotator='ucto', annotatortype='auto', datetime='now()'");
-	}
+      else {
 	if ( !proc.is_declared( folia::AnnotationType::LANG ) ){
 	  proc.declare( folia::AnnotationType::LANG,
 			ISO_SET, "annotator='ucto'" );
 	}
-      }
-      else {
 	string languages = configuration.lookUp( "languages", "tokenizer" );
 	if ( !languages.empty() ){
 	  vector<string> language_list;
 	  language_list = TiCC::split_at( languages, "," );
-	  //	  LOG << "Language List ="  << language_list << endl;
 	  proc.set_metadata( "language", language_list[0] );
 	  for ( const auto& l : language_list ){
 	    proc.declare( folia::AnnotationType::TOKEN,
@@ -2051,7 +2033,15 @@ void FrogAPI::FrogFile( const string& infilename,
 			  "annotator='ucto', annotatortype='auto', datetime='now()'");
 	  }
 	}
+	else if ( options.language == "none" ){
+	  proc.declare( folia::AnnotationType::TOKEN,
+			"tokconfig-nld",
+			"annotator='ucto', annotatortype='auto', datetime='now()'");
+	}
 	else {
+	  proc.declare( folia::AnnotationType::TOKEN,
+			"tokconfig-" + options.language,
+			"annotator='ucto', annotatortype='auto', datetime='now'");
 	  proc.set_metadata( "language", options.language );
 	}
       }
