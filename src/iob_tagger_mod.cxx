@@ -337,12 +337,17 @@ void IOBTagger::add_result( folia::Sentence* s,
   for ( const auto& word : fd.units ){
     if ( word.iob_tag[0] == 'B' ){
       if ( el == 0 ){
-	// create a layer, we need it
-	folia::KWargs args;
-	args["set"] = getTagset();
-	args["generate_id"] = s->id();
-	el = new folia::ChunkingLayer( args, s->doc() );
-	s->append(el);
+	try {
+	  el = s->annotation<folia::ChunkingLayer>(tagset);
+	}
+	catch(...){
+	  // create a layer, we need it
+	  folia::KWargs args;
+	  args["set"] = getTagset();
+	  args["generate_id"] = s->id();
+	  el = new folia::ChunkingLayer( args, s->doc() );
+	  s->append(el);
+	}
       }
       // a new entity starts here
       if ( iob != 0 ){
@@ -396,12 +401,17 @@ void IOBTagger::add_result( const frog_data& fd,
   for ( const auto& word : fd.units ){
     if ( word.iob_tag[0] == 'B' ){
       if ( el == 0 ){
-	// create a layer, we need it
-	folia::KWargs args;
-	args["set"] = getTagset();
-	args["generate_id"] = s->id();
-	el = new folia::ChunkingLayer( args, s->doc() );
-	s->append(el);
+	try {
+	  el = s->annotation<folia::ChunkingLayer>(tagset);
+	}
+	catch(...){
+	  // create a layer, we need it
+	  folia::KWargs args;
+	  args["set"] = getTagset();
+	  args["generate_id"] = s->id();
+	  el = new folia::ChunkingLayer( args, s->doc() );
+	  s->append(el);
+	}
       }
       // a new entity starts here
       if ( iob != 0 ){
