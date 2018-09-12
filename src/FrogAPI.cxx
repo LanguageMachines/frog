@@ -825,9 +825,12 @@ bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers ){
 }
 
 void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
+  if ( options.doXMLout ){
+    options.noStdOut = true;
+  }
   try {
     while ( conn.isValid() ) {
-      ostringstream outputstream;
+      ostringstream output_stream;
       if ( options.doXMLin ){
         string result;
         string s;
@@ -845,27 +848,12 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
         if ( options.debugFlag > 5 ){
 	  LOG << "received data [" << result << "]" << endl;
 	}
-	folia::Document doc;
-        try {
-	  doc.readFromString( result );
-        }
-	catch ( std::exception& e ){
-	  LOG << "FoLiaParsing failed:" << endl << e.what() << endl;
-	  throw;
-        }
-        LOG << "Processing XML... " << endl;
-	timers.reset();
-	timers.tokTimer.start();
-	tokenizer->tokenize( doc );
-	timers.tokTimer.stop();
-        FrogDoc( doc );
-	if ( options.doXMLout ){
-	  doc.save( outputstream, options.doKanon );
-	}
-	else {
-	  showResults( outputstream, doc );
-	}
-	//        LOG << "Done Processing XML... " << endl;
+	string tmp_file = tmpnam(0);
+	ofstream os( tmp_file );
+	os << result << endl;
+	os.close();
+	run_folia_processor( tmp_file, output_stream );
+	LOG << "Done Processing XML... " << endl;
       }
       else {
         string data = "";
@@ -902,17 +890,17 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	    root = append_to_folia( root, res );
 	  }
 	  else {
-	    showResults( outputstream, res );
+	    showResults( output_stream, res );
 	  }
 	  res = tokenizer->tokenize_stream( inputstream );
 	}
 	if ( options.doXMLout ){
-	  doc->save( outputstream, options.doKanon );
+	  doc->save( output_stream, options.doKanon );
 	  delete doc;
 	}
 	//	LOG << "Done Processing... " << endl;
       }
-      if (!conn.write( (outputstream.str()) ) || !(conn.write("READY\n"))  ){
+      if (!conn.write( (output_stream.str()) ) || !(conn.write("READY\n"))  ){
 	if (options.debugFlag > 5 ) {
 	  LOG << "socket " << conn.getMessage() << endl;
 	}
@@ -1987,6 +1975,109 @@ void FrogAPI::handle_one_paragraph( ostream& os, folia::Paragraph *p ){
   }
 }
 
+void FrogAPI::run_folia_processor( const string& infilename,
+				   ostream& output_stream,
+				   const string& xmlOutFile ){
+  folia::Processor proc( infilename );
+  if ( !options.doTok ){
+    proc.declare( folia::AnnotationType::TOKEN, "passthru",
+		  "annotator='ucto', annotatortype='auto', datetime='now()'" );
+  }
+  else {
+    if ( !proc.is_declared( folia::AnnotationType::LANG ) ){
+      proc.declare( folia::AnnotationType::LANG,
+		    ISO_SET, "annotator='ucto'" );
+    }
+    string languages = configuration.lookUp( "languages", "tokenizer" );
+    if ( !languages.empty() ){
+      vector<string> language_list;
+      language_list = TiCC::split_at( languages, "," );
+      proc.set_metadata( "language", language_list[0] );
+      for ( const auto& l : language_list ){
+	proc.declare( folia::AnnotationType::TOKEN,
+		      "tokconfig-" + l,
+		      "annotator='ucto', annotatortype='auto', datetime='now()'");
+      }
+    }
+    else if ( options.language == "none" ){
+      proc.declare( folia::AnnotationType::TOKEN,
+		    "tokconfig-nld",
+		    "annotator='ucto', annotatortype='auto', datetime='now()'");
+    }
+    else {
+      proc.declare( folia::AnnotationType::TOKEN,
+		    "tokconfig-" + options.language,
+		    "annotator='ucto', annotatortype='auto', datetime='now'");
+      proc.set_metadata( "language", options.language );
+    }
+  }
+  //      proc.set_debug( true );
+  myCGNTagger->addDeclaration( proc );
+  if ( options.doLemma ){
+    myMblem->addDeclaration( proc );
+  }
+  if ( options.doMorph ){
+    myMbma->addDeclaration( proc );
+  }
+  if ( options.doIOB ){
+    myIOBTagger->addDeclaration( proc );
+  }
+  if ( options.doNER ){
+    myNERTagger->addDeclaration( proc );
+  }
+  if ( options.doMwu ){
+    myMwu->addDeclaration( proc );
+  }
+  if ( options.doParse ){
+    myParser->addDeclaration( proc );
+  }
+  folia::FoliaElement *p = 0;
+  while ( (p = proc.get_node( "s|p" ) ) ){
+    if ( p->xmltag() == "s" ){
+      if  (options.debugFlag > 0){
+	LOG << "found sentence A " << p << endl;
+      }
+      handle_one_sentence( output_stream, dynamic_cast<folia::Sentence*>(p) );
+      if  (options.debugFlag > 0){
+	LOG << "after handle_one_sentence() A" << endl;
+      }
+    }
+    else {
+      vector<folia::Sentence*> sv = p->select<folia::Sentence>();
+      if ( sv.empty() ){
+	cerr << " No sentences!, take paragraph text" << endl;
+	handle_one_paragraph( output_stream, dynamic_cast<folia::Paragraph*>(p) );
+      }
+      else {
+	if  (options.debugFlag > 0){
+	  LOG << "found paragraph " << p << "   with " << sv.size() << " sentences " << endl;
+	}
+	for ( const auto& s : sv ){
+	  if  (options.debugFlag > 0){
+	    LOG << "found sentence B " << s << endl;
+	  }
+	  handle_one_sentence( output_stream, s );
+	  if  (options.debugFlag > 0){
+	    LOG << "after handle_one_sentence() B" << endl;
+	  }
+	}
+      }
+    }
+    if ( proc.next() ){
+      if  (options.debugFlag > 0){
+	LOG << "looping for more ..." << endl;
+      }
+    }
+  }
+  if ( !xmlOutFile.empty() ){
+    proc.save( xmlOutFile, options.doKanon );
+    LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
+  }
+  else if ( options.doXMLout ){
+    proc.save( output_stream, options.doKanon );
+  }
+}
+
 void FrogAPI::FrogFile( const string& infilename,
 			ostream& os,
 			const string& xmlOutF ) {
@@ -2011,101 +2102,7 @@ void FrogAPI::FrogFile( const string& infilename,
   }
   if ( xml_in ){
     timers.reset();
-    folia::Processor proc( infilename );
-    if ( !options.doTok ){
-      proc.declare( folia::AnnotationType::TOKEN, "passthru",
-		    "annotator='ucto', annotatortype='auto', datetime='now()'" );
-    }
-    else {
-      if ( !proc.is_declared( folia::AnnotationType::LANG ) ){
-	proc.declare( folia::AnnotationType::LANG,
-		      ISO_SET, "annotator='ucto'" );
-      }
-      string languages = configuration.lookUp( "languages", "tokenizer" );
-      if ( !languages.empty() ){
-	vector<string> language_list;
-	language_list = TiCC::split_at( languages, "," );
-	proc.set_metadata( "language", language_list[0] );
-	for ( const auto& l : language_list ){
-	  proc.declare( folia::AnnotationType::TOKEN,
-			"tokconfig-" + l,
-			"annotator='ucto', annotatortype='auto', datetime='now()'");
-	}
-      }
-      else if ( options.language == "none" ){
-	proc.declare( folia::AnnotationType::TOKEN,
-		      "tokconfig-nld",
-		      "annotator='ucto', annotatortype='auto', datetime='now()'");
-      }
-      else {
-	proc.declare( folia::AnnotationType::TOKEN,
-		      "tokconfig-" + options.language,
-		      "annotator='ucto', annotatortype='auto', datetime='now'");
-	proc.set_metadata( "language", options.language );
-      }
-    }
-    //      proc.set_debug( true );
-    myCGNTagger->addDeclaration( proc );
-    if ( options.doLemma ){
-      myMblem->addDeclaration( proc );
-    }
-    if ( options.doMorph ){
-      myMbma->addDeclaration( proc );
-    }
-    if ( options.doIOB ){
-      myIOBTagger->addDeclaration( proc );
-    }
-    if ( options.doNER ){
-      myNERTagger->addDeclaration( proc );
-    }
-    if ( options.doMwu ){
-      myMwu->addDeclaration( proc );
-    }
-    if ( options.doParse ){
-      myParser->addDeclaration( proc );
-    }
-    folia::FoliaElement *p = 0;
-    while ( (p = proc.get_node( "s|p" ) ) ){
-      if ( p->xmltag() == "s" ){
-	if  (options.debugFlag > 0){
-	  LOG << "found sentence A " << p << endl;
-	}
-	handle_one_sentence( os, dynamic_cast<folia::Sentence*>(p) );
-	if  (options.debugFlag > 0){
-	  LOG << "after handle_one_sentence() A" << endl;
-	}
-      }
-      else {
-	vector<folia::Sentence*> sv = p->select<folia::Sentence>();
-	if ( sv.empty() ){
-	  cerr << " No sentences!, take paragraph text" << endl;
-	  handle_one_paragraph( os, dynamic_cast<folia::Paragraph*>(p) );
-	}
-	else {
-	  if  (options.debugFlag > 0){
-	    LOG << "found paragraph " << p << "   with " << sv.size() << " sentences " << endl;
-	  }
-	  for ( const auto& s : sv ){
-	    if  (options.debugFlag > 0){
-	      LOG << "found sentence B " << s << endl;
-	    }
-	    handle_one_sentence( os, s );
-	    if  (options.debugFlag > 0){
-	      LOG << "after handle_one_sentence() B" << endl;
-	    }
-	  }
-	}
-      }
-      if ( proc.next() ){
-	if  (options.debugFlag > 0){
-	  LOG << "looping for more ..." << endl;
-	}
-      }
-    }
-    if ( !xmlOutFile.empty() ){
-      proc.save( xmlOutFile, options.doKanon );
-      LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
-    }
+    run_folia_processor( infilename, os, xmlOutFile );
   }
   else {
     ifstream TEST( infilename );
