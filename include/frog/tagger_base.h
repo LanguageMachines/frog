@@ -46,7 +46,7 @@ class BaseTagger {
   explicit BaseTagger( TiCC::LogStream *, const std::string& );
   virtual ~BaseTagger();
   virtual bool init( const TiCC::Configuration& );
-  virtual void post_process( const std::vector<folia::Word*>& ) = 0;
+  virtual void post_process( const std::vector<folia::Word*>& ){};
   virtual void post_process( frog_data& ) = 0;
   virtual void Classify( const std::vector<folia::Word*>& );
   virtual void Classify( frog_data& );

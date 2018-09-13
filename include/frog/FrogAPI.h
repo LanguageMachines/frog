@@ -104,7 +104,6 @@ class FrogAPI {
   static std::string defaultConfigDir( const std::string& ="" );
   static std::string defaultConfigFile( const std::string& ="" );
   void FrogFile( const std::string&, std::ostream&, const std::string& );
-  void FrogDoc( folia::Document&, bool=false );
   void FrogServer( Sockets::ServerSocket &conn );
   void FrogInteractive();
   bool frog_sentence( frog_data& );
@@ -133,18 +132,7 @@ class FrogAPI {
 			 const std::vector<folia::Word*>& ) const;
   void test_version( const std::string&, double );
   // functions
-  bool TestSentence( folia::Sentence*, TimerBlock& );
   void FrogStdin( bool prompt );
-  std::vector<folia::Word*> lookup( folia::Word *,
-				    const std::vector<folia::Entity*>& ) const;
-  folia::Dependency *lookupDep( const folia::Word *,
-				const std::vector<folia::Dependency*>& ) const;
-  std::string lookupNEREntity( const std::vector<folia::Word *>&,
-			       const std::vector<folia::Entity*>& ) const;
-  std::string lookupIOBChunk( const std::vector<folia::Word *>&,
-			      const std::vector<folia::Chunk*>& ) const;
-  void displayMWU( std::ostream&, size_t, const std::vector<folia::Word*>& ) const;
-  void showResults( std::ostream&, folia::Document& ) const;
   void show_record( std::ostream&, const frog_record& ) const;
   void showResults( std::ostream&, const frog_data& ) const;
   void handle_one_paragraph( std::ostream&,
@@ -171,10 +159,14 @@ class FrogAPI {
   UctoTokenizer *tokenizer;
 };
 
+// the functions below here are ONLY used by TSCAN.
+// the should be moved there probably
+// =======================================================================
+
 std::vector<std::string> get_full_morph_analysis( folia::Word *, bool = false );
-std::vector<std::string> get_full_morph_analysis( folia::Word *,
-						  const std::string&,
-						  bool = false );
 std::vector<std::string> get_compound_analysis( folia::Word * );
+//std::vector<std::string> get_full_morph_analysis( folia::Word *,
+//						  const std::string&,
+//						  bool = false );
 
 #endif

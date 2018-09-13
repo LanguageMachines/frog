@@ -700,132 +700,6 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
   }
 }
 
-bool FrogAPI::TestSentence( folia::Sentence* sent, TimerBlock& timers ){
-  vector<folia::Word*> swords;
-  if ( options.doQuoteDetection ){
-    swords = sent->wordParts();
-  }
-  else {
-    swords = sent->words();
-  }
-  bool showParse = options.doParse;
-  if ( !swords.empty() ) {
-    bool all_well = true;
-    string exs;
-    timers.tagTimer.start();
-    try {
-      myCGNTagger->Classify( swords );
-    }
-    catch ( exception&e ){
-      all_well = false;
-      exs += string(e.what()) + " ";
-    }
-    timers.tagTimer.stop();
-    if ( !all_well ){
-      throw runtime_error( exs );
-    }
-    for ( const auto& sword : swords ) {
-#pragma omp parallel sections
-      {
-#pragma omp section
-	{
-	  if ( options.doMorph ){
-	    timers.mbmaTimer.start();
-	    if (options.debugFlag > 1){
-	      LOG << "Calling mbma..." << endl;
-	    }
-	    try {
-	      myMbma->Classify( sword );
-	    }
-	    catch ( exception& e ){
-	      all_well = false;
-	      exs += string(e.what()) + " ";
-	    }
-	    timers.mbmaTimer.stop();
-	  }
-	}
-#pragma omp section
-	{
-	  if ( options.doLemma ){
-	    timers.mblemTimer.start();
-	    if (options.debugFlag > 1) {
-	      LOG << "Calling mblem..." << endl;
-	    }
-	    try {
-	      myMblem->Classify( sword );
-	    }
-	    catch ( exception&e ){
-	      all_well = false;
-	      exs += string(e.what()) + " ";
-	    }
-	    timers.mblemTimer.stop();
-	  }
-	}
-      } // omp parallel sections
-    } //for all words
-    if ( !all_well ){
-      throw runtime_error( exs );
-    }
-#pragma omp parallel sections
-    {
-#pragma omp section
-      {
-	if ( options.doNER ){
-	  timers.nerTimer.start();
-	  if (options.debugFlag > 1) {
-	    LOG << "Calling NER..." << endl;
-	  }
-	  try {
-	    myNERTagger->Classify( swords );
-	  }
-	  catch ( exception&e ){
-	    all_well = false;
-	    exs += string(e.what()) + " ";
-	  }
-	  timers.nerTimer.stop();
-	}
-      }
-#pragma omp section
-      {
-	if ( options.doIOB ){
-	  timers.iobTimer.start();
-	  try {
-	    myIOBTagger->Classify( swords );
-	  }
-	  catch ( exception&e ){
-	    all_well = false;
-	    exs += string(e.what()) + " ";
-	  }
-	  timers.iobTimer.stop();
-	}
-      }
-#pragma omp section
-      {
-	if ( options.doMwu ){
-	  if ( swords.size() > 0 ){
-	    timers.mwuTimer.start();
-	    myMwu->Classify( swords );
-	    timers.mwuTimer.stop();
-	  }
-	}
-	if ( options.doParse ){
-	  if ( options.maxParserTokens != 0
-	       && swords.size() > options.maxParserTokens ){
-	    showParse = false;
-	  }
-	  else {
-	    myParser->Parse( swords, timers );
-	  }
-	}
-      }
-    }
-    if ( !all_well ){
-      throw runtime_error( exs );
-    }
-  }
-  return showParse;
-}
-
 void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
   if ( options.doXMLout ){
     options.noStdOut = true;
@@ -1040,471 +914,6 @@ void FrogAPI::FrogInteractive(){
 #endif
 }
 
-vector<folia::Word*> FrogAPI::lookup( folia::Word *word,
-				      const vector<folia::Entity*>& entities ) const {
-  for ( const auto& ent : entities ){
-    vector<folia::Word*> vec = ent->select<folia::Word>();
-    if ( !vec.empty() ){
-      if ( vec[0]->id() == word->id() ) {
-	return vec;
-      }
-    }
-  }
-  vector<folia::Word*> vec;
-  vec.push_back( word ); // single unit
-  return vec;
-}
-
-folia::Dependency *FrogAPI::lookupDep( const folia::Word *word,
-				       const vector<folia::Dependency*>&dependencies ) const{
-  if (dependencies.size() == 0 ){
-    return 0;
-  }
-  int dbFlag = 0;
-  try {
-    dbFlag = TiCC::stringTo<int>( configuration.lookUp( "debug", "parser" ) );
-  }
-  catch (exception & e) {
-    dbFlag = 0;
-  }
-  if ( dbFlag > 1){
-    LOG << endl << "Dependency-lookup "<< word << " in " << dependencies << endl;
-  }
-  for ( const auto& dep : dependencies ){
-    if ( dbFlag > 1) {
-      LOG << "Dependency try: " << dep << endl;
-    }
-    try {
-      vector<folia::DependencyDependent*> dv
-	= dep->select<folia::DependencyDependent>();
-      if ( !dv.empty() ){
-	vector<folia::Word*> wv = dv[0]->select<folia::Word>();
-	for ( const auto& w : wv ){
-	  if ( w == word ){
-	    if ( dbFlag > 1 ){
-	      LOG << "Dependency found word " << w << endl;
-	    }
-	    return dep;
-	  }
-	}
-      }
-    }
-    catch ( exception& e ){
-      if (dbFlag > 0){
-	LOG << "get Dependency results failed: " << e.what() << endl;
-      }
-    }
-  }
-  return 0;
-}
-
-string FrogAPI::lookupNEREntity( const vector<folia::Word *>& mwus,
-				 const vector<folia::Entity*>& entities ) const {
-  string endresult;
-  int dbFlag = 0;
-  try{
-    dbFlag = TiCC::stringTo<int>( configuration.lookUp( "debug", "NER" ) );
-  }
-  catch (exception & e) {
-    dbFlag = 0;
-  }
-  for ( const auto& mwu : mwus ){
-    if ( dbFlag > 1 ){
-      LOG << endl << "NER: lookup "<< mwu << " in " << entities << endl;
-    }
-    string result;
-    for ( const auto& entity :entities ){
-      if ( dbFlag > 1 ){
-	LOG << "NER: try: " << entity << endl;
-      }
-      try {
-	vector<folia::Word*> wv = entity->select<folia::Word>();
-	bool first = true;
-	for ( const auto& word : wv ){
-	  if ( word == mwu ){
-	    if (dbFlag > 1){
-	      LOG << "NER found word " << word << endl;
-	    }
-	    if ( first ){
-	      result += "B-" + TiCC::uppercase(entity->cls());
-	    }
-	    else {
-	      result += "I-" + TiCC::uppercase(entity->cls());
-	    }
-	    break;
-	  }
-	  else {
-	    first = false;
-	  }
-	}
-      }
-      catch ( exception& e ){
-	if  (dbFlag > 0){
-	  LOG << "get NER results failed: "
-			  << e.what() << endl;
-	}
-      }
-    }
-    if ( result.empty() ){
-      endresult += "O";
-    }
-    else {
-      endresult += result;
-    }
-    if ( &mwu != &mwus.back() ){
-      endresult += "_";
-    }
-  }
-  return endresult;
-}
-
-
-string FrogAPI::lookupIOBChunk( const vector<folia::Word *>& mwus,
-				const vector<folia::Chunk*>& chunks ) const{
-  string endresult;
-  int dbFlag = 0;
-  try {
-    dbFlag = TiCC::stringTo<int>( configuration.lookUp( "debug", "IOB" ) );
-  }
-  catch (exception & e) {
-    dbFlag = 0;
-  }
-  for ( const auto& mwu : mwus ){
-    if ( dbFlag > 1 ){
-      LOG << "IOB lookup "<< mwu << " in " << chunks << endl;
-    }
-    string result;
-    for ( const auto& chunk : chunks ){
-      if ( dbFlag > 1){
-	LOG << "IOB try: " << chunk << endl;
-      }
-      try {
-	vector<folia::Word*> wv = chunk->select<folia::Word>();
-	bool first = true;
-	for ( const auto& word : wv ){
-	  if ( word == mwu ){
-	    if (dbFlag > 1){
-	      LOG << "IOB found word " << word << endl;
-	    }
-	    if ( first ) {
-	      result += "B-" + chunk->cls();
-	    }
-	    else {
-	      result += "I-" + chunk->cls();
-	    }
-	    break;
-	  }
-	  else {
-	    first = false;
-	  }
-	}
-      }
-      catch ( exception& e ){
-	if  (dbFlag > 0 ) {
-	  LOG << "get Chunks results failed: "
-			  << e.what() << endl;
-	}
-      }
-    }
-    if ( result.empty() ) {
-      endresult += "O";
-    }
-    else {
-      endresult += result;
-    }
-    if ( &mwu != &mwus.back() ){
-      endresult += "_";
-    }
-  }
-  return endresult;
-}
-
-vector<string> get_compound_analysis( folia::Word* word ){
-  vector<string> result;
-  vector<folia::MorphologyLayer*> layers
-    = word->annotations<folia::MorphologyLayer>( Mbma::mbma_tagset );
-  for ( const auto& layer : layers ){
-    vector<folia::Morpheme*> m =
-      layer->select<folia::Morpheme>( Mbma::mbma_tagset, false );
-    if ( m.size() == 1 ) {
-      // check for top layer compound
-      try {
-	folia::PosAnnotation *tag = m[0]->annotation<folia::PosAnnotation>( Mbma::clex_tagset );
-	result.push_back( tag->feat( "compound" ) ); // might be empty
-      }
-      catch (...){
-	result.push_back( "" ); // pad with empty strings
-      }
-    }
-  }
-  return result;
-}
-
-string flatten( const string& s ){
-  string result;
-  string::size_type bpos = s.find_first_not_of( "[" );
-  if ( bpos != string::npos ){
-    string::size_type epos = s.find_first_of( "]", bpos );
-    result += "[" + s.substr( bpos, epos-bpos ) + "]";
-    bpos = s.find_first_of( "[", epos+1 );
-    bpos = s.find_first_not_of( "[", bpos );
-    while ( bpos != string::npos ){
-      string::size_type epos = s.find_first_of( "]", bpos );
-      if ( epos == string::npos ){
-	break;
-      }
-      result += "[" + s.substr( bpos, epos-bpos ) + "]";
-      bpos = s.find_first_of( "[", epos+1 );
-      bpos = s.find_first_not_of( "[", bpos );
-    }
-  }
-  else {
-    result = s;
-  }
-  return result;
-}
-
-vector<string> get_full_morph_analysis( folia::Word* w, bool flat ){
-  return get_full_morph_analysis( w, "current", flat );
-}
-
-vector<string> get_full_morph_analysis( folia::Word* w,
-					const string& cls,
-					bool flat ){
-  vector<string> result;
-  vector<folia::MorphologyLayer*> layers
-    = w->annotations<folia::MorphologyLayer>( Mbma::mbma_tagset );
-  for ( const auto& layer : layers ){
-    vector<folia::Morpheme*> m =
-      layer->select<folia::Morpheme>( Mbma::mbma_tagset, false );
-    bool is_deep = false;
-    if ( m.size() == 1 ) {
-      // check for top layer from deep morph analysis
-      string str  = m[0]->feat( "structure" );
-      if ( !str.empty() ){
-	is_deep = true;
-	if ( flat ){
-	  str = flatten(str);
-	}
-	result.push_back( str );
-      }
-    }
-    if ( !is_deep ){
-      // flat structure
-      string morph;
-      vector<folia::Morpheme*> m
-	= layer->select<folia::Morpheme>( Mbma::mbma_tagset );
-      for ( const auto& mor : m ){
-	string txt = TiCC::UnicodeToUTF8( mor->text( cls ) );
-	morph += "[" + txt + "]";
-      }
-      result.push_back( morph );
-    }
-  }
-  return result;
-}
-
-void FrogAPI::displayMWU( ostream& os,
-			  size_t index,
-			  const vector<folia::Word*>& mwu ) const {
-  string wrd;
-  string pos;
-  string lemma;
-  string morph;
-  string comp;
-  double conf = 1;
-  for ( const auto& word : mwu ){
-    try {
-      wrd += word->str( options.outputclass );
-      folia::PosAnnotation *postag
-	= word->annotation<folia::PosAnnotation>( myCGNTagger->getTagset() );
-      pos += postag->cls();
-      if ( &word != &mwu.back() ){
-	wrd += "_";
-	pos += "_";
-      }
-      conf *= postag->confidence();
-    }
-    catch ( exception& e ){
-      if ( options.debugFlag > 2 ){
-	LOG << "get Postag results failed: "
-			<< e.what() << endl;
-      }
-    }
-    if ( options.doLemma ){
-      try {
-	lemma += word->lemma(myMblem->getTagset());
-	if ( &word != &mwu.back() ){
-	  lemma += "_";
-	}
-      }
-      catch ( exception& e ){
-	if ( options.debugFlag > 2 ){
-	  LOG << "get Lemma results failed: "
-			  << e.what() << endl;
-	}
-      }
-    }
-    if ( options.doMorph ){
-      // also covers doDeepMorph
-      try {
-	vector<string> morphs = get_full_morph_analysis( word, options.outputclass );
-	for ( const auto& m : morphs ){
-	  morph += m;
-	  if ( &m != &morphs.back() ){
-	    morph += "/";
-	  }
-	}
-	if ( &word != &mwu.back() ){
-	  morph += "_";
-	}
-      }
-      catch ( exception& e ){
-	if  (options.debugFlag > 2){
-	  LOG << "get Morph results failed: "
-			  << e.what() << endl;
-	}
-      }
-    }
-    if ( options.doDeepMorph ){
-      try {
-	vector<string> cpv = get_compound_analysis( word );
-	for ( const auto& cp : cpv ){
-	  if ( cp.empty() ){
-	    comp += "0";
-	  }
-	  else {
-	    comp += cp+"-compound";
-	  }
-	  if ( &cp != &cpv.back() ){
-	    morph += "/";
-	  }
-	}
-	if ( &word != &mwu.back() ){
-	  comp += "_";
-	}
-      }
-      catch ( exception& e ){
-	if  (options.debugFlag > 2){
-	  LOG << "get Morph results failed: "
-			  << e.what() << endl;
-	}
-      }
-    }
-  }
-  os << index << "\t" << wrd << "\t" << lemma << "\t" << morph;
-  if ( options.doDeepMorph ){
-    if ( comp.empty() ){
-      comp = "0";
-    }
-    os << "\t" << comp;
-  }
-  os << "\t" << pos << "\t" << std::fixed << conf;
-}
-
-void FrogAPI::showResults( ostream& os,
-			   folia::Document& doc ) const {
-  vector<folia::Sentence*> sentences = doc.sentences();
-  for ( auto const& sentence : sentences ){
-    vector<folia::Word*> words = sentence->words();
-    vector<folia::Entity*> mwu_entities;
-    if (myMwu){
-      mwu_entities = sentence->select<folia::Entity>( myMwu->getTagset() );
-    }
-    vector<folia::Dependency*> dependencies;
-    if (myParser){
-      dependencies = sentence->select<folia::Dependency>( myParser->getTagset() );
-    }
-    vector<folia::Chunk*> iob_chunking;
-    if ( myIOBTagger ){
-      iob_chunking = sentence->select<folia::Chunk>( myIOBTagger->getTagset() );
-    }
-    vector<folia::Entity*> ner_entities;
-    if (myNERTagger){
-      ner_entities =  sentence->select<folia::Entity>( myNERTagger->getTagset() );
-    }
-    static set<folia::ElementType> excludeSet;
-    vector<folia::Sentence*> parts = sentence->select<folia::Sentence>( excludeSet );
-    if ( !options.doQuoteDetection ){
-      assert( parts.size() == 0 );
-    }
-    for ( auto const& part : parts ){
-      vector<folia::Entity*> ents;
-      if (myMwu){
-	ents = part->select<folia::Entity>( myMwu->getTagset() );
-      }
-      mwu_entities.insert( mwu_entities.end(), ents.begin(), ents.end() );
-      vector<folia::Dependency*> deps = part->select<folia::Dependency>();
-      dependencies.insert( dependencies.end(), deps.begin(), deps.end() );
-      vector<folia::Chunk*> chunks = part->select<folia::Chunk>();
-      iob_chunking.insert( iob_chunking.end(), chunks.begin(), chunks.end() );
-      vector<folia::Entity*> ners ;
-      if (myNERTagger) {
-	ners = part->select<folia::Entity>( myNERTagger->getTagset() );
-      }
-      ner_entities.insert( ner_entities.end(), ners.begin(), ners.end() );
-    }
-
-    size_t index = 1;
-    unordered_map<folia::FoliaElement*, int> enumeration;
-    vector<vector<folia::Word*> > mwus;
-    for ( size_t i=0; i < words.size(); ++i ){
-      folia::Word *word = words[i];
-      vector<folia::Word*> mwu = lookup( word, mwu_entities );
-      for ( size_t j=0; j < mwu.size(); ++j ){
-	enumeration[mwu[j]] = index;
-      }
-      mwus.push_back( mwu );
-      i += mwu.size()-1;
-      ++index;
-    }
-    index = 0;
-    for ( const auto& mwu : mwus ){
-      displayMWU( os, ++index, mwu );
-      if ( options.doNER ){
-	string s = lookupNEREntity( mwu, ner_entities );
-	os << "\t" << s;
-      }
-      else {
-	os << "\t\t";
-      }
-      if ( options.doIOB ){
-	string s = lookupIOBChunk( mwu, iob_chunking);
-	os << "\t" << s;
-      }
-      else {
-	os << "\t\t";
-      }
-      if ( options.doParse ){
-	folia::Dependency *dep = lookupDep( mwu[0], dependencies);
-	if ( dep ){
-	  vector<folia::Headspan*> w = dep->select<folia::Headspan>();
-	  size_t num;
-	  if ( w[0]->index(0)->isinstance( folia::PlaceHolder_t ) ){
-	    string indexS = w[0]->index(0)->str();
-	    folia::FoliaElement *pnt = w[0]->index(0)->doc()->index(indexS);
-	    num = enumeration.find(pnt->index(0))->second;
-	  }
-	  else {
-	    num = enumeration.find(w[0]->index(0))->second;
-	  }
-	  os << "\t" << num << "\t" << dep->cls();
-	}
-	else {
-	  os << "\t"<< 0 << "\tROOT";
-	}
-      }
-      else {
-	os << "\t\t";
-      }
-      os << endl;
-    }
-    if ( words.size() ){
-      os << endl;
-    }
-  }
-}
-
 string FrogAPI::Frogtostring( const string& s ){
   /// Parse a string, Frog it and return the result as a string.
   /// @s: an UTF8 decoded string. May be multilined.
@@ -1533,112 +942,6 @@ string FrogAPI::Frogtostringfromfile( const string& name ){
   stringstream ss;
   FrogFile( name, ss, "" );
   return ss.str();
-}
-
-void FrogAPI::FrogDoc( folia::Document& doc,
-		       bool hidetimers ){
-  timers.frogTimer.start();
-  // first we make sure that the doc will accept our annotations, by
-  // declaring them in the doc
-  if (myCGNTagger){
-    myCGNTagger->addDeclaration( doc );
-  }
-  if ( options.doLemma && myMblem ) {
-    myMblem->addDeclaration( doc );
-  }
-  if ( options.doMorph && myMbma ) {
-    myMbma->addDeclaration( doc );
-  }
-  if ( options.doIOB && myIOBTagger ){
-    myIOBTagger->addDeclaration( doc );
-  }
-  if ( options.doNER && myNERTagger ){
-    myNERTagger->addDeclaration( doc );
-  }
-  if ( options.doMwu && myMwu ){
-    myMwu->addDeclaration( doc );
-  }
-  if ( options.doParse && myParser ){
-    myParser->addDeclaration( doc );
-  }
-  if ( options.debugFlag > 5 ){
-    LOG << "Testing document :" << doc << endl;
-  }
-  vector<folia::Sentence*> sentences;
-  if ( options.doQuoteDetection ){
-    sentences = doc.sentenceParts();
-  }
-  else {
-    sentences = doc.sentences();
-  }
-  size_t numS = sentences.size();
-  if ( numS > 0 ) { //process sentences
-    LOG << TiCC::Timer::now() << " process " << numS << " sentences" << endl;
-    for ( size_t i = 0; i < numS; ++i ) {
-      //NOTE- full sentences are passed (which may span multiple lines) (MvG)
-      string lan = sentences[i]->language();
-      if ( !options.language.empty()
-	   && options.language != "none"
-	   && !lan.empty()
-	   && lan != options.language ){
-	if  (options.debugFlag >= 0){
-	  LOG << "Not processing sentence " << i+1 << endl
-			  << " different language: " << lan << endl
-			  << " --language=" << options.language << endl;
-	}
-	continue;
-      }
-      //      LOG << sentences[i]->text() << endl;
-      bool showParse = TestSentence( sentences[i], timers );
-      if ( options.doParse && !showParse ){
-	LOG << "WARNING!" << endl;
-	LOG << "Sentence " << i+1
-	    << " isn't parsed because it contains more tokens then set with the --max-parser-tokens="
-	    << options.maxParserTokens << " option." << endl;
-      }
-      else {
-	if  (options.debugFlag > 0){
-	  LOG << TiCC::Timer::now() << " done with sentence[" << i+1 << "]" << endl;
-	}
-      }
-    }
-  }
-  else {
-    if  (options.debugFlag > 0){
-      LOG << "No sentences found in document. " << endl;
-    }
-  }
-
-  timers.frogTimer.stop();
-  if ( !hidetimers ){
-    LOG << "tokenisation took:  " << timers.tokTimer << endl;
-    LOG << "CGN tagging took:   " << timers.tagTimer << endl;
-    if ( options.doIOB){
-      LOG << "IOB chunking took:  " << timers.iobTimer << endl;
-    }
-    if ( options.doNER){
-      LOG << "NER took:           " << timers.nerTimer << endl;
-    }
-    if ( options.doMorph ){
-      LOG << "MBMA took:          " << timers.mbmaTimer << endl;
-    }
-    if ( options.doLemma ){
-      LOG << "Mblem took:         " << timers.mblemTimer << endl;
-    }
-    if ( options.doMwu ){
-      LOG << "MWU resolving took: " << timers.mwuTimer << endl;
-    }
-    if ( options.doParse ){
-      LOG << "Parsing (prepare) took: " << timers.prepareTimer << endl;
-      LOG << "Parsing (pairs)   took: " << timers.pairsTimer << endl;
-      LOG << "Parsing (rels)    took: " << timers.relsTimer << endl;
-      LOG << "Parsing (dir)     took: " << timers.dirTimer << endl;
-      LOG << "Parsing (csi)     took: " << timers.csiTimer << endl;
-      LOG << "Parsing (total)   took: " << timers.parseTimer << endl;
-    }
-   LOG << "Frogging in total took: " << timers.frogTimer << endl;
-  }
-  return;
 }
 
 string get_language( frog_data& fd ){
@@ -2212,4 +1515,92 @@ void FrogAPI::FrogFile( const string& infilename,
       LOG << "Frogging in total took: " << timers.frogTimer << endl;
     }
   }
+}
+
+// the functions below here are ONLY used by TSCAN.
+// the should be moved there probably
+// =======================================================================
+vector<string> get_compound_analysis( folia::Word* word ){
+  vector<string> result;
+  vector<folia::MorphologyLayer*> layers
+    = word->annotations<folia::MorphologyLayer>( Mbma::mbma_tagset );
+  for ( const auto& layer : layers ){
+    vector<folia::Morpheme*> m =
+      layer->select<folia::Morpheme>( Mbma::mbma_tagset, false );
+    if ( m.size() == 1 ) {
+      // check for top layer compound
+      try {
+	folia::PosAnnotation *tag = m[0]->annotation<folia::PosAnnotation>( Mbma::clex_tagset );
+	result.push_back( tag->feat( "compound" ) ); // might be empty
+      }
+      catch (...){
+	result.push_back( "" ); // pad with empty strings
+      }
+    }
+  }
+  return result;
+}
+
+string flatten( const string& s ){
+  string result;
+  string::size_type bpos = s.find_first_not_of( "[" );
+  if ( bpos != string::npos ){
+    string::size_type epos = s.find_first_of( "]", bpos );
+    result += "[" + s.substr( bpos, epos-bpos ) + "]";
+    bpos = s.find_first_of( "[", epos+1 );
+    bpos = s.find_first_not_of( "[", bpos );
+    while ( bpos != string::npos ){
+      string::size_type epos = s.find_first_of( "]", bpos );
+      if ( epos == string::npos ){
+	break;
+      }
+      result += "[" + s.substr( bpos, epos-bpos ) + "]";
+      bpos = s.find_first_of( "[", epos+1 );
+      bpos = s.find_first_not_of( "[", bpos );
+    }
+  }
+  else {
+    result = s;
+  }
+  return result;
+}
+
+vector<string> get_full_morph_analysis( folia::Word* w,
+                                       const string& cls,
+                                       bool flat ){
+  vector<string> result;
+  vector<folia::MorphologyLayer*> layers
+    = w->annotations<folia::MorphologyLayer>( Mbma::mbma_tagset );
+  for ( const auto& layer : layers ){
+    vector<folia::Morpheme*> m =
+      layer->select<folia::Morpheme>( Mbma::mbma_tagset, false );
+    bool is_deep = false;
+    if ( m.size() == 1 ) {
+      // check for top layer from deep morph analysis
+      string str  = m[0]->feat( "structure" );
+      if ( !str.empty() ){
+	is_deep = true;
+	if ( flat ){
+	  str = flatten(str);
+	}
+	result.push_back( str );
+      }
+    }
+    if ( !is_deep ){
+      // flat structure
+      string morph;
+      vector<folia::Morpheme*> m
+	= layer->select<folia::Morpheme>( Mbma::mbma_tagset );
+      for ( const auto& mor : m ){
+	string txt = TiCC::UnicodeToUTF8( mor->text( cls ) );
+	morph += "[" + txt + "]";
+      }
+      result.push_back( morph );
+    }
+  }
+  return result;
+}
+
+vector<string> get_full_morph_analysis( folia::Word* w, bool flat ){
+  return get_full_morph_analysis( w, "current", flat );
 }

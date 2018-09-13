@@ -43,11 +43,7 @@ class NERTagger: public BaseTagger {
  public:
   explicit NERTagger( TiCC::LogStream * );
   bool init( const TiCC::Configuration& );
-  void Classify( const std::vector<folia::Word *>& );
   void Classify( frog_data& );
-  void post_process( const std::vector<folia::Word*>& );
-  void post_process( const std::vector<folia::Word*>&,
-		     const std::vector<std::string>& );
   void post_process( frog_data& );
   void post_process( frog_data&,
 		     const std::vector<std::string>& );
@@ -58,9 +54,6 @@ class NERTagger: public BaseTagger {
 		   const std::vector<folia::Word*>& wv ) const;
   void add_result( const frog_data& fd,
 		   const std::vector<folia::Word*>& wv ) const;
-  void addNERTags( const std::vector<folia::Word*>&,
-		   const std::vector<std::string>&,
-		   const std::vector<double>& );
   void addNERTags( frog_data&,
 		   const std::vector<std::string>&,
 		   const std::vector<double>& );
@@ -95,10 +88,6 @@ class NERTagger: public BaseTagger {
 					    std::vector<std::unordered_map<std::string,std::set<std::string>>>& );
   std::vector<std::unordered_map<std::string,std::set<std::string>>> known_ners;
   std::vector<std::unordered_map<std::string,std::set<std::string>>> override_ners;
-  void addEntity( folia::Sentence *,
-		  const std::vector<folia::Word*>&,
-		  const std::vector<double>&,
-		  const std::string& );
   void addEntity( frog_data&,
 		  size_t,
 		  const std::vector<std::string>&,

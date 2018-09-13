@@ -239,131 +239,6 @@ vector<string> NERTagger::create_ner_list( const vector<string>& words,
   return serialize( stags );
 }
 
-void NERTagger::addEntity( folia::Sentence *sent,
-			   const vector<folia::Word*>& words,
-			   const vector<double>& confs,
-			   const string& NER ){
-  folia::EntitiesLayer *el = 0;
-  if ( debug > 8 ){
-    LOG << "add NER " << NER << " to entities layer" << endl;
-  }
-
-#pragma omp critical (foliaupdate)
-  {
-    try {
-      el = sent->annotation<folia::EntitiesLayer>(tagset);
-      if ( debug > 8 ){
-	LOG << "GOT existing layer " << el << endl;
-      }
-    }
-    catch(...){
-      folia::KWargs args;
-      string s_id = sent->id();
-      if ( !s_id.empty() ){
-	args["generate_id"] = s_id;
-      }
-      args["set"] = tagset;
-      el = new folia::EntitiesLayer( args, sent->doc() );
-      if ( debug > 8 ){
-	LOG << "CREATED layer " << el << endl;
-      }
-      sent->append( el );
-    }
-  }
-  double c = 0;
-  for ( auto const& val : confs ){
-    c += val;
-  }
-  c /= confs.size();
-  folia::KWargs args;
-  args["class"] = NER;
-  args["confidence"] = TiCC::toString(c);
-  args["set"] = tagset;
-  string el_id = el->id();
-  if ( !el_id.empty() ){
-    args["generate_id"] = el_id;
-  }
-  if ( textclass != "current" ){
-    args["textclass"] = textclass;
-  }
-  folia::Entity *e = 0;
-#pragma omp critical (foliaupdate)
-  {
-    e = new folia::Entity( args, el->doc() );
-    el->append( e );
-  }
-  for ( const auto& word : words ){
-#pragma omp critical (foliaupdate)
-    {
-      e->append( word );
-    }
-  }
-}
-
-void NERTagger::addNERTags( const vector<folia::Word*>& words,
-			    const vector<string>& tags,
-			    const vector<double>& confs ){
-  if ( words.empty() ) {
-    return;
-  }
-  folia::Sentence *sent = words[0]->sentence();
-  vector<folia::Word*> stack;
-  vector<double> dstack;
-  string curNER;
-  for ( size_t i=0; i < tags.size(); ++i ){
-    if (debug > 1){
-      LOG << "NER = " << tags[i] << endl;
-    }
-    vector<string> ner;
-    if ( tags[i] == "O" ){
-      if ( !stack.empty() ){
-	if (debug > 1) {
-	  LOG << "O spit out " << curNER << endl;
-	  LOG << "ners  " << stack << endl;
-	  LOG << "confs " << dstack << endl;
-	}
-	addEntity( sent, stack, dstack, curNER );
-	dstack.clear();
-	stack.clear();
-      }
-      continue;
-    }
-    else {
-      size_t num_words = TiCC::split_at( tags[i], ner, "-" );
-      if ( num_words != 2 ){
-	LOG << "expected <NER>-tag, got: " << tags[i] << endl;
-	throw runtime_error( "NER: unable to retrieve a NER tag from: "
-			     + tags[i] );
-      }
-    }
-    if ( ner[0] == "B" ||
-	 ( ner[0] == "I" && stack.empty() ) ||
-	 ( ner[0] == "I" && ner[1] != curNER ) ){
-      // an I without preceding B is handled as a B
-      // an I with a different TAG is also handled as a B
-      if ( !stack.empty() ){
-	if ( debug > 1 ){
-	  LOG << "B spit out " << curNER << endl;
-	  LOG << "spit out " << stack << endl;
-	}
-	addEntity( sent, stack, dstack, curNER );
-	dstack.clear();
-	stack.clear();
-      }
-      curNER = ner[1];
-    }
-    dstack.push_back( confs[i] );
-    stack.push_back( words[i] );
-  }
-  if ( !stack.empty() ){
-    if ( debug > 1 ){
-      LOG << "END spit out " << curNER << endl;
-      LOG << "spit out " << stack << endl;
-    }
-    addEntity( sent, stack, dstack, curNER );
-  }
-}
-
 void NERTagger::addDeclaration( folia::Document& doc ) const {
   doc.declare( folia::AnnotationType::ENTITY,
 	       tagset,
@@ -376,59 +251,6 @@ void NERTagger::addDeclaration( folia::Processor& proc ) const {
 		tagset,
 		"annotator='frog-ner-" + _version
 		+ "', annotatortype='auto', datetime='" + getTime() + "'");
-}
-
-void NERTagger::Classify( const vector<folia::Word *>& swords ){
-  if ( !swords.empty() ) {
-    vector<string> words;
-    vector<string> ptags;
-    extract_words_tags( swords, POS_tagset, words, ptags );
-    vector<string> ktags = create_ner_list( words, known_ners );
-    vector<string> override_tags = create_ner_list( words, override_ners );
-    string text_block;
-    string prev = "_";
-    string prevN = "_";
-    for ( size_t i=0; i < swords.size(); ++i ){
-      string word = words[i];
-      string pos = ptags[i];
-      text_block += word + "\t" + prev + "\t" + pos + "\t";
-      prev = pos;
-      if ( i < swords.size() - 1 ){
-	text_block += ptags[i+1];
-      }
-      else {
-	text_block += "_";
-      }
-      string ktag = ktags[i];
-      text_block += "\t" + prevN + "\t" + ktag + "\t";
-      prevN = ktag;
-      if ( i < swords.size() - 1 ){
-	text_block += ktags[i+1];
-      }
-      else {
-	text_block += "_";
-      }
-
-      text_block += "\t??\n";
-    }
-    if ( debug > 1 ){
-      LOG << "TAGGING TEXT_BLOCK\n" << text_block << endl;
-    }
-    _tag_result = tagger->TagLine( text_block );
-    if ( debug > 1 ){
-      LOG << "NER tagger out: " << endl;
-      for ( size_t i=0; i < _tag_result.size(); ++i ){
-	LOG << "[" << i << "] : word=" << _tag_result[i].word()
-	    << " tag=" << _tag_result[i].assignedTag()
-	    << " confidence=" << _tag_result[i].confidence() << endl;
-      }
-    }
-    post_process( swords, override_tags );
-  }
-}
-
-void NERTagger::post_process( const vector<folia::Word*>& ){
-  throw logic_error( "NER tagger call undefined postprocess() member" );
 }
 
 void NERTagger::Classify( frog_data& swords ){
@@ -699,20 +521,6 @@ void NERTagger::merge_override( vector<string>& tags,
   }
 }
 
-void NERTagger::post_process( const vector<folia::Word*>& swords,
-			      const vector<string>& override ){
-  vector<string> tags;
-  vector<double> conf;
-  for ( const auto& tag : _tag_result ){
-    tags.push_back( tag.assignedTag() );
-    conf.push_back( tag.confidence() );
-  }
-  if ( !override.empty() ){
-    vector<string> empty;
-    merge_override( tags, conf, override, true, empty );
-  }
-  addNERTags( swords, tags, conf );
-}
 
 bool NERTagger::Generate( const std::string& opt_line ){
   return tagger->GenerateTagger( opt_line );
@@ -771,52 +579,6 @@ void NERTagger::add_result( folia::Sentence *s,
 
 void NERTagger::add_result( const frog_data& fd,
 			    const vector<folia::Word*>& wv ) const {
-  folia::EntitiesLayer *el = 0;
-  folia::Entity *ner = 0;
-  size_t i = 0;
-
   folia::Sentence *s = wv[0]->sentence();
-  for ( const auto& word : fd.units ){
-    if ( word.ner_tag[0] == 'B' ){
-      if ( el == 0 ){
-	// create a layer, we need it
-	folia::KWargs args;
-	args["set"] = getTagset();
-	args["generate_id"] = s->id();
-	el = new folia::EntitiesLayer( args, s->doc() );
-	s->append(el);
-      }
-      // a new entity starts here
-      if ( ner != 0 ){
-	el->append( ner );
-      }
-      // now make new entity
-      folia::KWargs args;
-      args["set"] = getTagset();
-      args["generate_id"] = el->id();
-      args["class"] = word.ner_tag.substr(2);
-      args["confidence"] = TiCC::toString(word.ner_confidence);
-      if ( textclass != "current" ){
-	args["textclass"] = textclass;
-      }
-      ner = new folia::Entity( args, s->doc() );
-      ner->append( wv[i] );
-    }
-    else if ( word.ner_tag[0] == 'I' ){
-      // continue in an entity
-      assert( ner != 0 );
-      ner->append( wv[i] );
-    }
-    else if ( word.ner_tag[0] == '0' ){
-      if ( ner != 0 ){
-	el->append( ner );
-	ner = 0;
-      }
-    }
-    ++i;
-  }
-  if ( ner != 0 ){
-    // some leftovers
-    el->append( ner );
-  }
+  add_result( s, fd, wv );
 }

@@ -40,24 +40,14 @@ class IOBTagger: public BaseTagger {
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
   void addDeclaration( folia::Processor& ) const;
-  void Classify( const std::vector<folia::Word*>& );
   void Classify( frog_data& );
-  void post_process( const std::vector<folia::Word*>& );
   void post_process( frog_data& );
   void add_result( folia::Sentence *s,
-		   const frog_data& fd,
-		   const std::vector<folia::Word*>& wv ) const;
+   		   const frog_data& fd,
+   		   const std::vector<folia::Word*>& wv ) const;
   void add_result( const frog_data& fd,
 		   const std::vector<folia::Word*>& wv ) const;
  private:
-  void addChunk( folia::ChunkingLayer *,
-		 const std::vector<folia::Word*>&,
-		 const std::vector<double>&,
-		 const std::string&,
-		 const std::string& );
-  void addIOBTags( const std::vector<folia::Word*>&,
-		   const std::vector<std::string>&,
-		   const std::vector<double>& );
   void addTag( frog_record&,
 	       const std::string&,
 	       double );
