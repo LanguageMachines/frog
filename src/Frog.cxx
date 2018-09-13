@@ -388,6 +388,7 @@ bool parse_args( TiCC::CL_Options& Opts,
   }
 
   options.doKanon = Opts.extract("KANON");
+  options.test_API = Opts.extract("TESTAPI");
 
   options.doXMLin = false;
   if ( Opts.extract ('x', value ) ){
@@ -539,7 +540,7 @@ int main(int argc, char *argv[]) {
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
 			  "help,language:,retry,nostdout,ner-override:,"
 			  "debug:,keep-parser-files,version,threads:,"
-			  "override:,KANON");
+			  "override:,KANON,TESTAPI");
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
       // we already did show what we wanted.
@@ -635,27 +636,72 @@ int main(int argc, char *argv[]) {
 	  }
 	}
 	LOG << TiCC::Timer::now() << " Frogging " << testName << endl;
-	try {
-	  frog.FrogFile( testName, *outS, xmlOutName );
-	}
-	catch ( exception& e ){
-	  LOG << "problem frogging: " << name << endl
-			  << e.what() << endl;
-	  continue;
-	}
-	if ( !outName.empty() ){
-	  LOG << "results stored in " << outName << endl;
-	  if ( outS != &cout ){
-	    delete outS;
-	    outS = 0;
+	if ( options.test_API ){
+	  LOG << "running some extra Frog tests...." << endl;
+	  if ( testName.find( ".xml" ) != string::npos ){
+	    options.doXMLin = true;
 	  }
+	  else {
+	    options.doXMLin = false;
+	  }
+	  if ( !xmlOutName.empty() && xmlOutName.find( ".xml" ) != string::npos ){
+	    options.doXMLout = true;
+	  }
+	  LOG << "Start test: " << testName << endl;
+	  stringstream ss;
+	  ifstream is( testName );
+	  string line;
+	  while ( getline( is, line ) ){
+	    ss << line << endl;
+	  }
+	  string s1 = frog.Frogtostring_new( ss.str() );
+	  *outS << "STRING 1 " << endl;
+	  *outS << s1 << endl;
+	  if ( !options.doXMLin ){
+	    string s2 = frog.Frogtostring( ss.str() );
+	    *outS << "STRING 2 " << endl;
+	    *outS << s1 << endl;
+	    if ( s1 != s2 ){
+	      LOG << "FAILED test1 :" << testName << endl;
+	    }
+	    else {
+	      LOG << "test 1 OK!" << endl;
+	    }
+	  }
+	  string s3 = frog.Frogtostringfromfile( testName );
+	  *outS << "STRING 3 " << endl;
+	  *outS << s1 << endl;
+	  if ( s1 != s3 ){
+	    LOG << "FAILED test2 :" << testName << endl;
+	  }
+	  else {
+	    LOG << "test 2 OK!" << endl;
+	  }
+	  LOG << "Done with:" << testName << endl;
 	}
-      }
-      if ( !outputFileName.empty() ){
-	LOG << "results stored in " << outputFileName << endl;
-	if ( outS != &cout ){
-	  delete outS;
-	  outS = 0;
+	else {
+	  try {
+	    frog.FrogFile( testName, *outS, xmlOutName );
+	  }
+	  catch ( exception& e ){
+	    LOG << "problem frogging: " << name << endl
+		<< e.what() << endl;
+	    continue;
+	  }
+	  if ( !outName.empty() ){
+	    LOG << "results stored in " << outName << endl;
+	    if ( outS != &cout ){
+	      delete outS;
+	      outS = 0;
+	    }
+	  }
+	  if ( !outputFileName.empty() ){
+	    LOG << "results stored in " << outputFileName << endl;
+	    if ( outS != &cout ){
+	      delete outS;
+	      outS = 0;
+	    }
+	  }
 	}
       }
       LOG << TiCC::Timer::now() << " Frog finished" << endl;

@@ -73,7 +73,8 @@ class FrogOptions {
   bool doXMLout;
   bool doServer;
   bool doKanon;
-
+  bool test_API;
+  bool hide_timers;
   int debugFlag;
   bool interactive;
   int numThreads;
@@ -115,6 +116,7 @@ class FrogAPI {
   folia::FoliaElement *append_to_folia( folia::FoliaElement *,
 					const frog_data& ) const;
   std::string Frogtostring( const std::string& );
+  std::string Frogtostring_new( const std::string& );
   std::string Frogtostringfromfile( const std::string& );
 
  private:

@@ -116,6 +116,8 @@ FrogOptions::FrogOptions() {
   doXMLin =  false;
   doXMLout =  false;
   doKanon =  false;
+  test_API =  false;
+  hide_timers = false;
   interactive = false;
 
   maxParserTokens = 500; // 500 words in a sentence is already insane
@@ -1517,6 +1519,20 @@ string FrogAPI::Frogtostring( const string& s ){
   return ss.str();
 }
 
+string FrogAPI::Frogtostring_new( const string& s ){
+  if ( s.empty() ){
+    return s;
+  }
+  options.hide_timers = true;
+  string tmp_file = tmpnam(0);
+  ofstream os( tmp_file );
+  os << s << endl;
+  os.close();
+  stringstream ss;
+  FrogFile( tmp_file, ss, "" );
+  return ss.str();
+}
+
 string FrogAPI::Frogtostringfromfile( const string& name ){
   stringstream ss;
   FrogFile( name, ss, "" );
@@ -2171,7 +2187,7 @@ void FrogAPI::FrogFile( const string& infilename,
       LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
       delete doc1;
     }
-    if ( true ){ //!hidetimers ){
+    if ( !options.hide_timers ){
       LOG << "tokenisation took:  " << timers.tokTimer << endl;
       LOG << "CGN tagging took:   " << timers.tagTimer << endl;
       if ( options.doIOB){
