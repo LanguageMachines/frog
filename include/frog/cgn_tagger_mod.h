@@ -41,19 +41,17 @@ class CGNTagger: public BaseTagger {
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
   void addDeclaration( folia::Processor& ) const;
-  void post_process( const std::vector<folia::Word*>& );
   void post_process( frog_data& );
   std::vector<folia::Word*> add_result( folia::Sentence*,
 					const frog_data& ) const;
   void add_result( const std::vector<folia::Word*>&,
-					const frog_data& ) const;
+		   const frog_data& ) const;
   std::string getSubSet( const std::string& ,
 			 const std::string&,
 			 const std::string& ) const;
   void set_text_redundancy( const std::string& tr ){ textredundancy = tr; };
  private:
   void addTag( frog_record&, const std::string&, double );
-  void addTag( folia::Word *, const std::string&, double );
   void fillSubSetTable();
   bool fillSubSetTable( const std::string&, const std::string& );
   std::string textredundancy;

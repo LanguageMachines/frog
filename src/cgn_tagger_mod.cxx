@@ -172,37 +172,6 @@ string CGNTagger::getSubSet( const string& val, const string& head, const string
 			   "' within the constraints for '" + head + "', full class is: '" + fullclass + "'" );
 }
 
-void CGNTagger::addTag( folia::Word *word,
-			const string& inputTag,
-			double confidence ){
-  string pos_tag = inputTag;
-  string ucto_class = word->cls();
-  if ( debug > 1 ){
-    LOG << "lookup ucto class= " << ucto_class << endl;
-  }
-  auto const tt = token_tag_map.find( ucto_class );
-  if ( tt != token_tag_map.end() ){
-    if ( debug > 1 ){
-      LOG << "found translation ucto class= " << ucto_class
-	  << " to POS-Tag=" << tt->second << endl;
-    }
-    pos_tag = tt->second;
-    confidence = 1.0;
-  }
-  folia::KWargs args;
-  args["set"]  = tagset;
-  args["class"]  = pos_tag;
-  args["confidence"]= TiCC::toString(confidence);
-  if ( textclass != "current" ){
-    args["textclass"] = textclass;
-  }
-#pragma omp critical (foliaupdate)
-  {
-    word->addPosAnnotation( args );
-  }
-}
-
-
 void CGNTagger::post_process( frog_data& words ){
   for ( size_t i=0; i < _tag_result.size(); ++i ){
     addTag( words.units[i],
@@ -238,50 +207,6 @@ void CGNTagger::addTag( frog_record& fd,
     {
       fd.tag = tt->second;
       fd.tag_confidence = 1.0;
-    }
-  }
-}
-
-void CGNTagger::post_process( const vector<folia::Word*>& words ){
-  for ( size_t i=0; i < _tag_result.size(); ++i ){
-    addTag( words[i],
-	    _tag_result[i].assignedTag(),
-	    _tag_result[i].confidence() );
-  }
-  for ( auto const& word : words ){
-    folia::PosAnnotation *postag = 0;
-#pragma omp critical (foliaupdate)
-    {
-      postag = word->annotation<folia::PosAnnotation>( );
-    }
-    string cls = postag->cls();
-    vector<string> parts = TiCC::split_at_first_of( cls, "()" );
-    string head = parts[0];
-    folia::KWargs args;
-    args["class"]  = head;
-    args["set"]    = tagset;
-    folia::Feature *feat = new folia::HeadFeature( args );
-#pragma omp critical (foliaupdate)
-    {
-      postag->append( feat );
-      if ( head == "SPEC" ){
-	postag->confidence(1.0);
-      }
-    }
-    if ( parts.size() > 1
-	 && !cgnSubSets.empty() ){
-      vector<string> tagParts = TiCC::split_at( parts[1], "," );
-      for ( auto const& part : tagParts ){
-	folia::KWargs args;
-	args["set"]    = tagset;
-	args["subset"] = getSubSet( part, head, cls );
-	args["class"]  = part;
-#pragma omp critical (foliaupdate)
-	{
-	  folia::Feature *feat = new folia::Feature( args );
-	  postag->append( feat );
-	}
-      }
     }
   }
 }
