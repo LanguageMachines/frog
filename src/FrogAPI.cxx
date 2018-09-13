@@ -1945,7 +1945,9 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
   }
 }
 
-void FrogAPI::handle_one_paragraph( ostream& os, folia::Paragraph *p ){
+void FrogAPI::handle_one_paragraph( ostream& os,
+				    folia::Paragraph *p,
+				    int& sentence_done ){
   vector<folia::Word*> wv;
   string text = p->str(options.inputclass);
   cerr << "frog: " << text << endl;
@@ -1972,12 +1974,19 @@ void FrogAPI::handle_one_paragraph( ostream& os, folia::Paragraph *p ){
     timers.tokTimer.start();
     res = tokenizer->tokenize_stream( inputstream );
     timers.tokTimer.stop();
+    ++sentence_done;
   }
 }
 
 void FrogAPI::run_folia_processor( const string& infilename,
 				   ostream& output_stream,
 				   const string& xmlOutFile ){
+  if ( options.debugFlag > 0 ){
+    LOG << "folia_processor(" << infilename << "," << xmlOutFile << ")" << endl;
+  }
+  if ( xmlOutFile.empty() ){
+    options.noStdOut = false;
+  }
   folia::Processor proc( infilename );
   if ( !options.doTok ){
     proc.declare( folia::AnnotationType::TOKEN, "passthru",
@@ -2031,6 +2040,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
   if ( options.doParse ){
     myParser->addDeclaration( proc );
   }
+  int sentence_done = 0;
   folia::FoliaElement *p = 0;
   while ( (p = proc.get_node( "s|p" ) ) ){
     if ( p->xmltag() == "s" ){
@@ -2038,6 +2048,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
 	LOG << "found sentence A " << p << endl;
       }
       handle_one_sentence( output_stream, dynamic_cast<folia::Sentence*>(p) );
+      ++sentence_done;
       if  (options.debugFlag > 0){
 	LOG << "after handle_one_sentence() A" << endl;
       }
@@ -2046,7 +2057,9 @@ void FrogAPI::run_folia_processor( const string& infilename,
       vector<folia::Sentence*> sv = p->select<folia::Sentence>();
       if ( sv.empty() ){
 	cerr << " No sentences!, take paragraph text" << endl;
-	handle_one_paragraph( output_stream, dynamic_cast<folia::Paragraph*>(p) );
+	handle_one_paragraph( output_stream,
+			      dynamic_cast<folia::Paragraph*>(p),
+			      sentence_done );
       }
       else {
 	if  (options.debugFlag > 0){
@@ -2057,6 +2070,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
 	    LOG << "found sentence B " << s << endl;
 	  }
 	  handle_one_sentence( output_stream, s );
+	  ++sentence_done;
 	  if  (options.debugFlag > 0){
 	    LOG << "after handle_one_sentence() B" << endl;
 	  }
@@ -2068,6 +2082,11 @@ void FrogAPI::run_folia_processor( const string& infilename,
 	LOG << "looping for more ..." << endl;
       }
     }
+  }
+  if ( sentence_done == 0 ){
+    LOG << "document contains no sentences or paragraphs!" << endl;
+    LOG << "NO result!" << endl;
+    return;
   }
   if ( !xmlOutFile.empty() ){
     proc.save( xmlOutFile, options.doKanon );

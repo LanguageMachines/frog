@@ -146,7 +146,9 @@ class FrogAPI {
   void showResults( std::ostream&, folia::Document& ) const;
   void show_record( std::ostream&, const frog_record& ) const;
   void showResults( std::ostream&, const frog_data& ) const;
-  void handle_one_paragraph( std::ostream&, folia::Paragraph * );
+  void handle_one_paragraph( std::ostream&,
+			     folia::Paragraph*,
+			     int& );
   void handle_one_sentence( std::ostream&, folia::Sentence * );
   void append_to_sentence( folia::Sentence *, const frog_data& ) const;
   void append_to_words( const std::vector<folia::Word*>&,
