@@ -116,7 +116,6 @@ class FrogAPI {
   folia::FoliaElement *append_to_folia( folia::FoliaElement *,
 					const frog_data& ) const;
   std::string Frogtostring( const std::string& );
-  std::string Frogtostring_new( const std::string& );
   std::string Frogtostringfromfile( const std::string& );
 
  private:

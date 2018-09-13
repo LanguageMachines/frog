@@ -1506,20 +1506,11 @@ void FrogAPI::showResults( ostream& os,
 }
 
 string FrogAPI::Frogtostring( const string& s ){
-  folia::Document *doc = tokenizer->tokenizestring( s );
-  stringstream ss;
-  FrogDoc( *doc, true );
-  if ( options.doXMLout ){
-    doc->save( ss, options.doKanon );
-  }
-  else {
-    showResults( ss, *doc );
-  }
-  delete doc;
-  return ss.str();
-}
-
-string FrogAPI::Frogtostring_new( const string& s ){
+  /// Parse a string, Frog it and return the result as a string.
+  /// @s: an UTF8 decoded string. May be multilined.
+  /// @return the results of frogging. Depending of the current frog settings
+  /// the input can be interpreted as XML, an the ouput will be XML or
+  /// tab separated
   if ( s.empty() ){
     return s;
   }
@@ -1534,6 +1525,11 @@ string FrogAPI::Frogtostring_new( const string& s ){
 }
 
 string FrogAPI::Frogtostringfromfile( const string& name ){
+  /// Parse a file, Frog it and return the result as a string.
+  /// @s: an UTF8 decoded string. May be multilined.
+  /// @return the results of frogging. Depending of the current frog settings
+  /// the inputfile can be interpreted as XML, an the ouput will be XML or
+  /// tab separated
   stringstream ss;
   FrogFile( name, ss, "" );
   return ss.str();

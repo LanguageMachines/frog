@@ -654,28 +654,17 @@ int main(int argc, char *argv[]) {
 	  while ( getline( is, line ) ){
 	    ss << line << endl;
 	  }
-	  string s1 = frog.Frogtostring_new( ss.str() );
+	  string s1 = frog.Frogtostring( ss.str() );
 	  *outS << "STRING 1 " << endl;
 	  *outS << s1 << endl;
-	  if ( !options.doXMLin ){
-	    string s2 = frog.Frogtostring( ss.str() );
-	    *outS << "STRING 2 " << endl;
-	    *outS << s1 << endl;
-	    if ( s1 != s2 ){
-	      LOG << "FAILED test1 :" << testName << endl;
-	    }
-	    else {
-	      LOG << "test 1 OK!" << endl;
-	    }
-	  }
-	  string s3 = frog.Frogtostringfromfile( testName );
-	  *outS << "STRING 3 " << endl;
-	  *outS << s1 << endl;
-	  if ( s1 != s3 ){
-	    LOG << "FAILED test2 :" << testName << endl;
+	  string s2 = frog.Frogtostringfromfile( testName );
+	  *outS << "STRING 2 " << endl;
+	  *outS << s2 << endl;
+	  if ( s1 != s2 ){
+	    LOG << "FAILED test :" << testName << endl;
 	  }
 	  else {
-	    LOG << "test 2 OK!" << endl;
+	    LOG << "test OK!" << endl;
 	  }
 	  LOG << "Done with:" << testName << endl;
 	}
