@@ -1263,7 +1263,6 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
 void FrogAPI::handle_one_paragraph( ostream& os,
 				    folia::Paragraph *p,
 				    int& sentence_done ){
-  vector<folia::Word*> wv;
   string text = p->str(options.inputclass);
   cerr << "frog: " << text << endl;
   istringstream inputstream(text,istringstream::in);

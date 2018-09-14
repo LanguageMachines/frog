@@ -65,9 +65,9 @@ ostream& operator<<( ostream& os, const frog_record& fd ){
 	for ( const auto nm : fd.deep_morphs ){
 	  os << "[" << nm << "]";
 	  break; // first alternative only!
-	  if ( &nm != &fd.deep_morphs.back() ){
-	    os << "/";
-	  }
+	  // if ( &nm != &fd.deep_morphs.back() ){
+	  //   os << "/";
+	  // }
 	}
       }
     }
@@ -82,9 +82,9 @@ ostream& operator<<( ostream& os, const frog_record& fd ){
 	  os << m;
 	}
 	break; // first alternative only!
-	if ( &nm != &fd.morphs.back() ){
-	  os << "/";
-	}
+	// if ( &nm != &fd.morphs.back() ){
+	//   os << "/";
+	// }
       }
     }
   }
@@ -133,7 +133,6 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
 
 void frog_data::resolve_mwus(){
   mw_units.clear();
-  size_t mw_cnt = 0;
   for ( size_t pos=0; pos < units.size(); ++pos ){
     if ( mwus.find( pos ) == mwus.end() ){
       mw_units.push_back( units[pos] );
@@ -144,7 +143,6 @@ void frog_data::resolve_mwus(){
       mw_units.push_back( merged );
       pos = mwus[pos];
     }
-    ++mw_cnt;
   }
 }
 
