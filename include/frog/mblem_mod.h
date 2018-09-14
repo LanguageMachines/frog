@@ -58,25 +58,23 @@ class Mblem {
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
   void addDeclaration( folia::Processor& ) const;
-  void Classify( folia::Word * );
   void Classify( frog_record& );
   void Classify( const icu::UnicodeString& );
   std::vector<std::pair<std::string,std::string> > getResult() const;
+  std::string getTagset() const { return tagset; };
+  std::string version() const { return _version; };
   void filterTag( const std::string&  );
   void makeUnique();
-  std::string getTagset() const { return tagset; };
-  bool fill_ts_map( const std::string& );
-  bool fill_eq_set( const std::string& );
-  std::string version() const { return _version; };
   void add_lemmas( const std::vector<folia::Word*>&,
 		   const frog_data& ) const;
  private:
   void read_transtable( const std::string& );
   void create_MBlem_defaults();
   bool readsettings( const std::string& dir, const std::string& fname );
+  bool fill_ts_map( const std::string& );
+  bool fill_eq_set( const std::string& );
   void addLemma( folia::Word *, const std::string&) ;
   std::string make_instance( const icu::UnicodeString& in );
-  void getFoLiAResult( folia::Word *, const icu::UnicodeString& );
   Timbl::TimblAPI *myLex;
   std::string punctuation;
   size_t history;

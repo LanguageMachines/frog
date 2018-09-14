@@ -274,21 +274,6 @@ void Mblem::makeUnique( ){
   }
 }
 
-void Mblem::getFoLiAResult( folia::Word *word, const icu::UnicodeString& uWord ){
-  if ( mblemResult.empty() ){
-    // just return the word as a lemma
-    string result = TiCC::UnicodeToUTF8( uWord );
-    addLemma( word, result );
-  }
-  else {
-    for ( auto const& it : mblemResult ){
-      string result = it.getLemma();
-      addLemma( word, result );
-    }
-  }
-}
-
-
 void Mblem::addDeclaration( folia::Document& doc ) const {
   doc.declare( folia::AnnotationType::LEMMA,
 	       tagset,
@@ -301,66 +286,6 @@ void Mblem::addDeclaration( folia::Processor& proc ) const {
 		tagset,
 		"annotator='frog-mblem-" + _version
 		+ "', annotatortype='auto', datetime='" + getTime() + "'");
-}
-
-void Mblem::Classify( folia::Word *sword ){
-  if ( sword->isinstance( folia::PlaceHolder_t ) )
-    return;
-  icu::UnicodeString uword;
-  string pos;
-  string token_class;
-#pragma omp critical (foliaupdate)
-  {
-    uword = sword->text( textclass );
-    pos = sword->pos();
-    string txtcls = sword->textclass();
-    if ( txtcls == textclass ){
-      // so only use the word class if the textclass of the word
-      // matches the wanted text
-      token_class = sword->cls();
-    }
-  }
-  if (debug > 1 ){
-    LOG << "Classify " << uword << "(" << pos << ") ["
-	<< token_class << "]" << endl;
-  }
-  if ( filter )
-    uword = filter->filter( uword );
-
-  if ( token_class == "ABBREVIATION" ){
-    // We dont handle ABBREVIATION's so just take the word as such
-    string word = TiCC::UnicodeToUTF8(uword);
-    addLemma( sword, word );
-    return;
-  }
-  auto const& it1 = token_strip_map.find( pos );
-  if ( it1 != token_strip_map.end() ){
-    // some tag/tokenizer_class combinations are special
-    // we have to strip a few letters to get a lemma
-    auto const& it2 = it1->second.find( token_class );
-    if ( it2 != it1->second.end() ){
-      icu::UnicodeString uword2 = icu::UnicodeString( uword, 0, uword.length() - it2->second );
-      if ( uword2.isEmpty() ){
-	uword2 = uword;
-      }
-      string word = TiCC::UnicodeToUTF8(uword2);
-      addLemma( sword, word );
-      return;
-    }
-  }
-  if ( one_one_tags.find(pos) != one_one_tags.end() ){
-    // some tags are just taken as such
-    string word = TiCC::UnicodeToUTF8(uword);
-    addLemma( sword, word );
-    return;
-  }
-  if ( !keep_case ){
-    uword.toLower();
-  }
-  Classify( uword );
-  filterTag( pos );
-  makeUnique();
-  getFoLiAResult( sword, uword );
 }
 
 void Mblem::Classify( frog_record& fd ){
