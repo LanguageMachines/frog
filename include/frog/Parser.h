@@ -62,9 +62,7 @@ class Parser {
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
   void addDeclaration( folia::Processor& ) const;
-  void Parse( const std::vector<folia::Word *>&, TimerBlock& );
   void Parse( frog_data&, TimerBlock& );
-  parseData prepareParse( const std::vector<folia::Word *>& );
   parseData prepareParse( frog_data& );
   void add_result( folia::Sentence *s,
 		   const frog_data& fd,
