@@ -57,7 +57,7 @@ class Mbma {
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;
   void addDeclaration( folia::Processor& ) const;
-  void Classify( folia::Word * );
+  //  void Classify( folia::Word * );
   void Classify( frog_record& );
   void Classify( const icu::UnicodeString& );
   void filterHeadTag( const std::string& );
@@ -83,18 +83,14 @@ class Mbma {
   bool readsettings( const std::string&, const std::string& );
   void fillMaps();
   void init_cgn( const std::string&, const std::string& );
-  void getFoLiAResult( folia::Word *, const icu::UnicodeString& ) const;
+  //  void getFoLiAResult( folia::Word *, const icu::UnicodeString& ) const;
   void getResult( frog_record&, const icu::UnicodeString&, const std::string& ) const;
   std::vector<std::string> make_instances( const icu::UnicodeString& word );
   CLEX::Type getFinalTag( const std::list<BaseBracket*>& );
   int debugFlag;
-  void addMorph( folia::MorphologyLayer *,
-		 const std::vector<std::string>& ) const;
-  void addMorph( folia::Word *, const std::vector<std::string>& ) const;
-  void add_morph( frog_record&, const std::vector<std::string>& ) const;
-  void addBracketMorph( folia::Word *,
-			const std::string&,
-			const std::string& ) const;
+  void add_morphemes( folia::MorphologyLayer *,
+		      const std::vector<std::string>& ) const;
+  void store_morphemes( frog_record&, const std::vector<std::string>& ) const;
   void add_brackets( frog_record&,
 		     const std::string&,
 		     const std::string&,

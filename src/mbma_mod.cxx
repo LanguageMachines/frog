@@ -357,103 +357,6 @@ vector<Rule*> Mbma::execute( const icu::UnicodeString& word,
   return accepted;
 }
 
-void Mbma::addMorph( folia::Word *word,
-		     const vector<string>& morphs ) const {
-  folia::KWargs args;
-  args["set"] = mbma_tagset;
-  folia::MorphologyLayer *ml;
-#pragma omp critical (foliaupdate)
-  {
-    try {
-      ml = word->addMorphologyLayer( args );
-    }
-    catch( const exception& e ){
-      LOG << e.what() << " addMorph failed." << endl;
-      throw;
-    }
-  }
-  addMorph( ml, morphs );
-}
-
-void Mbma::addBracketMorph( folia::Word *word,
-			    const string& _wrd,
-			    const string& tag ) const {
-  if (debugFlag > 1){
-    LOG << "addBracketMorph(" << _wrd << "," << tag << ")" << endl;
-  }
-  string wrd = _wrd;
-  string celex_tag = tag;
-  string head = tag;
-  if ( head == "LET" || head == "SPEC" ){
-    head.clear();
-  }
-  else if ( head == "X" ) {
-    // unanalysed, so trust the TAGGER
-#pragma omp critical (foliaupdate)
-    {
-      const auto pos = word->annotation<folia::PosAnnotation>( pos_tagset );
-      head = pos->feat("head");
-    }
-    if (debugFlag > 1){
-      LOG << "head was X, tagger gives :" << head << endl;
-    }
-    const auto tagIt = TAGconv.find( head );
-    if ( tagIt == TAGconv.end() ) {
-      // this should never happen
-      throw folia::ValueError( "0 unknown head feature '" + head + "'" );
-    }
-    celex_tag = tagIt->second;
-    head = CLEX::get_tDescr(CLEX::toCLEX(tagIt->second));
-    if (debugFlag > 1){
-      LOG << "replaced X by: " << head << endl;
-    }
-  }
-  if ( head != "SPEC" ){
-    UnicodeString uword = TiCC::UnicodeFromUTF8(wrd);
-    uword.toLower();
-    wrd = TiCC::UnicodeToUTF8(uword);
-  }
-  folia::KWargs args;
-  args["set"] = mbma_tagset;
-  folia::MorphologyLayer *ml;
-#pragma omp critical (foliaupdate)
-  {
-    try {
-      ml = word->addMorphologyLayer( args );
-    }
-    catch( const exception& e ){
-      LOG << e.what() << " addBracketMorph failed." << endl;
-      throw;
-    }
-  }
-  args["class"] = "stem";
-  folia::Morpheme *result = 0;
-#pragma omp critical (foliaupdate)
-  {
-    result = new folia::Morpheme( args, word->doc() );
-    result->settext( wrd, textclass );
-  }
-  args.clear();
-  args["subset"] = "structure";
-  args["class"]  = "[" + wrd + "]" + head;
-#pragma omp critical (foliaupdate)
-  {
-    folia::Feature *feat = new folia::Feature( args );
-    result->append( feat );
-  }
-  args.clear();
-  args["set"] = clex_tagset;
-  args["class"] = celex_tag;
-#pragma omp critical (foliaupdate)
-  {
-    result->addPosAnnotation( args );
-  }
-#pragma omp critical (foliaupdate)
-  {
-    ml->append( result );
-  }
-}
-
 void Mbma::addBracketMorph( folia::Word *word,
 			    const string& orig_word,
 			    const BaseBracket *brackets ) const {
@@ -498,9 +401,9 @@ void Mbma::addBracketMorph( folia::Word *word,
   }
 }
 
-void Mbma::addMorph( folia::MorphologyLayer *ml,
-		     const vector<string>& morphs ) const {
-  for ( const auto& mor : morphs ){
+void Mbma::add_morphemes( folia::MorphologyLayer *ml,
+			  const vector<string>& morphemes ) const {
+  for ( const auto& mor : morphemes ){
     folia::KWargs args;
     args["set"] = mbma_tagset;
 #pragma omp critical (foliaupdate)
@@ -732,35 +635,6 @@ void Mbma::assign_compounds(){
   }
 }
 
-void Mbma::getFoLiAResult( folia::Word *fword,
-			   const icu::UnicodeString& uword ) const {
-  if ( analysis.size() == 0 ){
-    // fallback option: use the word and pretend it's a morpheme ;-)
-    if ( debugFlag > 1){
-      LOG << "no matches found, use the word instead: "
-		    << uword << endl;
-    }
-    if ( doDeepMorph ){
-      addBracketMorph( fword, TiCC::UnicodeToUTF8(uword), "X" );
-    }
-    else {
-      vector<string> tmp;
-      tmp.push_back( TiCC::UnicodeToUTF8(uword) );
-      addMorph( fword, tmp );
-    }
-  }
-  else {
-    for ( auto const& sit : analysis ){
-      if ( doDeepMorph ){
-	addBracketMorph( fword, TiCC::UnicodeToUTF8(uword), sit->brackets );
-      }
-      else {
-	addMorph( fword, sit->extract_morphemes() );
-      }
-    }
-  }
-}
-
 void Mbma::addDeclaration( folia::Document& doc ) const {
   doc.declare( folia::AnnotationType::MORPHOLOGICAL, mbma_tagset,
 	       "annotator='frog-mbma-" + _version +
@@ -783,87 +657,19 @@ void Mbma::addDeclaration( folia::Processor& proc ) const {
   }
 }
 
-void Mbma::Classify( folia::Word* sword ){
-  if ( sword->isinstance(folia::PlaceHolder_t) ){
-    return;
-  }
-  icu::UnicodeString uWord;
-  folia::PosAnnotation *pos;
-  string head;
-  string token_class;
-#pragma omp critical (foliaupdate)
-  {
-    uWord = sword->text( textclass );
-    pos = sword->annotation<folia::PosAnnotation>( pos_tagset );
-    head = pos->feat("head");
-    string txtcls = sword->textclass();
-    if ( txtcls == textclass ){
-      // so only use the word class is the textclass of the word
-      // matches the wanted text
-      token_class = sword->cls();
-    }
-  }
-  if (debugFlag >1 ){
-    LOG << "Classify " << uWord << "(" << pos << ") ["
-		  << token_class << "]" << endl;
-  }
-  if ( filter ){
-    uWord = filter->filter( uWord );
-  }
-  string word_s = TiCC::UnicodeToUTF8( uWord );
-  vector<string> parts = TiCC::split( word_s );
-  word_s.clear();
-  for ( const auto& p : parts ){
-    word_s += p;
-  }
-  uWord = TiCC::UnicodeFromUTF8( word_s );
-  if ( head == "LET" || head == "SPEC" || token_class == "ABBREVIATION" ){
-    // take over the letter/word 'as-is'.
-    //  also ABBREVIATION's aren't handled bij mbma-rules
-    string word = TiCC::UnicodeToUTF8( uWord );
-    if ( doDeepMorph ){
-      addBracketMorph( sword, word, head );
-    }
-    else {
-      vector<string> tmp;
-      tmp.push_back( word );
-      addMorph( sword, tmp );
-    }
-  }
-  else {
-    icu::UnicodeString lWord = uWord;
-    if ( head != "SPEC" ){
-      lWord.toLower();
-    }
-    Classify( lWord );
-    vector<string> featVals;
-#pragma omp critical (foliaupdate)
-    {
-      vector<folia::Feature*> feats = pos->select<folia::Feature>();
-      featVals.reserve( feats.size() );
-      for ( const auto& feat : feats )
-	featVals.push_back( feat->cls() );
-    }
-    filterHeadTag( head );
-    filterSubTags( featVals );
-    assign_compounds();
-    getFoLiAResult( sword, lWord );
-  }
-}
-
-void Mbma::add_morph( frog_record& fd,
-		      const vector<string>& morphs ) const {
+void Mbma::store_morphemes( frog_record& fd,
+			    const vector<string>& morphemes ) const {
   vector<string> adapted;
-  for ( const auto& m : morphs ){
+  for ( const auto& m : morphemes ){
     adapted.push_back( "[" + m + "]" );
-  }
-  if ( fd.morph_string.empty() ){
-    for ( const auto& a : adapted ){
-      fd.morph_string += a;
-    }
   }
 #pragma omp critical (dataupdate)
   {
+    if ( fd.morph_string.empty() ){
+      for ( const auto& a : adapted ){
+	fd.morph_string += a;
+      }
+    }
     fd.morphs.push_back( adapted );
   }
 }
@@ -956,7 +762,7 @@ void Mbma::getResult( frog_record& fd,
     else {
       vector<string> tmp;
       tmp.push_back( word );
-      add_morph( fd, tmp );
+      store_morphemes( fd, tmp );
     }
   }
   else {
@@ -980,7 +786,7 @@ void Mbma::getResult( frog_record& fd,
 	add_brackets( fd, TiCC::UnicodeToUTF8(uword), sit->brackets );
       }
       else {
-	add_morph( fd, sit->extract_morphemes() );
+	store_morphemes( fd, sit->extract_morphemes() );
       }
     }
   }
@@ -1024,7 +830,7 @@ void Mbma::Classify( frog_record& fd ){
     else {
       vector<string> tmp;
       tmp.push_back( word );
-      add_morph( fd, tmp );
+      store_morphemes( fd, tmp );
     }
   }
   else {
