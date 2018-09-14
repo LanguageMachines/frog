@@ -43,7 +43,6 @@
 class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );
  public:
-  mwuAna( folia::Word *, const std::string&, const std::string&, size_t );
   mwuAna( const std::string&, const std::string&, const std::string&, size_t );
   virtual ~mwuAna() {};
 
@@ -54,10 +53,6 @@ class mwuAna {
   }
 
   bool isSpec(){ return spec; };
-  folia::EntitiesLayer *addEntity( const std::string&,
-				   const std::string&,
-				   folia::Sentence *,
-				   folia::EntitiesLayer * );
 
   size_t mwu_start;
   size_t mwu_end;
@@ -80,9 +75,7 @@ class Mwu {
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
   void addDeclaration( folia::Processor& ) const;
-  void Classify( const std::vector<folia::Word *>& );
   void Classify( frog_data& );
-  void add( folia::Word *, size_t );
   void add( frog_record&, size_t );
   void add_result( folia::Sentence *,
 		   const frog_data&,
