@@ -1292,6 +1292,45 @@ void FrogAPI::handle_one_paragraph( ostream& os,
   }
 }
 
+void FrogAPI::handle_one_thing( ostream& os,
+				folia::FoliaElement *e,
+				int& sentence_done ){
+  string text = e->str(options.inputclass);
+  cerr << "frog: " << text << endl;
+  istringstream inputstream(text,istringstream::in);
+  timers.tokTimer.start();
+  frog_data res = tokenizer->tokenize_stream( inputstream );
+  timers.tokTimer.stop();
+  while ( res.size() > 0 ){
+    frog_sentence( res );
+    if ( !options.noStdOut ){
+      showResults( os, res );
+    }
+    if ( e->xmltag() == "w" ){
+    }
+    else if ( e->xmltag() == "s" ){
+      if  (options.debugFlag > 0){
+	LOG << "before append_to_sentence() B" << endl;
+      }
+      append_to_sentence( dynamic_cast<folia::Sentence*>(e), res );
+    }
+    else {
+      folia::KWargs args;
+      args["generate_id"] = e->id();
+      folia::Sentence *s = new folia::Sentence( args, e->doc() );
+      e->append( s );
+      if  (options.debugFlag > 0){
+	LOG << "before append_to_sentence() B" << endl;
+      }
+      append_to_sentence( s, res );
+    }
+    timers.tokTimer.start();
+    res = tokenizer->tokenize_stream( inputstream );
+    timers.tokTimer.stop();
+    ++sentence_done;
+  }
+}
+
 void FrogAPI::run_folia_processor( const string& infilename,
 				   ostream& output_stream,
 				   const string& xmlOutFile ){
@@ -1301,7 +1340,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
   if ( xmlOutFile.empty() ){
     options.noStdOut = false;
   }
-  folia::Processor proc( infilename );
+  folia::TextProcessor proc( infilename );
   if ( !options.doTok ){
     proc.declare( folia::AnnotationType::TOKEN, "passthru",
 		  "annotator='ucto', annotatortype='auto', datetime='now()'" );
@@ -1334,7 +1373,9 @@ void FrogAPI::run_folia_processor( const string& infilename,
       proc.set_metadata( "language", options.language );
     }
   }
-  //      proc.set_debug( true );
+  if  (options.debugFlag > 8){
+    proc.set_debug( true );
+  }
   myCGNTagger->addDeclaration( proc );
   if ( options.doLemma ){
     myMblem->addDeclaration( proc );
@@ -1354,9 +1395,10 @@ void FrogAPI::run_folia_processor( const string& infilename,
   if ( options.doParse ){
     myParser->addDeclaration( proc );
   }
+  proc.setup( options.inputclass );
   int sentence_done = 0;
   folia::FoliaElement *p = 0;
-  while ( (p = proc.get_node( "s|p" ) ) ){
+  while ( (p = proc.next_text_parent() ) ){
     if ( p->xmltag() == "s" ){
       if  (options.debugFlag > 0){
 	LOG << "found sentence A " << p << endl;
@@ -1367,29 +1409,15 @@ void FrogAPI::run_folia_processor( const string& infilename,
 	LOG << "after handle_one_sentence() A" << endl;
       }
     }
+    else if ( p->xmltag() == "p" ){
+      handle_one_paragraph( output_stream,
+			    dynamic_cast<folia::Paragraph*>(p),
+			    sentence_done );
+    }
     else {
-      vector<folia::Sentence*> sv = p->select<folia::Sentence>();
-      if ( sv.empty() ){
-	cerr << " No sentences!, take paragraph text" << endl;
-	handle_one_paragraph( output_stream,
-			      dynamic_cast<folia::Paragraph*>(p),
-			      sentence_done );
-      }
-      else {
-	if  (options.debugFlag > 0){
-	  LOG << "found paragraph " << p << "   with " << sv.size() << " sentences " << endl;
-	}
-	for ( const auto& s : sv ){
-	  if  (options.debugFlag > 0){
-	    LOG << "found sentence B " << s << endl;
-	  }
-	  handle_one_sentence( output_stream, s );
-	  ++sentence_done;
-	  if  (options.debugFlag > 0){
-	    LOG << "after handle_one_sentence() B" << endl;
-	  }
-	}
-      }
+      handle_one_thing( output_stream,
+			p,
+			sentence_done );
     }
     if ( proc.next() ){
       if  (options.debugFlag > 0){
