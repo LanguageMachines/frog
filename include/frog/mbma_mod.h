@@ -91,16 +91,16 @@ class Mbma {
   void add_morphemes( folia::MorphologyLayer *,
 		      const std::vector<std::string>& ) const;
   void store_morphemes( frog_record&, const std::vector<std::string>& ) const;
-  void add_brackets( frog_record&,
-		     const std::string&,
-		     const std::string&,
-		     const std::string& ) const;
+  void store_brackets( frog_record&,
+		       const std::string&,
+		       const std::string&,
+		       bool=false ) const;
   void addBracketMorph( folia::Word *,
 			const std::string&,
 			const BaseBracket * ) const;
-  void add_brackets( frog_record&,
-		     const std::string&,
-		     const BracketNest * ) const;
+  void store_brackets( frog_record&,
+		       const std::string&,
+		       const BracketNest * ) const;
   std::string MTreeFilename;
   Timbl::TimblAPI *MTree;
   std::vector<Rule*> analysis;

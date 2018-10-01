@@ -674,18 +674,15 @@ void Mbma::store_morphemes( frog_record& fd,
   }
 }
 
-void Mbma::add_brackets( frog_record& fd,
-			 const string& wrd,
-			 const string& pos_tag,
-			 const string& c_tag ) const {
+void Mbma::store_brackets( frog_record& fd,
+			   const string& wrd,
+			   const string& head,
+			   bool unanalysed ) const {
   if (debugFlag > 1){
-    LOG << "add_brackets(" << wrd << "," << pos_tag << ")" << endl;
+    LOG << "store_brackets(" << wrd << "," << head << ")" << endl;
   }
-  string head = c_tag;
-  string clex_tag = c_tag;
-  if ( head == "X" ) {
+  if ( unanalysed  ) {
     // unanalysed, so trust the TAGGER
-    head = pos_tag;
     if (debugFlag > 1){
       LOG << "head was X, tagger gives :" << head << endl;
     }
@@ -694,8 +691,8 @@ void Mbma::add_brackets( frog_record& fd,
       // this should never happen
       throw logic_error( "2 unknown head feature '" + head + "'" );
     }
-    clex_tag = tagIt->second;
-    head = CLEX::get_tDescr(CLEX::toCLEX(clex_tag));
+    string clex_tag = tagIt->second;
+    string head_tag = CLEX::get_tDescr(CLEX::toCLEX(clex_tag));
     if (debugFlag > 1){
       LOG << "replaced X by: " << head << endl;
     }
@@ -704,12 +701,12 @@ void Mbma::add_brackets( frog_record& fd,
 					 debugFlag,
 					 *mbmaLog );
     if ( fd.deep_morph_string.empty() ){
-      fd.deep_morph_string = "[" + wrd + "]" + head;
+      fd.deep_morph_string = "[" + wrd + "]" + head_tag;
     }
     fd.deep_morphs.push_back( leaf );
   }
   else if ( head == "LET" || head == "SPEC" ){
-    BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(clex_tag),
+    BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(head),
 					 TiCC::UnicodeFromUTF8(wrd),
 					 debugFlag,
 					 *mbmaLog );
@@ -720,24 +717,24 @@ void Mbma::add_brackets( frog_record& fd,
     fd.deep_morphs.push_back( leaf );
   }
   else {
-    BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(clex_tag),
+    BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(head),
 					 TiCC::UnicodeFromUTF8(wrd),
 					 debugFlag,
 					 *mbmaLog );
     leaf->set_status( STEM );
     if ( fd.deep_morph_string.empty() ){
-      fd.deep_morph_string = "[" + wrd + "]" + c_tag;
+      fd.deep_morph_string = "[" + wrd + "]" + head;
     }
     fd.deep_morphs.push_back( leaf );
   }
   return;
 }
 
-void Mbma::add_brackets( frog_record& fd,
-			 const string& orig_word,
-			 const BracketNest *brackets ) const {
+void Mbma::store_brackets( frog_record& fd,
+			   const string& orig_word,
+			   const BracketNest *brackets ) const {
   if (debugFlag > 1){
-    LOG << "add_brackets(" << fd.word << "," << orig_word << "," << brackets << ")" << endl;
+    LOG << "store_brackets(" << fd.word << "," << orig_word << "," << brackets << ")" << endl;
   }
 #pragma omp critical (dataupdate)
   {
@@ -757,7 +754,7 @@ void Mbma::getResult( frog_record& fd,
     }
     string word = TiCC::UnicodeToUTF8(uword);
     if ( doDeepMorph ){
-      add_brackets( fd, word, head, "X" );
+      store_brackets( fd, word, head, true );
     }
     else {
       vector<string> tmp;
@@ -783,7 +780,7 @@ void Mbma::getResult( frog_record& fd,
     }
     for ( auto const& sit : analysis ){
       if ( doDeepMorph ){
-	add_brackets( fd, TiCC::UnicodeToUTF8(uword), sit->brackets );
+	store_brackets( fd, TiCC::UnicodeToUTF8(uword), sit->brackets );
       }
       else {
 	store_morphemes( fd, sit->extract_morphemes() );
@@ -825,7 +822,7 @@ void Mbma::Classify( frog_record& fd ){
     string word = TiCC::UnicodeToUTF8( uWord );
     fd.clean_word = word;
     if ( doDeepMorph ){
-      add_brackets( fd, word, head, head );
+      store_brackets( fd, word, head );
     }
     else {
       vector<string> tmp;
