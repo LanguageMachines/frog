@@ -326,9 +326,9 @@ void Mwu::Classify(){
   return;
 } // //Classify
 
-void Mwu::add_result( folia::Sentence *s,
-		      const frog_data& fd,
+void Mwu::add_result( const frog_data& fd,
 		      const vector<folia::Word*>& wv ) const {
+  folia::Sentence *s = wv[0]->sentence();
   folia::KWargs args;
   args["generate_id"] = s->id();
   args["set"] = getTagset();
@@ -345,10 +345,4 @@ void Mwu::add_result( folia::Sentence *s,
       e->append( wv[pos] );
     }
   }
-}
-
-void Mwu::add_result( const frog_data& fd,
-		      const vector<folia::Word*>& wv ) const {
-  folia::Sentence *s = wv[0]->sentence();
-  add_result( s, fd, wv );
 }

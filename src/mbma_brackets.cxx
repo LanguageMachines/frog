@@ -1344,57 +1344,6 @@ CLEX::Type BracketNest::getFinalTag() {
 	break;
       }
     }
-#ifdef NO_WAY
-    else if ( !(*it)->inflection().empty()
-	      && (*it)->morpheme().isEmpty() ){
-      string inf = (*it)->inflection();
-      // it is an inflection tag
-      LOG << " inflection: >" << inf << "<" << endl;
-      // given the specific selections of certain inflections,
-      //    select a tag!
-      CLEX::Type new_tag = CLEX::UNASS;
-      for ( size_t i=0; i < inf.size(); ++i ){
-	new_tag = CLEX::select_tag( inf[i] );
-	if ( new_tag != CLEX::UNASS ){
-	  LOG << inf[i] << " selects " << new_tag << endl;
-	  break;
-	}
-      }
-      if ( new_tag != CLEX::UNASS ) {
-	// apply the change. Remember, the idea is that an inflection is
-	// far more certain of the tag of its predecessing morpheme than
-	// the morpheme itself.
-	// This is not always the case, but it works
-	//
-	// go back to the previous morpheme
-	auto pit = it;
-	for( ++pit; pit != parts.rend(); ++pit ){
-	  CLEX::Type old_tag = (*pit)->tag();
-	  LOG << "een terug is " << *pit << endl;
-	  if ( CLEX::isBasicClass( old_tag ) &&
-	       old_tag != CLEX::P ){
-	    // only nodes that can get inflected (and unanalysed too)
-	    // now see if we can replace this class for a better one
-	    if ( old_tag == CLEX::PN && new_tag == CLEX::N ){
-	      LOG << "Don't replace PN by N" << endl;
-	    }
-	    else {
-	      LOG << " replace " << old_tag
-		  << " by " << new_tag << endl;
-	      (*pit)->setTag( new_tag );
-	      cls = new_tag;
-	    }
-	    return new_tag;
-	  }
-	}
-      }
-      else {
-	// this realy shouldn't happen. probably an error in the data!?
-	LOG << "inflection: " << inf
-	    << " Problem: DOESN'T select a tag" << endl;
-      }
-    }
-#endif
     ++it;
   }
   //  LOG << "final tag = " << result_cls << endl;

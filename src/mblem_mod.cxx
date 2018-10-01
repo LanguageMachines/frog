@@ -197,26 +197,6 @@ string Mblem::make_instance( const icu::UnicodeString& in ) {
   return result;
 }
 
-void Mblem::addLemma( folia::Word *word, const string& cls ){
-  folia::KWargs args;
-  args["set"]=tagset;
-  args["class"]=cls;
-  if ( textclass != "current" ){
-    args["textclass"] = textclass;
-  }
-
-#pragma omp critical (foliaupdate)
-  {
-    try {
-      word->addLemmaAnnotation( args );
-    }
-    catch( const exception& e ){
-      LOG << e.what() << " addLemma failed." << endl;
-      throw;
-    }
-  }
-}
-
 void Mblem::filterTag( const string& postag ){
   auto it = mblemResult.begin();
   while( it != mblemResult.end() ){

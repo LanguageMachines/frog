@@ -151,9 +151,9 @@ void IOBTagger::addTag( frog_record& fd,
   }
 }
 
-void IOBTagger::add_result( folia::Sentence* s,
-			    const frog_data& fd,
+void IOBTagger::add_result( const frog_data& fd,
 			    const vector<folia::Word*>& wv ) const {
+  folia::Sentence* s = wv[0]->sentence();
   folia::ChunkingLayer *el = 0;
   folia::Chunk *iob = 0;
   double iob_conf = 0.0; //accummulated confidence
@@ -213,10 +213,4 @@ void IOBTagger::add_result( folia::Sentence* s,
     iob->confidence( iob_conf );
     el->append( iob );
   }
-}
-
-void IOBTagger::add_result( const frog_data& fd,
-			    const vector<folia::Word*>& wv ) const {
-  folia::Sentence* s = wv[0]->sentence();
-  add_result( s, fd, wv );
 }

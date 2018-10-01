@@ -73,7 +73,6 @@ class Mblem {
   bool readsettings( const std::string& dir, const std::string& fname );
   bool fill_ts_map( const std::string& );
   bool fill_eq_set( const std::string& );
-  void addLemma( folia::Word *, const std::string&) ;
   std::string make_instance( const icu::UnicodeString& in );
   Timbl::TimblAPI *myLex;
   std::string punctuation;

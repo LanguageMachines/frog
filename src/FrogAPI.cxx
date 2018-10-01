@@ -595,16 +595,16 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
       myMbma->add_morphemes( wv, fd );
     }
     if ( options.doNER ){
-      myNERTagger->add_result( s, fd, wv );
+      myNERTagger->add_result( fd, wv );
     }
     if ( options.doIOB ){
-      myIOBTagger->add_result( s, fd, wv );
+      myIOBTagger->add_result( fd, wv );
     }
     if ( options.doMwu && !fd.mwus.empty() ){
-      myMwu->add_result( s, fd, wv );
+      myMwu->add_result( fd, wv );
     }
     if ( options.doParse ){
-      myParser->add_result( s, fd, wv );
+      myParser->add_result( fd, wv );
     }
   }
   return result;
@@ -653,16 +653,16 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
       myMbma->add_morphemes( wv, fd );
     }
     if ( options.doNER ){
-      myNERTagger->add_result( sent, fd, wv );
+      myNERTagger->add_result( fd, wv );
     }
     if ( options.doIOB ){
-      myIOBTagger->add_result( sent, fd, wv );
+      myIOBTagger->add_result( fd, wv );
     }
     if ( options.doMwu && !fd.mwus.empty() ){
-      myMwu->add_result( sent, fd, wv );
+      myMwu->add_result( fd, wv );
     }
     if ( options.doParse ){
-      myParser->add_result( sent, fd, wv );
+      myParser->add_result( fd, wv );
     }
   }
 }

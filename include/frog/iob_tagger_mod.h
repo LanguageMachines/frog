@@ -42,9 +42,6 @@ class IOBTagger: public BaseTagger {
   void addDeclaration( folia::Processor& ) const;
   void Classify( frog_data& );
   void post_process( frog_data& );
-  void add_result( folia::Sentence *s,
-   		   const frog_data& fd,
-   		   const std::vector<folia::Word*>& wv ) const;
   void add_result( const frog_data& fd,
 		   const std::vector<folia::Word*>& wv ) const;
  private:

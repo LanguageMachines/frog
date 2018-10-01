@@ -526,9 +526,9 @@ bool NERTagger::Generate( const std::string& opt_line ){
   return tagger->GenerateTagger( opt_line );
 }
 
-void NERTagger::add_result( folia::Sentence *s,
-			    const frog_data& fd,
+void NERTagger::add_result( const frog_data& fd,
 			    const vector<folia::Word*>& wv ) const {
+  folia::Sentence *s = wv[0]->sentence();
   folia::EntitiesLayer *el = 0;
   folia::Entity *ner = 0;
   size_t i = 0;
@@ -575,10 +575,4 @@ void NERTagger::add_result( folia::Sentence *s,
     // some leftovers
     el->append( ner );
   }
-}
-
-void NERTagger::add_result( const frog_data& fd,
-			    const vector<folia::Word*>& wv ) const {
-  folia::Sentence *s = wv[0]->sentence();
-  add_result( s, fd, wv );
 }

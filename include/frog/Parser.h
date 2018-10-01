@@ -64,9 +64,6 @@ class Parser {
   void addDeclaration( folia::Processor& ) const;
   void Parse( frog_data&, TimerBlock& );
   parseData prepareParse( frog_data& );
-  void add_result( folia::Sentence *s,
-		   const frog_data& fd,
-		   const std::vector<folia::Word*>& wv ) const;
   void add_result( const frog_data&,
 		   const std::vector<folia::Word*>& ) const;
 

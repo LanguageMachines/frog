@@ -77,9 +77,6 @@ class Mwu {
   void addDeclaration( folia::Processor& ) const;
   void Classify( frog_data& );
   void add( frog_record&, size_t );
-  void add_result( folia::Sentence *,
-		   const frog_data&,
-		   const std::vector<folia::Word*>& ) const;
   void add_result( const frog_data&,
 		   const std::vector<folia::Word*>& ) const;
   std::string getTagset() const { return mwu_tagset; };

@@ -945,9 +945,9 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
   timers.parseTimer.stop();
 }
 
-void Parser::add_result( folia::Sentence *s,
-			 const frog_data& fd,
+void Parser::add_result( const frog_data& fd,
 			 const vector<folia::Word*>& wv ) const {
+  folia::Sentence *s = wv[0]->sentence();
   folia::KWargs args;
   args["generate_id"] = s->id();
   args["set"] = getTagset();
@@ -976,11 +976,4 @@ void Parser::add_result( folia::Sentence *s,
       e->append( dd );
     }
   }
-}
-
-void Parser::add_result( const frog_data& fd,
-			 const vector<folia::Word*>& wv ) const {
-  folia::Sentence *s = wv[0]->sentence();
-  add_result( s, fd, wv );
-  return;
 }
