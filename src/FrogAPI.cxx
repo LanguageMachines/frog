@@ -677,12 +677,11 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
     }
   }
   else {
-    LOG << "in append_to_words() 1" << endl;
     myCGNTagger->add_result( wv, fd );
     if ( options.doLemma ){
       myMblem->add_lemmas( wv, fd );
     }
-    LOG << "in append_to_words() 2" << endl;    if ( options.doMorph ){
+    if ( options.doMorph ){
       myMbma->add_morphemes( wv, fd );
     }
     if ( options.doNER ){
@@ -1448,7 +1447,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
   if ( options.doParse ){
     myParser->addDeclaration( proc );
   }
-  proc.setup( options.inputclass );
+  proc.setup( options.inputclass, true );
   int sentence_done = 0;
   folia::FoliaElement *p = 0;
   while ( (p = proc.next_text_parent() ) ){
