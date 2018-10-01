@@ -384,34 +384,10 @@ void Mbma::addBracketMorph( folia::Word *word,
     LOG << "createMorpheme failed: " << e.what() << endl;
     throw;
   }
-//   if ( brackets->status() == STEM ){
-//     args.clear();
-//     args["subset"] = "structure";
-//     args["class"]  = "[" + orig_word + "]";
-// #pragma omp critical (foliaupdate)
-//     {
-//       folia::Feature *feat = new folia::Feature( args );
-//       m->append( feat );
-//     }
-//   }
 #pragma omp critical (foliaupdate)
   {
     m->settext( orig_word, textclass );
     ml->append( m );
-  }
-}
-
-void Mbma::add_morphemes( folia::MorphologyLayer *ml,
-			  const vector<string>& morphemes ) const {
-  for ( const auto& mor : morphemes ){
-    folia::KWargs args;
-    args["set"] = mbma_tagset;
-#pragma omp critical (foliaupdate)
-    {
-      folia::Morpheme *m = new folia::Morpheme( args, ml->doc() );
-      m->settext( mor, textclass );
-      ml->append( m );
-    }
   }
 }
 
@@ -926,13 +902,20 @@ void Mbma::add_morphemes( const vector<folia::Word*>& wv,
     if ( !doDeepMorph ){
       folia::KWargs args;
       args["set"] = mbma_tagset;
-      folia::MorphologyLayer *ml = wv[i]->addMorphologyLayer( args );
+      folia::MorphologyLayer *ml = 0;
+#pragma omp critical (foliaupdate)
+      {
+	ml = wv[i]->addMorphologyLayer( args );
+      }
       for ( const auto& mor : fd.units[i].morphs ) {
 	for ( const auto& mt : mor ) {
 	  folia::Morpheme *m = new folia::Morpheme( args, wv[0]->doc() );
 	  string stripped = mt.substr(1,mt.size()-2);
-	  m->settext( stripped, textclass );
-	  ml->append( m );
+#pragma omp critical (foliaupdate)
+	  {
+	    m->settext( stripped, textclass );
+	    ml->append( m );
+	  }
 	}
       }
     }

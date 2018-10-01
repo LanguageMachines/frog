@@ -83,13 +83,10 @@ class Mbma {
   bool readsettings( const std::string&, const std::string& );
   void fillMaps();
   void init_cgn( const std::string&, const std::string& );
-  //  void getFoLiAResult( folia::Word *, const icu::UnicodeString& ) const;
   void getResult( frog_record&, const icu::UnicodeString&, const std::string& ) const;
   std::vector<std::string> make_instances( const icu::UnicodeString& word );
   CLEX::Type getFinalTag( const std::list<BaseBracket*>& );
   int debugFlag;
-  void add_morphemes( folia::MorphologyLayer *,
-		      const std::vector<std::string>& ) const;
   void store_morphemes( frog_record&, const std::vector<std::string>& ) const;
   void store_brackets( frog_record&,
 		       const std::string&,
