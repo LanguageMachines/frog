@@ -1191,6 +1191,24 @@ void FrogAPI::showResults( ostream& os,
   os << endl;
 }
 
+frog_record extract_from_word( const folia::Word* word,
+			       const string& textclass ){
+  frog_record rec;
+  rec.word = word->str(textclass);
+  folia::KWargs atts = word->collectAttributes();
+  if ( atts.find( "space" ) != atts.end() ){
+    rec.no_space = true;
+  }
+  if ( atts.find( "class" ) != atts.end() ){
+    rec.token_class = atts["class"];
+  }
+  else {
+    rec.token_class = "WORD";
+  }
+  rec.language = word->language();
+  return rec;
+}
+
 void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
   vector<folia::Word*> wv;
   wv = s->select<folia::Word>( options.inputclass );
@@ -1202,18 +1220,7 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
     // assume unfrogged yet
     frog_data res;
     for ( const auto& w : wv ){
-      frog_record rec;
-      rec.word = w->str(options.inputclass);
-      folia::KWargs atts = w->collectAttributes();
-      if ( atts.find( "space" ) != atts.end() ){
-	rec.no_space = true;
-      }
-      if ( atts.find( "class" ) != atts.end() ){
-	rec.token_class = atts["class"];
-      }
-      else {
-	rec.token_class = "WORD";
-      }
+      frog_record rec = extract_from_word( w, options.inputclass );
       res.units.push_back( rec );
     }
     if  (options.debugFlag > 0){
@@ -1298,14 +1305,8 @@ void FrogAPI::handle_one_element( ostream& os,
   if ( e->xmltag() == "w" ){
     // already tokenized into words!
     folia::Word *word = dynamic_cast<folia::Word*>(e);
-    string text = e->str(options.inputclass);
-    cerr << "frog: " << text << endl;
     frog_data res;
-    frog_record tmp;
-    tmp.word = text;
-    tmp.token_class = word->cls();
-    tmp.no_space = word->space();
-    tmp.language = word->language();
+    frog_record tmp = extract_from_word( word, options.inputclass );
     res.units.push_back(tmp);
     frog_sentence( res );
     if ( !options.noStdOut ){
