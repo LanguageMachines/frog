@@ -694,7 +694,7 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
     if ( options.doMwu && !fd.mwus.empty() ){
       myMwu->add_result( fd, wv );
     }
-    if ( options.doParse ){
+    if ( options.doParse && wv.size() > 1 ){
       myParser->add_result( fd, wv );
     }
   }
@@ -1292,42 +1292,94 @@ void FrogAPI::handle_one_paragraph( ostream& os,
   }
 }
 
-void FrogAPI::handle_one_thing( ostream& os,
-				folia::FoliaElement *e,
-				int& sentence_done ){
-  string text = e->str(options.inputclass);
-  cerr << "frog: " << text << endl;
-  istringstream inputstream(text,istringstream::in);
-  timers.tokTimer.start();
-  frog_data res = tokenizer->tokenize_stream( inputstream );
-  timers.tokTimer.stop();
-  while ( res.size() > 0 ){
+void FrogAPI::handle_one_element( ostream& os,
+				  folia::FoliaElement *e,
+				  int& sentence_done ){
+  if ( e->xmltag() == "w" ){
+    // already tokenized into words!
+    folia::Word *word = dynamic_cast<folia::Word*>(e);
+    string text = e->str(options.inputclass);
+    cerr << "frog: " << text << endl;
+    frog_data res;
+    frog_record tmp;
+    tmp.word = text;
+    tmp.token_class = word->cls();
+    tmp.no_space = word->space();
+    tmp.language = word->language();
+    res.units.push_back(tmp);
     frog_sentence( res );
     if ( !options.noStdOut ){
       showResults( os, res );
     }
-    if ( e->xmltag() == "w" ){
+    vector<folia::Word*> wv;
+    wv.push_back( word );
+    append_to_words( wv, res );
+    ++sentence_done;
+  }
+  else if ( e->xmltag() == "s" ){
+    // OK a text in a sentence
+    if  (options.debugFlag > 0){
+      LOG << "found text in a sentence " << e << endl;
     }
-    else if ( e->xmltag() == "s" ){
-      if  (options.debugFlag > 0){
-	LOG << "before append_to_sentence() B" << endl;
+    handle_one_sentence( os, dynamic_cast<folia::Sentence*>(e) );
+    ++sentence_done;
+    if  (options.debugFlag > 0){
+      LOG << "after handle_one_sentence()" << endl;
+    }
+  }
+  else if ( e->xmltag() == "p" ){
+    // OK a longer text in some paragraph
+    if  (options.debugFlag > 0){
+      LOG << "found text in a paragraph " << e << endl;
+    }
+    handle_one_paragraph( os,
+			  dynamic_cast<folia::Paragraph*>(e),
+			  sentence_done );
+  }
+  else {
+    // Some text outside word, paragraphs or sentences (yet)
+    string text = e->str(options.inputclass);
+    cerr << "frog: " << text << endl;
+    istringstream inputstream(text,istringstream::in);
+    timers.tokTimer.start();
+    frog_data res = tokenizer->tokenize_stream( inputstream );
+    timers.tokTimer.stop();
+    vector<folia::Sentence*> sents;
+    while ( res.size() > 0 ){
+      frog_sentence( res );
+      if ( !options.noStdOut ){
+	showResults( os, res );
       }
-      append_to_sentence( dynamic_cast<folia::Sentence*>(e), res );
-    }
-    else {
       folia::KWargs args;
       args["generate_id"] = e->id();
       folia::Sentence *s = new folia::Sentence( args, e->doc() );
-      e->append( s );
-      if  (options.debugFlag > 0){
-	LOG << "before append_to_sentence() B" << endl;
-      }
       append_to_sentence( s, res );
+      if  (options.debugFlag > 0){
+	LOG << "created a new sentence: " << s << endl;
+      }
+      sents.push_back( s );
+      timers.tokTimer.start();
+      res = tokenizer->tokenize_stream( inputstream );
+      timers.tokTimer.stop();
+      ++sentence_done;
     }
-    timers.tokTimer.start();
-    res = tokenizer->tokenize_stream( inputstream );
-    timers.tokTimer.stop();
-    ++sentence_done;
+    assert( sents.size() > 0 );
+    if ( sents.size() > 1 ){
+      // multiple sentences. We need a Paragraph.
+      folia::KWargs args;
+      args["generate_id"] = e->id();
+      folia::Paragraph *p = new folia::Paragraph( args, e->doc() );
+      e->append( p );
+      for ( const auto& s : sents ){
+	p->append( s );
+	++sentence_done;
+      }
+    }
+    else {
+      // 1 sentence, connect directly.
+      e->append( sents[0] );
+      ++sentence_done;
+    }
   }
 }
 
@@ -1399,26 +1451,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
   int sentence_done = 0;
   folia::FoliaElement *p = 0;
   while ( (p = proc.next_text_parent() ) ){
-    if ( p->xmltag() == "s" ){
-      if  (options.debugFlag > 0){
-	LOG << "found sentence A " << p << endl;
-      }
-      handle_one_sentence( output_stream, dynamic_cast<folia::Sentence*>(p) );
-      ++sentence_done;
-      if  (options.debugFlag > 0){
-	LOG << "after handle_one_sentence() A" << endl;
-      }
-    }
-    else if ( p->xmltag() == "p" ){
-      handle_one_paragraph( output_stream,
-			    dynamic_cast<folia::Paragraph*>(p),
-			    sentence_done );
-    }
-    else {
-      handle_one_thing( output_stream,
-			p,
-			sentence_done );
-    }
+    handle_one_element( output_stream, p, sentence_done );
     if ( proc.next() ){
       if  (options.debugFlag > 0){
 	LOG << "looping for more ..." << endl;
@@ -1427,8 +1460,8 @@ void FrogAPI::run_folia_processor( const string& infilename,
   }
   if ( sentence_done == 0 ){
     LOG << "document contains no sentences or paragraphs!" << endl;
-    LOG << "NO result!" << endl;
-    return;
+     LOG << "NO result!" << endl;
+     return;
   }
   if ( !xmlOutFile.empty() ){
     proc.save( xmlOutFile, options.doKanon );
