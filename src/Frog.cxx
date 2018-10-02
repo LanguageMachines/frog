@@ -704,11 +704,6 @@ int main(int argc, char *argv[]) {
 	}
       }
       LOG << TiCC::Timer::now() << " Frog finished" << endl;
-      if ( options.debugFlag ){
-	LOG << "Debug information is stored in " << db_filename << endl;
-      }
-      delete the_dbg_stream;
-      delete theDbgLog;
     }
     else if ( options.doServer ) {
       //first set up some things to deal with zombies
@@ -768,6 +763,9 @@ int main(int argc, char *argv[]) {
       // interactive mode
       frog.FrogInteractive();
     }
+    if ( options.debugFlag ){
+      LOG << "Debug information is stored in " << db_filename << endl;
+    }
   }
   catch ( const TiCC::OptionError& e ){
     usage();
@@ -778,5 +776,7 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
   delete theErrLog;
+  delete theDbgLog;
+  delete the_dbg_stream;
   return EXIT_SUCCESS;
 }
