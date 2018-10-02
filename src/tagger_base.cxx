@@ -38,36 +38,33 @@ using namespace std;
 using namespace Tagger;
 
 
-#define LOG *TiCC::Log(tag_log)
+#define LOG *TiCC::Log(err_log)
+#define DBG *TiCC::Log(dbg_log)
 
-BaseTagger::BaseTagger( TiCC::LogStream *logstream, const string& label ){
+BaseTagger::BaseTagger( TiCC::LogStream *errlog,
+			TiCC::LogStream *dbglog,
+			const string& label ){
   debug = 0;
   tagger = 0;
   filter = 0;
   _label = label;
-  tag_log = new TiCC::LogStream( logstream, _label + "-tagger-" );
+  err_log = new TiCC::LogStream( errlog, _label + "-tagger-" );
+  if ( dbglog ){
+    dbg_log = new TiCC::LogStream( dbglog, _label + "-tagger-" );
+  }
+  else {
+    dbg_log = err_log;
+  }
 }
 
 BaseTagger::~BaseTagger(){
   delete tagger;
   delete filter;
-  delete tag_log;
+  if ( err_log != dbg_log ){
+    delete dbg_log;
+  }
+  delete err_log;
 }
-
-// bool fill_set( const string& file, set<string>& st ){
-//   ifstream is( file );
-//   if ( !is ){
-//     return false;
-//   }
-//   string line;
-//   while( getline( is, line ) ){
-//     if ( line.empty() || line[0] == '#' )
-//       continue;
-//     line = TiCC::trim( line );
-//     st.insert( line );
-//   }
-//   return true;
-// }
 
 bool BaseTagger::fill_map( const string& file, map<string,string>& mp ){
   ifstream is( file );
@@ -106,22 +103,22 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   switch ( debug ){
   case 0:
   case 1:
-    tag_log->setlevel(LogSilent);
+    dbg_log->setlevel(LogSilent);
     break;
   case 2:
-    tag_log->setlevel(LogNormal);
+    dbg_log->setlevel(LogNormal);
     break;
   case 3:
   case 4:
-    tag_log->setlevel(LogDebug);
+    dbg_log->setlevel(LogDebug);
     break;
   case 5:
   case 6:
   case 7:
-    tag_log->setlevel(LogHeavy);
+    dbg_log->setlevel(LogHeavy);
     break;
   default:
-    tag_log->setlevel(LogExtreme);
+    dbg_log->setlevel(LogExtreme);
   }
   val = config.lookUp( "settings", _label );
   if ( val.empty() ){
@@ -175,10 +172,10 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
     textclass = "current";
   }
   if ( debug > 1 ){
-    LOG << _label << "-tagger textclass= " << textclass << endl;
+    DBG << _label << "-tagger textclass= " << textclass << endl;
   }
   string init = "-s " + settings + " -vcf";
-  tagger = new MbtAPI( init, *tag_log );
+  tagger = new MbtAPI( init, *dbg_log );
   return tagger->isInit();
 }
 
@@ -247,7 +244,7 @@ void BaseTagger::Classify( const vector<folia::Word*>& swords ){
   if ( !swords.empty() ) {
     string sentence = extract_sentence( swords, _words );
     if (debug > 1){
-      LOG << _label << "-tagger in: " << sentence << endl;
+      DBG << _label << "-tagger in: " << sentence << endl;
     }
     _tag_result = tagger->TagLine(sentence);
     if ( _tag_result.size() != swords.size() ){
@@ -263,9 +260,9 @@ void BaseTagger::Classify( const vector<folia::Word*>& swords ){
       throw runtime_error( _label + "-tagger is confused" );
     }
     if ( debug > 1 ){
-      LOG << _label + "-tagger out: " << endl;
+      DBG << _label + "-tagger out: " << endl;
       for ( size_t i=0; i < _tag_result.size(); ++i ){
-	LOG << "[" << i << "] : word=" << _tag_result[i].word()
+	DBG << "[" << i << "] : word=" << _tag_result[i].word()
 	    << " tag=" << _tag_result[i].assignedTag()
 	    << " confidence=" << _tag_result[i].confidence() << endl;
       }
@@ -295,7 +292,7 @@ string BaseTagger::extract_sentence( const frog_data& sent,
 void BaseTagger::Classify( frog_data& sent ){
   string sentence = extract_sentence( sent, _words );
   if ( debug > 1 ){
-    LOG << _label << "-tagger in: " << sentence << endl;
+    DBG << _label << "-tagger in: " << sentence << endl;
   }
   _tag_result = tagger->TagLine(sentence);
   if ( _tag_result.size() != sent.size() ){
@@ -311,9 +308,9 @@ void BaseTagger::Classify( frog_data& sent ){
     throw runtime_error( _label + "-tagger is confused" );
   }
   if ( debug > 1 ){
-    LOG << _label + "-tagger out: " << endl;
+    DBG << _label + "-tagger out: " << endl;
     for ( size_t i=0; i < _tag_result.size(); ++i ){
-      LOG << "[" << i << "] : word=" << _tag_result[i].word()
+      DBG << "[" << i << "] : word=" << _tag_result[i].word()
 	  << " tag=" << _tag_result[i].assignedTag()
 	  << " confidence=" << _tag_result[i].confidence() << endl;
     }

@@ -52,7 +52,7 @@ namespace Timbl{
 
 class Mbma {
  public:
- explicit Mbma( TiCC::LogStream * );
+  explicit Mbma( TiCC::LogStream *, TiCC::LogStream * =0 );
   ~Mbma();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;
@@ -103,7 +103,8 @@ class Mbma {
   std::vector<Rule*> analysis;
   std::string _version;
   std::string textclass;
-  TiCC::LogStream *mbmaLog;
+  TiCC::LogStream *errLog;
+  TiCC::LogStream *dbgLog;
   TiCC::UniFilter *filter;
   bool filter_diac;
   bool doDeepMorph;

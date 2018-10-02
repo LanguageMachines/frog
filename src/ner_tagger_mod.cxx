@@ -42,12 +42,13 @@ using namespace std;
 using namespace Tagger;
 using TiCC::operator<<;
 
-#define LOG *TiCC::Log(tag_log)
+#define LOG *TiCC::Log(err_log)
+#define DBG *TiCC::Log(dbg_log)
 
 static string POS_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
 
-NERTagger::NERTagger( TiCC::LogStream *l ):
-  BaseTagger( l, "NER" ),
+NERTagger::NERTagger( TiCC::LogStream *l, TiCC::LogStream *d ):
+  BaseTagger( l, d, "NER" ),
   max_ner_size(20)
 { known_ners.resize( max_ner_size + 1 );
   override_ners.resize( max_ner_size + 1 );
@@ -208,7 +209,7 @@ vector<string> NERTagger::create_ner_list( const vector<string>& words,
 					   std::vector<std::unordered_map<std::string,std::set<std::string>>>& ners ){
   vector<set<string>> stags( words.size() );
   if ( debug > 1 ){
-    LOG << "search for known NER's" << endl;
+    DBG << "search for known NER's" << endl;
   }
   for ( size_t j=0; j < words.size(); ++j ){
     // cycle through the words
@@ -222,12 +223,12 @@ vector<string> NERTagger::create_ner_list( const vector<string>& words,
       }
       seq += words[j+i];
       if ( debug > 1 ){
-	LOG << "sequence = '" << seq << "'" << endl;
+	DBG << "sequence = '" << seq << "'" << endl;
       }
       auto const& tags = mp.find(seq);
       if ( tags != mp.end() ){
 	if ( debug > 1 ){
-	  LOG << "FOUND tags " << tags->first << "-" << tags->second << endl;
+	  DBG << "FOUND tags " << tags->first << "-" << tags->second << endl;
 	}
 	for ( size_t k = 0; k <= i; ++k ){
 	  stags[k+j].insert( tags->second.begin(), tags->second.end() );
@@ -255,7 +256,7 @@ void NERTagger::addDeclaration( folia::Processor& proc ) const {
 
 void NERTagger::Classify( frog_data& swords ){
   if ( debug ){
-    LOG << "classify from DATA" << endl;
+    DBG << "classify from DATA" << endl;
   }
   vector<string> words;
   vector<string> ptags;
@@ -298,13 +299,13 @@ void NERTagger::Classify( frog_data& swords ){
     text_block += "\t??\n";
   }
   if ( debug > 1 ){
-    LOG << "TAGGING TEXT_BLOCK\n" << text_block << endl;
+    DBG << "TAGGING TEXT_BLOCK\n" << text_block << endl;
   }
   _tag_result = tagger->TagLine( text_block );
   if ( debug > 1 ){
-    LOG << "NER tagger out: " << endl;
+    DBG << "NER tagger out: " << endl;
     for ( size_t i=0; i < _tag_result.size(); ++i ){
-      LOG << "[" << i << "] : word=" << _tag_result[i].word()
+      DBG << "[" << i << "] : word=" << _tag_result[i].word()
 	  << " tag=" << _tag_result[i].assignedTag()
 	  << " confidence=" << _tag_result[i].confidence() << endl;
     }
@@ -358,15 +359,15 @@ void NERTagger::addNERTags( frog_data& words,
   string curNER;
   for ( size_t i=0; i < tags.size(); ++i ){
     if (debug > 1){
-      LOG << "NER = " << tags[i] << endl;
+      DBG << "NER = " << tags[i] << endl;
     }
     vector<string> ner;
     if ( tags[i] == "O" ){
       if ( !stack.empty() ){
 	if (debug > 1) {
-	  LOG << "O spit out " << curNER << endl;
-	  LOG << "ners  " << stack << endl;
-	  LOG << "confs " << dstack << endl;
+	  DBG << "O spit out " << curNER << endl;
+	  DBG << "ners  " << stack << endl;
+	  DBG << "confs " << dstack << endl;
 	}
 	addEntity( words, i, stack, dstack );
 	dstack.clear();
@@ -389,8 +390,8 @@ void NERTagger::addNERTags( frog_data& words,
       // an I with a different TAG is also handled as a B
       if ( !stack.empty() ){
 	if ( debug > 1 ){
-	  LOG << "B spit out " << curNER << endl;
-	  LOG << "spit out " << stack << endl;
+	  DBG << "B spit out " << curNER << endl;
+	  DBG << "spit out " << stack << endl;
 	}
 	addEntity( words, i, stack, dstack );
 	dstack.clear();
@@ -403,8 +404,8 @@ void NERTagger::addNERTags( frog_data& words,
   }
   if ( !stack.empty() ){
     if ( debug > 1 ){
-      LOG << "END spit out " << curNER << endl;
-      LOG << "spit out " << stack << endl;
+      DBG << "END spit out " << curNER << endl;
+      DBG << "spit out " << stack << endl;
     }
     addEntity( words, words.size(), stack, dstack );
   }

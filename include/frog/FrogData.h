@@ -42,6 +42,7 @@ class BaseBracket;
 class frog_record {
  public:
   frog_record();
+  ~frog_record();
   std::string word;
   std::string clean_word;
   std::string token_class;

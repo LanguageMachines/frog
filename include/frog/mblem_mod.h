@@ -53,7 +53,7 @@ class mblemData {
 
 class Mblem {
  public:
-  explicit Mblem( TiCC::LogStream * );
+  explicit Mblem( TiCC::LogStream *, TiCC::LogStream * =0 );
   ~Mblem();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
@@ -87,7 +87,8 @@ class Mblem {
   std::string tagset;
   std::string POS_tagset;
   std::string textclass;
-  TiCC::LogStream *mblemLog;
+  TiCC::LogStream *errLog;
+  TiCC::LogStream *dbgLog;
   TiCC::UniFilter *filter;
 };
 

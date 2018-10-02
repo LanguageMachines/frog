@@ -77,7 +77,7 @@ class BaseBracket {
     myLog(l)
     {};
   virtual ~BaseBracket() {};
-
+  virtual BaseBracket *clone() const = 0;
   Status status() const { return _status; };
   void set_status( const Status s ) { _status = s; };
   virtual icu::UnicodeString morpheme() const { return "";};
@@ -113,6 +113,7 @@ class BracketLeaf: public BaseBracket {
 public:
   BracketLeaf( const RulePart&, int, TiCC::LogStream& );
   BracketLeaf( CLEX::Type, const icu::UnicodeString&, int, TiCC::LogStream& );
+  BracketLeaf *clone() const;
   icu::UnicodeString put( bool = true ) const;
   icu::UnicodeString pretty_put() const;
   icu::UnicodeString morpheme() const { return morph; };
@@ -135,6 +136,7 @@ class BracketNest: public BaseBracket {
  public:
   BracketNest( CLEX::Type, Compound::Type, int, TiCC::LogStream& );
   BaseBracket *append( BaseBracket * );
+  BracketNest *clone() const;
   ~BracketNest();
   bool isNested() { return true; };
   void clearEmptyNodes();

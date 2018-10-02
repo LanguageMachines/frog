@@ -36,7 +36,8 @@
 
 class IOBTagger: public BaseTagger {
  public:
-  explicit IOBTagger( TiCC::LogStream *l ): BaseTagger( l, "IOB" ){};
+  explicit IOBTagger( TiCC::LogStream *l, TiCC::LogStream *d =0 ):
+  BaseTagger( l, d, "IOB" ){};
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
   void addDeclaration( folia::Processor& ) const;

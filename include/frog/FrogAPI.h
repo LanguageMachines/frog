@@ -99,6 +99,7 @@ class FrogAPI {
  public:
   FrogAPI( FrogOptions&,
 	   const TiCC::Configuration&,
+	   TiCC::LogStream *,
 	   TiCC::LogStream * );
   ~FrogAPI();
   static std::string defaultConfigDir( const std::string& ="" );
@@ -150,6 +151,7 @@ class FrogAPI {
   const TiCC::Configuration& configuration;
   FrogOptions& options;
   TiCC::LogStream *theErrLog;
+  TiCC::LogStream *theDbgLog;
   TimerBlock timers;
   // pointers to all the modules
   Mbma *myMbma;

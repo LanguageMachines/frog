@@ -293,6 +293,10 @@ BracketLeaf::BracketLeaf( CLEX::Type t,
   _status = Status::STEM;
 }
 
+BracketLeaf *BracketLeaf::clone() const{
+  return new BracketLeaf( *this );
+}
+
 BracketNest::BracketNest( CLEX::Type t,
 			  Compound::Type c,
 			  int flag,
@@ -301,6 +305,14 @@ BracketNest::BracketNest( CLEX::Type t,
   _compound( c )
 {
   _status = Status::COMPLEX;
+}
+
+BracketNest *BracketNest::clone() const {
+  BracketNest *result = new BracketNest( *this );
+  for ( auto& it : result->parts ){
+    it = it->clone();
+  }
+  return result;
 }
 
 BaseBracket *BracketNest::append( BaseBracket *t ){

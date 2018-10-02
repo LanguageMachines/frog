@@ -41,7 +41,7 @@
 
 class NERTagger: public BaseTagger {
  public:
-  explicit NERTagger( TiCC::LogStream * );
+  explicit NERTagger( TiCC::LogStream *, TiCC::LogStream * =0 );
   bool init( const TiCC::Configuration& );
   void Classify( frog_data& );
   void post_process( frog_data& );

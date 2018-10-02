@@ -43,11 +43,27 @@
 using namespace std;
 using TiCC::operator<<;
 
-#define LOG *TiCC::Log(uctoLog)
+#define LOG *TiCC::Log(errLog)
+#define DBG *TiCC::Log(dbgLog)
 
-UctoTokenizer::UctoTokenizer( TiCC::LogStream * logstream ) {
+UctoTokenizer::UctoTokenizer( TiCC::LogStream *errlog,
+			      TiCC::LogStream *dbglog ) {
   tokenizer = 0;
-  uctoLog = new TiCC::LogStream( logstream, "tok-" );
+  errLog = new TiCC::LogStream( errlog, "tok-" );
+  if ( dbglog ){
+    dbgLog = new TiCC::LogStream( dbglog, "tok-" );
+  }
+  else {
+    dbgLog = errLog;
+  }
+}
+
+UctoTokenizer::~UctoTokenizer(){
+  // dbg_log is deleted by deleting the tokenizer!
+  if ( dbgLog != errLog ){
+    delete errLog;
+  }
+  delete tokenizer;
 }
 
 string resolve_configdir( const string& rules_name, const string& dir ){
@@ -66,7 +82,7 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
   if ( tokenizer )
     throw runtime_error( "ucto tokenizer is already initialized" );
   tokenizer = new Tokenizer::TokenizerClass();
-  tokenizer->setErrorLog( uctoLog );
+  tokenizer->setErrorLog( dbgLog );
   int debug = 0;
   string val = config.lookUp( "debug", "tokenizer" );
   if ( val.empty() ){

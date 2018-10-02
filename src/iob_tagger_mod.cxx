@@ -38,7 +38,8 @@
 using namespace std;
 using namespace Tagger;
 
-#define LOG *TiCC::Log(tag_log)
+#define LOG *TiCC::Log(err_log)
+#define DBG *TiCC::Log(dbg_log)
 
 static string POS_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
 
@@ -96,13 +97,13 @@ void IOBTagger::Classify( frog_data& swords ){
     text_block += "\t??\n";
   }
   if ( debug ){
-    LOG << "TAGGING TEXT_BLOCK\n" << text_block << endl;
+    DBG << "TAGGING TEXT_BLOCK\n" << text_block << endl;
   }
   _tag_result = tagger->TagLine( text_block );
   if ( debug ){
-    LOG << "IOB tagger out: " << endl;
+    DBG << "IOB tagger out: " << endl;
     for ( size_t i=0; i < _tag_result.size(); ++i ){
-      LOG << "[" << i << "] : word=" << _tag_result[i].word()
+      DBG << "[" << i << "] : word=" << _tag_result[i].word()
 	  << " tag=" << _tag_result[i].assignedTag()
 	  << " confidence=" << _tag_result[i].confidence() << endl;
     }
@@ -112,7 +113,7 @@ void IOBTagger::Classify( frog_data& swords ){
 
 void IOBTagger::post_process( frog_data& words ){
   if ( debug ){
-    LOG << "IOB postprocess...." << endl;
+    DBG << "IOB postprocess...." << endl;
   }
   string last_tag;
   for ( size_t i=0; i < _tag_result.size(); ++i ){

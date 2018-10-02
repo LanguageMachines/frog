@@ -36,7 +36,8 @@
 using namespace std;
 using namespace Tagger;
 
-#define LOG *TiCC::Log(tag_log)
+#define LOG *TiCC::Log(err_log)
+#define DBG *TiCC::Log(dbg_log)
 
 
 static string subsets_file = "subsets.cgn";
@@ -92,7 +93,7 @@ bool CGNTagger::fillSubSetTable( const string& sub_file,
 
 bool CGNTagger::init( const TiCC::Configuration& config ){
   if (  debug > 1 ){
-    LOG << "INIT CGN Tagger." << endl;
+    DBG << "INIT CGN Tagger." << endl;
   }
   if ( !BaseTagger::init( config ) ){
     return false;
@@ -125,7 +126,7 @@ bool CGNTagger::init( const TiCC::Configuration& config ){
     }
   }
   if ( debug > 1 ){
-    LOG << "DONE Init CGN Tagger." << endl;
+    DBG << "DONE Init CGN Tagger." << endl;
   }
   return true;
 }
@@ -195,12 +196,12 @@ void CGNTagger::addTag( frog_record& fd,
   }
   string ucto_class = fd.token_class;
   if ( debug > 1 ){
-    LOG << "lookup ucto class= " << ucto_class << endl;
+    DBG << "lookup ucto class= " << ucto_class << endl;
   }
   auto const tt = token_tag_map.find( ucto_class );
   if ( tt != token_tag_map.end() ){
     if ( debug > 1 ){
-      LOG << "found translation ucto class= " << ucto_class
+      DBG << "found translation ucto class= " << ucto_class
 	  << " to POS-Tag=" << tt->second << endl;
     }
 #pragma omp critical (dataupdate)

@@ -61,6 +61,7 @@
 using namespace std;
 
 #define LOG *TiCC::Log(theErrLog)
+#define DBG *TiCC::Log(theDbgLog)
 
 string testDirName;
 string outputFileName;
@@ -143,7 +144,7 @@ void usage( ) {
 
 bool parse_args( TiCC::CL_Options& Opts,
 		 FrogOptions& options,
-		 TiCC::LogStream* theErrLog ) {
+		 TiCC::LogStream* theErrLog ){
   // process the command line and fill FrogOptions to initialize the API
   // also fill some globals we use for our own main.
 
@@ -530,6 +531,8 @@ int main(int argc, char *argv[]) {
        << Tagger::VersionName() << "]" << endl;
   TiCC::LogStream *theErrLog
     = new TiCC::LogStream( cerr, "frog-", StampMessage );
+  ostream *the_dbg_stream = 0;
+  TiCC::LogStream *theDbgLog = 0;
   std::ios_base::sync_with_stdio(false);
   FrogOptions options;
 
@@ -540,7 +543,7 @@ int main(int argc, char *argv[]) {
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
 			  "help,language:,retry,nostdout,ner-override:,"
 			  "debug:,keep-parser-files,version,threads:,"
-			  "override:,KANON,TESTAPI");
+			  "override:,KANON,TESTAPI,debugfile:");
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
       // we already did show what we wanted.
@@ -551,11 +554,18 @@ int main(int argc, char *argv[]) {
       usage();
       return EXIT_SUCCESS;
     };
+    string db_filename;
+    Opts.extract( "debugfile", db_filename );
+    if ( db_filename.empty() ){
+      db_filename = "frog.debug";
+    }
+    the_dbg_stream = new ofstream( db_filename );
+    theDbgLog = new TiCC::LogStream( *the_dbg_stream, "frog-", StampMessage );
     bool parsed = parse_args( Opts, options, theErrLog );
     if (!parsed) {
       throw runtime_error( "init failed" );
     }
-    FrogAPI frog( options, configuration, theErrLog );
+    FrogAPI frog( options, configuration, theErrLog, theDbgLog );
     if ( !fileNames.empty() ) {
       string outPath = outputDirName;
       string xmlPath = xmlDirName;
@@ -694,6 +704,10 @@ int main(int argc, char *argv[]) {
 	}
       }
       LOG << TiCC::Timer::now() << " Frog finished" << endl;
+      if ( options.debugFlag ){
+	LOG << "Debug information is stored in " << db_filename << endl;
+      }
+      delete theDbgLog;
     }
     else if ( options.doServer ) {
       //first set up some things to deal with zombies

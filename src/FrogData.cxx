@@ -33,6 +33,7 @@
 #include <iomanip>
 #include "ticcutils/PrettyPrint.h"
 #include "frog/FrogData.h"
+#include "frog/mbma_brackets.h"
 
 using namespace std;
 using TiCC::operator<<;
@@ -45,8 +46,15 @@ frog_record::frog_record():
   iob_confidence(0.0),
   ner_tag( "O" ),
   ner_confidence(0.0),
-  compound_string( "0" )
+  compound_string( "0" ),
+  parse_index(-1)
 {}
+
+frog_record::~frog_record(){
+  for( const auto& dm : deep_morphs ){
+    delete dm;
+  }
+}
 
 const string TAB = "\t";
 

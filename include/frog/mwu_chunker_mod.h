@@ -69,7 +69,7 @@ class mwuAna {
 class Mwu {
   friend std::ostream& operator<< (std::ostream&, const Mwu& );
  public:
-  explicit Mwu(TiCC::LogStream*);
+  explicit Mwu( TiCC::LogStream*, TiCC::LogStream* );
   ~Mwu();
   void reset();
   bool init( const TiCC::Configuration& );
@@ -90,7 +90,8 @@ class Mwu {
   std::string mwuFileName;
   std::vector<mwuAna*> mWords;
   mymap2 MWUs;
-  TiCC::LogStream *mwuLog;
+  TiCC::LogStream *errLog;
+  TiCC::LogStream *dbgLog;
   std::string _version;
   std::string textclass;
   std::string mwu_tagset;

@@ -50,7 +50,8 @@ using namespace std;
 
 using TiCC::operator<<;
 
-#define LOG *TiCC::Log(parseLog)
+#define LOG *TiCC::Log(errLog)
+#define DBG *TiCC::Log(dbgLog)
 
 TiCC::Timer prepareTimer;
 TiCC::Timer relsTimer;
@@ -98,7 +99,7 @@ bool Parser::init( const TiCC::Configuration& configuration ){
     int level;
     if ( TiCC::stringTo<int>( val, level ) ){
       if ( level > 5 ){
-	parseLog->setlevel( LogLevel::LogDebug );
+	dbgLog->setlevel( LogLevel::LogDebug );
       }
     }
   }
@@ -240,7 +241,8 @@ Parser::~Parser(){
   delete rels;
   delete dir;
   delete pairs;
-  delete parseLog;
+  delete errLog;
+  delete dbgLog;
   delete filter;
 }
 
@@ -939,7 +941,7 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
 			       d_results,
 			       pd.words.size(),
 			       maxDepSpan,
-			       parseLog );
+			       dbgLog );
   timers.csiTimer.stop();
   appendParseResult( fd, res );
   timers.parseTimer.stop();

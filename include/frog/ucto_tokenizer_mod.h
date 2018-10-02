@@ -35,8 +35,8 @@
 
 class UctoTokenizer {
  public:
-  explicit UctoTokenizer( TiCC::LogStream * );
-  ~UctoTokenizer() { delete tokenizer; };
+  explicit UctoTokenizer( TiCC::LogStream *, TiCC::LogStream * =0 );
+  ~UctoTokenizer();
   bool init( const TiCC::Configuration& );
   void setUttMarker( const std::string& );
   void setPassThru( bool );
@@ -57,7 +57,8 @@ class UctoTokenizer {
   std::string tokenizeStream( std::istream& );
  private:
   Tokenizer::TokenizerClass *tokenizer;
-  TiCC::LogStream *uctoLog;
+  TiCC::LogStream *errLog;
+  TiCC::LogStream *dbgLog;
 };
 
 #endif

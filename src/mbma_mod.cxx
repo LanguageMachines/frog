@@ -53,16 +53,23 @@ using TiCC::operator<<;
 const long int LEFT =  6; // left context
 const long int RIGHT = 6; // right context
 
-#define LOG *TiCC::Log(mbmaLog)
+#define LOG *TiCC::Log(errLog)
+#define DBG *TiCC::Log(dbgLog)
 
-Mbma::Mbma( TiCC::LogStream * logstream):
+Mbma::Mbma( TiCC::LogStream *errlog, TiCC::LogStream *dbglog ):
   MTreeFilename( "dm.igtree" ),
   MTree(0),
   filter(0),
   filter_diac(false),
   doDeepMorph(false)
 {
-  mbmaLog = new TiCC::LogStream( logstream, "mbma-" );
+  errLog = new TiCC::LogStream( errlog, "mbma-" );
+  if ( dbglog ){
+    dbgLog = new TiCC::LogStream( dbglog, "mbma-" );
+  }
+  else {
+    dbgLog = errLog;
+  }
 }
 
 // define the statics
@@ -74,7 +81,10 @@ string Mbma::clex_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-clex";
 Mbma::~Mbma() {
   cleanUp();
   delete filter;
-  delete mbmaLog;
+  if ( errLog != dbgLog ){
+    delete dbgLog;
+  }
+  delete errLog;
 }
 
 
@@ -215,12 +225,12 @@ vector<string> Mbma::make_instances( const icu::UnicodeString& word ){
   insts.reserve( word.length() );
   for ( long i=0; i < word.length(); ++i ) {
     if (debugFlag > 10){
-      LOG << "itt #:" << i << endl;
+      DBG << "itt #:" << i << endl;
     }
     icu::UnicodeString inst;
     for ( long j=i ; j <= i + RIGHT + LEFT; ++j ) {
       if (debugFlag > 10){
-	LOG << " " << j-LEFT << ": ";
+	DBG << " " << j-LEFT << ": ";
       }
       if ( j < LEFT || j >= word.length()+LEFT ){
 	inst += '_';
@@ -235,7 +245,7 @@ vector<string> Mbma::make_instances( const icu::UnicodeString& word ){
       }
       inst += ",";
       if (debugFlag > 10){
-	LOG << " : " << inst << endl;
+	DBG << " : " << inst << endl;
       }
     }
     inst += "?";
@@ -298,34 +308,34 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
 }
 
 void Mbma::clearAnalysis(){
-  // for ( const auto& a: analysis ){
-  //   delete a;
-  // }
+  for ( const auto& a: analysis ){
+    delete a;
+  }
   analysis.clear();
 }
 
 Rule* Mbma::matchRule( const std::vector<std::string>& ana,
 		       const icu::UnicodeString& word ){
-  Rule *rule = new Rule( ana, word, *mbmaLog, debugFlag );
+  Rule *rule = new Rule( ana, word, *dbgLog, debugFlag );
   if ( rule->performEdits() ){
     rule->reduceZeroNodes();
     if ( debugFlag > 1 ){
-      LOG << "after reduction: " << rule << endl;
+      DBG << "after reduction: " << rule << endl;
     }
     rule->resolve_inflections();
     if ( debugFlag > 1 ){
-      LOG << "after resolving: " << rule << endl;
+      DBG << "after resolving: " << rule << endl;
     }
     rule->resolveBrackets( doDeepMorph );
     rule->getCleanInflect();
     if ( debugFlag > 1 ){
-      LOG << "1 added Inflection: " << rule << endl;
+      DBG << "1 added Inflection: " << rule << endl;
     }
     return rule;
   }
   else {
     if ( debugFlag > 1 ){
-      LOG << "rejected rule: " << rule << endl;
+      DBG << "rejected rule: " << rule << endl;
     }
     delete rule;
     return 0;
@@ -342,8 +352,8 @@ vector<Rule*> Mbma::execute( const icu::UnicodeString& word,
       out += cls + ",";
     }
     out += ">";
-    LOG << out << endl;
-    LOG << "allParts : " << allParts << endl;
+    DBG << out << endl;
+    DBG << "allParts : " << allParts << endl;
   }
 
   vector<Rule*> accepted;
@@ -361,7 +371,8 @@ void Mbma::addBracketMorph( folia::Word *word,
 			    const string& orig_word,
 			    const BaseBracket *brackets ) const {
   if (debugFlag > 1){
-    LOG << "addBracketMorph(" << word << "," << orig_word << "," << brackets << ")" << endl;
+    DBG << "addBracketMorph(" << word << "," << orig_word << ","
+	<< brackets << ")" << endl;
   }
   folia::KWargs args;
   args["set"] = mbma_tagset;
@@ -398,11 +409,11 @@ bool mbmacmp( Rule *m1, Rule *m2 ){
 void Mbma::filterHeadTag( const string& head ){
   // first we select only the matching heads
   if (debugFlag > 1){
-    LOG << "filter with head: " << head << endl;
-    LOG << "filter: analysis is:" << endl;
+    DBG << "filter with head: " << head << endl;
+    DBG << "filter: analysis is:" << endl;
     int i=0;
     for ( const auto& it : analysis ){
-      LOG << ++i << " - " << it << endl;
+      DBG << ++i << " - " << it << endl;
     }
   }
   map<string,string>::const_iterator tagIt = TAGconv.find( head );
@@ -412,14 +423,14 @@ void Mbma::filterHeadTag( const string& head ){
   }
   string celex_tag = tagIt->second;
   if (debugFlag > 1){
-    LOG << "#matches: CGN:" << head << " CELEX " << celex_tag << endl;
+    DBG << "#matches: CGN:" << head << " CELEX " << celex_tag << endl;
   }
   auto ait = analysis.begin();
   while ( ait != analysis.end() ){
     string mbma_tag = CLEX::toString((*ait)->tag);
     if ( celex_tag == mbma_tag ){
       if (debugFlag > 1){
-	LOG << "comparing " << celex_tag << " with "
+	DBG << "comparing " << celex_tag << " with "
 		      << mbma_tag << " (OK)" << endl;
       }
       (*ait)->confidence = 1.0;
@@ -427,7 +438,7 @@ void Mbma::filterHeadTag( const string& head ){
     }
     else if ( celex_tag == "N" && mbma_tag == "PN" ){
       if (debugFlag > 1){
-	LOG << "comparing " << celex_tag << " with "
+	DBG << "comparing " << celex_tag << " with "
 		      << mbma_tag << " (OK)" << endl;
       }
       (*ait)->confidence = 1.0;
@@ -436,7 +447,7 @@ void Mbma::filterHeadTag( const string& head ){
     else if ( ( celex_tag == "B" && mbma_tag == "A" )
 	      || ( celex_tag == "A" && mbma_tag == "B" ) ){
       if (debugFlag > 1){
-	LOG << "comparing " << celex_tag << " with "
+	DBG << "comparing " << celex_tag << " with "
 		      << mbma_tag << " (OK)" << endl;
       }
       (*ait)->confidence = 0.8;
@@ -444,7 +455,7 @@ void Mbma::filterHeadTag( const string& head ){
     }
     else if ( celex_tag == "A" && mbma_tag == "V" ){
       if (debugFlag > 1){
-	LOG << "comparing " << celex_tag << " with "
+	DBG << "comparing " << celex_tag << " with "
 		      << mbma_tag << " (OK)" << endl;
       }
       (*ait)->confidence = 0.5;
@@ -452,7 +463,7 @@ void Mbma::filterHeadTag( const string& head ){
     }
     else {
       if (debugFlag > 1){
-	LOG << "comparing " << celex_tag << " with "
+	DBG << "comparing " << celex_tag << " with "
 		      << mbma_tag << " (rejected)" << endl;
       }
       delete *ait;
@@ -460,10 +471,10 @@ void Mbma::filterHeadTag( const string& head ){
     }
   }
   if (debugFlag > 1){
-    LOG << "filter: analysis after head filter:" << endl;
+    DBG << "filter: analysis after head filter:" << endl;
     int i=0;
     for ( const auto& it : analysis ){
-      LOG << ++i << " - " << it << endl;
+      DBG << ++i << " - " << it << endl;
     }
   }
 }
@@ -471,7 +482,7 @@ void Mbma::filterHeadTag( const string& head ){
 void Mbma::filterSubTags( const vector<string>& feats ){
   if ( analysis.size() < 1 ){
     if (debugFlag > 1){
-      LOG << "analysis is empty so skip next filter" << endl;
+      DBG << "analysis is empty so skip next filter" << endl;
     }
     return;
   }
@@ -491,25 +502,25 @@ void Mbma::filterSubTags( const vector<string>& feats ){
       continue;
     }
     if (debugFlag>1){
-      LOG << "matching " << inflection << " with " << feats << endl;
+      DBG << "matching " << inflection << " with " << feats << endl;
     }
     for ( const auto& feat : feats ){
       map<string,string>::const_iterator conv_tag_p = TAGconv.find( feat );
       if (conv_tag_p != TAGconv.end()) {
 	string c = conv_tag_p->second;
 	if (debugFlag > 1){
-	  LOG << "found " << feat << " ==> " << c << endl;
+	  DBG << "found " << feat << " ==> " << c << endl;
 	}
 	if ( inflection.find( c ) != string::npos ){
 	  if (debugFlag >1){
-	    LOG << "it is in the inflection " << endl;
+	    DBG << "it is in the inflection " << endl;
 	  }
 	  match_count++;
 	}
       }
     }
     if (debugFlag > 1 ){
-      LOG << "score: " << match_count << " max was " << max_count << endl;
+      DBG << "score: " << match_count << " max was " << max_count << endl;
     }
     if (match_count >= max_count) {
       if (match_count > max_count) {
@@ -523,12 +534,12 @@ void Mbma::filterSubTags( const vector<string>& feats ){
   // now filter on confidence:
   //
   if ( debugFlag > 1){
-    LOG << "filter: best matches before sort on confidence:" << endl;
+    DBG << "filter: best matches before sort on confidence:" << endl;
     int i=0;
     for ( const auto& it : bestMatches ){
-      LOG << ++i << " - " << it << endl;
+      DBG << ++i << " - " << it << endl;
     }
-    LOG << "" << endl;
+    DBG << "" << endl;
   }
   double best_conf = -0.1;
   set<Rule*> highConf;
@@ -580,13 +591,13 @@ void Mbma::filterSubTags( const vector<string>& feats ){
     }
   }
   if ( debugFlag > 1){
-    LOG << "filter: analysis before sort on length:" << endl;
+    DBG << "filter: analysis before sort on length:" << endl;
     int i=0;
     for ( const auto& it : analysis ){
-      LOG << ++i << " - " << it << " " << it->getKey(false)
+      DBG << ++i << " - " << it << " " << it->getKey(false)
 	  << " (" << it->getKey(false).length() << ")" << endl;
     }
-    LOG << "" << endl;
+    DBG << "" << endl;
   }
   // Now we have a small list of unique and differtent analysis.
   // We assume the 'longest' analysis to be the best.
@@ -595,12 +606,12 @@ void Mbma::filterSubTags( const vector<string>& feats ){
   sort( analysis.begin(), analysis.end(), mbmacmp );
 
   if ( debugFlag > 1){
-    LOG << "filter: definitive analysis:" << endl;
+    DBG << "filter: definitive analysis:" << endl;
     int i=0;
     for ( auto const& it : analysis ){
-      LOG << ++i << " - " << it << endl;
+      DBG << ++i << " - " << it << endl;
     }
-    LOG << "done filtering" << endl;
+    DBG << "done filtering" << endl;
   }
   return;
 }
@@ -655,12 +666,12 @@ void Mbma::store_brackets( frog_record& fd,
 			   const string& head,
 			   bool unanalysed ) const {
   if (debugFlag > 1){
-    LOG << "store_brackets(" << wrd << "," << head << ")" << endl;
+    DBG << "store_brackets(" << wrd << "," << head << ")" << endl;
   }
   if ( unanalysed  ) {
     // unanalysed, so trust the TAGGER
     if (debugFlag > 1){
-      LOG << "head was X, tagger gives :" << head << endl;
+      DBG << "head was X, tagger gives :" << head << endl;
     }
     const auto tagIt = TAGconv.find( head );
     if ( tagIt == TAGconv.end() ) {
@@ -670,12 +681,12 @@ void Mbma::store_brackets( frog_record& fd,
     string clex_tag = tagIt->second;
     string head_tag = CLEX::get_tDescr(CLEX::toCLEX(clex_tag));
     if (debugFlag > 1){
-      LOG << "replaced X by: " << head << endl;
+      DBG << "replaced X by: " << head << endl;
     }
     BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(clex_tag),
 					 TiCC::UnicodeFromUTF8(wrd),
 					 debugFlag,
-					 *mbmaLog );
+					 *dbgLog );
     if ( fd.deep_morph_string.empty() ){
       fd.deep_morph_string = "[" + wrd + "]" + head_tag;
     }
@@ -685,7 +696,7 @@ void Mbma::store_brackets( frog_record& fd,
     BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(head),
 					 TiCC::UnicodeFromUTF8(wrd),
 					 debugFlag,
-					 *mbmaLog );
+					 *dbgLog );
     leaf->set_status( STEM );
     if ( fd.deep_morph_string.empty() ){
       fd.deep_morph_string = "[" + wrd + "]";
@@ -696,7 +707,7 @@ void Mbma::store_brackets( frog_record& fd,
     BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(head),
 					 TiCC::UnicodeFromUTF8(wrd),
 					 debugFlag,
-					 *mbmaLog );
+					 *dbgLog );
     leaf->set_status( STEM );
     if ( fd.deep_morph_string.empty() ){
       fd.deep_morph_string = "[" + wrd + "]" + head;
@@ -706,15 +717,21 @@ void Mbma::store_brackets( frog_record& fd,
   return;
 }
 
+BracketNest *copy_nest( const BracketNest *brackets ){
+  return brackets->clone();
+}
+
 void Mbma::store_brackets( frog_record& fd,
 			   const string& orig_word,
 			   const BracketNest *brackets ) const {
   if (debugFlag > 1){
-    LOG << "store_brackets(" << fd.word << "," << orig_word << "," << brackets << ")" << endl;
+    DBG << "store_brackets(" << fd.word << "," << orig_word
+	<< "," << brackets << ")" << endl;
   }
+  BracketNest *copy = copy_nest( brackets );
 #pragma omp critical (dataupdate)
   {
-    fd.deep_morphs.push_back( brackets );
+    fd.deep_morphs.push_back( copy );
   }
   return;
 }
@@ -725,7 +742,7 @@ void Mbma::getResult( frog_record& fd,
   if ( analysis.size() == 0 ){
     // fallback option: use the word and pretend it's a morpheme ;-)
     if ( debugFlag > 1){
-      LOG << "no matches found, use the word instead: "
+      DBG << "no matches found, use the word instead: "
 		    << uword << endl;
     }
     string word = TiCC::UnicodeToUTF8(uword);
@@ -779,7 +796,7 @@ void Mbma::Classify( frog_record& fd ){
   vector<string> v = TiCC::split_at_first_of( tag, "()" );
   string head = v[0];
   if (debugFlag >1 ){
-    LOG << "Classify " << uWord << "(" << head << ") ["
+    DBG << "Classify " << uWord << "(" << head << ") ["
 	<< token_class << "]" << endl;
   }
   // HACK! for now remove any whitespace!
@@ -838,7 +855,7 @@ void Mbma::Classify( const icu::UnicodeString& word ){
     string ans;
     MTree->Classify( inst, ans );
     if ( debugFlag > 1){
-      LOG << "itt #" << i+1 << " " << insts[i] << " ==> " << ans
+      DBG << "itt #" << i+1 << " " << insts[i] << " ==> " << ans
 		    << ", depth=" << MTree->matchDepth() << endl;
       ++i;
     }
@@ -859,7 +876,7 @@ vector<string> Mbma::getResult() const {
     result.push_back( tmp );
   }
   if ( debugFlag > 1 ){
-    LOG << "result of morph analyses: " << result << endl;
+    DBG << "result of morph analyses: " << result << endl;
   }
   return result;
 }
@@ -872,9 +889,9 @@ vector<pair<string,string>> Mbma::getResults( ) const {
     result.push_back( make_pair(tmp,cmp) );
   }
   if ( debugFlag > 1 ){
-    LOG << "result of morph analyses: ";
+    DBG << "result of morph analyses: ";
     for ( const auto& r : result ){
-      LOG << " " << r.first << "/" << r.second << "," << endl;
+      DBG << " " << r.first << "/" << r.second << "," << endl;
     }
   }
   return result;
@@ -888,9 +905,9 @@ vector<pair<string,string>> Mbma::getPrettyResults( ) const {
     result.push_back( make_pair(tmp,cmp) );
   }
   if ( debugFlag > 1 ){
-    LOG << "pretty result of morph analyses: ";
+    DBG << "pretty result of morph analyses: ";
     for ( const auto& r : result ){
-      LOG << " " << r.first << "/" << r.second << "," << endl;
+      DBG << " " << r.first << "/" << r.second << "," << endl;
     }
   }
   return result;

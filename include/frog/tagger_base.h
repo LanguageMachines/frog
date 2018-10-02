@@ -43,7 +43,9 @@
 
 class BaseTagger {
  public:
-  explicit BaseTagger( TiCC::LogStream *, const std::string& );
+  explicit BaseTagger( TiCC::LogStream *,
+		       TiCC::LogStream *,
+		       const std::string& );
   virtual ~BaseTagger();
   virtual bool init( const TiCC::Configuration& );
   virtual void post_process( const std::vector<folia::Word*>& ){};
@@ -71,7 +73,8 @@ class BaseTagger {
   std::string tagset;
   std::string _version;
   std::string textclass;
-  TiCC::LogStream *tag_log;
+  TiCC::LogStream *err_log;
+  TiCC::LogStream *dbg_log;
   MbtAPI *tagger;
   TiCC::UniFilter *filter;
   std::vector<std::string> _words;

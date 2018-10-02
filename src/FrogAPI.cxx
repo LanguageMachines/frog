@@ -85,6 +85,7 @@ using namespace Tagger;
 using TiCC::operator<<;
 
 #define LOG *TiCC::Log(theErrLog)
+#define DBG *TiCC::Log(theDbgLog)
 
 const string ISO_SET = "http://raw.github.com/proycon/folia/master/setdefinitions/iso639_3.foliaset";
 
@@ -180,10 +181,12 @@ void FrogAPI::test_version( const string& where, double minimum ){
 
 FrogAPI::FrogAPI( FrogOptions &opt,
 		  const TiCC::Configuration &conf,
-		  TiCC::LogStream *log ):
+		  TiCC::LogStream *err_log,
+		  TiCC::LogStream *dbg_log ):
   configuration(conf),
   options(opt),
-  theErrLog(log),
+  theErrLog(err_log),
+  theDbgLog(dbg_log),
   myMbma(0),
   myMblem(0),
   myMwu(0),
@@ -248,7 +251,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
     // we use fork(). omp (GCC version) doesn't do well when omp is used
     // before the fork!
     // see: http://bisqwit.iki.fi/story/howto/openmp/#OpenmpAndFork
-    tokenizer = new UctoTokenizer(theErrLog);
+    tokenizer = new UctoTokenizer(theErrLog,theDbgLog);
     bool stat = tokenizer->init( configuration );
     if ( stat ){
       tokenizer->setPassThru( !options.doTok );
@@ -261,31 +264,31 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       tokenizer->setInputClass( options.inputclass );
       tokenizer->setOutputClass( options.outputclass );
       tokenizer->setTextRedundancy( options.textredundancy );
-      myCGNTagger = new CGNTagger( theErrLog );
+      myCGNTagger = new CGNTagger( theErrLog,theDbgLog );
       stat = myCGNTagger->init( configuration );
       if ( stat ){
 	myCGNTagger->set_eos_mark( options.uttmark );
 	myCGNTagger->set_text_redundancy( options.textredundancy );
 	if ( options.doIOB ){
-	  myIOBTagger = new IOBTagger( theErrLog );
+	  myIOBTagger = new IOBTagger( theErrLog, theDbgLog );
 	  stat = myIOBTagger->init( configuration );
 	  if ( stat ){
 	    myIOBTagger->set_eos_mark( options.uttmark );
 	  }
 	}
 	if ( stat && options.doNER ){
-	  myNERTagger = new NERTagger( theErrLog );
+	  myNERTagger = new NERTagger( theErrLog, theDbgLog );
 	  stat = myNERTagger->init( configuration );
 	  if ( stat ){
 	    myNERTagger->set_eos_mark( options.uttmark );
 	  }
 	}
 	if ( stat && options.doLemma ){
-	  myMblem = new Mblem(theErrLog);
+	  myMblem = new Mblem(theErrLog,theDbgLog);
 	  stat = myMblem->init( configuration );
 	}
 	if ( stat && options.doMorph ){
-	  myMbma = new Mbma(theErrLog);
+	  myMbma = new Mbma(theErrLog,theDbgLog);
 	  stat = myMbma->init( configuration );
 	  if ( stat ) {
 	    if ( options.doDeepMorph )
@@ -293,10 +296,10 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	  }
 	}
 	if ( stat && options.doMwu ){
-	  myMwu = new Mwu(theErrLog);
+	  myMwu = new Mwu(theErrLog,theDbgLog);
 	  stat = myMwu->init( configuration );
 	  if ( stat && options.doParse ){
-	    myParser = new Parser(theErrLog);
+	    myParser = new Parser(theErrLog,theDbgLog);
 	    stat = myParser->init( configuration );
 	  }
 	}
@@ -317,7 +320,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 		      << " threads instead" << endl;
     }
     else if ( options.debugFlag ){
-      LOG << "running on " << curt
+      DBG << "running on " << curt
 		      << " threads" << endl;
     }
 
@@ -345,7 +348,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 #pragma omp section
       {
 	try {
-	  tokenizer = new UctoTokenizer(theErrLog);
+	  tokenizer = new UctoTokenizer(theErrLog,theDbgLog);
 	  tokStat = tokenizer->init( configuration );
 	}
 	catch ( const exception& e ){
@@ -369,7 +372,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       {
 	if ( options.doLemma ){
 	  try {
-	    myMblem = new Mblem(theErrLog);
+	    myMblem = new Mblem(theErrLog,theDbgLog);
 	    lemStat = myMblem->init( configuration );
 	  }
 	  catch ( const exception& e ){
@@ -382,7 +385,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       {
 	if ( options.doMorph ){
 	  try {
-	    myMbma = new Mbma(theErrLog);
+	    myMbma = new Mbma(theErrLog,theDbgLog);
 	    mbaStat = myMbma->init( configuration );
 	    if ( options.doDeepMorph )
 	      myMbma->setDeepMorph(true);
@@ -396,7 +399,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 #pragma omp section
       {
 	try {
-	  myCGNTagger = new CGNTagger( theErrLog );
+	  myCGNTagger = new CGNTagger( theErrLog, theDbgLog );
 	  tagStat = myCGNTagger->init( configuration );
 	  myCGNTagger->set_text_redundancy( options.textredundancy );
 	}
@@ -409,7 +412,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       {
 	if ( options.doIOB ){
 	  try {
-	    myIOBTagger = new IOBTagger( theErrLog );
+	    myIOBTagger = new IOBTagger( theErrLog, theDbgLog );
 	    iobStat = myIOBTagger->init( configuration );
 	  }
 	  catch ( const exception& e ){
@@ -422,7 +425,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       {
 	if ( options.doNER ){
 	  try {
-	    myNERTagger = new NERTagger( theErrLog );
+	    myNERTagger = new NERTagger( theErrLog, theDbgLog );
 	    nerStat = myNERTagger->init( configuration );
 	  }
 	  catch ( const exception& e ){
@@ -435,13 +438,13 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       {
 	if ( options.doMwu ){
 	  try {
-	    myMwu = new Mwu(theErrLog);
+	    myMwu = new Mwu( theErrLog, theDbgLog );
 	    mwuStat = myMwu->init( configuration );
 	    if ( mwuStat && options.doParse ){
 	      TiCC::Timer initTimer;
 	      initTimer.start();
 	      try {
-		myParser = new Parser(theErrLog);
+		myParser = new Parser( theErrLog, theDbgLog );
 		parStat = myParser->init( configuration );
 		initTimer.stop();
 		LOG << "init Parse took: " << initTimer << endl;
@@ -545,7 +548,7 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
   folia::KWargs args;
   args["id"] = doc->id() + ".text";
   folia::Text *text = new folia::Text( args );
-  doc->append( text );
+  doc->setRoot( text );
   return text;
 }
 
@@ -617,15 +620,15 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     la = sent->annotation<folia::LangAnnotation>()->cls();
   }
   if (options.debugFlag > 1){
-    LOG << "fd.language = " << fd.language << endl;
-    LOG << "options.language = " << options.language << endl;
-    LOG << "sentence language = " << la << endl;
+    DBG << "fd.language = " << fd.language << endl;
+    DBG << "options.language = " << options.language << endl;
+    DBG << "sentence language = " << la << endl;
   }
   if ( !la.empty() && la != options.language
        && options.language != "none" ){
     // skip
     if ( options.debugFlag > 0 ){
-      LOG << "append_to_sentence() SKIP a sentence: " << la << endl;
+      DBG << "append_to_sentence() SKIP a sentence: " << la << endl;
     }
   }
   else {
@@ -673,7 +676,7 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
        && options.language != "none"
        && fd.language != options.language ){
     if ( options.debugFlag > 0 ){
-      LOG << "append_words() SKIP a sentence: " << fd.language << endl;
+      DBG << "append_words() SKIP a sentence: " << fd.language << endl;
     }
   }
   else {
@@ -721,7 +724,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
             throw( runtime_error( "read garbage" ) );
         }
         if ( options.debugFlag > 5 ){
-	  LOG << "received data [" << result << "]" << endl;
+	  DBG << "received data [" << result << "]" << endl;
 	}
 	string tmp_file = tmpnam(0);
 	ofstream os( tmp_file );
@@ -747,7 +750,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	  }
         }
         if ( options.debugFlag > 5 ){
-	  LOG << "Received: [" << data << "]" << endl;
+	  DBG << "Received: [" << data << "]" << endl;
 	}
         LOG << TiCC::Timer::now() << " Processing... " << endl;
 	istringstream inputstream(data,istringstream::in);
@@ -773,11 +776,11 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	  doc->save( output_stream, options.doKanon );
 	  delete doc;
 	}
-	//	LOG << "Done Processing... " << endl;
+	//	DBG << "Done Processing... " << endl;
       }
       if (!conn.write( (output_stream.str()) ) || !(conn.write("READY\n"))  ){
 	if (options.debugFlag > 5 ) {
-	  LOG << "socket " << conn.getMessage() << endl;
+	  DBG << "socket " << conn.getMessage() << endl;
 	}
 	throw( runtime_error( "write to client failed" ) );
       }
@@ -960,7 +963,7 @@ bool FrogAPI::frog_sentence( frog_data& sent ){
        && lan != "default"
        && lan != options.language ){
     if ( options.debugFlag >= 0 ){
-       LOG << "skipping sentence (different language: " << lan
+       DBG << "skipping sentence (different language: " << lan
 	   << " --language=" << options.language << ")" << endl;
     }
     return false;
@@ -969,7 +972,7 @@ bool FrogAPI::frog_sentence( frog_data& sent ){
     bool showParse = options.doParse;
     timers.frogTimer.start();
     if ( options.debugFlag > 5 ){
-      LOG << "Frogging sentence:" << sent << endl;
+      DBG << "Frogging sentence:" << sent << endl;
     }
     bool all_well = true;
     string exs;
@@ -993,7 +996,7 @@ bool FrogAPI::frog_sentence( frog_data& sent ){
 	  if ( options.doMorph ){
 	    timers.mbmaTimer.start();
 	    if (options.debugFlag > 1){
-	      LOG << "Calling mbma..." << endl;
+	      DBG << "Calling mbma..." << endl;
 	    }
 	    try {
 	      myMbma->Classify( word );
@@ -1010,7 +1013,7 @@ bool FrogAPI::frog_sentence( frog_data& sent ){
 	  if ( options.doLemma ){
 	    timers.mblemTimer.start();
 	    if (options.debugFlag > 1) {
-	      LOG << "Calling mblem..." << endl;
+	      DBG << "Calling mblem..." << endl;
 	    }
 	    try {
 	      myMblem->Classify( word );
@@ -1035,7 +1038,7 @@ bool FrogAPI::frog_sentence( frog_data& sent ){
 	if ( options.doNER ){
 	  timers.nerTimer.start();
 	  if (options.debugFlag > 1) {
-	    LOG << "Calling NER..." << endl;
+	    DBG << "Calling NER..." << endl;
 	  }
 	  try {
 	    myNERTagger->Classify( sent );
@@ -1223,18 +1226,18 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
       res.units.push_back( rec );
     }
     if  (options.debugFlag > 0){
-      LOG << "before frog_sentence() 1" << endl;
+      DBG << "before frog_sentence() 1" << endl;
     }
     frog_sentence( res );
     if ( !options.noStdOut ){
       showResults( os, res );
     }
     if  (options.debugFlag > 0){
-      LOG << "before append_to_words()" << endl;
+      DBG << "before append_to_words()" << endl;
     }
     append_to_words( wv, res );
     if (options.debugFlag > 0){
-      LOG << "after append_to_words()" << endl;
+      DBG << "after append_to_words()" << endl;
     }
   }
   else {
@@ -1246,18 +1249,18 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
     timers.tokTimer.stop();
     while ( res.size() > 0 ){
       if  (options.debugFlag > 0){
-	LOG << "before frog_sentence() LOOP" << endl;
+	DBG << "before frog_sentence() LOOP" << endl;
       }
       frog_sentence( res );
       if ( !options.noStdOut ){
 	showResults( os, res );
       }
       if  (options.debugFlag > 0){
-	LOG << "before append_to_sentence() A" << endl;
+	DBG << "before append_to_sentence() A" << endl;
       }
       append_to_sentence( s, res );
       if  (options.debugFlag > 0){
-	LOG << "after append_to_sentence() A" << endl;
+	DBG << "after append_to_sentence() A" << endl;
       }
       timers.tokTimer.start();
       res = tokenizer->tokenize_stream( inputstream );
@@ -1285,11 +1288,11 @@ void FrogAPI::handle_one_paragraph( ostream& os,
     folia::Sentence *s = new folia::Sentence( args, p->doc() );
     p->append( s );
     if  (options.debugFlag > 0){
-      LOG << "before append_to_sentence() B" << endl;
+      DBG << "before append_to_sentence() B" << endl;
     }
     append_to_sentence( s, res );
     if  (options.debugFlag > 0){
-      LOG << "after append_to_sentence() B" << endl;
+      DBG << "after append_to_sentence() B" << endl;
     }
     timers.tokTimer.start();
     res = tokenizer->tokenize_stream( inputstream );
@@ -1319,18 +1322,18 @@ void FrogAPI::handle_one_element( ostream& os,
   else if ( e->xmltag() == "s" ){
     // OK a text in a sentence
     if  (options.debugFlag > 0){
-      LOG << "found text in a sentence " << e << endl;
+      DBG << "found text in a sentence " << e << endl;
     }
     handle_one_sentence( os, dynamic_cast<folia::Sentence*>(e) );
     ++sentence_done;
     if  (options.debugFlag > 0){
-      LOG << "after handle_one_sentence()" << endl;
+      DBG << "after handle_one_sentence()" << endl;
     }
   }
   else if ( e->xmltag() == "p" ){
     // OK a longer text in some paragraph
     if  (options.debugFlag > 0){
-      LOG << "found text in a paragraph " << e << endl;
+      DBG << "found text in a paragraph " << e << endl;
     }
     handle_one_paragraph( os,
 			  dynamic_cast<folia::Paragraph*>(e),
@@ -1355,7 +1358,7 @@ void FrogAPI::handle_one_element( ostream& os,
       folia::Sentence *s = new folia::Sentence( args, e->doc() );
       append_to_sentence( s, res );
       if  (options.debugFlag > 0){
-	LOG << "created a new sentence: " << s << endl;
+	DBG << "created a new sentence: " << s << endl;
       }
       sents.push_back( s );
       timers.tokTimer.start();
@@ -1387,7 +1390,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
 				   ostream& output_stream,
 				   const string& xmlOutFile ){
   if ( options.debugFlag > 0 ){
-    LOG << "folia_processor(" << infilename << "," << xmlOutFile << ")" << endl;
+    DBG << "folia_processor(" << infilename << "," << xmlOutFile << ")" << endl;
   }
   if ( xmlOutFile.empty() ){
     options.noStdOut = false;
@@ -1454,7 +1457,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
     handle_one_element( output_stream, p, sentence_done );
     if ( proc.next() ){
       if  (options.debugFlag > 0){
-	LOG << "looping for more ..." << endl;
+	DBG << "looping for more ..." << endl;
       }
     }
   }
@@ -1531,7 +1534,7 @@ void FrogAPI::FrogFile( const string& infilename,
       }
       else {
 	if  (options.debugFlag > 0){
-	  LOG << TiCC::Timer::now() << " done with sentence[" << i << "]" << endl;
+	  DBG << TiCC::Timer::now() << " done with sentence[" << i << "]" << endl;
 	}
 	if ( !xmlOutFile.empty() ){
 	  root = append_to_folia( root, res );

@@ -37,7 +37,8 @@
 
 class CGNTagger: public BaseTagger {
  public:
-  explicit CGNTagger( TiCC::LogStream *l ): BaseTagger( l, "tagger" ){};
+  explicit CGNTagger( TiCC::LogStream *l, TiCC::LogStream *d = 0 ):
+  BaseTagger( l, d, "tagger" ){};
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
   void addDeclaration( folia::Processor& ) const;

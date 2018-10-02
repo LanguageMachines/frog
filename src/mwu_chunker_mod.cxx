@@ -46,7 +46,8 @@
 
 using namespace std;
 
-#define LOG *TiCC::Log(mwuLog)
+#define LOG *TiCC::Log(errLog)
+#define DBG *TiCC::Log(dbgLog)
 
 mwuAna::mwuAna( const string& txt,
 		const string& tag,
@@ -66,14 +67,16 @@ void mwuAna::merge( const mwuAna *add ){
   delete add;
 }
 
-Mwu::Mwu( TiCC::LogStream * logstream ){
-  mwuLog = new TiCC::LogStream( logstream, "mwu-" );
+Mwu::Mwu( TiCC::LogStream *errlog, TiCC::LogStream *dbglog ){
+  errLog = new TiCC::LogStream( errlog, "mwu-" );
+  dbgLog = new TiCC::LogStream( dbglog, "mwu-" );
   filter = 0;
 }
 
 Mwu::~Mwu(){
   reset();
-  delete mwuLog;
+  delete errLog;
+  delete dbgLog;
   delete filter;
 }
 
@@ -221,7 +224,7 @@ void Mwu::Classify( frog_data& sent ){
 
 void Mwu::Classify(){
   if ( debug > 1 ) {
-    LOG << "Starting mwu Classify" << endl;
+    DBG << "Starting mwu Classify" << endl;
   }
   mymap2::iterator best_match;
   size_t matchLength = 0;
@@ -244,14 +247,14 @@ void Mwu::Classify(){
   for ( i = 0; i < max; i++) {
     string word = mWords[i]->getWord();
     if ( debug > 1 ){
-      LOG << "checking word[" << i <<"]: " << word << endl;
+      DBG << "checking word[" << i <<"]: " << word << endl;
     }
     const auto matches = MWUs.equal_range(word);
     if ( matches.first != MWUs.end() ) {
       //match
       auto current_match = matches.first;
       if (  debug > 1 ) {
-	LOG << "MWU: match found for " << word << endl;
+	DBG << "MWU: match found for " << word << endl;
       }
       while( current_match != matches.second
 	     && current_match != MWUs.end() ){
@@ -259,12 +262,12 @@ void Mwu::Classify(){
 	size_t max_match = match.size();
 	size_t j = 0;
 	if ( debug > 1 ){
-	  LOG << "checking " << max_match << " matches:" << endl;
+	  DBG << "checking " << max_match << " matches:" << endl;
 	}
 	for (; i + j + 1 < max && j < max_match; j++) {
 	  if ( match[j] != mWords[i+j+1]->getWord() ) {
 	    if ( debug > 1){
-	      LOG << "match " << j <<" (" << match[j]
+	      DBG << "match " << j <<" (" << match[j]
 			   << ") doesn't match with word " << i+ j + 1
 			   << " (" << mWords[i+j + 1]->getWord() <<")" << endl;
 	    }
@@ -272,7 +275,7 @@ void Mwu::Classify(){
 	    break;
 	  }
 	  else if ( debug > 1 ){
-	    LOG << " matched " <<  mWords[i+j+1]->getWord()
+	    DBG << " matched " <<  mWords[i+j+1]->getWord()
 			 << " j=" << j << endl;
 	  }
 
@@ -286,10 +289,10 @@ void Mwu::Classify(){
       } // while
       if( debug > 1){
 	if (matchLength >0 ) {
-	  LOG << "MWU: found match starting with " << (*best_match).first << endl;
+	  DBG << "MWU: found match starting with " << (*best_match).first << endl;
 	}
 	else {
-	  LOG <<"MWU: no match" << endl;
+	  DBG <<"MWU: no match" << endl;
 	}
       }
       // we found a matching mwu, break out of loop thru sentence,
@@ -300,17 +303,17 @@ void Mwu::Classify(){
     } //match found
     else {
       if( debug > 1 )
-	LOG <<"MWU:check: no match" << endl;
+	DBG <<"MWU:check: no match" << endl;
     }
   } //for (i < max)
   if (matchLength > 0 ) {
     //concat
     if ( debug >1 ){
-      LOG << "mwu found, processing" << endl;
+      DBG << "mwu found, processing" << endl;
     }
     for ( size_t j = 1; j <= matchLength; ++j) {
       if ( debug > 1 ){
-	LOG << "concat " << mWords[i+j]->getWord() << endl;
+	DBG << "concat " << mWords[i+j]->getWord() << endl;
       }
       mWords[i]->merge( mWords[i+j] );
     }
@@ -318,8 +321,8 @@ void Mwu::Classify(){
     vector<mwuAna*>::iterator anatmp2 = ++anatmp1 + matchLength;
     mWords.erase(anatmp1, anatmp2);
     if ( debug > 1){
-      LOG << "tussenstand:" << endl;
-      LOG << *this << endl;
+      DBG << "tussenstand:" << endl;
+      DBG << *this << endl;
     }
     Classify( );
   } //if (matchLength)
