@@ -707,6 +707,7 @@ int main(int argc, char *argv[]) {
       if ( options.debugFlag ){
 	LOG << "Debug information is stored in " << db_filename << endl;
       }
+      delete the_dbg_stream;
       delete theDbgLog;
     }
     else if ( options.doServer ) {
