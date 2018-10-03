@@ -620,6 +620,7 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     la = sent->annotation<folia::LangAnnotation>()->cls();
   }
   if (options.debugFlag > 1){
+    DBG << "append_to_sentence()" << endl;
     DBG << "fd.language = " << fd.language << endl;
     DBG << "options.language = " << options.language << endl;
     DBG << "sentence language = " << la << endl;
@@ -667,6 +668,9 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     if ( options.doParse ){
       myParser->add_result( fd, wv );
     }
+  }
+  if (options.debugFlag > 1){
+    DBG << "done with append_to_sentence()" << endl;
   }
 }
 
@@ -1242,7 +1246,9 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
   }
   else {
     string text = s->str(options.inputclass);
-    cerr << "frog: " << text << endl;
+    if ( options.debugFlag > 0 ){
+      DBG << "frog-sentence:" << text << endl;
+    }
     istringstream inputstream(text,istringstream::in);
     timers.tokTimer.start();
     frog_data res = tokenizer->tokenize_stream( inputstream );
@@ -1273,7 +1279,9 @@ void FrogAPI::handle_one_paragraph( ostream& os,
 				    folia::Paragraph *p,
 				    int& sentence_done ){
   string text = p->str(options.inputclass);
-  cerr << "frog: " << text << endl;
+  if ( options.debugFlag > 0 ){
+    DBG << "frog-paragraph:" << text << endl;
+  }
   istringstream inputstream(text,istringstream::in);
   timers.tokTimer.start();
   frog_data res = tokenizer->tokenize_stream( inputstream );
@@ -1284,7 +1292,10 @@ void FrogAPI::handle_one_paragraph( ostream& os,
       showResults( os, res );
     }
     folia::KWargs args;
-    args["generate_id"] = p->id();
+    string p_id = p->id();
+    if ( !p_id.empty() ){
+      args["generate_id"] = p_id;
+    }
     folia::Sentence *s = new folia::Sentence( args, p->doc() );
     p->append( s );
     if  (options.debugFlag > 0){
@@ -1342,7 +1353,9 @@ void FrogAPI::handle_one_element( ostream& os,
   else {
     // Some text outside word, paragraphs or sentences (yet)
     string text = e->str(options.inputclass);
-    cerr << "frog: " << text << endl;
+    if ( options.debugFlag > 0 ){
+      DBG << "frog-" << e->xmltag() << ":" << text << endl;
+    }
     istringstream inputstream(text,istringstream::in);
     timers.tokTimer.start();
     frog_data res = tokenizer->tokenize_stream( inputstream );
@@ -1354,7 +1367,10 @@ void FrogAPI::handle_one_element( ostream& os,
 	showResults( os, res );
       }
       folia::KWargs args;
-      args["generate_id"] = e->id();
+      string e_id = e->id();
+      if ( !e_id.empty() ){
+	args["generate_id"] = e_id;
+      }
       folia::Sentence *s = new folia::Sentence( args, e->doc() );
       append_to_sentence( s, res );
       if  (options.debugFlag > 0){
@@ -1370,7 +1386,10 @@ void FrogAPI::handle_one_element( ostream& os,
     if ( sents.size() > 1 ){
       // multiple sentences. We need a Paragraph.
       folia::KWargs args;
-      args["generate_id"] = e->id();
+      string e_id = e->id();
+      if ( !e_id.empty() ){
+	args["generate_id"] = e_id;
+      }
       folia::Paragraph *p = new folia::Paragraph( args, e->doc() );
       e->append( p );
       for ( const auto& s : sents ){
@@ -1429,6 +1448,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
     }
   }
   if  (options.debugFlag > 8){
+    proc.set_dbg_stream( theDbgLog );
     proc.set_debug( true );
   }
   myCGNTagger->addDeclaration( proc );

@@ -951,14 +951,18 @@ void Parser::add_result( const frog_data& fd,
 			 const vector<folia::Word*>& wv ) const {
   folia::Sentence *s = wv[0]->sentence();
   folia::KWargs args;
-  args["generate_id"] = s->id();
+  if ( !s->id().empty() ){
+    args["generate_id"] = s->id();
+  }
   args["set"] = getTagset();
   folia::DependenciesLayer *el = new folia::DependenciesLayer( args, s->doc() );
   s->append( el );
   for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
     string cls = fd.mw_units[pos].parse_role;
     if ( cls != "ROOT" ){
-      args["generate_id"] = el->id();
+      if ( !el->id().empty() ){
+	args["generate_id"] = el->id();
+      }
       args["class"] = cls;
       if ( textclass != "current" ){
 	args["textclass"] = textclass;

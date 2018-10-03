@@ -169,7 +169,9 @@ void IOBTagger::add_result( const frog_data& fd,
 	  // create a layer, we need it
 	  folia::KWargs args;
 	  args["set"] = getTagset();
-	  args["generate_id"] = s->id();
+	  if ( !s->id().empty() ){
+	    args["generate_id"] = s->id();
+	  }
 	  el = new folia::ChunkingLayer( args, s->doc() );
 	  s->append(el);
 	}
@@ -184,7 +186,9 @@ void IOBTagger::add_result( const frog_data& fd,
       // now make new entity
       folia::KWargs args;
       args["set"] = getTagset();
-      args["generate_id"] = el->id();
+      if ( !el->id().empty() ){
+	args["generate_id"] = el->id();
+      }
       args["class"] = word.iob_tag.substr(2);
       args["confidence"] = TiCC::toString(word.iob_confidence);
       if ( textclass != "current" ){

@@ -539,7 +539,9 @@ void NERTagger::add_result( const frog_data& fd,
 	// create a layer, we need it
 	folia::KWargs args;
 	args["set"] = getTagset();
-	args["generate_id"] = s->id();
+	if ( !s->id().empty() ){
+	  args["generate_id"] = s->id();
+	}
 	el = new folia::EntitiesLayer( args, s->doc() );
 	s->append(el);
       }

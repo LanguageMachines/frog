@@ -217,7 +217,9 @@ vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
   vector<folia::Word*> wv;
   for ( const auto& word : fd.units ){
     folia::KWargs args;
-    args["generate_id"] = s->id();
+    if ( !s->id().empty() ){
+      args["generate_id"] = s->id();
+    }
     args["class"] = word.token_class;
     if ( word.no_space ){
       args["space"] = "no";
