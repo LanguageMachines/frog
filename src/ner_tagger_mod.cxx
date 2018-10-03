@@ -130,7 +130,7 @@ bool NERTagger::fill_ners( const string& cat,
       ++ner_cnt;
     }
   }
-  LOG << "loaded " << ner_cnt << " additional " << cat
+  DBG << "loaded " << ner_cnt << " additional " << cat
       << " Named Entities from: " << file_name << endl;
   return true;
 }
