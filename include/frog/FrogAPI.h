@@ -143,7 +143,7 @@ class FrogAPI {
 			   folia::FoliaElement *e,
 			   int&  );
   void handle_one_sentence( std::ostream&, folia::Sentence * );
-  void append_to_sentence( folia::Sentence *, const frog_data& ) const;
+  void append_to_sentence( folia::Sentence *, const frog_data&, bool =true ) const;
   void append_to_words( const std::vector<folia::Word*>&,
 			const frog_data& ) const;
 

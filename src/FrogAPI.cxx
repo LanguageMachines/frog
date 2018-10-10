@@ -614,7 +614,8 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
 }
 
 void FrogAPI::append_to_sentence( folia::Sentence *sent,
-				  const frog_data& fd ) const {
+				  const frog_data& fd,
+				  bool show_parse ) const {
   string la;
   if ( sent->hasannotation<folia::LangAnnotation>() ){
     la = sent->annotation<folia::LangAnnotation>()->cls();
@@ -665,12 +666,12 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     if ( options.doMwu && !fd.mwus.empty() ){
       myMwu->add_result( fd, wv );
     }
-    if ( options.doParse ){
+    if ( options.doParse && show_parse ){
       myParser->add_result( fd, wv );
     }
-  }
-  if (options.debugFlag > 1){
-    DBG << "done with append_to_sentence()" << endl;
+    if (options.debugFlag > 1){
+      DBG << "done with append_to_sentence()" << endl;
+    }
   }
 }
 
@@ -1034,7 +1035,7 @@ bool FrogAPI::frog_sentence( frog_data& sent ){
     if ( !all_well ){
       throw runtime_error( exs );
     }
-    cout << endl;
+    //    cout << endl;
 #pragma omp parallel sections
     {
 #pragma omp section
@@ -1257,14 +1258,14 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
       if  (options.debugFlag > 0){
 	DBG << "before frog_sentence() LOOP" << endl;
       }
-      frog_sentence( res );
+      bool ok = frog_sentence( res );
       if ( !options.noStdOut ){
 	showResults( os, res );
       }
       if  (options.debugFlag > 0){
 	DBG << "before append_to_sentence() A" << endl;
       }
-      append_to_sentence( s, res );
+      append_to_sentence( s, res, ok );
       if  (options.debugFlag > 0){
 	DBG << "after append_to_sentence() A" << endl;
       }
@@ -1287,7 +1288,7 @@ void FrogAPI::handle_one_paragraph( ostream& os,
   frog_data res = tokenizer->tokenize_stream( inputstream );
   timers.tokTimer.stop();
   while ( res.size() > 0 ){
-    frog_sentence( res );
+    bool ok = frog_sentence( res );
     if ( !options.noStdOut ){
       showResults( os, res );
     }
@@ -1301,7 +1302,13 @@ void FrogAPI::handle_one_paragraph( ostream& os,
     if  (options.debugFlag > 0){
       DBG << "before append_to_sentence() B" << endl;
     }
-    append_to_sentence( s, res );
+    if ( options.doParse && !ok ){
+      LOG << "WARNING!" << endl;
+      LOG << "Sentence " << sentence_done
+	  << " isn't parsed because it contains more tokens then set with the --max-parser-tokens="
+	  << options.maxParserTokens << " option." << endl;
+    }
+    append_to_sentence( s, res, ok );
     if  (options.debugFlag > 0){
       DBG << "after append_to_sentence() B" << endl;
     }
