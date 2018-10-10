@@ -1218,9 +1218,9 @@ frog_record extract_from_word( const folia::Word* word,
 
 void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
   vector<folia::Word*> wv;
-  wv = s->select<folia::Word>( options.inputclass );
+  wv = s->words( options.inputclass );
   if ( wv.empty() ){
-    wv = s->select<folia::Word>();
+    wv = s->words();
   }
   if ( !wv.empty() ){
     // there are already words.
