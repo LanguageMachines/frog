@@ -955,6 +955,9 @@ void Parser::add_result( const frog_data& fd,
     args["generate_id"] = s->id();
   }
   args["set"] = getTagset();
+  if ( textclass != "current" ){
+    args["textclass"] = textclass;
+  }
   folia::DependenciesLayer *el = new folia::DependenciesLayer( args, s->doc() );
   s->append( el );
   for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
@@ -969,13 +972,17 @@ void Parser::add_result( const frog_data& fd,
       }
       folia::Dependency *e = new folia::Dependency( args, s->doc() );
       el->append( e );
-      folia::Headspan *dh = new folia::Headspan();
+      args.clear();
+      if ( textclass != "current" ){
+	args["textclass"] = textclass;
+      }
+      folia::Headspan *dh = new folia::Headspan( args );
       size_t head_index = fd.mw_units[pos].parse_index-1;
       for ( auto const& i : fd.mw_units[head_index].parts ){
 	dh->append( wv[i] );
       }
       e->append( dh );
-      folia::DependencyDependent *dd = new folia::DependencyDependent();
+      folia::DependencyDependent *dd = new folia::DependencyDependent( args );
       for ( auto const& i : fd.mw_units[pos].parts ){
 	dd->append( wv[i] );
       }
