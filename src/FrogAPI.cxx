@@ -533,11 +533,11 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
   if ( options.doMorph ){
     myMbma->addDeclaration( *doc );
   }
-  if ( options.doIOB ){
-    myIOBTagger->addDeclaration( *doc );
-  }
   if ( options.doNER ){
     myNERTagger->addDeclaration( *doc );
+  }
+  if ( options.doIOB ){
+    myIOBTagger->addDeclaration( *doc );
   }
   if ( options.doMwu ){
     myMwu->addDeclaration( *doc );
