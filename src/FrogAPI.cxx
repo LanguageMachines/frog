@@ -1237,12 +1237,14 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
     if ( !options.noStdOut ){
       showResults( os, res );
     }
-    if  (options.debugFlag > 0){
-      DBG << "before append_to_words()" << endl;
-    }
-    append_to_words( wv, res );
-    if (options.debugFlag > 0){
-      DBG << "after append_to_words()" << endl;
+    if ( options.doXMLout ){
+      if  (options.debugFlag > 0){
+	DBG << "before append_to_words()" << endl;
+      }
+      append_to_words( wv, res );
+      if (options.debugFlag > 0){
+	DBG << "after append_to_words()" << endl;
+      }
     }
   }
   else {
@@ -1262,12 +1264,14 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
       if ( !options.noStdOut ){
 	showResults( os, res );
       }
-      if  (options.debugFlag > 0){
-	DBG << "before append_to_sentence() A" << endl;
-      }
-      append_to_sentence( s, res, ok );
-      if  (options.debugFlag > 0){
-	DBG << "after append_to_sentence() A" << endl;
+      if ( options.doXMLout ){
+	if  (options.debugFlag > 0){
+	  DBG << "before append_to_sentence() A" << endl;
+	}
+	append_to_sentence( s, res, ok );
+	if  (options.debugFlag > 0){
+	  DBG << "after append_to_sentence() A" << endl;
+	}
       }
       timers.tokTimer.start();
       res = tokenizer->tokenize_stream( inputstream );
@@ -1289,28 +1293,30 @@ void FrogAPI::handle_one_paragraph( ostream& os,
   timers.tokTimer.stop();
   while ( res.size() > 0 ){
     bool ok = frog_sentence( res );
-    if ( !options.noStdOut ){
-      showResults( os, res );
-    }
-    folia::KWargs args;
-    string p_id = p->id();
-    if ( !p_id.empty() ){
-      args["generate_id"] = p_id;
-    }
-    folia::Sentence *s = new folia::Sentence( args, p->doc() );
-    p->append( s );
-    if  (options.debugFlag > 0){
-      DBG << "before append_to_sentence() B" << endl;
-    }
     if ( options.doParse && !ok ){
       LOG << "WARNING!" << endl;
       LOG << "Sentence " << sentence_done
 	  << " isn't parsed because it contains more tokens then set with the --max-parser-tokens="
 	  << options.maxParserTokens << " option." << endl;
     }
-    append_to_sentence( s, res, ok );
-    if  (options.debugFlag > 0){
-      DBG << "after append_to_sentence() B" << endl;
+    if ( !options.noStdOut ){
+      showResults( os, res );
+    }
+    if ( options.doXMLout ){
+      folia::KWargs args;
+      string p_id = p->id();
+      if ( !p_id.empty() ){
+	args["generate_id"] = p_id;
+      }
+      folia::Sentence *s = new folia::Sentence( args, p->doc() );
+      p->append( s );
+      if  (options.debugFlag > 0){
+	DBG << "before append_to_sentence() B" << endl;
+      }
+      append_to_sentence( s, res, ok );
+      if  (options.debugFlag > 0){
+	DBG << "after append_to_sentence() B" << endl;
+      }
     }
     timers.tokTimer.start();
     res = tokenizer->tokenize_stream( inputstream );
@@ -1332,9 +1338,11 @@ void FrogAPI::handle_one_element( ostream& os,
     if ( !options.noStdOut ){
       showResults( os, res );
     }
-    vector<folia::Word*> wv;
-    wv.push_back( word );
-    append_to_words( wv, res );
+    if ( options.doXMLout ){
+      vector<folia::Word*> wv;
+      wv.push_back( word );
+      append_to_words( wv, res );
+    }
     ++sentence_done;
   }
   else if ( e->xmltag() == "s" ){
@@ -1378,48 +1386,50 @@ void FrogAPI::handle_one_element( ostream& os,
       res = tokenizer->tokenize_stream( inputstream );
       timers.tokTimer.stop();
     }
-    if ( sents.size() > 1 ){
-      // multiple sentences. We need a Paragraph.
-      folia::KWargs args;
-      string e_id = e->id();
-      if ( !e_id.empty() ){
-	args["generate_id"] = e_id;
-      }
-      folia::Paragraph *p = new folia::Paragraph( args, e->doc() );
-      e->append( p );
-      for ( const auto& sent : sents ){
+    if ( options.doXMLout ){
+      if ( sents.size() > 1 ){
+	// multiple sentences. We need a Paragraph.
 	folia::KWargs args;
-	string p_id = p->id();
-	if ( !p_id.empty() ){
-	  args["generate_id"] = p_id;
+	string e_id = e->id();
+	if ( !e_id.empty() ){
+	  args["generate_id"] = e_id;
+	}
+	folia::Paragraph *p = new folia::Paragraph( args, e->doc() );
+	e->append( p );
+	for ( const auto& sent : sents ){
+	  folia::KWargs args;
+	  string p_id = p->id();
+	  if ( !p_id.empty() ){
+	    args["generate_id"] = p_id;
+	  }
+	  folia::Sentence *s = new folia::Sentence( args, e->doc() );
+	  append_to_sentence( s, sent );
+	  if  (options.debugFlag > 0){
+	    DBG << "created a new sentence: " << s << endl;
+	  }
+	  p->append( s );
+	  ++sentence_done;
+	}
+      }
+      else {
+	// 1 sentence, connect directly.
+	folia::KWargs args;
+	string e_id = e->id();
+	if ( e_id.empty() ){
+	  e_id = e->parent()->id();
+	}
+	if ( !e_id.empty() ){
+	  args["generate_id"] = e_id;
 	}
 	folia::Sentence *s = new folia::Sentence( args, e->doc() );
-	append_to_sentence( s, sent );
+	append_to_sentence( s, sents[0] );
 	if  (options.debugFlag > 0){
 	  DBG << "created a new sentence: " << s << endl;
 	}
-	p->append( s );
-	++sentence_done;
+	e->append( s );
       }
     }
-    else {
-      // 1 sentence, connect directly.
-      folia::KWargs args;
-      string e_id = e->id();
-      if ( e_id.empty() ){
-	e_id = e->parent()->id();
-      }
-      if ( !e_id.empty() ){
-	args["generate_id"] = e_id;
-      }
-      folia::Sentence *s = new folia::Sentence( args, e->doc() );
-      append_to_sentence( s, sents[0] );
-      if  (options.debugFlag > 0){
-	DBG << "created a new sentence: " << s << endl;
-      }
-      e->append( s );
-      ++sentence_done;
-    }
+    ++sentence_done;
   }
 }
 
