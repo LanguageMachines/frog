@@ -657,14 +657,14 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     if ( options.doMorph ){
       myMbma->add_morphemes( wv, fd );
     }
-    if ( options.doNER ){
-      myNERTagger->add_result( fd, wv );
-    }
     if ( options.doIOB ){
       myIOBTagger->add_result( fd, wv );
     }
     if ( options.doMwu && !fd.mwus.empty() ){
       myMwu->add_result( fd, wv );
+    }
+    if ( options.doNER ){
+      myNERTagger->add_result( fd, wv );
     }
     if ( options.doParse && show_parse ){
       myParser->add_result( fd, wv );
@@ -1367,29 +1367,17 @@ void FrogAPI::handle_one_element( ostream& os,
     timers.tokTimer.start();
     frog_data res = tokenizer->tokenize_stream( inputstream );
     timers.tokTimer.stop();
-    vector<folia::Sentence*> sents;
+    vector<frog_data> sents;
     while ( res.size() > 0 ){
       frog_sentence( res );
+      sents.push_back( res );
       if ( !options.noStdOut ){
 	showResults( os, res );
       }
-      folia::KWargs args;
-      string e_id = e->id();
-      if ( !e_id.empty() ){
-	args["generate_id"] = e_id;
-      }
-      folia::Sentence *s = new folia::Sentence( args, e->doc() );
-      append_to_sentence( s, res );
-      if  (options.debugFlag > 0){
-	DBG << "created a new sentence: " << s << endl;
-      }
-      sents.push_back( s );
       timers.tokTimer.start();
       res = tokenizer->tokenize_stream( inputstream );
       timers.tokTimer.stop();
-      ++sentence_done;
     }
-    assert( sents.size() > 0 );
     if ( sents.size() > 1 ){
       // multiple sentences. We need a Paragraph.
       folia::KWargs args;
@@ -1399,14 +1387,37 @@ void FrogAPI::handle_one_element( ostream& os,
       }
       folia::Paragraph *p = new folia::Paragraph( args, e->doc() );
       e->append( p );
-      for ( const auto& s : sents ){
+      for ( const auto& sent : sents ){
+	folia::KWargs args;
+	string p_id = p->id();
+	if ( !p_id.empty() ){
+	  args["generate_id"] = p_id;
+	}
+	folia::Sentence *s = new folia::Sentence( args, e->doc() );
+	append_to_sentence( s, sent );
+	if  (options.debugFlag > 0){
+	  DBG << "created a new sentence: " << s << endl;
+	}
 	p->append( s );
 	++sentence_done;
       }
     }
     else {
       // 1 sentence, connect directly.
-      e->append( sents[0] );
+      folia::KWargs args;
+      string e_id = e->id();
+      if ( e_id.empty() ){
+	e_id = e->parent()->id();
+      }
+      if ( !e_id.empty() ){
+	args["generate_id"] = e_id;
+      }
+      folia::Sentence *s = new folia::Sentence( args, e->doc() );
+      append_to_sentence( s, sents[0] );
+      if  (options.debugFlag > 0){
+	DBG << "created a new sentence: " << s << endl;
+      }
+      e->append( s );
       ++sentence_done;
     }
   }
