@@ -1500,9 +1500,10 @@ void FrogAPI::run_folia_processor( const string& infilename,
     }
   }
   if ( sentence_done == 0 ){
-    LOG << "document contains no sentences or paragraphs!" << endl;
-     LOG << "NO result!" << endl;
-     return;
+    LOG << "document contains no text in the desired inputclass: "
+	<< options.inputclass << endl;
+    LOG << "NO result!" << endl;
+    return;
   }
   if ( !xmlOutFile.empty() ){
     proc.save( xmlOutFile, options.doKanon );
