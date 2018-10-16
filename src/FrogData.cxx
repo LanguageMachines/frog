@@ -105,13 +105,18 @@ ostream& operator<<( ostream& os, const frog_record& fd ){
 }
 
 frog_record merge( const frog_data& fd, size_t start, size_t finish ){
+  // cerr << "merge a FD of size:" << fd.units.size() << " with start=" << start
+  //      << " and finish=" << finish << endl;
   frog_record result = fd.units[start];
+  //  cerr << "start: " << result << endl;
   result.parts.insert( start );
   for ( size_t i = start+1; i <= finish; ++i ){
     result.parts.insert( i );
     result.word += "_" + fd.units[i].word;
     result.clean_word += "_" + fd.units[i].word;
-    result.lemmas[0] += "_" + fd.units[i].lemmas[0];
+    if ( !result.lemmas.empty() ){
+      result.lemmas[0] += "_" + fd.units[i].lemmas[0];
+    }
     if ( result.morphs.empty() ){
       if ( result.deep_morph_string.empty() ){
 	// no morphemes
@@ -122,11 +127,14 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
     }
     else {
       result.morph_string += "_" + fd.units[i].morph_string;
+      // cerr << endl << "STEP " << i << endl;
+      // cerr << "result.morphs=" << result.morphs << endl;
+      // cerr << "fd.units[" << i << "].morphs=" << fd.units[i].morphs << endl;
+      result.morphs[0].back() += "_";
       for ( size_t pos=0; pos < fd.units[i].morphs.size(); ++pos ){
-	result.morphs[pos].back() += "_";
 	auto variant = fd.units[i].morphs[pos];
 	for ( size_t k=0; k < variant.size(); ++k ){
-	  result.morphs[pos].back() += variant[k];
+	  result.morphs[0].back() += variant[k];
 	}
       }
     }
@@ -135,7 +143,11 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
     result.tag_confidence *= fd.units[i].tag_confidence;
     result.ner_tag += "_" + fd.units[i].ner_tag;
     result.iob_tag += "_" + fd.units[i].iob_tag;
+    // cerr << "intermediate: " << result << endl;
+    // cerr << "result.morphs=" << result.morphs << endl;
   }
+  // cerr << "DONE: " << result << endl;
+  // cerr << "result.morphs=" << result.morphs << endl;
   return result;
 }
 

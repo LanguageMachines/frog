@@ -1416,9 +1416,10 @@ void FrogAPI::handle_one_element( ostream& os,
 	folia::KWargs args;
 	string e_id = e->id();
 	if ( e_id.empty() ){
-	  e_id = e->parent()->id();
+	  e_id = e->generateId( e->xmltag() );
+	  args["id"] = e_id + ".s.1";
 	}
-	if ( !e_id.empty() ){
+	else {
 	  args["generate_id"] = e_id;
 	}
 	folia::Sentence *s = new folia::Sentence( args, e->doc() );
@@ -1479,6 +1480,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
     proc.set_dbg_stream( theDbgLog );
     proc.set_debug( true );
   }
+  //  proc.set_debug( true );
   myCGNTagger->addDeclaration( proc );
   if ( options.doLemma ){
     myMblem->addDeclaration( proc );
@@ -1502,6 +1504,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
   int sentence_done = 0;
   folia::FoliaElement *p = 0;
   while ( (p = proc.next_text_parent() ) ){
+    //    cerr << "next text parent: " << p << endl;
     handle_one_element( output_stream, p, sentence_done );
     if ( proc.next() ){
       if  (options.debugFlag > 0){
@@ -1510,9 +1513,10 @@ void FrogAPI::run_folia_processor( const string& infilename,
     }
   }
   if ( sentence_done == 0 ){
-    LOG << "document contains no sentences or paragraphs!" << endl;
-     LOG << "NO result!" << endl;
-     return;
+    LOG << "document contains no text in the desired inputclass: "
+	<< options.inputclass << endl;
+    LOG << "NO result!" << endl;
+    return;
   }
   if ( !xmlOutFile.empty() ){
     proc.save( xmlOutFile, options.doKanon );

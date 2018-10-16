@@ -973,9 +973,9 @@ void Parser::add_result( const frog_data& fd,
       folia::Dependency *e = new folia::Dependency( args, s->doc() );
       el->append( e );
       args.clear();
-      if ( textclass != "current" ){
-	args["textclass"] = textclass;
-      }
+      // if ( textclass != "current" ){
+      // 	args["textclass"] = textclass;
+      // }
       folia::Headspan *dh = new folia::Headspan( args );
       size_t head_index = fd.mw_units[pos].parse_index-1;
       for ( auto const& i : fd.mw_units[head_index].parts ){
