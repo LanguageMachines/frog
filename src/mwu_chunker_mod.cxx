@@ -60,9 +60,6 @@ mwuAna::mwuAna( const string& txt,
 }
 
 void mwuAna::merge( const mwuAna *add ){
-  if ( !add->fwords.empty() ){
-    fwords.push_back( add->fwords[0] );
-  }
   mwu_end = add->mwu_end;
   delete add;
 }

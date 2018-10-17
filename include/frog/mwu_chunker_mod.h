@@ -61,7 +61,6 @@ class mwuAna {
     mwuAna(){};
     std::string word;
     bool spec;
-    std::vector<folia::Word *> fwords;
 };
 
 #define mymap2 std::multimap<std::string, std::vector<std::string> >
