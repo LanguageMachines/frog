@@ -78,6 +78,6 @@ class frog_data {
 };
 
 std::ostream& operator<<( std::ostream&, const frog_record& );
-std::ostream& operator<<( std::ostream&, frog_data& );
+std::ostream& operator<<( std::ostream&, const frog_data& );
 
 #endif

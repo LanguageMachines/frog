@@ -172,7 +172,7 @@ void frog_data::resolve_mwus(){
   }
 }
 
-ostream& operator<<( ostream& os, frog_data& fd ){
+ostream& operator<<( ostream& os, const frog_data& fd ){
   if ( fd.mw_units.empty() ){
     for ( size_t pos=0; pos < fd.units.size(); ++pos ){
       os << pos+1 << TAB << fd.units[pos] << endl;

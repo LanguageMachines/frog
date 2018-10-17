@@ -230,9 +230,13 @@ vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
     if ( fd.language != "default" ){
       args["set"] = "tokconfig-" + fd.language;
     }
-    folia::Word *w = new folia::Word( args, s->doc() );
-    w->settext( word.word, textclass );
-    s->append( w );
+    folia::Word *w;
+#pragma omp critical (foliaupdate)
+    {
+      w = new folia::Word( args, s->doc() );
+      w->settext( word.word, textclass );
+      s->append( w );
+    }
     wv.push_back( w );
     args.clear();
     args["set"]   = getTagset();
@@ -241,14 +245,22 @@ vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
       args["textclass"] = textclass;
     }
     args["confidence"]= TiCC::toString(word.tag_confidence);
-    folia::FoliaElement *postag = w->addPosAnnotation( args );
+    folia::FoliaElement *postag;
+#pragma omp critical (foliaupdate)
+    {
+      postag = w->addPosAnnotation( args );
+    }
     vector<string> hv = TiCC::split_at_first_of( word.tag, "()" );
     string head = hv[0];
     args["class"] = head;
-    folia::Feature *feat = new folia::HeadFeature( args );
-    postag->append( feat );
-    if ( head == "SPEC" ){
+    folia::Feature *feat;
+#pragma omp critical (foliaupdate)
+    {
+      feat = new folia::HeadFeature( args );
+      postag->append( feat );
+      if ( head == "SPEC" ){
       postag->confidence(1.0);
+      }
     }
     vector<string> feats;
     if ( hv.size() > 1 ){
@@ -259,8 +271,12 @@ vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
       args["set"] =  getTagset();
       args["subset"] = getSubSet( f, head, word.tag );
       args["class"]  = f;
-      folia::Feature *feat = new folia::Feature( args, s->doc() );
-      postag->append( feat );
+      folia::Feature *feat = 0;
+#pragma omp critical (foliaupdate)
+      {
+	feat = new folia::Feature( args, s->doc() );
+	postag->append( feat );
+      }
     }
   }
   if ( textredundancy == "full" ){
@@ -281,14 +297,22 @@ void CGNTagger::add_result( const vector<folia::Word*>& wv,
       args["textclass"] = textclass;
     }
     args["confidence"]= TiCC::toString(word.tag_confidence);
-    folia::FoliaElement *postag = wv[pos]->addPosAnnotation( args );
+    folia::FoliaElement *postag;
+#pragma omp critical (foliaupdate)
+    {
+      postag = wv[pos]->addPosAnnotation( args );
+    }
     vector<string> hv = TiCC::split_at_first_of( word.tag, "()" );
     string head = hv[0];
     args["class"] = head;
-    folia::Feature *feat = new folia::HeadFeature( args );
-    postag->append( feat );
-    if ( head == "SPEC" ){
-      postag->confidence(1.0);
+    folia::Feature *feat;
+#pragma omp critical (foliaupdate)
+    {
+      feat = new folia::HeadFeature( args );
+      postag->append( feat );
+      if ( head == "SPEC" ){
+	postag->confidence(1.0);
+      }
     }
     vector<string> feats;
     if ( hv.size() > 1 ){
@@ -299,12 +323,19 @@ void CGNTagger::add_result( const vector<folia::Word*>& wv,
       args["set"] =  getTagset();
       args["subset"] = getSubSet( f, head, word.tag );
       args["class"]  = f;
-      folia::Feature *feat = new folia::Feature( args, wv[pos]->doc() );
-      postag->append( feat );
+      folia::Feature *feat;
+#pragma omp critical (foliaupdate)
+      {
+	feat = new folia::Feature( args, wv[pos]->doc() );
+	postag->append( feat );
+      }
     }
     ++pos;
   }
-  if ( textredundancy == "full" ){
-    wv[0]->sentence()->settext( wv[0]->str(textclass), textclass );
+  if ( textredundancy == "full" ) {
+#pragma omp critical (foliaupdate)
+    {
+      wv[0]->sentence()->settext( wv[0]->str(textclass), textclass );
+    }
   }
 }

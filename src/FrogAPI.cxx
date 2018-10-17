@@ -996,6 +996,8 @@ bool FrogAPI::frog_sentence( frog_data& sent ){
     for ( auto& word : sent.units ) {
 #pragma omp parallel sections
       {
+	// Lemmatization and Mophological analysis can be done in parallel
+	// per word
 #pragma omp section
 	{
 	  if ( options.doMorph ){
@@ -1038,6 +1040,7 @@ bool FrogAPI::frog_sentence( frog_data& sent ){
     //    cout << endl;
 #pragma omp parallel sections
     {
+      // NER and IOB tagging can be done in parallel, per Sentence
 #pragma omp section
       {
 	if ( options.doNER ){
@@ -1070,6 +1073,10 @@ bool FrogAPI::frog_sentence( frog_data& sent ){
 	}
       }
     }
+    //
+    // MWU resolution needs the previous results per sentence
+    // AND must be done before parsing
+    //
     if ( !all_well ){
       throw runtime_error( exs );
     }

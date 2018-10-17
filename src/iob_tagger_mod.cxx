@@ -172,8 +172,11 @@ void IOBTagger::add_result( const frog_data& fd,
 	  if ( !s->id().empty() ){
 	    args["generate_id"] = s->id();
 	  }
-	  el = new folia::ChunkingLayer( args, s->doc() );
-	  s->append(el);
+#pragma omp critical (foliaupdate)
+	  {
+	    el = new folia::ChunkingLayer( args, s->doc() );
+	    s->append(el);
+	  }
 	}
       }
       // a new entity starts here
@@ -181,7 +184,10 @@ void IOBTagger::add_result( const frog_data& fd,
 	// add this iob to the layer
 	iob->confidence( iob_conf );
 	iob_conf = 0.0;
-	el->append( iob );
+#pragma omp critical (foliaupdate)
+	{
+	  el->append( iob );
+	}
       }
       // now make new entity
       folia::KWargs args;
@@ -194,20 +200,29 @@ void IOBTagger::add_result( const frog_data& fd,
       if ( textclass != "current" ){
 	args["textclass"] = textclass;
       }
-      iob = new folia::Chunk( args, s->doc() );
-      iob_conf = word.iob_confidence;
-      iob->append( wv[i] );
+#pragma omp critical (foliaupdate)
+      {
+	iob = new folia::Chunk( args, s->doc() );
+	iob_conf = word.iob_confidence;
+	iob->append( wv[i] );
+      }
     }
     else if ( word.iob_tag[0] == 'I' ){
       // continue in an entity
       iob_conf *= word.iob_confidence;
-      iob->append( wv[i] );
+#pragma omp critical (foliaupdate)
+      {
+	iob->append( wv[i] );
+      }
     }
     else if ( word.iob_tag[0] == '0' ){
       if ( iob != 0 ){
 	iob->confidence( iob_conf );
 	iob_conf = 0.0;
-	el->append( iob );
+#pragma omp critical (foliaupdate)
+	{
+	  el->append( iob );
+	}
 	iob = 0;
       }
     }
@@ -216,6 +231,9 @@ void IOBTagger::add_result( const frog_data& fd,
   if ( iob != 0 ){
     // some leftovers
     iob->confidence( iob_conf );
-    el->append( iob );
+#pragma omp critical (foliaupdate)
+    {
+      el->append( iob );
+    }
   }
 }

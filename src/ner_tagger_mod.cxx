@@ -542,12 +542,18 @@ void NERTagger::add_result( const frog_data& fd,
 	if ( !s->id().empty() ){
 	  args["generate_id"] = s->id();
 	}
-	el = new folia::EntitiesLayer( args, s->doc() );
-	s->append(el);
+#pragma omp critical (foliaupdate )
+	{
+	  el = new folia::EntitiesLayer( args, s->doc() );
+	  s->append(el);
+	}
       }
       // a new entity starts here
       if ( ner != 0 ){
-	el->append( ner );
+#pragma omp critical (foliaupdate )
+	{
+	  el->append( ner );
+	}
       }
       // now make new entity
       folia::KWargs args;
@@ -558,17 +564,25 @@ void NERTagger::add_result( const frog_data& fd,
       if ( textclass != "current" ){
 	args["textclass"] = textclass;
       }
-      ner = new folia::Entity( args, s->doc() );
-      ner->append( wv[i] );
+#pragma omp critical (foliaupdate )
+      {
+	ner = new folia::Entity( args, s->doc() );
+	ner->append( wv[i] );
+      }
     }
     else if ( word.ner_tag[0] == 'I' ){
       // continue in an entity
-      assert( ner != 0 );
-      ner->append( wv[i] );
+#pragma omp critical (foliaupdate )
+      {
+	ner->append( wv[i] );
+      }
     }
     else if ( word.ner_tag[0] == '0' ){
       if ( ner != 0 ){
-	el->append( ner );
+#pragma omp critical (foliaupdate )
+	{
+	  el->append( ner );
+	}
 	ner = 0;
       }
     }
@@ -576,6 +590,9 @@ void NERTagger::add_result( const frog_data& fd,
   }
   if ( ner != 0 ){
     // some leftovers
-    el->append( ner );
+#pragma omp critical (foliaupdate )
+    {
+      el->append( ner );
+    }
   }
 }
