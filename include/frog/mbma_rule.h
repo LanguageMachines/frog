@@ -71,6 +71,7 @@ public:
   Rule( const std::vector<std::string>&,
 	const icu::UnicodeString&,
 	TiCC::LogStream&,
+	TiCC::LogStream&,
 	int );
   ~Rule();
   std::vector<std::string> extract_morphemes() const;
@@ -92,6 +93,7 @@ public:
   Compound::Type compound;
   BracketNest *brackets;
   TiCC::LogStream& myLog;
+  TiCC::LogStream& dbgLog;
   double confidence;
 };
 

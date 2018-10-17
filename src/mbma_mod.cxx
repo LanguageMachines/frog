@@ -316,7 +316,7 @@ void Mbma::clearAnalysis(){
 
 Rule* Mbma::matchRule( const std::vector<std::string>& ana,
 		       const icu::UnicodeString& word ){
-  Rule *rule = new Rule( ana, word, *dbgLog, debugFlag );
+  Rule *rule = new Rule( ana, word, *errLog, *dbgLog, debugFlag );
   if ( rule->performEdits() ){
     rule->reduceZeroNodes();
     if ( debugFlag > 1 ){
