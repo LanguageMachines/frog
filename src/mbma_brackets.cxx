@@ -914,13 +914,6 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
       folia::Feature *feat = new folia::Feature( args );
       result->append( feat );
     }
-    args.clear();
-//     args["set"] = Mbma::clex_tagset;
-//     args["class"] = orig;
-// #pragma omp critical (foliaupdate)
-//     {
-//       result->addPosAnnotation( args );
-//     }
   }
   else if ( _status == Status::INFO ){
     folia::KWargs args;

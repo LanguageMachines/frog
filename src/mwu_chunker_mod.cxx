@@ -88,13 +88,10 @@ void Mwu::reset(){
 }
 
 void Mwu::add( frog_record& fd, size_t index ){
-  icu::UnicodeString tmp;
-#pragma omp critical (dataupdate)
-  {
-    tmp = TiCC::UnicodeFromUTF8(fd.word);
-  }
-  if ( filter )
+  icu::UnicodeString tmp = TiCC::UnicodeFromUTF8(fd.word);
+  if ( filter ){
     tmp = filter->filter( tmp );
+  }
   string txt = TiCC::UnicodeToUTF8( tmp );
   mWords.push_back( new mwuAna( txt, fd.tag, glue_tag, index ) );
 }
@@ -337,8 +334,12 @@ void Mwu::add_result( const frog_data& fd,
     args["generate_id"] = s->id();
   }
   args["set"] = getTagset();
-  folia::EntitiesLayer *el = new folia::EntitiesLayer( args, s->doc() );
-  s->append( el );
+  folia::EntitiesLayer *el;
+#pragma omp critical (foliaupdate)
+  {
+    el = new folia::EntitiesLayer( args, s->doc() );
+    s->append( el );
+  }
   for ( const auto& mwu : fd.mwus ){
     if ( !el->id().empty() ){
       args["generate_id"] = el->id();
@@ -346,10 +347,13 @@ void Mwu::add_result( const frog_data& fd,
     if ( textclass != "current" ){
       args["textclass"] = textclass;
     }
-    folia::Entity *e = new folia::Entity( args, s->doc() );
-    el->append( e );
-    for ( size_t pos = mwu.first; pos <= mwu.second; ++pos ){
-      e->append( wv[pos] );
+#pragma omp critical (foliaupdate)
+    {
+      folia::Entity *e = new folia::Entity( args, s->doc() );
+      el->append( e );
+      for ( size_t pos = mwu.first; pos <= mwu.second; ++pos ){
+	e->append( wv[pos] );
+      }
     }
   }
 }

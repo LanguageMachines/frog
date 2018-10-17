@@ -297,9 +297,10 @@ void Mblem::Classify( frog_record& fd ){
   }
   if ( token_class == "ABBREVIATION" ){
     // We dont handle ABBREVIATION's so just take the word as such
+    string word = TiCC::UnicodeToUTF8(uword);
 #pragma omp critical (dataupdate)
     {
-      fd.lemmas.push_back( TiCC::UnicodeToUTF8(uword) );
+      fd.lemmas.push_back( word );
     }
     return;
   }
@@ -323,9 +324,10 @@ void Mblem::Classify( frog_record& fd ){
   }
   if ( one_one_tags.find(pos) != one_one_tags.end() ){
     // some tags are just taken as such
+    string word = TiCC::UnicodeToUTF8(uword);
 #pragma omp critical (dataupdate)
     {
-      fd.lemmas.push_back( TiCC::UnicodeToUTF8(uword) );
+      fd.lemmas.push_back( word );
     }
     return;
   }
@@ -337,9 +339,10 @@ void Mblem::Classify( frog_record& fd ){
   makeUnique();
   if ( mblemResult.empty() ){
     // just return the word as a lemma
+    string word = TiCC::UnicodeToUTF8(uword);
 #pragma omp critical (dataupdate)
     {
-      fd.lemmas.push_back( TiCC::UnicodeToUTF8( uword ) );
+      fd.lemmas.push_back( word );
     }
   }
   else {
@@ -519,7 +522,10 @@ void Mblem::add_lemmas( const vector<folia::Word*>& wv,
       if ( textclass != "current" ){
 	args["textclass"] = textclass;
       }
-      wv[i]->addLemmaAnnotation( args );
+#pragma omp critical (foliaupdate)
+      {
+	wv[i]->addLemmaAnnotation( args );
+      }
     }
   }
 }
