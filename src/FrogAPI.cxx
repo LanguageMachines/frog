@@ -780,7 +780,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	  }
 	  res = tokenizer->tokenize_stream( inputstream );
 	}
-	if ( options.doXMLout ){
+	if ( options.doXMLout && doc ){
 	  doc->save( output_stream, options.doKanon );
 	  delete doc;
 	}
