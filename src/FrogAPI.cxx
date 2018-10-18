@@ -1135,24 +1135,26 @@ string filter_non_NC( const string& filename ){
   return result;
 }
 
+const string Tab = "\t";
+
 void FrogAPI::show_record( ostream& os, const frog_record& fd ) const {
-  os << fd.word << TAB;
+  os << fd.word << Tab;
   if ( options.doLemma ){
     if ( !fd.lemmas.empty() ){
       os << fd.lemmas[0];
     }
     else {
-      os << TAB;
+      os << Tab;
     }
   }
   else {
-    os << TAB;
+    os << Tab;
   }
-  os << TAB;
+  os << Tab;
   if ( options.doMorph ){
     if ( fd.morphs.empty() ){
       if ( !fd.deep_morph_string.empty() ){
-	os << fd.deep_morph_string << TAB;
+	os << fd.deep_morph_string << Tab;
 	if ( fd.compound_string == "0"  ){
 	  os << "0";
 	}
@@ -1166,26 +1168,26 @@ void FrogAPI::show_record( ostream& os, const frog_record& fd ) const {
     }
   }
   else {
-    os << TAB;
+    os << Tab;
   }
-  os << TAB << fd.tag << TAB << fixed << showpoint << std::setprecision(6) << fd.tag_confidence;
+  os << Tab << fd.tag << Tab << fixed << showpoint << std::setprecision(6) << fd.tag_confidence;
   if ( options.doNER ){
-    os << TAB << TiCC::uppercase(fd.ner_tag);
+    os << Tab << TiCC::uppercase(fd.ner_tag);
   }
   else {
-    os << TAB << TAB;
+    os << Tab << Tab;
   }
   if ( options.doIOB ){
-    os << TAB << fd.iob_tag;
+    os << Tab << fd.iob_tag;
   }
   else {
-    os << TAB << TAB;
+    os << Tab << Tab;
   }
   if ( options.doParse ){
-    os << TAB << fd.parse_index << TAB << fd.parse_role;
+    os << Tab << fd.parse_index << Tab << fd.parse_role;
   }
   else {
-    os << TAB << TAB << TAB << TAB;
+    os << Tab << Tab << Tab << Tab;
   }
 }
 
@@ -1193,14 +1195,14 @@ void FrogAPI::showResults( ostream& os,
 			   const frog_data& fd ) const {
   if ( fd.mw_units.empty() ){
     for ( size_t pos=0; pos < fd.units.size(); ++pos ){
-      os << pos+1 << TAB;
+      os << pos+1 << Tab;
       show_record( os, fd.units[pos] );
       os << endl;
     }
   }
   else {
     for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
-      os << pos+1 << TAB;
+      os << pos+1 << Tab;
       show_record( os, fd.mw_units[pos] );
       os << endl;
     }
