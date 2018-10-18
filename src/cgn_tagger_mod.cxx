@@ -253,10 +253,9 @@ vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
     vector<string> hv = TiCC::split_at_first_of( word.tag, "()" );
     string head = hv[0];
     args["class"] = head;
-    folia::Feature *feat;
 #pragma omp critical (foliaupdate)
     {
-      feat = new folia::HeadFeature( args );
+      folia::Feature *feat = new folia::HeadFeature( args );
       postag->append( feat );
       if ( head == "SPEC" ){
       postag->confidence(1.0);
@@ -271,10 +270,9 @@ vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
       args["set"] =  getTagset();
       args["subset"] = getSubSet( f, head, word.tag );
       args["class"]  = f;
-      folia::Feature *feat = 0;
 #pragma omp critical (foliaupdate)
       {
-	feat = new folia::Feature( args, s->doc() );
+	folia::Feature *feat = new folia::Feature( args, s->doc() );
 	postag->append( feat );
       }
     }
@@ -305,10 +303,9 @@ void CGNTagger::add_result( const vector<folia::Word*>& wv,
     vector<string> hv = TiCC::split_at_first_of( word.tag, "()" );
     string head = hv[0];
     args["class"] = head;
-    folia::Feature *feat;
 #pragma omp critical (foliaupdate)
     {
-      feat = new folia::HeadFeature( args );
+      folia::Feature *feat = new folia::HeadFeature( args );
       postag->append( feat );
       if ( head == "SPEC" ){
 	postag->confidence(1.0);
@@ -323,10 +320,9 @@ void CGNTagger::add_result( const vector<folia::Word*>& wv,
       args["set"] =  getTagset();
       args["subset"] = getSubSet( f, head, word.tag );
       args["class"]  = f;
-      folia::Feature *feat;
 #pragma omp critical (foliaupdate)
       {
-	feat = new folia::Feature( args, wv[pos]->doc() );
+	folia::Feature *feat = new folia::Feature( args, wv[pos]->doc() );
 	postag->append( feat );
       }
     }
