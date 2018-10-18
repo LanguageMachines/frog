@@ -556,6 +556,9 @@ static int p_count = 0;
 
 folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
 					       const frog_data& fd ) const {
+  if ( !root || !root->doc() ){
+    return 0;
+  }
   folia::FoliaElement *result = root;
   folia::KWargs args;
   if ( fd.units[0].new_paragraph ){

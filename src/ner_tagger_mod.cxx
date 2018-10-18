@@ -572,9 +572,14 @@ void NERTagger::add_result( const frog_data& fd,
     }
     else if ( word.ner_tag[0] == 'I' ){
       // continue in an entity
+      if ( ner ){
 #pragma omp critical (foliaupdate )
-      {
-	ner->append( wv[i] );
+	{
+	  ner->append( wv[i] );
+	}
+      }
+      else {
+	throw logic_error( "unexpected empty ner" );
       }
     }
     else if ( word.ner_tag[0] == '0' ){

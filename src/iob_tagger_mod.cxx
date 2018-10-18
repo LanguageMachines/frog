@@ -183,7 +183,6 @@ void IOBTagger::add_result( const frog_data& fd,
       if ( iob != 0 ){
 	// add this iob to the layer
 	iob->confidence( iob_conf );
-	iob_conf = 0.0;
 #pragma omp critical (foliaupdate)
 	{
 	  el->append( iob );
@@ -210,9 +209,14 @@ void IOBTagger::add_result( const frog_data& fd,
     else if ( word.iob_tag[0] == 'I' ){
       // continue in an entity
       iob_conf *= word.iob_confidence;
+      if ( iob ){
 #pragma omp critical (foliaupdate)
-      {
-	iob->append( wv[i] );
+	{
+	  iob->append( wv[i] );
+	}
+      }
+      else {
+	throw logic_error( "unexpected empty IOB" );
       }
     }
     else if ( word.iob_tag[0] == '0' ){
