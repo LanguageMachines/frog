@@ -6,6 +6,7 @@ group: edge
 branches:
   only:
     - master
+    - new_datastructure
 
 notifications:
   irc:
@@ -128,8 +129,9 @@ install:
 script:
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
   - make check
-  - git clone https://github.com/LanguageMachines/frogtests.git
+  - git clone https://github.com/LanguageMachines/frogtests.git;
   - cd frogtests
+  - if [ "$TRAVIS_BRANCH" == "new_datastructure" ]; then git checkout new_datastructure; fi
   - frog_bin=/usr/local/bin ./testall >&2
 
 after_failure:
