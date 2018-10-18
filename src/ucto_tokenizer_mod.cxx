@@ -209,6 +209,14 @@ void UctoTokenizer::setInputXml( bool b ){
     throw runtime_error( "ucto tokenizer not initialized" );
 }
 
+void UctoTokenizer::setFiltering( bool b ){
+  if ( tokenizer ){
+    tokenizer->setFiltering( b );
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initialized" );
+}
+
 void UctoTokenizer::setTextRedundancy( const string& tr ) {
   if ( tokenizer ){
     tokenizer->setTextRedundancy( tr );

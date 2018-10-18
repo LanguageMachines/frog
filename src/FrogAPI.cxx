@@ -1444,6 +1444,9 @@ void FrogAPI::handle_one_element( ostream& os,
 void FrogAPI::run_folia_processor( const string& infilename,
 				   ostream& output_stream,
 				   const string& xmlOutFile ){
+  if ( options.inputclass == options.outputclass ){
+    tokenizer->setFiltering(false);
+  }
   if ( options.debugFlag > 0 ){
     DBG << "folia_processor(" << infilename << "," << xmlOutFile << ")" << endl;
   }

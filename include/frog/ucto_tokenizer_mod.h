@@ -45,6 +45,7 @@ class UctoTokenizer {
   void setInputEncoding( const std::string& );
   void setQuoteDetection( bool );
   void setInputXml( bool );
+  void setFiltering( bool );
   void setInputClass( const std::string& );
   void setOutputClass( const std::string& );
   void setDocID( const std::string& );
