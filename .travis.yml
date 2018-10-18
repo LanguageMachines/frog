@@ -4,9 +4,8 @@ group: edge
 
 # whitelist
 branches:
-  only:
-    - master
-    - new_datastructure
+  - master
+  - new_datastructure
 
 notifications:
   irc:
@@ -76,6 +75,7 @@ before_install:
   - cd ..
   - git clone https://github.com/LanguageMachines/libfolia
   - cd libfolia
+  - if [ "$TRAVIS_BRANCH" == "new_datastructure" ]; then git checkout foliareader; fi
   - bash bootstrap.sh
   - ./configure $OPENMPFLAG
   - make
