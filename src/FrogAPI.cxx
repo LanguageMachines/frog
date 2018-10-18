@@ -1497,6 +1497,7 @@ void FrogAPI::FrogFile( const string& infilename,
       LOG << e.what() << endl;
       throw ( runtime_error( "read failed" ) );
     }
+    tokenizer->setInputXml(true); // THIS IS SILLY, the tokenizer knows it get FoLiA
     tokenizer->tokenize( doc );
     timers.tokTimer.stop();
     FrogDoc( doc );
