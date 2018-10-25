@@ -1572,7 +1572,7 @@ void FrogAPI::FrogFile( const string& infilename,
   else {
     ifstream TEST( infilename );
     int i = 0;
-    folia::Document *doc1 = 0;
+    folia::Document *doc = 0;
     folia::FoliaElement *root = 0;
     if ( !xmlOutFile.empty() ){
       string doc_id = infilename;
@@ -1581,7 +1581,7 @@ void FrogAPI::FrogFile( const string& infilename,
       }
       doc_id = doc_id.substr( 0, doc_id.find( ".xml" ) );
       doc_id = filter_non_NC( TiCC::basename(doc_id) );
-      root = start_document( doc_id, doc1 );
+      root = start_document( doc_id, doc );
       p_count = 0;
     }
     timers.reset();
@@ -1612,10 +1612,10 @@ void FrogAPI::FrogFile( const string& infilename,
       res = tokenizer->tokenize_stream( TEST );
       timers.tokTimer.stop();
     }
-    if ( !xmlOutFile.empty() ){
-      doc1->save( xmlOutFile, options.doKanon );
+    if ( !xmlOutFile.empty() && doc ){
+      doc->save( xmlOutFile, options.doKanon );
       LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
-      delete doc1;
+      delete doc;
     }
   }
   if ( !options.hide_timers ){
