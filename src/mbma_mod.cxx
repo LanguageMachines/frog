@@ -786,12 +786,9 @@ void Mbma::Classify( frog_record& fd ){
   string word_s;
   string tag;
   string token_class;
-#pragma omp critical (dataupdate)
-  {
-    word_s = fd.word;
-    tag = fd.tag;
-    token_class = fd.token_class;
-  }
+  word_s = fd.word;
+  tag = fd.tag;
+  token_class = fd.token_class;
   icu::UnicodeString uWord = TiCC::UnicodeFromUTF8( word_s );
   vector<string> v = TiCC::split_at_first_of( tag, "()" );
   string head = v[0];

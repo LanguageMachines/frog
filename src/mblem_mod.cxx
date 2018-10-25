@@ -282,12 +282,9 @@ void Mblem::Classify( frog_record& fd ){
   icu::UnicodeString uword;
   string pos;
   string token_class;
-#pragma omp critical (dataupdate)
-  {
-    uword = TiCC::UnicodeFromUTF8(fd.word);
-    pos = fd.tag;
-    token_class = fd.token_class;
-  }
+  uword = TiCC::UnicodeFromUTF8(fd.word);
+  pos = fd.tag;
+  token_class = fd.token_class;
   if (debug > 1 ){
     DBG << "Classify " << uword << "(" << pos << ") ["
 	<< token_class << "]" << endl;

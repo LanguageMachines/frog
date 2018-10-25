@@ -762,6 +762,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	}
         LOG << TiCC::Timer::now() << " Processing... " << endl;
 	istringstream inputstream(data,istringstream::in);
+	timers.tokTimer.start();
 	frog_data res = tokenizer->tokenize_stream( inputstream );
 	timers.tokTimer.stop();
 	folia::Document *doc = 0;
@@ -778,7 +779,9 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	  else {
 	    showResults( output_stream, res );
 	  }
+	  timers.tokTimer.start();
 	  res = tokenizer->tokenize_stream( inputstream );
+	  timers.tokTimer.stop();
 	}
 	if ( options.doXMLout && doc ){
 	  doc->save( output_stream, options.doKanon );
@@ -1458,7 +1461,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
   if ( xmlOutFile.empty() ){
     options.noStdOut = false;
   }
-  folia::TextProcessor proc( infilename );
+  folia::TextProcessor proc( infilename, xmlOutFile );
   if ( !options.doTok ){
     proc.declare( folia::AnnotationType::TOKEN, "passthru",
 		  "annotator='ucto', annotatortype='auto', datetime='now()'" );
@@ -1545,8 +1548,6 @@ void FrogAPI::run_folia_processor( const string& infilename,
 void FrogAPI::FrogFile( const string& infilename,
 			ostream& os,
 			const string& xmlOutF ) {
-  // stuff the whole input into one FoLiA document.
-  // This is not a good idea on the long term, I think (agreed [proycon] )
   string xmlOutFile = xmlOutF;
   bool xml_in = options.doXMLin;
   if ( TiCC::match_back( infilename, ".xml.gz" )
@@ -1616,34 +1617,34 @@ void FrogAPI::FrogFile( const string& infilename,
       LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
       delete doc1;
     }
-    if ( !options.hide_timers ){
-      LOG << "tokenisation took:  " << timers.tokTimer << endl;
-      LOG << "CGN tagging took:   " << timers.tagTimer << endl;
-      if ( options.doIOB){
-	LOG << "IOB chunking took:  " << timers.iobTimer << endl;
-      }
-      if ( options.doNER){
-	LOG << "NER took:           " << timers.nerTimer << endl;
-      }
-      if ( options.doMorph ){
-	LOG << "MBMA took:          " << timers.mbmaTimer << endl;
-      }
-      if ( options.doLemma ){
-	LOG << "Mblem took:         " << timers.mblemTimer << endl;
-      }
-      if ( options.doMwu ){
-	LOG << "MWU resolving took: " << timers.mwuTimer << endl;
-      }
-      if ( options.doParse ){
-	LOG << "Parsing (prepare) took: " << timers.prepareTimer << endl;
-	LOG << "Parsing (pairs)   took: " << timers.pairsTimer << endl;
-	LOG << "Parsing (rels)    took: " << timers.relsTimer << endl;
-	LOG << "Parsing (dir)     took: " << timers.dirTimer << endl;
-	LOG << "Parsing (csi)     took: " << timers.csiTimer << endl;
-	LOG << "Parsing (total)   took: " << timers.parseTimer << endl;
-      }
-      LOG << "Frogging in total took: " << timers.frogTimer << endl;
+  }
+  if ( !options.hide_timers ){
+    LOG << "tokenisation took:  " << timers.tokTimer << endl;
+    LOG << "CGN tagging took:   " << timers.tagTimer << endl;
+    if ( options.doIOB){
+      LOG << "IOB chunking took:  " << timers.iobTimer << endl;
     }
+    if ( options.doNER){
+      LOG << "NER took:           " << timers.nerTimer << endl;
+    }
+    if ( options.doMorph ){
+      LOG << "MBMA took:          " << timers.mbmaTimer << endl;
+    }
+    if ( options.doLemma ){
+      LOG << "Mblem took:         " << timers.mblemTimer << endl;
+    }
+    if ( options.doMwu ){
+      LOG << "MWU resolving took: " << timers.mwuTimer << endl;
+    }
+    if ( options.doParse ){
+      LOG << "Parsing (prepare) took: " << timers.prepareTimer << endl;
+      LOG << "Parsing (pairs)   took: " << timers.pairsTimer << endl;
+      LOG << "Parsing (rels)    took: " << timers.relsTimer << endl;
+      LOG << "Parsing (dir)     took: " << timers.dirTimer << endl;
+      LOG << "Parsing (csi)     took: " << timers.csiTimer << endl;
+      LOG << "Parsing (total)   took: " << timers.parseTimer << endl;
+    }
+    LOG << "Frogging in total took: " << timers.frogTimer << endl;
   }
 }
 
