@@ -1461,7 +1461,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
   if ( xmlOutFile.empty() ){
     options.noStdOut = false;
   }
-  folia::TextProcessor proc( infilename, xmlOutFile );
+  folia::TextProcessor proc( infilename );
   if ( !options.doTok ){
     proc.declare( folia::AnnotationType::TOKEN, "passthru",
 		  "annotator='ucto', annotatortype='auto', datetime='now()'" );
