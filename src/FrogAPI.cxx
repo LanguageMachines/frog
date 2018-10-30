@@ -757,30 +757,36 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	    data += line + "\n";
 	  }
         }
+	// So dat will contain the COMPLETE input,
+	// OR a FoLiA Document (which should be valid)
+	// OR a sequence of lines, forming sentences and paragraphs
         if ( options.debugFlag > 5 ){
 	  DBG << "Received: [" << data << "]" << endl;
 	}
         LOG << TiCC::Timer::now() << " Processing... " << endl;
-	istringstream inputstream(data,istringstream::in);
-	timers.tokTimer.start();
-	frog_data res = tokenizer->tokenize_stream( inputstream );
-	timers.tokTimer.stop();
 	folia::Document *doc = 0;
 	folia::FoliaElement *root = 0;
 	if ( options.doXMLout ){
 	  string doc_id = "untitled";
 	  root = start_document( doc_id, doc );
 	}
-	while ( res.size() > 0 ){
-	  frog_sentence( res );
+	istringstream inputstream(data,istringstream::in);
+	timers.tokTimer.start();
+	// start tokenizing
+	// tokenize_stream() delivers 1 sentence at a time and should
+	//  be called multiple times to get all sentences!
+	frog_data sent = tokenizer->tokenize_stream( inputstream );
+	timers.tokTimer.stop();
+	while ( sent.size() > 0 ){
+	  frog_sentence( sent );
 	  if ( options.doXMLout ){
-	    root = append_to_folia( root, res );
+	    root = append_to_folia( root, sent );
 	  }
 	  else {
-	    showResults( output_stream, res );
+	    showResults( output_stream, sent );
 	  }
 	  timers.tokTimer.start();
-	  res = tokenizer->tokenize_stream( inputstream );
+	  sent = tokenizer->tokenize_stream_next();
 	  timers.tokTimer.stop();
 	}
 	if ( options.doXMLout && doc ){
@@ -1269,27 +1275,18 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
     }
     istringstream inputstream(text,istringstream::in);
     timers.tokTimer.start();
-    frog_data res = tokenizer->tokenize_stream( inputstream );
+    frog_data sent = tokenizer->tokenize_stream( inputstream );
     timers.tokTimer.stop();
-    while ( res.size() > 0 ){
-      if  (options.debugFlag > 0){
-	DBG << "before frog_sentence() LOOP" << endl;
-      }
-      bool ok = frog_sentence( res );
+    while ( sent.size() > 0 ){
+      bool ok = frog_sentence( sent );
       if ( !options.noStdOut ){
-	showResults( os, res );
+	showResults( os, sent );
       }
       if ( options.doXMLout ){
-	if  (options.debugFlag > 0){
-	  DBG << "before append_to_sentence() A" << endl;
-	}
-	append_to_sentence( s, res, ok );
-	if  (options.debugFlag > 0){
-	  DBG << "after append_to_sentence() A" << endl;
-	}
+	append_to_sentence( s, sent, ok );
       }
       timers.tokTimer.start();
-      res = tokenizer->tokenize_stream( inputstream );
+      sent = tokenizer->tokenize_stream_next();
       timers.tokTimer.stop();
     }
   }
@@ -1334,7 +1331,7 @@ void FrogAPI::handle_one_paragraph( ostream& os,
       }
     }
     timers.tokTimer.start();
-    res = tokenizer->tokenize_stream( inputstream );
+    res = tokenizer->tokenize_stream_next();
     timers.tokTimer.stop();
     ++sentence_done;
   }
@@ -1398,7 +1395,7 @@ void FrogAPI::handle_one_element( ostream& os,
 	showResults( os, res );
       }
       timers.tokTimer.start();
-      res = tokenizer->tokenize_stream( inputstream );
+      res = tokenizer->tokenize_stream_next( );
       timers.tokTimer.stop();
     }
     if ( options.doXMLout ){
@@ -1609,7 +1606,7 @@ void FrogAPI::FrogFile( const string& infilename,
 	}
       }
       timers.tokTimer.start();
-      res = tokenizer->tokenize_stream( TEST );
+      res = tokenizer->tokenize_stream_next();
       timers.tokTimer.stop();
     }
     if ( !xmlOutFile.empty() && doc ){

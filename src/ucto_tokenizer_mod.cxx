@@ -49,6 +49,7 @@ using TiCC::operator<<;
 UctoTokenizer::UctoTokenizer( TiCC::LogStream *errlog,
 			      TiCC::LogStream *dbglog ) {
   tokenizer = 0;
+  cur_is = 0;
   errLog = new TiCC::LogStream( errlog, "tok-" );
   if ( dbglog ){
     dbgLog = new TiCC::LogStream( dbglog, "tok-" );
@@ -265,32 +266,15 @@ string UctoTokenizer::tokenizeStream( istream& is ){
     throw runtime_error( "ucto tokenizer not initialized" );
 }
 
-folia::Document *UctoTokenizer::tokenize( istream& is ){
-  if ( tokenizer )
-    return tokenizer->tokenize( is );
-  else
-    throw runtime_error( "ucto tokenizer not initialized" );
-}
-
-folia::Document *UctoTokenizer::tokenizestring( const string& s){
-  if ( tokenizer) {
-    istringstream is(s);
-    return tokenizer->tokenize( is);
-  }
-  else
-    throw runtime_error( "ucto tokenizer not initialized" );
-}
-
-frog_data UctoTokenizer::tokenize_stream( istream& is ){
+frog_data UctoTokenizer::tokenize_stream_next( ){
   // this is non greedy. Might be called multiple times to consume
   // the whole stream
   // will return tokens upto an ENDOFSENTENCE token or out of data
-  static vector<Tokenizer::Token> stack; // NOT THREAD SAFE!!!
   if ( tokenizer) {
     frog_data result;
     vector<Tokenizer::Token> toks = stack; // add tokens from previous visit
     stack.clear();
-    vector<Tokenizer::Token> new_toks = tokenizer->tokenizeStream( is );
+    vector<Tokenizer::Token> new_toks = tokenizer->tokenizeStream( *cur_is );
     // now add new tokens
     toks.insert( toks.end(), new_toks.begin(), new_toks.end() );
     bool skip = false;
@@ -326,10 +310,10 @@ frog_data UctoTokenizer::tokenize_stream( istream& is ){
     throw runtime_error( "ucto tokenizer not initialized" );
 }
 
-bool UctoTokenizer::tokenize( folia::Document& doc ){
-  if ( tokenizer )
-    return tokenizer->tokenize( doc );
-  else
-    throw runtime_error( "ucto tokenizer not initialized" );
-
+frog_data UctoTokenizer::tokenize_stream( istream& is ){
+  ///  restart the tokenizer on stream @is
+  ///  and calls tokenizer_stream_next() for the first results
+  cur_is = &is;
+  stack.clear();
+  return tokenize_stream_next();
 }
