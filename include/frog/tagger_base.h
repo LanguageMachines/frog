@@ -48,9 +48,7 @@ class BaseTagger {
 		       const std::string& );
   virtual ~BaseTagger();
   virtual bool init( const TiCC::Configuration& );
-  virtual void post_process( const std::vector<folia::Word*>& ){};
   virtual void post_process( frog_data& ) = 0;
-  virtual void Classify( const std::vector<folia::Word*>& );
   virtual void Classify( frog_data& );
   void addDeclaration( folia::Document& ) const;
   std::string getTagset() const { return tagset; };

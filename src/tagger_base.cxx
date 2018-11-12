@@ -240,37 +240,6 @@ void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
   }
 }
 
-void BaseTagger::Classify( const vector<folia::Word*>& swords ){
-  if ( !swords.empty() ) {
-    string sentence = extract_sentence( swords, _words );
-    if (debug > 1){
-      DBG << _label << "-tagger in: " << sentence << endl;
-    }
-    _tag_result = tagger->TagLine(sentence);
-    if ( _tag_result.size() != swords.size() ){
-      LOG << _label << "-tagger mismatch between number of <w> tags and the tagger result." << endl;
-      LOG << "words according to <w> tags: " << endl;
-      for ( size_t w = 0; w < swords.size(); ++w ) {
-	LOG << "w[" << w << "]= " << swords[w]->str( textclass ) << endl;
-      }
-      LOG << "words according to " << _label << "-tagger: " << endl;
-      for ( size_t i=0; i < _tag_result.size(); ++i ){
-	LOG << "word[" << i << "]=" << _tag_result[i].word() << endl;
-      }
-      throw runtime_error( _label + "-tagger is confused" );
-    }
-    if ( debug > 1 ){
-      DBG << _label + "-tagger out: " << endl;
-      for ( size_t i=0; i < _tag_result.size(); ++i ){
-	DBG << "[" << i << "] : word=" << _tag_result[i].word()
-	    << " tag=" << _tag_result[i].assignedTag()
-	    << " confidence=" << _tag_result[i].confidence() << endl;
-      }
-    }
-    post_process( swords );
-  }
-}
-
 string BaseTagger::extract_sentence( const frog_data& sent,
 				     vector<string>& words ){
   words.clear();
