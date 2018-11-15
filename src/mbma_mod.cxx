@@ -47,6 +47,7 @@
 #include "frog/Frog-util.h"
 
 using namespace std;
+using namespace icu;
 using TiCC::operator<<;
 
 const long int LEFT =  6; // left context
@@ -209,14 +210,14 @@ void Mbma::cleanUp(){
   clearAnalysis();
 }
 
-vector<string> Mbma::make_instances( const icu::UnicodeString& word ){
+vector<string> Mbma::make_instances( const UnicodeString& word ){
   vector<string> insts;
   insts.reserve( word.length() );
   for ( long i=0; i < word.length(); ++i ) {
     if (debugFlag > 10){
       LOG << "itt #:" << i << endl;
     }
-    icu::UnicodeString inst;
+    UnicodeString inst;
     for ( long j=i ; j <= i + RIGHT + LEFT; ++j ) {
       if (debugFlag > 10){
 	LOG << " " << j-LEFT << ": ";
@@ -304,7 +305,7 @@ void Mbma::clearAnalysis(){
 }
 
 Rule* Mbma::matchRule( const std::vector<std::string>& ana,
-		       const icu::UnicodeString& word ){
+		       const UnicodeString& word ){
   Rule *rule = new Rule( ana, word, *mbmaLog, debugFlag );
   if ( rule->performEdits() ){
     rule->reduceZeroNodes();
@@ -331,7 +332,7 @@ Rule* Mbma::matchRule( const std::vector<std::string>& ana,
   }
 }
 
-vector<Rule*> Mbma::execute( const icu::UnicodeString& word,
+vector<Rule*> Mbma::execute( const UnicodeString& word,
 			     const vector<string>& classes ){
   vector<vector<string> > allParts = generate_all_perms( classes );
   if ( debugFlag > 1 ){
@@ -664,9 +665,9 @@ void Mbma::filterSubTags( const vector<string>& feats ){
   // we still might have doubles. (different Rule's yielding the same result)
   // reduce these
   //
-  map<icu::UnicodeString, Rule*> unique;
+  map<UnicodeString, Rule*> unique;
   for ( const auto& ait : highConf ){
-    icu::UnicodeString tmp = ait->getKey( doDeepMorph );
+    UnicodeString tmp = ait->getKey( doDeepMorph );
     unique[tmp] = ait;
   }
   // so now we have map of 'equal' analysis.
@@ -719,7 +720,7 @@ void Mbma::assign_compounds(){
 }
 
 void Mbma::getFoLiAResult( folia::Word *fword,
-			   const icu::UnicodeString& uword ) const {
+			   const UnicodeString& uword ) const {
   if ( analysis.size() == 0 ){
     // fallback option: use the word and pretend it's a morpheme ;-)
     if ( debugFlag > 1){
@@ -762,7 +763,7 @@ void Mbma::Classify( folia::Word* sword ){
   if ( sword->isinstance(folia::PlaceHolder_t) ){
     return;
   }
-  icu::UnicodeString uWord;
+  UnicodeString uWord;
   folia::PosAnnotation *pos;
   string head;
   string token_class;
@@ -806,7 +807,7 @@ void Mbma::Classify( folia::Word* sword ){
     }
   }
   else {
-    icu::UnicodeString lWord = uWord;
+    UnicodeString lWord = uWord;
     if ( head != "SPEC" ){
       lWord.toLower();
     }
@@ -826,9 +827,9 @@ void Mbma::Classify( folia::Word* sword ){
   }
 }
 
-void Mbma::Classify( const icu::UnicodeString& word ){
+void Mbma::Classify( const UnicodeString& word ){
   clearAnalysis();
-  icu::UnicodeString uWord = word;
+  UnicodeString uWord = word;
   if ( filter_diac ){
     uWord = TiCC::filter_diacritics( uWord );
   }

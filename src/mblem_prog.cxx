@@ -46,6 +46,7 @@
 #include "frog/cgn_tagger_mod.h"
 
 using namespace std;
+using namespace icu;
 using namespace Timbl;
 using namespace Tagger;
 
@@ -176,7 +177,7 @@ void Test( istream& in, ostream& os ){
       if ( useTagger ){
 	vector<TagResult> tagrv = tagger.tagLine( s );
 	for ( const auto& tr : tagrv ){
-	  icu::UnicodeString uWord = TiCC::UnicodeFromUTF8(tr.word());
+	  UnicodeString uWord = TiCC::UnicodeFromUTF8(tr.word());
 	  myMblem.Classify( uWord );
 	  myMblem.filterTag( tr.assignedTag() );
 	  vector<pair<string,string> > res = myMblem.getResult();
@@ -192,7 +193,7 @@ void Test( istream& in, ostream& os ){
       else {
 	vector<string> parts = TiCC::split( s );
 	for ( const auto& w : parts ){
-	  icu::UnicodeString uWord = TiCC::UnicodeFromUTF8(w);
+	  UnicodeString uWord = TiCC::UnicodeFromUTF8(w);
 	  myMblem.Classify( uWord );
 	  vector<pair<string,string> > res = myMblem.getResult();
 	  string line = w + "\t";

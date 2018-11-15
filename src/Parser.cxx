@@ -47,7 +47,7 @@
 #include "frog/csidp.h"
 
 using namespace std;
-
+using namespace icu;
 using TiCC::operator<<;
 
 #define LOG *TiCC::Log(parseLog)
@@ -822,7 +822,7 @@ parseData Parser::prepareParse( const vector<folia::Word *>& fwords ){
       string head;
       string mod;
       for ( const auto& mwu : mwuv ){
-	icu::UnicodeString tmp;
+	UnicodeString tmp;
 #pragma omp critical (foliaupdate)
 	{
 	  tmp = mwu->text( textclass );
@@ -856,7 +856,7 @@ parseData Parser::prepareParse( const vector<folia::Word *>& fwords ){
       i += mwuv.size()-1;
     }
     else {
-      icu::UnicodeString tmp;
+      UnicodeString tmp;
 #pragma omp critical (foliaupdate)
       {
 	tmp = word->text( textclass );

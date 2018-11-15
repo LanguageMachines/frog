@@ -45,6 +45,7 @@
 #include "frog/mbma_mod.h"
 
 using namespace std;
+using namespace icu;
 using TiCC::operator<<;
 
 #define LOG *TiCC::Log(myLog)
@@ -282,7 +283,7 @@ BracketLeaf::BracketLeaf( const RulePart& p, int flag, TiCC::LogStream& l ):
 }
 
 BracketLeaf::BracketLeaf( CLEX::Type t,
-			  const icu::UnicodeString& us,
+			  const UnicodeString& us,
 			  int flag,
 			  TiCC::LogStream& l ):
   BaseBracket( t, vector<CLEX::Type>(), flag, l ),
@@ -314,17 +315,17 @@ BracketNest::~BracketNest(){
   }
 }
 
-icu::UnicodeString BaseBracket::put( bool full ) const {
-  icu::UnicodeString result = "[err?]";
+UnicodeString BaseBracket::put( bool full ) const {
+  UnicodeString result = "[err?]";
   if ( full ){
-    icu::UnicodeString s = TiCC::UnicodeFromUTF8(toString(cls));
+    UnicodeString s = TiCC::UnicodeFromUTF8(toString(cls));
     result += s;
   }
   return result;
 }
 
-icu::UnicodeString BracketLeaf::put( bool full ) const {
-  icu::UnicodeString result;
+UnicodeString BracketLeaf::put( bool full ) const {
+  UnicodeString result;
   if ( !morph.isEmpty() ){
     result += "[";
     result += morph;
@@ -332,7 +333,7 @@ icu::UnicodeString BracketLeaf::put( bool full ) const {
   }
   if ( full ){
     if ( orig.empty() ){
-      icu::UnicodeString s = TiCC::UnicodeFromUTF8(toString(cls));
+      UnicodeString s = TiCC::UnicodeFromUTF8(toString(cls));
       if ( s == "/" ){
 	result += s + TiCC::UnicodeFromUTF8(inflect);
       }
@@ -347,10 +348,10 @@ icu::UnicodeString BracketLeaf::put( bool full ) const {
   return result;
 }
 
-icu::UnicodeString BracketNest::put( bool full ) const {
-  icu::UnicodeString result = "[ ";
+UnicodeString BracketNest::put( bool full ) const {
+  UnicodeString result = "[ ";
   for ( auto const& it : parts ){
-    icu::UnicodeString m = it->put( full );
+    UnicodeString m = it->put( full );
     if ( !m.isEmpty() ){
       result += m + " ";
       // if (&it != &parts.back() ){

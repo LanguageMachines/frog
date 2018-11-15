@@ -41,6 +41,7 @@
 #include "frog/mbma_brackets.h"
 
 using namespace std;
+using namespace icu;
 using TiCC::operator<<;
 
 #define LOG *TiCC::Log(myLog)
@@ -234,7 +235,7 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
 }
 
 Rule::Rule( const vector<string>& parts,
-	    const icu::UnicodeString& s,
+	    const UnicodeString& s,
 	    TiCC::LogStream& ls,
 	    int flag ):
   debugFlag( flag ),
@@ -299,7 +300,7 @@ vector<string> Rule::extract_morphemes( ) const {
   vector<string> morphemes;
   morphemes.reserve( rules.size() );
   for ( const auto& it : rules ){
-    icu::UnicodeString morpheme = it.morpheme;
+    UnicodeString morpheme = it.morpheme;
     if ( !morpheme.isEmpty() ){
       morphemes.push_back( TiCC::UnicodeToUTF8(morpheme) );
     }
@@ -310,7 +311,7 @@ vector<string> Rule::extract_morphemes( ) const {
 string Rule::morpheme_string( bool structured ) const {
   string result;
   if ( structured ){
-    icu::UnicodeString us = brackets->put(true);
+    UnicodeString us = brackets->put(true);
     result = TiCC::UnicodeToUTF8( us );
   }
   else {
@@ -341,7 +342,7 @@ bool Rule::performEdits(){
       for ( int j=0; j < cur->del.length(); ++j ){
 	if ( (k + j) < rules.size() ){
 	  if ( rules[k+j].uchar != cur->del[j] ){
-	    icu::UnicodeString tmp(cur->del[j]);
+	    UnicodeString tmp(cur->del[j]);
 	    LOG << "Hmm: deleting " << cur->del << " is impossible. ("
 			      << rules[k+j].uchar << " != " << tmp
 			      << ")." << endl;
@@ -350,7 +351,7 @@ bool Rule::performEdits(){
 	  }
 	}
 	else {
-	  icu::UnicodeString tmp(cur->del[j]);
+	  UnicodeString tmp(cur->del[j]);
 	  LOG << "Hmm: deleting " << cur->del
 			    << " is impossible. (beyond end of the rule)"
 			    << endl;
@@ -368,7 +369,7 @@ bool Rule::performEdits(){
     }
 
     bool inserted = false;
-    icu::UnicodeString part; // store to-be-inserted particles here!
+    UnicodeString part; // store to-be-inserted particles here!
     if ( !cur->hide.isEmpty() ){
       last->morpheme += cur->uchar; // add to prevvoius morheme
       cur->uchar = "";
@@ -488,10 +489,10 @@ void Rule::resolve_inflections(){
   }
 }
 
-icu::UnicodeString Rule::getKey( bool deep ){
+UnicodeString Rule::getKey( bool deep ){
   if ( deep ){
     if ( sortkey.isEmpty() ){
-      icu::UnicodeString tmp;
+      UnicodeString tmp;
       stringstream ss;
       ss << brackets << endl;
       tmp = TiCC::UnicodeFromUTF8(ss.str());
@@ -501,7 +502,7 @@ icu::UnicodeString Rule::getKey( bool deep ){
   }
   else {
     vector<string> morphs = extract_morphemes();
-    icu::UnicodeString tmp;
+    UnicodeString tmp;
     // create an unique string
     for ( auto const& mor : morphs ){
       tmp += TiCC::UnicodeFromUTF8(mor) + "++";

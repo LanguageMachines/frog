@@ -36,7 +36,7 @@
 
 using namespace std;
 using namespace Tagger;
-
+using namespace icu;
 
 #define LOG *TiCC::Log(tag_log)
 
@@ -201,7 +201,7 @@ string BaseTagger::extract_sentence( const vector<folia::Word*>& swords,
   words.clear();
   string sentence;
   for ( const auto& sword : swords ){
-    icu::UnicodeString word;
+    UnicodeString word;
 #pragma omp critical (foliaupdate)
     {
       word = sword->text( textclass );
@@ -226,7 +226,7 @@ void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
   for ( size_t i=0; i < swords.size(); ++i ){
     folia::Word *sw = swords[i];
     folia::PosAnnotation *postag = 0;
-    icu::UnicodeString word;
+    UnicodeString word;
 #pragma omp critical (foliaupdate)
     {
       word = sw->text( textclass );

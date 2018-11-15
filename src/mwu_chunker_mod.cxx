@@ -44,6 +44,7 @@
 #include "frog/Frog-util.h" // defines etc.
 
 using namespace std;
+using namespace icu;
 
 #define LOG *TiCC::Log(mwuLog)
 
@@ -126,7 +127,7 @@ void Mwu::reset(){
 }
 
 void Mwu::add( folia::Word *word ){
-  icu::UnicodeString tmp;
+  UnicodeString tmp;
 #pragma omp critical (foliaupdate)
   {
     tmp = word->text( textclass );
