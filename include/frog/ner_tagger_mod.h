@@ -48,7 +48,7 @@ class NERTagger: public BaseTagger {
   void Classify( const std::vector<folia::Word *>& );
   void post_process( const std::vector<folia::Word*>& );
   void post_process( const std::vector<folia::Word*>&,
-		     const std::vector<std::string>& );
+		     const std::vector<tc_pair>& );
   void addDeclaration( folia::Document& ) const;
   void addNERTags( const std::vector<folia::Word*>&,
 		   const std::vector<tc_pair>& );
@@ -66,7 +66,7 @@ class NERTagger: public BaseTagger {
   }
   bool Generate( const std::string& );
   void merge_override( std::vector<tc_pair>&,
-		       const std::vector<std::string>&,
+		       const std::vector<tc_pair>&,
 		       bool,
 		       const std::vector<std::string>& ) const;
 

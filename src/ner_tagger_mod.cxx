@@ -379,7 +379,11 @@ void NERTagger::Classify( const vector<folia::Word *>& swords ){
     vector<string> pos_tags;
     extract_words_tags( swords, POS_tagset, words, pos_tags );
     vector<string> known_tags = create_ner_list( words, known_ners );
-    vector<string> override_tags = create_ner_list( words, override_ners );
+    vector<string> override_v = create_ner_list( words, override_ners );
+    vector<tc_pair> override_tags;
+    for ( const auto& it : override_v ){
+      override_tags.push_back( make_pair( it, 1.0 ) );
+    }
     string text_block;
     string prev_pos = "_";
     string prev_ner = "_";
@@ -443,17 +447,17 @@ string to_tag( const string& label, bool inside ){
 }
 
 void NERTagger::merge_override( vector<tc_pair>& tags,
-				const vector<string>& override,
+				const vector<tc_pair>& overrides,
 				bool unconditional,
 				const vector<string>& POS_tags ) const{
   string label;
   for ( size_t i=0; i < tags.size(); ++i ){
-    if ( override[i] != "O"
+    if ( overrides[i].first != "O"
 	 && ( POS_tags.empty()
 	      || POS_tags[i].find("SPEC(") != string::npos
 	      || POS_tags[i].find("N(") != string::npos ) ){
       // if ( i == 0 ){
-      //  	 cerr << "override = " << override << endl;
+      //  	 cerr << "override = " << overrides << endl;
       //  	 cerr << "ner tags = " << tags << endl;
       //  	 cerr << "POS tags = " << POS_tags << endl;
       // }
@@ -462,9 +466,9 @@ void NERTagger::merge_override( vector<tc_pair>& tags,
 	// don't tamper with existing tags
 	continue;
       }
-      bool inside = (label == override[i] );
-      //      cerr << "step i=" << i << " override=" << override[i] << endl;
-      string replace = to_tag(override[i], inside );
+      bool inside = (label == overrides[i].first );
+      //      cerr << "step i=" << i << " override=" << overrides[i].first << endl;
+      string replace = to_tag(overrides[i].first, inside );
       //      cerr << "replace=" << replace << endl;
       if ( replace != "O" ){
 	// there is something to override.
@@ -500,7 +504,7 @@ void NERTagger::merge_override( vector<tc_pair>& tags,
 	tags[i].first = replace;
 	tags[i].second = 1;
 	if ( !inside ){
-	  label = override[i];
+	  label = overrides[i].first;
 	}
       }
     }
@@ -511,16 +515,16 @@ void NERTagger::merge_override( vector<tc_pair>& tags,
 }
 
 void NERTagger::post_process( const vector<folia::Word*>& swords,
-			      const vector<string>& override ){
-  vector<tc_pair> tags;
+			      const vector<tc_pair>& override_tags ){
+  vector<tc_pair> ner_tags;
   for ( const auto& tag : _tag_result ){
-    tags.push_back( make_pair(tag.assignedTag(), tag.confidence() ) );
+    ner_tags.push_back( make_pair(tag.assignedTag(), tag.confidence() ) );
   }
-  if ( !override.empty() ){
+  if ( !override_tags.empty() ){
     vector<string> empty;
-    merge_override( tags, override, true, empty );
+    merge_override( ner_tags, override_tags, true, empty );
   }
-  addNERTags( swords, tags );
+  addNERTags( swords, ner_tags );
 }
 
 bool NERTagger::Generate( const std::string& opt_line ){
