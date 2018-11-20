@@ -41,16 +41,6 @@ using namespace std;
 using namespace Tagger;
 using TiCC::operator<<;
 
-namespace TiCC {
-
-  template< typename S, typename T >
-  inline std::ostream& operator<< ( std::ostream& os, const std::pair<S,T>& p ){
-    os << "<" << p.first << "," << p.second << ">";
-    return os;
-  }
-
-}
-
 #define LOG *TiCC::Log(tag_log)
 
 static string POS_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
@@ -379,29 +369,26 @@ void NERTagger::addDeclaration( folia::Document& doc ) const {
 void NERTagger::Classify( const vector<folia::Word *>& swords ){
   if ( !swords.empty() ) {
     vector<string> words;
-    vector<string> ptags;
-    extract_words_tags( swords, POS_tagset, words, ptags );
-    vector<string> ktags = create_ner_list( words, known_ners );
+    vector<string> pos_tags;
+    extract_words_tags( swords, POS_tagset, words, pos_tags );
+    vector<string> known_tags = create_ner_list( words, known_ners );
     vector<string> override_tags = create_ner_list( words, override_ners );
     string text_block;
-    string prev = "_";
-    string prevN = "_";
+    string prev_pos = "_";
+    string prev_ner = "_";
     for ( size_t i=0; i < swords.size(); ++i ){
-      string word = words[i];
-      string pos = ptags[i];
-      text_block += word + "\t" + prev + "\t" + pos + "\t";
-      prev = pos;
+      text_block += words[i] + "\t" + prev_pos + "\t" + pos_tags[i] + "\t";
+      prev_pos = pos_tags[i];
       if ( i < swords.size() - 1 ){
-	text_block += ptags[i+1];
+	text_block += pos_tags[i+1];
       }
       else {
 	text_block += "_";
       }
-      string ktag = ktags[i];
-      text_block += "\t" + prevN + "\t" + ktag + "\t";
-      prevN = ktag;
+      text_block += "\t" + prev_ner + "\t" + known_tags[i] + "\t";
+      prev_ner = known_tags[i];
       if ( i < swords.size() - 1 ){
-	text_block += ktags[i+1];
+	text_block += known_tags[i+1];
       }
       else {
 	text_block += "_";
