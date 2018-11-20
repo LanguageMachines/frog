@@ -102,9 +102,6 @@ bool NERTagger::fill_ners( const string& cat,
     else {
       vector<string> parts = TiCC::split( line );
       if ( parts.size() > (unsigned)max_ner_size ){
-	// LOG << "expected 1 to " << max_ner_size
-	// 		   << " SPACE-separated parts in line: '" << line
-	// 		   << "'" << endl;
 	if ( ++long_err_cnt > 50 ){
 	  LOG << "too many long entries in additional wordlist file. " << file_name << endl;
 	  LOG << "consider raising the max_ner_size in the configuration. (now "
@@ -112,7 +109,11 @@ bool NERTagger::fill_ners( const string& cat,
 	  return false;
 	}
 	else {
-	//	LOG << "ignoring entry" << endl;
+	  if ( debug > 1 ){
+	    LOG << "expected 1 to " << max_ner_size
+		<< " SPACE-separated parts in line: '" << line
+		<< "', ignoring it" << endl;
+	  }
 	  continue;
 	}
       }
@@ -239,8 +240,10 @@ vector<string> NERTagger::create_ner_list( const vector<string>& words,
 }
 
 void NERTagger::addEntity( folia::Sentence *sent,
-			   const vector<pair<folia::Word*,double>>& ents,
+			   const vector<pair<folia::Word*,double>>& entity,
 			   const string& NER ){
+  /// add the sequence of Words in @entity with class @NER to the Sentence @sent
+  /// may create an EntitiesLayer in the Sentence, if not already present
   folia::EntitiesLayer *el = 0;
   if ( debug > 8 ){
     LOG << "add NER " << NER << " to entities layer" << endl;
@@ -269,10 +272,10 @@ void NERTagger::addEntity( folia::Sentence *sent,
     }
   }
   double c = 0;
-  for ( auto const& it : ents ){
+  for ( auto const& it : entity ){
     c += it.second;
   }
-  c /= ents.size();
+  c /= entity.size();
   folia::KWargs args;
   args["class"] = NER;
   args["confidence"] = TiCC::toString(c);
@@ -290,7 +293,7 @@ void NERTagger::addEntity( folia::Sentence *sent,
     e = new folia::Entity( args, el->doc() );
     el->append( e );
   }
-  for ( const auto& it : ents ){
+  for ( const auto& it : entity ){
 #pragma omp critical (foliaupdate)
     {
       e->append( it.first );
@@ -299,27 +302,32 @@ void NERTagger::addEntity( folia::Sentence *sent,
 }
 
 void NERTagger::addNERTags( const vector<folia::Word*>& words,
-			    const vector<tc_pair>& tags ){
+			    const vector<tc_pair>& ners ){
+  /// @ners is a sequence of NE tags (maybe 'O') with their confidence
+  /// these are appended to the corresponding @words
+  /// On the fly, classification errors are fixed:
+  /// - a NE starting with with I is added as starting with B
+  /// - a change in NE value is handled as a new NE start
   if ( words.empty() ) {
     return;
   }
   folia::Sentence *sent = words[0]->sentence();
-  vector<pair<folia::Word*,double>> stack;
+  vector<pair<folia::Word*,double>> entity;
   string curNER;
   size_t pos = 0;
-  for ( const auto& it : tags ){
+  for ( const auto& it : ners ){
     if (debug > 1){
       LOG << "NER = " << it.first << endl;
     }
     vector<string> ner;
     if ( it.first == "O" ){
-      if ( !stack.empty() ){
+      if ( !entity.empty() ){
 	if (debug > 1) {
 	  LOG << "O spit out " << curNER << endl;
-	  LOG << "ners  " << stack << endl;
+	  LOG << "entity= " << entity << endl;
 	}
-	addEntity( sent, stack, curNER );
-	stack.clear();
+	addEntity( sent, entity, curNER );
+	entity.clear();
       }
       ++pos;
       continue;
@@ -333,29 +341,28 @@ void NERTagger::addNERTags( const vector<folia::Word*>& words,
       }
     }
     if ( ner[0] == "B" ||
-	 ( ner[0] == "I" && stack.empty() ) ||
+	 ( ner[0] == "I" && entity.empty() ) ||
 	 ( ner[0] == "I" && ner[1] != curNER ) ){
       // an I without preceding B is handled as a B
       // an I with a different TAG is also handled as a B
-      if ( !stack.empty() ){
+      if ( !entity.empty() ){
 	if ( debug > 1 ){
 	  LOG << "B spit out " << curNER << endl;
-	  using TiCC::operator<<;
-	  LOG << "spit out " << stack << endl;
+	  LOG << "entity= " << entity << endl;
 	}
-	addEntity( sent, stack, curNER );
-	stack.clear();
+	addEntity( sent, entity, curNER );
+	entity.clear();
       }
       curNER = ner[1];
     }
-    stack.push_back( make_pair(words[pos++], it.second) );
+    entity.push_back( make_pair(words[pos++], it.second) );
   }
-  if ( !stack.empty() ){
+  if ( !entity.empty() ){
     if ( debug > 1 ){
       LOG << "END spit out " << curNER << endl;
-      LOG << "spit out " << stack << endl;
+      LOG << "entity= " << entity << endl;
     }
-    addEntity( sent, stack,curNER );
+    addEntity( sent, entity, curNER );
   }
 }
 
@@ -446,7 +453,6 @@ void NERTagger::merge_override( vector<tc_pair>& tags,
 	      || POS_tags[i].find("SPEC(") != string::npos
 	      || POS_tags[i].find("N(") != string::npos ) ){
       // if ( i == 0 ){
-      // 	using TiCC::operator<<;
       //  	 cerr << "override = " << override << endl;
       //  	 cerr << "ner tags = " << tags << endl;
       //  	 cerr << "POS tags = " << POS_tags << endl;
