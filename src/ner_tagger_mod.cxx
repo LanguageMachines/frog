@@ -41,6 +41,16 @@ using namespace std;
 using namespace Tagger;
 using TiCC::operator<<;
 
+namespace TiCC {
+
+  template< typename S, typename T >
+  inline std::ostream& operator<< ( std::ostream& os, const std::pair<S,T>& p ){
+    os << "<" << p.first << "," << p.second << ">";
+    return os;
+  }
+
+}
+
 #define LOG *TiCC::Log(tag_log)
 
 static string POS_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
@@ -239,8 +249,7 @@ vector<string> NERTagger::create_ner_list( const vector<string>& words,
 }
 
 void NERTagger::addEntity( folia::Sentence *sent,
-			   const vector<folia::Word*>& words,
-			   const vector<double>& confs,
+			   const vector<pair<folia::Word*,double>>& ents,
 			   const string& NER ){
   folia::EntitiesLayer *el = 0;
   if ( debug > 8 ){
@@ -270,10 +279,10 @@ void NERTagger::addEntity( folia::Sentence *sent,
     }
   }
   double c = 0;
-  for ( auto const& val : confs ){
-    c += val;
+  for ( auto const& it : ents ){
+    c += it.second;
   }
-  c /= confs.size();
+  c /= ents.size();
   folia::KWargs args;
   args["class"] = NER;
   args["confidence"] = TiCC::toString(c);
@@ -291,49 +300,46 @@ void NERTagger::addEntity( folia::Sentence *sent,
     e = new folia::Entity( args, el->doc() );
     el->append( e );
   }
-  for ( const auto& word : words ){
+  for ( const auto& it : ents ){
 #pragma omp critical (foliaupdate)
     {
-      e->append( word );
+      e->append( it.first );
     }
   }
 }
 
 void NERTagger::addNERTags( const vector<folia::Word*>& words,
-			    const vector<string>& tags,
-			    const vector<double>& confs ){
+			    const vector<tc_pair>& tags ){
   if ( words.empty() ) {
     return;
   }
   folia::Sentence *sent = words[0]->sentence();
-  vector<folia::Word*> stack;
-  vector<double> dstack;
+  vector<pair<folia::Word*,double>> stack;
   string curNER;
-  for ( size_t i=0; i < tags.size(); ++i ){
+  size_t pos = 0;
+  for ( const auto& it : tags ){
     if (debug > 1){
-      LOG << "NER = " << tags[i] << endl;
+      LOG << "NER = " << it.first << endl;
     }
     vector<string> ner;
-    if ( tags[i] == "O" ){
+    if ( it.first == "O" ){
       if ( !stack.empty() ){
 	if (debug > 1) {
 	  LOG << "O spit out " << curNER << endl;
-	  using TiCC::operator<<;
 	  LOG << "ners  " << stack << endl;
-	  LOG << "confs " << dstack << endl;
 	}
-	addEntity( sent, stack, dstack, curNER );
-	dstack.clear();
+	addEntity( sent, stack, curNER );
 	stack.clear();
       }
+      ++pos;
       continue;
     }
     else {
-      size_t num_words = TiCC::split_at( tags[i], ner, "-" );
+      size_t num_words = TiCC::split_at( it.first, ner, "-" );
       if ( num_words != 2 ){
-	LOG << "expected <NER>-tag, got: " << tags[i] << endl;
+	LOG << "expected <NER>-tag, got: " << it.first << endl;
 	throw runtime_error( "NER: unable to retrieve a NER tag from: "
-			     + tags[i] );
+			     + it.first );
       }
     }
     if ( ner[0] == "B" ||
@@ -347,22 +353,19 @@ void NERTagger::addNERTags( const vector<folia::Word*>& words,
 	  using TiCC::operator<<;
 	  LOG << "spit out " << stack << endl;
 	}
-	addEntity( sent, stack, dstack, curNER );
-	dstack.clear();
+	addEntity( sent, stack, curNER );
 	stack.clear();
       }
       curNER = ner[1];
     }
-    dstack.push_back( confs[i] );
-    stack.push_back( words[i] );
+    stack.push_back( make_pair(words[pos++], it.second) );
   }
   if ( !stack.empty() ){
     if ( debug > 1 ){
       LOG << "END spit out " << curNER << endl;
-      using TiCC::operator<<;
       LOG << "spit out " << stack << endl;
     }
-    addEntity( sent, stack, dstack, curNER );
+    addEntity( sent, stack,curNER );
   }
 }
 
@@ -445,8 +448,7 @@ string to_tag( const string& label, bool inside ){
   }
 }
 
-void NERTagger::merge_override( vector<string>& tags,
-				vector<double>& conf,
+void NERTagger::merge_override( vector<tc_pair>& tags,
 				const vector<string>& override,
 				bool unconditional,
 				const vector<string>& POS_tags ) const{
@@ -462,7 +464,7 @@ void NERTagger::merge_override( vector<string>& tags,
       //  	 cerr << "ner tags = " << tags << endl;
       //  	 cerr << "POS tags = " << POS_tags << endl;
       // }
-      if ( tags[i][0] != 'O'
+      if ( tags[i].first[0] != 'O'
 	   && !unconditional ){
 	// don't tamper with existing tags
 	continue;
@@ -474,36 +476,36 @@ void NERTagger::merge_override( vector<string>& tags,
       if ( replace != "O" ){
 	// there is something to override.
 	// NB: replace wil return "O" for ambi tags too!
-	if ( tags[i][0] == 'I' && !inside ){
+	if ( tags[i].first[0] == 'I' && !inside ){
 	  //	  cerr << "before  whiping tags = " << tags << endl;
 	  //oops, inside a NER tag, and now a new override
 	  // whipe previous I tags, and one B
 	  if ( i == 0 ){
 	    // strange exception, in fact starting with an I tag is impossible
-	    tags[i][0] = 'B'; // fix it on the fly
+	    tags[i].first[0] = 'B'; // fix it on the fly
 	    continue; // next i
 	  }
 	  for ( size_t j = i-1; j > 0; --j ){
-	    if ( tags[j][0] == 'B' ){
+	    if ( tags[j].first[0] == 'B' ){
 	      // we are done
-	      tags[j] = "O";
+	      tags[j].first = "O";
 	      break;
 	    }
-	    tags[j] = "O";
+	    tags[j].first = "O";
 	  }
 	  // whipe next I tags too, to be sure
 	  for ( size_t j = i+1; j < tags.size(); ++j ){
-	    if ( tags[j][0] != 'I' ){
+	    if ( tags[j].first[0] != 'I' ){
 	      // a B or O
 	      break;
 	    }
 	    // still inside
-	    tags[j] = "O";
+	    tags[j].first = "O";
 	  }
 	}
 	//	cerr << POS_tags[i] << "REPLACE " << tags[i] << " by " << replace << endl;
-	tags[i] = replace;
-	conf[i] = 1;
+	tags[i].first = replace;
+	tags[i].second = 1;
 	if ( !inside ){
 	  label = override[i];
 	}
@@ -517,17 +519,15 @@ void NERTagger::merge_override( vector<string>& tags,
 
 void NERTagger::post_process( const vector<folia::Word*>& swords,
 			      const vector<string>& override ){
-  vector<string> tags;
-  vector<double> conf;
+  vector<tc_pair> tags;
   for ( const auto& tag : _tag_result ){
-    tags.push_back( tag.assignedTag() );
-    conf.push_back( tag.confidence() );
+    tags.push_back( make_pair(tag.assignedTag(), tag.confidence() ) );
   }
   if ( !override.empty() ){
     vector<string> empty;
-    merge_override( tags, conf, override, true, empty );
+    merge_override( tags, override, true, empty );
   }
-  addNERTags( swords, tags, conf );
+  addNERTags( swords, tags );
 }
 
 bool NERTagger::Generate( const std::string& opt_line ){

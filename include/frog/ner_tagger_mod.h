@@ -39,6 +39,8 @@
 #include "libfolia/folia.h"
 #include "frog/tagger_base.h"
 
+typedef std::pair<std::string,double> tc_pair;
+
 class NERTagger: public BaseTagger {
  public:
   explicit NERTagger( TiCC::LogStream * );
@@ -49,8 +51,7 @@ class NERTagger: public BaseTagger {
 		     const std::vector<std::string>& );
   void addDeclaration( folia::Document& ) const;
   void addNERTags( const std::vector<folia::Word*>&,
-		   const std::vector<std::string>&,
-		   const std::vector<double>& );
+		   const std::vector<tc_pair>& );
   bool read_gazets( const std::string& f, const std::string& p ){
     return read_gazets( f, p, known_ners );
   }
@@ -64,8 +65,7 @@ class NERTagger: public BaseTagger {
     return create_ner_list( s, override_ners );
   }
   bool Generate( const std::string& );
-  void merge_override( std::vector<std::string>&,
-		       std::vector<double>&,
+  void merge_override( std::vector<tc_pair>&,
 		       const std::vector<std::string>&,
 		       bool,
 		       const std::vector<std::string>& ) const;
@@ -82,10 +82,9 @@ class NERTagger: public BaseTagger {
 					    std::vector<std::unordered_map<std::string,std::set<std::string>>>& );
   std::vector<std::unordered_map<std::string,std::set<std::string>>> known_ners;
   std::vector<std::unordered_map<std::string,std::set<std::string>>> override_ners;
-  void addEntity( folia::Sentence *sent,
-		  const std::vector<folia::Word*>& words,
-		  const std::vector<double>& confs,
-		  const std::string& NER );
+  void addEntity( folia::Sentence *,
+		  const std::vector<std::pair<folia::Word*,double>>&,
+		  const std::string& );
   int max_ner_size;
 };
 
