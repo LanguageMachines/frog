@@ -104,9 +104,6 @@ bool NERTagger::fill_ners( const string& cat,
     else {
       vector<string> parts = TiCC::split( line );
       if ( parts.size() > (unsigned)max_ner_size ){
-	// LOG << "expected 1 to " << max_ner_size
-	// 		   << " SPACE-separated parts in line: '" << line
-	// 		   << "'" << endl;
 	if ( ++long_err_cnt > 50 ){
 	  LOG << "too many long entries in additional wordlist file. " << file_name << endl;
 	  LOG << "consider raising the max_ner_size in the configuration. (now "
@@ -114,7 +111,11 @@ bool NERTagger::fill_ners( const string& cat,
 	  return false;
 	}
 	else {
-	//	LOG << "ignoring entry" << endl;
+	  if ( debug > 1 ){
+	    DBG << "expected 1 to " << max_ner_size
+		<< " SPACE-separated parts in line: '" << line
+		<< "'" << endl;
+	  }
 	  continue;
 	}
       }
@@ -270,8 +271,12 @@ void NERTagger::Classify( frog_data& swords ){
       ptags.push_back( w.tag );
     }
   }
-  vector<string> ktags = create_ner_list( words, known_ners );
-  vector<string> override_tags = create_ner_list( words, override_ners );
+  vector<string> known_tags = create_ner_list( words, known_ners );
+  vector<string> override_v = create_ner_list( words, override_ners );
+  vector<tc_pair> override_tags;
+  for ( const auto& it : override_v ){
+    override_tags.push_back( make_pair( it, 1.0 ) );
+  }
   string text_block;
   string prev = "_";
   string prevN = "_";
@@ -286,11 +291,11 @@ void NERTagger::Classify( frog_data& swords ){
     else {
       text_block += "_";
     }
-    string ktag = ktags[i];
+    string ktag = known_tags[i];
     text_block += "\t" + prevN + "\t" + ktag + "\t";
     prevN = ktag;
     if ( i < swords.size() - 1 ){
-      text_block += ktags[i+1];
+      text_block += known_tags[i+1];
     }
     else {
       text_block += "_";
@@ -314,9 +319,8 @@ void NERTagger::Classify( frog_data& swords ){
 }
 
 void NERTagger::post_process( frog_data& swords,
-			      const vector<string>& override ){
-  vector<string> tags;
-  vector<double> conf;
+			      const vector<tc_pair>& override_tags ){
+  vector<tc_pair> ner_tags;
   string last_tag;
   for ( const auto& tag : _tag_result ){
     string a_tag = tag.assignedTag();
@@ -338,93 +342,90 @@ void NERTagger::post_process( frog_data& swords,
     else if ( a_tag[0] == 'B' ){
       last_tag = a_tag;
     }
-    tags.push_back( a_tag );
-    conf.push_back( tag.confidence() );
+    ner_tags.push_back( make_pair(a_tag,tag.confidence() ) );
   }
-  if ( !override.empty() ){
+  if ( !override_tags.empty() ){
     vector<string> empty;
-    merge_override( tags, conf, override, true, empty );
+    merge_override( ner_tags, override_tags, true, empty );
   }
-  addNERTags( swords, tags, conf );
+  addNERTags( swords, ner_tags );
 }
 
 void NERTagger::addNERTags( frog_data& words,
-			    const vector<string>& tags,
-			    const vector<double>& confs ){
+			    const vector<tc_pair>& ners ){
+  /// @ners is a sequence of NE tags (maybe 'O') with their confidence
+  /// these are appended to the corresponding @words
+  /// On the fly, classification errors are fixed:
+  /// - a NE starting with with I is added as starting with B
+  /// - a change in NE value is handled as a new NE start
   if ( words.size() == 0 ) {
     return;
   }
-  vector<string> stack;
-  vector<double> dstack;
+  vector<tc_pair> entity;
   string curNER;
-  for ( size_t i=0; i < tags.size(); ++i ){
+  for ( size_t i=0; i < ners.size(); ++i ){
     if (debug > 1){
-      DBG << "NER = " << tags[i] << endl;
+      DBG << "NER = " << ners[i].first << endl;
     }
     vector<string> ner;
-    if ( tags[i] == "O" ){
-      if ( !stack.empty() ){
+    if ( ners[i].first == "O" ){
+      if ( !entity.empty() ){
 	if (debug > 1) {
 	  DBG << "O spit out " << curNER << endl;
-	  DBG << "ners  " << stack << endl;
-	  DBG << "confs " << dstack << endl;
+	  DBG << "ners  " << entity << endl;
 	}
-	addEntity( words, i, stack, dstack );
-	dstack.clear();
-	stack.clear();
+	addEntity( words, i, entity );
+	entity.clear();
       }
       continue;
     }
     else {
-      size_t num_words = TiCC::split_at( tags[i], ner, "-" );
+      size_t num_words = TiCC::split_at( ners[i].first, ner, "-" );
       if ( num_words != 2 ){
-	LOG << "expected <NER>-tag, got: " << tags[i] << endl;
+	LOG << "expected <NER>-tag, got: " << ners[i].first << endl;
 	throw runtime_error( "NER: unable to retrieve a NER tag from: "
-			     + tags[i] );
+			     + ners[i].first );
       }
     }
     if ( ner[0] == "B" ||
-	 ( ner[0] == "I" && stack.empty() ) ||
+	 ( ner[0] == "I" && entity.empty() ) ||
 	 ( ner[0] == "I" && ner[1] != curNER ) ){
       // an I without preceding B is handled as a B
       // an I with a different TAG is also handled as a B
-      if ( !stack.empty() ){
+      if ( !entity.empty() ){
 	if ( debug > 1 ){
 	  DBG << "B spit out " << curNER << endl;
-	  DBG << "spit out " << stack << endl;
+	  DBG << "spit out " << entity << endl;
 	}
-	addEntity( words, i, stack, dstack );
-	dstack.clear();
-	stack.clear();
+	addEntity( words, i, entity );
+	entity.clear();
       }
       curNER = ner[1];
     }
-    dstack.push_back( confs[i] );
-    stack.push_back( tags[i] );
+    entity.push_back( make_pair( ners[i].first, ners[i].second ) );
   }
-  if ( !stack.empty() ){
+  if ( !entity.empty() ){
     if ( debug > 1 ){
       DBG << "END spit out " << curNER << endl;
-      DBG << "spit out " << stack << endl;
+      DBG << "spit out " << entity << endl;
     }
-    addEntity( words, words.size(), stack, dstack );
+    addEntity( words, words.size(), entity );
   }
 }
 
 void NERTagger::addEntity( frog_data& sent,
 			   const size_t pos,
-			   const vector<string>& words,
-			   const vector<double>& confs ){
+			   const vector<tc_pair>& entity ){
   double c = 0;
-  for ( auto const& val : confs ){
-    c += val;
+  for ( auto const& val : entity ){
+    c += val.second;
   }
-  c /= confs.size();
-  for ( size_t i = 0; i < words.size(); ++i ){
+  c /= entity.size();
+  for ( size_t i = 0; i < entity.size(); ++i ){
 #pragma omp critical (foliaupdate)
     {
-      sent.units[pos-words.size()+i].ner_tag = words[i];
-      sent.units[pos-words.size()+i].ner_confidence = c;
+      sent.units[pos-entity.size()+i].ner_tag = entity[i].first;
+      sent.units[pos-entity.size()+i].ner_confidence = c;
     }
   }
 }
@@ -453,14 +454,13 @@ string to_tag( const string& label, bool inside ){
   }
 }
 
-void NERTagger::merge_override( vector<string>& tags,
-				vector<double>& conf,
-				const vector<string>& override,
+void NERTagger::merge_override( vector<tc_pair>& tags,
+				const vector<tc_pair>& overrides,
 				bool unconditional,
 				const vector<string>& POS_tags ) const{
   string label;
   for ( size_t i=0; i < tags.size(); ++i ){
-    if ( override[i] != "O"
+    if ( overrides[i].first != "O"
 	 && ( POS_tags.empty()
 	      || POS_tags[i].find("SPEC(") != string::npos
 	      || POS_tags[i].find("N(") != string::npos ) ){
@@ -469,50 +469,50 @@ void NERTagger::merge_override( vector<string>& tags,
       //  	 cerr << "ner tags = " << tags << endl;
       //  	 cerr << "POS tags = " << POS_tags << endl;
       // }
-      if ( tags[i][0] != 'O'
+      if ( tags[i].first[0] != 'O'
 	   && !unconditional ){
 	// don't tamper with existing tags
 	continue;
       }
-      bool inside = (label == override[i] );
-      //      cerr << "step i=" << i << " override=" << override[i] << endl;
-      string replace = to_tag(override[i], inside );
+      bool inside = (label == overrides[i].first );
+      //      cerr << "step i=" << i << " override=" << overrides[i] << endl;
+      string replace = to_tag(overrides[i].first, inside );
       //      cerr << "replace=" << replace << endl;
       if ( replace != "O" ){
 	// there is something to override.
 	// NB: replace wil return "O" for ambi tags too!
-	if ( tags[i][0] == 'I' && !inside ){
+	if ( tags[i].first[0] == 'I' && !inside ){
 	  //	  cerr << "before  whiping tags = " << tags << endl;
 	  //oops, inside a NER tag, and now a new override
 	  // whipe previous I tags, and one B
 	  if ( i == 0 ){
 	    // strange exception, in fact starting with an I tag is impossible
-	    tags[i][0] = 'B'; // fix it on the fly
+	    tags[i].first[0] = 'B'; // fix it on the fly
 	    continue; // next i
 	  }
 	  for ( size_t j = i-1; j > 0; --j ){
-	    if ( tags[j][0] == 'B' ){
+	    if ( tags[j].first[0] == 'B' ){
 	      // we are done
-	      tags[j] = "O";
+	      tags[j].first = "O";
 	      break;
 	    }
-	    tags[j] = "O";
+	    tags[j].first = "O";
 	  }
 	  // whipe next I tags too, to be sure
 	  for ( size_t j = i+1; j < tags.size(); ++j ){
-	    if ( tags[j][0] != 'I' ){
+	    if ( tags[j].first[0] != 'I' ){
 	      // a B or O
 	      break;
 	    }
 	    // still inside
-	    tags[j] = "O";
+	    tags[j].first = "O";
 	  }
 	}
 	//	cerr << POS_tags[i] << "REPLACE " << tags[i] << " by " << replace << endl;
-	tags[i] = replace;
-	conf[i] = 1;
+	tags[i].first = replace;
+	tags[i].second = 1;
 	if ( !inside ){
-	  label = override[i];
+	  label = overrides[i].first;
 	}
       }
     }
