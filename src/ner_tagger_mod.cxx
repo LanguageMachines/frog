@@ -536,3 +536,78 @@ void NERTagger::merge_override( vector<tc_pair>& tags,
 bool NERTagger::Generate( const std::string& opt_line ){
   return tagger->GenerateTagger( opt_line );
 }
+
+void NERTagger::add_result( const frog_data& fd,
+			    const vector<folia::Word*>& wv ) const {
+  folia::Sentence *s = wv[0]->sentence();
+  folia::EntitiesLayer *el = 0;
+  folia::Entity *ner = 0;
+  size_t i = 0;
+  for ( const auto& word : fd.units ){
+    if ( word.ner_tag[0] == 'B' ){
+      if ( el == 0 ){
+	// create a layer, we need it
+	folia::KWargs args;
+	args["set"] = getTagset();
+	if ( !s->id().empty() ){
+	  args["generate_id"] = s->id();
+	}
+#pragma omp critical (foliaupdate )
+	{
+	  el = new folia::EntitiesLayer( args, s->doc() );
+	  s->append(el);
+	}
+      }
+      // a new entity starts here
+      if ( ner != 0 ){
+#pragma omp critical (foliaupdate )
+	{
+	  el->append( ner );
+	}
+      }
+      // now make new entity
+      folia::KWargs args;
+      args["set"] = getTagset();
+      args["generate_id"] = el->id();
+      args["class"] = word.ner_tag.substr(2);
+      args["confidence"] = TiCC::toString(word.ner_confidence);
+      if ( textclass != "current" ){
+	args["textclass"] = textclass;
+      }
+#pragma omp critical (foliaupdate )
+      {
+	ner = new folia::Entity( args, s->doc() );
+	ner->append( wv[i] );
+      }
+    }
+    else if ( word.ner_tag[0] == 'I' ){
+      // continue in an entity
+      if ( ner ){
+#pragma omp critical (foliaupdate )
+	{
+	  ner->append( wv[i] );
+	}
+      }
+      else {
+	throw logic_error( "unexpected empty ner" );
+      }
+    }
+    else if ( word.ner_tag[0] == '0' ){
+      if ( ner != 0 ){
+#pragma omp critical (foliaupdate )
+	{
+	  el->append( ner );
+	}
+	ner = 0;
+      }
+    }
+    ++i;
+  }
+  if ( ner != 0 ){
+    // some leftovers
+#pragma omp critical (foliaupdate )
+    {
+      el->append( ner );
+    }
+  }
+}
