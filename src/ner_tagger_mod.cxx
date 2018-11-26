@@ -47,8 +47,9 @@ static string POS_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
 
 NERTagger::NERTagger( TiCC::LogStream *l ):
   BaseTagger( l, "NER" ),
+  gazets_only(false),
   max_ner_size(20)
-{ known_ners.resize( max_ner_size + 1 );
+{ gazet_ners.resize( max_ner_size + 1 );
   override_ners.resize( max_ner_size + 1 );
 }
 
@@ -71,6 +72,10 @@ bool NERTagger::init( const TiCC::Configuration& config ){
     if ( !read_overrides( val, config.configDir() ) ){
       return false;
     }
+  }
+  val = config.lookUp( "only_gazets", "NER" );
+  if ( !val.empty() ){
+    gazets_only = TiCC::stringTo<bool>( val );
   }
   val = config.lookUp( "set", "tagger" );
   if ( !val.empty() ){
@@ -378,48 +383,82 @@ void NERTagger::Classify( const vector<folia::Word *>& swords ){
     vector<string> words;
     vector<string> pos_tags;
     extract_words_tags( swords, POS_tagset, words, pos_tags );
-    vector<string> known_tags = create_ner_list( words, known_ners );
-    vector<string> override_v = create_ner_list( words, override_ners );
-    vector<tc_pair> override_tags;
-    for ( const auto& it : override_v ){
-      override_tags.push_back( make_pair( it, 1.0 ) );
+    vector<tc_pair> ner_tags;
+    if ( gazets_only ){
+      vector<string> gazet_tags = create_ner_list( words, gazet_ners );
+      string last = "O";
+      cerr << "bekijk gazet tags: " << gazet_tags << endl;
+      for ( const auto& it : gazet_tags ){
+	vector<string> parts = TiCC::split_at( it, "+" );
+	string tag = parts[0];
+	cerr << "AHA: last = " << last << " Nieuw=" << tag << endl;
+	if ( tag == "O" ){
+	  last = tag;
+	}
+	else {
+	  if ( tag == last ){
+	    tag = "I-" + tag;
+	  }
+	  else {
+	    last = tag;
+	    tag = "B-" + tag;
+	  }
+	}
+	cerr << "add a tag: " << tag << endl;
+	ner_tags.push_back( make_pair( tag, 1.0 ) );
+      }
     }
-    string text_block;
-    string prev_pos = "_";
-    string prev_ner = "_";
-    for ( size_t i=0; i < swords.size(); ++i ){
-      text_block += words[i] + "\t" + prev_pos + "\t" + pos_tags[i] + "\t";
-      prev_pos = pos_tags[i];
-      if ( i < swords.size() - 1 ){
-	text_block += pos_tags[i+1];
+    else {
+      vector<string> gazet_tags = create_ner_list( words, gazet_ners );
+      vector<string> override_v = create_ner_list( words, override_ners );
+      vector<tc_pair> override_tags;
+      for ( const auto& it : override_v ){
+	override_tags.push_back( make_pair( it, 1.0 ) );
       }
-      else {
-	text_block += "_";
-      }
-      text_block += "\t" + prev_ner + "\t" + known_tags[i] + "\t";
-      prev_ner = known_tags[i];
-      if ( i < swords.size() - 1 ){
-	text_block += known_tags[i+1];
-      }
-      else {
-	text_block += "_";
-      }
+      string text_block;
+      string prev_pos = "_";
+      string prev_ner = "_";
+      for ( size_t i=0; i < swords.size(); ++i ){
+	text_block += words[i] + "\t" + prev_pos + "\t" + pos_tags[i] + "\t";
+	prev_pos = pos_tags[i];
+	if ( i < swords.size() - 1 ){
+	  text_block += pos_tags[i+1];
+	}
+	else {
+	  text_block += "_";
+	}
+	text_block += "\t" + prev_ner + "\t" + gazet_tags[i] + "\t";
+	prev_ner = gazet_tags[i];
+	if ( i < swords.size() - 1 ){
+	  text_block += gazet_tags[i+1];
+	}
+	else {
+	  text_block += "_";
+	}
 
-      text_block += "\t??\n";
-    }
-    if ( debug > 1 ){
-      LOG << "TAGGING TEXT_BLOCK\n" << text_block << endl;
-    }
-    _tag_result = tagger->TagLine( text_block );
-    if ( debug > 1 ){
-      LOG << "NER tagger out: " << endl;
-      for ( size_t i=0; i < _tag_result.size(); ++i ){
-	LOG << "[" << i << "] : word=" << _tag_result[i].word()
-	    << " tag=" << _tag_result[i].assignedTag()
-	    << " confidence=" << _tag_result[i].confidence() << endl;
+	text_block += "\t??\n";
+      }
+      if ( debug > 1 ){
+	LOG << "TAGGING TEXT_BLOCK\n" << text_block << endl;
+      }
+      _tag_result = tagger->TagLine( text_block );
+      if ( debug > 1 ){
+	LOG << "NER tagger out: " << endl;
+	for ( size_t i=0; i < _tag_result.size(); ++i ){
+	  LOG << "[" << i << "] : word=" << _tag_result[i].word()
+	      << " tag=" << _tag_result[i].assignedTag()
+	      << " confidence=" << _tag_result[i].confidence() << endl;
+	}
+      }
+      for ( const auto& tag : _tag_result ){
+	ner_tags.push_back( make_pair(tag.assignedTag(), tag.confidence() ) );
+      }
+      if ( !override_tags.empty() ){
+	vector<string> empty;
+	merge_override( ner_tags, override_tags, true, empty );
       }
     }
-    post_process( swords, override_tags );
+    post_process( swords, ner_tags );
   }
 }
 
@@ -515,15 +554,7 @@ void NERTagger::merge_override( vector<tc_pair>& tags,
 }
 
 void NERTagger::post_process( const vector<folia::Word*>& swords,
-			      const vector<tc_pair>& override_tags ){
-  vector<tc_pair> ner_tags;
-  for ( const auto& tag : _tag_result ){
-    ner_tags.push_back( make_pair(tag.assignedTag(), tag.confidence() ) );
-  }
-  if ( !override_tags.empty() ){
-    vector<string> empty;
-    merge_override( ner_tags, override_tags, true, empty );
-  }
+			      const vector<tc_pair>& ner_tags ){
   addNERTags( swords, ner_tags );
 }
 

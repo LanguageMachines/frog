@@ -53,13 +53,13 @@ class NERTagger: public BaseTagger {
   void addNERTags( const std::vector<folia::Word*>&,
 		   const std::vector<tc_pair>& );
   bool read_gazets( const std::string& f, const std::string& p ){
-    return read_gazets( f, p, known_ners );
+    return read_gazets( f, p, gazet_ners );
   }
   bool read_overrides( const std::string& f, const std::string& p ){
     return read_gazets( f, p, override_ners );
   }
   std::vector<std::string> create_ner_list( const std::vector<std::string>& s ){
-    return create_ner_list( s, known_ners );
+    return create_ner_list( s, gazet_ners );
   }
   std::vector<std::string> create_override_list( const std::vector<std::string>& s ){
     return create_ner_list( s, override_ners );
@@ -80,11 +80,12 @@ class NERTagger: public BaseTagger {
 		  std::vector<std::unordered_map<std::string,std::set<std::string>>>& );
   std::vector<std::string> create_ner_list( const std::vector<std::string>&,
 					    std::vector<std::unordered_map<std::string,std::set<std::string>>>& );
-  std::vector<std::unordered_map<std::string,std::set<std::string>>> known_ners;
+  std::vector<std::unordered_map<std::string,std::set<std::string>>> gazet_ners;
   std::vector<std::unordered_map<std::string,std::set<std::string>>> override_ners;
   void addEntity( folia::Sentence *,
 		  const std::vector<std::pair<folia::Word*,double>>&,
 		  const std::string& );
+  bool gazets_only;
   int max_ner_size;
 };
 
