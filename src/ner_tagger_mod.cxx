@@ -306,8 +306,8 @@ void NERTagger::addEntity( folia::Sentence *sent,
   }
 }
 
-void NERTagger::addNERTags( const vector<folia::Word*>& words,
-			    const vector<tc_pair>& ners ){
+void NERTagger::post_process( const vector<folia::Word*>& words,
+			      const vector<tc_pair>& ners ){
   /// @ners is a sequence of NE tags (maybe 'O') with their confidence
   /// these are appended to the corresponding @words
   /// On the fly, classification errors are fixed:
@@ -450,8 +450,30 @@ void NERTagger::Classify( const vector<folia::Word *>& swords ){
 	      << " confidence=" << _tag_result[i].confidence() << endl;
 	}
       }
+      string last;
       for ( const auto& tag : _tag_result ){
-	ner_tags.push_back( make_pair(tag.assignedTag(), tag.confidence() ) );
+	// we might have to correct for tags that start with 'I-'
+	// (the MBT tagger may deliver those)
+	string assigned = tag.assignedTag();
+	if ( assigned == "O" ){
+	  last = "";
+	}
+	else {
+	  vector<string> parts = TiCC::split_at( assigned, "-" );
+	  vector<string> vals = TiCC::split_at( parts[1], "+" );
+	  string val = vals[0];
+	  if ( val == last ){
+	    assigned = "I-" + val;
+	  }
+	  else {
+	    if ( debug > 1 ){
+	      LOG << "replace " << assigned << " by " << "B-" << val << endl;
+	    }
+	    last = val;
+	    assigned = "B-" + val;
+	  }
+	}
+	ner_tags.push_back( make_pair(assigned, tag.confidence() ) );
       }
       if ( !override_tags.empty() ){
 	vector<string> empty;
@@ -551,11 +573,6 @@ void NERTagger::merge_override( vector<tc_pair>& tags,
       label = "";
     }
   }
-}
-
-void NERTagger::post_process( const vector<folia::Word*>& swords,
-			      const vector<tc_pair>& ner_tags ){
-  addNERTags( swords, ner_tags );
 }
 
 bool NERTagger::Generate( const std::string& opt_line ){
