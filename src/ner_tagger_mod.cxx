@@ -403,6 +403,7 @@ void NERTagger::addNERTags( frog_data& words,
     vector<string> ner;
     if ( ners[i].first == "O" ){
       if ( !entity.empty() ){
+	// end the previous entity
 	if (debug > 1) {
 	  DBG << "O spit out " << curNER << endl;
 	  DBG << "ners  " << entity << endl;
@@ -419,21 +420,17 @@ void NERTagger::addNERTags( frog_data& words,
 	throw runtime_error( "NER: unable to retrieve a NER tag from: "
 			     + ners[i].first );
       }
-    }
-    if ( ner[0] == "B" ||
-	 ( ner[0] == "I" && entity.empty() ) ||
-	 ( ner[0] == "I" && ner[1] != curNER ) ){
-      // an I without preceding B is handled as a B
-      // an I with a different TAG is also handled as a B
-      if ( !entity.empty() ){
-	if ( debug > 1 ){
-	  DBG << "B spit out " << curNER << endl;
-	  DBG << "spit out " << entity << endl;
+      if ( ner[0] == "B" ){
+	if ( !entity.empty() ){
+	  if ( debug > 1 ){
+	    DBG << "B spit out " << curNER << endl;
+	    DBG << "spit out " << entity << endl;
+	  }
+	  addEntity( words, i, entity );
+	  entity.clear();
 	}
-	addEntity( words, i, entity );
-	entity.clear();
+	curNER = ner[1];
       }
-      curNER = ner[1];
     }
     entity.push_back( make_pair( ners[i].first, ners[i].second ) );
   }
