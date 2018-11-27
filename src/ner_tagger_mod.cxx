@@ -379,16 +379,11 @@ void NERTagger::Classify( frog_data& swords ){
   post_process( swords, ner_tags );
 }
 
-void NERTagger::post_process( frog_data& swords,
-			      const vector<tc_pair>& ner_tags ){
-  addNERTags( swords, ner_tags );
-}
-
-void NERTagger::addNERTags( frog_data& words,
-			    const vector<tc_pair>& ners ){
+void NERTagger::post_process( frog_data& sentence,
+			      const vector<tc_pair>& ners ){
   /// @ners is a sequence of NE tags (maybe 'O') with their confidence
-  /// these are appended to the corresponding @words
-  if ( words.size() == 0 ) {
+  /// these are appended to the corresponding @sentence structure
+  if ( sentence.size() == 0 ) {
     return;
   }
   vector<tc_pair> entity;
@@ -405,7 +400,7 @@ void NERTagger::addNERTags( frog_data& words,
 	  DBG << "O spit out " << curNER << endl;
 	  DBG << "ners  " << entity << endl;
 	}
-	addEntity( words, i, entity );
+	addEntity( sentence, i, entity );
 	entity.clear();
       }
       continue;
@@ -417,7 +412,7 @@ void NERTagger::addNERTags( frog_data& words,
 	  DBG << "spit out " << entity << endl;
 	  curNER = ners[i].first.substr(2);
 	}
-	addEntity( words, i, entity );
+	addEntity( sentence, i, entity );
 	entity.clear();
       }
     }
@@ -428,7 +423,7 @@ void NERTagger::addNERTags( frog_data& words,
       DBG << "END spit out " << curNER << endl;
       DBG << "spit out " << entity << endl;
     }
-    addEntity( words, words.size(), entity );
+    addEntity( sentence, sentence.size(), entity );
   }
 }
 

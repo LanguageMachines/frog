@@ -53,8 +53,6 @@ class NERTagger: public BaseTagger {
   void addDeclaration( folia::Processor& ) const;
   void add_result( const frog_data& fd,
 		   const std::vector<folia::Word*>& wv ) const;
-  void addNERTags( frog_data&,
-		   const std::vector<tc_pair>& );
   bool read_gazets( const std::string& f, const std::string& p ){
     return read_gazets( f, p, gazet_ners );
   }
