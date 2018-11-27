@@ -388,14 +388,11 @@ void NERTagger::addNERTags( frog_data& words,
 			    const vector<tc_pair>& ners ){
   /// @ners is a sequence of NE tags (maybe 'O') with their confidence
   /// these are appended to the corresponding @words
-  /// On the fly, classification errors are fixed:
-  /// - a NE starting with with I is added as starting with B
-  /// - a change in NE value is handled as a new NE start
   if ( words.size() == 0 ) {
     return;
   }
   vector<tc_pair> entity;
-  string curNER;
+  string curNER; // only used in debug messages
   for ( size_t i=0; i < ners.size(); ++i ){
     if (debug > 1){
       DBG << "NER = " << ners[i].first << endl;
@@ -413,23 +410,15 @@ void NERTagger::addNERTags( frog_data& words,
       }
       continue;
     }
-    else {
-      size_t num_words = TiCC::split_at( ners[i].first, ner, "-" );
-      if ( num_words != 2 ){
-	LOG << "expected <NER>-tag, got: " << ners[i].first << endl;
-	throw runtime_error( "NER: unable to retrieve a NER tag from: "
-			     + ners[i].first );
-      }
-      if ( ner[0] == "B" ){
-	if ( !entity.empty() ){
-	  if ( debug > 1 ){
-	    DBG << "B spit out " << curNER << endl;
-	    DBG << "spit out " << entity << endl;
-	  }
-	  addEntity( words, i, entity );
-	  entity.clear();
+    else if ( ners[i].first[0] == 'B' ){
+      if ( !entity.empty() ){
+	if ( debug > 1 ){
+	  DBG << "B spit out " << curNER << endl;
+	  DBG << "spit out " << entity << endl;
+	  curNER = ners[i].first.substr(2);
 	}
-	curNER = ner[1];
+	addEntity( words, i, entity );
+	entity.clear();
       }
     }
     entity.push_back( make_pair( ners[i].first, ners[i].second ) );
