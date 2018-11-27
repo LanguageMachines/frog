@@ -345,8 +345,31 @@ void NERTagger::Classify( frog_data& swords ){
 	    << " confidence=" << _tag_result[i].confidence() << endl;
       }
     }
+    //
+    // we have to correct for tags that start with 'I-'
+    // (the MBT tagger may deliver those)
+    string last;
     for ( const auto& tag : _tag_result ){
-      ner_tags.push_back( make_pair(tag.assignedTag(), tag.confidence() ) );
+      string assigned = tag.assignedTag();
+      if ( assigned == "O" ){
+	last = "";
+      }
+      else {
+	vector<string> parts = TiCC::split_at( assigned, "-" );
+	vector<string> vals = TiCC::split_at( parts[1], "+" );
+	string val = vals[0];
+	if ( val == last ){
+	  assigned = "I-" + val;
+	}
+	else {
+	  if ( debug > 1 ){
+	    DBG << "replace " << assigned << " by " << "B-" << val << endl;
+	  }
+	  last = val;
+	  assigned = "B-" + val;
+	}
+      }
+      ner_tags.push_back( make_pair( assigned, tag.confidence() ) );
     }
     if ( !override_tags.empty() ){
       vector<string> empty;
