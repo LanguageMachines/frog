@@ -337,19 +337,7 @@ void NERTagger::post_process( const vector<folia::Word*>& words,
       ++pos;
       continue;
     }
-    else {
-      size_t num_words = TiCC::split_at( it.first, ner, "-" );
-      if ( num_words != 2 ){
-	LOG << "expected <NER>-tag, got: " << it.first << endl;
-	throw runtime_error( "NER: unable to retrieve a NER tag from: "
-			     + it.first );
-      }
-    }
-    if ( ner[0] == "B" ||
-	 ( ner[0] == "I" && entity.empty() ) ||
-	 ( ner[0] == "I" && ner[1] != curNER ) ){
-      // an I without preceding B is handled as a B
-      // an I with a different TAG is also handled as a B
+    if ( it.first[0] == 'B' ){
       if ( !entity.empty() ){
 	if ( debug > 1 ){
 	  LOG << "B spit out " << curNER << endl;
@@ -357,6 +345,12 @@ void NERTagger::post_process( const vector<folia::Word*>& words,
 	}
 	addEntity( sent, entity, curNER );
 	entity.clear();
+      }
+      size_t num_words = TiCC::split_at( it.first, ner, "-" );
+      if ( num_words != 2 ){
+	LOG << "expected <NER>-tag, got: " << it.first << endl;
+	throw runtime_error( "NER: unable to retrieve a NER tag from: "
+			     + it.first );
       }
       curNER = ner[1];
     }
