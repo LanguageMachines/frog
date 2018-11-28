@@ -32,9 +32,11 @@
 #include "frog/cgn_tagger_mod.h"
 #include "frog/FrogData.h"
 #include "frog/Frog-util.h"
+#include "ticcutils/PrettyPrint.h"
 
 using namespace std;
 using namespace Tagger;
+using TiCC::operator<<;
 
 #define LOG *TiCC::Log(err_log)
 #define DBG *TiCC::Log(dbg_log)
@@ -230,6 +232,7 @@ vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
     if ( fd.language != "default" ){
       args["set"] = "tokconfig-" + fd.language;
     }
+    cout << "create a word: " << args << endl;
     folia::Word *w;
 #pragma omp critical (foliaupdate)
     {
