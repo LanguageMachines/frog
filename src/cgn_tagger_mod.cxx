@@ -232,7 +232,6 @@ vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
     if ( fd.language != "default" ){
       args["set"] = "tokconfig-" + fd.language;
     }
-    cout << "create a word: " << args << endl;
     folia::Word *w;
 #pragma omp critical (foliaupdate)
     {

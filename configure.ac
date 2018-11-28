@@ -73,6 +73,39 @@ fi
 
 AC_OSX_PKG( [icu4c] )
 
+PKG_CHECK_MODULES( [TEXTCAT],
+  [libexttextcat],
+  [TEXTCAT_FOUND=1
+   CXXFLAGS="$CXXFLAGS $TEXTCAT_CFLAGS"
+   LIBS="$TEXTCAT_LIBS $LIBS"],
+  [PKG_CHECK_MODULES( [TEXTCAT],
+   [libtextcat],
+   [TEXTCAT_FOUND=1
+    CXXFLAGS="$CXXFLAGS $TEXTCAT_CFLAGS"
+    LIBS="$TEXTCAT_LIBS $LIBS"],
+   [TEXTCAT_FOUND=0]
+   )]
+ )
+
+if test $TEXTCAT_FOUND = 0; then
+# So, no pkg-config for textcat found.
+#     Hopefully an old style version can be found???
+  AC_CHECK_OLD_TEXTCAT
+  if test $TEXTCAT_FOUND = 1; then
+    AC_DEFINE([HAVE_OLD_TEXTCAT], [1], [textcat needs C linkage])
+  fi
+fi
+
+if test $TEXTCAT_FOUND = 1; then
+  AC_SEARCH_LM
+fi
+
+if test $TEXTCAT_FOUND = 0; then
+   AC_MSG_ERROR( [no working libtextcat or libexttextcat found!] )
+else
+   AC_DEFINE([HAVE_TEXTCAT], [1], [textcat])
+fi
+
 PKG_CHECK_MODULES([XML2], [libxml-2.0 >= 2.6.16] )
 CXXFLAGS="$CXXFLAGS $XML2_CFLAGS"
 LIBS="$XML2_LIBS $LIBS"
