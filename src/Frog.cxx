@@ -373,6 +373,12 @@ bool parse_args( TiCC::CL_Options& Opts,
   };
   options.doXMLout = false;
   Opts.extract( "id", options.docid );
+  if ( !options.docid.empty() ){
+    if ( !folia::isNCName(options.docid) ){
+      LOG << "Invalid value for 'id': " << options.docid << " (not a valid NCName)" << endl;
+      return false;
+    }
+  }
   if ( Opts.extract( "xmldir", xmlDirName ) ){
     if ( xmlDirName.back() != '/' ){
       xmlDirName += "/";
