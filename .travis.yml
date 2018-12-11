@@ -6,6 +6,7 @@ group: edge
 branches:
   only:
     - master
+    - new_datastructure
 
 notifications:
   irc:
