@@ -1,5 +1,4 @@
 sudo: required
-dist: xenial
 group: edge
 
 # whitelist
@@ -21,12 +20,14 @@ language: cpp
 matrix:
   include:
     - os: linux
+      dist: xenial
       compiler: g++
       cache: ccache
       env:
         - SCAN=echo
 
     - os: linux
+      dist: trusty
       compiler: clang++
       cache: ccache
       env:
