@@ -133,7 +133,7 @@ void usage( ) {
        << "\t -V or --version       Show version info.\n"
        << "\t -d <debug level>  (for more verbosity)\n"
        << "\t --debug=<module><level>,<module><level>... (eg --debug=l5,n3) \n"
-       << "\t\t Set debug value for Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"
+       << "\t\t Set debug value for Tagger (T), Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"
        << "\t -S <port>             Run as server instead of reading from testfile\n"
 #ifdef HAVE_OPENMP
        << "\t --threads=<n>         Use a maximum of 'n' threads. Default: 8. \n"
@@ -215,7 +215,6 @@ bool parse_args( TiCC::CL_Options& Opts,
     configuration.setatt( "debug", "0" );
   }
   if ( Opts.extract( "debug", value ) ) {
-    value = TiCC::lowercase( value );
     vector<string> vec = TiCC::split_at( value, "," );
     for ( const auto& val : vec ){
       char mod = val[0];
@@ -226,6 +225,9 @@ bool parse_args( TiCC::CL_Options& Opts,
 	return false;
       }
       switch ( mod ){
+      case 'T':
+	configuration.setatt( "debug", value, "tagger" );
+	break;
       case 't':
 	configuration.setatt( "debug", value, "tokenizer" );
 	break;
