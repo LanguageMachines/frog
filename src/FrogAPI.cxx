@@ -1179,7 +1179,13 @@ void FrogAPI::show_record( ostream& os, const frog_record& fd ) const {
   else {
     os << Tab;
   }
-  os << Tab << fd.tag << Tab << fixed << showpoint << std::setprecision(6) << fd.tag_confidence;
+  if ( fd.tag.empty() ){
+    os << Tab << Tab << fixed << showpoint << std::setprecision(6) << 1.0;
+  }
+  else {
+    os << Tab << fd.tag << Tab
+       << fixed << showpoint << std::setprecision(6) << fd.tag_confidence;
+  }
   if ( options.doNER ){
     os << Tab << TiCC::uppercase(fd.ner_tag);
   }
@@ -1193,7 +1199,12 @@ void FrogAPI::show_record( ostream& os, const frog_record& fd ) const {
     os << Tab << Tab;
   }
   if ( options.doParse ){
-    os << Tab << fd.parse_index << Tab << fd.parse_role;
+    if ( fd.parse_index == -1 ){
+      os << Tab << "0" << Tab << "ROOT"; // bit strange, but backward compatible
+    }
+    else {
+      os << Tab << fd.parse_index << Tab << fd.parse_role;
+    }
   }
   else {
     os << Tab << Tab << Tab << Tab;
