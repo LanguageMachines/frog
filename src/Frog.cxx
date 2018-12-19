@@ -1,6 +1,6 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  Copyright (c) 2006 - 2018
+  Copyright (c) 2006 - 2019
   CLST  - Radboud University
   ILK   - Tilburg University
 
@@ -520,7 +520,7 @@ void KillServerFun( int Signal ){
 
 
 int main(int argc, char *argv[]) {
-  cerr << "frog " << VERSION << " (c) CLTS, ILK 1998 - 2018" << endl
+  cerr << "frog " << VERSION << " (c) CLTS, ILK 1998 - 2019" << endl
        << "CLST  - Centre for Language and Speech Technology,"
        << "Radboud University" << endl
        << "ILK   - Induction of Linguistic Knowledge Research Group,"
