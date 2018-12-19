@@ -970,6 +970,7 @@ void Parser::add_result( const frog_data& fd,
       if ( textclass != "current" ){
 	args["textclass"] = textclass;
       }
+      args["set"] = getTagset();
       folia::Dependency *e = new folia::Dependency( args, s->doc() );
       el->append( e );
       args.clear();
