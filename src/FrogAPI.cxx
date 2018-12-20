@@ -583,6 +583,10 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
   if ( fd.language != "default"
        && options.language != "none"
        && fd.language != options.language ){
+    //
+    // so the language doesn't match just create an empty sentence...
+    // don't frog it further
+    //
     folia::KWargs args;
     args["class"] = fd.language;
     string sett = root->doc()->defaultset( folia::AnnotationType::LANG );
@@ -591,11 +595,22 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
     }
     folia::LangAnnotation *la = new folia::LangAnnotation( args, root->doc() );
     s->append( la );
+    string text;
+    for ( const auto& r : fd.units ){
+      text += r.word + " ";
+    }
+    text = TiCC::trim( text );
+    if ( !text.empty() ){
+      s->settext( text );
+    }
   }
   else {
     string tok_set;
     if ( !fd.language.empty() && fd.language != "default" ){
       tok_set = "tokconfig-" + fd.language;
+      root->doc()->declare( folia::AnnotationType::TOKEN,
+			    tok_set,
+			    "annotator='ucto', annotatortype='auto', datetime='now'");
     }
     vector<folia::Word*> wv = myCGNTagger->add_result( s, tok_set, fd );
     if ( options.doLemma ){
