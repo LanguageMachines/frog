@@ -593,7 +593,11 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
     s->append( la );
   }
   else {
-    vector<folia::Word*> wv = myCGNTagger->add_result( s, fd );
+    string tok_set;
+    if ( !fd.language.empty() && fd.language != "default" ){
+      tok_set = "tokconfig-" + fd.language;
+    }
+    vector<folia::Word*> wv = myCGNTagger->add_result( s, tok_set, fd );
     if ( options.doLemma ){
       myMblem->add_lemmas( wv, fd );
     }
@@ -653,7 +657,14 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
       folia::LangAnnotation *la = new folia::LangAnnotation( args, sent->doc() );
       sent->append( la );
     }
-    vector<folia::Word*> wv = myCGNTagger->add_result( sent, fd );
+    string tok_set;
+    if ( fd.language != "default" ){
+      tok_set = "tokconfig-" + fd.language;
+    }
+    else {
+      tok_set = "tokconfig-nld";
+    }
+    vector<folia::Word*> wv = myCGNTagger->add_result( sent, tok_set, fd );
     if ( options.doLemma ){
       myMblem->add_lemmas( wv, fd );
     }

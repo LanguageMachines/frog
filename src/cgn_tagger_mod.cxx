@@ -215,6 +215,7 @@ void CGNTagger::addTag( frog_record& fd,
 }
 
 vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
+					    const string& tok_set,
 					    const frog_data& fd ) const {
   vector<folia::Word*> wv;
   for ( const auto& word : fd.units ){
@@ -229,8 +230,8 @@ vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
     if ( textclass != "current" ){
       args["textclass"] = textclass;
     }
-    if ( fd.language != "default" ){
-      args["set"] = "tokconfig-" + fd.language;
+    if ( !tok_set.empty() ){
+      args["set"] = tok_set;
     }
     folia::Word *w;
 #pragma omp critical (foliaupdate)
