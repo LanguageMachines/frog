@@ -218,7 +218,13 @@ vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
 					    const string& tok_set,
 					    const frog_data& fd ) const {
   vector<folia::Word*> wv;
+  if (  debug > 5 ){
+    DBG << "add_result\n" << fd << endl;
+  }
   for ( const auto& word : fd.units ){
+    if (  debug > 5 ){
+      DBG << "add_result\n" << word << endl;
+    }
     folia::KWargs args;
     if ( !s->id().empty() ){
       args["generate_id"] = s->id();
@@ -236,8 +242,14 @@ vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
     folia::Word *w;
 #pragma omp critical (foliaupdate)
     {
+      if (  debug > 5 ){
+	DBG << "add_result, create a word:" << endl;
+      }
       w = new folia::Word( args, s->doc() );
       w->settext( word.word, textclass );
+      if (  debug > 5 ){
+	DBG << "add_result, create a word, done:" << w << endl;
+      }
       s->append( w );
     }
     wv.push_back( w );

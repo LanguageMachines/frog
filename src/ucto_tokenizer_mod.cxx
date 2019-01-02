@@ -108,7 +108,12 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     // it wil run in minimal mode then.
   }
   else {
-    string rulesName = config.lookUp( "rulesFile", "tokenizer" );
+    // when a language (list) is specified on the command line,
+    // it overrules the language from the config file
+    string rulesName;
+    if ( language_list.empty() ){
+      rulesName = config.lookUp( "rulesFile", "tokenizer" );
+    }
     if ( rulesName.empty() ){
       if ( language_list.empty() ){
 	LOG << "no 'rulesFile' or 'languages' found in configuration" << endl;
@@ -273,7 +278,7 @@ frog_data UctoTokenizer::tokenize_stream_next( ){
   if ( tokenizer) {
     frog_data result;
     vector<Tokenizer::Token> toks = stack; // add tokens from previous visit
-    stack.clear();
+ stack.clear();
     vector<Tokenizer::Token> new_toks = tokenizer->tokenizeStream( *cur_is );
     // now add new tokens
     toks.insert( toks.end(), new_toks.begin(), new_toks.end() );

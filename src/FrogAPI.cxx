@@ -518,13 +518,24 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
     doc->declare( folia::AnnotationType::TOKEN, "passthru", "annotator='ucto', annotatortype='auto', datetime='now()'" );
   }
   else {
-    doc->declare( folia::AnnotationType::TOKEN,
-		  configuration.lookUp( "rulesFile", "tokenizer" ),
-		  "annotator='ucto', annotatortype='auto', datetime='now()'");
-    if ( !doc->isDeclared( folia::AnnotationType::LANG ) ){
-      doc->declare( folia::AnnotationType::LANG,
-		    ISO_SET, "annotator='ucto'" );
+    string languages = configuration.lookUp( "languages", "tokenizer" );
+    if ( !languages.empty() ){
+      vector<string> language_list;
+      language_list = TiCC::split_at( languages, "," );
+      options.language = language_list[0];
+      for ( const auto& l : language_list ){
+	doc->declare( folia::AnnotationType::TOKEN,
+		      "tokconfig-" + l,
+		      "annotator='ucto', annotatortype='auto', datetime='now()'");
+      }
     }
+    else {
+      doc->declare( folia::AnnotationType::TOKEN,
+		    configuration.lookUp( "rulesFile", "tokenizer" ),
+		    "annotator='ucto', annotatortype='auto', datetime='now()'");
+    }
+    doc->declare( folia::AnnotationType::LANG,
+		  ISO_SET, "annotator='ucto'" );
   }
   myCGNTagger->addDeclaration( *doc );
   if ( options.doLemma ){
@@ -559,18 +570,31 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
   if ( !root || !root->doc() ){
     return 0;
   }
+  if  (options.debugFlag > 5 ){
+    DBG << "append_to_folia, root = " << root << endl;
+    DBG << "frog_data=\n" << fd << endl;
+  }
   folia::FoliaElement *result = root;
   folia::KWargs args;
   if ( fd.units[0].new_paragraph ){
+    if  (options.debugFlag > 5 ){
+      DBG << "append_to_folia, NEW paragraph " << endl;
+    }
     args["id"] = root->doc()->id() + ".p." + TiCC::toString(++p_count);
     folia::Paragraph *p = new folia::Paragraph( args, root->doc() );
     if ( root->element_id() == folia::Text_t ){
+      if  (options.debugFlag > 5 ){
+	DBG << "append_to_folia, add paragraph to Text" << endl;
+      }
       root->append( p );
     }
     else {
       // root is a paragraph, which is done now.
       if ( options.textredundancy == "full" ){
 	root->settext( root->str(options.outputclass), options.outputclass);
+      }
+      if  (options.debugFlag > 5 ){
+	DBG << "append_to_folia, add paragraph to parent of " << root << endl;
       }
       root->parent()->append( p );
     }
@@ -580,6 +604,13 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
   args["generate_id"] = result->id();
   folia::Sentence *s = new folia::Sentence( args, root->doc() );
   result->append( s );
+  if  (options.debugFlag > 5 ){
+    DBG << "append_to_folia, created Sentence" << s << endl;
+  }
+  string tok_set;
+  if ( !fd.language.empty() && fd.language != "default" ){
+    tok_set = "tokconfig-" + fd.language;
+  }
   if ( fd.language != "default"
        && options.language != "none"
        && fd.language != options.language ){
@@ -591,12 +622,35 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
     }
     folia::LangAnnotation *la = new folia::LangAnnotation( args, root->doc() );
     s->append( la );
+    for ( const auto& word : fd.units ){
+      folia::KWargs args;
+      if ( !s->id().empty() ){
+	args["generate_id"] = s->id();
+      }
+      args["class"] = word.token_class;
+      if ( word.no_space ){
+	args["space"] = "no";
+      }
+      if ( options.outputclass != "current" ){
+	args["textclass"] = options.outputclass;
+      }
+      if ( !tok_set.empty() ){
+	args["set"] = tok_set;
+      }
+      folia::Word *w;
+#pragma omp critical (foliaupdate)
+      {
+	w = new folia::Word( args, s->doc() );
+	w->settext( word.word, options.outputclass );
+	if (  options.debugFlag > 5 ){
+	  DBG << "add_result, create a word, done:" << w << endl;
+	}
+	s->append( w );
+      }
+    }
+    s->settext( s->str(options.outputclass), options.outputclass );
   }
   else {
-    string tok_set;
-    if ( !fd.language.empty() && fd.language != "default" ){
-      tok_set = "tokconfig-" + fd.language;
-    }
     vector<folia::Word*> wv = myCGNTagger->add_result( s, tok_set, fd );
     if ( options.doLemma ){
       myMblem->add_lemmas( wv, fd );
@@ -616,6 +670,9 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
     if ( options.doParse ){
       myParser->add_result( fd, wv );
     }
+  }
+  if  (options.debugFlag > 5 ){
+    DBG << "append_to_folia, done, result node = " << result << endl;
   }
   return result;
 }
@@ -638,6 +695,40 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     // skip
     if ( options.debugFlag > 0 ){
       DBG << "append_to_sentence() SKIP a sentence: " << la << endl;
+    }
+    // BUT add tokenization, when applicable
+    string tok_set;
+    if ( fd.language != "default" ){
+      tok_set = "tokconfig-" + fd.language;
+    }
+    else {
+      tok_set = "tokconfig-nld";
+    }
+    for ( const auto& word : fd.units ){
+      folia::KWargs args;
+      if ( !sent->id().empty() ){
+	args["generate_id"] = sent->id();
+      }
+      args["class"] = word.token_class;
+      if ( word.no_space ){
+	args["space"] = "no";
+      }
+      if ( options.outputclass != "current" ){
+	args["textclass"] = options.outputclass;
+      }
+      if ( !tok_set.empty() ){
+	args["set"] = tok_set;
+      }
+      folia::Word *w;
+#pragma omp critical (foliaupdate)
+      {
+	w = new folia::Word( args, sent->doc() );
+	w->settext( word.word, options.outputclass );
+	if (  options.debugFlag > 5 ){
+	  DBG << "add_result, create a word, done:" << w << endl;
+	}
+	sent->append( w );
+      }
     }
   }
   else {
@@ -1494,6 +1585,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
     if ( !languages.empty() ){
       vector<string> language_list;
       language_list = TiCC::split_at( languages, "," );
+      options.language = language_list[0];
       proc.set_metadata( "language", language_list[0] );
       for ( const auto& l : language_list ){
 	proc.declare( folia::AnnotationType::TOKEN,
