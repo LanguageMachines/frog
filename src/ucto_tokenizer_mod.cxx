@@ -89,7 +89,12 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     // it wil run in minimal mode then.
   }
   else {
-    string rulesName = config.lookUp( "rulesFile", "tokenizer" );
+    // when a languas (list) is specified on the command line,
+    // it overrules the language from the config file
+    string rulesName;
+    if ( language_list.empty() ){
+      rulesName = config.lookUp( "rulesFile", "tokenizer" );
+    }
     if ( rulesName.empty() ){
       if ( language_list.empty() ){
 	LOG << "no 'rulesFile' or 'languages' found in configuration" << endl;
