@@ -514,11 +514,13 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
     doc->set_metadata( "language", options.language );
   }
   doc->addStyle( "text/xsl", "folia.xsl" );
+  DBG << "start document!!!" << endl;
   if ( !options.doTok ){
     doc->declare( folia::AnnotationType::TOKEN, "passthru", "annotator='ucto', annotatortype='auto', datetime='now()'" );
   }
   else {
     string languages = configuration.lookUp( "languages", "tokenizer" );
+    DBG << "languages: " << languages << endl;
     if ( !languages.empty() ){
       vector<string> language_list;
       language_list = TiCC::split_at( languages, "," );
@@ -527,6 +529,8 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
 	doc->declare( folia::AnnotationType::TOKEN,
 		      "tokconfig-" + l,
 		      "annotator='ucto', annotatortype='auto', datetime='now()'");
+	DBG << "added token-annotation for: 'tokconfig-" << l << "'" << endl;
+
       }
     }
     else {
@@ -640,6 +644,7 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
       folia::Word *w;
 #pragma omp critical (foliaupdate)
       {
+	DBG << "1 create Word(" << args << ")" << endl;
 	w = new folia::Word( args, s->doc() );
 	w->settext( word.word, options.outputclass );
 	if (  options.debugFlag > 5 ){
@@ -722,6 +727,7 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
       folia::Word *w;
 #pragma omp critical (foliaupdate)
       {
+	DBG << "2 create Word(" << args << ")" << endl;
 	w = new folia::Word( args, sent->doc() );
 	w->settext( word.word, options.outputclass );
 	if (  options.debugFlag > 5 ){

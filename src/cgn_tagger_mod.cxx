@@ -245,6 +245,7 @@ vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
       if (  debug > 5 ){
 	DBG << "add_result, create a word:" << endl;
       }
+      DBG << "3 create Word(" << args << ")" << endl;
       w = new folia::Word( args, s->doc() );
       w->settext( word.word, textclass );
       if (  debug > 5 ){
