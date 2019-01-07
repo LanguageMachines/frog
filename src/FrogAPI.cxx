@@ -572,7 +572,7 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
   if ( !root || !root->doc() ){
     return 0;
   }
-  if  (options.debugFlag > 5 ){
+  if  (options.debugFlag > 0 ){
     DBG << "append_to_folia, root = " << root << endl;
     DBG << "frog_data=\n" << fd << endl;
   }
