@@ -57,6 +57,7 @@ UctoTokenizer::UctoTokenizer( TiCC::LogStream *errlog,
   else {
     dbgLog = errLog;
   }
+  debug = 0;
 }
 
 UctoTokenizer::~UctoTokenizer(){
@@ -84,7 +85,6 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     throw runtime_error( "ucto tokenizer is already initialized" );
   tokenizer = new Tokenizer::TokenizerClass();
   tokenizer->setErrorLog( dbgLog );
-  int debug = 0;
   string val = config.lookUp( "debug", "tokenizer" );
   if ( val.empty() ){
     val = config.lookUp( "debug" );
@@ -137,7 +137,7 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
       }
     }
   }
-  string textredundancy = config.lookUp( "textredundancy", "tokenizer" );
+  textredundancy = config.lookUp( "textredundancy", "tokenizer" );
   if ( !textredundancy.empty() ){
     tokenizer->setTextRedundancy( textredundancy );
   }
@@ -321,4 +321,52 @@ frog_data UctoTokenizer::tokenize_stream( istream& is ){
   cur_is = &is;
   stack.clear();
   return tokenize_stream_next();
+}
+
+vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
+					       const string& textclass,
+					       const string& tok_set,
+					       const frog_data& fd ) const {
+  vector<folia::Word*> wv;
+  if (  debug > 5 ){
+    DBG << "add_words\n" << fd << endl;
+  }
+  for ( const auto& word : fd.units ){
+    if (  debug > 5 ){
+      DBG << "add_result\n" << word << endl;
+    }
+    folia::KWargs args;
+    if ( !s->id().empty() ){
+      args["generate_id"] = s->id();
+    }
+    args["class"] = word.token_class;
+    if ( word.no_space ){
+      args["space"] = "no";
+    }
+    if ( textclass != "current" ){
+      args["textclass"] = textclass;
+    }
+    if ( !tok_set.empty() ){
+      args["set"] = tok_set;
+    }
+    folia::Word *w;
+#pragma omp critical (foliaupdate)
+    {
+      if (  debug > 5 ){
+	DBG << "add_result, create a word:" << endl;
+      }
+      DBG << "3 create Word(" << args << ")" << endl;
+      w = new folia::Word( args, s->doc() );
+      w->settext( word.word, textclass );
+      if (  debug > 5 ){
+	DBG << "add_result, create a word, done:" << w << endl;
+      }
+      s->append( w );
+    }
+    wv.push_back( w );
+  }
+  if ( textredundancy == "full" ){
+    s->settext( s->str(textclass), textclass );
+  }
+  return wv;
 }

@@ -268,7 +268,6 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       stat = myCGNTagger->init( configuration );
       if ( stat ){
 	myCGNTagger->set_eos_mark( options.uttmark );
-	myCGNTagger->set_text_redundancy( options.textredundancy );
 	if ( options.doIOB ){
 	  myIOBTagger = new IOBTagger( theErrLog, theDbgLog );
 	  stat = myIOBTagger->init( configuration );
@@ -401,7 +400,6 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	try {
 	  myCGNTagger = new CGNTagger( theErrLog, theDbgLog );
 	  tagStat = myCGNTagger->init( configuration );
-	  myCGNTagger->set_text_redundancy( options.textredundancy );
 	}
 	catch ( const exception& e ){
 	  tagWhat = e.what();
@@ -615,6 +613,7 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
   if ( !fd.language.empty() && fd.language != "default" ){
     tok_set = "tokconfig-" + fd.language;
   }
+  vector<folia::Word*> wv = tokenizer->add_words( s, options.outputclass, tok_set, fd );
   if ( fd.language != "default"
        && options.language != "none"
        && fd.language != options.language ){
@@ -626,37 +625,9 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
     }
     folia::LangAnnotation *la = new folia::LangAnnotation( args, root->doc() );
     s->append( la );
-    for ( const auto& word : fd.units ){
-      folia::KWargs args;
-      if ( !s->id().empty() ){
-	args["generate_id"] = s->id();
-      }
-      args["class"] = word.token_class;
-      if ( word.no_space ){
-	args["space"] = "no";
-      }
-      if ( options.outputclass != "current" ){
-	args["textclass"] = options.outputclass;
-      }
-      if ( !tok_set.empty() ){
-	args["set"] = tok_set;
-      }
-      folia::Word *w;
-#pragma omp critical (foliaupdate)
-      {
-	DBG << "1 create Word(" << args << ")" << endl;
-	w = new folia::Word( args, s->doc() );
-	w->settext( word.word, options.outputclass );
-	if (  options.debugFlag > 5 ){
-	  DBG << "add_result, create a word, done:" << w << endl;
-	}
-	s->append( w );
-      }
-    }
-    s->settext( s->str(options.outputclass), options.outputclass );
   }
   else {
-    vector<folia::Word*> wv = myCGNTagger->add_result( s, tok_set, fd );
+    myCGNTagger->add_tags( wv, fd );
     if ( options.doLemma ){
       myMblem->add_lemmas( wv, fd );
     }
@@ -709,33 +680,7 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     else {
       tok_set = "tokconfig-nld";
     }
-    for ( const auto& word : fd.units ){
-      folia::KWargs args;
-      if ( !sent->id().empty() ){
-	args["generate_id"] = sent->id();
-      }
-      args["class"] = word.token_class;
-      if ( word.no_space ){
-	args["space"] = "no";
-      }
-      if ( options.outputclass != "current" ){
-	args["textclass"] = options.outputclass;
-      }
-      if ( !tok_set.empty() ){
-	args["set"] = tok_set;
-      }
-      folia::Word *w;
-#pragma omp critical (foliaupdate)
-      {
-	DBG << "2 create Word(" << args << ")" << endl;
-	w = new folia::Word( args, sent->doc() );
-	w->settext( word.word, options.outputclass );
-	if (  options.debugFlag > 5 ){
-	  DBG << "add_result, create a word, done:" << w << endl;
-	}
-	sent->append( w );
-      }
-    }
+    vector<folia::Word*> wv = tokenizer->add_words( sent, options.outputclass, tok_set, fd );
   }
   else {
     if ( options.language != "none"
@@ -761,7 +706,8 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     else {
       tok_set = "tokconfig-nld";
     }
-    vector<folia::Word*> wv = myCGNTagger->add_result( sent, tok_set, fd );
+    vector<folia::Word*> wv = tokenizer->add_words( sent, options.outputclass, tok_set, fd );
+    myCGNTagger->add_tags( wv, fd );
     if ( options.doLemma ){
       myMblem->add_lemmas( wv, fd );
     }
@@ -796,7 +742,7 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
     }
   }
   else {
-    myCGNTagger->add_result( wv, fd );
+    myCGNTagger->add_tags( wv, fd );
     if ( options.doLemma ){
       myMblem->add_lemmas( wv, fd );
     }

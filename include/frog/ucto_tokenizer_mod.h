@@ -54,12 +54,18 @@ class UctoTokenizer {
   frog_data tokenize_stream( std::istream& );
   frog_data tokenize_stream_next();
   std::string tokenizeStream( std::istream& );
+  std::vector<folia::Word*> add_words( folia::Sentence *,
+				       const std::string&,
+				       const std::string&,
+				       const frog_data& ) const;
  private:
   std::vector<Tokenizer::Token> stack;  // for the reentrant tokenize_stream()
   std::istream *cur_is;
   Tokenizer::TokenizerClass *tokenizer;
   TiCC::LogStream *errLog;
   TiCC::LogStream *dbgLog;
+  int debug;
+  std::string textredundancy;
 };
 
 #endif
