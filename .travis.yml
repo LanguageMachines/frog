@@ -132,7 +132,8 @@ script:
   - git clone https://github.com/LanguageMachines/frogtests.git;
   - cd frogtests
   - if [ "$TRAVIS_BRANCH" == "new_datastructure" ]; then git checkout new_datastructure; fi
-  - frog_bin=/usr/local/bin ./testall >&2
+#  - frog_bin=/usr/local/bin ./testall >&2
+  - frog_bin=/usr/local/bin ./testone testlang >&2
 
 after_failure:
   - for file in *.diff; do echo DIFF in $file; cat $file; done
