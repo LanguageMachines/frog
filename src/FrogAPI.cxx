@@ -656,6 +656,15 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
 void FrogAPI::append_to_sentence( folia::Sentence *sent,
 				  const frog_data& fd,
 				  bool show_parse ) const {
+  // add tokenization, when applicable
+  string tok_set;
+  if ( fd.language != "default" ){
+    tok_set = "tokconfig-" + fd.language;
+  }
+  else {
+    tok_set = "tokconfig-nld";
+  }
+  vector<folia::Word*> wv = tokenizer->add_words( sent, options.outputclass, tok_set, fd );
   string la;
   if ( sent->hasannotation<folia::LangAnnotation>() ){
     la = sent->annotation<folia::LangAnnotation>()->cls();
@@ -672,15 +681,6 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     if ( options.debugFlag > 0 ){
       DBG << "append_to_sentence() SKIP a sentence: " << la << endl;
     }
-    // BUT add tokenization, when applicable
-    string tok_set;
-    if ( fd.language != "default" ){
-      tok_set = "tokconfig-" + fd.language;
-    }
-    else {
-      tok_set = "tokconfig-nld";
-    }
-    vector<folia::Word*> wv = tokenizer->add_words( sent, options.outputclass, tok_set, fd );
   }
   else {
     if ( options.language != "none"
@@ -699,14 +699,6 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
       folia::LangAnnotation *la = new folia::LangAnnotation( args, sent->doc() );
       sent->append( la );
     }
-    string tok_set;
-    if ( fd.language != "default" ){
-      tok_set = "tokconfig-" + fd.language;
-    }
-    else {
-      tok_set = "tokconfig-nld";
-    }
-    vector<folia::Word*> wv = tokenizer->add_words( sent, options.outputclass, tok_set, fd );
     myCGNTagger->add_tags( wv, fd );
     if ( options.doLemma ){
       myMblem->add_lemmas( wv, fd );
