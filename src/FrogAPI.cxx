@@ -672,7 +672,7 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
   if ( sent->hasannotation<folia::LangAnnotation>() ){
     la = sent->annotation<folia::LangAnnotation>()->cls();
   }
-  if (options.debugFlag > 1){
+  if (options.debugFlag > 0){
     DBG << "append_to_sentence()" << endl;
     DBG << "fd.language = " << fd.language << endl;
     DBG << "options.language = " << options.language << endl;
