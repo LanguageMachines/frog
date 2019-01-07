@@ -572,7 +572,7 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
   if ( !root || !root->doc() ){
     return 0;
   }
-  if  (options.debugFlag > 0 ){
+  if  (options.debugFlag > 5 ){
     DBG << "append_to_folia, root = " << root << endl;
     DBG << "frog_data=\n" << fd << endl;
   }
@@ -672,7 +672,7 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
   if ( sent->hasannotation<folia::LangAnnotation>() ){
     la = sent->annotation<folia::LangAnnotation>()->cls();
   }
-  if (options.debugFlag > 0){
+  if (options.debugFlag == 0){
     DBG << "append_to_sentence()" << endl;
     DBG << "fd.language = " << fd.language << endl;
     DBG << "options.language = " << options.language << endl;
@@ -1023,6 +1023,9 @@ string get_language( frog_data& fd ){
 
 bool FrogAPI::frog_sentence( frog_data& sent ){
   string lan = get_language( sent );
+  DBG << "frog_sentence\n" << sent << endl;
+  DBG << "options.language=" <<  options.language << endl;
+  DBG << "lan=" << lan << endl;
   if ( !options.language.empty()
        && options.language != "none"
        && !lan.empty()
@@ -1311,7 +1314,7 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
       frog_record rec = extract_from_word( w, options.inputclass );
       res.units.push_back( rec );
     }
-    if  (options.debugFlag > 0){
+    if  (options.debugFlag > 1){
       DBG << "before frog_sentence() 1" << endl;
     }
     frog_sentence( res );
@@ -1338,6 +1341,7 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
     frog_data sent = tokenizer->tokenize_stream( inputstream );
     timers.tokTimer.stop();
     while ( sent.size() > 0 ){
+      DBG << "before frog_sentence() 111" << endl;
       bool ok = frog_sentence( sent );
       if ( !options.noStdOut ){
 	showResults( os, sent );

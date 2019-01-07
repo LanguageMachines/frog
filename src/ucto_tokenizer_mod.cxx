@@ -355,7 +355,7 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
       if (  debug > 5 ){
 	DBG << "add_result, create a word:" << endl;
       }
-      DBG << "create Word(" << args << ")" << endl;
+      DBG << "create Word(" << args << ") = " << word.word << endl;
       w = new folia::Word( args, s->doc() );
       w->settext( word.word, textclass );
       if (  debug > 5 ){
