@@ -264,6 +264,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       tokenizer->setInputClass( options.inputclass );
       tokenizer->setOutputClass( options.outputclass );
       tokenizer->setTextRedundancy( options.textredundancy );
+      tokenizer->set_TC_debug( true );
       myCGNTagger = new CGNTagger( theErrLog,theDbgLog );
       stat = myCGNTagger->init( configuration );
       if ( stat ){

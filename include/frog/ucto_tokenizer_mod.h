@@ -40,6 +40,7 @@ class UctoTokenizer {
   bool init( const TiCC::Configuration& );
   void setUttMarker( const std::string& );
   void setPassThru( bool );
+  void set_TC_debug( bool );
   bool getPassThru() const;
   void setSentencePerLineInput( bool );
   void setInputEncoding( const std::string& );

@@ -85,29 +85,35 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     throw runtime_error( "ucto tokenizer is already initialized" );
   tokenizer = new Tokenizer::TokenizerClass();
   tokenizer->setErrorLog( dbgLog );
-  string val = config.lookUp( "debug", "tokenizer" );
-  if ( val.empty() ){
-    val = config.lookUp( "debug" );
-  }
-  if ( !val.empty() )
-    debug = TiCC::stringTo<int>( val );
+  tokenizer->setEosMarker( "" );
+  tokenizer->setVerbose( false );
+  tokenizer->setParagraphDetection( false ); //detection of paragraphs
+  tokenizer->setXMLOutput( true );
   if ( !config.hasSection("tokenizer") ){
     tokenizer->setPassThru();
-  }
-  if ( debug > 1 ){
-    tokenizer->setDebug( debug );
-  }
-  string languages = config.lookUp( "languages", "tokenizer" );
-  vector<string> language_list;
-  if ( !languages.empty() ){
-    language_list = TiCC::split_at( languages, "," );
-    LOG << "Language List ="  << language_list << endl;
-  }
-  if ( tokenizer->getPassThru() ){
     // when passthru, we don't further initialize the tokenizer
     // it wil run in minimal mode then.
   }
   else {
+    string val = config.lookUp( "debug", "tokenizer" );
+    if ( val.empty() ){
+      val = config.lookUp( "debug" );
+    }
+    if ( !val.empty() )
+      debug = TiCC::stringTo<int>( val );
+    if ( debug > 1 ){
+      tokenizer->setDebug( debug );
+    }
+    val = config.lookUp( "textcatdebug", "tokenizer" );
+    if ( !val.empty() ){
+      tokenizer->set_tc_debug( true );
+    }
+    string languages = config.lookUp( "languages", "tokenizer" );
+    vector<string> language_list;
+    if ( !languages.empty() ){
+      language_list = TiCC::split_at( languages, "," );
+      LOG << "Language List ="  << language_list << endl;
+    }
     // when a language (list) is specified on the command line,
     // it overrules the language from the config file
     string rulesName;
@@ -136,15 +142,11 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
 	tokenizer->setLanguage( "none" );
       }
     }
+    textredundancy = config.lookUp( "textredundancy", "tokenizer" );
+    if ( !textredundancy.empty() ){
+      tokenizer->setTextRedundancy( textredundancy );
+    }
   }
-  textredundancy = config.lookUp( "textredundancy", "tokenizer" );
-  if ( !textredundancy.empty() ){
-    tokenizer->setTextRedundancy( textredundancy );
-  }
-  tokenizer->setEosMarker( "" );
-  tokenizer->setVerbose( false );
-  tokenizer->setParagraphDetection( false ); //detection of paragraphs
-  tokenizer->setXMLOutput( true );
   return true;
 }
 
@@ -226,6 +228,14 @@ void UctoTokenizer::setFiltering( bool b ){
 void UctoTokenizer::setTextRedundancy( const string& tr ) {
   if ( tokenizer ){
     tokenizer->setTextRedundancy( tr );
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initialized" );
+}
+
+void UctoTokenizer::set_TC_debug( const bool b ) {
+  if ( tokenizer ){
+    tokenizer->set_tc_debug( b );
   }
   else
     throw runtime_error( "ucto tokenizer not initialized" );
