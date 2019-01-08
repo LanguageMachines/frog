@@ -268,7 +268,6 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       stat = myCGNTagger->init( configuration );
       if ( stat ){
 	myCGNTagger->set_eos_mark( options.uttmark );
-	myCGNTagger->set_text_redundancy( options.textredundancy );
 	if ( options.doIOB ){
 	  myIOBTagger = new IOBTagger( theErrLog, theDbgLog );
 	  stat = myIOBTagger->init( configuration );
@@ -401,7 +400,6 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	try {
 	  myCGNTagger = new CGNTagger( theErrLog, theDbgLog );
 	  tagStat = myCGNTagger->init( configuration );
-	  myCGNTagger->set_text_redundancy( options.textredundancy );
 	}
 	catch ( const exception& e ){
 	  tagWhat = e.what();
@@ -514,17 +512,32 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
     doc->set_metadata( "language", options.language );
   }
   doc->addStyle( "text/xsl", "folia.xsl" );
+  DBG << "start document!!!" << endl;
   if ( !options.doTok ){
     doc->declare( folia::AnnotationType::TOKEN, "passthru", "annotator='ucto', annotatortype='auto', datetime='now()'" );
   }
   else {
-    doc->declare( folia::AnnotationType::TOKEN,
-		  configuration.lookUp( "rulesFile", "tokenizer" ),
-		  "annotator='ucto', annotatortype='auto', datetime='now()'");
-    if ( !doc->isDeclared( folia::AnnotationType::LANG ) ){
-      doc->declare( folia::AnnotationType::LANG,
-		    ISO_SET, "annotator='ucto'" );
+    string languages = configuration.lookUp( "languages", "tokenizer" );
+    DBG << "languages: " << languages << endl;
+    if ( !languages.empty() ){
+      vector<string> language_list;
+      language_list = TiCC::split_at( languages, "," );
+      options.language = language_list[0];
+      for ( const auto& l : language_list ){
+	doc->declare( folia::AnnotationType::TOKEN,
+		      "tokconfig-" + l,
+		      "annotator='ucto', annotatortype='auto', datetime='now()'");
+	DBG << "added token-annotation for: 'tokconfig-" << l << "'" << endl;
+
+      }
     }
+    else {
+      doc->declare( folia::AnnotationType::TOKEN,
+		    configuration.lookUp( "rulesFile", "tokenizer" ),
+		    "annotator='ucto', annotatortype='auto', datetime='now()'");
+    }
+    doc->declare( folia::AnnotationType::LANG,
+		  ISO_SET, "annotator='ucto'" );
   }
   myCGNTagger->addDeclaration( *doc );
   if ( options.doLemma ){
@@ -559,18 +572,31 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
   if ( !root || !root->doc() ){
     return 0;
   }
+  if  (options.debugFlag > 5 ){
+    DBG << "append_to_folia, root = " << root << endl;
+    DBG << "frog_data=\n" << fd << endl;
+  }
   folia::FoliaElement *result = root;
   folia::KWargs args;
   if ( fd.units[0].new_paragraph ){
+    if  (options.debugFlag > 5 ){
+      DBG << "append_to_folia, NEW paragraph " << endl;
+    }
     args["id"] = root->doc()->id() + ".p." + TiCC::toString(++p_count);
     folia::Paragraph *p = new folia::Paragraph( args, root->doc() );
     if ( root->element_id() == folia::Text_t ){
+      if  (options.debugFlag > 5 ){
+	DBG << "append_to_folia, add paragraph to Text" << endl;
+      }
       root->append( p );
     }
     else {
       // root is a paragraph, which is done now.
       if ( options.textredundancy == "full" ){
 	root->settext( root->str(options.outputclass), options.outputclass);
+      }
+      if  (options.debugFlag > 5 ){
+	DBG << "append_to_folia, add paragraph to parent of " << root << endl;
       }
       root->parent()->append( p );
     }
@@ -580,6 +606,17 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
   args["generate_id"] = result->id();
   folia::Sentence *s = new folia::Sentence( args, root->doc() );
   result->append( s );
+  if  (options.debugFlag > 5 ){
+    DBG << "append_to_folia, created Sentence" << s << endl;
+  }
+  string tok_set;
+  if ( fd.language != "default" ){
+    tok_set = "tokconfig-" + fd.language;
+  }
+  else {
+    tok_set = "tokconfig-nld";
+  }
+  vector<folia::Word*> wv = tokenizer->add_words( s, options.outputclass, tok_set, fd );
   if ( fd.language != "default"
        && options.language != "none"
        && fd.language != options.language ){
@@ -605,14 +642,7 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
     }
   }
   else {
-    string tok_set;
-    if ( !fd.language.empty() && fd.language != "default" ){
-      tok_set = "tokconfig-" + fd.language;
-      root->doc()->declare( folia::AnnotationType::TOKEN,
-			    tok_set,
-			    "annotator='ucto', annotatortype='auto', datetime='now'");
-    }
-    vector<folia::Word*> wv = myCGNTagger->add_result( s, tok_set, fd );
+    myCGNTagger->add_tags( wv, fd );
     if ( options.doLemma ){
       myMblem->add_lemmas( wv, fd );
     }
@@ -632,17 +662,29 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
       myParser->add_result( fd, wv );
     }
   }
+  if  (options.debugFlag > 5 ){
+    DBG << "append_to_folia, done, result node = " << result << endl;
+  }
   return result;
 }
 
 void FrogAPI::append_to_sentence( folia::Sentence *sent,
 				  const frog_data& fd,
 				  bool show_parse ) const {
+  // add tokenization, when applicable
+  string tok_set;
+  if ( fd.language != "default" ){
+    tok_set = "tokconfig-" + fd.language;
+  }
+  else {
+    tok_set = "tokconfig-nld";
+  }
+  vector<folia::Word*> wv = tokenizer->add_words( sent, options.outputclass, tok_set, fd );
   string la;
   if ( sent->hasannotation<folia::LangAnnotation>() ){
     la = sent->annotation<folia::LangAnnotation>()->cls();
   }
-  if (options.debugFlag > 1){
+  if (options.debugFlag == 0){
     DBG << "append_to_sentence()" << endl;
     DBG << "fd.language = " << fd.language << endl;
     DBG << "options.language = " << options.language << endl;
@@ -672,14 +714,7 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
       folia::LangAnnotation *la = new folia::LangAnnotation( args, sent->doc() );
       sent->append( la );
     }
-    string tok_set;
-    if ( fd.language != "default" ){
-      tok_set = "tokconfig-" + fd.language;
-    }
-    else {
-      tok_set = "tokconfig-nld";
-    }
-    vector<folia::Word*> wv = myCGNTagger->add_result( sent, tok_set, fd );
+    myCGNTagger->add_tags( wv, fd );
     if ( options.doLemma ){
       myMblem->add_lemmas( wv, fd );
     }
@@ -714,7 +749,7 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
     }
   }
   else {
-    myCGNTagger->add_result( wv, fd );
+    myCGNTagger->add_tags( wv, fd );
     if ( options.doLemma ){
       myMblem->add_lemmas( wv, fd );
     }
@@ -1000,6 +1035,9 @@ string get_language( frog_data& fd ){
 
 bool FrogAPI::frog_sentence( frog_data& sent ){
   string lan = get_language( sent );
+  DBG << "frog_sentence\n" << sent << endl;
+  DBG << "options.language=" <<  options.language << endl;
+  DBG << "lan=" << lan << endl;
   if ( !options.language.empty()
        && options.language != "none"
        && !lan.empty()
@@ -1288,7 +1326,7 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
       frog_record rec = extract_from_word( w, options.inputclass );
       res.units.push_back( rec );
     }
-    if  (options.debugFlag > 0){
+    if  (options.debugFlag > 1){
       DBG << "before frog_sentence() 1" << endl;
     }
     frog_sentence( res );
@@ -1315,6 +1353,7 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
     frog_data sent = tokenizer->tokenize_stream( inputstream );
     timers.tokTimer.stop();
     while ( sent.size() > 0 ){
+      DBG << "before frog_sentence() 111" << endl;
       bool ok = frog_sentence( sent );
       if ( !options.noStdOut ){
 	showResults( os, sent );
@@ -1509,6 +1548,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
     if ( !languages.empty() ){
       vector<string> language_list;
       language_list = TiCC::split_at( languages, "," );
+      options.language = language_list[0];
       proc.set_metadata( "language", language_list[0] );
       for ( const auto& l : language_list ){
 	proc.declare( folia::AnnotationType::TOKEN,

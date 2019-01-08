@@ -214,80 +214,8 @@ void CGNTagger::addTag( frog_record& fd,
   }
 }
 
-vector<folia::Word*> CGNTagger::add_result( folia::Sentence* s,
-					    const string& tok_set,
-					    const frog_data& fd ) const {
-  vector<folia::Word*> wv;
-  for ( const auto& word : fd.units ){
-    folia::KWargs args;
-    if ( !s->id().empty() ){
-      args["generate_id"] = s->id();
-    }
-    args["class"] = word.token_class;
-    if ( word.no_space ){
-      args["space"] = "no";
-    }
-    if ( textclass != "current" ){
-      args["textclass"] = textclass;
-    }
-    if ( !tok_set.empty() ){
-      args["set"] = tok_set;
-    }
-    folia::Word *w;
-#pragma omp critical (foliaupdate)
-    {
-      w = new folia::Word( args, s->doc() );
-      w->settext( word.word, textclass );
-      s->append( w );
-    }
-    wv.push_back( w );
-    args.clear();
-    args["set"]   = getTagset();
-    args["class"] = word.tag;
-    if ( textclass != "current" ){
-      args["textclass"] = textclass;
-    }
-    args["confidence"]= TiCC::toString(word.tag_confidence);
-    folia::FoliaElement *postag;
-#pragma omp critical (foliaupdate)
-    {
-      postag = w->addPosAnnotation( args );
-    }
-    vector<string> hv = TiCC::split_at_first_of( word.tag, "()" );
-    string head = hv[0];
-    args["class"] = head;
-#pragma omp critical (foliaupdate)
-    {
-      folia::Feature *feat = new folia::HeadFeature( args );
-      postag->append( feat );
-      if ( head == "SPEC" ){
-      postag->confidence(1.0);
-      }
-    }
-    vector<string> feats;
-    if ( hv.size() > 1 ){
-      feats = TiCC::split_at( hv[1], "," );
-    }
-    for ( const auto& f : feats ){
-      folia::KWargs args;
-      args["set"] =  getTagset();
-      args["subset"] = getSubSet( f, head, word.tag );
-      args["class"]  = f;
-#pragma omp critical (foliaupdate)
-      {
-	folia::Feature *feat = new folia::Feature( args, s->doc() );
-	postag->append( feat );
-      }
-    }
-  }
-  if ( textredundancy == "full" ){
-    s->settext( s->str(textclass), textclass );
-  }
-  return wv;
-}
-
-void CGNTagger::add_result( const vector<folia::Word*>& wv,
-			    const frog_data& fd ) const {
+void CGNTagger::add_tags( const vector<folia::Word*>& wv,
+			  const frog_data& fd ) const {
   assert( wv.size() == fd.size() );
   size_t pos = 0;
   for ( const auto& word : fd.units ){
@@ -330,11 +258,5 @@ void CGNTagger::add_result( const vector<folia::Word*>& wv,
       }
     }
     ++pos;
-  }
-  if ( textredundancy == "full" ) {
-#pragma omp critical (foliaupdate)
-    {
-      wv[0]->sentence()->settext( wv[0]->str(textclass), textclass );
-    }
   }
 }
