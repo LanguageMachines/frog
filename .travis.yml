@@ -12,7 +12,8 @@ notifications:
     channels:
       - "irc.uvt.nl#gitlama"
     template:
-      - "%{repository_slug}#%{build_number}-%{branch} : %{message} --> %{build_url}"
+      - "%{repository_slug}#%{build_number}-%{branch} : \
+        %{message} --> %{build_url}"
     skip_join: true
 
 language: cpp
@@ -42,7 +43,10 @@ matrix:
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       sudo apt-get update;
-      sudo apt-get install pkg-config autoconf-archive autotools-dev ccache cppcheck libicu-dev libxml2-dev libbz2-dev zlib1g-dev libtar-dev libboost-dev libboost-regex-dev expect libexttextcat-dev;
+      sudo apt-get install pkg-config autoconf-archive autotools-dev ccache;
+      sudo apt-get install cppcheck libicu-dev libxml2-dev libbz2-dev;
+      sudo apt-get install zlib1g-dev libtar-dev libboost-dev;
+      sudo apt-get install libboost-regex-dev expect libexttextcat-dev;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew update;
@@ -75,7 +79,6 @@ before_install:
   - cd ..
   - git clone https://github.com/LanguageMachines/libfolia
   - cd libfolia
-#  - if [ "$TRAVIS_BRANCH" == "new_datastructure" ]; then git checkout foliareader; fi
   - bash bootstrap.sh
   - ./configure $OPENMPFLAG
   - make
@@ -131,12 +134,19 @@ script:
   - make check
   - git clone https://github.com/LanguageMachines/frogtests.git;
   - cd frogtests
-  - if [ "$TRAVIS_BRANCH" == "new_datastructure" ]; then git checkout new_datastructure; fi
-#  - frog_bin=/usr/local/bin ./testall >&2
+  - if [ "$TRAVIS_BRANCH" == "new_datastructure" ]; then
+      git checkout new_datastructure;
+    fi
+  #  - frog_bin=/usr/local/bin ./testall >&2
   - frog_bin=/usr/local/bin ./testone.sh testlang >&2
 
 after_failure:
   - for file in *.diff; do echo DIFF in $file; cat $file; done
   - for file in *.log; do echo SERVER LOGS in $file; cat $file; done
-  - for file in *.err; do echo ERRORS in $file; cat $file; cat $(echo $file| cut -f 1 -d '.').out; done
-  - if [ "$TRAVIS_BRANCH" == "new_datastructure" ]; then echo "last frog.debug"; cat frog.debug; fi
+  - for file in *.err; do
+      echo ERRORS in $file;
+      cat $file; cat $(echo $file| cut -f 1 -d '.').out;
+    done
+  - if [ "$TRAVIS_BRANCH" == "new_datastructure" ]; then
+      echo "last frog.debug"; cat frog.debug;
+    fi
