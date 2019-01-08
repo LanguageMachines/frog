@@ -264,7 +264,6 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       tokenizer->setInputClass( options.inputclass );
       tokenizer->setOutputClass( options.outputclass );
       tokenizer->setTextRedundancy( options.textredundancy );
-      tokenizer->set_TC_debug( true );
       myCGNTagger = new CGNTagger( theErrLog,theDbgLog );
       stat = myCGNTagger->init( configuration );
       if ( stat ){
@@ -350,6 +349,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	try {
 	  tokenizer = new UctoTokenizer(theErrLog,theDbgLog);
 	  tokStat = tokenizer->init( configuration );
+	  tokenizer->set_TC_debug( true );
 	}
 	catch ( const exception& e ){
 	  tokWhat = e.what();
