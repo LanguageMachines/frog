@@ -536,7 +536,7 @@ int main(int argc, char *argv[]) {
   TiCC::LogStream *theDbgLog = 0;
   std::ios_base::sync_with_stdio(false);
   FrogOptions options;
-
+  string db_filename;
   try {
     TiCC::CL_Options Opts("c:e:o:t:T:x::X::nQhVd:S:",
 			  "textclass:,inputclass:,outputclass:,testdir:,"
@@ -555,7 +555,6 @@ int main(int argc, char *argv[]) {
       usage();
       return EXIT_SUCCESS;
     };
-    string db_filename;
     Opts.extract( "debugfile", db_filename );
     if ( db_filename.empty() ){
       db_filename = "frog.debug";
@@ -764,9 +763,6 @@ int main(int argc, char *argv[]) {
       // interactive mode
       frog.FrogInteractive();
     }
-    if ( options.debugFlag ){
-      LOG << "Debug information is stored in " << db_filename << endl;
-    }
   }
   catch ( const TiCC::OptionError& e ){
     usage();
@@ -779,5 +775,15 @@ int main(int argc, char *argv[]) {
   delete theErrLog;
   delete theDbgLog;
   delete the_dbg_stream;
+
+  if ( !db_filename.empty() ){
+    ifstream test(db_filename,ifstream::ate);
+    if ( test.tellg() > 0 ){
+      cerr << "Some debugging information is availale in: " << db_filename << endl;
+    }
+    else {
+      remove( db_filename.c_str() );
+    }
+  }
   return EXIT_SUCCESS;
 }

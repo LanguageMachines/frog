@@ -107,7 +107,7 @@ class FrogAPI {
   void FrogFile( const std::string&, std::ostream&, const std::string& );
   void FrogServer( Sockets::ServerSocket &conn );
   void FrogInteractive();
-  bool frog_sentence( frog_data& );
+  bool frog_sentence( frog_data&, const size_t );
   void run_folia_processor( const std::string&,
 			    std::ostream&,
 			    const std::string& = "" );
@@ -142,7 +142,9 @@ class FrogAPI {
   void handle_one_element( std::ostream&,
 			   folia::FoliaElement *e,
 			   int&  );
-  void handle_one_sentence( std::ostream&, folia::Sentence * );
+  void handle_one_sentence( std::ostream&,
+			    folia::Sentence *,
+			    const size_t );
   void append_to_sentence( folia::Sentence *, const frog_data& ) const;
   void append_to_words( const std::vector<folia::Word*>&,
 			const frog_data& ) const;

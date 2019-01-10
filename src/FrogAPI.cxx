@@ -662,7 +662,8 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
     if ( options.doParse ){
       if ( options.maxParserTokens != 0
 	   && fd.size() > options.maxParserTokens ){
-	DBG << "no parse results added. sentence too long" << endl;
+	DBG << "no parse results added. sentence too long (" << fd.size()
+	    << " words)" << endl;
       }
       else {
 	myParser->add_result( fd, wv );
@@ -690,7 +691,7 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
   if ( sent->hasannotation<folia::LangAnnotation>() ){
     la = sent->annotation<folia::LangAnnotation>()->cls();
   }
-  if (options.debugFlag == 0){
+  if (options.debugFlag > 1 ){
     DBG << "append_to_sentence()" << endl;
     DBG << "fd.language = " << fd.language << endl;
     DBG << "options.language = " << options.language << endl;
@@ -857,7 +858,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	frog_data sent = tokenizer->tokenize_stream( inputstream );
 	timers.tokTimer.stop();
 	while ( sent.size() > 0 ){
-	  frog_sentence( sent );
+	  frog_sentence( sent, 1 );
 	  if ( options.doXMLout ){
 	    root = append_to_folia( root, sent );
 	  }
@@ -932,7 +933,7 @@ void FrogAPI::FrogStdin( bool prompt ) {
     istringstream inputstream(data,istringstream::in);
     frog_data res = tokenizer->tokenize_stream( inputstream );
     if ( res.size() > 0 ){
-      frog_sentence( res );
+      frog_sentence( res, 1 );
       showResults( cout, res );
     }
     if ( prompt ){
@@ -1003,7 +1004,7 @@ void FrogAPI::FrogInteractive(){
 	cout << "Processing... '" << data << "'" << endl;
 	istringstream inputstream(data,istringstream::in);
 	frog_data res = tokenizer->tokenize_stream( inputstream );
-	frog_sentence( res );
+	frog_sentence( res, 1 );
 	showResults( cout, res );
       }
     }
@@ -1051,7 +1052,7 @@ string get_language( frog_data& fd ){
   return fd.language;
 }
 
-bool FrogAPI::frog_sentence( frog_data& sent ){
+bool FrogAPI::frog_sentence( frog_data& sent, const size_t s_count ){
   string lan = get_language( sent );
   if ( options.debugFlag > 2 ){
     DBG << "frog_sentence\n" << sent << endl;
@@ -1064,7 +1065,7 @@ bool FrogAPI::frog_sentence( frog_data& sent ){
        && lan != "default"
        && lan != options.language ){
     if ( options.debugFlag > 0 ){
-       DBG << "skipping sentence (different language: " << lan
+      DBG << "skipping sentence " << s_count << " (different language: " << lan
 	   << " --language=" << options.language << ")" << endl;
     }
     return false;
@@ -1189,9 +1190,12 @@ bool FrogAPI::frog_sentence( frog_data& sent ){
       }
       else {
 	LOG << "WARNING!" << endl;
-	LOG << "Sentence '" << sent.sentence() << "'\n"
-	    << "isn't parsed because it contains more tokens then set with the --max-parser-tokens="
+	LOG << "Sentence " << s_count
+	    << " isn't parsed because it contains more tokens (" << sent.size()
+	    << ") then set with the --max-parser-tokens="
 	    << options.maxParserTokens << " option." << endl;
+	DBG << 	"Sentence is too long: " << s_count << endl
+	    << sent.sentence() << endl;
       }
     }
     timers.frogTimer.stop();
@@ -1334,7 +1338,9 @@ frog_record extract_from_word( const folia::Word* word,
   return rec;
 }
 
-void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
+void FrogAPI::handle_one_sentence( ostream& os,
+				   folia::Sentence *s,
+				   const size_t s_cnt ){
   vector<folia::Word*> wv;
   wv = s->words( options.inputclass );
   if ( wv.empty() ){
@@ -1349,9 +1355,9 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
       res.units.push_back( rec );
     }
     if  (options.debugFlag > 1){
-      DBG << "handle_one_sentence() on existoing words" << endl;
+      DBG << "handle_one_sentence() on existing words" << endl;
     }
-    if ( frog_sentence( res ) ){
+    if ( frog_sentence( res, s_cnt ) ){
       if ( !options.noStdOut ){
 	showResults( os, res );
       }
@@ -1373,7 +1379,7 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
       if ( options.debugFlag > 0 ){
 	DBG << "frog_sentence() on a part." << endl;
       }
-      frog_sentence( sent );
+      frog_sentence( sent, s_cnt );
       if ( !options.noStdOut ){
 	  showResults( os, sent );
       }
@@ -1399,7 +1405,7 @@ void FrogAPI::handle_one_paragraph( ostream& os,
   frog_data res = tokenizer->tokenize_stream( inputstream );
   timers.tokTimer.stop();
   while ( res.size() > 0 ){
-    frog_sentence( res );
+    frog_sentence( res, ++sentence_done );
     if ( !options.noStdOut ){
       showResults( os, res );
     }
@@ -1411,18 +1417,11 @@ void FrogAPI::handle_one_paragraph( ostream& os,
       }
       folia::Sentence *s = new folia::Sentence( args, p->doc() );
       p->append( s );
-      if  (options.debugFlag > 0){
-	DBG << "before append_to_sentence() B" << endl;
-      }
       append_to_sentence( s, res );
-      if  (options.debugFlag > 0){
-	DBG << "after append_to_sentence() B" << endl;
-      }
     }
     timers.tokTimer.start();
     res = tokenizer->tokenize_stream_next();
     timers.tokTimer.stop();
-    ++sentence_done;
   }
 }
 
@@ -1435,7 +1434,7 @@ void FrogAPI::handle_one_element( ostream& os,
     frog_data res;
     frog_record tmp = extract_from_word( word, options.inputclass );
     res.units.push_back(tmp);
-    frog_sentence( res );
+    frog_sentence( res, ++sentence_done );
     if ( !options.noStdOut ){
       showResults( os, res );
     }
@@ -1444,22 +1443,18 @@ void FrogAPI::handle_one_element( ostream& os,
       wv.push_back( word );
       append_to_words( wv, res );
     }
-    ++sentence_done;
   }
   else if ( e->xmltag() == "s" ){
     // OK a text in a sentence
-    if  (options.debugFlag > 0){
+    if ( options.debugFlag > 2 ){
       DBG << "found text in a sentence " << e << endl;
     }
-    handle_one_sentence( os, dynamic_cast<folia::Sentence*>(e) );
-    ++sentence_done;
-    if  (options.debugFlag > 0){
-      DBG << "after handle_one_sentence()" << endl;
-    }
+    handle_one_sentence( os, dynamic_cast<folia::Sentence*>(e),
+			 ++sentence_done );
   }
   else if ( e->xmltag() == "p" ){
     // OK a longer text in some paragraph
-    if  (options.debugFlag > 0){
+    if ( options.debugFlag > 2 ){
       DBG << "found text in a paragraph " << e << endl;
     }
     handle_one_paragraph( os,
@@ -1469,7 +1464,7 @@ void FrogAPI::handle_one_element( ostream& os,
   else {
     // Some text outside word, paragraphs or sentences (yet)
     string text = e->str(options.inputclass);
-    if ( options.debugFlag > 0 ){
+    if ( options.debugFlag > 1 ){
       DBG << "frog-" << e->xmltag() << ":" << text << endl;
     }
     istringstream inputstream(text,istringstream::in);
@@ -1478,7 +1473,7 @@ void FrogAPI::handle_one_element( ostream& os,
     timers.tokTimer.stop();
     vector<frog_data> sents;
     while ( res.size() > 0 ){
-      frog_sentence( res );
+      frog_sentence( res, ++sentence_done );
       sents.push_back( res );
       if ( !options.noStdOut ){
 	showResults( os, res );
@@ -1611,8 +1606,11 @@ void FrogAPI::run_folia_processor( const string& infilename,
   while ( (p = proc.next_text_parent() ) ){
     //    cerr << "next text parent: " << p << endl;
     handle_one_element( output_stream, p, sentence_done );
+    if ( options.debugFlag > 0 ){
+      DBG << "done with sentence " << sentence_done << endl;
+    }
     if ( proc.next() ){
-      if  (options.debugFlag > 0){
+      if ( options.debugFlag > 1 ){
 	DBG << "looping for more ..." << endl;
       }
     }
@@ -1676,8 +1674,7 @@ void FrogAPI::FrogFile( const string& infilename,
     frog_data res = tokenizer->tokenize_stream( TEST );
     timers.tokTimer.stop();
     while ( res.size() > 0 ){
-      ++i;
-      frog_sentence( res );
+      frog_sentence( res, ++i );
       if ( !options.noStdOut ){
 	showResults( os, res );
       }
