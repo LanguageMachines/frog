@@ -633,10 +633,7 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
     }
     folia::LangAnnotation *la = new folia::LangAnnotation( args, root->doc() );
     s->append( la );
-    string text;
-    for ( const auto& r : fd.units ){
-      text += r.word + " ";
-    }
+    string text = fd.sentence(); // get tokenized, space separated, sentence.
     text = TiCC::trim( text );
     if ( !text.empty() ){
       s->settext( text );
@@ -1195,7 +1192,7 @@ bool FrogAPI::frog_sentence( frog_data& sent, const size_t s_count ){
 	    << ") then set with the --max-parser-tokens="
 	    << options.maxParserTokens << " option." << endl;
 	DBG << 	"Sentence is too long: " << s_count << endl
-	    << sent.sentence() << endl;
+	    << sent.sentence(true) << endl;
       }
     }
     timers.frogTimer.stop();
