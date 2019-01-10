@@ -151,6 +151,17 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
   return result;
 }
 
+string frog_data::sentence() const{
+  string result;
+  for ( const auto& it : units ){
+    result += it.word;
+    if ( !it.no_space ){
+      result += " ";
+    }
+  }
+  return result;
+}
+
 void frog_data::resolve_mwus(){
   mw_units.clear();
   for ( size_t pos=0; pos < units.size(); ++pos ){

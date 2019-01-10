@@ -660,7 +660,13 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
       myMwu->add_result( fd, wv );
     }
     if ( options.doParse ){
-      myParser->add_result( fd, wv );
+      if ( options.maxParserTokens != 0
+	   && fd.size() > options.maxParserTokens ){
+	DBG << "no parse results added. sentence too long" << endl;
+      }
+      else {
+	myParser->add_result( fd, wv );
+      }
     }
   }
   if  (options.debugFlag > 5 ){
@@ -670,8 +676,7 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
 }
 
 void FrogAPI::append_to_sentence( folia::Sentence *sent,
-				  const frog_data& fd,
-				  bool show_parse ) const {
+				  const frog_data& fd ) const {
   // add tokenization, when applicable
   string tok_set;
   if ( fd.language != "default" ){
@@ -731,8 +736,14 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     if ( options.doNER ){
       myNERTagger->add_result( fd, wv );
     }
-    if ( options.doParse && show_parse ){
-      myParser->add_result( fd, wv );
+    if ( options.doParse ){
+      if ( options.maxParserTokens != 0
+	   && fd.size() > options.maxParserTokens ){
+	DBG << "no parse results added. sentence too long" << endl;
+      }
+      else {
+	myParser->add_result( fd, wv );
+      }
     }
     if (options.debugFlag > 1){
       DBG << "done with append_to_sentence()" << endl;
@@ -767,7 +778,13 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
       myMwu->add_result( fd, wv );
     }
     if ( options.doParse && wv.size() > 1 ){
-      myParser->add_result( fd, wv );
+      if ( options.maxParserTokens != 0
+	   && wv.size() > options.maxParserTokens ){
+	DBG << "no parse results added. sentence too long" << endl;
+      }
+      else {
+	myParser->add_result( fd, wv );
+      }
     }
   }
 }
@@ -1036,22 +1053,23 @@ string get_language( frog_data& fd ){
 
 bool FrogAPI::frog_sentence( frog_data& sent ){
   string lan = get_language( sent );
-  DBG << "frog_sentence\n" << sent << endl;
-  DBG << "options.language=" <<  options.language << endl;
-  DBG << "lan=" << lan << endl;
+  if ( options.debugFlag > 2 ){
+    DBG << "frog_sentence\n" << sent << endl;
+    DBG << "options.language=" <<  options.language << endl;
+    DBG << "lan=" << lan << endl;
+  }
   if ( !options.language.empty()
        && options.language != "none"
        && !lan.empty()
        && lan != "default"
        && lan != options.language ){
-    if ( options.debugFlag >= 0 ){
+    if ( options.debugFlag > 0 ){
        DBG << "skipping sentence (different language: " << lan
 	   << " --language=" << options.language << ")" << endl;
     }
     return false;
   }
   else {
-    bool showParse = options.doParse;
     timers.frogTimer.start();
     if ( options.debugFlag > 5 ){
       DBG << "Frogging sentence:" << sent << endl;
@@ -1165,16 +1183,19 @@ bool FrogAPI::frog_sentence( frog_data& sent ){
       }
     }
     if ( options.doParse ){
-      if ( options.maxParserTokens != 0
-	   && sent.size() > options.maxParserTokens ){
-	showParse = false;
+      if ( options.maxParserTokens == 0
+	   || sent.size() <= options.maxParserTokens ){
+	myParser->Parse( sent, timers );
       }
       else {
-	myParser->Parse( sent, timers );
+	LOG << "WARNING!" << endl;
+	LOG << "Sentence '" << sent.sentence() << "'\n"
+	    << "isn't parsed because it contains more tokens then set with the --max-parser-tokens="
+	    << options.maxParserTokens << " option." << endl;
       }
     }
     timers.frogTimer.stop();
-    return showParse;
+    return true;
   }
 }
 
@@ -1328,39 +1349,36 @@ void FrogAPI::handle_one_sentence( ostream& os, folia::Sentence *s ){
       res.units.push_back( rec );
     }
     if  (options.debugFlag > 1){
-      DBG << "before frog_sentence() 1" << endl;
+      DBG << "handle_one_sentence() on existoing words" << endl;
     }
-    frog_sentence( res );
-    if ( !options.noStdOut ){
-      showResults( os, res );
-    }
-    if ( options.doXMLout ){
-      if  (options.debugFlag > 0){
-	DBG << "before append_to_words()" << endl;
+    if ( frog_sentence( res ) ){
+      if ( !options.noStdOut ){
+	showResults( os, res );
       }
-      append_to_words( wv, res );
-      if (options.debugFlag > 0){
-	DBG << "after append_to_words()" << endl;
+      if ( options.doXMLout ){
+	append_to_words( wv, res );
       }
     }
   }
   else {
     string text = s->str(options.inputclass);
     if ( options.debugFlag > 0 ){
-      DBG << "frog-sentence:" << text << endl;
+      DBG << "handle_one_sentence() from string: '" << text << "'" << endl;
     }
     istringstream inputstream(text,istringstream::in);
     timers.tokTimer.start();
     frog_data sent = tokenizer->tokenize_stream( inputstream );
     timers.tokTimer.stop();
     while ( sent.size() > 0 ){
-      DBG << "before frog_sentence() 111" << endl;
-      bool ok = frog_sentence( sent );
+      if ( options.debugFlag > 0 ){
+	DBG << "frog_sentence() on a part." << endl;
+      }
+      frog_sentence( sent );
       if ( !options.noStdOut ){
-	showResults( os, sent );
+	  showResults( os, sent );
       }
       if ( options.doXMLout ){
-	append_to_sentence( s, sent, ok );
+	append_to_sentence( s, sent );
       }
       timers.tokTimer.start();
       sent = tokenizer->tokenize_stream_next();
@@ -1374,20 +1392,14 @@ void FrogAPI::handle_one_paragraph( ostream& os,
 				    int& sentence_done ){
   string text = p->str(options.inputclass);
   if ( options.debugFlag > 0 ){
-    DBG << "frog-paragraph:" << text << endl;
+    DBG << "handle_one_paragraph:" << text << endl;
   }
   istringstream inputstream(text,istringstream::in);
   timers.tokTimer.start();
   frog_data res = tokenizer->tokenize_stream( inputstream );
   timers.tokTimer.stop();
   while ( res.size() > 0 ){
-    bool ok = frog_sentence( res );
-    if ( options.doParse && !ok ){
-      LOG << "WARNING!" << endl;
-      LOG << "Sentence " << sentence_done
-	  << " isn't parsed because it contains more tokens then set with the --max-parser-tokens="
-	  << options.maxParserTokens << " option." << endl;
-    }
+    frog_sentence( res );
     if ( !options.noStdOut ){
       showResults( os, res );
     }
@@ -1402,7 +1414,7 @@ void FrogAPI::handle_one_paragraph( ostream& os,
       if  (options.debugFlag > 0){
 	DBG << "before append_to_sentence() B" << endl;
       }
-      append_to_sentence( s, res, ok );
+      append_to_sentence( s, res );
       if  (options.debugFlag > 0){
 	DBG << "after append_to_sentence() B" << endl;
       }
@@ -1665,23 +1677,15 @@ void FrogAPI::FrogFile( const string& infilename,
     timers.tokTimer.stop();
     while ( res.size() > 0 ){
       ++i;
-      bool showParse = frog_sentence( res );
+      frog_sentence( res );
       if ( !options.noStdOut ){
 	showResults( os, res );
       }
-      if ( options.doParse && !showParse ){
-	LOG << "WARNING!" << endl;
-	LOG << "Sentence " << i
-	    << " isn't parsed because it contains more tokens then set with the --max-parser-tokens="
-	    << options.maxParserTokens << " option." << endl;
+      if ( !xmlOutFile.empty() ){
+	root = append_to_folia( root, res );
       }
-      else {
-	if  (options.debugFlag > 0){
-	  DBG << TiCC::Timer::now() << " done with sentence[" << i << "]" << endl;
-	}
-	if ( !xmlOutFile.empty() ){
-	  root = append_to_folia( root, res );
-	}
+      if  (options.debugFlag > 0){
+	DBG << TiCC::Timer::now() << " done with sentence[" << i << "]" << endl;
       }
       timers.tokTimer.start();
       res = tokenizer->tokenize_stream_next();

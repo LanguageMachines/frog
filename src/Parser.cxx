@@ -949,6 +949,7 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
 
 void Parser::add_result( const frog_data& fd,
 			 const vector<folia::Word*>& wv ) const {
+  DBG << "Parser::add_result:" << endl << fd << endl;
   folia::Sentence *s = wv[0]->sentence();
   folia::KWargs args;
   if ( !s->id().empty() ){
