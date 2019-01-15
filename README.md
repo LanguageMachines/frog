@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/LanguageMachines/frog.svg?branch=master)](https://travis-ci.org/LanguageMachines/frog) [![Language Machines Badge](http://applejack.science.ru.nl/lamabadge.php/frog)](http://applejack.science.ru.nl/languagemachines/) [![DOI](https://zenodo.org/badge/1948022.svg)](https://zenodo.org/badge/latestdoi/1948022)
+[![Build Status](https://travis-ci.org/LanguageMachines/frog.svg?branch=master)](https://travis-ci.org/LanguageMachines/frog) [![Language Machines Badge](http://applejack.science.ru.nl/lamabadge.php/frog)](http://applejack.science.ru.nl/languagemachines/) [![DOI](https://zenodo.org/badge/20526435.svg)](https://zenodo.org/badge/latestdoi/20526435)
 
 Frog - A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
 ==============================================================================
