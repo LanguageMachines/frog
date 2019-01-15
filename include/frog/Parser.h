@@ -62,7 +62,6 @@ class Parser {
   ~Parser();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
-  void addDeclaration( folia::Processor& ) const;
   void Parse( frog_data&, TimerBlock& );
   parseData prepareParse( frog_data& );
   void add_result( const frog_data&,

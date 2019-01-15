@@ -860,7 +860,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	    root = append_to_folia( root, sent );
 	  }
 	  else {
-	    showResults( output_stream, sent );
+	    show_results( output_stream, sent );
 	  }
 	  timers.tokTimer.start();
 	  sent = tokenizer->tokenize_stream_next();
@@ -931,7 +931,7 @@ void FrogAPI::FrogStdin( bool prompt ) {
     frog_data res = tokenizer->tokenize_stream( inputstream );
     if ( res.size() > 0 ){
       frog_sentence( res, 1 );
-      showResults( cout, res );
+      show_results( cout, res );
     }
     if ( prompt ){
       cout << "frog>"; cout.flush();
@@ -1002,7 +1002,7 @@ void FrogAPI::FrogInteractive(){
 	istringstream inputstream(data,istringstream::in);
 	frog_data res = tokenizer->tokenize_stream( inputstream );
 	frog_sentence( res, 1 );
-	showResults( cout, res );
+	show_results( cout, res );
       }
     }
     cout << "Done.\n";
@@ -1233,7 +1233,11 @@ string filter_non_NC( const string& filename ){
 
 const string Tab = "\t";
 
-void FrogAPI::show_record( ostream& os, const frog_record& fd ) const {
+void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
+  ///
+  /// output a frog_record @fd in tabbed format to stream @os
+  /// This done in a backward compatible manor to older Frog versions
+  ///
   os << fd.word << Tab;
   if ( options.doLemma ){
     if ( !fd.lemmas.empty() ){
@@ -1298,19 +1302,23 @@ void FrogAPI::show_record( ostream& os, const frog_record& fd ) const {
   }
 }
 
-void FrogAPI::showResults( ostream& os,
-			   const frog_data& fd ) const {
+void FrogAPI::show_results( ostream& os,
+			    const frog_data& fd ) const {
+  ///
+  /// output a frog_data structure @fd in tabbed format to stream @os
+  /// This done in a backward compatible manor to older Frog versions
+  ///
   if ( fd.mw_units.empty() ){
     for ( size_t pos=0; pos < fd.units.size(); ++pos ){
       os << pos+1 << Tab;
-      show_record( os, fd.units[pos] );
+      output_tabbed( os, fd.units[pos] );
       os << endl;
     }
   }
   else {
     for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
       os << pos+1 << Tab;
-      show_record( os, fd.mw_units[pos] );
+      output_tabbed( os, fd.mw_units[pos] );
       os << endl;
     }
   }
@@ -1349,14 +1357,14 @@ void FrogAPI::handle_one_sentence( ostream& os,
     frog_data res;
     for ( const auto& w : wv ){
       frog_record rec = extract_from_word( w, options.inputclass );
-      res.units.push_back( rec );
+      res.append( rec );
     }
     if  (options.debugFlag > 1){
       DBG << "handle_one_sentence() on existing words" << endl;
     }
     if ( frog_sentence( res, s_cnt ) ){
       if ( !options.noStdOut ){
-	showResults( os, res );
+	show_results( os, res );
       }
       if ( options.doXMLout ){
 	append_to_words( wv, res );
@@ -1378,7 +1386,7 @@ void FrogAPI::handle_one_sentence( ostream& os,
       }
       frog_sentence( sent, s_cnt );
       if ( !options.noStdOut ){
-	  showResults( os, sent );
+	  show_results( os, sent );
       }
       if ( options.doXMLout ){
 	append_to_sentence( s, sent );
@@ -1404,7 +1412,7 @@ void FrogAPI::handle_one_paragraph( ostream& os,
   while ( res.size() > 0 ){
     frog_sentence( res, ++sentence_done );
     if ( !options.noStdOut ){
-      showResults( os, res );
+      show_results( os, res );
     }
     if ( options.doXMLout ){
       folia::KWargs args;
@@ -1422,18 +1430,24 @@ void FrogAPI::handle_one_paragraph( ostream& os,
   }
 }
 
-void FrogAPI::handle_one_element( ostream& os,
-				  folia::FoliaElement *e,
-				  int& sentence_done ){
+void FrogAPI::handle_one_text_parent( ostream& os,
+				      folia::FoliaElement *e,
+				      int& sentence_done ){
+  ///
+  /// input is a FoLiA element @e containing text.
+  /// this can be a Word, Sentence, Paragraph or some other element
+  /// In the latter case, we construct a Sentene from the text, and
+  /// a Paragraph is more then one Sentence is found
+  ///
   if ( e->xmltag() == "w" ){
     // already tokenized into words!
     folia::Word *word = dynamic_cast<folia::Word*>(e);
     frog_data res;
     frog_record tmp = extract_from_word( word, options.inputclass );
-    res.units.push_back(tmp);
+    res.append(tmp);
     frog_sentence( res, ++sentence_done );
     if ( !options.noStdOut ){
-      showResults( os, res );
+      show_results( os, res );
     }
     if ( options.doXMLout ){
       vector<folia::Word*> wv;
@@ -1446,7 +1460,8 @@ void FrogAPI::handle_one_element( ostream& os,
     if ( options.debugFlag > 2 ){
       DBG << "found text in a sentence " << e << endl;
     }
-    handle_one_sentence( os, dynamic_cast<folia::Sentence*>(e),
+    handle_one_sentence( os,
+			 dynamic_cast<folia::Sentence*>(e),
 			 ++sentence_done );
   }
   else if ( e->xmltag() == "p" ){
@@ -1473,7 +1488,7 @@ void FrogAPI::handle_one_element( ostream& os,
       frog_sentence( res, ++sentence_done );
       sents.push_back( res );
       if ( !options.noStdOut ){
-	showResults( os, res );
+	show_results( os, res );
       }
       timers.tokTimer.start();
       res = tokenizer->tokenize_stream_next( );
@@ -1481,7 +1496,7 @@ void FrogAPI::handle_one_element( ostream& os,
     }
     if ( options.doXMLout ){
       if ( sents.size() > 1 ){
-	// multiple sentences. We need a Paragraph.
+	// multiple sentences. We need an extra Paragraph.
 	folia::KWargs args;
 	string e_id = e->id();
 	if ( !e_id.empty() ){
@@ -1501,7 +1516,6 @@ void FrogAPI::handle_one_element( ostream& os,
 	    DBG << "created a new sentence: " << s << endl;
 	  }
 	  p->append( s );
-	  ++sentence_done;
 	}
       }
       else {
@@ -1523,7 +1537,6 @@ void FrogAPI::handle_one_element( ostream& os,
 	e->append( s );
       }
     }
-    ++sentence_done;
   }
 }
 
@@ -1578,31 +1591,32 @@ void FrogAPI::run_folia_processor( const string& infilename,
     proc.set_debug( true );
   }
   //  proc.set_debug( true );
-  myCGNTagger->addDeclaration( proc );
+  folia::Document &doc = *proc.doc();
+  myCGNTagger->addDeclaration( doc );
   if ( options.doLemma ){
-    myMblem->addDeclaration( proc );
+    myMblem->addDeclaration( doc );
   }
   if ( options.doMorph ){
-    myMbma->addDeclaration( proc );
+    myMbma->addDeclaration( doc );
   }
   if ( options.doIOB ){
-    myIOBTagger->addDeclaration( proc );
+    myIOBTagger->addDeclaration( doc );
   }
   if ( options.doNER ){
-    myNERTagger->addDeclaration( proc );
+    myNERTagger->addDeclaration( doc );
   }
   if ( options.doMwu ){
-    myMwu->addDeclaration( proc );
+    myMwu->addDeclaration( doc );
   }
   if ( options.doParse ){
-    myParser->addDeclaration( proc );
+    myParser->addDeclaration( doc );
   }
   proc.setup( options.inputclass, true );
   int sentence_done = 0;
   folia::FoliaElement *p = 0;
   while ( (p = proc.next_text_parent() ) ){
     //    cerr << "next text parent: " << p << endl;
-    handle_one_element( output_stream, p, sentence_done );
+    handle_one_text_parent( output_stream, p, sentence_done );
     if ( options.debugFlag > 0 ){
       DBG << "done with sentence " << sentence_done << endl;
     }
@@ -1627,69 +1641,76 @@ void FrogAPI::run_folia_processor( const string& infilename,
   }
 }
 
+void FrogAPI::run_text_processor( const string& infilename,
+				  ostream& os,
+				  const string& xmlOutFile ){
+  ifstream TEST( infilename );
+  int i = 0;
+  folia::Document *doc = 0;
+  folia::FoliaElement *root = 0;
+  if ( !xmlOutFile.empty() ){
+    string doc_id = infilename;
+    if ( options.docid != "untitled" ){
+      doc_id = options.docid;
+    }
+    doc_id = doc_id.substr( 0, doc_id.find( ".xml" ) );
+    doc_id = filter_non_NC( TiCC::basename(doc_id) );
+    root = start_document( doc_id, doc );
+    p_count = 0;
+  }
+  timers.tokTimer.start();
+  frog_data res = tokenizer->tokenize_stream( TEST );
+  timers.tokTimer.stop();
+  while ( res.size() > 0 ){
+    frog_sentence( res, ++i );
+    if ( !options.noStdOut ){
+      show_results( os, res );
+    }
+    if ( !xmlOutFile.empty() ){
+      root = append_to_folia( root, res );
+    }
+    if  (options.debugFlag > 0){
+      DBG << TiCC::Timer::now() << " done with sentence[" << i << "]" << endl;
+    }
+    timers.tokTimer.start();
+    res = tokenizer->tokenize_stream_next();
+    timers.tokTimer.stop();
+  }
+  if ( !xmlOutFile.empty() && doc ){
+    doc->save( xmlOutFile, options.doKanon );
+    LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
+    delete doc;
+  }
+}
+
 void FrogAPI::FrogFile( const string& infilename,
 			ostream& os,
 			const string& xmlOutF ) {
-  string xmlOutFile = xmlOutF;
   bool xml_in = options.doXMLin;
   if ( TiCC::match_back( infilename, ".xml.gz" )
        || TiCC::match_back( infilename, ".xml.bz2" )
        || TiCC::match_back( infilename, ".xml" ) ){
+    // auto detect (compressed) xml.
     xml_in = true;
   }
-  if ( xml_in && !xmlOutFile.empty() ){
-    if ( TiCC::match_back( infilename, ".gz" ) ){
-      if ( !TiCC::match_back( xmlOutFile, ".gz" ) )
-	xmlOutFile += ".gz";
-    }
-    else if ( TiCC::match_back( infilename, ".bz2" ) ){
-      if ( !TiCC::match_back( xmlOutFile, ".bz2" ) )
-	xmlOutFile += ".bz2";
-    }
-  }
+  timers.reset();
   if ( xml_in ){
-    timers.reset();
+    // when the inputfile is .bz2 or .gz, we use the same compression on output
+    string xmlOutFile = xmlOutF;
+    if ( !xmlOutFile.empty() ){
+      if ( TiCC::match_back( infilename, ".gz" ) ){
+	if ( !TiCC::match_back( xmlOutFile, ".gz" ) )
+	  xmlOutFile += ".gz";
+      }
+      else if ( TiCC::match_back( infilename, ".bz2" ) ){
+	if ( !TiCC::match_back( xmlOutFile, ".bz2" ) )
+	  xmlOutFile += ".bz2";
+      }
+    }
     run_folia_processor( infilename, os, xmlOutFile );
   }
   else {
-    ifstream TEST( infilename );
-    int i = 0;
-    folia::Document *doc = 0;
-    folia::FoliaElement *root = 0;
-    if ( !xmlOutFile.empty() ){
-      string doc_id = infilename;
-      if ( options.docid != "untitled" ){
-	doc_id = options.docid;
-      }
-      doc_id = doc_id.substr( 0, doc_id.find( ".xml" ) );
-      doc_id = filter_non_NC( TiCC::basename(doc_id) );
-      root = start_document( doc_id, doc );
-      p_count = 0;
-    }
-    timers.reset();
-    timers.tokTimer.start();
-    frog_data res = tokenizer->tokenize_stream( TEST );
-    timers.tokTimer.stop();
-    while ( res.size() > 0 ){
-      frog_sentence( res, ++i );
-      if ( !options.noStdOut ){
-	showResults( os, res );
-      }
-      if ( !xmlOutFile.empty() ){
-	root = append_to_folia( root, res );
-      }
-      if  (options.debugFlag > 0){
-	DBG << TiCC::Timer::now() << " done with sentence[" << i << "]" << endl;
-      }
-      timers.tokTimer.start();
-      res = tokenizer->tokenize_stream_next();
-      timers.tokTimer.stop();
-    }
-    if ( !xmlOutFile.empty() && doc ){
-      doc->save( xmlOutFile, options.doKanon );
-      LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
-      delete doc;
-    }
+    run_text_processor( infilename, os, xmlOutF );
   }
   if ( !options.hide_timers ){
     LOG << "tokenisation took:  " << timers.tokTimer << endl;

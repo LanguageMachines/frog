@@ -271,13 +271,6 @@ void Mblem::addDeclaration( folia::Document& doc ) const {
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
-void Mblem::addDeclaration( folia::Processor& proc ) const {
-  proc.declare( folia::AnnotationType::LEMMA,
-		tagset,
-		"annotator='frog-mblem-" + _version
-		+ "', annotatortype='auto', datetime='" + getTime() + "'");
-}
-
 void Mblem::Classify( frog_record& fd ){
   icu::UnicodeString uword;
   string pos;

@@ -633,17 +633,6 @@ void Mbma::addDeclaration( folia::Document& doc ) const {
   }
 }
 
-void Mbma::addDeclaration( folia::Processor& proc ) const {
-  proc.declare( folia::AnnotationType::MORPHOLOGICAL, mbma_tagset,
-	       "annotator='frog-mbma-" + _version +
-	       + "', annotatortype='auto', datetime='" + getTime() + "'");
-  if ( doDeepMorph ){
-    proc.declare( folia::AnnotationType::POS, clex_tagset,
-		 "annotator='frog-mbma-" + _version +
-		 + "', annotatortype='auto', datetime='" + getTime() + "'");
-  }
-}
-
 void Mbma::store_morphemes( frog_record& fd,
 			    const vector<string>& morphemes ) const {
   vector<string> adapted;

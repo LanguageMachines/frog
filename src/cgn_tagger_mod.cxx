@@ -140,13 +140,6 @@ void CGNTagger::addDeclaration( folia::Document& doc ) const {
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
-void CGNTagger::addDeclaration( folia::Processor& proc ) const {
-  proc.declare( folia::AnnotationType::POS,
-		tagset,
-		"annotator='frog-mbpos-" + _version
-		+ "', annotatortype='auto', datetime='" + getTime() + "'");
-}
-
 string CGNTagger::getSubSet( const string& val, const string& head, const string& fullclass ) const {
   auto it = cgnSubSets.find( val );
   if ( it == cgnSubSets.end() ){

@@ -40,7 +40,6 @@ class IOBTagger: public BaseTagger {
   BaseTagger( l, d, "IOB" ){};
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
-  void addDeclaration( folia::Processor& ) const;
   void Classify( frog_data& );
   void post_process( frog_data& );
   void add_result( const frog_data& fd,

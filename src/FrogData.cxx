@@ -200,3 +200,7 @@ ostream& operator<<( ostream& os, const frog_data& fd ){
   }
   return os;
 }
+
+void frog_data::append( const frog_record& fr ){
+  units.push_back( fr );
+}

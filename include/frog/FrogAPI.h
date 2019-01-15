@@ -111,6 +111,9 @@ class FrogAPI {
   void run_folia_processor( const std::string&,
 			    std::ostream&,
 			    const std::string& = "" );
+  void run_text_processor( const std::string&,
+			   std::ostream&,
+			   const std::string& = "" );
   folia::FoliaElement* start_document( const std::string&,
 				  folia::Document *& ) const;
   folia::FoliaElement *append_to_folia( folia::FoliaElement *,
@@ -134,14 +137,14 @@ class FrogAPI {
   void test_version( const std::string&, double );
   // functions
   void FrogStdin( bool prompt );
-  void show_record( std::ostream&, const frog_record& ) const;
-  void showResults( std::ostream&, const frog_data& ) const;
+  void output_tabbed( std::ostream&, const frog_record& ) const;
+  void show_results( std::ostream&, const frog_data& ) const;
   void handle_one_paragraph( std::ostream&,
 			     folia::Paragraph*,
 			     int& );
-  void handle_one_element( std::ostream&,
-			   folia::FoliaElement *e,
-			   int&  );
+  void handle_one_text_parent( std::ostream&,
+			       folia::FoliaElement *e,
+			       int&  );
   void handle_one_sentence( std::ostream&,
 			    folia::Sentence *,
 			    const size_t );

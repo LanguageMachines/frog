@@ -71,6 +71,7 @@ class frog_data {
   size_t size() const { return units.size(); };
   bool empty() const { return units.size() == 0; };
   void resolve_mwus();
+  void append( const frog_record& );
   std::string sentence( bool = false ) const;
   std::string language; // the language of all units
   std::vector<frog_record> units;

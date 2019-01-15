@@ -791,12 +791,6 @@ void Parser::addDeclaration( folia::Document& doc ) const {
 	       + "', annotatortype='auto'");
 }
 
-void Parser::addDeclaration( folia::Processor& proc ) const {
-  proc.declare( folia::AnnotationType::DEPENDENCY, dep_tagset,
-	       "annotator='frog-depparse-" + version
-	       + "', annotatortype='auto'");
-}
-
 void extract( const string& tv, string& head, string& mods ){
   vector<string> v = TiCC::split_at_first_of( tv, "()" );
   head = v[0];
