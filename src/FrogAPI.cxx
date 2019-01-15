@@ -349,7 +349,6 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	try {
 	  tokenizer = new UctoTokenizer(theErrLog,theDbgLog);
 	  tokStat = tokenizer->init( configuration );
-	  tokenizer->set_TC_debug( true );
 	}
 	catch ( const exception& e ){
 	  tokWhat = e.what();
