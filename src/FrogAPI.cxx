@@ -1437,6 +1437,7 @@ void FrogAPI::handle_one_paragraph( ostream& os,
     }
   }
   else {
+    // For now wu just IGNORE the loose words (backward compatability)
     for ( const auto& s : sv ){
       handle_one_sentence( os, s, sentence_done );
     }
@@ -1488,66 +1489,90 @@ void FrogAPI::handle_one_text_parent( ostream& os,
   }
   else {
     // Some text outside word, paragraphs or sentences (yet)
-    string text = e->str(options.inputclass);
-    if ( options.debugFlag > 1 ){
-      DBG << "frog-" << e->xmltag() << ":" << text << endl;
-    }
-    istringstream inputstream(text,istringstream::in);
-    timers.tokTimer.start();
-    frog_data res = tokenizer->tokenize_stream( inputstream );
-    timers.tokTimer.stop();
-    vector<frog_data> sents;
-    while ( res.size() > 0 ){
-      frog_sentence( res, ++sentence_done );
-      sents.push_back( res );
-      if ( !options.noStdOut ){
-	show_results( os, res );
+    // mabe <div> or <note> or such
+    // there may be Paragraph, Word and Sentence nodes
+    // if so, Paragraphs and Sentences should be handled separately
+    vector<folia::Word*> wv = e->select<folia::Word>(false);
+    vector<folia::Sentence*> sv = e->select<folia::Sentence>(false);
+    vector<folia::Paragraph*> pv = e->select<folia::Paragraph>(false);
+    DBG << "found some Words " << wv << endl;
+    DBG << "found some Sentences " << sv << endl;
+    DBG << "found some Paragraphs " << pv << endl;
+    if ( pv.empty() && sv.empty() ){
+      // just words of text
+      string text = e->str(options.inputclass);
+      if ( options.debugFlag > 1 ){
+	DBG << "frog-" << e->xmltag() << ":" << text << endl;
       }
+      istringstream inputstream(text,istringstream::in);
       timers.tokTimer.start();
-      res = tokenizer->tokenize_stream_next( );
+      frog_data res = tokenizer->tokenize_stream( inputstream );
       timers.tokTimer.stop();
-    }
-    if ( options.doXMLout ){
-      if ( sents.size() > 1 ){
-	// multiple sentences. We need an extra Paragraph.
-	folia::KWargs args;
-	string e_id = e->id();
-	if ( !e_id.empty() ){
-	  args["generate_id"] = e_id;
+      vector<frog_data> sents;
+      while ( res.size() > 0 ){
+	frog_sentence( res, ++sentence_done );
+	sents.push_back( res );
+	if ( !options.noStdOut ){
+	  show_results( os, res );
 	}
-	folia::Paragraph *p = new folia::Paragraph( args, e->doc() );
-	e->append( p );
-	for ( const auto& sent : sents ){
+	timers.tokTimer.start();
+	res = tokenizer->tokenize_stream_next( );
+	timers.tokTimer.stop();
+      }
+      if ( options.doXMLout ){
+	if ( sents.size() > 1 ){
+	  // multiple sentences. We need an extra Paragraph.
 	  folia::KWargs args;
-	  string p_id = p->id();
-	  if ( !p_id.empty() ){
-	    args["generate_id"] = p_id;
+	  string e_id = e->id();
+	  if ( !e_id.empty() ){
+	    args["generate_id"] = e_id;
+	  }
+	  folia::Paragraph *p = new folia::Paragraph( args, e->doc() );
+	  e->append( p );
+	  for ( const auto& sent : sents ){
+	    folia::KWargs args;
+	    string p_id = p->id();
+	    if ( !p_id.empty() ){
+	      args["generate_id"] = p_id;
+	    }
+	    folia::Sentence *s = new folia::Sentence( args, e->doc() );
+	    append_to_sentence( s, sent );
+	    if  (options.debugFlag > 0){
+	      DBG << "created a new sentence: " << s << endl;
+	    }
+	    p->append( s );
+	  }
+	}
+	else {
+	  // 1 sentence, connect directly.
+	  folia::KWargs args;
+	  string e_id = e->id();
+	  if ( e_id.empty() ){
+	    e_id = e->generateId( e->xmltag() );
+	    args["id"] = e_id + ".s.1";
+	  }
+	  else {
+	    args["generate_id"] = e_id;
 	  }
 	  folia::Sentence *s = new folia::Sentence( args, e->doc() );
-	  append_to_sentence( s, sent );
+	  append_to_sentence( s, sents[0] );
 	  if  (options.debugFlag > 0){
 	    DBG << "created a new sentence: " << s << endl;
 	  }
-	  p->append( s );
+	e->append( s );
 	}
       }
-      else {
-	// 1 sentence, connect directly.
-	folia::KWargs args;
-	string e_id = e->id();
-	if ( e_id.empty() ){
-	  e_id = e->generateId( e->xmltag() );
-	  args["id"] = e_id + ".s.1";
-	}
-	else {
-	  args["generate_id"] = e_id;
-	}
-	folia::Sentence *s = new folia::Sentence( args, e->doc() );
-	append_to_sentence( s, sents[0] );
-	if  (options.debugFlag > 0){
-	  DBG << "created a new sentence: " << s << endl;
-	}
-	e->append( s );
+    }
+    else if ( !pv.empty() ){
+      // For now wu only handle the Paragraphs, ignore sentences and words
+      for ( const auto& p : pv ){
+	handle_one_paragraph( os, p, sentence_done );
+      }
+    }
+    else {
+      // For now we just IGNORE the loose words (backward compatability)
+      for ( const auto& s : sv ){
+	handle_one_sentence( os, s, sentence_done );
       }
     }
   }
