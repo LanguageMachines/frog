@@ -1400,32 +1400,46 @@ void FrogAPI::handle_one_sentence( ostream& os,
 void FrogAPI::handle_one_paragraph( ostream& os,
 				    folia::Paragraph *p,
 				    int& sentence_done ){
-  string text = p->str(options.inputclass);
-  if ( options.debugFlag > 0 ){
-    DBG << "handle_one_paragraph:" << text << endl;
-  }
-  istringstream inputstream(text,istringstream::in);
-  timers.tokTimer.start();
-  frog_data res = tokenizer->tokenize_stream( inputstream );
-  timers.tokTimer.stop();
-  while ( res.size() > 0 ){
-    frog_sentence( res, ++sentence_done );
-    if ( !options.noStdOut ){
-      show_results( os, res );
+  // a Paragraph may contain both Word and Sentence nodes
+  // if so, the Sentences should be handled separately
+  vector<folia::Word*> wv = p->select<folia::Word>(false);
+  vector<folia::Sentence*> sv = p->select<folia::Sentence>(false);
+  DBG << "found some Words " << wv << endl;
+  DBG << "found some Sentences " << sv << endl;
+  if ( sv.empty() ){
+    // No Sentence, so only words OR just text
+    string text = p->str(options.inputclass);
+    if ( options.debugFlag > 0 ){
+      DBG << "handle_one_paragraph:" << text << endl;
     }
-    if ( options.doXMLout ){
-      folia::KWargs args;
-      string p_id = p->id();
-      if ( !p_id.empty() ){
-	args["generate_id"] = p_id;
-      }
-      folia::Sentence *s = new folia::Sentence( args, p->doc() );
-      p->append( s );
-      append_to_sentence( s, res );
-    }
+    istringstream inputstream(text,istringstream::in);
     timers.tokTimer.start();
-    res = tokenizer->tokenize_stream_next();
+    frog_data res = tokenizer->tokenize_stream( inputstream );
     timers.tokTimer.stop();
+    while ( res.size() > 0 ){
+      frog_sentence( res, ++sentence_done );
+      if ( !options.noStdOut ){
+	show_results( os, res );
+      }
+      if ( options.doXMLout ){
+	folia::KWargs args;
+	string p_id = p->id();
+	if ( !p_id.empty() ){
+	  args["generate_id"] = p_id;
+	}
+	folia::Sentence *s = new folia::Sentence( args, p->doc() );
+	p->append( s );
+	append_to_sentence( s, res );
+      }
+      timers.tokTimer.start();
+      res = tokenizer->tokenize_stream_next();
+      timers.tokTimer.stop();
+    }
+  }
+  else {
+    for ( const auto& s : sv ){
+      handle_one_sentence( os, s, sentence_done );
+    }
   }
 }
 
