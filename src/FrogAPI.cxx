@@ -1404,8 +1404,10 @@ void FrogAPI::handle_one_paragraph( ostream& os,
   // if so, the Sentences should be handled separately
   vector<folia::Word*> wv = p->select<folia::Word>(false);
   vector<folia::Sentence*> sv = p->select<folia::Sentence>(false);
-  DBG << "found some Words " << wv << endl;
-  DBG << "found some Sentences " << sv << endl;
+  if ( options.debugFlag > 1 ){
+    DBG << "found some Words " << wv << endl;
+    DBG << "found some Sentences " << sv << endl;
+  }
   if ( sv.empty() ){
     // No Sentence, so only words OR just text
     string text = p->str(options.inputclass);
@@ -1495,9 +1497,11 @@ void FrogAPI::handle_one_text_parent( ostream& os,
     vector<folia::Word*> wv = e->select<folia::Word>(false);
     vector<folia::Sentence*> sv = e->select<folia::Sentence>(false);
     vector<folia::Paragraph*> pv = e->select<folia::Paragraph>(false);
-    DBG << "found some Words " << wv << endl;
-    DBG << "found some Sentences " << sv << endl;
-    DBG << "found some Paragraphs " << pv << endl;
+    if ( options.debugFlag > 1 ){
+      DBG << "found some Words " << wv << endl;
+      DBG << "found some Sentences " << sv << endl;
+      DBG << "found some Paragraphs " << pv << endl;
+    }
     if ( pv.empty() && sv.empty() ){
       // just words of text
       string text = e->str(options.inputclass);
