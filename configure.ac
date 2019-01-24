@@ -128,7 +128,7 @@ PKG_CHECK_MODULES([mbt], [mbt >= 3.2.14] )
 CXXFLAGS="$CXXFLAGS $mbt_CFLAGS"
 LIBS="$mbt_LIBS $LIBS"
 
-PKG_CHECK_MODULES([folia],[folia >= 1.10])
+PKG_CHECK_MODULES([folia],[folia >= 1.16])
 CXXFLAGS="$CXXFLAGS $folia_CFLAGS"
 LIBS="$folia_LIBS $LIBS"
 
