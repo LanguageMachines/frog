@@ -507,7 +507,7 @@ FrogAPI::~FrogAPI() {
 
 folia::FoliaElement* FrogAPI::start_document( const string& id,
 					      folia::Document *& doc ) const {
-  doc = new folia::Document( "_id='" + id + "'" );
+  doc = new folia::Document( "xml:id='" + id + "'" );
   if ( options.language != "none" ){
     doc->set_metadata( "language", options.language );
   }
@@ -559,7 +559,7 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
     myParser->addDeclaration( *doc );
   }
   folia::KWargs args;
-  args["_id"] = doc->id() + ".text";
+  args["xml:id"] = doc->id() + ".text";
   folia::Text *text = new folia::Text( args );
   doc->setRoot( text );
   return text;
@@ -582,7 +582,7 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
     if  (options.debugFlag > 5 ){
       DBG << "append_to_folia, NEW paragraph " << endl;
     }
-    args["_id"] = root->doc()->id() + ".p." + TiCC::toString(++p_count);
+    args["xml:id"] = root->doc()->id() + ".p." + TiCC::toString(++p_count);
     folia::Paragraph *p = new folia::Paragraph( args, root->doc() );
     if ( root->element_id() == folia::Text_t ){
       if  (options.debugFlag > 5 ){
@@ -1553,7 +1553,7 @@ void FrogAPI::handle_one_text_parent( ostream& os,
 	  string e_id = e->id();
 	  if ( e_id.empty() ){
 	    e_id = e->generateId( e->xmltag() );
-	    args["_id"] = e_id + ".s.1";
+	    args["xml:id"] = e_id + ".s.1";
 	  }
 	  else {
 	    args["generate_id"] = e_id;
