@@ -1070,6 +1070,7 @@ bool FrogAPI::frog_sentence( frog_data& sent, const size_t s_count ){
     timers.frogTimer.start();
     if ( options.debugFlag > 5 ){
       DBG << "Frogging sentence:" << sent << endl;
+      DBG << "tokenized text = " << sent.sentence() << endl;
     }
     bool all_well = true;
     string exs;
@@ -1358,8 +1359,9 @@ void FrogAPI::handle_one_sentence( ostream& os,
       frog_record rec = extract_from_word( w, options.inputclass );
       res.append( rec );
     }
-    if  (options.debugFlag > 1){
+    if  ( options.debugFlag > 1 ){
       DBG << "handle_one_sentence() on existing words" << endl;
+      DBG << "handle_one_sentence() tokenized string: '" << res.sentence() << "'" << endl;
     }
     if ( frog_sentence( res, s_cnt ) ){
       if ( !options.noStdOut ){
@@ -1657,7 +1659,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
   int sentence_done = 0;
   folia::FoliaElement *p = 0;
   while ( (p = proc.next_text_parent() ) ){
-    //    cerr << "next text parent: " << p << endl;
+    //    DBG << "next text parent: " << p << endl;
     handle_one_text_parent( output_stream, p, sentence_done );
     if ( options.debugFlag > 0 ){
       DBG << "done with sentence " << sentence_done << endl;
