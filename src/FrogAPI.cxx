@@ -1782,7 +1782,7 @@ void FrogAPI::FrogFile( const string& infilename,
       LOG << "Parsing (csi)     took: " << timers.csiTimer << endl;
       LOG << "Parsing (total)   took: " << timers.parseTimer << endl;
     }
-    LOG << "Frogging in total took: " << timers.frogTimer << endl;
+    LOG << "Frogging in total took: " << timers.frogTimer + timers.tokTimer << endl;
   }
 }
 
