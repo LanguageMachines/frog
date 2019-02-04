@@ -53,12 +53,6 @@ using TiCC::operator<<;
 #define LOG *TiCC::Log(errLog)
 #define DBG *TiCC::Log(dbgLog)
 
-TiCC::Timer prepareTimer;
-TiCC::Timer relsTimer;
-TiCC::Timer pairsTimer;
-TiCC::Timer dirTimer;
-TiCC::Timer csiTimer;
-
 struct parseData {
   void clear() { words.clear(); heads.clear(); mods.clear(); mwus.clear(); }
   vector<string> words;
