@@ -333,6 +333,18 @@ frog_data UctoTokenizer::tokenize_stream( istream& is ){
   return tokenize_stream_next();
 }
 
+string get_parent_id( folia::FoliaElement *el ){
+  if ( !el ){
+    return "";
+  }
+  else if ( !el->id().empty() ){
+    return el->id();
+  }
+  else {
+    return get_parent_id( el->parent() );
+  }
+}
+
 vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
 					       const string& textclass,
 					       const string& tok_set,
@@ -346,8 +358,9 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
       DBG << "add_result\n" << word << endl;
     }
     folia::KWargs args;
-    if ( !s->id().empty() ){
-      args["generate_id"] = s->id();
+    string ids = get_parent_id( s );
+    if ( !ids.empty() ){
+      args["generate_id"] = ids;
     }
     args["class"] = word.token_class;
     if ( word.no_space ){
