@@ -287,35 +287,31 @@ frog_data UctoTokenizer::tokenize_stream_next( ){
   // will return tokens upto an ENDOFSENTENCE token or out of data
   if ( tokenizer) {
     frog_data result;
-    vector<Tokenizer::Token> toks = stack; // add tokens from previous visit
- stack.clear();
     vector<Tokenizer::Token> new_toks = tokenizer->tokenizeStream( *cur_is );
-    // now add new tokens
-    toks.insert( toks.end(), new_toks.begin(), new_toks.end() );
-    bool skip = false;
+    // add new tokens to the queue
+    queue.insert( queue.end(), new_toks.begin(), new_toks.end() );
     int quotelevel = 0;
-    for ( const auto tok : toks ){
-      if ( skip ){
-	// save tokens for next visit.
-	stack.push_back( tok );
+    while ( !queue.empty() ){
+      const auto tok = queue.front();
+      queue.pop_front();
+      frog_record tmp;
+      tmp.word = TiCC::UnicodeToUTF8(tok.us);
+      tmp.token_class = TiCC::UnicodeToUTF8(tok.type);
+      tmp.no_space = (tok.role & Tokenizer::TokenRole::NOSPACE);
+      tmp.language = tok.lc;
+      tmp.new_paragraph = (tok.role & Tokenizer::TokenRole::NEWPARAGRAPH);
+      result.units.push_back( tmp );
+      if ( (tok.role & Tokenizer::TokenRole::BEGINQUOTE) ){
+	++quotelevel;
       }
-      else {
-	frog_record tmp;
-	tmp.word = TiCC::UnicodeToUTF8(tok.us);
-	tmp.token_class = TiCC::UnicodeToUTF8(tok.type);
-	tmp.no_space = (tok.role & Tokenizer::TokenRole::NOSPACE);
-	tmp.language = tok.lc;
-	tmp.new_paragraph = (tok.role & Tokenizer::TokenRole::NEWPARAGRAPH);
-	result.units.push_back( tmp );
-	if ( (tok.role & Tokenizer::TokenRole::BEGINQUOTE) ){
-	  ++quotelevel;
-	}
-	if ( (tok.role & Tokenizer::TokenRole::ENDQUOTE) ){
+      if ( (tok.role & Tokenizer::TokenRole::ENDQUOTE) ){
 	  --quotelevel;
-	}
-	if ( (tok.role & Tokenizer::TokenRole::ENDOFSENTENCE) ){
-	  // we are at ENDOFSENTENCE. When more data is available, stack it.
-	  skip = quotelevel == 0;
+      }
+      if ( (tok.role & Tokenizer::TokenRole::ENDOFSENTENCE) ){
+	// we are at ENDOFSENTENCE.
+	// when quotelevel == 0, we step out, until the next call
+	if ( quotelevel == 0 ){
+	  break;
 	}
       }
     }
@@ -329,7 +325,7 @@ frog_data UctoTokenizer::tokenize_stream( istream& is ){
   ///  restart the tokenizer on stream @is
   ///  and calls tokenizer_stream_next() for the first results
   cur_is = &is;
-  stack.clear();
+  queue.clear();
   return tokenize_stream_next();
 }
 

@@ -60,7 +60,7 @@ class UctoTokenizer {
 				       const std::string&,
 				       const frog_data& ) const;
  private:
-  std::vector<Tokenizer::Token> stack;  // for the reentrant tokenize_stream()
+  std::list<Tokenizer::Token> queue;  // for the reentrant tokenize_stream()
   std::istream *cur_is;
   Tokenizer::TokenizerClass *tokenizer;
   TiCC::LogStream *errLog;
