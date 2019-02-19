@@ -288,7 +288,7 @@ frog_data UctoTokenizer::tokenize_stream_next( ){
   if ( tokenizer) {
     frog_data result;
     vector<Tokenizer::Token> toks = stack; // add tokens from previous visit
- stack.clear();
+    stack.clear();
     vector<Tokenizer::Token> new_toks = tokenizer->tokenizeStream( *cur_is );
     // now add new tokens
     toks.insert( toks.end(), new_toks.begin(), new_toks.end() );
