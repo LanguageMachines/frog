@@ -329,6 +329,47 @@ frog_data UctoTokenizer::tokenize_stream( istream& is ){
   return tokenize_stream_next();
 }
 
+#define OLD
+frog_data UctoTokenizer::tokenize_line( const string& line ){
+  if ( tokenizer ){
+#ifdef OLD
+    istringstream is( line );
+    return tokenize_stream( is );
+#else
+    frog_data result;
+    vector<Tokenizer::Token> queue = tokenizer->tokenize_line( line );
+    int quotelevel = 0;
+    while ( !queue.empty() ){
+      const auto tok = queue.front();
+      queue.erase(queue.begin());
+      frog_record tmp;
+      tmp.word = TiCC::UnicodeToUTF8(tok.us);
+      tmp.token_class = TiCC::UnicodeToUTF8(tok.type);
+      tmp.no_space = (tok.role & Tokenizer::TokenRole::NOSPACE);
+      tmp.language = tok.lc;
+      tmp.new_paragraph = (tok.role & Tokenizer::TokenRole::NEWPARAGRAPH);
+      result.units.push_back( tmp );
+      if ( (tok.role & Tokenizer::TokenRole::BEGINQUOTE) ){
+	++quotelevel;
+      }
+      if ( (tok.role & Tokenizer::TokenRole::ENDQUOTE) ){
+	--quotelevel;
+      }
+      // if ( (tok.role & Tokenizer::TokenRole::ENDOFSENTENCE) ){
+      // 	// we are at ENDOFSENTENCE.
+      // 	// when quotelevel == 0, we step out, until the next call
+      // 	if ( quotelevel == 0 ){
+      // 	  break;
+      // 	}
+      // }
+    }
+    return result;
+#endif
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initialized" );
+}
+
 string get_parent_id( folia::FoliaElement *el ){
   if ( !el ){
     return "";

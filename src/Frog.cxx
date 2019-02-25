@@ -779,7 +779,8 @@ int main(int argc, char *argv[]) {
   if ( !db_filename.empty() ){
     ifstream test(db_filename,ifstream::ate);
     if ( test.tellg() > 0 ){
-      cerr << "Some debugging information is availale in: " << db_filename << endl;
+      cerr << "Some debugging information is available in: "
+	   << db_filename << endl;
     }
     else {
       remove( db_filename.c_str() );
