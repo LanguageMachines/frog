@@ -53,6 +53,7 @@ class UctoTokenizer {
   void setTextRedundancy( const std::string& );
   std::vector<std::string> tokenize( const std::string&  );
   frog_data tokenize_line( const std::string& );
+  frog_data tokenize_line_next();
   frog_data tokenize_stream( std::istream& );
   frog_data tokenize_stream_next();
   std::string tokenizeStream( std::istream& );
@@ -61,7 +62,7 @@ class UctoTokenizer {
 				       const std::string&,
 				       const frog_data& ) const;
  private:
-  std::list<Tokenizer::Token> queue;  // for the reentrant tokenize_stream()
+  std::vector<Tokenizer::Token> queue;  // for the reentrant tokenize_stream()
   std::istream *cur_is;
   Tokenizer::TokenizerClass *tokenizer;
   TiCC::LogStream *errLog;

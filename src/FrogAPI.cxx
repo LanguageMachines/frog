@@ -927,9 +927,10 @@ void FrogAPI::FrogStdin( bool prompt ) {
       cout << "Processing... " << endl;
     }
     frog_data res = tokenizer->tokenize_line( data );
-    if ( res.size() > 0 ){
+    while ( res.size() > 0 ){
       frog_sentence( res, 1 );
       show_results( cout, res );
+      res = tokenizer->tokenize_line_next();
     }
     if ( prompt ){
       cout << "frog>"; cout.flush();
@@ -998,8 +999,11 @@ void FrogAPI::FrogInteractive(){
 	}
 	cout << "Processing... '" << data << "'" << endl;
 	frog_data res = tokenizer->tokenize_line( data );
-	frog_sentence( res, 1 );
-	show_results( cout, res );
+	while ( !res.empty() ){
+	  frog_sentence( res, 1 );
+	  show_results( cout, res );
+	  res = tokenizer->tokenize_line_next();
+	}
       }
     }
     cout << "Done.\n";
