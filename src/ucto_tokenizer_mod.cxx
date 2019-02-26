@@ -340,7 +340,6 @@ frog_data UctoTokenizer::tokenize_line( const string& line ){
     if ( TiCC::stringTo( Tokenizer::Version(), version )
 	 && version > 0.14 ){
       // modern ucto
-      cerr << "MODERM!" << endl;
       tokenizer->tokenizeLine( line ); // will consume whole line!
       return tokenize_line_next(); // returns next sentence
     }
