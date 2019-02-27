@@ -39,6 +39,7 @@
 #include "ticcutils/FileUtils.h"
 #include "ticcutils/Unicode.h"
 #include "ticcutils/PrettyPrint.h"
+#include "config.h"
 
 using namespace std;
 using TiCC::operator<<;
@@ -334,44 +335,51 @@ frog_data UctoTokenizer::tokenize_stream( istream& is ){
   return tokenize_stream_next();
 }
 
+#if UCTO_INT_VERSION < 15
 frog_data UctoTokenizer::tokenize_line( const string& line ){
+  cerr << "OLD ucto " << UCTO_INT_VERSION << endl;
   if ( tokenizer ){
-    double version = 0.0;
-    if ( TiCC::stringTo( Tokenizer::Version(), version )
-	 && version > 0.14 ){
-      // modern ucto
-      tokenizer->tokenizeLine( line ); // will consume whole line!
-      return tokenize_line_next(); // returns next sentence
-    }
-    else {
-      cur_is = new istringstream ( line ); // HACK!, will leak
-      return tokenize_stream( *cur_is );
-    }
+    cur_is = new istringstream ( line ); // HACK!, will leak
+    return tokenize_stream( *cur_is );
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
   }
 }
-
 
 frog_data UctoTokenizer::tokenize_line_next() {
   if ( tokenizer ){
-    double version = 0.0;
-    if ( TiCC::stringTo( Tokenizer::Version(), version )
-	 && version > 0.14 ){
-      // modern ucto
-      vector<Tokenizer::Token> tokens = tokenizer->popSentence();
-      return create_fd( tokens );
+    return tokenize_stream_next();
     }
-    else {
-      return tokenize_stream_next();
-    }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
+#else
+
+frog_data UctoTokenizer::tokenize_line( const string& line ){
+  cerr << "NEW ucto " << UCTO_INT_VERSION << endl;
+  if ( tokenizer ){
+    tokenizer->tokenizeLine( line ); // will consume whole line!
+    return tokenize_line_next(); // returns next sentence in the line
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
   }
 }
 
+frog_data UctoTokenizer::tokenize_line_next() {
+  if ( tokenizer ){
+    vector<Tokenizer::Token> tokens = tokenizer->popSentence();
+    return create_fd( tokens );
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
+#endif // UCTO_INT_VERSION
 
 string get_parent_id( folia::FoliaElement *el ){
   if ( !el ){
