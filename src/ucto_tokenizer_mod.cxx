@@ -335,9 +335,8 @@ frog_data UctoTokenizer::tokenize_stream( istream& is ){
   return tokenize_stream_next();
 }
 
-#if UCTO_INT_VERSION < 15
+#if UCTO_INT_VERSION < 14
 frog_data UctoTokenizer::tokenize_line( const string& line ){
-  cerr << "OLD ucto " << UCTO_INT_VERSION << endl;
   if ( tokenizer ){
     cur_is = new istringstream ( line ); // HACK!, will leak
     return tokenize_stream( *cur_is );
@@ -359,7 +358,6 @@ frog_data UctoTokenizer::tokenize_line_next() {
 #else
 
 frog_data UctoTokenizer::tokenize_line( const string& line ){
-  cerr << "NEW ucto " << UCTO_INT_VERSION << endl;
   if ( tokenizer ){
     tokenizer->tokenizeLine( line ); // will consume whole line!
     return tokenize_line_next(); // returns next sentence in the line
