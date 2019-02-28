@@ -37,6 +37,7 @@
 #include "ticcutils/Configuration.h"
 #include "ticcutils/FileUtils.h"
 #include "ticcutils/PrettyPrint.h"
+#include "config.h"
 
 using namespace std;
 using TiCC::operator<<;
@@ -220,6 +221,7 @@ bool UctoTokenizer::getPassThru() const {
     throw runtime_error( "ucto tokenizer not initialized" );
 }
 
+#if UCTO_INT_VERSION < 15
 vector<string> UctoTokenizer::tokenize( const string& line ){
   if ( tokenizer ){
     tokenizer->reset();
@@ -243,6 +245,26 @@ string UctoTokenizer::tokenizeStream( istream& is ){
   else
     throw runtime_error( "ucto tokenizer not initialized" );
 }
+#else
+vector<string> UctoTokenizer::tokenize( const string& line ){
+  if ( tokenizer ){
+    tokenizer->reset();
+    tokenizer->tokenizeLine( line );
+    return tokenizer->getSentences();
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initialized" );
+}
+
+string UctoTokenizer::tokenizeStream( istream& is ){
+  if ( tokenizer ){
+    vector<Tokenizer::Token> toks = tokenizer->tokenizeOneSentence( is );
+    return tokenizer->getString( toks );
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initialized" );
+}
+#endif
 
 folia::Document *UctoTokenizer::tokenize( istream& is ){
   if ( tokenizer )
