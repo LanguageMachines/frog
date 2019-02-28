@@ -258,6 +258,7 @@ bool UctoTokenizer::getPassThru() const {
     throw runtime_error( "ucto tokenizer not initialized" );
 }
 
+#if UCTO_INT_VERSION < 15
 vector<string> UctoTokenizer::tokenize( const string& line ){
   if ( tokenizer ){
     tokenizer->reset();
@@ -282,6 +283,28 @@ string UctoTokenizer::tokenizeStream( istream& is ){
     throw runtime_error( "ucto tokenizer not initialized" );
 }
 
+
+#else
+vector<string> UctoTokenizer::tokenize( const string& line ){
+  if ( tokenizer ){
+    tokenizer->reset();
+    tokenizer->tokenizeLine( line );
+    return tokenizer->getSentences();
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initialized" );
+}
+
+string UctoTokenizer::tokenizeStream( istream& is ){
+  if ( tokenizer ){
+    vector<Tokenizer::Token> toks = tokenizer->tokenizeOneSentence( is );
+    return tokenizer->getString( toks );
+  }
+  else
+    throw runtime_error( "ucto tokenizer not initialized" );
+}
+#endif
+
 frog_data create_fd( vector<Tokenizer::Token>& tokens ){
   frog_data result;
   int quotelevel = 0;
@@ -292,7 +315,11 @@ frog_data create_fd( vector<Tokenizer::Token>& tokens ){
     tmp.word = TiCC::UnicodeToUTF8(tok.us);
     tmp.token_class = TiCC::UnicodeToUTF8(tok.type);
     tmp.no_space = (tok.role & Tokenizer::TokenRole::NOSPACE);
+#if UCTO_INT_VERSION < 15
     tmp.language = tok.lc;
+#else
+    tmp.language = tok.lang_code;
+#endif
     tmp.new_paragraph = (tok.role & Tokenizer::TokenRole::NEWPARAGRAPH);
     result.units.push_back( tmp );
     if ( (tok.role & Tokenizer::TokenRole::BEGINQUOTE) ){
@@ -317,7 +344,11 @@ frog_data UctoTokenizer::tokenize_stream_next( ){
   // the whole stream
   // will return tokens upto an ENDOFSENTENCE token or out of data
   if ( tokenizer) {
+#if UCTO_INT_VERSION < 15
     vector<Tokenizer::Token> new_toks = tokenizer->tokenizeStream( *cur_is );
+#else
+    vector<Tokenizer::Token> new_toks = tokenizer->tokenizeOneSentence( *cur_is );
+#endif
     // add new tokens to the queue
     queue.insert( queue.end(), new_toks.begin(), new_toks.end() );
     frog_data result = create_fd( queue ); // may leave entries in the queue
@@ -335,7 +366,7 @@ frog_data UctoTokenizer::tokenize_stream( istream& is ){
   return tokenize_stream_next();
 }
 
-#if UCTO_INT_VERSION < 14
+#if UCTO_INT_VERSION < 15
 frog_data UctoTokenizer::tokenize_line( const string& line ){
   if ( tokenizer ){
     cur_is = new istringstream ( line ); // HACK!, will leak
