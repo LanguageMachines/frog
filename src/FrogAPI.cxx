@@ -1456,8 +1456,9 @@ string filter_non_NC( const string& filename ){
       result += filename[i];
     }
   }
-  if ( result.empty() ){
-    // ouch, only numbers?
+  if ( result.empty()
+       || result[0] == '.' ){
+    // ouch, only numbers? Or only before the extension?
     return filter_non_NC( "N" + filename );
   }
   return result;
