@@ -49,8 +49,8 @@ class UctoTokenizer {
   void setDocID( const std::string& );
   void setTextRedundancy( const std::string& );
   folia::Document *tokenizestring( const std::string& );
+  folia::Document *tokenize_folia( const std::string& );
   folia::Document *tokenize( std::istream& );
-  bool tokenize( folia::Document& );
   std::vector<std::string> tokenize( const std::string&  );
   std::string tokenizeStream( std::istream& );
  private:

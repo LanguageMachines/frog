@@ -645,26 +645,20 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
         if ( options.debugFlag > 5 ){
 	  LOG << "received data [" << result << "]" << endl;
 	}
-	folia::Document doc;
-        try {
-	  doc.readFromString( result );
-        }
-	catch ( std::exception& e ){
-	  LOG << "FoLiaParsing failed:" << endl << e.what() << endl;
-	  throw;
-        }
         LOG << "Processing XML... " << endl;
 	timers.reset();
 	timers.tokTimer.start();
-	tokenizer->tokenize( doc );
+	folia::Document *doc;
+	doc = tokenizer->tokenize_folia( result );
 	timers.tokTimer.stop();
-        FrogDoc( doc );
+        FrogDoc( *doc );
 	if ( options.doXMLout ){
-	  doc.save( outputstream, options.doKanon );
+	  doc->save( outputstream, options.doKanon );
 	}
 	else {
-	  showResults( outputstream, doc );
+	  showResults( outputstream, *doc );
 	}
+	delete doc;
 	//        LOG << "Done Processing XML... " << endl;
       }
       else {
@@ -1489,26 +1483,25 @@ void FrogAPI::FrogFile( const string& infilename,
   if ( xml_in ){
     timers.reset();
     timers.tokTimer.start();
-    folia::Document doc;
+    folia::Document *doc;
     try {
-      doc.readFromFile( infilename );
+      doc = tokenizer->tokenize_folia( infilename );
     }
     catch ( exception &e ){
       LOG << "retrieving FoLiA from '" << infilename << "' failed with exception:" << endl;
       LOG << e.what() << endl;
       throw ( runtime_error( "read failed" ) );
     }
-    tokenizer->setInputXml(true); // THIS IS SILLY, the tokenizer knows it get FoLiA
-    tokenizer->tokenize( doc );
     timers.tokTimer.stop();
-    FrogDoc( doc );
+    FrogDoc( *doc );
     if ( !options.noStdOut ){
-      showResults( os, doc );
+      showResults( os, *doc );
     }
     if ( !xmlOutFile.empty() ){
-      doc.save( xmlOutFile, options.doKanon );
+      doc->save( xmlOutFile, options.doKanon );
       LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
     }
+    delete doc;
   }
   else {
     ifstream IN( infilename );

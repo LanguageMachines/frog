@@ -245,7 +245,24 @@ string UctoTokenizer::tokenizeStream( istream& is ){
   else
     throw runtime_error( "ucto tokenizer not initialized" );
 }
+
+folia::Document *UctoTokenizer::tokenize_folia( const string& buffer ){
+  if ( !tokenizer ){
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+  folia::Document *doc = new folia::Document();
+  if ( buffer.find("<?xml " ) == 0 ){
+    doc->readFromString( buffer );
+  }
+  else {
+    doc->readFromFile( buffer );
+  }
+  tokenize( *doc );
+  return doc;
+}
+
 #else
+
 vector<string> UctoTokenizer::tokenize( const string& line ){
   if ( tokenizer ){
     tokenizer->reset();
@@ -264,6 +281,16 @@ string UctoTokenizer::tokenizeStream( istream& is ){
   else
     throw runtime_error( "ucto tokenizer not initialized" );
 }
+
+folia::Document *UctoTokenizer::tokenize_folia( const string& buffer ){
+  if ( !tokenizer ){
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+  else {
+    return tokenizer->tokenize_folia( buffer );
+  }
+}
+
 #endif
 
 folia::Document *UctoTokenizer::tokenize( istream& is ){
@@ -280,12 +307,4 @@ folia::Document *UctoTokenizer::tokenizestring( const string& s){
   }
   else
     throw runtime_error( "ucto tokenizer not initialized" );
-}
-
-bool UctoTokenizer::tokenize( folia::Document& doc ){
-  if ( tokenizer )
-    return tokenizer->tokenize( doc );
-  else
-    throw runtime_error( "ucto tokenizer not initialized" );
-
 }
