@@ -109,7 +109,7 @@ void usage( ) {
        << "\t --retry                assume frog is running again on the same input,\n"
        << "\t                        already done files are skipped. (detected on the basis of already existing output files)\n"
        << "\t --max-parser-tokens=<n> inhibit parsing when a sentence contains over 'n' tokens. (default: 500, needs already 16Gb of memory!)\n"
-       << "\t -Q                   Enable quote detection in tokeniser.\n"
+       << "\t -Q                   Enable quote detection in tokeniser. (NOT SUPPORTED AT THE MOMENT)\n"
        << "\t-T or --textredundancy=[full|minimal|none]  - set text redundancy level in the tokenizer for text nodes in FoLiA output: " << endl
        << "\t                    'full' - add text to all levels: <p> <s> <w> etc." << endl
        << "\t                    'minimal' - don't introduce text on higher levels, but retain what is already there." << endl
@@ -270,6 +270,10 @@ bool parse_args( TiCC::CL_Options& Opts,
   }
   options.doSentencePerLine = Opts.extract( 'n' );
   options.doQuoteDetection = Opts.extract( 'Q' );
+  if (  options.doQuoteDetection ){
+    LOG << "Quote detection is NOT supported!" << endl;
+    return false;
+  }
   if ( Opts.extract( "skip", value )) {
     string skip = value;
     if ( skip.find_first_of("tT") != string::npos )
