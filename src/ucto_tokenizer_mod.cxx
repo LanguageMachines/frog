@@ -82,8 +82,9 @@ string resolve_configdir( const string& rules_name, const string& dir ){
 }
 
 bool UctoTokenizer::init( const TiCC::Configuration& config ){
-  if ( tokenizer )
+  if ( tokenizer ){
     throw runtime_error( "ucto tokenizer is already initialized" );
+  }
   tokenizer = new Tokenizer::TokenizerClass();
   tokenizer->setErrorLog( dbgLog );
   tokenizer->setEosMarker( "" );
@@ -156,22 +157,27 @@ void UctoTokenizer::setUttMarker( const string& u ) {
     if ( !u.empty() )
       tokenizer->setEosMarker( u );
   }
-  else
+  else {
     throw runtime_error( "ucto tokenizer not initialized" );
+  }
 }
 
 void UctoTokenizer::setSentencePerLineInput( bool b ) {
-  if ( tokenizer )
+  if ( tokenizer ){
     tokenizer->setSentencePerLineInput( b );
-  else
+  }
+  else {
     throw runtime_error( "ucto tokenizer not initialized" );
+  }
 }
 
 void UctoTokenizer::setQuoteDetection( bool b ) {
-  if ( tokenizer )
+  if ( tokenizer ) {
     tokenizer->setQuoteDetection( b );
-  else
+  }
+  else {
     throw runtime_error( "ucto tokenizer not initialized" );
+  }
 }
 
 void UctoTokenizer::setInputEncoding( const std::string & enc ){
@@ -179,8 +185,9 @@ void UctoTokenizer::setInputEncoding( const std::string & enc ){
     if ( !enc.empty() )
       tokenizer->setInputEncoding( enc );
   }
-  else
+  else {
     throw runtime_error( "ucto tokenizer not initialized" );
+  }
 }
 
 void UctoTokenizer::setInputClass( const std::string& cls ){
@@ -188,8 +195,9 @@ void UctoTokenizer::setInputClass( const std::string& cls ){
     if ( !cls.empty() )
       tokenizer->setInputClass( cls );
   }
-  else
+  else {
     throw runtime_error( "ucto tokenizer not initialized" );
+  }
 }
 
 void UctoTokenizer::setOutputClass( const std::string& cls ){
@@ -197,8 +205,9 @@ void UctoTokenizer::setOutputClass( const std::string& cls ){
     if ( !cls.empty() )
       tokenizer->setOutputClass( cls );
   }
-  else
+  else {
     throw runtime_error( "ucto tokenizer not initialized" );
+  }
 }
 
 void UctoTokenizer::setDocID( const std::string& id ){
@@ -206,56 +215,74 @@ void UctoTokenizer::setDocID( const std::string& id ){
     if ( !id.empty() )
       tokenizer->setDocID( id );
   }
-  else
+  else {
     throw runtime_error( "ucto tokenizer not initialized" );
+  }
 }
 
 void UctoTokenizer::setInputXml( bool b ){
   if ( tokenizer ){
     tokenizer->setXMLInput( b );
   }
-  else
+  else {
     throw runtime_error( "ucto tokenizer not initialized" );
+  }
 }
 
 void UctoTokenizer::setFiltering( bool b ){
   if ( tokenizer ){
     tokenizer->setFiltering( b );
   }
-  else
+  else {
     throw runtime_error( "ucto tokenizer not initialized" );
+  }
 }
 
 void UctoTokenizer::setTextRedundancy( const string& tr ) {
   if ( tokenizer ){
     tokenizer->setTextRedundancy( tr );
   }
-  else
+  else {
     throw runtime_error( "ucto tokenizer not initialized" );
+  }
 }
 
 void UctoTokenizer::set_TC_debug( const bool b ) {
   if ( tokenizer ){
     tokenizer->set_tc_debug( b );
   }
-  else
+  else {
     throw runtime_error( "ucto tokenizer not initialized" );
+  }
 }
 
 void UctoTokenizer::setPassThru( const bool b ) {
   if ( tokenizer ){
     tokenizer->setPassThru( b );
   }
-  else
+  else {
     throw runtime_error( "ucto tokenizer not initialized" );
+  }
 }
 
 bool UctoTokenizer::getPassThru() const {
   if ( tokenizer ){
     return tokenizer->getPassThru();
   }
-  else
+  else {
     throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
+vector<string> UctoTokenizer::tokenize( const string& line ){
+  if ( tokenizer ){
+    tokenizer->reset();
+    tokenizer->tokenizeLine( line );
+    return tokenizer->getSentences();
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
 }
 
 string UctoTokenizer::tokenizeStream( istream& is ){
@@ -316,7 +343,7 @@ frog_data UctoTokenizer::tokenize_stream_next( ){
 frog_data UctoTokenizer::tokenize_stream( istream& is ){
   ///  restart the tokenizer on stream @is
   ///  and calls tokenizer_stream_next() for the first results
-  if ( tokenizer) {
+  if ( tokenizer ){
     cur_is = &is;
     queue.clear();
     return tokenize_stream_next();
