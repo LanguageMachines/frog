@@ -1219,9 +1219,6 @@ ostream& FrogAPI::showResults( ostream& os,
     }
     static set<folia::ElementType> excludeSet;
     vector<folia::Sentence*> parts = sentence->select<folia::Sentence>( excludeSet );
-    if ( !options.doQuoteDetection ){
-      assert( parts.size() == 0 );
-    }
     for ( auto const& part : parts ){
       vector<folia::Entity*> ents;
       if (myMwu){
@@ -1373,7 +1370,9 @@ void FrogAPI::FrogDoc( folia::Document& doc,
 	}
 	continue;
       }
-      //      LOG << sentences[i]->text() << endl;
+      if ( options.debugFlag > 0 ){
+	LOG << "sentence[" << i+1 << "]: " << sentences[i]->text() << endl;
+      }
       bool showParse = TestSentence( sentences[i], timers );
       if ( options.doParse && !showParse ){
 	LOG << "WARNING!" << endl;
