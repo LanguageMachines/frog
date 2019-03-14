@@ -39,21 +39,27 @@
 #include "mbt/MbtAPI.h"
 #include "libfolia/folia.h"
 #include "ucto/tokenize.h"
+#include "frog/FrogData.h"
 
 class BaseTagger {
  public:
-  explicit BaseTagger( TiCC::LogStream *, const std::string& );
+  explicit BaseTagger( TiCC::LogStream *,
+		       TiCC::LogStream *,
+		       const std::string& );
   virtual ~BaseTagger();
   virtual bool init( const TiCC::Configuration& );
-  virtual void post_process( const std::vector<folia::Word*>& ) = 0;
-  virtual void Classify( const std::vector<folia::Word*>& );
+  virtual void post_process( frog_data& ) = 0;
+  virtual void Classify( frog_data& );
   void addDeclaration( folia::Document& ) const;
   std::string getTagset() const { return tagset; };
   std::string set_eos_mark( const std::string& );
   bool fill_map( const std::string&, std::map<std::string,std::string>& );
   std::vector<Tagger::TagResult> tagLine( const std::string& );
+  std::string version() const { return _version; };
  private:
   std::string extract_sentence( const std::vector<folia::Word*>&,
+				std::vector<std::string>& );
+  std::string extract_sentence( const frog_data&,
 				std::vector<std::string>& );
  protected:
   void extract_words_tags(  const std::vector<folia::Word *>&,
@@ -63,9 +69,10 @@ class BaseTagger {
   int debug;
   std::string _label;
   std::string tagset;
-  std::string version;
+  std::string _version;
   std::string textclass;
-  TiCC::LogStream *tag_log;
+  TiCC::LogStream *err_log;
+  TiCC::LogStream *dbg_log;
   MbtAPI *tagger;
   TiCC::UniFilter *filter;
   std::vector<std::string> _words;

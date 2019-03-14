@@ -38,11 +38,12 @@
 #include "ticcutils/Configuration.h"
 #include "ticcutils/Unicode.h"
 #include "libfolia/folia.h"
+#include "frog/FrogData.h"
 
 class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );
  public:
-  mwuAna( folia::Word *, const std::string&, const std::string& );
+  mwuAna( const std::string&, const std::string&, const std::string&, size_t );
   virtual ~mwuAna() {};
 
   void merge( const mwuAna * );
@@ -52,16 +53,14 @@ class mwuAna {
   }
 
   bool isSpec(){ return spec; };
-  folia::EntitiesLayer *addEntity( const std::string&,
-				   const std::string&,
-				   folia::Sentence *,
-				   folia::EntitiesLayer * );
+
+  size_t mwu_start;
+  size_t mwu_end;
 
  protected:
     mwuAna(){};
     std::string word;
     bool spec;
-    std::vector<folia::Word *> fwords;
 };
 
 #define mymap2 std::multimap<std::string, std::vector<std::string> >
@@ -69,15 +68,18 @@ class mwuAna {
 class Mwu {
   friend std::ostream& operator<< (std::ostream&, const Mwu& );
  public:
-  explicit Mwu(TiCC::LogStream*);
+  explicit Mwu( TiCC::LogStream*, TiCC::LogStream* );
   ~Mwu();
   void reset();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
-  void Classify( const std::vector<folia::Word *>& );
-  void add( folia::Word * );
+  void Classify( frog_data& );
+  void add( frog_record&, size_t );
+  void add_result( const frog_data&,
+		   const std::vector<folia::Word*>& ) const;
   std::string getTagset() const { return mwu_tagset; };
   std::vector<mwuAna*>& getAna(){ return mWords; };
+  std::string version() const { return _version; };
  private:
   bool readsettings( const std::string&, const std::string&);
   bool read_mwus( const std::string& );
@@ -86,8 +88,9 @@ class Mwu {
   std::string mwuFileName;
   std::vector<mwuAna*> mWords;
   mymap2 MWUs;
-  TiCC::LogStream *mwuLog;
-  std::string version;
+  TiCC::LogStream *errLog;
+  TiCC::LogStream *dbgLog;
+  std::string _version;
   std::string textclass;
   std::string mwu_tagset;
   std::string glue_tag;

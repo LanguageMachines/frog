@@ -41,13 +41,14 @@
 #include "libfolia/folia.h"
 #include "ucto/tokenize.h"
 #include "timbl/TimblAPI.h"
+#include "frog/FrogData.h"
 
 struct parseData;
 class TimerBlock;
 
 class Parser {
  public:
-  explicit Parser( TiCC::LogStream* logstream ):
+  explicit Parser( TiCC::LogStream* errlog, TiCC::LogStream* dbglog ):
   pairs(0),
     dir(0),
     rels(0),
@@ -55,13 +56,16 @@ class Parser {
     isInit( false ),
     filter( 0 )
       {
-	parseLog = new TiCC::LogStream(logstream, "parser-");
+	errLog = new TiCC::LogStream(errlog, "parser-");
+	dbgLog = new TiCC::LogStream(dbglog, "parser-dbg-");
       };
   ~Parser();
   bool init( const TiCC::Configuration& );
-  void addDeclaration( folia::Document& doc ) const;
-  void Parse( const std::vector<folia::Word *>&, TimerBlock& );
-  parseData prepareParse( const std::vector<folia::Word *>& );
+  void addDeclaration( folia::Document& ) const;
+  void Parse( frog_data&, TimerBlock& );
+  parseData prepareParse( frog_data& );
+  void add_result( const frog_data&,
+		   const std::vector<folia::Word*>& ) const;
 
   std::vector<std::string> createParserInstances( const parseData& );
   std::string getTagset() const { return dep_tagset; };
@@ -76,7 +80,8 @@ class Parser {
   std::string maxDepSpanS;
   size_t maxDepSpan;
   bool isInit;
-  TiCC::LogStream *parseLog;
+  TiCC::LogStream *errLog;
+  TiCC::LogStream *dbgLog;
   std::string version;
   std::string dep_tagset;
   std::string POS_tagset;

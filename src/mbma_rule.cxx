@@ -45,6 +45,7 @@ using namespace icu;
 using TiCC::operator<<;
 
 #define LOG *TiCC::Log(myLog)
+#define DBG *TiCC::Log(dbgLog)
 
 bool RulePart::isBasic() const {
   return isBasicClass( ResultClass );
@@ -237,6 +238,7 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
 Rule::Rule( const vector<string>& parts,
 	    const UnicodeString& s,
 	    TiCC::LogStream& ls,
+	    TiCC::LogStream& ds,
 	    int flag ):
   debugFlag( flag ),
   tag(CLEX::UNASS),
@@ -244,6 +246,7 @@ Rule::Rule( const vector<string>& parts,
   compound( Compound::Type::NONE ),
   brackets(0),
   myLog(ls),
+  dbgLog(ds),
   confidence(0.0)
 {
   for ( size_t k=0; k < parts.size(); ++k ) {
@@ -323,9 +326,14 @@ string Rule::morpheme_string( bool structured ) const {
   return result;
 }
 
+string Rule::pretty_string() const {
+  icu::UnicodeString us = brackets->pretty_put();
+  return TiCC::UnicodeToUTF8( us );
+}
+
 bool Rule::performEdits(){
   if ( debugFlag > 1 ){
-    LOG << "FOUND rule " << this << endl;
+    DBG << "FOUND rule " << this << endl;
   }
   RulePart *last = 0;
   for ( size_t k=0; k < rules.size(); ++k ) {
@@ -334,7 +342,7 @@ bool Rule::performEdits(){
       last = cur;
     }
     if ( debugFlag > 1){
-      LOG << "edit::act=" << cur << endl;
+      DBG << "edit::act=" << cur << endl;
     }
     bool is_replace = false;
     if ( !cur->del.isEmpty() ){
@@ -380,7 +388,7 @@ bool Rule::performEdits(){
       // start a new morpheme, BUT: inserts are appended to the previous one
       // except in case of Replace edits
       if ( debugFlag >1 ){
-	LOG << "FOUND a (basic) tag " << cur->ResultClass << endl;
+	DBG << "FOUND a (basic) tag " << cur->ResultClass << endl;
       }
       if ( !is_replace ){
 	if ( cur->ins == "ge" ){
@@ -401,14 +409,14 @@ bool Rule::performEdits(){
     if ( !inserted || !cur->hide.isEmpty() ){
       // insert the deletestring :-)
       if ( debugFlag > 1){
-	LOG << "add to morpheme: '" << cur->ins
+	DBG << "add to morpheme: '" << cur->ins
 			  << cur->hide<< "'" << endl;
       }
       last->morpheme += cur->ins + cur->hide;
     }
     else if ( !part.isEmpty() ){
       if ( debugFlag > 1){
-	LOG << "a part to add: " << part << endl;
+	DBG << "a part to add: " << part << endl;
       }
       last->morpheme += part;
       part.remove();
@@ -416,7 +424,7 @@ bool Rule::performEdits(){
     last->morpheme += cur->uchar; // might be empty because of deletion
   }
   if ( debugFlag > 1 ){
-    LOG << "edited rule " << this << endl;
+    DBG << "edited rule " << this << endl;
   }
   return true;
 }
@@ -431,7 +439,7 @@ void Rule::resolve_inflections(){
     if ( !inf.empty() && !rules[i].is_participle ){
       // it is an inflection tag
       if (debugFlag > 1){
-	LOG << " inflection: >" << inf << "<" << endl;
+	DBG << " inflection: >" << inf << "<" << endl;
       }
       // given the specific selections of certain inflections,
       //    select a tag!
@@ -440,7 +448,7 @@ void Rule::resolve_inflections(){
 	new_tag = CLEX::select_tag( inf[i] );
 	if ( new_tag != CLEX::UNASS ){
 	  if ( debugFlag > 1 ){
-	    LOG << inf[i] << " selects " << new_tag << endl;
+	    DBG << inf[i] << " selects " << new_tag << endl;
 	  }
 	  break;
 	}
@@ -453,7 +461,7 @@ void Rule::resolve_inflections(){
 	//
 	// go back to the previous morpheme
 	for( size_t k=i-1; k+1 > 0; --k ){
-	  //	  LOG << "een terug is " << rules[k].ResultClass << endl;
+	  //	  DBG << "een terug is " << rules[k].ResultClass << endl;
 	  if ( rules[k].isBasic() &&
 	       rules[k].ResultClass != CLEX::P ){
 	    // only nodes that can get inflected (and unanalysed too)
@@ -461,12 +469,12 @@ void Rule::resolve_inflections(){
 	    if ( rules[k].ResultClass == CLEX::PN &&
 		 new_tag == CLEX::N ){
 	      if ( debugFlag > 1 ){
-		LOG << "Don't replace PN by N" << endl;
+		DBG << "Don't replace PN by N" << endl;
 	      }
 	    }
 	    else {
 	      if ( debugFlag > 1 ){
-		LOG << " replace " << rules[k].ResultClass
+		DBG << " replace " << rules[k].ResultClass
 				  << " by " << new_tag << endl;
 	      }
 	      rules[k].ResultClass = new_tag;
@@ -515,34 +523,34 @@ void Rule::getCleanInflect() {
   // get the last inflection and clean it up by extracting only
   //  known inflection names
   if ( debugFlag > 5 ){
-    LOG << "getCleanInflect: " << this << endl;
+    DBG << "getCleanInflect: " << this << endl;
   }
   inflection = "";
   auto it = rules.rbegin();
   while ( it != rules.rend() ){
     RulePart rule = *it;
     if ( debugFlag > 5 ){
-      LOG << rule << endl;
+      DBG << rule << endl;
     }
     if ( !rule.inflect.empty() ){
       if ( debugFlag > 5 ){
-	LOG << "x inflect:'" << rule.inflect << "'" << endl;
+	DBG << "x inflect:'" << rule.inflect << "'" << endl;
       }
       string inflect;
       for ( auto const& i : rule.inflect ){
 	if ( i != '/' ){
 	  // check if it is a known inflection
 	  if ( debugFlag > 5 ){
-	    LOG << "x bekijk [" << i << "]" << endl;
+	    DBG << "x bekijk [" << i << "]" << endl;
 	  }
 	  string inf = CLEX::get_iDescr(i);
 	  if ( inf.empty() ){
-	    LOG << "added unknown inflection X" << endl;
+	    DBG << "added unknown inflection X" << endl;
 	    inflect += "X";
 	  }
 	  else {
 	    if ( debugFlag > 5 ){
-	      LOG << "added known inflection " << i
+	      DBG << "added known inflection " << i
 				<< " (" << inf << ")" << endl;
 	    }
 	    inflect += i;
@@ -550,7 +558,7 @@ void Rule::getCleanInflect() {
 	}
       }
       if ( debugFlag > 5 ){
-	LOG << "cleaned inflection " << inflect << endl;
+	DBG << "cleaned inflection " << inflect << endl;
       }
       inflection = inflect;
       return;
@@ -561,12 +569,12 @@ void Rule::getCleanInflect() {
 
 void Rule::resolveBrackets( bool deep ) {
   if ( debugFlag > 5 ){
-    LOG << "check rule for bracketing: " << this << endl;
+    DBG << "check rule for bracketing: " << this << endl;
   }
-  brackets = new BracketNest( CLEX::UNASS, Compound::Type::NONE, debugFlag, myLog );
+  brackets = new BracketNest( CLEX::UNASS, Compound::Type::NONE, debugFlag, dbgLog );
   for ( auto const& rule : rules ){
     // fill a flat result;
-    BracketLeaf *tmp = new BracketLeaf( rule, debugFlag, myLog );
+    BracketLeaf *tmp = new BracketLeaf( rule, debugFlag, dbgLog );
     if ( tmp->status() == Status::STEM && tmp->morpheme().isEmpty() ){
       delete tmp;
     }
@@ -575,24 +583,24 @@ void Rule::resolveBrackets( bool deep ) {
     }
   }
   if ( debugFlag > 5 ){
-    LOG << "STEP 1:" << brackets << endl;
+    DBG << "STEP 1:" << brackets << endl;
   }
   if ( deep ){
     brackets->resolveGlue( );
     if ( debugFlag > 5 ){
-      LOG << "STEP 2:" << brackets << endl;
+      DBG << "STEP 2:" << brackets << endl;
     }
     brackets->resolveLead( );
     if ( debugFlag > 5 ){
-      LOG << "STEP 3:" << brackets << endl;
+      DBG << "STEP 3:" << brackets << endl;
     }
     brackets->resolveTail( );
     if ( debugFlag > 5 ){
-      LOG << "STEP 4:" << brackets << endl;
+      DBG << "STEP 4:" << brackets << endl;
     }
     brackets->resolveMiddle();
     if ( debugFlag > 5 ){
-      LOG << "STEP 5:" << brackets << endl;
+      DBG << "STEP 5:" << brackets << endl;
     }
     brackets->resolveNouns( );
     brackets->clearEmptyNodes();
@@ -600,6 +608,6 @@ void Rule::resolveBrackets( bool deep ) {
   tag = brackets->getFinalTag();
   description = get_tDescr( tag );
   if ( debugFlag > 4 ){
-    LOG << "Final Bracketing:" << brackets << " with tag=" << tag << endl;
+    DBG << "Final Bracketing:" << brackets << " with tag=" << tag << endl;
   }
 }

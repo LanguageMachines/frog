@@ -40,6 +40,7 @@
 #include "ticcutils/Unicode.h"
 #include "ticcutils/Configuration.h"
 #include "libfolia/folia.h"
+#include "frog/FrogData.h"
 #include "frog/clex.h"
 #include "frog/mbma_rule.h"
 #include "frog/mbma_brackets.h"
@@ -51,22 +52,26 @@ namespace Timbl{
 
 class Mbma {
  public:
- explicit Mbma( TiCC::LogStream * );
+  explicit Mbma( TiCC::LogStream *, TiCC::LogStream * =0 );
   ~Mbma();
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& doc ) const;
-  void Classify( folia::Word * );
+  void Classify( frog_record& );
   void Classify( const icu::UnicodeString& );
   void filterHeadTag( const std::string& );
   void filterSubTags( const std::vector<std::string>& );
   void assign_compounds();
   std::vector<std::string> getResult() const;
   std::vector<std::pair<std::string,std::string>> getResults( ) const;
+  std::vector<std::pair<std::string,std::string>> getPrettyResults( ) const;
   void setDeepMorph( bool b ){ doDeepMorph = b; };
   void clearAnalysis();
   Rule* matchRule( const std::vector<std::string>&, const icu::UnicodeString& );
   std::vector<Rule*> execute( const icu::UnicodeString& ,
 			      const std::vector<std::string>& );
+  std::string version() const { return _version; };
+  void add_morphemes( const std::vector<folia::Word*>&,
+		      const frog_data& fd ) const;
   static std::map<std::string,std::string> TAGconv;
   static std::string mbma_tagset;
   static std::string pos_tagset;
@@ -76,25 +81,28 @@ class Mbma {
   bool readsettings( const std::string&, const std::string& );
   void fillMaps();
   void init_cgn( const std::string&, const std::string& );
-  void getFoLiAResult( folia::Word *, const icu::UnicodeString& ) const;
+  void getResult( frog_record&, const icu::UnicodeString&, const std::string& ) const;
   std::vector<std::string> make_instances( const icu::UnicodeString& word );
   CLEX::Type getFinalTag( const std::list<BaseBracket*>& );
   int debugFlag;
-  void addMorph( folia::MorphologyLayer *,
-		 const std::vector<std::string>& ) const;
-  void addMorph( folia::Word *, const std::vector<std::string>& ) const;
+  void store_morphemes( frog_record&, const std::vector<std::string>& ) const;
+  void store_brackets( frog_record&,
+		       const std::string&,
+		       const std::string&,
+		       bool=false ) const;
   void addBracketMorph( folia::Word *,
 			const std::string&,
-			const std::string& ) const;
-  void addBracketMorph( folia::Word *,
-			const std::string&,
-			const BracketNest * ) const;
+			const BaseBracket * ) const;
+  void store_brackets( frog_record&,
+		       const std::string&,
+		       const BracketNest * ) const;
   std::string MTreeFilename;
   Timbl::TimblAPI *MTree;
   std::vector<Rule*> analysis;
-  std::string version;
+  std::string _version;
   std::string textclass;
-  TiCC::LogStream *mbmaLog;
+  TiCC::LogStream *errLog;
+  TiCC::LogStream *dbgLog;
   TiCC::UniFilter *filter;
   bool filter_diac;
   bool doDeepMorph;

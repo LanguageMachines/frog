@@ -43,13 +43,15 @@ typedef std::pair<std::string,double> tc_pair;
 
 class NERTagger: public BaseTagger {
  public:
-  explicit NERTagger( TiCC::LogStream * );
+  explicit NERTagger( TiCC::LogStream *, TiCC::LogStream * =0 );
   bool init( const TiCC::Configuration& );
-  void Classify( const std::vector<folia::Word *>& );
-  void post_process( const std::vector<folia::Word*>& );
-  void post_process( const std::vector<folia::Word*>&,
+  void Classify( frog_data& );
+  void post_process( frog_data& );
+  void post_process( frog_data&,
 		     const std::vector<tc_pair>& );
   void addDeclaration( folia::Document& ) const;
+  void add_result( const frog_data& fd,
+		   const std::vector<folia::Word*>& wv ) const;
   bool read_gazets( const std::string& f, const std::string& p ){
     return read_gazets( f, p, gazet_ners );
   }
@@ -80,9 +82,9 @@ class NERTagger: public BaseTagger {
 					    std::vector<std::unordered_map<std::string,std::set<std::string>>>& );
   std::vector<std::unordered_map<std::string,std::set<std::string>>> gazet_ners;
   std::vector<std::unordered_map<std::string,std::set<std::string>>> override_ners;
-  void addEntity( folia::Sentence *,
-		  const std::vector<std::pair<folia::Word*,double>>&,
-		  const std::string& );
+  void addEntity( frog_data&,
+		  size_t,
+		  const std::vector<tc_pair>& );
   bool gazets_only;
   int max_ner_size;
 };

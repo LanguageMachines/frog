@@ -44,8 +44,7 @@
 
 using namespace std;
 
-#define LOG *TiCC::Log(log)
-#define DBG *TiCC::Dbg(log)
+#define DBG *TiCC::Dbg(dbglog)
 
 unordered_map<string,double> split_dist( const vector< pair<string,double>>& dist ){
   unordered_map<string,double> result;
@@ -64,7 +63,7 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
 					 const vector<timbl_result>& p_res,
 					 size_t sent_len,
 					 size_t maxDist,
-					 TiCC::LogStream *log ){
+					 TiCC::LogStream *dbglog ){
   vector<const Constraint*> constraints;
   vector<timbl_result>::const_iterator pit = p_res.begin();
   for ( size_t dependent_id = 1;
@@ -88,7 +87,7 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
       size_t diff = ( headId > dependent_id ) ? headId - dependent_id : dependent_id - headId;
       if ( diff != 0 && diff <= maxDist ){
 	if ( pit == p_res.end() ){
-	  LOG << "OEPS p_res leeg? " << endl;
+	  DBG << "OEPS p_res leeg? " << endl;
 	  break;
 	}
 	string top_class = pit->cls();
@@ -148,10 +147,10 @@ vector<parsrel> parse( const vector<timbl_result>& p_res,
 		       const vector<timbl_result>& d_res,
 		       size_t parse_size,
 		       int maxDist,
-		       TiCC::LogStream *log ){
+		       TiCC::LogStream *dbglog ){
   vector<const Constraint*> constraints
-    = formulateWCSP( d_res, r_res, p_res, parse_size, maxDist, log );
-  CKYParser parser( parse_size, constraints, log );
+    = formulateWCSP( d_res, r_res, p_res, parse_size, maxDist, dbglog );
+  CKYParser parser( parse_size, constraints, dbglog );
   parser.parse();
   vector<parsrel> result( parse_size );
   parser.rightComplete(0, parse_size, result );

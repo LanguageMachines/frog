@@ -47,16 +47,11 @@
 #include "frog/csidp.h"
 
 using namespace std;
-using namespace icu;
+
 using TiCC::operator<<;
 
-#define LOG *TiCC::Log(parseLog)
-
-TiCC::Timer prepareTimer;
-TiCC::Timer relsTimer;
-TiCC::Timer pairsTimer;
-TiCC::Timer dirTimer;
-TiCC::Timer csiTimer;
+#define LOG *TiCC::Log(errLog)
+#define DBG *TiCC::Log(dbgLog)
 
 struct parseData {
   void clear() { words.clear(); heads.clear(); mods.clear(); mwus.clear(); }
@@ -98,7 +93,7 @@ bool Parser::init( const TiCC::Configuration& configuration ){
     int level;
     if ( TiCC::stringTo<int>( val, level ) ){
       if ( level > 5 ){
-	parseLog->setlevel( LogLevel::LogDebug );
+	dbgLog->setlevel( LogLevel::LogDebug );
       }
     }
   }
@@ -240,24 +235,9 @@ Parser::~Parser(){
   delete rels;
   delete dir;
   delete pairs;
-  delete parseLog;
+  delete errLog;
+  delete dbgLog;
   delete filter;
-}
-
-static vector<folia::Word *> lookup( folia::Word *word,
-				     const vector<folia::Entity*>& entities ){
-  vector<folia::Word*> vec;
-  for ( const auto& ent : entities ){
-    vec = ent->select<folia::Word>();
-    if ( !vec.empty() ){
-      if ( vec[0]->id() == word->id() ) {
-	// cerr << "found " << vec << endl;
-	return vec;
-      }
-    }
-  }
-  vec.clear();
-  return vec;
 }
 
 vector<string> Parser::createPairInstances( const parseData& pd ){
@@ -805,161 +785,77 @@ void Parser::addDeclaration( folia::Document& doc ) const {
 	       + "', annotatortype='auto'");
 }
 
-parseData Parser::prepareParse( const vector<folia::Word *>& fwords ){
-  parseData pd;
-  folia::Sentence *sent = 0;
-  vector<folia::Entity*> entities;
-#pragma omp critical (foliaupdate)
-  {
-    sent = fwords[0]->sentence();
-    entities = sent->select<folia::Entity>(MWU_tagset);
+void extract( const string& tv, string& head, string& mods ){
+  vector<string> v = TiCC::split_at_first_of( tv, "()" );
+  head = v[0];
+  mods.clear();
+  if ( v.size() > 1 ){
+    vector<string> mv = TiCC::split_at( v[1], "," );
+    mods = mv[0];
+    for ( size_t i=1; i < mv.size(); ++i ){
+      mods += "|" + mv[i];
+    }
   }
-  for ( size_t i=0; i < fwords.size(); ++i ){
-    folia::Word *word = fwords[i];
-    vector<folia::Word*> mwuv = lookup( word, entities );
-    if ( !mwuv.empty() ){
+  else {
+    mods = ""; // HACK should be "__", but then there are differences!
+  }                                                      //     ^
+}                                                        //     |
+                                                         //     |
+parseData Parser::prepareParse( frog_data& fd ){         //     |
+  parseData pd;                                          //     |
+  for ( size_t i = 0; i < fd.units.size(); ++i ){        //     |
+    if ( fd.mwus.find( i ) == fd.mwus.end() ){           //     |
+      string head;                                       //     |
+      string mods;                                       //     |
+      extract( fd.units[i].tag, head, mods );            //     |
+      string word_s = fd.units[i].word;                  //     |
+      // the word may contain spaces, remove them all!          |
+      word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
+      pd.words.push_back( word_s );                      //     |
+      pd.heads.push_back( head );                        //     |
+      if ( mods.empty() ){                               //    \/
+	// HACK: make this bug-to-bug compatible with older versions.
+	// But in fact this should also be done for the mwu's loop below!
+	// now sometimes empty mods get appended there.
+	// extract should return "__", I suppose  (see above)
+	mods = "__";
+      }
+      pd.mods.push_back( mods );
+    }
+    else {
       string multi_word;
-      string head;
-      string mod;
-      for ( const auto& mwu : mwuv ){
-	UnicodeString tmp;
-#pragma omp critical (foliaupdate)
-	{
-	  tmp = mwu->text( textclass );
-	}
+      string multi_head;
+      string multi_mods;
+      for ( size_t k = i; k <= fd.mwus[i]; ++k ){
+	icu::UnicodeString tmp = TiCC::UnicodeFromUTF8( fd.units[k].word );
 	if ( filter )
 	  tmp = filter->filter( tmp );
 	string ms = TiCC::UnicodeToUTF8( tmp );
 	// the word may contain spaces, remove them all!
 	ms.erase(remove_if(ms.begin(), ms.end(), ::isspace), ms.end());
-	multi_word += ms;
-	folia::PosAnnotation *postag
-	  = mwu->annotation<folia::PosAnnotation>( POS_tagset );
-	head += postag->feat("head");
-	vector<folia::Feature*> feats = postag->select<folia::Feature>();
-	for ( const auto& feat : feats ){
-	  mod += feat->cls();
-	  if ( &feat != &feats.back() ){
-	    mod += "|";
-	  }
+	string head;
+	string mods;
+	extract( fd.units[k].tag, head, mods );
+	if ( k == i ){
+	  multi_word = ms;
+	  multi_head = head;
+	  multi_mods = mods;
 	}
-	if ( &mwu != &mwuv.back() ){
-	  multi_word += "_";
-	  head += "_";
-	  mod += "_";
+	else {
+	  multi_word += "_" + ms;
+	  multi_head += "_" + head;
+	  multi_mods += "_" + mods;
 	}
       }
       pd.words.push_back( multi_word );
-      pd.heads.push_back( head );
-      pd.mods.push_back( mod );
-      pd.mwus.push_back( mwuv );
-      i += mwuv.size()-1;
-    }
-    else {
-      UnicodeString tmp;
-#pragma omp critical (foliaupdate)
-      {
-	tmp = word->text( textclass );
-      }
-      if ( filter )
-	tmp = filter->filter( tmp );
-      string ms = TiCC::UnicodeToUTF8( tmp );
-      // the word may contain spaces, remove them all!
-      ms.erase(remove_if(ms.begin(), ms.end(), ::isspace), ms.end());
-      pd.words.push_back( ms );
-      folia::PosAnnotation *postag
-	= word->annotation<folia::PosAnnotation>( POS_tagset );
-      string head = postag->feat("head");
-      pd.heads.push_back( head );
-      string mod;
-      vector<folia::Feature*> feats = postag->select<folia::Feature>();
-      if ( feats.empty() ){
-	mod = "__";
-      }
-      else {
-	for ( const auto& feat : feats ){
-	  mod += feat->cls();
-	  if ( &feat != &feats.back() ){
-	    mod += "|";
-	  }
-	}
-      }
-      pd.mods.push_back( mod );
-      vector<folia::Word*> vec;
-      vec.push_back(word);
-      pd.mwus.push_back( vec );
+      pd.heads.push_back( multi_head );
+      pd.mods.push_back( multi_mods );
+      i = fd.mwus[i];
     }
   }
   return pd;
 }
 
-void appendResult( const vector<folia::Word *>& words,
-		   parseData& pd,
-		   const string& tagset,
-		   const string& textclass,
-		   const vector<int>& nums,
-		   const vector<string>& roles ){
-  folia::Sentence *sent = 0;
-#pragma omp critical (foliaupdate)
-  {
-    sent = words[0]->sentence();
-  }
-  folia::DependenciesLayer *dl = 0;
-  folia::KWargs args;
-  string s_id = sent->id();
-  if ( !s_id.empty() ){
-    args["generate_id"] = s_id;
-  }
-  args["set"] = tagset;
-#pragma omp critical (foliaupdate)
-  {
-    dl = new folia::DependenciesLayer( args, sent->doc() );
-    sent->append( dl );
-  }
-  string dl_id = dl->id();
-  for ( size_t i=0; i < nums.size(); ++i ){
-    if ( nums[i] != 0 ){
-      folia::KWargs args;
-      if ( !dl_id.empty() ){
-	args["generate_id"] = dl_id;
-      }
-      args["class"] = roles[i];
-      args["set"] = tagset;
-      if ( textclass != "current" ){
-	args["textclass"] = textclass;
-      }
-#pragma omp critical (foliaupdate)
-      {
-	folia::Dependency *d = new folia::Dependency( args, sent->doc() );
-	dl->append( d );
-	folia::Headspan *dh = new folia::Headspan();
-	for ( const auto& wrd : pd.mwus[nums[i]-1] ){
-	  dh->append( wrd );
-	}
-	d->append( dh );
-	folia::DependencyDependent *dd = new folia::DependencyDependent();
-	for ( const auto& it : pd.mwus[i] ){
-	  dd->append( it );
-	}
-	d->append( dd );
-      }
-    }
-  }
-}
-
-void appendParseResult( const vector<folia::Word *>& words,
-			parseData& pd,
-			const string& tagset,
-			const string& textclass,
-			const vector<parsrel>& res ){
-  vector<int> nums;
-  vector<string> roles;
-  for ( const auto& it : res ){
-    nums.push_back( it.head );
-    roles.push_back( it.deprel );
-  }
-  appendResult( words, pd, tagset, textclass, nums, roles );
-}
 
 void timbl( Timbl::TimblAPI* tim,
 	    const vector<string>& instances,
@@ -972,19 +868,32 @@ void timbl( Timbl::TimblAPI* tim,
   }
 }
 
-void Parser::Parse( const vector<folia::Word*>& words,
-		    TimerBlock& timers ){
+void appendParseResult( frog_data& fd,
+			const vector<parsrel>& res ){
+  vector<int> nums;
+  vector<string> roles;
+  for ( const auto& it : res ){
+    nums.push_back( it.head );
+    roles.push_back( it.deprel );
+  }
+  for ( size_t i = 0; i < nums.size(); ++i ){
+    fd.mw_units[i].parse_index = nums[i];
+    fd.mw_units[i].parse_role = roles[i];
+  }
+}
+
+void Parser::Parse( frog_data& fd, TimerBlock& timers ){
   timers.parseTimer.start();
   if ( !isInit ){
     LOG << "Parser is not initialized! EXIT!" << endl;
     throw runtime_error( "Parser is not initialized!" );
   }
-  if ( words.empty() ){
+  if ( fd.empty() ){
     LOG << "unable to parse an analisis without words" << endl;
     return;
   }
   timers.prepareTimer.start();
-  parseData pd = prepareParse( words );
+  parseData pd = prepareParse( fd );
   timers.prepareTimer.stop();
   vector<timbl_result> p_results;
   vector<timbl_result> d_results;
@@ -1020,8 +929,54 @@ void Parser::Parse( const vector<folia::Word*>& words,
 			       d_results,
 			       pd.words.size(),
 			       maxDepSpan,
-			       parseLog );
+			       dbgLog );
   timers.csiTimer.stop();
-  appendParseResult( words, pd, dep_tagset, textclass, res );
+  appendParseResult( fd, res );
   timers.parseTimer.stop();
+}
+
+void Parser::add_result( const frog_data& fd,
+			 const vector<folia::Word*>& wv ) const {
+  //  DBG << "Parser::add_result:" << endl << fd << endl;
+  folia::Sentence *s = wv[0]->sentence();
+  folia::KWargs args;
+  if ( !s->id().empty() ){
+    args["generate_id"] = s->id();
+  }
+  args["set"] = getTagset();
+  if ( textclass != "current" ){
+    args["textclass"] = textclass;
+  }
+  folia::DependenciesLayer *el = new folia::DependenciesLayer( args, s->doc() );
+  s->append( el );
+  for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
+    string cls = fd.mw_units[pos].parse_role;
+    if ( cls != "ROOT" ){
+      if ( !el->id().empty() ){
+	args["generate_id"] = el->id();
+      }
+      args["class"] = cls;
+      if ( textclass != "current" ){
+	args["textclass"] = textclass;
+      }
+      args["set"] = getTagset();
+      folia::Dependency *e = new folia::Dependency( args, s->doc() );
+      el->append( e );
+      args.clear();
+      // if ( textclass != "current" ){
+      // 	args["textclass"] = textclass;
+      // }
+      folia::Headspan *dh = new folia::Headspan( args );
+      size_t head_index = fd.mw_units[pos].parse_index-1;
+      for ( auto const& i : fd.mw_units[head_index].parts ){
+	dh->append( wv[i] );
+      }
+      e->append( dh );
+      folia::DependencyDependent *dd = new folia::DependencyDependent( args );
+      for ( auto const& i : fd.mw_units[pos].parts ){
+	dd->append( wv[i] );
+      }
+      e->append( dd );
+    }
+  }
 }

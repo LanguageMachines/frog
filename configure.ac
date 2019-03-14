@@ -73,6 +73,39 @@ fi
 
 AC_OSX_PKG( [icu4c] )
 
+PKG_CHECK_MODULES( [TEXTCAT],
+  [libexttextcat],
+  [TEXTCAT_FOUND=1
+   CXXFLAGS="$CXXFLAGS $TEXTCAT_CFLAGS"
+   LIBS="$TEXTCAT_LIBS $LIBS"],
+  [PKG_CHECK_MODULES( [TEXTCAT],
+   [libtextcat],
+   [TEXTCAT_FOUND=1
+    CXXFLAGS="$CXXFLAGS $TEXTCAT_CFLAGS"
+    LIBS="$TEXTCAT_LIBS $LIBS"],
+   [TEXTCAT_FOUND=0]
+   )]
+ )
+
+if test $TEXTCAT_FOUND = 0; then
+# So, no pkg-config for textcat found.
+#     Hopefully an old style version can be found???
+  AC_CHECK_OLD_TEXTCAT
+  if test $TEXTCAT_FOUND = 1; then
+    AC_DEFINE([HAVE_OLD_TEXTCAT], [1], [textcat needs C linkage])
+  fi
+fi
+
+if test $TEXTCAT_FOUND = 1; then
+  AC_SEARCH_LM
+fi
+
+if test $TEXTCAT_FOUND = 0; then
+   AC_MSG_ERROR( [no working libtextcat or libexttextcat found!] )
+else
+   AC_DEFINE([HAVE_TEXTCAT], [1], [textcat])
+fi
+
 PKG_CHECK_MODULES([XML2], [libxml-2.0 >= 2.6.16] )
 CXXFLAGS="$CXXFLAGS $XML2_CFLAGS"
 LIBS="$XML2_LIBS $LIBS"
@@ -83,7 +116,8 @@ LIBS="$ICU_LIBS $LIBS"
 
 AX_LIB_READLINE
 
-PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.20] )
+PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.21] )
+
 CXXFLAGS="$CXXFLAGS $ticcutils_CFLAGS"
 LIBS="$ticcutils_LIBS $LIBS"
 
@@ -95,11 +129,11 @@ PKG_CHECK_MODULES([mbt], [mbt >= 3.2.14] )
 CXXFLAGS="$CXXFLAGS $mbt_CFLAGS"
 LIBS="$mbt_LIBS $LIBS"
 
-PKG_CHECK_MODULES([folia],[folia >= 1.10])
+PKG_CHECK_MODULES([folia],[folia >= 1.16])
 CXXFLAGS="$CXXFLAGS $folia_CFLAGS"
 LIBS="$folia_LIBS $LIBS"
 
-PKG_CHECK_MODULES([ucto], [ucto >= 0.13] )
+PKG_CHECK_MODULES([ucto], [ucto >= 0.15] )
 CXXFLAGS="$CXXFLAGS $ucto_CFLAGS"
 LIBS="$ucto_LIBS $LIBS"
 
@@ -107,8 +141,8 @@ UCTO_VERSION=`pkg-config --modversion ucto`
 UCTO_INT="${UCTO_VERSION//.}" # no dots
 UCTO_INT=$((10#$UCTO_INT))    # no leading 0 (that's octal)
 AC_DEFINE_UNQUOTED( [UCTO_INT_VERSION],
-                   [${UCTO_INT}],
-                   [The integer representation of the ucto version])
+	   	    [${UCTO_INT}],
+		    [The integer representation of the ucto version])
 
 PKG_CHECK_MODULES([frogdata], [frogdata >= 0.15] )
 

@@ -30,12 +30,16 @@
 */
 
 #include "frog/cgn_tagger_mod.h"
+#include "frog/FrogData.h"
 #include "frog/Frog-util.h"
+#include "ticcutils/PrettyPrint.h"
 
 using namespace std;
 using namespace Tagger;
+using TiCC::operator<<;
 
-#define LOG *TiCC::Log(tag_log)
+#define LOG *TiCC::Log(err_log)
+#define DBG *TiCC::Log(dbg_log)
 
 
 static string subsets_file = "subsets.cgn";
@@ -91,7 +95,7 @@ bool CGNTagger::fillSubSetTable( const string& sub_file,
 
 bool CGNTagger::init( const TiCC::Configuration& config ){
   if (  debug > 1 ){
-    LOG << "INIT CGN Tagger." << endl;
+    DBG << "INIT CGN Tagger." << endl;
   }
   if ( !BaseTagger::init( config ) ){
     return false;
@@ -124,7 +128,7 @@ bool CGNTagger::init( const TiCC::Configuration& config ){
     }
   }
   if ( debug > 1 ){
-    LOG << "DONE Init CGN Tagger." << endl;
+    DBG << "DONE Init CGN Tagger." << endl;
   }
   return true;
 }
@@ -132,11 +136,11 @@ bool CGNTagger::init( const TiCC::Configuration& config ){
 void CGNTagger::addDeclaration( folia::Document& doc ) const {
   doc.declare( folia::AnnotationType::POS,
 	       tagset,
-	       "annotator='frog-mbpos-" + version
+	       "annotator='frog-mbpos-" + _version
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
-string CGNTagger::getSubSet( const string& val, const string& head, const string& fullclass ){
+string CGNTagger::getSubSet( const string& val, const string& head, const string& fullclass ) const {
   auto it = cgnSubSets.find( val );
   if ( it == cgnSubSets.end() ){
     throw folia::ValueError( "unknown cgn subset for class: '" + val + "', full class is: '" + fullclass + "'" );
@@ -164,77 +168,88 @@ string CGNTagger::getSubSet( const string& val, const string& head, const string
 			   "' within the constraints for '" + head + "', full class is: '" + fullclass + "'" );
 }
 
-void CGNTagger::addTag( folia::Word *word,
+void CGNTagger::post_process( frog_data& words ){
+  for ( size_t i=0; i < _tag_result.size(); ++i ){
+    addTag( words.units[i],
+	    _tag_result[i].assignedTag(),
+	    _tag_result[i].confidence() );
+  }
+}
+
+void CGNTagger::addTag( frog_record& fd,
 			const string& inputTag,
 			double confidence ){
-  string pos_tag = inputTag;
-  string ucto_class = word->cls();
+#pragma omp critical (dataupdate)
+  {
+    fd.tag = inputTag;
+    if ( inputTag.find( "SPEC(" ) == 0 ){
+      fd.tag_confidence = 1;
+    }
+    else {
+      fd.tag_confidence = confidence;
+    }
+  }
+  string ucto_class = fd.token_class;
   if ( debug > 1 ){
-    LOG << "lookup ucto class= " << ucto_class << endl;
+    DBG << "lookup ucto class= " << ucto_class << endl;
   }
   auto const tt = token_tag_map.find( ucto_class );
   if ( tt != token_tag_map.end() ){
     if ( debug > 1 ){
-      LOG << "found translation ucto class= " << ucto_class
+      DBG << "found translation ucto class= " << ucto_class
 	  << " to POS-Tag=" << tt->second << endl;
     }
-    pos_tag = tt->second;
-    confidence = 1.0;
-  }
-  folia::KWargs args;
-  args["set"]  = tagset;
-  args["class"]  = pos_tag;
-  args["confidence"]= TiCC::toString(confidence);
-  if ( textclass != "current" ){
-    args["textclass"] = textclass;
-  }
-#pragma omp critical (foliaupdate)
-  {
-    word->addPosAnnotation( args );
+#pragma omp critical (dataupdate)
+    {
+      fd.tag = tt->second;
+      fd.tag_confidence = 1.0;
+    }
   }
 }
 
-
-void CGNTagger::post_process( const vector<folia::Word *>& words ){
-  for ( size_t i=0; i < _tag_result.size(); ++i ){
-    addTag( words[i],
-	    _tag_result[i].assignedTag(),
-	    _tag_result[i].confidence() );
-  }
-  for ( auto const& word : words ){
-    folia::PosAnnotation *postag = 0;
-#pragma omp critical (foliaupdate)
-    {
-      postag = word->annotation<folia::PosAnnotation>( );
-    }
-    string cls = postag->cls();
-    vector<string> parts = TiCC::split_at_first_of( cls, "()" );
-    string head = parts[0];
+void CGNTagger::add_tags( const vector<folia::Word*>& wv,
+			  const frog_data& fd ) const {
+  assert( wv.size() == fd.size() );
+  size_t pos = 0;
+  for ( const auto& word : fd.units ){
     folia::KWargs args;
-    args["class"]  = head;
-    args["set"]    = tagset;
-    folia::Feature *feat = new folia::HeadFeature( args );
+    args["set"]   = getTagset();
+    args["class"] = word.tag;
+    if ( textclass != "current" ){
+      args["textclass"] = textclass;
+    }
+    args["confidence"]= TiCC::toString(word.tag_confidence);
+    folia::FoliaElement *postag;
 #pragma omp critical (foliaupdate)
     {
+      postag = wv[pos]->addPosAnnotation( args );
+    }
+    vector<string> hv = TiCC::split_at_first_of( word.tag, "()" );
+    string head = hv[0];
+    args["class"] = head;
+#pragma omp critical (foliaupdate)
+    {
+      folia::Feature *feat = new folia::HeadFeature( args );
       postag->append( feat );
       if ( head == "SPEC" ){
 	postag->confidence(1.0);
       }
     }
-    if ( parts.size() > 1
-	 && !cgnSubSets.empty() ){
-      vector<string> tagParts = TiCC::split_at( parts[1], "," );
-      for ( auto const& part : tagParts ){
-	folia::KWargs args;
-	args["set"]    = tagset;
-	args["subset"] = getSubSet( part, head, cls );
-	args["class"]  = part;
+    vector<string> feats;
+    if ( hv.size() > 1 ){
+      feats = TiCC::split_at( hv[1], "," );
+    }
+    for ( const auto& f : feats ){
+      folia::KWargs args;
+      args["set"] =  getTagset();
+      args["subset"] = getSubSet( f, head, word.tag );
+      args["class"]  = f;
 #pragma omp critical (foliaupdate)
-	{
-	  folia::Feature *feat = new folia::Feature( args );
-	  postag->append( feat );
-	}
+      {
+	folia::Feature *feat = new folia::Feature( args, wv[pos]->doc() );
+	postag->append( feat );
       }
     }
+    ++pos;
   }
 }

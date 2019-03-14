@@ -37,6 +37,7 @@
 #include "ticcutils/Configuration.h"
 #include "ticcutils/Unicode.h"
 #include "timbl/TimblAPI.h"
+#include "frog/FrogData.h"
 
 class mblemData {
  public:
@@ -52,25 +53,26 @@ class mblemData {
 
 class Mblem {
  public:
-  explicit Mblem( TiCC::LogStream * );
+  explicit Mblem( TiCC::LogStream *, TiCC::LogStream * =0 );
   ~Mblem();
   bool init( const TiCC::Configuration& );
-  void addDeclaration( folia::Document& doc ) const;
-  void Classify( folia::Word * );
+  void addDeclaration( folia::Document& ) const;
+  void Classify( frog_record& );
   void Classify( const icu::UnicodeString& );
   std::vector<std::pair<std::string,std::string> > getResult() const;
+  std::string getTagset() const { return tagset; };
+  std::string version() const { return _version; };
   void filterTag( const std::string&  );
   void makeUnique();
-  std::string getTagset() const { return tagset; };
-  bool fill_ts_map( const std::string& );
-  bool fill_eq_set( const std::string& );
+  void add_lemmas( const std::vector<folia::Word*>&,
+		   const frog_data& ) const;
  private:
   void read_transtable( const std::string& );
   void create_MBlem_defaults();
   bool readsettings( const std::string& dir, const std::string& fname );
-  void addLemma( folia::Word *, const std::string&) ;
+  bool fill_ts_map( const std::string& );
+  bool fill_eq_set( const std::string& );
   std::string make_instance( const icu::UnicodeString& in );
-  void getFoLiAResult( folia::Word *, const icu::UnicodeString& );
   Timbl::TimblAPI *myLex;
   std::string punctuation;
   size_t history;
@@ -80,11 +82,12 @@ class Mblem {
   std::map<std::string, std::map<std::string, int>> token_strip_map;
   std::set<std::string> one_one_tags;
   std::vector<mblemData> mblemResult;
-  std::string version;
+  std::string _version;
   std::string tagset;
   std::string POS_tagset;
   std::string textclass;
-  TiCC::LogStream *mblemLog;
+  TiCC::LogStream *errLog;
+  TiCC::LogStream *dbgLog;
   TiCC::UniFilter *filter;
 };
 

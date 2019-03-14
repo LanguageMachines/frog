@@ -61,6 +61,7 @@
 using namespace std;
 
 #define LOG *TiCC::Log(theErrLog)
+#define DBG *TiCC::Log(theDbgLog)
 
 string testDirName;
 string outputFileName;
@@ -108,7 +109,7 @@ void usage( ) {
        << "\t --retry                assume frog is running again on the same input,\n"
        << "\t                        already done files are skipped. (detected on the basis of already existing output files)\n"
        << "\t --max-parser-tokens=<n> inhibit parsing when a sentence contains over 'n' tokens. (default: 500, needs already 16Gb of memory!)\n"
-       << "\t -Q                   Enable quote detection in tokeniser.\n"
+       << "\t -Q                   Enable quote detection in tokeniser. (NOT SUPPORTED AT THE MOMENT)\n"
        << "\t-T or --textredundancy=[full|minimal|none]  - set text redundancy level in the tokenizer for text nodes in FoLiA output: " << endl
        << "\t                    'full' - add text to all levels: <p> <s> <w> etc." << endl
        << "\t                    'minimal' - don't introduce text on higher levels, but retain what is already there." << endl
@@ -143,7 +144,7 @@ void usage( ) {
 
 bool parse_args( TiCC::CL_Options& Opts,
 		 FrogOptions& options,
-		 TiCC::LogStream* theErrLog ) {
+		 TiCC::LogStream* theErrLog ){
   // process the command line and fill FrogOptions to initialize the API
   // also fill some globals we use for our own main.
 
@@ -154,7 +155,7 @@ bool parse_args( TiCC::CL_Options& Opts,
   string configFileName;
   if ( languages.empty() ){
     // ok no languages parameter.
-    // us a (default) configfile. Dutch
+    // use a (default) configfile. Dutch
     configFileName = FrogAPI::defaultConfigFile("nld");
     language = "none";
   }
@@ -250,7 +251,7 @@ bool parse_args( TiCC::CL_Options& Opts,
 	configuration.setatt( "debug", value, "parser" );
 	break;
       default:
-	cerr << "unknown module '" << mod << "'" << endl;
+	cerr << "unknown module code:'" << mod << "'" << endl;
 	return false;
       }
     }
@@ -269,6 +270,10 @@ bool parse_args( TiCC::CL_Options& Opts,
   }
   options.doSentencePerLine = Opts.extract( 'n' );
   options.doQuoteDetection = Opts.extract( 'Q' );
+  if (  options.doQuoteDetection ){
+    LOG << "Quote detection is NOT supported!" << endl;
+    return false;
+  }
   if ( Opts.extract( "skip", value )) {
     string skip = value;
     if ( skip.find_first_of("tT") != string::npos )
@@ -310,7 +315,6 @@ bool parse_args( TiCC::CL_Options& Opts,
   if ( Opts.extract( "ner-override", value ) ){
     configuration.setatt( "ner_override", value, "NER" );
   }
-
   options.doServer = Opts.extract('S', options.listenport );
 
 #ifdef HAVE_OPENMP
@@ -396,6 +400,7 @@ bool parse_args( TiCC::CL_Options& Opts,
   }
 
   options.doKanon = Opts.extract("KANON");
+  options.test_API = Opts.extract("TESTAPI");
 
   options.doXMLin = false;
   if ( Opts.extract ('x', value ) ){
@@ -537,9 +542,11 @@ int main(int argc, char *argv[]) {
        << Tagger::VersionName() << "]" << endl;
   TiCC::LogStream *theErrLog
     = new TiCC::LogStream( cerr, "frog-", StampMessage );
+  ostream *the_dbg_stream = 0;
+  TiCC::LogStream *theDbgLog = 0;
   std::ios_base::sync_with_stdio(false);
   FrogOptions options;
-
+  string db_filename;
   try {
     TiCC::CL_Options Opts("c:e:o:t:T:x::X::nQhVd:S:",
 			  "textclass:,inputclass:,outputclass:,testdir:,"
@@ -547,7 +554,7 @@ int main(int argc, char *argv[]) {
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
 			  "help,language:,retry,nostdout,ner-override:,"
 			  "debug:,keep-parser-files,version,threads:,"
-			  "override:,KANON");
+			  "override:,KANON,TESTAPI,debugfile:");
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
       // we already did show what we wanted.
@@ -558,11 +565,17 @@ int main(int argc, char *argv[]) {
       usage();
       return EXIT_SUCCESS;
     };
+    Opts.extract( "debugfile", db_filename );
+    if ( db_filename.empty() ){
+      db_filename = "frog.debug";
+    }
+    the_dbg_stream = new ofstream( db_filename );
+    theDbgLog = new TiCC::LogStream( *the_dbg_stream, "frog-", StampMessage );
     bool parsed = parse_args( Opts, options, theErrLog );
     if (!parsed) {
       throw runtime_error( "init failed" );
     }
-    FrogAPI frog( options, configuration, theErrLog );
+    FrogAPI frog( options, configuration, theErrLog, theDbgLog );
     if ( !fileNames.empty() ) {
       string outPath = outputDirName;
       string xmlPath = xmlDirName;
@@ -643,27 +656,61 @@ int main(int argc, char *argv[]) {
 	  }
 	}
 	LOG << TiCC::Timer::now() << " Frogging " << testName << endl;
-	try {
-	  frog.FrogFile( testName, *outS, xmlOutName );
-	}
-	catch ( exception& e ){
-	  LOG << "problem frogging: " << name << endl
-			  << e.what() << endl;
-	  continue;
-	}
-	if ( !outName.empty() ){
-	  LOG << "results stored in " << outName << endl;
-	  if ( outS != &cout ){
-	    delete outS;
-	    outS = 0;
+	if ( options.test_API ){
+	  LOG << "running some extra Frog tests...." << endl;
+	  if ( testName.find( ".xml" ) != string::npos ){
+	    options.doXMLin = true;
 	  }
+	  else {
+	    options.doXMLin = false;
+	  }
+	  if ( !xmlOutName.empty() && xmlOutName.find( ".xml" ) != string::npos ){
+	    options.doXMLout = true;
+	  }
+	  LOG << "Start test: " << testName << endl;
+	  stringstream ss;
+	  ifstream is( testName );
+	  string line;
+	  while ( getline( is, line ) ){
+	    ss << line << endl;
+	  }
+	  string s1 = frog.Frogtostring( ss.str() );
+	  *outS << "STRING 1 " << endl;
+	  *outS << s1 << endl;
+	  string s2 = frog.Frogtostringfromfile( testName );
+	  *outS << "STRING 2 " << endl;
+	  *outS << s2 << endl;
+	  if ( s1 != s2 ){
+	    LOG << "FAILED test :" << testName << endl;
+	  }
+	  else {
+	    LOG << "test OK!" << endl;
+	  }
+	  LOG << "Done with:" << testName << endl;
 	}
-      }
-      if ( !outputFileName.empty() ){
-	LOG << "results stored in " << outputFileName << endl;
-	if ( outS != &cout ){
-	  delete outS;
-	  outS = 0;
+	else {
+	  try {
+	    frog.FrogFile( testName, *outS, xmlOutName );
+	  }
+	  catch ( exception& e ){
+	    LOG << "problem frogging: " << name << endl
+		<< e.what() << endl;
+	    continue;
+	  }
+	  if ( !outName.empty() ){
+	    LOG << "results stored in " << outName << endl;
+	    if ( outS != &cout ){
+	      delete outS;
+	      outS = 0;
+	    }
+	  }
+	  if ( !outputFileName.empty() ){
+	    LOG << "results stored in " << outputFileName << endl;
+	    if ( outS != &cout ){
+	      delete outS;
+	      outS = 0;
+	    }
+	  }
 	}
       }
       LOG << TiCC::Timer::now() << " Frog finished" << endl;
@@ -727,10 +774,27 @@ int main(int argc, char *argv[]) {
       frog.FrogInteractive();
     }
   }
+  catch ( const TiCC::OptionError& e ){
+    usage();
+    return EXIT_FAILURE;
+  }
   catch ( const exception& e ){
     LOG << "fatal error: " << e.what() << endl;
     return EXIT_FAILURE;
   }
   delete theErrLog;
+  delete theDbgLog;
+  delete the_dbg_stream;
+
+  if ( !db_filename.empty() ){
+    ifstream test(db_filename,ifstream::ate);
+    if ( test.tellg() > 0 ){
+      cerr << "Some debugging information is available in: "
+	   << db_filename << endl;
+    }
+    else {
+      remove( db_filename.c_str() );
+    }
+  }
   return EXIT_SUCCESS;
 }

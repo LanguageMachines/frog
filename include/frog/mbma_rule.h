@@ -71,10 +71,12 @@ public:
   Rule( const std::vector<std::string>&,
 	const icu::UnicodeString&,
 	TiCC::LogStream&,
+	TiCC::LogStream&,
 	int );
   ~Rule();
   std::vector<std::string> extract_morphemes() const;
   std::string morpheme_string( bool = false ) const;
+  std::string pretty_string() const;
   icu::UnicodeString getKey( bool );
   bool performEdits();
   void getCleanInflect();
@@ -91,6 +93,7 @@ public:
   Compound::Type compound;
   BracketNest *brackets;
   TiCC::LogStream& myLog;
+  TiCC::LogStream& dbgLog;
   double confidence;
 };
 

@@ -29,6 +29,7 @@
 
 */
 
+#include <algorithm>
 #include "frog/ner_tagger_mod.h"
 
 #include "mbt/MbtAPI.h"
@@ -41,12 +42,13 @@ using namespace std;
 using namespace Tagger;
 using TiCC::operator<<;
 
-#define LOG *TiCC::Log(tag_log)
+#define LOG *TiCC::Log(err_log)
+#define DBG *TiCC::Log(dbg_log)
 
 static string POS_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
 
-NERTagger::NERTagger( TiCC::LogStream *l ):
-  BaseTagger( l, "NER" ),
+NERTagger::NERTagger( TiCC::LogStream *l, TiCC::LogStream *d ):
+  BaseTagger( l, d, "NER" ),
   gazets_only(false),
   max_ner_size(20)
 { gazet_ners.resize( max_ner_size + 1 );
@@ -115,9 +117,9 @@ bool NERTagger::fill_ners( const string& cat,
 	}
 	else {
 	  if ( debug > 1 ){
-	    LOG << "expected 1 to " << max_ner_size
+	    DBG << "expected 1 to " << max_ner_size
 		<< " SPACE-separated parts in line: '" << line
-		<< "', ignoring it" << endl;
+		<< "'" << endl;
 	  }
 	  continue;
 	}
@@ -134,7 +136,7 @@ bool NERTagger::fill_ners( const string& cat,
       ++ner_cnt;
     }
   }
-  LOG << "loaded " << ner_cnt << " additional " << cat
+  DBG << "loaded " << ner_cnt << " additional " << cat
       << " Named Entities from: " << file_name << endl;
   return true;
 }
@@ -213,7 +215,7 @@ vector<string> NERTagger::create_ner_list( const vector<string>& words,
 					   std::vector<std::unordered_map<std::string,std::set<std::string>>>& ners ){
   vector<set<string>> stags( words.size() );
   if ( debug > 1 ){
-    LOG << "search for known NER's" << endl;
+    DBG << "search for known NER's" << endl;
   }
   for ( size_t j=0; j < words.size(); ++j ){
     // cycle through the words
@@ -227,12 +229,12 @@ vector<string> NERTagger::create_ner_list( const vector<string>& words,
       }
       seq += words[j+i];
       if ( debug > 1 ){
-	LOG << "sequence = '" << seq << "'" << endl;
+	DBG << "sequence = '" << seq << "'" << endl;
       }
       auto const& tags = mp.find(seq);
       if ( tags != mp.end() ){
 	if ( debug > 1 ){
-	  LOG << "FOUND tags " << tags->first << "-" << tags->second << endl;
+	  DBG << "FOUND tags " << tags->first << "-" << tags->second << endl;
 	}
 	for ( size_t k = 0; k <= i; ++k ){
 	  stags[k+j].insert( tags->second.begin(), tags->second.end() );
@@ -244,241 +246,199 @@ vector<string> NERTagger::create_ner_list( const vector<string>& words,
   return serialize( stags );
 }
 
-void NERTagger::addEntity( folia::Sentence *sent,
-			   const vector<pair<folia::Word*,double>>& entity,
-			   const string& NER ){
-  /// add the sequence of Words in @entity with class @NER to the Sentence @sent
-  /// may create an EntitiesLayer in the Sentence, if not already present
-  folia::EntitiesLayer *el = 0;
-  if ( debug > 8 ){
-    LOG << "add NER " << NER << " to entities layer" << endl;
-  }
-
-#pragma omp critical (foliaupdate)
-  {
-    try {
-      el = sent->annotation<folia::EntitiesLayer>(tagset);
-      if ( debug > 8 ){
-	LOG << "GOT existing layer " << el << endl;
-      }
-    }
-    catch(...){
-      folia::KWargs args;
-      string s_id = sent->id();
-      if ( !s_id.empty() ){
-	args["generate_id"] = s_id;
-      }
-      args["set"] = tagset;
-      el = new folia::EntitiesLayer( args, sent->doc() );
-      if ( debug > 8 ){
-	LOG << "CREATED layer " << el << endl;
-      }
-      sent->append( el );
-    }
-  }
-  double c = 0;
-  for ( auto const& it : entity ){
-    c += it.second;
-  }
-  c /= entity.size();
-  folia::KWargs args;
-  args["class"] = NER;
-  args["confidence"] = TiCC::toString(c);
-  args["set"] = tagset;
-  string el_id = el->id();
-  if ( !el_id.empty() ){
-    args["generate_id"] = el_id;
-  }
-  if ( textclass != "current" ){
-    args["textclass"] = textclass;
-  }
-  folia::Entity *e = 0;
-#pragma omp critical (foliaupdate)
-  {
-    e = new folia::Entity( args, el->doc() );
-    el->append( e );
-  }
-  for ( const auto& it : entity ){
-#pragma omp critical (foliaupdate)
-    {
-      e->append( it.first );
-    }
-  }
-}
-
-void NERTagger::post_process( const vector<folia::Word*>& words,
-			      const vector<tc_pair>& ners ){
-  /// @ners is a sequence of NE tags (maybe 'O') with their confidence
-  /// these are appended to the corresponding @words
-  /// On the fly, classification errors are fixed:
-  /// - a NE starting with with I is added as starting with B
-  /// - a change in NE value is handled as a new NE start
-  if ( words.empty() ) {
-    return;
-  }
-  folia::Sentence *sent = words[0]->sentence();
-  vector<pair<folia::Word*,double>> entity;
-  string curNER;
-  size_t pos = 0;
-  for ( const auto& it : ners ){
-    if (debug > 1){
-      LOG << "NER = " << it.first << endl;
-    }
-    vector<string> ner;
-    if ( it.first == "O" ){
-      if ( !entity.empty() ){
-	if (debug > 1) {
-	  LOG << "O spit out " << curNER << endl;
-	  LOG << "entity= " << entity << endl;
-	}
-	addEntity( sent, entity, curNER );
-	entity.clear();
-      }
-      ++pos;
-      continue;
-    }
-    if ( it.first[0] == 'B' ){
-      if ( !entity.empty() ){
-	if ( debug > 1 ){
-	  LOG << "B spit out " << curNER << endl;
-	  LOG << "entity= " << entity << endl;
-	}
-	addEntity( sent, entity, curNER );
-	entity.clear();
-      }
-      size_t num_words = TiCC::split_at( it.first, ner, "-" );
-      if ( num_words != 2 ){
-	LOG << "expected <NER>-tag, got: " << it.first << endl;
-	throw runtime_error( "NER: unable to retrieve a NER tag from: "
-			     + it.first );
-      }
-      curNER = ner[1];
-    }
-    entity.push_back( make_pair(words[pos++], it.second) );
-  }
-  if ( !entity.empty() ){
-    if ( debug > 1 ){
-      LOG << "END spit out " << curNER << endl;
-      LOG << "entity= " << entity << endl;
-    }
-    addEntity( sent, entity, curNER );
-  }
-}
-
 void NERTagger::addDeclaration( folia::Document& doc ) const {
   doc.declare( folia::AnnotationType::ENTITY,
 	       tagset,
-	       "annotator='frog-ner-" + version
+	       "annotator='frog-ner-" + _version
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
-void NERTagger::Classify( const vector<folia::Word *>& swords ){
-  if ( !swords.empty() ) {
-    vector<string> words;
-    vector<string> pos_tags;
-    extract_words_tags( swords, POS_tagset, words, pos_tags );
-    vector<tc_pair> ner_tags;
-    if ( gazets_only ){
-      vector<string> gazet_tags = create_ner_list( words, gazet_ners );
-      string last = "O";
-      cerr << "bekijk gazet tags: " << gazet_tags << endl;
-      for ( const auto& it : gazet_tags ){
-	vector<string> parts = TiCC::split_at( it, "+" );
-	string tag = parts[0];
-	cerr << "AHA: last = " << last << " Nieuw=" << tag << endl;
-	if ( tag == "O" ){
+void NERTagger::Classify( frog_data& swords ){
+  if ( debug ){
+    DBG << "classify from DATA" << endl;
+  }
+  vector<string> words;
+  vector<string> pos_tags;
+#pragma omp critical (dataupdate)
+  {
+    for ( const auto& w : swords.units ){
+      string word_s = w.word;
+      // the word may contain spaces, remove them all!
+      word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
+      words.push_back( word_s );
+      pos_tags.push_back( w.tag );
+    }
+  }
+  vector<tc_pair> ner_tags;
+  if ( gazets_only ){
+    vector<string> gazet_tags = create_ner_list( words, gazet_ners );
+    string last = "O";
+    cerr << "bekijk gazet tags: " << gazet_tags << endl;
+    for ( const auto& it : gazet_tags ){
+      vector<string> parts = TiCC::split_at( it, "+" );
+      string tag = parts[0];
+      cerr << "AHA: last = " << last << " Nieuw=" << tag << endl;
+      if ( tag == "O" ){
+	last = tag;
+      }
+      else {
+	if ( tag == last ){
+	  tag = "I-" + tag;
+	}
+	else {
 	  last = tag;
+	  tag = "B-" + tag;
 	}
-	else {
-	  if ( tag == last ){
-	    tag = "I-" + tag;
-	  }
-	  else {
-	    last = tag;
-	    tag = "B-" + tag;
-	  }
-	}
-	cerr << "add a tag: " << tag << endl;
-	ner_tags.push_back( make_pair( tag, 1.0 ) );
+      }
+      cerr << "add a tag: " << tag << endl;
+      ner_tags.push_back( make_pair( tag, 1.0 ) );
+    }
+  }
+  else {
+    vector<string> gazet_tags = create_ner_list( words, gazet_ners );
+    vector<string> override_v = create_ner_list( words, override_ners );
+    vector<tc_pair> override_tags;
+    for ( const auto& it : override_v ){
+      override_tags.push_back( make_pair( it, 1.0 ) );
+    }
+    string text_block;
+    string prev = "_";
+    string prevN = "_";
+    for ( size_t i=0; i < swords.size(); ++i ){
+      string word = words[i];
+      string pos = pos_tags[i];
+      text_block += word + "\t" + prev + "\t" + pos + "\t";
+      prev = pos;
+      if ( i < swords.size() - 1 ){
+	text_block += pos_tags[i+1];
+      }
+      else {
+	text_block += "_";
+      }
+      string ktag = gazet_tags[i];
+      text_block += "\t" + prevN + "\t" + ktag + "\t";
+      prevN = ktag;
+      if ( i < swords.size() - 1 ){
+	text_block += gazet_tags[i+1];
+      }
+      else {
+	text_block += "_";
+      }
+      text_block += "\t??\n";
+    }
+    if ( debug > 1 ){
+      DBG << "TAGGING TEXT_BLOCK\n" << text_block << endl;
+    }
+    _tag_result = tagger->TagLine( text_block );
+    if ( debug > 1 ){
+      DBG << "NER tagger out: " << endl;
+      for ( size_t i=0; i < _tag_result.size(); ++i ){
+	DBG << "[" << i << "] : word=" << _tag_result[i].word()
+	    << " tag=" << _tag_result[i].assignedTag()
+	    << " confidence=" << _tag_result[i].confidence() << endl;
       }
     }
-    else {
-      vector<string> gazet_tags = create_ner_list( words, gazet_ners );
-      vector<string> override_v = create_ner_list( words, override_ners );
-      vector<tc_pair> override_tags;
-      for ( const auto& it : override_v ){
-	override_tags.push_back( make_pair( it, 1.0 ) );
+    //
+    // we have to correct for tags that start with 'I-'
+    // (the MBT tagger may deliver those)
+    string last;
+    for ( const auto& tag : _tag_result ){
+      string assigned = tag.assignedTag();
+      if ( assigned == "O" ){
+	last = "";
       }
-      string text_block;
-      string prev_pos = "_";
-      string prev_ner = "_";
-      for ( size_t i=0; i < swords.size(); ++i ){
-	text_block += words[i] + "\t" + prev_pos + "\t" + pos_tags[i] + "\t";
-	prev_pos = pos_tags[i];
-	if ( i < swords.size() - 1 ){
-	  text_block += pos_tags[i+1];
+      else {
+	vector<string> parts = TiCC::split_at( assigned, "-" );
+	vector<string> vals = TiCC::split_at( parts[1], "+" );
+	string val = vals[0];
+	if ( val == last ){
+	  assigned = "I-" + val;
 	}
 	else {
-	  text_block += "_";
+	  if ( debug > 1 ){
+	    DBG << "replace " << assigned << " by " << "B-" << val << endl;
+	  }
+	  last = val;
+	  assigned = "B-" + val;
 	}
-	text_block += "\t" + prev_ner + "\t" + gazet_tags[i] + "\t";
-	prev_ner = gazet_tags[i];
-	if ( i < swords.size() - 1 ){
-	  text_block += gazet_tags[i+1];
-	}
-	else {
-	  text_block += "_";
-	}
+      }
+      ner_tags.push_back( make_pair( assigned, tag.confidence() ) );
+    }
+    if ( !override_tags.empty() ){
+      vector<string> empty;
+      merge_override( ner_tags, override_tags, true, empty );
+    }
+  }
+  post_process( swords, ner_tags );
+}
 
-	text_block += "\t??\n";
-      }
-      if ( debug > 1 ){
-	LOG << "TAGGING TEXT_BLOCK\n" << text_block << endl;
-      }
-      _tag_result = tagger->TagLine( text_block );
-      if ( debug > 1 ){
-	LOG << "NER tagger out: " << endl;
-	for ( size_t i=0; i < _tag_result.size(); ++i ){
-	  LOG << "[" << i << "] : word=" << _tag_result[i].word()
-	      << " tag=" << _tag_result[i].assignedTag()
-	      << " confidence=" << _tag_result[i].confidence() << endl;
+void NERTagger::post_process( frog_data& sentence,
+			      const vector<tc_pair>& ners ){
+  /// @ners is a sequence of NE tags (maybe 'O') with their confidence
+  /// these are appended to the corresponding @sentence structure
+  if ( sentence.size() == 0 ) {
+    return;
+  }
+  vector<tc_pair> entity;
+  string curNER; // only used in debug messages
+  for ( size_t i=0; i < ners.size(); ++i ){
+    if (debug > 1){
+      DBG << "NER = " << ners[i].first << endl;
+    }
+    vector<string> ner;
+    if ( ners[i].first == "O" ){
+      if ( !entity.empty() ){
+	// end the previous entity
+	if (debug > 1) {
+	  DBG << "O spit out " << curNER << endl;
+	  DBG << "ners  " << entity << endl;
 	}
+	addEntity( sentence, i, entity );
+	entity.clear();
       }
-      string last;
-      for ( const auto& tag : _tag_result ){
-	// we might have to correct for tags that start with 'I-'
-	// (the MBT tagger may deliver those)
-	string assigned = tag.assignedTag();
-	if ( assigned == "O" ){
-	  last = "";
+      continue;
+    }
+    else if ( ners[i].first[0] == 'B' ){
+      if ( !entity.empty() ){
+	if ( debug > 1 ){
+	  DBG << "B spit out " << curNER << endl;
+	  DBG << "spit out " << entity << endl;
+	  curNER = ners[i].first.substr(2);
 	}
-	else {
-	  vector<string> parts = TiCC::split_at( assigned, "-" );
-	  vector<string> vals = TiCC::split_at( parts[1], "+" );
-	  string val = vals[0];
-	  if ( val == last ){
-	    assigned = "I-" + val;
-	  }
-	  else {
-	    if ( debug > 1 ){
-	      LOG << "replace " << assigned << " by " << "B-" << val << endl;
-	    }
-	    last = val;
-	    assigned = "B-" + val;
-	  }
-	}
-	ner_tags.push_back( make_pair(assigned, tag.confidence() ) );
-      }
-      if ( !override_tags.empty() ){
-	vector<string> empty;
-	merge_override( ner_tags, override_tags, true, empty );
+	addEntity( sentence, i, entity );
+	entity.clear();
       }
     }
-    post_process( swords, ner_tags );
+    entity.push_back( make_pair( ners[i].first, ners[i].second ) );
+  }
+  if ( !entity.empty() ){
+    if ( debug > 1 ){
+      DBG << "END spit out " << curNER << endl;
+      DBG << "spit out " << entity << endl;
+    }
+    addEntity( sentence, sentence.size(), entity );
   }
 }
 
-void NERTagger::post_process( const vector<folia::Word*>& ){
+void NERTagger::addEntity( frog_data& sent,
+			   const size_t pos,
+			   const vector<tc_pair>& entity ){
+  double c = 0;
+  for ( auto const& val : entity ){
+    c += val.second;
+  }
+  c /= entity.size();
+  for ( size_t i = 0; i < entity.size(); ++i ){
+#pragma omp critical (foliaupdate)
+    {
+      sent.units[pos-entity.size()+i].ner_tag = entity[i].first;
+      sent.units[pos-entity.size()+i].ner_confidence = c;
+    }
+  }
+}
+
+
+void NERTagger::post_process( frog_data& ){
   throw logic_error( "NER tagger call undefined postprocess() member" );
 }
 
@@ -512,7 +472,7 @@ void NERTagger::merge_override( vector<tc_pair>& tags,
 	      || POS_tags[i].find("SPEC(") != string::npos
 	      || POS_tags[i].find("N(") != string::npos ) ){
       // if ( i == 0 ){
-      //  	 cerr << "override = " << overrides << endl;
+      //  	 cerr << "override = " << override << endl;
       //  	 cerr << "ner tags = " << tags << endl;
       //  	 cerr << "POS tags = " << POS_tags << endl;
       // }
@@ -522,7 +482,7 @@ void NERTagger::merge_override( vector<tc_pair>& tags,
 	continue;
       }
       bool inside = (label == overrides[i].first );
-      //      cerr << "step i=" << i << " override=" << overrides[i].first << endl;
+      //      cerr << "step i=" << i << " override=" << overrides[i] << endl;
       string replace = to_tag(overrides[i].first, inside );
       //      cerr << "replace=" << replace << endl;
       if ( replace != "O" ){
@@ -569,6 +529,82 @@ void NERTagger::merge_override( vector<tc_pair>& tags,
   }
 }
 
+
 bool NERTagger::Generate( const std::string& opt_line ){
   return tagger->GenerateTagger( opt_line );
+}
+
+void NERTagger::add_result( const frog_data& fd,
+			    const vector<folia::Word*>& wv ) const {
+  folia::Sentence *s = wv[0]->sentence();
+  folia::EntitiesLayer *el = 0;
+  folia::Entity *ner = 0;
+  size_t i = 0;
+  for ( const auto& word : fd.units ){
+    if ( word.ner_tag[0] == 'B' ){
+      if ( el == 0 ){
+	// create a layer, we need it
+	folia::KWargs args;
+	args["set"] = getTagset();
+	if ( !s->id().empty() ){
+	  args["generate_id"] = s->id();
+	}
+#pragma omp critical (foliaupdate )
+	{
+	  el = new folia::EntitiesLayer( args, s->doc() );
+	  s->append(el);
+	}
+      }
+      // a new entity starts here
+      if ( ner != 0 ){
+#pragma omp critical (foliaupdate )
+	{
+	  el->append( ner );
+	}
+      }
+      // now make new entity
+      folia::KWargs args;
+      args["set"] = getTagset();
+      args["generate_id"] = el->id();
+      args["class"] = word.ner_tag.substr(2);
+      args["confidence"] = TiCC::toString(word.ner_confidence);
+      if ( textclass != "current" ){
+	args["textclass"] = textclass;
+      }
+#pragma omp critical (foliaupdate )
+      {
+	ner = new folia::Entity( args, s->doc() );
+	ner->append( wv[i] );
+      }
+    }
+    else if ( word.ner_tag[0] == 'I' ){
+      // continue in an entity
+      if ( ner ){
+#pragma omp critical (foliaupdate )
+	{
+	  ner->append( wv[i] );
+	}
+      }
+      else {
+	throw logic_error( "unexpected empty ner" );
+      }
+    }
+    else if ( word.ner_tag[0] == '0' ){
+      if ( ner != 0 ){
+#pragma omp critical (foliaupdate )
+	{
+	  el->append( ner );
+	}
+	ner = 0;
+      }
+    }
+    ++i;
+  }
+  if ( ner != 0 ){
+    // some leftovers
+#pragma omp critical (foliaupdate )
+    {
+      el->append( ner );
+    }
+  }
 }

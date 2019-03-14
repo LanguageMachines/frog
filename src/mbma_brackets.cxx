@@ -45,7 +45,6 @@
 #include "frog/mbma_mod.h"
 
 using namespace std;
-using namespace icu;
 using TiCC::operator<<;
 
 #define LOG *TiCC::Log(myLog)
@@ -283,7 +282,7 @@ BracketLeaf::BracketLeaf( const RulePart& p, int flag, TiCC::LogStream& l ):
 }
 
 BracketLeaf::BracketLeaf( CLEX::Type t,
-			  const UnicodeString& us,
+			  const icu::UnicodeString& us,
 			  int flag,
 			  TiCC::LogStream& l ):
   BaseBracket( t, vector<CLEX::Type>(), flag, l ),
@@ -294,6 +293,10 @@ BracketLeaf::BracketLeaf( CLEX::Type t,
   _status = Status::STEM;
 }
 
+BracketLeaf *BracketLeaf::clone() const{
+  return new BracketLeaf( *this );
+}
+
 BracketNest::BracketNest( CLEX::Type t,
 			  Compound::Type c,
 			  int flag,
@@ -302,6 +305,14 @@ BracketNest::BracketNest( CLEX::Type t,
   _compound( c )
 {
   _status = Status::COMPLEX;
+}
+
+BracketNest *BracketNest::clone() const {
+  BracketNest *result = new BracketNest( *this );
+  for ( auto& it : result->parts ){
+    it = it->clone();
+  }
+  return result;
 }
 
 BaseBracket *BracketNest::append( BaseBracket *t ){
@@ -315,17 +326,24 @@ BracketNest::~BracketNest(){
   }
 }
 
-UnicodeString BaseBracket::put( bool full ) const {
-  UnicodeString result = "[err?]";
+icu::UnicodeString BaseBracket::put( bool full ) const {
+  icu::UnicodeString result = "[err?]";
   if ( full ){
-    UnicodeString s = TiCC::UnicodeFromUTF8(toString(cls));
+    icu::UnicodeString s = TiCC::UnicodeFromUTF8(toString(cls));
     result += s;
   }
   return result;
 }
 
-UnicodeString BracketLeaf::put( bool full ) const {
-  UnicodeString result;
+icu::UnicodeString BaseBracket::pretty_put() const {
+  icu::UnicodeString result = "[err?]";
+  icu::UnicodeString s = TiCC::UnicodeFromUTF8(CLEX::get_tDescr(cls));
+  result += s;
+  return result;
+}
+
+icu::UnicodeString BracketLeaf::put( bool full ) const {
+  icu::UnicodeString result;
   if ( !morph.isEmpty() ){
     result += "[";
     result += morph;
@@ -333,7 +351,7 @@ UnicodeString BracketLeaf::put( bool full ) const {
   }
   if ( full ){
     if ( orig.empty() ){
-      UnicodeString s = TiCC::UnicodeFromUTF8(toString(cls));
+      icu::UnicodeString s = TiCC::UnicodeFromUTF8(toString(cls));
       if ( s == "/" ){
 	result += s + TiCC::UnicodeFromUTF8(inflect);
       }
@@ -348,15 +366,46 @@ UnicodeString BracketLeaf::put( bool full ) const {
   return result;
 }
 
-UnicodeString BracketNest::put( bool full ) const {
-  UnicodeString result = "[ ";
+icu::UnicodeString BracketLeaf::pretty_put() const {
+  string result;
+  if ( !morph.isEmpty() ){
+    result += "[";
+    result += TiCC::UnicodeToUTF8(morph);
+    result += "]";
+  }
+  if ( glue ){
+    string::size_type pos = orig.find( "^" );
+    string tag;
+    tag += orig[pos+1];
+    result += CLEX::get_tDescr(CLEX::toCLEX(tag));
+  }
+  if ( status() != Status::PARTICIPLE
+       && status() != Status::PARTICLE
+       && status() != Status::DERIVATIONAL
+       &&  status() != Status::FAILED
+       && cls != CLEX::UNASS
+       && cls != CLEX::NEUTRAL ){
+    LOG << this << " " << this->status() << endl;
+    string s = CLEX::get_tDescr(cls);
+    if ( s != "/" ){
+      result += s;
+    }
+  }
+  for ( const auto& i : inflect ){
+    string id = CLEX::get_iDescr(i);
+    if ( !id.empty() ){
+      result += "/" + id;
+    }
+  }
+  return TiCC::UnicodeFromUTF8(result);
+}
+
+icu::UnicodeString BracketNest::put( bool full ) const {
+  icu::UnicodeString result = "[ ";
   for ( auto const& it : parts ){
-    UnicodeString m = it->put( full );
+    icu::UnicodeString m = it->put( full );
     if ( !m.isEmpty() ){
       result += m + " ";
-      // if (&it != &parts.back() ){
-      // 	result += " ";
-      // }
     }
   }
   result += "]";
@@ -366,6 +415,25 @@ UnicodeString BracketNest::put( bool full ) const {
     }
     if ( _compound != Compound::Type::NONE ){
       result += " " + TiCC::UnicodeFromUTF8(toString(_compound)) + "-compound";
+    }
+  }
+  return result;
+}
+
+icu::UnicodeString BracketNest::pretty_put( ) const {
+  icu::UnicodeString result;
+  int cnt = 0;
+  for ( auto const& it : parts ){
+    icu::UnicodeString m = it->pretty_put();
+    if ( m[0] == '[' ){
+      ++cnt;
+    }
+    result += m;
+  }
+  if ( cnt > 1 ){
+    result = "[" + result + "]";
+    if ( cls != CLEX::UNASS && cls != CLEX::NEUTRAL ){
+      result += TiCC::UnicodeFromUTF8(CLEX::get_tDescr(cls));
     }
   }
   return result;
@@ -475,7 +543,6 @@ Compound::Type construct( const CLEX::Type tag1, const CLEX::Type tag2 ){
   return construct( v );
 }
 
-bool TEST = 1;
 Compound::Type BracketNest::getCompoundType(){
   if ( debugFlag > 5 ){
     LOG << "get compoundType: " << this << endl;
@@ -728,6 +795,20 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     else {
       args["class"] = toString( tag() );
       desc = "[" + out + "]" + CLEX::get_tDescr( tag() ); // spread the word upwards!
+      folia::KWargs fargs;
+      fargs["subset"] = "structure";
+      if ( tag() == CLEX::SPEC
+	   || tag() == CLEX::LET ){
+	fargs["class"] = "[" + out + "]";
+      }
+      else {
+	fargs["class"] = desc;
+      }
+#pragma omp critical (foliaupdate)
+      {
+	folia::Feature *feat = new folia::Feature( fargs );
+	result->append( feat );
+      }
     }
 #pragma omp critical (foliaupdate)
     {
@@ -833,13 +914,6 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
       folia::Feature *feat = new folia::Feature( args );
       result->append( feat );
     }
-    args.clear();
-//     args["set"] = Mbma::clex_tagset;
-//     args["class"] = orig;
-// #pragma omp critical (foliaupdate)
-//     {
-//       result->addPosAnnotation( args );
-//     }
   }
   else if ( _status == Status::INFO ){
     folia::KWargs args;
@@ -921,6 +995,9 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
   cnt = 1;
   args.clear();
   args["subset"] = "structure";
+  if ( desc.empty() ){
+    desc = "XYZ";
+  }
   args["class"]  = desc;
 #pragma omp critical (foliaupdate)
   {
@@ -1272,57 +1349,6 @@ CLEX::Type BracketNest::getFinalTag() {
 	break;
       }
     }
-#ifdef NO_WAY
-    else if ( !(*it)->inflection().empty()
-	      && (*it)->morpheme().isEmpty() ){
-      string inf = (*it)->inflection();
-      // it is an inflection tag
-      LOG << " inflection: >" << inf << "<" << endl;
-      // given the specific selections of certain inflections,
-      //    select a tag!
-      CLEX::Type new_tag = CLEX::UNASS;
-      for ( size_t i=0; i < inf.size(); ++i ){
-	new_tag = CLEX::select_tag( inf[i] );
-	if ( new_tag != CLEX::UNASS ){
-	  LOG << inf[i] << " selects " << new_tag << endl;
-	  break;
-	}
-      }
-      if ( new_tag != CLEX::UNASS ) {
-	// apply the change. Remember, the idea is that an inflection is
-	// far more certain of the tag of its predecessing morpheme than
-	// the morpheme itself.
-	// This is not always the case, but it works
-	//
-	// go back to the previous morpheme
-	auto pit = it;
-	for( ++pit; pit != parts.rend(); ++pit ){
-	  CLEX::Type old_tag = (*pit)->tag();
-	  LOG << "een terug is " << *pit << endl;
-	  if ( CLEX::isBasicClass( old_tag ) &&
-	       old_tag != CLEX::P ){
-	    // only nodes that can get inflected (and unanalysed too)
-	    // now see if we can replace this class for a better one
-	    if ( old_tag == CLEX::PN && new_tag == CLEX::N ){
-	      LOG << "Don't replace PN by N" << endl;
-	    }
-	    else {
-	      LOG << " replace " << old_tag
-		  << " by " << new_tag << endl;
-	      (*pit)->setTag( new_tag );
-	      cls = new_tag;
-	    }
-	    return new_tag;
-	  }
-	}
-      }
-      else {
-	// this realy shouldn't happen. probably an error in the data!?
-	LOG << "inflection: " << inf
-	    << " Problem: DOESN'T select a tag" << endl;
-      }
-    }
-#endif
     ++it;
   }
   //  LOG << "final tag = " << result_cls << endl;

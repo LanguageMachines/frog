@@ -43,6 +43,7 @@
 #include "libfolia/folia.h"
 
 #include "frog/Frog-util.h"
+#include "frog/FrogData.h"
 
 class UctoTokenizer;
 class Mbma;
@@ -72,7 +73,8 @@ class FrogOptions {
   bool doXMLout;
   bool doServer;
   bool doKanon;
-
+  bool test_API;
+  bool hide_timers;
   int debugFlag;
   bool interactive;
   int numThreads;
@@ -97,37 +99,64 @@ class FrogAPI {
  public:
   FrogAPI( FrogOptions&,
 	   const TiCC::Configuration&,
+	   TiCC::LogStream *,
 	   TiCC::LogStream * );
   ~FrogAPI();
   static std::string defaultConfigDir( const std::string& ="" );
   static std::string defaultConfigFile( const std::string& ="" );
   void FrogFile( const std::string&, std::ostream&, const std::string& );
-  void FrogDoc( folia::Document&, bool=false );
   void FrogServer( Sockets::ServerSocket &conn );
   void FrogInteractive();
+  bool frog_sentence( frog_data&, const size_t );
+  void run_folia_processor( const std::string&,
+			    std::ostream&,
+			    const std::string& = "" );
+  void run_text_processor( const std::string&,
+			   std::ostream&,
+			   const std::string& = "" );
+  folia::FoliaElement* start_document( const std::string&,
+				  folia::Document *& ) const;
+  folia::FoliaElement *append_to_folia( folia::FoliaElement *,
+					const frog_data& ) const;
   std::string Frogtostring( const std::string& );
   std::string Frogtostringfromfile( const std::string& );
 
  private:
+  void add_ner_result( folia::Sentence *,
+		       const frog_data&,
+		       const std::vector<folia::Word*>& ) const;
+  void add_iob_result( folia::Sentence *,
+		       const frog_data&,
+		       const std::vector<folia::Word*>& ) const;
+  void add_mwu_result( folia::Sentence *,
+		       const frog_data&,
+		       const std::vector<folia::Word*>& ) const;
+  void add_parse_result( folia::Sentence *,
+			 const frog_data&,
+			 const std::vector<folia::Word*>& ) const;
   void test_version( const std::string&, double );
   // functions
-  bool TestSentence( folia::Sentence*, TimerBlock& );
   void FrogStdin( bool prompt );
-  std::vector<folia::Word*> lookup( folia::Word *,
-				    const std::vector<folia::Entity*>& ) const;
-  folia::Dependency *lookupDep( const folia::Word *,
-				const std::vector<folia::Dependency*>& ) const;
-  std::string lookupNEREntity( const std::vector<folia::Word *>&,
-			       const std::vector<folia::Entity*>& ) const;
-  std::string lookupIOBChunk( const std::vector<folia::Word *>&,
-			      const std::vector<folia::Chunk*>& ) const;
-  void displayMWU( std::ostream&, size_t, const std::vector<folia::Word*>& ) const;
-  std::ostream& showResults( std::ostream&, folia::Document& ) const;
+  void output_tabbed( std::ostream&, const frog_record& ) const;
+  void show_results( std::ostream&, const frog_data& ) const;
+  void handle_one_paragraph( std::ostream&,
+			     folia::Paragraph*,
+			     int& );
+  void handle_one_text_parent( std::ostream&,
+			       folia::FoliaElement *e,
+			       int&  );
+  void handle_one_sentence( std::ostream&,
+			    folia::Sentence *,
+			    const size_t );
+  void append_to_sentence( folia::Sentence *, const frog_data& ) const;
+  void append_to_words( const std::vector<folia::Word*>&,
+			const frog_data& ) const;
 
   // data
   const TiCC::Configuration& configuration;
   FrogOptions& options;
   TiCC::LogStream *theErrLog;
+  TiCC::LogStream *theDbgLog;
   TimerBlock timers;
   // pointers to all the modules
   Mbma *myMbma;
@@ -140,10 +169,14 @@ class FrogAPI {
   UctoTokenizer *tokenizer;
 };
 
+// the functions below here are ONLY used by TSCAN.
+// the should be moved there probably
+// =======================================================================
+
 std::vector<std::string> get_full_morph_analysis( folia::Word *, bool = false );
-std::vector<std::string> get_full_morph_analysis( folia::Word *,
-						  const std::string&,
-						  bool = false );
 std::vector<std::string> get_compound_analysis( folia::Word * );
+//std::vector<std::string> get_full_morph_analysis( folia::Word *,
+//						  const std::string&,
+//						  bool = false );
 
 #endif

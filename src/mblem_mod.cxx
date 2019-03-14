@@ -40,11 +40,11 @@
 #include "frog/Frog-util.h"
 
 using namespace std;
-using namespace icu;
 
-#define LOG *TiCC::Log(mblemLog)
+#define LOG *TiCC::Log(errLog)
+#define DBG *TiCC::Log(dbgLog)
 
-Mblem::Mblem( TiCC::LogStream *logstream ):
+Mblem::Mblem( TiCC::LogStream *errlog, TiCC::LogStream *dbglog ):
   myLex(0),
   punctuation( "?...,:;\\'`(){}[]%#+-_=/!" ),
   history(20),
@@ -52,7 +52,13 @@ Mblem::Mblem( TiCC::LogStream *logstream ):
   keep_case( false ),
   filter(0)
 {
-  mblemLog = new TiCC::LogStream( logstream, "mblem" );
+  errLog = new TiCC::LogStream( errlog, "mblem-" );
+  if ( dbglog ){
+    dbgLog = new TiCC::LogStream( dbglog, "mblem" );
+  }
+  else {
+    dbgLog = errLog;
+  }
 }
 
 bool Mblem::fill_ts_map( const string& file ){
@@ -73,7 +79,7 @@ bool Mblem::fill_ts_map( const string& file ){
     token_strip_map[parts[0]].insert( make_pair( parts[1], TiCC::stringTo<int>( parts[2] ) ) );
   }
   if ( debug > 1 ){
-    LOG << "read token strip rules from: '" << file << "'" << endl;
+    DBG << "read token strip rules from: '" << file << "'" << endl;
   }
   return true;
 }
@@ -90,10 +96,10 @@ bool Mblem::init( const TiCC::Configuration& config ) {
   }
   val = config.lookUp( "version", "mblem" );
   if ( val.empty() ){
-    version = "1.0";
+    _version = "1.0";
   }
   else
-    version = val;
+    _version = val;
   val = config.lookUp( "set", "mblem" );
   if ( val.empty() ){
     tagset = "http://ilk.uvt.nl/folia/sets/frog-mblem-nl";
@@ -171,14 +177,17 @@ Mblem::~Mblem(){
   delete filter;
   delete myLex;
   myLex = 0;
-  delete mblemLog;
+  if ( errLog != dbgLog ){
+    delete dbgLog;
+  }
+  delete errLog;
 }
 
-string Mblem::make_instance( const UnicodeString& in ) {
+string Mblem::make_instance( const icu::UnicodeString& in ) {
   if (debug > 2 ) {
-    LOG << "making instance from: " << in << endl;
+    DBG << "making instance from: " << in << endl;
   }
-  UnicodeString instance = "";
+  icu::UnicodeString instance = "";
   size_t length = in.length();
   for ( size_t i=0; i < history; i++) {
     size_t j = length - history + i;
@@ -193,29 +202,9 @@ string Mblem::make_instance( const UnicodeString& in ) {
   instance += "?";
   string result = TiCC::UnicodeToUTF8(instance);
   if ( debug > 2 ){
-    LOG << "inst: " << instance << endl;
+    DBG << "inst: " << instance << endl;
   }
   return result;
-}
-
-void Mblem::addLemma( folia::Word *word, const string& cls ){
-  folia::KWargs args;
-  args["set"]=tagset;
-  args["class"]=cls;
-  if ( textclass != "current" ){
-    args["textclass"] = textclass;
-  }
-
-#pragma omp critical (foliaupdate)
-  {
-    try {
-      word->addLemmaAnnotation( args );
-    }
-    catch( const exception& e ){
-      LOG << e.what() << " addLemma failed." << endl;
-      throw;
-    }
-  }
 }
 
 void Mblem::filterTag( const string& postag ){
@@ -224,21 +213,21 @@ void Mblem::filterTag( const string& postag ){
     string tag = it->getTag();
     if ( postag == tag ){
       if ( debug > 1 ){
-	LOG << "compare cgn-tag " << postag << " with mblem-tag " << tag
-		       << "\n\t==> identical tags"  << endl;
+	DBG << "compare cgn-tag " << postag << " with mblem-tag " << tag
+	    << "\n\t==> identical tags"  << endl;
       }
       ++it;
     }
     else {
       if ( debug > 1 ){
-	LOG << "compare cgn-tag " << postag << " with mblem-tag " << tag
+	DBG << "compare cgn-tag " << postag << " with mblem-tag " << tag
 		       << "\n\t==> different tags" << endl;
       }
       it = mblemResult.erase(it);
     }
   }
   if ( (debug > 1) && mblemResult.empty() ){
-    LOG << "NO CORRESPONDING TAG! " << postag << endl;
+    DBG << "NO CORRESPONDING TAG! " << postag << endl;
   }
 }
 
@@ -249,17 +238,17 @@ void Mblem::makeUnique( ){
     auto it2 = it+1;
     while( it2 != mblemResult.end() ){
       if (debug > 1){
-	LOG << "compare lemma " << lemma << " with " << it2->getLemma() << " ";
+	DBG << "compare lemma " << lemma << " with " << it2->getLemma() << " ";
       }
       if ( lemma == it2->getLemma() ){
 	if ( debug > 1){
-	  LOG << "equal " << endl;
+	  DBG << "equal " << endl;
 	}
 	it2 = mblemResult.erase(it2);
       }
       else {
 	if ( debug > 1){
-	  LOG << "NOT equal! " << endl;
+	  DBG << "NOT equal! " << endl;
 	}
 	++it2;
       }
@@ -267,64 +256,42 @@ void Mblem::makeUnique( ){
     ++it;
   }
   if (debug > 1){
-    LOG << "final result after filter and unique" << endl;
+    DBG << "final result after filter and unique" << endl;
     for ( const auto& mbr : mblemResult ){
-      LOG << "lemma alt: " << mbr.getLemma()
+      DBG << "lemma alt: " << mbr.getLemma()
 	  << "\ttag alt: " << mbr.getTag() << endl;
     }
   }
 }
 
-void Mblem::getFoLiAResult( folia::Word *word, const UnicodeString& uWord ){
-  if ( mblemResult.empty() ){
-    // just return the word as a lemma
-    string result = TiCC::UnicodeToUTF8( uWord );
-    addLemma( word, result );
-  }
-  else {
-    for ( auto const& it : mblemResult ){
-      string result = it.getLemma();
-      addLemma( word, result );
-    }
-  }
-}
-
-
 void Mblem::addDeclaration( folia::Document& doc ) const {
   doc.declare( folia::AnnotationType::LEMMA,
 	       tagset,
-	       "annotator='frog-mblem-" + version
+	       "annotator='frog-mblem-" + _version
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
-void Mblem::Classify( folia::Word *sword ){
-  if ( sword->isinstance( folia::PlaceHolder_t ) )
-    return;
-  UnicodeString uword;
+void Mblem::Classify( frog_record& fd ){
+  icu::UnicodeString uword;
   string pos;
   string token_class;
-#pragma omp critical (foliaupdate)
-  {
-    uword = sword->text( textclass );
-    pos = sword->pos();
-    string txtcls = sword->textclass();
-    if ( txtcls == textclass ){
-      // so only use the word class is the textclass of the word
-      // matches the wanted text
-      token_class = sword->cls();
-    }
-  }
+  uword = TiCC::UnicodeFromUTF8(fd.word);
+  pos = fd.tag;
+  token_class = fd.token_class;
   if (debug > 1 ){
-    LOG << "Classify " << uword << "(" << pos << ") ["
+    DBG << "Classify " << uword << "(" << pos << ") ["
 	<< token_class << "]" << endl;
   }
-  if ( filter )
+  if ( filter ){
     uword = filter->filter( uword );
-
+  }
   if ( token_class == "ABBREVIATION" ){
     // We dont handle ABBREVIATION's so just take the word as such
     string word = TiCC::UnicodeToUTF8(uword);
-    addLemma( sword, word );
+#pragma omp critical (dataupdate)
+    {
+      fd.lemmas.push_back( word );
+    }
     return;
   }
   auto const& it1 = token_strip_map.find( pos );
@@ -333,19 +300,25 @@ void Mblem::Classify( folia::Word *sword ){
     // we have to strip a few letters to get a lemma
     auto const& it2 = it1->second.find( token_class );
     if ( it2 != it1->second.end() ){
-      UnicodeString uword2 = UnicodeString( uword, 0, uword.length() - it2->second );
+      icu::UnicodeString uword2 = icu::UnicodeString( uword, 0, uword.length() - it2->second );
       if ( uword2.isEmpty() ){
 	uword2 = uword;
       }
       string word = TiCC::UnicodeToUTF8(uword2);
-      addLemma( sword, word );
+#pragma omp critical (dataupdate)
+      {
+	fd.lemmas.push_back( word );
+      }
       return;
     }
   }
   if ( one_one_tags.find(pos) != one_one_tags.end() ){
     // some tags are just taken as such
     string word = TiCC::UnicodeToUTF8(uword);
-    addLemma( sword, word );
+#pragma omp critical (dataupdate)
+    {
+      fd.lemmas.push_back( word );
+    }
     return;
   }
   if ( !keep_case ){
@@ -354,16 +327,32 @@ void Mblem::Classify( folia::Word *sword ){
   Classify( uword );
   filterTag( pos );
   makeUnique();
-  getFoLiAResult( sword, uword );
+  if ( mblemResult.empty() ){
+    // just return the word as a lemma
+    string word = TiCC::UnicodeToUTF8(uword);
+#pragma omp critical (dataupdate)
+    {
+      fd.lemmas.push_back( word );
+    }
+  }
+  else {
+#pragma omp critical (dataupdate)
+    {
+      for ( auto const& it : mblemResult ){
+	string result = it.getLemma();
+	fd.lemmas.push_back( result );
+      }
+    }
+  }
 }
 
-void Mblem::Classify( const UnicodeString& uWord ){
+void Mblem::Classify( const icu::UnicodeString& uWord ){
   mblemResult.clear();
   string inst = make_instance(uWord);
   string classString;
   myLex->Classify( inst, classString );
   if ( debug > 1){
-    LOG << "class: " << classString  << endl;
+    DBG << "class: " << classString  << endl;
   }
   // 1st find all alternatives
   vector<string> parts;
@@ -374,7 +363,7 @@ void Mblem::Classify( const UnicodeString& uWord ){
   int index = 0;
   while ( index < numParts ) {
     string partS = parts[index++];
-    UnicodeString lemma;
+    icu::UnicodeString lemma;
     string restag;
     string::size_type pos = partS.find("+");
     if ( pos == string::npos ){
@@ -390,9 +379,9 @@ void Mblem::Classify( const UnicodeString& uWord ){
       }
       restag = edits[0]; // the first one is the POS tag
 
-      UnicodeString insstr;
-      UnicodeString delstr;
-      UnicodeString prefix;
+      icu::UnicodeString insstr;
+      icu::UnicodeString delstr;
+      icu::UnicodeString prefix;
       for ( const auto& edit : edits ){
 	if ( edit == edits.front() ){
 	  continue;
@@ -413,8 +402,8 @@ void Mblem::Classify( const UnicodeString& uWord ){
 	}
       }
       if (debug > 1){
-	LOG << "pre-prefix word: '" << uWord << "' prefix: '"
-		       << prefix << "'" << endl;
+	DBG << "pre-prefix word: '" << uWord << "' prefix: '"
+	    << prefix << "'" << endl;
       }
       int prefixpos = 0;
       if ( !prefix.isEmpty() ) {
@@ -423,7 +412,7 @@ void Mblem::Classify( const UnicodeString& uWord ){
 	// become prefixpos = uWord.lastIndexOf(prefix);
 	prefixpos = uWord.indexOf(prefix);
 	if (debug > 1){
-	  LOG << "prefixpos = " << prefixpos << endl;
+	  DBG << "prefixpos = " << prefixpos << endl;
 	}
 	// repair cases where there's actually not a prefix present
 	if (prefixpos > uWord.length()-2) {
@@ -433,14 +422,14 @@ void Mblem::Classify( const UnicodeString& uWord ){
       }
 
       if (debug > 1){
-	LOG << "prefixpos = " << prefixpos << endl;
+	DBG << "prefixpos = " << prefixpos << endl;
       }
       if (prefixpos >= 0) {
-	lemma = UnicodeString( uWord, 0L, prefixpos );
+	lemma = icu::UnicodeString( uWord, 0L, prefixpos );
 	prefixpos = prefixpos + prefix.length();
       }
       if (debug > 1){
-	LOG << "post word: "<< uWord
+	DBG << "post word: "<< uWord
 	    << " lemma: " << lemma
 	    << " prefix: " << prefix
 	    << " delstr: " << delstr
@@ -455,13 +444,13 @@ void Mblem::Classify( const UnicodeString& uWord ){
 	    lemma += uWord;
 	  }
 	  else {
-	    UnicodeString part = UnicodeString( uWord, prefixpos, uWord.length() - delstr.length() - prefixpos );
+	    icu::UnicodeString part = icu::UnicodeString( uWord, prefixpos, uWord.length() - delstr.length() - prefixpos );
 	    lemma += part + insstr;
 	  }
 	}
 	else if ( insstr.isEmpty() ){
 	  // no replacement, just take part after the prefix
-	  lemma += UnicodeString( uWord, prefixpos, uWord.length() ); // uWord;
+	  lemma += icu::UnicodeString( uWord, prefixpos, uWord.length() ); // uWord;
 	}
 	else {
 	  // but replace if possible
@@ -476,12 +465,12 @@ void Mblem::Classify( const UnicodeString& uWord ){
       // translate TAG(number) stuf back to CGN things
       auto const& it = classMap.find(restag);
       if ( debug > 1 ){
-	LOG << "looking up " << restag << endl;
+	DBG << "looking up " << restag << endl;
       }
       if ( it != classMap.end() ){
 	restag = it->second;
 	if ( debug > 1 ){
-	  LOG << "found " << restag << endl;
+	  DBG << "found " << restag << endl;
 	}
       }
       else {
@@ -490,15 +479,15 @@ void Mblem::Classify( const UnicodeString& uWord ){
       }
     }
     if ( debug > 1 ){
-      LOG << "appending lemma " << lemma << " and tag " << restag << endl;
+      DBG << "appending lemma " << lemma << " and tag " << restag << endl;
     }
     mblemResult.push_back( mblemData( TiCC::UnicodeToUTF8(lemma), restag ) );
   } // while
   if ( debug > 1) {
-    LOG << "stored lemma and tag options: " << mblemResult.size()
+    DBG << "stored lemma and tag options: " << mblemResult.size()
 	<< " lemma's and " << mblemResult.size() << " tags:" << endl;
     for ( const auto& mbr : mblemResult ){
-      LOG << "lemma alt: " << mbr.getLemma()
+      DBG << "lemma alt: " << mbr.getLemma()
 	  << "\ttag alt: " << mbr.getTag() << endl;
     }
   }
@@ -511,4 +500,22 @@ vector<pair<string,string> > Mblem::getResult() const {
 				 mbr.getTag() ) );
   }
   return result;
+}
+
+void Mblem::add_lemmas( const vector<folia::Word*>& wv,
+			const frog_data& fd ) const {
+  for ( size_t i=0; i < wv.size(); ++i ){
+    folia::KWargs args;
+    args["set"] = getTagset();
+    for ( const auto& lemma : fd.units[i].lemmas ){
+      args["class"] = lemma;
+      if ( textclass != "current" ){
+	args["textclass"] = textclass;
+      }
+#pragma omp critical (foliaupdate)
+      {
+	wv[i]->addLemmaAnnotation( args );
+      }
+    }
+  }
 }
