@@ -561,7 +561,7 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
   folia::KWargs args;
   args["xml:id"] = doc->id() + ".text";
   folia::Text *text = new folia::Text( args );
-  doc->setRoot( text );
+  doc->addText( text );
   return text;
 }
 
