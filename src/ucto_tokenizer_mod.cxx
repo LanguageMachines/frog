@@ -392,6 +392,7 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
   vector<folia::Word*> wv;
   if (  debug > 5 ){
     DBG << "add_words\n" << fd << endl;
+    DBG << "sentence has tekst: " << s->str(textclass) << endl;
   }
   for ( const auto& word : fd.units ){
     if (  debug > 5 ){
@@ -418,7 +419,13 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
       if (  debug > 5 ){
 	DBG << "create Word(" << args << ") = " << word.word << endl;
       }
-      w = new folia::Word( args, s->doc() );
+      try {
+	w = new folia::Word( args, s->doc() );
+      }
+      catch ( const exception& e ){
+	cerr << "Word(" << args << ") creation failed: " << e.what() << endl;
+	exit(EXIT_FAILURE);
+      }
       w->settext( word.word, textclass );
       if (  debug > 5 ){
 	DBG << "add_result, create a word, done:" << w << endl;
@@ -427,6 +434,11 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
     }
     wv.push_back( w );
   }
+  if (  debug > 5 ){
+    DBG << "add_result, finished sentence:" << s << endl;
+    DBG << "Sentence tekst: " << s->str(textclass) << endl;
+  }
+
   if ( textredundancy == "full" ){
     s->settext( s->str(textclass), textclass );
   }

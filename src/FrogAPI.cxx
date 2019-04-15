@@ -514,21 +514,65 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
   doc->addStyle( "text/xsl", "folia.xsl" );
   DBG << "start document!!!" << endl;
   if ( !options.doTok ){
-    doc->declare( folia::AnnotationType::TOKEN, "passthru", "annotator='ucto', annotatortype='auto', datetime='now()'" );
+    folia::KWargs args;
+    args["name"] = "ucto";
+    args["id"] = "uct.1";
+    args["version"] = PACKAGE_VERSION;
+    //    args["command"] = _command;
+    folia::processor *proc = doc->add_processor( args );
+    proc->get_system_defaults();
+    args.clear();
+    args["processor"] = "ucto.1";
+    doc->declare( folia::AnnotationType::TOKEN, "passthru", args );
   }
   else {
     string languages = configuration.lookUp( "languages", "tokenizer" );
     DBG << "languages: " << languages << endl;
+    string main_id = "ucto.1";
     if ( !languages.empty() ){
       vector<string> language_list;
       language_list = TiCC::split_at( languages, "," );
       options.language = language_list[0];
+      folia::KWargs args;
+      args["name"] = "ucto";
+      args["id"] = main_id;
+      args["version"] = PACKAGE_VERSION;
+      //      args["command"] = _command;
+      folia::processor *proc = doc->add_processor( args );
+      proc->get_system_defaults();
+      args.clear();
+      args["name"] = "uctodata";
+      string id = "ucto.1.1";
+      args["id"] = id;
+      args["type"] = "datasource";
+      //      args["version"] = data_version;
+      args["generator"] = "NO";
+      proc  = doc->add_processor( args, proc );
+      args.clear();
+      int i=0;
       for ( const auto& l : language_list ){
+ 	if ( options.debugFlag > 3 ){
+	  LOG << "language: " << l << endl;
+	}
+	string sub_id = id + "." + TiCC::toString( ++i );
+	string config = "tokconfig-" + l;
+	folia::KWargs args;
+	args["name"] = config;
+	args["id"] = sub_id;
+	args["type"] = "datasource";
+	//	args["version"] = s.second->version;
+	args["generator"] = "NO";
+	doc->add_processor( args, proc );
+	args.clear();
+	args["processor"] = main_id;
+	args["alias"] = config;
 	doc->declare( folia::AnnotationType::TOKEN,
-		      "tokconfig-" + l,
-		      "annotator='ucto', annotatortype='auto', datetime='now()'");
-	DBG << "added token-annotation for: 'tokconfig-" << l << "'" << endl;
-
+		      "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/" + config + ".foliaset.ttl",
+		      args );
+	if ( options.debugFlag > 3 ){
+	  LOG << "added processor and token-annotation for: '"
+	      << config << "'" << endl;
+	}
       }
     }
     else {
@@ -536,8 +580,11 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
 		    configuration.lookUp( "rulesFile", "tokenizer" ),
 		    "annotator='ucto', annotatortype='auto', datetime='now()'");
     }
+    folia::KWargs args;
+    args["processor"] = main_id;
     doc->declare( folia::AnnotationType::LANG,
-		  ISO_SET, "annotator='ucto'" );
+		  ISO_SET,
+		  args );
   }
   myCGNTagger->addDeclaration( *doc );
   if ( options.doLemma ){
@@ -632,11 +679,11 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
     }
     folia::LangAnnotation *la = new folia::LangAnnotation( args, root->doc() );
     s->append( la );
-    string text = fd.sentence(); // get tokenized, space separated, sentence.
-    text = TiCC::trim( text );
-    if ( !text.empty() ){
-      s->settext( text );
-    }
+    // string text = fd.sentence(); // get tokenized, space separated, sentence.
+    // text = TiCC::trim( text );
+    // if ( !text.empty() ){
+    //   s->settext( text );
+    // }
   }
   else {
     myCGNTagger->add_tags( wv, fd );
@@ -1595,46 +1642,91 @@ void FrogAPI::run_folia_processor( const string& infilename,
   if ( xmlOutFile.empty() ){
     options.noStdOut = false;
   }
-  folia::TextProcessor proc( infilename );
+  folia::TextEngine engine( infilename );
   if ( !options.doTok ){
-    proc.declare( folia::AnnotationType::TOKEN, "passthru",
-		  "annotator='ucto', annotatortype='auto', datetime='now()'" );
+    folia::KWargs args;
+    args["name"] = "ucto";
+    args["id"] = "ucto.1";
+    args["version"] = PACKAGE_VERSION;
+    //    args["command"] = _command;
+    folia::processor *fp = engine.doc()->add_processor( args );
+    fp->get_system_defaults();
+    args.clear();
+    args["processor"] = "ucto.1";
+    engine.declare( folia::AnnotationType::TOKEN, "passthru", args );
   }
   else {
-    if ( !proc.is_declared( folia::AnnotationType::LANG ) ){
-      proc.declare( folia::AnnotationType::LANG,
-		    ISO_SET, "annotator='ucto'" );
+    if ( !engine.is_declared( folia::AnnotationType::LANG ) ){
+      engine.declare( folia::AnnotationType::LANG,
+		      ISO_SET, "annotator='ucto'" );
     }
     string languages = configuration.lookUp( "languages", "tokenizer" );
     if ( !languages.empty() ){
       vector<string> language_list;
       language_list = TiCC::split_at( languages, "," );
       options.language = language_list[0];
-      proc.set_metadata( "language", language_list[0] );
+      engine.set_metadata( "language", language_list[0] );
+      folia::KWargs args;
+      args["name"] = "ucto";
+      string main_id = "ucto.1";
+      args["id"] = main_id;
+      args["version"] = PACKAGE_VERSION;
+      //      args["command"] = _command;
+      folia::processor *proc = engine.doc()->add_processor( args );
+      proc->get_system_defaults();
+      args.clear();
+      args["name"] = "uctodata";
+      string id = "ucto.1.1";
+      args["id"] = id;
+      args["type"] = "datasource";
+      //      args["version"] = data_version;
+      args["generator"] = "NO";
+      proc  = engine.doc()->add_processor( args, proc );
+      args.clear();
+      int i=0;
       for ( const auto& l : language_list ){
-	proc.declare( folia::AnnotationType::TOKEN,
-		      "tokconfig-" + l,
-		      "annotator='ucto', annotatortype='auto', datetime='now()'");
+   	if ( options.debugFlag > 3 ){
+	  LOG << "language: " << l << endl;
+	}
+	string sub_id = id + "." + TiCC::toString( ++i );
+	string config = "tokconfig-" + l;
+	folia::KWargs args;
+	args["name"] = config;
+	args["id"] = sub_id;
+	args["type"] = "datasource";
+	//	args["version"] = s.second->version;
+	args["generator"] = "NO";
+	engine.doc()->add_processor( args, proc );
+	args.clear();
+	args["processor"] = main_id;
+	args["alias"] = config;
+	engine.declare( folia::AnnotationType::TOKEN,
+			"https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/" + config + ".foliaset.ttl",
+			args );
+	if ( options.debugFlag > 3 ){
+	  LOG << "added processor and token-annotation for: '"
+	      << config << "'" << endl;
+	}
       }
     }
     else if ( options.language == "none" ){
-      proc.declare( folia::AnnotationType::TOKEN,
-		    "tokconfig-nld",
-		    "annotator='ucto', annotatortype='auto', datetime='now()'");
+      engine.declare( folia::AnnotationType::TOKEN,
+		      "tokconfig-nld",
+		      "annotator='ucto', annotatortype='auto', datetime='now()'");
     }
     else {
-      proc.declare( folia::AnnotationType::TOKEN,
-		    "tokconfig-" + options.language,
-		    "annotator='ucto', annotatortype='auto', datetime='now'");
-      proc.set_metadata( "language", options.language );
+      engine.declare( folia::AnnotationType::TOKEN,
+		      "tokconfig-" + options.language,
+		      "annotator='ucto', annotatortype='auto', datetime='now'");
+      engine.set_metadata( "language", options.language );
     }
   }
   if  (options.debugFlag > 8){
-    proc.set_dbg_stream( theDbgLog );
-    proc.set_debug( true );
+    engine.set_dbg_stream( theDbgLog );
+    engine.set_debug( true );
   }
   //  proc.set_debug( true );
-  folia::Document &doc = *proc.doc();
+  folia::Document &doc = *engine.doc();
   myCGNTagger->addDeclaration( doc );
   if ( options.doLemma ){
     myMblem->addDeclaration( doc );
@@ -1654,16 +1746,16 @@ void FrogAPI::run_folia_processor( const string& infilename,
   if ( options.doParse ){
     myParser->addDeclaration( doc );
   }
-  proc.setup( options.inputclass, true );
+  engine.setup( options.inputclass, true );
   int sentence_done = 0;
   folia::FoliaElement *p = 0;
-  while ( (p = proc.next_text_parent() ) ){
+  while ( (p = engine.next_text_parent() ) ){
     //    DBG << "next text parent: " << p << endl;
     handle_one_text_parent( output_stream, p, sentence_done );
     if ( options.debugFlag > 0 ){
       DBG << "done with sentence " << sentence_done << endl;
     }
-    if ( proc.next() ){
+    if ( engine.next() ){
       if ( options.debugFlag > 1 ){
 	DBG << "looping for more ..." << endl;
       }
@@ -1676,11 +1768,11 @@ void FrogAPI::run_folia_processor( const string& infilename,
     return;
   }
   if ( !xmlOutFile.empty() ){
-    proc.save( xmlOutFile, options.doKanon );
+    engine.save( xmlOutFile, options.doKanon );
     LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
   }
   else if ( options.doXMLout ){
-    proc.save( output_stream, options.doKanon );
+    engine.save( output_stream, options.doKanon );
   }
 }
 
