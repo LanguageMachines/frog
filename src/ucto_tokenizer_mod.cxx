@@ -427,8 +427,5 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
     }
     wv.push_back( w );
   }
-  if ( textredundancy == "full" ){
-    s->settext( s->str(textclass), textclass );
-  }
   return wv;
 }
