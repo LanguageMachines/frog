@@ -438,9 +438,5 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
     DBG << "add_result, finished sentence:" << s << endl;
     DBG << "Sentence tekst: " << s->str(textclass) << endl;
   }
-
-  if ( textredundancy == "full" ){
-    s->settext( s->str(textclass), textclass );
-  }
   return wv;
 }

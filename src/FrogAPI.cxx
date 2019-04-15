@@ -679,11 +679,9 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
     }
     folia::LangAnnotation *la = new folia::LangAnnotation( args, root->doc() );
     s->append( la );
-    // string text = fd.sentence(); // get tokenized, space separated, sentence.
-    // text = TiCC::trim( text );
-    // if ( !text.empty() ){
-    //   s->settext( text );
-    // }
+    if ( options.textredundancy == "full" ){
+      s->settext( s->str(options.inputclass), options.inputclass );
+    }
   }
   else {
     myCGNTagger->add_tags( wv, fd );
