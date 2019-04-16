@@ -51,6 +51,8 @@ class UctoTokenizer {
   void setOutputClass( const std::string& );
   void setDocID( const std::string& );
   void setTextRedundancy( const std::string& );
+  std::string get_data_version() const;
+  bool get_setting_info( const std::string&, std::string&, std::string& ) const;
   std::vector<std::string> tokenize( const std::string&  );
   frog_data tokenize_line( const std::string& );
   frog_data tokenize_line_next();

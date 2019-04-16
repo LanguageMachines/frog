@@ -529,58 +529,84 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
     string languages = configuration.lookUp( "languages", "tokenizer" );
     DBG << "languages: " << languages << endl;
     string main_id = "ucto.1";
+    folia::KWargs args;
+    args["name"] = "ucto";
+    args["id"] = main_id;
+    args["version"] = PACKAGE_VERSION;
+    //      args["command"] = _command;
+    folia::processor *tok_proc = doc->add_processor( args );
+    tok_proc->get_system_defaults();
+    args.clear();
+    args["name"] = "uctodata";
+    string id = "ucto.1.1";
+    args["id"] = id;
+    args["type"] = "datasource";
+    //      args["version"] = data_version;
+    args["generator"] = "NO";
+    folia::processor *proc = doc->add_processor( args, tok_proc );
     if ( !languages.empty() ){
       vector<string> language_list;
       language_list = TiCC::split_at( languages, "," );
       options.language = language_list[0];
       folia::KWargs args;
-      args["name"] = "ucto";
-      args["id"] = main_id;
-      args["version"] = PACKAGE_VERSION;
-      //      args["command"] = _command;
-      folia::processor *proc = doc->add_processor( args );
-      proc->get_system_defaults();
-      args.clear();
-      args["name"] = "uctodata";
-      string id = "ucto.1.1";
-      args["id"] = id;
-      args["type"] = "datasource";
-      //      args["version"] = data_version;
-      args["generator"] = "NO";
-      proc  = doc->add_processor( args, proc );
-      args.clear();
       int i=0;
       for ( const auto& l : language_list ){
  	if ( options.debugFlag > 3 ){
 	  LOG << "language: " << l << endl;
 	}
 	string sub_id = id + "." + TiCC::toString( ++i );
-	string config = "tokconfig-" + l;
+	string set_file;
+	string version;
+	if ( !tokenizer->get_setting_info( l, set_file, version ) ){
+	  throw runtime_error( "paniek" );
+	}
 	folia::KWargs args;
-	args["name"] = config;
+	args["name"] = set_file;
 	args["id"] = sub_id;
 	args["type"] = "datasource";
-	//	args["version"] = s.second->version;
+	args["version"] = version;
 	args["generator"] = "NO";
 	doc->add_processor( args, proc );
 	args.clear();
 	args["processor"] = main_id;
-	args["alias"] = config;
+	args["alias"] = set_file;
 	doc->declare( folia::AnnotationType::TOKEN,
-		      "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/" + config + ".foliaset.ttl",
+		      "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/" + set_file + ".foliaset.ttl",
 		      args );
 	if ( options.debugFlag > 3 ){
 	  LOG << "added processor and token-annotation for: '"
-	      << config << "'" << endl;
+	      << set_file << "'" << endl;
 	}
       }
     }
     else {
+      string setting = configuration.lookUp( "rulesFile", "tokenizer" );
+      string set_file;
+      string version;
+      if ( tokenizer->get_setting_info( "default", set_file, version ) ){
+	folia::KWargs args;
+	args["name"] = set_file;
+	args["id"] = "next()";
+	args["type"] = "datasource";
+	args["version"] = version;
+	args["generator"] = "NO";
+	doc->add_processor( args, proc );
+      }
+      else {
+	DBG << "no setting info found for 'default' (setting="
+	  << setting << ")"  << endl;
+      }
+      folia::KWargs args;
+      args["processor"] = main_id;
       doc->declare( folia::AnnotationType::TOKEN,
-		    configuration.lookUp( "rulesFile", "tokenizer" ),
-		    "annotator='ucto', annotatortype='auto', datetime='now()'");
+		    setting,
+		    args );
+      if ( options.debugFlag > 3 ){
+	LOG << "added processor and token-annotation for: '"
+	    << setting << "'" << endl;
+      }
     }
-    folia::KWargs args;
+    args.clear();
     args["processor"] = main_id;
     doc->declare( folia::AnnotationType::LANG,
 		  ISO_SET,
@@ -1654,69 +1680,99 @@ void FrogAPI::run_folia_processor( const string& infilename,
     engine.declare( folia::AnnotationType::TOKEN, "passthru", args );
   }
   else {
-    if ( !engine.is_declared( folia::AnnotationType::LANG ) ){
-      engine.declare( folia::AnnotationType::LANG,
-		      ISO_SET, "annotator='ucto'" );
-    }
     string languages = configuration.lookUp( "languages", "tokenizer" );
+    string main_id = "ucto.1";
+    folia::KWargs args;
+    args["name"] = "ucto";
+    args["id"] = main_id;
+    args["version"] = PACKAGE_VERSION;
+    //      args["command"] = _command;
+    folia::processor *tok_proc = engine.doc()->add_processor( args );
+    tok_proc->get_system_defaults();
+    args.clear();
+    args["name"] = "uctodata";
+    string id = "ucto.1.1";
+    args["id"] = id;
+    args["type"] = "datasource";
+    args["version"] = tokenizer->get_data_version();
+    args["generator"] = "NO";
+    folia::processor *proc = engine.doc()->add_processor( args, tok_proc );
+    proc->get_system_defaults();
     if ( !languages.empty() ){
       vector<string> language_list;
       language_list = TiCC::split_at( languages, "," );
       options.language = language_list[0];
       engine.set_metadata( "language", language_list[0] );
       folia::KWargs args;
-      args["name"] = "ucto";
-      string main_id = "ucto.1";
-      args["id"] = main_id;
-      args["version"] = PACKAGE_VERSION;
-      //      args["command"] = _command;
-      folia::processor *proc = engine.doc()->add_processor( args );
-      proc->get_system_defaults();
-      args.clear();
-      args["name"] = "uctodata";
-      string id = "ucto.1.1";
-      args["id"] = id;
-      args["type"] = "datasource";
-      //      args["version"] = data_version;
-      args["generator"] = "NO";
-      proc  = engine.doc()->add_processor( args, proc );
-      args.clear();
       int i=0;
       for ( const auto& l : language_list ){
    	if ( options.debugFlag > 3 ){
 	  LOG << "language: " << l << endl;
 	}
 	string sub_id = id + "." + TiCC::toString( ++i );
-	string config = "tokconfig-" + l;
+	string set_file;
+	string version;
+	if ( !tokenizer->get_setting_info( l, set_file, version ) ){
+	  throw runtime_error( "paniek" );
+	}
 	folia::KWargs args;
-	args["name"] = config;
+	args["name"] = set_file;
 	args["id"] = sub_id;
 	args["type"] = "datasource";
-	//	args["version"] = s.second->version;
+	args["version"] = version;
 	args["generator"] = "NO";
 	engine.doc()->add_processor( args, proc );
 	args.clear();
 	args["processor"] = main_id;
-	args["alias"] = config;
+	args["alias"] = set_file;
 	engine.declare( folia::AnnotationType::TOKEN,
-			"https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/" + config + ".foliaset.ttl",
+			"https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/" + set_file + ".foliaset.ttl",
 			args );
 	if ( options.debugFlag > 3 ){
 	  LOG << "added processor and token-annotation for: '"
-	      << config << "'" << endl;
+	      << set_file << "'" << endl;
 	}
       }
     }
     else if ( options.language == "none" ){
-      engine.declare( folia::AnnotationType::TOKEN,
-		      "tokconfig-nld",
-		      "annotator='ucto', annotatortype='auto', datetime='now()'");
+      string setting = configuration.lookUp( "rulesFile", "tokenizer" );
+      string set_file;
+      string version;
+      if ( tokenizer->get_setting_info( "default", set_file, version ) ){
+	folia::KWargs args;
+	args["name"] = set_file;
+	args["id"] = "next()";
+	args["type"] = "datasource";
+	args["version"] = version;
+	args["generator"] = "NO";
+	engine.doc()->add_processor( args, proc );
+      }
+      else {
+	DBG << "no setting info found for 'default' (setting="
+	    << setting << ")"  << endl;
+      }
+      folia::KWargs args;
+      args["processor"] = main_id;
+      engine.doc()->declare( folia::AnnotationType::TOKEN,
+			     setting,
+			     args );
+      if ( options.debugFlag > 3 ){
+	LOG << "added processor and token-annotation for: '"
+	    << setting << "'" << endl;
+      }
     }
     else {
       engine.declare( folia::AnnotationType::TOKEN,
 		      "tokconfig-" + options.language,
 		      "annotator='ucto', annotatortype='auto', datetime='now'");
       engine.set_metadata( "language", options.language );
+    }
+    if ( !engine.is_declared( folia::AnnotationType::LANG ) ){
+      args.clear();
+      args["processor"] = main_id;
+      engine.declare( folia::AnnotationType::LANG,
+		      ISO_SET,
+		      args );
     }
   }
   if  (options.debugFlag > 8){

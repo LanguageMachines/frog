@@ -373,6 +373,27 @@ frog_data UctoTokenizer::tokenize_line_next() {
   }
 }
 
+string UctoTokenizer::get_data_version() const{
+  if ( tokenizer ){
+    return tokenizer->get_data_version();
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
+bool UctoTokenizer::get_setting_info( const std::string& lang,
+				      std::string& name,
+				      std::string& version ) const {
+  if ( tokenizer ){
+    return tokenizer->get_setting_info( lang, name, version );
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
+
 string get_parent_id( folia::FoliaElement *el ){
   if ( !el ){
     return "";
