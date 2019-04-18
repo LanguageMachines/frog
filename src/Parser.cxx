@@ -944,9 +944,9 @@ void Parser::add_result( const frog_data& fd,
     args["generate_id"] = s->id();
   }
   args["set"] = getTagset();
-  if ( textclass != "current" ){
-    args["textclass"] = textclass;
-  }
+  // if ( textclass != "current" ){
+  //   args["textclass"] = textclass;
+  // }
   folia::DependenciesLayer *el = new folia::DependenciesLayer( args, s->doc() );
   s->append( el );
   for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
