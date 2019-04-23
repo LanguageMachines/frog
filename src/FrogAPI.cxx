@@ -106,7 +106,7 @@ string FrogAPI::defaultConfigFile( const string& lang ){
 }
 
 FrogOptions::FrogOptions() {
-  doTok = doLemma = doMorph = doMwu = doIOB = doNER = doParse = true;
+  doTok = doLemma = doMorph = doMwu = doIOB = doNER = doParse = doTagger = true;
   doDeepMorph = false;
   doSentencePerLine = false;
   doQuoteDetection = false;
@@ -612,7 +612,9 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
 		  ISO_SET,
 		  args );
   }
-  myCGNTagger->addDeclaration( *doc );
+  if ( options.doTagger ){
+    myCGNTagger->addDeclaration( *doc );
+  }
   if ( options.doLemma ){
     myMblem->addDeclaration( *doc );
   }
@@ -710,7 +712,9 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
     }
   }
   else {
-    myCGNTagger->add_tags( wv, fd );
+    if ( options.doTagger ){
+      myCGNTagger->add_tags( wv, fd );
+    }
     if ( options.doLemma ){
       myMblem->add_lemmas( wv, fd );
     }
@@ -788,7 +792,9 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
       folia::LangAnnotation *la = new folia::LangAnnotation( args, sent->doc() );
       sent->append( la );
     }
-    myCGNTagger->add_tags( wv, fd );
+    if ( options.doTagger ){
+      myCGNTagger->add_tags( wv, fd );
+    }
     if ( options.doLemma ){
       myMblem->add_lemmas( wv, fd );
     }
@@ -829,7 +835,9 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
     }
   }
   else {
-    myCGNTagger->add_tags( wv, fd );
+    if ( options.doTagger ){
+      myCGNTagger->add_tags( wv, fd );
+    }
     if ( options.doLemma ){
       myMblem->add_lemmas( wv, fd );
     }
@@ -1343,12 +1351,17 @@ void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
   else {
     os << Tab;
   }
-  if ( fd.tag.empty() ){
-    os << Tab << Tab << fixed << showpoint << std::setprecision(6) << 1.0;
+  if ( options.doTagger ){
+    if ( fd.tag.empty() ){
+      os << Tab << Tab << fixed << showpoint << std::setprecision(6) << 1.0;
+    }
+    else {
+      os << Tab << fd.tag << Tab
+	 << fixed << showpoint << std::setprecision(6) << fd.tag_confidence;
+    }
   }
   else {
-    os << Tab << fd.tag << Tab
-       << fixed << showpoint << std::setprecision(6) << fd.tag_confidence;
+    os << Tab << Tab << Tab;
   }
   if ( options.doNER ){
     os << Tab << TiCC::uppercase(fd.ner_tag);
@@ -1781,7 +1794,9 @@ void FrogAPI::run_folia_processor( const string& infilename,
   }
   //  proc.set_debug( true );
   folia::Document &doc = *engine.doc();
-  myCGNTagger->addDeclaration( doc );
+  if ( options.doTagger ){
+    myCGNTagger->addDeclaration( doc );
+  }
   if ( options.doLemma ){
     myMblem->addDeclaration( doc );
   }

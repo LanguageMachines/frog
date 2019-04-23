@@ -276,20 +276,30 @@ bool parse_args( TiCC::CL_Options& Opts,
   }
   if ( Opts.extract( "skip", value )) {
     string skip = value;
-    if ( skip.find_first_of("tT") != string::npos )
+    if ( skip.find_first_of("tT") != string::npos ){
       options.doTok = false;
-    if ( skip.find_first_of("lL") != string::npos )
+    }
+    if ( skip.find_first_of("lL") != string::npos ){
       options.doLemma = false;
-    if ( skip.find_first_of("aA") != string::npos )
+    }
+    if ( skip.find_first_of("aA") != string::npos ){
       options.doMorph = false;
-    if ( skip.find_first_of("mM") != string::npos )
+    }
+    if ( skip.find_first_of("mM") != string::npos ){
       options.doMwu = false;
-    if ( skip.find_first_of("cC") != string::npos )
+    }
+    if ( skip.find_first_of("cC") != string::npos ){
       options.doIOB = false;
-    if ( skip.find_first_of("nN") != string::npos )
+    }
+    if ( skip.find_first_of("nN") != string::npos ){
       options.doNER = false;
-    if ( skip.find_first_of("pP") != string::npos )
+    }
+    if ( skip.find_first_of("gG") != string::npos ){
+      options.doTagger = false;
+    }
+    if ( skip.find_first_of("pP") != string::npos ){
       options.doParse = false;
+    }
     else if ( !options.doMwu ){
       LOG << " Parser disabled, because MWU is deselected" << endl;
       options.doParse = false;

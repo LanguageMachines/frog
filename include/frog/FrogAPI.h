@@ -64,6 +64,7 @@ class FrogOptions {
   bool doIOB;
   bool doNER;
   bool doParse;
+  bool doTagger;
   bool doSentencePerLine;
   bool doQuoteDetection;
   bool doDirTest;
