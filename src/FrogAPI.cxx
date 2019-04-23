@@ -570,7 +570,12 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
 	doc->add_processor( args, proc );
 	args.clear();
 	args["processor"] = main_id;
-	args["alias"] = set_file;
+	string alias = set_file;
+	args["alias"] = alias;
+	if ( doc->isDeclared( folia::AnnotationType::TOKEN, alias ) ){
+	  // we assume that an old-style declaration is present
+	  doc->un_declare( folia::AnnotationType::TOKEN, alias );
+	}
 	doc->declare( folia::AnnotationType::TOKEN,
 		      "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/" + set_file + ".foliaset.ttl",
 		      args );
@@ -595,7 +600,12 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
 	doc->add_processor( args, proc );
 	args.clear();
 	args["processor"] = main_id;
-	args["alias"] = set_file;
+	string alias = set_file;
+	args["alias"] = alias;
+	if ( doc->isDeclared( folia::AnnotationType::TOKEN, alias ) ){
+	  // we assume that an old-style declaration is present
+	  doc->un_declare( folia::AnnotationType::TOKEN, alias );
+	}
 	string sett = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/" + set_file + ".foliaset.ttl";
 	doc->declare( folia::AnnotationType::TOKEN,
 		      sett,
@@ -1746,7 +1756,12 @@ void FrogAPI::run_folia_processor( const string& infilename,
 	engine.doc()->add_processor( args, proc );
 	args.clear();
 	args["processor"] = main_id;
-	args["alias"] = set_file;
+	string alias = set_file;
+	args["alias"] = alias;
+	if ( engine.is_declared( folia::AnnotationType::TOKEN, alias ) ){
+	  // we assume that an old-style declaration is present
+	  engine.un_declare( folia::AnnotationType::TOKEN, alias );
+	}
 	engine.declare( folia::AnnotationType::TOKEN,
 			"https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/" + set_file + ".foliaset.ttl",
 			args );
@@ -1771,7 +1786,12 @@ void FrogAPI::run_folia_processor( const string& infilename,
 	engine.doc()->add_processor( args, proc );
 	args.clear();
 	args["processor"] = main_id;
-	args["alias"] = set_file;
+	string alias = set_file;
+	args["alias"] = alias;
+	if ( engine.is_declared( folia::AnnotationType::TOKEN, alias ) ){
+	  // we assume that an old-style declaration is present
+	  engine.un_declare( folia::AnnotationType::TOKEN, alias );
+	}
 	string sett = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/" + set_file + ".foliaset.ttl";
 	engine.doc()->declare( folia::AnnotationType::TOKEN,
 			       sett,
