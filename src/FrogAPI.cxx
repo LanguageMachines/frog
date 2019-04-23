@@ -541,13 +541,14 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
     string id = "ucto.1.1";
     args["id"] = id;
     args["type"] = "datasource";
-    //      args["version"] = data_version;
+    args["version"] = tokenizer->get_data_version();
     args["generator"] = "NO";
     folia::processor *proc = doc->add_processor( args, tok_proc );
     if ( !languages.empty() ){
       vector<string> language_list;
       language_list = TiCC::split_at( languages, "," );
       options.language = language_list[0];
+      doc->set_metadata( "language", language_list[0] );
       folia::KWargs args;
       int i=0;
       for ( const auto& l : language_list ){
@@ -584,6 +585,7 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
       string set_file;
       string version;
       if ( tokenizer->get_setting_info( "default", set_file, version ) ){
+	// so it is a known language in the tokenizer!
 	folia::KWargs args;
 	args["name"] = set_file;
 	args["id"] = "next()";
@@ -591,16 +593,26 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
 	args["version"] = version;
 	args["generator"] = "NO";
 	doc->add_processor( args, proc );
+	args.clear();
+	args["processor"] = main_id;
+	args["alias"] = set_file;
+	string sett = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/" + set_file + ".foliaset.ttl";
+	doc->declare( folia::AnnotationType::TOKEN,
+		      sett,
+		      args );
+	if ( set_file.find( "tokconfig-" ) == 0 ) {
+	  doc->set_metadata( "language", set_file.substr(10) );
+	}
       }
       else {
 	DBG << "no setting info found for 'default' (setting="
-	  << setting << ")"  << endl;
+	    << setting << ")"  << endl;
+	folia::KWargs args;
+	args["processor"] = main_id;
+	doc->declare( folia::AnnotationType::TOKEN,
+		      setting,
+		      args );
       }
-      folia::KWargs args;
-      args["processor"] = main_id;
-      doc->declare( folia::AnnotationType::TOKEN,
-		    setting,
-		    args );
       if ( options.debugFlag > 3 ){
 	LOG << "added processor and token-annotation for: '"
 	    << setting << "'" << endl;
@@ -1685,7 +1697,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
     args["name"] = "ucto";
     args["id"] = "ucto.1";
     args["version"] = PACKAGE_VERSION;
-    //    args["command"] = _command;
+    //    args["command"] = Hmmm....
     folia::processor *fp = engine.doc()->add_processor( args );
     fp->get_system_defaults();
     args.clear();
@@ -1699,7 +1711,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
     args["name"] = "ucto";
     args["id"] = main_id;
     args["version"] = PACKAGE_VERSION;
-    //      args["command"] = _command;
+    //      args["command"] = Hmmm....
     folia::processor *tok_proc = engine.doc()->add_processor( args );
     tok_proc->get_system_defaults();
     args.clear();
@@ -1721,6 +1733,10 @@ void FrogAPI::run_folia_processor( const string& infilename,
       for ( const auto& l : language_list ){
    	if ( options.debugFlag > 3 ){
 	  LOG << "language: " << l << endl;
+	}
+	if ( i == 0 ){
+	  // first language is the default
+	  engine.set_metadata( "language", l );
 	}
 	string sub_id = id + "." + TiCC::toString( ++i );
 	string set_file;
@@ -1775,9 +1791,12 @@ void FrogAPI::run_folia_processor( const string& infilename,
       }
     }
     else {
+      folia::KWargs args;
+      args["processor"] = main_id;
+      string setting = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/" + options.language + ".foliaset.ttl";
       engine.declare( folia::AnnotationType::TOKEN,
-		      "tokconfig-" + options.language,
-		      "annotator='ucto', annotatortype='auto', datetime='now'");
+		      setting,
+		      args );
       engine.set_metadata( "language", options.language );
     }
     if ( !engine.is_declared( folia::AnnotationType::LANG ) ){
