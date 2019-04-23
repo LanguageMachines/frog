@@ -538,8 +538,7 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
     tok_proc->get_system_defaults();
     args.clear();
     args["name"] = "uctodata";
-    string id = "ucto.1.1";
-    args["id"] = id;
+    args["id"] = "ucto.1.1";
     args["type"] = "datasource";
     args["version"] = tokenizer->get_data_version();
     args["generator"] = "NO";
@@ -550,12 +549,13 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
       options.language = language_list[0];
       doc->set_metadata( "language", language_list[0] );
       folia::KWargs args;
-      int i=0;
       for ( const auto& l : language_list ){
  	if ( options.debugFlag > 3 ){
 	  LOG << "language: " << l << endl;
 	}
-	string sub_id = id + "." + TiCC::toString( ++i );
+	if ( l == language_list.front() ){
+	  doc->set_metadata( "language", l );
+	}
 	string set_file;
 	string version;
 	if ( !tokenizer->get_setting_info( l, set_file, version ) ){
@@ -563,7 +563,7 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
 	}
 	folia::KWargs args;
 	args["name"] = set_file;
-	args["id"] = sub_id;
+	args["id"] = "next()";
 	args["type"] = "datasource";
 	args["version"] = version;
 	args["generator"] = "NO";
@@ -605,7 +605,7 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
 	}
       }
       else {
-	DBG << "no setting info found for 'default' (setting="
+	LOG << "no setting info found for 'default' (setting="
 	    << setting << ")"  << endl;
 	folia::KWargs args;
 	args["processor"] = main_id;
@@ -1716,29 +1716,22 @@ void FrogAPI::run_folia_processor( const string& infilename,
     tok_proc->get_system_defaults();
     args.clear();
     args["name"] = "uctodata";
-    string id = "ucto.1.1";
-    args["id"] = id;
+    args["id"] = "ucto.1.1";
     args["type"] = "datasource";
     args["version"] = tokenizer->get_data_version();
     args["generator"] = "NO";
     folia::processor *proc = engine.doc()->add_processor( args, tok_proc );
-    proc->get_system_defaults();
     if ( !languages.empty() ){
       vector<string> language_list;
       language_list = TiCC::split_at( languages, "," );
+      // first language is the default
       options.language = language_list[0];
       engine.set_metadata( "language", language_list[0] );
+      if ( options.debugFlag > 3 ){
+	LOG << "SET META: language: " << options.language << endl;
+      }
       folia::KWargs args;
-      int i=0;
       for ( const auto& l : language_list ){
-   	if ( options.debugFlag > 3 ){
-	  LOG << "language: " << l << endl;
-	}
-	if ( i == 0 ){
-	  // first language is the default
-	  engine.set_metadata( "language", l );
-	}
-	string sub_id = id + "." + TiCC::toString( ++i );
 	string set_file;
 	string version;
 	if ( !tokenizer->get_setting_info( l, set_file, version ) ){
@@ -1746,7 +1739,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
 	}
 	folia::KWargs args;
 	args["name"] = set_file;
-	args["id"] = sub_id;
+	args["id"] = "next()";
 	args["type"] = "datasource";
 	args["version"] = version;
 	args["generator"] = "NO";
@@ -1768,6 +1761,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
       string set_file;
       string version;
       if ( tokenizer->get_setting_info( "default", set_file, version ) ){
+	// so it is a known language in the tokenizer!
 	folia::KWargs args;
 	args["name"] = set_file;
 	args["id"] = "next()";
@@ -1775,19 +1769,33 @@ void FrogAPI::run_folia_processor( const string& infilename,
 	args["version"] = version;
 	args["generator"] = "NO";
 	engine.doc()->add_processor( args, proc );
+	args.clear();
+	args["processor"] = main_id;
+	args["alias"] = set_file;
+	string sett = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/" + set_file + ".foliaset.ttl";
+	engine.doc()->declare( folia::AnnotationType::TOKEN,
+			       sett,
+			       args );
+	if ( set_file.find( "tokconfig-" ) == 0 ) {
+	  engine.doc()->set_metadata( "language", set_file.substr(10) );
+	}
+	if ( options.debugFlag > 3 ){
+	  DBG << "so added processor and token-annotation for: '"
+	      << setting << "'" << endl;
+	}
       }
       else {
 	DBG << "no setting info found for 'default' (setting="
 	    << setting << ")"  << endl;
-      }
-      folia::KWargs args;
-      args["processor"] = main_id;
-      engine.doc()->declare( folia::AnnotationType::TOKEN,
-			     setting,
-			     args );
-      if ( options.debugFlag > 3 ){
-	LOG << "added processor and token-annotation for: '"
-	    << setting << "'" << endl;
+	folia::KWargs args;
+	args["processor"] = main_id;
+	engine.doc()->declare( folia::AnnotationType::TOKEN,
+			       setting,
+			       args );
+	if ( options.debugFlag > 3 ){
+	  DBG << "added specific processor and token-annotation for: '"
+	      << setting << "'" << endl;
+	}
       }
     }
     else {
@@ -1797,6 +1805,10 @@ void FrogAPI::run_folia_processor( const string& infilename,
       engine.declare( folia::AnnotationType::TOKEN,
 		      setting,
 		      args );
+      if ( options.debugFlag > 3 ){
+	DBG << "added processor and token-annotation for: '"
+	    << setting << "'" << endl;
+      }
       engine.set_metadata( "language", options.language );
     }
     if ( !engine.is_declared( folia::AnnotationType::LANG ) ){
@@ -1838,7 +1850,9 @@ void FrogAPI::run_folia_processor( const string& infilename,
   int sentence_done = 0;
   folia::FoliaElement *p = 0;
   while ( (p = engine.next_text_parent() ) ){
-    //    DBG << "next text parent: " << p << endl;
+    if ( options.debugFlag > 3 ){
+      DBG << "next text parent: " << p << endl;
+    }
     handle_one_text_parent( output_stream, p, sentence_done );
     if ( options.debugFlag > 0 ){
       DBG << "done with sentence " << sentence_done << endl;
