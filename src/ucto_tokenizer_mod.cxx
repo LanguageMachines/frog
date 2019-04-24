@@ -274,6 +274,24 @@ bool UctoTokenizer::getPassThru() const {
   }
 }
 
+void UctoTokenizer::add_provenance_passthru( folia::Document *doc ) const {
+  if ( tokenizer ){
+    tokenizer->add_provenance_passthru( doc );
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
+void UctoTokenizer::add_provenance_setting( folia::Document * doc ) const {
+  if ( tokenizer ){
+    tokenizer->add_provenance_setting( doc );
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
 vector<string> UctoTokenizer::tokenize( const string& line ){
   if ( tokenizer ){
     tokenizer->reset();
@@ -317,6 +335,7 @@ frog_data create_fd( vector<Tokenizer::Token>& tokens ){
       // we are at ENDOFSENTENCE.
       // when quotelevel == 0, we step out, until the next call
       if ( quotelevel == 0 ){
+	result.language == tok.lang_code;
      	break;
       }
     }

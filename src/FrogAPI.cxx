@@ -508,22 +508,10 @@ FrogAPI::~FrogAPI() {
 folia::FoliaElement* FrogAPI::start_document( const string& id,
 					      folia::Document *& doc ) const {
   doc = new folia::Document( "xml:id='" + id + "'" );
-  if ( options.language != "none" ){
-    doc->set_metadata( "language", options.language );
-  }
   doc->addStyle( "text/xsl", "folia.xsl" );
   DBG << "start document!!!" << endl;
   if ( !options.doTok ){
-    folia::KWargs args;
-    args["name"] = "ucto";
-    args["id"] = "uct.1";
-    args["version"] = PACKAGE_VERSION;
-    //    args["command"] = _command;
-    folia::processor *proc = doc->add_processor( args );
-    proc->get_system_defaults();
-    args.clear();
-    args["processor"] = "ucto.1";
-    doc->declare( folia::AnnotationType::TOKEN, "passthru", args );
+    tokenizer->add_provenance_passthru( doc );
   }
   else {
     string languages = configuration.lookUp( "languages", "tokenizer" );
@@ -1703,18 +1691,12 @@ void FrogAPI::run_folia_processor( const string& infilename,
   }
   folia::TextEngine engine( infilename );
   if ( !options.doTok ){
-    folia::KWargs args;
-    args["name"] = "ucto";
-    args["id"] = "ucto.1";
-    args["version"] = PACKAGE_VERSION;
-    //    args["command"] = Hmmm....
-    folia::processor *fp = engine.doc()->add_processor( args );
-    fp->get_system_defaults();
-    args.clear();
-    args["processor"] = "ucto.1";
-    engine.declare( folia::AnnotationType::TOKEN, "passthru", args );
+    tokenizer->add_provenance_passthru( engine.doc() );
   }
   else {
+#if NEW
+    tokenizer->add_provenance_setting( engine.doc() );
+#else
     string languages = configuration.lookUp( "languages", "tokenizer" );
     string main_id = "ucto.1";
     folia::KWargs args;
@@ -1838,6 +1820,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
 		      ISO_SET,
 		      args );
     }
+#endif
   }
   if  (options.debugFlag > 8){
     engine.set_dbg_stream( theDbgLog );
