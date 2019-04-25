@@ -167,6 +167,9 @@ bool parse_args( TiCC::CL_Options& Opts,
       return false;
     }
     language = lang_v[0]; // the first mentioned is the default.
+    for ( const auto& l : lang_v ){
+      options.languages.insert( l );
+    }
     if ( lang_v.size() > 1 ){
       cerr << "WARNING: you used the --language=" << languages << " option"
 	   << " with more then one language " << endl
@@ -184,7 +187,7 @@ bool parse_args( TiCC::CL_Options& Opts,
       cerr << "using fallback configuration file: " << configFileName << endl;
     }
   }
-  options.language = language;
+  options.default_language = language;
   // override default config settings when a configfile is specified
   Opts.extract( 'c',  configFileName );
   if ( configuration.fill( configFileName ) ){

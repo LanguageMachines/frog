@@ -514,113 +514,13 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
     tokenizer->add_provenance_passthru( doc );
   }
   else {
-    string languages = configuration.lookUp( "languages", "tokenizer" );
-    DBG << "languages: " << languages << endl;
-    string main_id = "ucto.1";
-    folia::KWargs args;
-    args["name"] = "ucto";
-    args["id"] = main_id;
-    args["version"] = PACKAGE_VERSION;
-    //      args["command"] = _command;
-    folia::processor *tok_proc = doc->add_processor( args );
-    tok_proc->get_system_defaults();
-    args.clear();
-    args["name"] = "uctodata";
-    args["id"] = "ucto.1.1";
-    args["type"] = "datasource";
-    args["version"] = tokenizer->get_data_version();
-    args["generator"] = "NO";
-    folia::processor *proc = doc->add_processor( args, tok_proc );
-    if ( !languages.empty() ){
-      vector<string> language_list;
-      language_list = TiCC::split_at( languages, "," );
-      options.language = language_list[0];
-      doc->set_metadata( "language", language_list[0] );
-      folia::KWargs args;
-      for ( const auto& l : language_list ){
- 	if ( options.debugFlag > 3 ){
-	  LOG << "language: " << l << endl;
-	}
-	if ( l == language_list.front() ){
-	  doc->set_metadata( "language", l );
-	}
-	string set_file;
-	string version;
-	if ( !tokenizer->get_setting_info( l, set_file, version ) ){
-	  throw runtime_error( "paniek" );
-	}
-	folia::KWargs args;
-	args["name"] = set_file;
-	args["id"] = "next()";
-	args["type"] = "datasource";
-	args["version"] = version;
-	args["generator"] = "NO";
-	doc->add_processor( args, proc );
-	args.clear();
-	args["processor"] = main_id;
-	string alias = set_file;
-	args["alias"] = alias;
-	if ( doc->isDeclared( folia::AnnotationType::TOKEN, alias ) ){
-	  // we assume that an old-style declaration is present
-	  doc->un_declare( folia::AnnotationType::TOKEN, alias );
-	}
-	doc->declare( folia::AnnotationType::TOKEN,
-		      "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/" + set_file + ".foliaset.ttl",
-		      args );
-	if ( options.debugFlag > 3 ){
-	  LOG << "added processor and token-annotation for: '"
-	      << set_file << "'" << endl;
-	}
-      }
+    tokenizer->add_provenance_setting( doc );
+    if ( options.default_language != "none" ){
+      doc->set_metadata( "language", options.default_language );
     }
     else {
-      string setting = configuration.lookUp( "rulesFile", "tokenizer" );
-      string set_file;
-      string version;
-      if ( tokenizer->get_setting_info( "default", set_file, version ) ){
-	// so it is a known language in the tokenizer!
-	folia::KWargs args;
-	args["name"] = set_file;
-	args["id"] = "next()";
-	args["type"] = "datasource";
-	args["version"] = version;
-	args["generator"] = "NO";
-	doc->add_processor( args, proc );
-	args.clear();
-	args["processor"] = main_id;
-	string alias = set_file;
-	args["alias"] = alias;
-	if ( doc->isDeclared( folia::AnnotationType::TOKEN, alias ) ){
-	  // we assume that an old-style declaration is present
-	  doc->un_declare( folia::AnnotationType::TOKEN, alias );
-	}
-	string sett = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/" + set_file + ".foliaset.ttl";
-	doc->declare( folia::AnnotationType::TOKEN,
-		      sett,
-		      args );
-	if ( set_file.find( "tokconfig-" ) == 0 ) {
-	  doc->set_metadata( "language", set_file.substr(10) );
-	}
-      }
-      else {
-	LOG << "no setting info found for 'default' (setting="
-	    << setting << ")"  << endl;
-	folia::KWargs args;
-	args["processor"] = main_id;
-	doc->declare( folia::AnnotationType::TOKEN,
-		      setting,
-		      args );
-      }
-      if ( options.debugFlag > 3 ){
-	LOG << "added processor and token-annotation for: '"
-	    << setting << "'" << endl;
-      }
+      doc->set_metadata( "language", "nld" );
     }
-    args.clear();
-    args["processor"] = main_id;
-    doc->declare( folia::AnnotationType::LANG,
-		  ISO_SET,
-		  args );
   }
   if ( options.doTagger ){
     myCGNTagger->addDeclaration( *doc );
@@ -703,8 +603,8 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
   }
   vector<folia::Word*> wv = tokenizer->add_words( s, options.outputclass, tok_set, fd );
   if ( fd.language != "default"
-       && options.language != "none"
-       && fd.language != options.language ){
+       && options.default_language != "none"
+       && fd.language != options.default_language ){
     //
     // so the language doesn't match just create an empty sentence...
     // don't frog it further
@@ -775,20 +675,20 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
   if (options.debugFlag > 1 ){
     DBG << "append_to_sentence()" << endl;
     DBG << "fd.language = " << fd.language << endl;
-    DBG << "options.language = " << options.language << endl;
+    DBG << "options.default_language = " << options.default_language << endl;
     DBG << "sentence language = " << la << endl;
   }
-  if ( !la.empty() && la != options.language
-       && options.language != "none" ){
+  if ( !la.empty() && la != options.default_language
+       && options.default_language != "none" ){
     // skip
     if ( options.debugFlag > 0 ){
       DBG << "append_to_sentence() SKIP a sentence: " << la << endl;
     }
   }
   else {
-    if ( options.language != "none"
+    if ( options.default_language != "none"
 	 && fd.language != "default"
-	 && fd.language != options.language ){
+	 && fd.language != options.default_language ){
       if (!sent->doc()->isDeclared( folia::AnnotationType::LANG ) ){
 	sent->doc()->declare( folia::AnnotationType::LANG,
 			      ISO_SET, "annotator='ucto'" );
@@ -838,8 +738,8 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
 void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
 			       const frog_data& fd ) const {
   if ( fd.language != "default"
-       && options.language != "none"
-       && fd.language != options.language ){
+       && options.default_language != "none"
+       && fd.language != options.default_language ){
     if ( options.debugFlag > 0 ){
       DBG << "append_words() SKIP a sentence: " << fd.language << endl;
     }
@@ -1142,17 +1042,17 @@ bool FrogAPI::frog_sentence( frog_data& sent, const size_t s_count ){
   string lan = get_language( sent );
   if ( options.debugFlag > 2 ){
     DBG << "frog_sentence\n" << sent << endl;
-    DBG << "options.language=" <<  options.language << endl;
+    DBG << "options.default_language=" << options.default_language << endl;
     DBG << "lan=" << lan << endl;
   }
-  if ( !options.language.empty()
-       && options.language != "none"
+  if ( !options.default_language.empty()
+       && options.default_language != "none"
        && !lan.empty()
        && lan != "default"
-       && lan != options.language ){
+       && lan != options.default_language ){
     if ( options.debugFlag > 0 ){
       DBG << "skipping sentence " << s_count << " (different language: " << lan
-	   << " --language=" << options.language << ")" << endl;
+	   << " --language=" << options.default_language << ")" << endl;
     }
     return false;
   }
@@ -1548,8 +1448,8 @@ void FrogAPI::handle_one_text_parent( ostream& os,
   ///
   /// input is a FoLiA element @e containing text.
   /// this can be a Word, Sentence, Paragraph or some other element
-  /// In the latter case, we construct a Sentene from the text, and
-  /// a Paragraph is more then one Sentence is found
+  /// In the latter case, we construct a Sentence from the text, and
+  /// a Paragraph if more then one Sentence is found
   ///
   if ( e->xmltag() == "w" ){
     // already tokenized into words!
@@ -1717,10 +1617,10 @@ void FrogAPI::run_folia_processor( const string& infilename,
       vector<string> language_list;
       language_list = TiCC::split_at( languages, "," );
       // first language is the default
-      options.language = language_list[0];
+      options.default_language = language_list[0];
       engine.set_metadata( "language", language_list[0] );
       if ( options.debugFlag > 3 ){
-	LOG << "SET META: language: " << options.language << endl;
+	LOG << "SET META: language: " << options.default_language << endl;
       }
       folia::KWargs args;
       for ( const auto& l : language_list ){
@@ -1753,7 +1653,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
 	}
       }
     }
-    else if ( options.language == "none" ){
+    else if ( options.default_language == "none" ){
       string setting = configuration.lookUp( "rulesFile", "tokenizer" );
       string set_file;
       string version;
@@ -1803,7 +1703,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
     else {
       folia::KWargs args;
       args["processor"] = main_id;
-      string setting = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/" + options.language + ".foliaset.ttl";
+      string setting = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/" + options.default_language + ".foliaset.ttl";
       engine.declare( folia::AnnotationType::TOKEN,
 		      setting,
 		      args );
@@ -1811,7 +1711,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
 	DBG << "added processor and token-annotation for: '"
 	    << setting << "'" << endl;
       }
-      engine.set_metadata( "language", options.language );
+      engine.set_metadata( "language", options.default_language );
     }
     if ( !engine.is_declared( folia::AnnotationType::LANG ) ){
       args.clear();
@@ -1826,7 +1726,6 @@ void FrogAPI::run_folia_processor( const string& infilename,
     engine.set_dbg_stream( theDbgLog );
     engine.set_debug( true );
   }
-  //  proc.set_debug( true );
   folia::Document &doc = *engine.doc();
   if ( options.doTagger ){
     myCGNTagger->addDeclaration( doc );
@@ -1884,7 +1783,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
 void FrogAPI::run_text_processor( const string& infilename,
 				  ostream& os,
 				  const string& xmlOutFile ){
-  ifstream TEST( infilename );
+  ifstream test_file( infilename );
   int i = 0;
   folia::Document *doc = 0;
   folia::FoliaElement *root = 0;
@@ -1899,7 +1798,7 @@ void FrogAPI::run_text_processor( const string& infilename,
     p_count = 0;
   }
   timers.tokTimer.start();
-  frog_data res = tokenizer->tokenize_stream( TEST );
+  frog_data res = tokenizer->tokenize_stream( test_file );
   timers.tokTimer.stop();
   while ( res.size() > 0 ){
     frog_sentence( res, ++i );

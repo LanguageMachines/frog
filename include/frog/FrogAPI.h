@@ -86,7 +86,8 @@ class FrogOptions {
   std::string docid;
   std::string inputclass;
   std::string outputclass;
-  std::string language;
+  std::string default_language;
+  std::set<std::string> languages;
   std::string textredundancy;
   unsigned int maxParserTokens;
 
