@@ -196,6 +196,11 @@ bool parse_args( TiCC::CL_Options& Opts,
     if ( !vers.empty() ){
       LOG << "configuration version = " << vers << endl;
     }
+    string languages = configuration.getatt( "languages", "tokenizer" );
+    if ( !languages.empty() ){
+      vector<string> lang_v = TiCC::split_at( languages, "," );
+      options.default_language = lang_v[0]; // hacking
+    }
   }
   else {
     cerr << "failed to read configuration from '" << configFileName << "' !!" << endl;

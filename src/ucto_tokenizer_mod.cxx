@@ -335,8 +335,8 @@ frog_data create_fd( vector<Tokenizer::Token>& tokens ){
       // we are at ENDOFSENTENCE.
       // when quotelevel == 0, we step out, until the next call
       if ( quotelevel == 0 ){
-	result.language == tok.lang_code;
-     	break;
+	result.language = tok.lang_code;
+	break;
       }
     }
   }
