@@ -54,7 +54,7 @@ class UctoTokenizer {
   std::string get_data_version() const;
   bool get_setting_info( const std::string&, std::string&, std::string& ) const;
   std::vector<std::string> tokenize( const std::string&  );
-  frog_data tokenize_line( const std::string& );
+  frog_data tokenize_line( const std::string&, const std::string& = "" );
   frog_data tokenize_line_next();
   frog_data tokenize_stream( std::istream& );
   frog_data tokenize_stream_next();

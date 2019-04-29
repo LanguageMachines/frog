@@ -1342,6 +1342,9 @@ frog_record extract_from_word( const folia::Word* word,
 void FrogAPI::handle_one_sentence( ostream& os,
 				   folia::Sentence *s,
 				   const size_t s_cnt ){
+  if  ( options.debugFlag > 1 ){
+    DBG << "handle_one_sentence: " << s << endl;
+  }
   vector<folia::Word*> wv;
   wv = s->words( options.inputclass );
   if ( wv.empty() ){
@@ -1371,11 +1374,23 @@ void FrogAPI::handle_one_sentence( ostream& os,
   }
   else {
     string text = s->str(options.inputclass);
+    string sent_lang =  s->language();
+    if ( sent_lang.empty() ){
+      sent_lang = options.default_language;
+    }
     if ( options.debugFlag > 0 ){
-      DBG << "handle_one_sentence() from string: '" << text << "'" << endl;
+      DBG << "handle_one_sentence() from string: '" << text << "' (lang="
+	  << sent_lang << ")" << endl;
+    }
+    if ( options.languages.find( sent_lang ) == options.languages.end() ){
+      // ignore this language!
+      if ( options.debugFlag > 0 ){
+	DBG << sent_lang << " NOT in: " << options.languages << endl;
+      }
+      return;
     }
     timers.tokTimer.start();
-    frog_data sent = tokenizer->tokenize_line( text );
+    frog_data sent = tokenizer->tokenize_line( text, sent_lang );
     timers.tokTimer.stop();
     while ( sent.size() > 0 ){
       if ( options.debugFlag > 0 ){

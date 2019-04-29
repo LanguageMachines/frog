@@ -115,6 +115,7 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     if ( !languages.empty() ){
       language_list = TiCC::split_at( languages, "," );
       LOG << "Language List ="  << language_list << endl;
+      tokenizer->setLangDetection(true);
     }
     // when a language (list) is specified on the command line,
     // it overrules the language from the config file
@@ -372,9 +373,10 @@ frog_data UctoTokenizer::tokenize_stream( istream& is ){
   }
 }
 
-frog_data UctoTokenizer::tokenize_line( const string& line ){
+frog_data UctoTokenizer::tokenize_line( const string& line,
+					const string& lang ){
   if ( tokenizer ){
-    tokenizer->tokenizeLine( line ); // will consume whole line!
+    tokenizer->tokenizeLine( line, lang ); // will consume whole line!
     return tokenize_line_next(); // returns next sentence in the line
   }
   else {
