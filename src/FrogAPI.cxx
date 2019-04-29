@@ -665,7 +665,7 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
   if ( sent->hasannotation<folia::LangAnnotation>() ){
     la = sent->annotation<folia::LangAnnotation>()->cls();
   }
-  if (options.debugFlag > 1 ){
+  if ( options.debugFlag > 1 ){
     DBG << "append_to_sentence()" << endl;
     DBG << "fd.language = " << fd.language << endl;
     DBG << "options.default_language = " << options.default_language << endl;
@@ -678,22 +678,6 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     }
   }
   else {
-    if (
-	 fd.language != "default"
-	 && fd.language != options.default_language ){
-      if (!sent->doc()->isDeclared( folia::AnnotationType::LANG ) ){
-	sent->doc()->declare( folia::AnnotationType::LANG,
-			      ISO_SET, "annotator='ucto'" );
-      }
-      folia::KWargs args;
-      args["class"] = fd.language;
-      string sett = sent->doc()->defaultset( folia::AnnotationType::LANG );
-      if ( !sett.empty() && sett != "default" ){
-	args["set"] = sett;
-      }
-      folia::LangAnnotation *la = new folia::LangAnnotation( args, sent->doc() );
-      sent->append( la );
-    }
     if ( options.doTagger ){
       myCGNTagger->add_tags( wv, fd );
     }
