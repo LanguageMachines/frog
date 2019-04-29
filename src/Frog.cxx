@@ -157,7 +157,7 @@ bool parse_args( TiCC::CL_Options& Opts,
     // ok no languages parameter.
     // use a (default) configfile. Dutch
     configFileName = FrogAPI::defaultConfigFile("nld");
-    language = "none";
+    language = "nld";
     options.languages.insert( "nld" );
   }
   else {
@@ -200,7 +200,7 @@ bool parse_args( TiCC::CL_Options& Opts,
     string languages = configuration.getatt( "languages", "tokenizer" );
     if ( !languages.empty() ){
       vector<string> lang_v = TiCC::split_at( languages, "," );
-      options.default_language = lang_v[0]; // hacking
+      options.default_language = lang_v[0];
       for ( const auto& l : lang_v ){
 	options.languages.insert( l );
       }

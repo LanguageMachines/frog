@@ -101,8 +101,9 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     if ( val.empty() ){
       val = config.lookUp( "debug" );
     }
-    if ( !val.empty() )
+    if ( !val.empty() ){
       debug = TiCC::stringTo<int>( val );
+    }
     if ( debug > 1 ){
       tokenizer->setDebug( debug );
     }
@@ -140,9 +141,6 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
       }
       if ( !language_list.empty() ){
 	tokenizer->setLanguage( language_list[0] );
-      }
-      else {
-	tokenizer->setLanguage( "none" );
       }
     }
     textredundancy = config.lookUp( "textredundancy", "tokenizer" );

@@ -515,12 +515,6 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
   }
   else {
     tokenizer->add_provenance_setting( doc );
-    if ( options.default_language != "none" ){
-      doc->set_metadata( "language", options.default_language );
-    }
-    else {
-      doc->set_metadata( "language", "nld" );
-    }
   }
   if ( options.doTagger ){
     myCGNTagger->addDeclaration( *doc );
@@ -603,7 +597,6 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
   }
   vector<folia::Word*> wv = tokenizer->add_words( s, options.outputclass, tok_set, fd );
   if ( fd.language != "default"
-       && options.default_language != "none"
        && fd.language != options.default_language ){
     //
     // so the language doesn't match just create an empty sentence...
@@ -678,16 +671,15 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     DBG << "options.default_language = " << options.default_language << endl;
     DBG << "sentence language = " << la << endl;
   }
-  if ( !la.empty() && la != options.default_language
-       && options.default_language != "none" ){
+  if ( !la.empty() && la != options.default_language ){
     // skip
     if ( options.debugFlag > 0 ){
       DBG << "append_to_sentence() SKIP a sentence: " << la << endl;
     }
   }
   else {
-    if ( options.default_language != "none"
-	 && fd.language != "default"
+    if (
+	 fd.language != "default"
 	 && fd.language != options.default_language ){
       if (!sent->doc()->isDeclared( folia::AnnotationType::LANG ) ){
 	sent->doc()->declare( folia::AnnotationType::LANG,
@@ -738,7 +730,6 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
 void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
 			       const frog_data& fd ) const {
   if ( fd.language != "default"
-       && options.default_language != "none"
        && fd.language != options.default_language ){
     if ( options.debugFlag > 0 ){
       DBG << "append_words() SKIP a sentence: " << fd.language << endl;
@@ -1020,7 +1011,7 @@ string FrogAPI::Frogtostring( const string& s ){
 
 string FrogAPI::Frogtostringfromfile( const string& name ){
   /// Parse a file, Frog it and return the result as a string.
-  /// @s: an UTF8 decoded string. May be multilined.
+  /// @name: The filename.
   /// @return the results of frogging. Depending of the current frog settings
   /// the inputfile can be interpreted as XML, an the ouput will be XML or
   /// tab separated
@@ -1046,7 +1037,6 @@ bool FrogAPI::frog_sentence( frog_data& sent, const size_t s_count ){
     DBG << "lan=" << lan << endl;
   }
   if ( !options.default_language.empty()
-       && options.default_language != "none"
        && !lan.empty()
        && lan != "default"
        && lan != options.default_language ){
@@ -1613,11 +1603,8 @@ void FrogAPI::run_folia_processor( const string& infilename,
   }
   else {
     tokenizer->add_provenance_setting( engine.doc() );
-    if ( options.default_language != "none" ){
+    if ( !options.default_language.empty() ){
       engine.doc()->set_metadata( "language", options.default_language );
-    }
-    else {
-      engine.doc()->set_metadata( "language", "nld" );
     }
   }
   if  (options.debugFlag > 8){
