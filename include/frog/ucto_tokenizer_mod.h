@@ -60,8 +60,6 @@ class UctoTokenizer {
   frog_data tokenize_stream_next();
   std::string tokenizeStream( std::istream& );
   std::vector<folia::Word*> add_words( folia::Sentence *,
-				       const std::string&,
-				       const std::string&,
 				       const frog_data& ) const;
   void add_provenance_passthru( folia::Document * ) const;
   void add_provenance_setting( folia::Document * ) const;

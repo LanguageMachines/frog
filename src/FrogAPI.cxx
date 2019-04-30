@@ -598,14 +598,8 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
 void FrogAPI::append_to_sentence( folia::Sentence *sent,
 				  const frog_data& fd ) const {
   // add tokenization, when applicable
-  string tok_set;
-  if ( fd.language != "default" ){
-    tok_set = "tokconfig-" + fd.language;
-  }
-  else {
-    tok_set = "tokconfig-nld";
-  }
-  vector<folia::Word*> wv = tokenizer->add_words( sent, options.outputclass, tok_set, fd );
+  vector<folia::Word*> wv = tokenizer->add_words( sent,
+						  fd );
   string la;
   if ( sent->hasannotation<folia::LangAnnotation>() ){
     la = sent->annotation<folia::LangAnnotation>()->cls();

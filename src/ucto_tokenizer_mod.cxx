@@ -426,9 +426,15 @@ string get_parent_id( folia::FoliaElement *el ){
 }
 
 vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
-					       const string& textclass,
-					       const string& tok_set,
 					       const frog_data& fd ) const {
+  string textclass = tokenizer->getOutputClass();
+  string tok_set;
+  if ( fd.language != "default" ){
+    tok_set = "tokconfig-" + fd.language;
+  }
+  else {
+    tok_set = "tokconfig-nld";
+  }
   vector<folia::Word*> wv;
   if (  debug > 5 ){
     DBG << "add_words\n" << fd << endl;
@@ -450,9 +456,7 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
     if ( textclass != "current" ){
       args["textclass"] = textclass;
     }
-    if ( !tok_set.empty() ){
-      args["set"] = tok_set;
-    }
+    args["set"] = tok_set;
     folia::Word *w;
 #pragma omp critical (foliaupdate)
     {
