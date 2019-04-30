@@ -588,62 +588,7 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
   if  (options.debugFlag > 5 ){
     DBG << "append_to_folia, created Sentence" << s << endl;
   }
-  string tok_set;
-  if ( fd.language != "default" ){
-    tok_set = "tokconfig-" + fd.language;
-  }
-  else {
-    tok_set = "tokconfig-nld";
-  }
-  vector<folia::Word*> wv = tokenizer->add_words( s, options.outputclass, tok_set, fd );
-  if ( fd.language != "default"
-       && fd.language != options.default_language ){
-    //
-    // so the language doesn't match just create an empty sentence...
-    // don't frog it further
-    //
-    folia::KWargs args;
-    args["class"] = fd.language;
-    string sett = root->doc()->defaultset( folia::AnnotationType::LANG );
-    if ( !sett.empty() && sett != "default" ){
-      args["set"] = sett;
-    }
-    folia::LangAnnotation *la = new folia::LangAnnotation( args, root->doc() );
-    s->append( la );
-    if ( options.textredundancy == "full" ){
-      s->settext( s->str(options.inputclass), options.inputclass );
-    }
-  }
-  else {
-    if ( options.doTagger ){
-      myCGNTagger->add_tags( wv, fd );
-    }
-    if ( options.doLemma ){
-      myMblem->add_lemmas( wv, fd );
-    }
-    if ( options.doMorph ){
-      myMbma->add_morphemes( wv, fd );
-    }
-    if ( options.doNER ){
-      myNERTagger->add_result( fd, wv );
-    }
-    if ( options.doIOB ){
-      myIOBTagger->add_result( fd, wv );
-    }
-    if ( options.doMwu && !fd.mwus.empty() ){
-      myMwu->add_result( fd, wv );
-    }
-    if ( options.doParse ){
-      if ( options.maxParserTokens != 0
-	   && fd.size() > options.maxParserTokens ){
-	DBG << "no parse results added. sentence too long (" << fd.size()
-	    << " words)" << endl;
-      }
-      else {
-	myParser->add_result( fd, wv );
-      }
-    }
-  }
+  append_to_sentence( s, fd );
   if  (options.debugFlag > 5 ){
     DBG << "append_to_folia, done, result node = " << result << endl;
   }
@@ -671,8 +616,30 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     DBG << "options.default_language = " << options.default_language << endl;
     DBG << "sentence language = " << la << endl;
   }
+  if ( la.empty()
+       && fd.language != "default"
+       && fd.language != options.default_language ){
+    //
+    // so the language is non default, and not set
+    //
+    folia::KWargs args;
+    args["class"] = fd.language;
+    string sett = sent->doc()->defaultset( folia::AnnotationType::LANG );
+    if ( !sett.empty() && sett != "default" ){
+      args["set"] = sett;
+    }
+    folia::LangAnnotation *la = new folia::LangAnnotation( args, sent->doc() );
+    sent->append( la );
+    if ( options.textredundancy == "full" ){
+      sent->settext( sent->str(options.inputclass), options.inputclass );
+    }
+    return;
+  }
   if ( !la.empty() && la != options.default_language ){
-    // skip
+    //
+    // so the language is set, and it is NOT the default language
+    // Don't process any further
+    //
     if ( options.debugFlag > 0 ){
       DBG << "append_to_sentence() SKIP a sentence: " << la << endl;
     }
