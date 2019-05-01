@@ -271,6 +271,21 @@ void Mblem::addDeclaration( folia::Document& doc ) const {
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
+void Mblem::add_provenance( folia::Document& doc ) const {
+  string _label = "mblem";
+  folia::processor *proc = doc.get_processor( _label );
+  if ( !proc ){
+    folia::KWargs args;
+    args["name"] = _label;
+    args["id"] = _label + ".1";
+    args["version"] = _version;
+    proc = doc.add_processor( args );
+  }
+  folia::KWargs args;
+  args["processor"] = proc->id();
+  doc.declare( folia::AnnotationType::LEMMA, tagset, args );
+}
+
 void Mblem::Classify( frog_record& fd ){
   icu::UnicodeString uword;
   string pos;

@@ -633,6 +633,25 @@ void Mbma::addDeclaration( folia::Document& doc ) const {
   }
 }
 
+void Mbma::add_provenance( folia::Document& doc ) const {
+  string _label = "mbma";
+  folia::processor *proc = doc.get_processor( _label );
+  if ( !proc ){
+    folia::KWargs args;
+    args["name"] = _label;
+    args["id"] = _label + ".1";
+    args["version"] = _version;
+    proc = doc.add_processor( args );
+  }
+  folia::KWargs args;
+  args["processor"] = proc->id();
+  doc.declare( folia::AnnotationType::MORPHOLOGICAL, mbma_tagset, args );
+  if ( doDeepMorph ){
+    doc.declare( folia::AnnotationType::POS, clex_tagset, args );
+  }
+}
+
+
 void Mbma::store_morphemes( frog_record& fd,
 			    const vector<string>& morphemes ) const {
   vector<string> adapted;

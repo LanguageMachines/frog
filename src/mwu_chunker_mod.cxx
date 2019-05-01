@@ -194,6 +194,21 @@ void Mwu::addDeclaration( folia::Document& doc ) const {
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
+void Mwu::add_provenance( folia::Document& doc ) const {
+  string _label = "mwu";
+  folia::processor *proc = doc.get_processor( _label );
+  if ( !proc ){
+    folia::KWargs args;
+    args["name"] = _label;
+    args["id"] = _label + ".1";
+    args["version"] = _version;
+    proc = doc.add_processor( args );
+  }
+  folia::KWargs args;
+  args["processor"] = proc->id();
+  doc.declare( folia::AnnotationType::ENTITY, mwu_tagset, args );
+}
+
 void Mwu::Classify( frog_data& sent ){
   reset();
   size_t id=0;
