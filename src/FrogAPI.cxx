@@ -516,6 +516,7 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
   else {
     tokenizer->add_provenance_setting( doc );
   }
+  tokenizer->add_provenance_structure( doc );
   if ( options.doTagger ){
     myCGNTagger->addDeclaration( *doc );
   }
@@ -1552,6 +1553,7 @@ void FrogAPI::run_folia_engine( const string& infilename,
       engine.doc()->set_metadata( "language", options.default_language );
     }
   }
+  tokenizer->add_provenance_structure( engine.doc() );
   if  (options.debugFlag > 8){
     engine.set_dbg_stream( theDbgLog );
     engine.set_debug( true );

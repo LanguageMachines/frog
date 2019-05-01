@@ -282,9 +282,18 @@ void UctoTokenizer::add_provenance_passthru( folia::Document *doc ) const {
   }
 }
 
-void UctoTokenizer::add_provenance_setting( folia::Document * doc ) const {
+void UctoTokenizer::add_provenance_setting( folia::Document *doc ) const {
   if ( tokenizer ){
     tokenizer->add_provenance_setting( doc );
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
+void UctoTokenizer::add_provenance_structure( folia::Document *doc ) const {
+  if ( tokenizer ){
+    tokenizer->add_provenance_structure( doc );
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
