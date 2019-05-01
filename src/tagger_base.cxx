@@ -179,6 +179,19 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   return tagger->isInit();
 }
 
+void BaseTagger::add_provenance( folia::Document& doc ) const {
+  folia::processor *proc = doc.get_processor( _label );
+  if ( !proc ){
+    folia::KWargs args;
+    args["name"] = _label;
+    args["id"] = _label + ".1";
+    args["version"] = _version;
+    proc = doc.add_processor( args );
+  }
+  add_declaration( doc, proc );
+}
+
+
 vector<TagResult> BaseTagger::tagLine( const string& line ){
   if ( tagger )
     return tagger->TagLine(line);

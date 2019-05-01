@@ -41,6 +41,7 @@ class CGNTagger: public BaseTagger {
   BaseTagger( l, d, "tagger" ){};
   bool init( const TiCC::Configuration& );
   void addDeclaration( folia::Document& ) const;
+  void add_declaration( folia::Document&, folia::processor * ) const;
   void post_process( frog_data& );
   void add_tags( const std::vector<folia::Word*>&,
 		 const frog_data& ) const;

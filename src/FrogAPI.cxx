@@ -518,7 +518,7 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
   }
   tokenizer->add_provenance_structure( doc );
   if ( options.doTagger ){
-    myCGNTagger->addDeclaration( *doc );
+    myCGNTagger->add_provenance( *doc );
   }
   if ( options.doLemma ){
     myMblem->addDeclaration( *doc );
@@ -527,10 +527,10 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
     myMbma->addDeclaration( *doc );
   }
   if ( options.doNER ){
-    myNERTagger->addDeclaration( *doc );
+    myNERTagger->add_provenance( *doc );
   }
   if ( options.doIOB ){
-    myIOBTagger->addDeclaration( *doc );
+    myIOBTagger->add_provenance( *doc );
   }
   if ( options.doMwu ){
     myMwu->addDeclaration( *doc );
@@ -1560,7 +1560,7 @@ void FrogAPI::run_folia_engine( const string& infilename,
   }
   folia::Document &doc = *engine.doc();
   if ( options.doTagger ){
-    myCGNTagger->addDeclaration( doc );
+    myCGNTagger->add_provenance( doc );
   }
   if ( options.doLemma ){
     myMblem->addDeclaration( doc );
@@ -1569,10 +1569,10 @@ void FrogAPI::run_folia_engine( const string& infilename,
     myMbma->addDeclaration( doc );
   }
   if ( options.doIOB ){
-    myIOBTagger->addDeclaration( doc );
+    myIOBTagger->add_provenance( doc );
   }
   if ( options.doNER ){
-    myNERTagger->addDeclaration( doc );
+    myNERTagger->add_provenance( doc );
   }
   if ( options.doMwu ){
     myMwu->addDeclaration( doc );

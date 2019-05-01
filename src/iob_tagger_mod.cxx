@@ -61,6 +61,13 @@ void IOBTagger::addDeclaration( folia::Document& doc ) const {
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
+void IOBTagger::add_declaration( folia::Document& doc,
+				 folia::processor *proc ) const {
+  folia::KWargs args;
+  args["processor"] = proc->id();
+  doc.declare( folia::AnnotationType::CHUNKING, tagset, args );
+}
+
 void IOBTagger::Classify( frog_data& swords ){
   vector<string> words;
   vector<string> ptags;

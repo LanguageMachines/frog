@@ -253,6 +253,13 @@ void NERTagger::addDeclaration( folia::Document& doc ) const {
 	       + "', annotatortype='auto', datetime='" + getTime() + "'");
 }
 
+void NERTagger::add_declaration( folia::Document& doc,
+				 folia::processor *proc ) const {
+  folia::KWargs args;
+  args["processor"] = proc->id();
+  doc.declare( folia::AnnotationType::ENTITY, tagset, args );
+}
+
 void NERTagger::Classify( frog_data& swords ){
   if ( debug ){
     DBG << "classify from DATA" << endl;
