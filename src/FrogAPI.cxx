@@ -739,7 +739,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	ofstream os( tmp_file );
 	os << result << endl;
 	os.close();
-	run_folia_processor( tmp_file, output_stream );
+	run_folia_engine( tmp_file, output_stream );
 	LOG << "Done Processing XML... " << endl;
       }
       else {
@@ -1530,14 +1530,14 @@ void FrogAPI::handle_one_text_parent( ostream& os,
   }
 }
 
-void FrogAPI::run_folia_processor( const string& infilename,
-				   ostream& output_stream,
-				   const string& xmlOutFile ){
+void FrogAPI::run_folia_engine( const string& infilename,
+				ostream& output_stream,
+				const string& xmlOutFile ){
   if ( options.inputclass == options.outputclass ){
     tokenizer->setFiltering(false);
   }
   if ( options.debugFlag > 0 ){
-    DBG << "folia_processor(" << infilename << "," << xmlOutFile << ")" << endl;
+    DBG << "run_folia_engine(" << infilename << "," << xmlOutFile << ")" << endl;
   }
   if ( xmlOutFile.empty() ){
     options.noStdOut = false;
@@ -1610,9 +1610,9 @@ void FrogAPI::run_folia_processor( const string& infilename,
   }
 }
 
-void FrogAPI::run_text_processor( const string& infilename,
-				  ostream& os,
-				  const string& xmlOutFile ){
+void FrogAPI::run_text_engine( const string& infilename,
+			       ostream& os,
+			       const string& xmlOutFile ){
   ifstream test_file( infilename );
   int i = 0;
   folia::Document *doc = 0;
@@ -1676,10 +1676,10 @@ void FrogAPI::FrogFile( const string& infilename,
 	  xmlOutFile += ".bz2";
       }
     }
-    run_folia_processor( infilename, os, xmlOutFile );
+    run_folia_engine( infilename, os, xmlOutFile );
   }
   else {
-    run_text_processor( infilename, os, xmlOutF );
+    run_text_engine( infilename, os, xmlOutF );
   }
   if ( !options.hide_timers ){
     LOG << "tokenisation took:  " << timers.tokTimer << endl;
