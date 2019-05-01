@@ -622,17 +622,6 @@ void Mbma::assign_compounds(){
   }
 }
 
-void Mbma::addDeclaration( folia::Document& doc ) const {
-  doc.declare( folia::AnnotationType::MORPHOLOGICAL, mbma_tagset,
-	       "annotator='frog-mbma-" + _version +
-	       + "', annotatortype='auto', datetime='" + getTime() + "'");
-  if ( doDeepMorph ){
-    doc.declare( folia::AnnotationType::POS, clex_tagset,
-		 "annotator='frog-mbma-" + _version +
-		 + "', annotatortype='auto', datetime='" + getTime() + "'");
-  }
-}
-
 void Mbma::add_provenance( folia::Document& doc ) const {
   string _label = "mbma";
   folia::processor *proc = doc.get_processor( _label );
@@ -650,7 +639,6 @@ void Mbma::add_provenance( folia::Document& doc ) const {
     doc.declare( folia::AnnotationType::POS, clex_tagset, args );
   }
 }
-
 
 void Mbma::store_morphemes( frog_record& fd,
 			    const vector<string>& morphemes ) const {

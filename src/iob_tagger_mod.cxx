@@ -54,13 +54,6 @@ bool IOBTagger::init( const TiCC::Configuration& config ){
   return true;
 }
 
-void IOBTagger::addDeclaration( folia::Document& doc ) const {
-  doc.declare( folia::AnnotationType::CHUNKING,
-	       tagset,
-	       "annotator='frog-chunker-" + _version
-	       + "', annotatortype='auto', datetime='" + getTime() + "'");
-}
-
 void IOBTagger::add_declaration( folia::Document& doc,
 				 folia::processor *proc ) const {
   folia::KWargs args;

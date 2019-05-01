@@ -273,30 +273,16 @@ bool UctoTokenizer::getPassThru() const {
   }
 }
 
-void UctoTokenizer::add_provenance_passthru( folia::Document *doc ) const {
-  if ( tokenizer ){
+void UctoTokenizer::add_provenance( folia::Document *doc ) const {
+  if ( !tokenizer ){
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+  if ( tokenizer->getPassThru() ){
     tokenizer->add_provenance_passthru( doc );
   }
   else {
-    throw runtime_error( "ucto tokenizer not initialized" );
-  }
-}
-
-void UctoTokenizer::add_provenance_setting( folia::Document *doc ) const {
-  if ( tokenizer ){
     tokenizer->add_provenance_setting( doc );
-  }
-  else {
-    throw runtime_error( "ucto tokenizer not initialized" );
-  }
-}
-
-void UctoTokenizer::add_provenance_structure( folia::Document *doc ) const {
-  if ( tokenizer ){
     tokenizer->add_provenance_structure( doc );
-  }
-  else {
-    throw runtime_error( "ucto tokenizer not initialized" );
   }
 }
 
@@ -438,7 +424,10 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
 					       const frog_data& fd ) const {
   string textclass = tokenizer->getOutputClass();
   string tok_set;
-  if ( fd.language != "default" ){
+  if ( fd.language.empty() ){
+    tok_set = "passthru";
+  }
+  else if ( fd.language != "default" ){
     tok_set = "tokconfig-" + fd.language;
   }
   else {

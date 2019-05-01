@@ -55,7 +55,6 @@ class Mbma {
   explicit Mbma( TiCC::LogStream *, TiCC::LogStream * =0 );
   ~Mbma();
   bool init( const TiCC::Configuration& );
-  void addDeclaration( folia::Document& doc ) const;
   void add_provenance( folia::Document& ) const;
   void Classify( frog_record& );
   void Classify( const icu::UnicodeString& );

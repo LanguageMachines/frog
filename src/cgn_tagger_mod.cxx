@@ -133,13 +133,6 @@ bool CGNTagger::init( const TiCC::Configuration& config ){
   return true;
 }
 
-void CGNTagger::addDeclaration( folia::Document& doc ) const {
-  doc.declare( folia::AnnotationType::POS,
-	       tagset,
-	       "annotator='frog-mbpos-" + _version
-	       + "', annotatortype='auto', datetime='" + getTime() + "'");
-}
-
 void CGNTagger::add_declaration( folia::Document& doc,
 				 folia::processor *proc ) const {
   folia::KWargs args;

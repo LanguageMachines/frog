@@ -264,13 +264,6 @@ void Mblem::makeUnique( ){
   }
 }
 
-void Mblem::addDeclaration( folia::Document& doc ) const {
-  doc.declare( folia::AnnotationType::LEMMA,
-	       tagset,
-	       "annotator='frog-mblem-" + _version
-	       + "', annotatortype='auto', datetime='" + getTime() + "'");
-}
-
 void Mblem::add_provenance( folia::Document& doc ) const {
   string _label = "mblem";
   folia::processor *proc = doc.get_processor( _label );

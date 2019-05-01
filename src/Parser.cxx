@@ -99,10 +99,10 @@ bool Parser::init( const TiCC::Configuration& configuration ){
   }
   val = configuration.lookUp( "version", "parser" );
   if ( val.empty() ){
-    version = "1.0";
+    _version = "1.0";
   }
   else {
-    version = val;
+    _version = val;
   }
   val = configuration.lookUp( "set", "parser" );
   if ( val.empty() ){
@@ -779,10 +779,19 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
 }
 
 
-void Parser::addDeclaration( folia::Document& doc ) const {
-  doc.declare( folia::AnnotationType::DEPENDENCY, dep_tagset,
-	       "annotator='frog-depparse-" + version
-	       + "', annotatortype='auto'");
+void Parser::add_provenance( folia::Document& doc ) const {
+  string _label = "dep-parser";
+  folia::processor *proc = doc.get_processor( _label );
+  if ( !proc ){
+    folia::KWargs args;
+    args["name"] = _label;
+    args["id"] = _label + ".1";
+    args["version"] = _version;
+    proc = doc.add_processor( args );
+  }
+  folia::KWargs args;
+  args["processor"] = proc->id();
+  doc.declare( folia::AnnotationType::DEPENDENCY, dep_tagset, args );
 }
 
 void extract( const string& tv, string& head, string& mods ){

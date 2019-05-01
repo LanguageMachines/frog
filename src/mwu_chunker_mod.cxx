@@ -187,13 +187,6 @@ ostream &operator<<( ostream& os, const Mwu& mwu ){
   return os;
 }
 
-void Mwu::addDeclaration( folia::Document& doc ) const {
-  doc.declare( folia::AnnotationType::ENTITY,
-	       mwu_tagset,
-	       "annotator='frog-mwu-" + _version
-	       + "', annotatortype='auto', datetime='" + getTime() + "'");
-}
-
 void Mwu::add_provenance( folia::Document& doc ) const {
   string _label = "mwu";
   folia::processor *proc = doc.get_processor( _label );

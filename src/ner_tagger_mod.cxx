@@ -246,13 +246,6 @@ vector<string> NERTagger::create_ner_list( const vector<string>& words,
   return serialize( stags );
 }
 
-void NERTagger::addDeclaration( folia::Document& doc ) const {
-  doc.declare( folia::AnnotationType::ENTITY,
-	       tagset,
-	       "annotator='frog-ner-" + _version
-	       + "', annotatortype='auto', datetime='" + getTime() + "'");
-}
-
 void NERTagger::add_declaration( folia::Document& doc,
 				 folia::processor *proc ) const {
   folia::KWargs args;

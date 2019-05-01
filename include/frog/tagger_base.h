@@ -50,7 +50,6 @@ class BaseTagger {
   virtual bool init( const TiCC::Configuration& );
   virtual void post_process( frog_data& ) = 0;
   virtual void Classify( frog_data& );
-  virtual void addDeclaration( folia::Document& ) const = 0;
   virtual void add_declaration( folia::Document&, folia::processor * ) const = 0;
   void add_provenance( folia::Document& ) const;
   std::string getTagset() const { return tagset; };

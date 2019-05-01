@@ -510,13 +510,7 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
   doc = new folia::Document( "xml:id='" + id + "'" );
   doc->addStyle( "text/xsl", "folia.xsl" );
   DBG << "start document!!!" << endl;
-  if ( !options.doTok ){
-    tokenizer->add_provenance_passthru( doc );
-  }
-  else {
-    tokenizer->add_provenance_setting( doc );
-  }
-  tokenizer->add_provenance_structure( doc );
+  tokenizer->add_provenance( doc ); // unconditional
   if ( options.doTagger ){
     myCGNTagger->add_provenance( *doc );
   }
@@ -536,7 +530,7 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
     myMwu->add_provenance( *doc );
   }
   if ( options.doParse ){
-    myParser->addDeclaration( *doc );
+    myParser->add_provenance( *doc );
   }
   folia::KWargs args;
   args["xml:id"] = doc->id() + ".text";
@@ -612,6 +606,7 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     DBG << "sentence language = " << la << endl;
   }
   if ( la.empty()
+       && !fd.language.empty()
        && fd.language != "default"
        && fd.language != options.default_language ){
     //
@@ -1544,17 +1539,11 @@ void FrogAPI::run_folia_engine( const string& infilename,
     options.noStdOut = false;
   }
   folia::TextEngine engine( infilename );
-  if ( !options.doTok ){
-    tokenizer->add_provenance_passthru( engine.doc() );
+  tokenizer->add_provenance( engine.doc() ); // unconditional
+  if ( !options.default_language.empty() ){
+    engine.doc()->set_metadata( "language", options.default_language );
   }
-  else {
-    tokenizer->add_provenance_setting( engine.doc() );
-    if ( !options.default_language.empty() ){
-      engine.doc()->set_metadata( "language", options.default_language );
-    }
-  }
-  tokenizer->add_provenance_structure( engine.doc() );
-  if  (options.debugFlag > 8){
+ if  (options.debugFlag > 8){
     engine.set_dbg_stream( theDbgLog );
     engine.set_debug( true );
   }
@@ -1578,7 +1567,7 @@ void FrogAPI::run_folia_engine( const string& infilename,
     myMwu->add_provenance( doc );
   }
   if ( options.doParse ){
-    myParser->addDeclaration( doc );
+    myParser->add_provenance( doc );
   }
   engine.setup( options.inputclass, true );
   int sentence_done = 0;

@@ -49,7 +49,6 @@ class NERTagger: public BaseTagger {
   void post_process( frog_data& );
   void post_process( frog_data&,
 		     const std::vector<tc_pair>& );
-  void addDeclaration( folia::Document& ) const;
   void add_declaration( folia::Document&, folia::processor * ) const;
   void add_result( const frog_data& fd,
 		   const std::vector<folia::Word*>& wv ) const;

@@ -72,7 +72,6 @@ class Mwu {
   ~Mwu();
   void reset();
   bool init( const TiCC::Configuration& );
-  void addDeclaration( folia::Document& ) const;
   void add_provenance( folia::Document& ) const;
   void Classify( frog_data& );
   void add( frog_record&, size_t );
