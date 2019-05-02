@@ -188,6 +188,7 @@ void BaseTagger::add_provenance( folia::Document& doc,
   args["name"] = _label;
   args["id"] = _label + ".1";
   args["version"] = _version;
+  args["begindatetime"] = "now()";
   folia::processor *proc = doc.add_processor( args, main );
   add_declaration( doc, proc );
 }

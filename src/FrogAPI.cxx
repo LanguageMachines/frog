@@ -512,7 +512,7 @@ folia::processor *FrogAPI::add_provenance( folia::Document& doc ) const {
     folia::KWargs args;
     args["name"] = _label;
     args["id"] = _label + ".1";
-    args["command"] = options.command;
+    args["command"] = "frog " + options.command;
     args["version"] = PACKAGE_VERSION;
     args["generator"] = "yes";
     proc = doc.add_processor( args );
