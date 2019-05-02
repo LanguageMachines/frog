@@ -514,6 +514,7 @@ folia::processor *FrogAPI::add_provenance( folia::Document& doc ) const {
     args["id"] = _label + ".1";
     args["command"] = options.command;
     args["version"] = PACKAGE_VERSION;
+    args["generator"] = "yes";
     proc = doc.add_processor( args );
     proc->get_system_defaults();
   }
