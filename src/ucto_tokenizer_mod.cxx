@@ -273,16 +273,17 @@ bool UctoTokenizer::getPassThru() const {
   }
 }
 
-void UctoTokenizer::add_provenance( folia::Document *doc ) const {
+void UctoTokenizer::add_provenance( folia::Document& doc,
+				    folia::processor *main ) const {
   if ( !tokenizer ){
     throw runtime_error( "ucto tokenizer not initialized" );
   }
   if ( tokenizer->getPassThru() ){
-    tokenizer->add_provenance_passthru( doc );
+    tokenizer->add_provenance_passthru( &doc, main );
   }
   else {
-    tokenizer->add_provenance_setting( doc );
-    tokenizer->add_provenance_structure( doc );
+    tokenizer->add_provenance_setting( &doc, main );
+    tokenizer->add_provenance_structure( &doc, main );
   }
 }
 

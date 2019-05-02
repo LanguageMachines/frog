@@ -90,6 +90,7 @@ class FrogOptions {
   std::set<std::string> languages;
   std::string textredundancy;
   unsigned int maxParserTokens;
+  std::string command;
 
   FrogOptions();
  private:
@@ -136,6 +137,7 @@ class FrogAPI {
   void add_parse_result( folia::Sentence *,
 			 const frog_data&,
 			 const std::vector<folia::Word*>& ) const;
+  folia::processor *add_provenance( folia::Document& ) const;
   void test_version( const std::string&, double );
   // functions
   void FrogStdin( bool prompt );

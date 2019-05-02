@@ -505,33 +505,52 @@ FrogAPI::~FrogAPI() {
   delete tokenizer;
 }
 
+folia::processor *FrogAPI::add_provenance( folia::Document& doc ) const {
+  string _label = "frog";
+  folia::processor *proc = doc.get_processor( _label );
+  if ( !proc ){
+    folia::KWargs args;
+    args["name"] = _label;
+    args["id"] = _label + ".1";
+    args["command"] = options.command;
+    args["version"] = PACKAGE_VERSION;
+    proc = doc.add_processor( args );
+    proc->get_system_defaults();
+  }
+  if ( options.debugFlag > 4 ){
+    DBG << "add_provenance(), using processor: " << proc->id() << endl;
+  }
+      tokenizer->add_provenance( doc, proc ); // unconditional
+  if ( options.doTagger ){
+    myCGNTagger->add_provenance( doc, proc );
+  }
+  if ( options.doLemma ){
+    myMblem->add_provenance( doc, proc );
+  }
+  if ( options.doMorph ){
+    myMbma->add_provenance( doc, proc );
+  }
+  if ( options.doIOB ){
+    myIOBTagger->add_provenance( doc, proc );
+  }
+  if ( options.doNER ){
+    myNERTagger->add_provenance( doc, proc );
+  }
+  if ( options.doMwu ){
+    myMwu->add_provenance( doc, proc );
+  }
+  if ( options.doParse ){
+    myParser->add_provenance( doc, proc );
+  }
+  return proc;
+}
+
 folia::FoliaElement* FrogAPI::start_document( const string& id,
 					      folia::Document *& doc ) const {
   doc = new folia::Document( "xml:id='" + id + "'" );
   doc->addStyle( "text/xsl", "folia.xsl" );
   DBG << "start document!!!" << endl;
-  tokenizer->add_provenance( doc ); // unconditional
-  if ( options.doTagger ){
-    myCGNTagger->add_provenance( *doc );
-  }
-  if ( options.doLemma ){
-    myMblem->add_provenance( *doc );
-  }
-  if ( options.doMorph ){
-    myMbma->add_provenance( *doc );
-  }
-  if ( options.doNER ){
-    myNERTagger->add_provenance( *doc );
-  }
-  if ( options.doIOB ){
-    myIOBTagger->add_provenance( *doc );
-  }
-  if ( options.doMwu ){
-    myMwu->add_provenance( *doc );
-  }
-  if ( options.doParse ){
-    myParser->add_provenance( *doc );
-  }
+  add_provenance( *doc );
   folia::KWargs args;
   args["xml:id"] = doc->id() + ".text";
   folia::Text *text = new folia::Text( args );
@@ -1539,37 +1558,18 @@ void FrogAPI::run_folia_engine( const string& infilename,
     options.noStdOut = false;
   }
   folia::TextEngine engine( infilename );
-  tokenizer->add_provenance( engine.doc() ); // unconditional
-  if ( !options.default_language.empty() ){
-    engine.doc()->set_metadata( "language", options.default_language );
-  }
- if  (options.debugFlag > 8){
+  engine.setup( options.inputclass, true );
+  if  (options.debugFlag > 8){
     engine.set_dbg_stream( theDbgLog );
     engine.set_debug( true );
   }
   folia::Document &doc = *engine.doc();
-  if ( options.doTagger ){
-    myCGNTagger->add_provenance( doc );
+  if ( !options.default_language.empty() ){
+    if ( doc.metadatatype() == "native" ){
+      doc.set_metadata( "language", options.default_language );
+    }
   }
-  if ( options.doLemma ){
-    myMblem->add_provenance( doc );
-  }
-  if ( options.doMorph ){
-    myMbma->add_provenance( doc );
-  }
-  if ( options.doIOB ){
-    myIOBTagger->add_provenance( doc );
-  }
-  if ( options.doNER ){
-    myNERTagger->add_provenance( doc );
-  }
-  if ( options.doMwu ){
-    myMwu->add_provenance( doc );
-  }
-  if ( options.doParse ){
-    myParser->add_provenance( doc );
-  }
-  engine.setup( options.inputclass, true );
+  add_provenance( doc );
   int sentence_done = 0;
   folia::FoliaElement *p = 0;
   while ( (p = engine.next_text_parent() ) ){

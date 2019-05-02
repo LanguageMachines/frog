@@ -51,7 +51,7 @@ class BaseTagger {
   virtual void post_process( frog_data& ) = 0;
   virtual void Classify( frog_data& );
   virtual void add_declaration( folia::Document&, folia::processor * ) const = 0;
-  void add_provenance( folia::Document& ) const;
+  void add_provenance( folia::Document&, folia::processor * ) const;
   std::string getTagset() const { return tagset; };
   std::string set_eos_mark( const std::string& );
   bool fill_map( const std::string&, std::map<std::string,std::string>& );

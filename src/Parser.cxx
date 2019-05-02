@@ -779,17 +779,17 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
 }
 
 
-void Parser::add_provenance( folia::Document& doc ) const {
+void Parser::add_provenance( folia::Document& doc, folia::processor *main ) const {
   string _label = "dep-parser";
-  folia::processor *proc = doc.get_processor( _label );
-  if ( !proc ){
-    folia::KWargs args;
-    args["name"] = _label;
-    args["id"] = _label + ".1";
-    args["version"] = _version;
-    proc = doc.add_processor( args );
+  if ( !main ){
+    throw logic_error( "Parser::add_provenance() without arguments." );
   }
   folia::KWargs args;
+  args["name"] = _label;
+  args["id"] = _label + ".1";
+  args["version"] = _version;
+  folia::processor *proc = doc.add_processor( args, main );
+  args.clear();
   args["processor"] = proc->id();
   doc.declare( folia::AnnotationType::DEPENDENCY, dep_tagset, args );
 }

@@ -147,7 +147,7 @@ bool parse_args( TiCC::CL_Options& Opts,
 		 TiCC::LogStream* theErrLog ){
   // process the command line and fill FrogOptions to initialize the API
   // also fill some globals we use for our own main.
-
+  options.command = Opts.toString();
   // is a language-list specified? Default is dutch
   string language;
   string languages;

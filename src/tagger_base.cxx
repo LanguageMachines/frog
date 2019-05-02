@@ -179,15 +179,16 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   return tagger->isInit();
 }
 
-void BaseTagger::add_provenance( folia::Document& doc ) const {
-  folia::processor *proc = doc.get_processor( _label );
-  if ( !proc ){
-    folia::KWargs args;
-    args["name"] = _label;
-    args["id"] = _label + ".1";
-    args["version"] = _version;
-    proc = doc.add_processor( args );
+void BaseTagger::add_provenance( folia::Document& doc,
+				 folia::processor *main ) const {
+  if ( !main ){
+    throw logic_error( _label + "::add_provenance() without parent proc." );
   }
+  folia::KWargs args;
+  args["name"] = _label;
+  args["id"] = _label + ".1";
+  args["version"] = _version;
+  folia::processor *proc = doc.add_processor( args, main );
   add_declaration( doc, proc );
 }
 

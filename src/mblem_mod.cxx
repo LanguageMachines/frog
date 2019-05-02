@@ -264,17 +264,18 @@ void Mblem::makeUnique( ){
   }
 }
 
-void Mblem::add_provenance( folia::Document& doc ) const {
+void Mblem::add_provenance( folia::Document& doc,
+			    folia::processor *main ) const {
   string _label = "mblem";
-  folia::processor *proc = doc.get_processor( _label );
-  if ( !proc ){
-    folia::KWargs args;
-    args["name"] = _label;
-    args["id"] = _label + ".1";
-    args["version"] = _version;
-    proc = doc.add_processor( args );
+  if ( !main ){
+    throw logic_error( "mblem::add_provenance() without arguments." );
   }
   folia::KWargs args;
+  args["name"] = _label;
+  args["id"] = _label + ".1";
+  args["version"] = _version;
+  folia::processor *proc = doc.add_processor( args, main );
+  args.clear();
   args["processor"] = proc->id();
   doc.declare( folia::AnnotationType::LEMMA, tagset, args );
 }

@@ -61,7 +61,7 @@ class UctoTokenizer {
   std::string tokenizeStream( std::istream& );
   std::vector<folia::Word*> add_words( folia::Sentence *,
 				       const frog_data& ) const;
-  void add_provenance( folia::Document * ) const;
+  void add_provenance( folia::Document& , folia::processor * ) const;
  private:
   std::vector<Tokenizer::Token> queue;  // for the reentrant tokenize_stream()
   std::istream *cur_is;
