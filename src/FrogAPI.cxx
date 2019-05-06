@@ -811,7 +811,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	}
 	//	DBG << "Done Processing... " << endl;
       }
-      if (!conn.write( (output_stream.str()) ) || !(conn.write("READY\n"))  ){
+      if (!conn.write( (output_stream.str()) ) || !(conn.write("READY\n\n"))  ){
 	if (options.debugFlag > 5 ) {
 	  DBG << "socket " << conn.getMessage() << endl;
 	}
