@@ -96,9 +96,9 @@ before_install:
   - sudo make install
   - cd ..
   - git clone https://github.com/LanguageMachines/ucto
-   - cd ucto
-   - if [ "$TRAVIS_BRANCH" == "folia2.0" ]; then git checkout folia2.0; fi
-   - bash bootstrap.sh
+  - cd ucto
+  - if [ "$TRAVIS_BRANCH" == "folia2.0" ]; then git checkout folia2.0; fi
+  - bash bootstrap.sh
   - ./configure $OPENMPFLAG
   - make
   - sudo make install
