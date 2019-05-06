@@ -561,7 +561,7 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
   folia::KWargs args;
   args["xml:id"] = doc->id() + ".text";
   folia::Text *text = new folia::Text( args );
-  doc->setRoot( text );
+  doc->addText( text );
   return text;
 }
 
@@ -632,10 +632,12 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
     }
     folia::LangAnnotation *la = new folia::LangAnnotation( args, root->doc() );
     s->append( la );
-    string text = fd.sentence(); // get tokenized, space separated, sentence.
-    text = TiCC::trim( text );
-    if ( !text.empty() ){
-      s->settext( text );
+    if ( options.textredundancy == "full" ){
+      string text = fd.sentence(false); // get detokenized sentence.
+      text = TiCC::trim( text );
+      if ( !text.empty() ){
+	s->settext( s->str(options.outputclass), options.outputclass );
+      }
     }
   }
   else {
@@ -1595,7 +1597,7 @@ void FrogAPI::run_folia_processor( const string& infilename,
   if ( xmlOutFile.empty() ){
     options.noStdOut = false;
   }
-  folia::TextProcessor proc( infilename );
+  folia::TextEngine proc( infilename );
   if ( !options.doTok ){
     proc.declare( folia::AnnotationType::TOKEN, "passthru",
 		  "annotator='ucto', annotatortype='auto', datetime='now()'" );
