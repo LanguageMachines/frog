@@ -1,3 +1,4 @@
+---   # frog.yml
 sudo: required
 group: edge
 
@@ -5,6 +6,7 @@ group: edge
 branches:
   only:
     - master
+    - folia2.0
 
 notifications:
   irc:
@@ -80,6 +82,7 @@ before_install:
   - cd ..
   - git clone https://github.com/LanguageMachines/libfolia
   - cd libfolia
+  - if [ "$TRAVIS_BRANCH" == "folia2.0" ]; then git checkout folia2.0; fi
   - bash bootstrap.sh
   - ./configure $OPENMPFLAG
   - make
@@ -93,8 +96,9 @@ before_install:
   - sudo make install
   - cd ..
   - git clone https://github.com/LanguageMachines/ucto
-  - cd ucto
-  - bash bootstrap.sh
+   - cd ucto
+   - if [ "$TRAVIS_BRANCH" == "folia2.0" ]; then git checkout folia2.0; fi
+   - bash bootstrap.sh
   - ./configure $OPENMPFLAG
   - make
   - sudo make install
@@ -119,7 +123,8 @@ before_install:
   - ./configure $OPENMPFLAG
   - make
   - sudo make install
-  - cd ..
+  - cd .
+  - if [ "$TRAVIS_BRANCH" == "folia2.0" ]; then git checkout folia2.0; fi
 
 install:
   - bash bootstrap.sh
@@ -135,9 +140,7 @@ script:
   - make check
   - git clone https://github.com/LanguageMachines/frogtests.git;
   - cd frogtests
-  - if [ "$TRAVIS_BRANCH" == "new_datastructure" ]; then
-      git checkout new_datastructure;
-    fi
+  - if [ "$TRAVIS_BRANCH" == "folia2.0" ]; then git checkout folia2.0; fi
   - frog_bin=/usr/local/bin ./testall >&2
 
 after_failure:
