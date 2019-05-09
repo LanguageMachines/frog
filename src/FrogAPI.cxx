@@ -34,13 +34,13 @@
 #include <cstdio>
 #include <unistd.h>
 #include <signal.h>
+#include <algorithm>
 #include <string>
 #include <cstring>
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <vector>
-#include <unordered_map>
 #include "config.h"
 #ifdef HAVE_OPENMP
 #include <omp.h>
@@ -581,19 +581,7 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     //
     // so the language is non default, and not set
     //
-    folia::KWargs args;
-    args["class"] = fd.language;
-    string sett = sent->doc()->defaultset( folia::AnnotationType::LANG );
-    if ( sett.empty() ){
-      sett = ISO_SET;
-      folia::KWargs args;
-      args["processor"] = "ucto.1";
-      sent->doc()->declare( folia::AnnotationType::LANG,
-			    ISO_SET,
-			    args );
-    }
-    folia::LangAnnotation *la = new folia::LangAnnotation( args, sent->doc() );
-    sent->append( la );
+    Tokenizer::set_language( sent, fd.language );
     if ( options.textredundancy == "full" ){
       sent->settext( sent->str(options.inputclass), options.inputclass );
     }
@@ -797,10 +785,9 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	// tokenize_line() delivers 1 sentence at a time and should
 	//  be called multiple times to get all sentences!
 	vector<Tokenizer::Token> toks = tokenizer->tokenize_line( data );
-	frog_data sent = extract_fd( toks );
 	timers.tokTimer.stop();
-	while ( sent.size() > 0 ){
-	  frog_sentence( sent, 1 );
+	while ( toks.size() > 0 ){
+	  frog_data sent = frog_sentence( toks, 1 );
 	  if ( options.doXMLout ){
 	    root = append_to_folia( root, sent );
 	  }
@@ -809,7 +796,6 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	  }
 	  timers.tokTimer.start();
 	  toks = tokenizer->tokenize_line_next();
-	  sent = extract_fd( toks );
 	  timers.tokTimer.stop();
 	}
 	if ( options.doXMLout && doc ){
@@ -874,12 +860,10 @@ void FrogAPI::FrogStdin( bool prompt ) {
       cout << "Processing... " << endl;
     }
     vector<Tokenizer::Token> toks = tokenizer->tokenize_line( data );
-    frog_data res = extract_fd( toks );
-    while ( res.size() > 0 ){
-      frog_sentence( res, 1 );
+    while ( toks.size() > 0 ){
+      frog_data res = frog_sentence( toks, 1 );
       show_results( cout, res );
       toks = tokenizer->tokenize_line_next();
-      res = extract_fd( toks );
     }
     if ( prompt ){
       cout << "frog>"; cout.flush();
@@ -948,12 +932,10 @@ void FrogAPI::FrogInteractive(){
 	}
 	cout << "Processing... '" << data << "'" << endl;
 	vector<Tokenizer::Token> toks = tokenizer->tokenize_line( data );
-	frog_data res = extract_fd( toks );
-	while ( !res.empty() ){
-	  frog_sentence( res, 1 );
+	while ( !toks.empty() ){
+	  frog_data res = frog_sentence( toks, 1 );
 	  show_results( cout, res );
 	  toks = tokenizer->tokenize_line_next();
-	  res = extract_fd( toks );
 	}
       }
     }
@@ -1154,14 +1136,13 @@ bool FrogAPI::frog_sentence( frog_data& sent, const size_t s_count ){
 
 frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
 				  const size_t s_count ){
-  frog_data sentence;
   string lan = get_language( sent );
   if ( options.debugFlag > 0 ){
     DBG << "frog_sentence() on a part. (lang=" << lan << ")" << endl;
     DBG << "tokens:\n" << sent << endl;
     DBG << "options.default_language=" << options.default_language << endl;
   }
-  sentence = extract_fd( sent );
+  frog_data sentence = extract_fd( sent );
   if ( !options.default_language.empty()
        && !lan.empty()
        && lan != "default"
@@ -1470,17 +1451,22 @@ void FrogAPI::handle_one_sentence( ostream& os,
   if ( !wv.empty() ){
     // there are already words.
     // assume unfrogged yet
-    frog_data res;
+    string text;
     for ( const auto& w : wv ){
-      frog_record rec = extract_from_word( w, options.inputclass );
-      res.append( rec );
+      string tmp = w->str( options.inputclass );
+      replace( tmp.begin(), tmp.end(), ' ', '_' );
+      text += tmp + " ";
     }
-    res.language = s->language();
     if  ( options.debugFlag > 1 ){
       DBG << "handle_one_sentence() on existing words" << endl;
-      DBG << "handle_one_sentence() tokenized string: '" << res.sentence() << "'" << endl;
+      DBG << "handle_one_sentence() untokenized string: '" << text << "'" << endl;
     }
-    if ( frog_sentence( res, s_cnt ) ){
+    vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text );
+    cerr << "text:" << text << " size=" << wv.size() << endl;
+    cerr << "tokens:" << toks << " size=" << toks.size() << endl;
+    frog_data res = frog_sentence( toks, s_cnt );
+    cerr << "res:" << res << " size=" << res.size() << endl;
+    if ( res.size() > 0 ){
       if ( !options.noStdOut ){
 	show_results( os, res );
       }
@@ -1586,11 +1572,10 @@ void FrogAPI::handle_one_text_parent( ostream& os,
   if ( e->xmltag() == "w" ){
     // already tokenized into words!
     folia::Word *word = dynamic_cast<folia::Word*>(e);
-    frog_data res;
-    frog_record tmp = extract_from_word( word, options.inputclass );
-    res.append(tmp);
-    res.language = word->language();
-    frog_sentence( res, ++sentence_done );
+    string text = word->str( options.inputclass );
+    replace( text.begin(), text.end(), ' ', '_' );
+    vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text );
+    frog_data res = frog_sentence( toks, ++sentence_done );
     if ( !options.noStdOut ){
       show_results( os, res );
     }
@@ -1639,18 +1624,16 @@ void FrogAPI::handle_one_text_parent( ostream& os,
       }
       timers.tokTimer.start();
       vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text );
-      frog_data res = extract_fd( toks );
       timers.tokTimer.stop();
       vector<frog_data> sents;
-      while ( res.size() > 0 ){
-	frog_sentence( res, ++sentence_done );
+      while ( toks.size() > 0 ){
+	frog_data res = frog_sentence( toks, ++sentence_done );
 	sents.push_back( res );
 	if ( !options.noStdOut ){
 	  show_results( os, res );
 	}
 	timers.tokTimer.start();
 	toks = tokenizer->tokenize_line_next( );
-	res = extract_fd( toks );
 	timers.tokTimer.stop();
       }
       if ( options.doXMLout ){
