@@ -307,7 +307,7 @@ string UctoTokenizer::tokenizeStream( istream& is ){
     throw runtime_error( "ucto tokenizer not initialized" );
 }
 
-frog_data create_fd( vector<Tokenizer::Token>& tokens ){
+frog_data extract_fd( vector<Tokenizer::Token>& tokens ){
   frog_data result;
   int quotelevel = 0;
   while ( !tokens.empty() ){
@@ -346,7 +346,7 @@ frog_data UctoTokenizer::tokenize_stream_next( ){
     vector<Tokenizer::Token> new_toks = tokenizer->tokenizeOneSentence( *cur_is );
     // add new tokens to the queue
     queue.insert( queue.end(), new_toks.begin(), new_toks.end() );
-    frog_data result = create_fd( queue ); // may leave entries in the queue
+    frog_data result = extract_fd( queue ); // may leave entries in the queue
     return result;
   }
   else {
@@ -367,8 +367,8 @@ frog_data UctoTokenizer::tokenize_stream( istream& is ){
   }
 }
 
-frog_data UctoTokenizer::tokenize_line( const string& line,
-					const string& lang ){
+vector<Tokenizer::Token> UctoTokenizer::tokenize_line( const string& line,
+						       const string& lang ){
   if ( tokenizer ){
     tokenizer->tokenizeLine( line, lang ); // will consume whole line!
     return tokenize_line_next(); // returns next sentence in the line
@@ -378,10 +378,9 @@ frog_data UctoTokenizer::tokenize_line( const string& line,
   }
 }
 
-frog_data UctoTokenizer::tokenize_line_next() {
+vector<Tokenizer::Token> UctoTokenizer::tokenize_line_next() {
   if ( tokenizer ){
-    vector<Tokenizer::Token> tokens = tokenizer->popSentence();
-    return create_fd( tokens );
+    return tokenizer->popSentence();
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );

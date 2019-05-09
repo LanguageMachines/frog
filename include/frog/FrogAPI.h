@@ -41,6 +41,7 @@
 #include "ticcutils/ServerBase.h"
 
 #include "libfolia/folia.h"
+#include "ucto/tokenize.h"
 
 #include "frog/Frog-util.h"
 #include "frog/FrogData.h"
@@ -111,6 +112,7 @@ class FrogAPI {
   void FrogServer( Sockets::ServerSocket &conn );
   void FrogInteractive();
   bool frog_sentence( frog_data&, const size_t );
+  frog_data frog_sentence( std::vector<Tokenizer::Token>&, const size_t );
   void run_folia_engine( const std::string&,
 			 std::ostream&,
 			 const std::string& = "" );
