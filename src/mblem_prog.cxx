@@ -175,6 +175,10 @@ bool init(){
 void Test( istream& in, ostream& os ){
   string line;
   while ( getline( in, line ) ){
+    if ( line.empty() ) {
+      os << endl;
+      continue;
+    }
     vector<string> sentences;
     if ( useTokenizer ){
       sentences = tokenizer.tokenize( line );
