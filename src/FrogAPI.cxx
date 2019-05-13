@@ -983,166 +983,18 @@ string get_language( frog_data& fd ){
   return fd.language;
 }
 
-bool FrogAPI::frog_sentence( frog_data& sent, const size_t s_count ){
-  string lan = get_language( sent );
-  if ( options.debugFlag > 2 ){
-    DBG << "frog_sentence\n" << sent << endl;
-    DBG << "options.default_language=" << options.default_language << endl;
-    DBG << "lan=" << lan << endl;
-  }
-  if ( !options.default_language.empty()
-       && !lan.empty()
-       && lan != "default"
-       && lan != options.default_language ){
-    if ( options.debugFlag > 0 ){
-      DBG << "skipping sentence " << s_count << " (different language: " << lan
-	   << " --language=" << options.default_language << ")" << endl;
-    }
-    return false;
-  }
-  else {
-    timers.frogTimer.start();
-    if ( options.debugFlag > 5 ){
-      DBG << "Frogging sentence:" << sent << endl;
-      DBG << "tokenized text = " << sent.sentence() << endl;
-    }
-    bool all_well = true;
-    string exs;
-    timers.tagTimer.start();
-    try {
-      myCGNTagger->Classify( sent );
-    }
-    catch ( exception&e ){
-      all_well = false;
-      exs += string(e.what()) + " ";
-    }
-    timers.tagTimer.stop();
-    if ( !all_well ){
-      throw runtime_error( exs );
-    }
-    for ( auto& word : sent.units ) {
-#pragma omp parallel sections
-      {
-	// Lemmatization and Mophological analysis can be done in parallel
-	// per word
-#pragma omp section
-	{
-	  if ( options.doMorph ){
-	    timers.mbmaTimer.start();
-	    if (options.debugFlag > 1){
-	      DBG << "Calling mbma..." << endl;
-	    }
-	    try {
-	      myMbma->Classify( word );
-	    }
-	    catch ( exception& e ){
-	      all_well = false;
-	      exs += string(e.what()) + " ";
-	    }
-	    timers.mbmaTimer.stop();
-	  }
-	}
-#pragma omp section
-	{
-	  if ( options.doLemma ){
-	    timers.mblemTimer.start();
-	    if (options.debugFlag > 1) {
-	      DBG << "Calling mblem..." << endl;
-	    }
-	    try {
-	      myMblem->Classify( word );
-	    }
-	    catch ( exception&e ){
-	      all_well = false;
-	      exs += string(e.what()) + " ";
-	    }
-	    timers.mblemTimer.stop();
-	  }
-	}
-      } // omp parallel sections
-    } //for all words
-    if ( !all_well ){
-      throw runtime_error( exs );
-    }
-    //    cout << endl;
-#pragma omp parallel sections
-    {
-      // NER and IOB tagging can be done in parallel, per Sentence
-#pragma omp section
-      {
-	if ( options.doNER ){
-	  timers.nerTimer.start();
-	  if (options.debugFlag > 1) {
-	    DBG << "Calling NER..." << endl;
-	  }
-	  try {
-	    myNERTagger->Classify( sent );
-	  }
-	  catch ( exception&e ){
-	    all_well = false;
-	    exs += string(e.what()) + " ";
-	  }
-	  timers.nerTimer.stop();
-	}
-      }
-#pragma omp section
-      {
-	if ( options.doIOB ){
-	  timers.iobTimer.start();
-	  try {
-	    myIOBTagger->Classify( sent );
-	  }
-	  catch ( exception&e ){
-	    all_well = false;
-	    exs += string(e.what()) + " ";
-	  }
-	  timers.iobTimer.stop();
-	}
-      }
-    }
-    //
-    // MWU resolution needs the previous results per sentence
-    // AND must be done before parsing
-    //
-    if ( !all_well ){
-      throw runtime_error( exs );
-    }
-    if ( options.doMwu ){
-      if ( !sent.empty() ){
-	timers.mwuTimer.start();
-	myMwu->Classify( sent );
-	timers.mwuTimer.stop();
-      }
-    }
-    if ( options.doParse ){
-      if ( options.maxParserTokens == 0
-	   || sent.size() <= options.maxParserTokens ){
-	myParser->Parse( sent, timers );
-      }
-      else {
-	LOG << "WARNING!" << endl;
-	LOG << "Sentence " << s_count
-	    << " isn't parsed because it contains more tokens (" << sent.size()
-	    << ") then set with the --max-parser-tokens="
-	    << options.maxParserTokens << " option." << endl;
-	DBG << 	"Sentence is too long: " << s_count << endl
-	    << sent.sentence(true) << endl;
-      }
-    }
-    timers.frogTimer.stop();
-    return true;
-  }
-}
-
 frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
 				  const size_t s_count ){
-  string lan = get_language( sent );
   if ( options.debugFlag > 0 ){
-    DBG << "frog_sentence() on a part. (lang=" << lan << ")" << endl;
     DBG << "tokens:\n" << sent << endl;
-    DBG << "options.default_language=" << options.default_language << endl;
   }
   frog_data sentence = extract_fd( sent );
+  string lan = get_language( sentence );
+  if ( options.debugFlag > 0 ){
+    DBG << "frog_sentence() on a part. (lang=" << lan << ")" << endl;
+    DBG << "frog_data:\n" << sentence << endl;
+    DBG << "options.default_language=" << options.default_language << endl;
+  }
   if ( !options.default_language.empty()
        && !lan.empty()
        && lan != "default"
@@ -1269,7 +1121,7 @@ frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
     }
     if ( options.doParse ){
       if ( options.maxParserTokens == 0
-	   || sent.size() <= options.maxParserTokens ){
+	   || sentence.size() <= options.maxParserTokens ){
 	myParser->Parse( sentence, timers );
       }
       else {
@@ -1529,26 +1381,27 @@ void FrogAPI::handle_one_paragraph( ostream& os,
     }
     timers.tokTimer.start();
     vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text );
-    frog_data res = extract_fd( toks );
     timers.tokTimer.stop();
-    while ( res.size() > 0 ){
-      frog_sentence( res, ++sentence_done );
-      if ( !options.noStdOut ){
-	show_results( os, res );
-      }
-      if ( options.doXMLout ){
-	folia::KWargs args;
-	string p_id = p->id();
-	if ( !p_id.empty() ){
-	  args["generate_id"] = p_id;
+    while ( toks.size() > 0 ){
+      frog_data res = frog_sentence( toks, ++sentence_done );
+      while ( !res.empty() ){
+	if ( !options.noStdOut ){
+	  show_results( os, res );
 	}
-	folia::Sentence *s = new folia::Sentence( args, p->doc() );
-	p->append( s );
-	append_to_sentence( s, res );
+	if ( options.doXMLout ){
+	  folia::KWargs args;
+	  string p_id = p->id();
+	  if ( !p_id.empty() ){
+	    args["generate_id"] = p_id;
+	  }
+	  folia::Sentence *s = new folia::Sentence( args, p->doc() );
+	  p->append( s );
+	  append_to_sentence( s, res );
+	}
+	res = frog_sentence( toks, ++sentence_done );
       }
       timers.tokTimer.start();
       toks = tokenizer->tokenize_line_next();
-      res = extract_fd( toks );
       timers.tokTimer.stop();
     }
   }
@@ -1769,10 +1622,10 @@ void FrogAPI::run_text_engine( const string& infilename,
     p_count = 0;
   }
   timers.tokTimer.start();
-  frog_data res = tokenizer->tokenize_stream( test_file );
+  vector<Tokenizer::Token> toks = tokenizer->tokenize_stream( test_file );
   timers.tokTimer.stop();
-  while ( res.size() > 0 ){
-    frog_sentence( res, ++i );
+  while ( toks.size() > 0 ){
+    frog_data res = frog_sentence( toks, ++i );
     if ( !options.noStdOut ){
       show_results( os, res );
     }
@@ -1783,7 +1636,7 @@ void FrogAPI::run_text_engine( const string& infilename,
       DBG << TiCC::Timer::now() << " done with sentence[" << i << "]" << endl;
     }
     timers.tokTimer.start();
-    res = tokenizer->tokenize_stream_next();
+    toks = tokenizer->tokenize_stream_next();
     timers.tokTimer.stop();
   }
   if ( !xmlOutFile.empty() && doc ){

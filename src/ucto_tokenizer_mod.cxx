@@ -338,28 +338,23 @@ frog_data extract_fd( vector<Tokenizer::Token>& tokens ){
   return result;
 }
 
-frog_data UctoTokenizer::tokenize_stream_next( ){
+vector<Tokenizer::Token> UctoTokenizer::tokenize_stream_next( ){
   // this is non greedy. Might be called multiple times to consume
   // the whole stream
   // will return tokens upto an ENDOFSENTENCE token or out of data
   if ( tokenizer) {
-    vector<Tokenizer::Token> new_toks = tokenizer->tokenizeOneSentence( *cur_is );
-    // add new tokens to the queue
-    queue.insert( queue.end(), new_toks.begin(), new_toks.end() );
-    frog_data result = extract_fd( queue ); // may leave entries in the queue
-    return result;
+    return tokenizer->tokenizeOneSentence( *cur_is );
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
   }
 }
 
-frog_data UctoTokenizer::tokenize_stream( istream& is ){
+vector<Tokenizer::Token> UctoTokenizer::tokenize_stream( istream& is ){
   ///  restart the tokenizer on stream @is
   ///  and calls tokenizer_stream_next() for the first results
   if ( tokenizer ){
     cur_is = &is;
-    queue.clear();
     return tokenize_stream_next();
   }
   else {
