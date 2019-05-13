@@ -521,7 +521,7 @@ folia::processor *FrogAPI::add_provenance( folia::Document& doc ) const {
   if ( options.debugFlag > 4 ){
     DBG << "add_provenance(), using processor: " << proc->id() << endl;
   }
-      tokenizer->add_provenance( doc, proc ); // unconditional
+  tokenizer->add_provenance( doc, proc ); // unconditional
   if ( options.doTagger ){
     myCGNTagger->add_provenance( doc, proc );
   }
@@ -630,10 +630,9 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
   }
 }
 
-static int p_count = 0;
-
 folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
-					       const frog_data& fd ) const {
+					       const frog_data& fd,
+					       unsigned int& p_count ) const {
   if ( !root || !root->doc() ){
     return 0;
   }
@@ -776,6 +775,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
         LOG << TiCC::Timer::now() << " Processing... " << endl;
 	folia::Document *doc = 0;
 	folia::FoliaElement *root = 0;
+	unsigned int par_count = 0;
 	if ( options.doXMLout ){
 	  string doc_id = "untitled";
 	  root = start_document( doc_id, doc );
@@ -789,7 +789,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	while ( toks.size() > 0 ){
 	  frog_data sent = frog_sentence( toks, 1 );
 	  if ( options.doXMLout ){
-	    root = append_to_folia( root, sent );
+	    root = append_to_folia( root, sent, par_count );
 	  }
 	  else {
 	    show_results( output_stream, sent );
@@ -1642,6 +1642,7 @@ void FrogAPI::run_text_engine( const string& infilename,
   int i = 0;
   folia::Document *doc = 0;
   folia::FoliaElement *root = 0;
+  unsigned int par_count = 0;
   if ( !xmlOutFile.empty() ){
     string doc_id = infilename;
     if ( options.docid != "untitled" ){
@@ -1650,7 +1651,6 @@ void FrogAPI::run_text_engine( const string& infilename,
     doc_id = doc_id.substr( 0, doc_id.find( ".xml" ) );
     doc_id = filter_non_NC( TiCC::basename(doc_id) );
     root = start_document( doc_id, doc );
-    p_count = 0;
   }
   timers.tokTimer.start();
   vector<Tokenizer::Token> toks = tokenizer->tokenize_stream( test_file );
@@ -1661,7 +1661,7 @@ void FrogAPI::run_text_engine( const string& infilename,
       show_results( os, res );
     }
     if ( !xmlOutFile.empty() ){
-      root = append_to_folia( root, res );
+      root = append_to_folia( root, res, par_count );
     }
     if  (options.debugFlag > 0){
       DBG << TiCC::Timer::now() << " done with sentence[" << i << "]" << endl;
