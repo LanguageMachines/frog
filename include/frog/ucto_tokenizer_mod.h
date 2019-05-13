@@ -71,6 +71,4 @@ class UctoTokenizer {
   std::string textredundancy;
 };
 
-frog_data extract_fd( std::vector<Tokenizer::Token>& tokens );
-
 #endif

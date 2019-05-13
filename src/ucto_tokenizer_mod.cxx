@@ -307,37 +307,6 @@ string UctoTokenizer::tokenizeStream( istream& is ){
     throw runtime_error( "ucto tokenizer not initialized" );
 }
 
-frog_data extract_fd( vector<Tokenizer::Token>& tokens ){
-  frog_data result;
-  int quotelevel = 0;
-  while ( !tokens.empty() ){
-    const auto tok = tokens.front();
-    tokens.erase(tokens.begin());
-    frog_record tmp;
-    tmp.word = TiCC::UnicodeToUTF8(tok.us);
-    tmp.token_class = TiCC::UnicodeToUTF8(tok.type);
-    tmp.no_space = (tok.role & Tokenizer::TokenRole::NOSPACE);
-    tmp.language = tok.lang_code;
-    tmp.new_paragraph = (tok.role & Tokenizer::TokenRole::NEWPARAGRAPH);
-    result.units.push_back( tmp );
-    if ( (tok.role & Tokenizer::TokenRole::BEGINQUOTE) ){
-      ++quotelevel;
-    }
-    if ( (tok.role & Tokenizer::TokenRole::ENDQUOTE) ){
-      --quotelevel;
-    }
-    if ( (tok.role & Tokenizer::TokenRole::ENDOFSENTENCE) ){
-      // we are at ENDOFSENTENCE.
-      // when quotelevel == 0, we step out, until the next call
-      if ( quotelevel == 0 ){
-	result.language = tok.lang_code;
-	break;
-      }
-    }
-  }
-  return result;
-}
-
 vector<Tokenizer::Token> UctoTokenizer::tokenize_stream_next( ){
   // this is non greedy. Might be called multiple times to consume
   // the whole stream

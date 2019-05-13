@@ -983,6 +983,37 @@ string get_language( frog_data& fd ){
   return fd.language;
 }
 
+frog_data extract_fd( vector<Tokenizer::Token>& tokens ){
+  frog_data result;
+  int quotelevel = 0;
+  while ( !tokens.empty() ){
+    const auto tok = tokens.front();
+    tokens.erase(tokens.begin());
+    frog_record tmp;
+    tmp.word = TiCC::UnicodeToUTF8(tok.us);
+    tmp.token_class = TiCC::UnicodeToUTF8(tok.type);
+    tmp.no_space = (tok.role & Tokenizer::TokenRole::NOSPACE);
+    tmp.language = tok.lang_code;
+    tmp.new_paragraph = (tok.role & Tokenizer::TokenRole::NEWPARAGRAPH);
+    result.units.push_back( tmp );
+    if ( (tok.role & Tokenizer::TokenRole::BEGINQUOTE) ){
+      ++quotelevel;
+    }
+    if ( (tok.role & Tokenizer::TokenRole::ENDQUOTE) ){
+      --quotelevel;
+    }
+    if ( (tok.role & Tokenizer::TokenRole::ENDOFSENTENCE) ){
+      // we are at ENDOFSENTENCE.
+      // when quotelevel == 0, we step out, until the next call
+      if ( quotelevel == 0 ){
+	result.language = tok.lang_code;
+	break;
+      }
+    }
+  }
+  return result;
+}
+
 frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
 				  const size_t s_count ){
   if ( options.debugFlag > 0 ){
@@ -1529,7 +1560,7 @@ void FrogAPI::handle_one_text_parent( ostream& os,
 	  if  (options.debugFlag > 0){
 	    DBG << "created a new sentence: " << s << endl;
 	  }
-	e->append( s );
+	  e->append( s );
 	}
       }
     }
