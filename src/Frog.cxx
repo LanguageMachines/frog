@@ -476,10 +476,12 @@ bool parse_args( TiCC::CL_Options& Opts,
 
   Opts.extract ("uttmarker", options.uttmark );
   if ( !testDirName.empty() ){
-    if ( options.doXMLin )
+    if ( options.doXMLin ){
       getFileNames( testDirName, ".xml", fileNames );
-    else
+    }
+    else {
       getFileNames( testDirName, "", fileNames );
+    }
     if ( fileNames.empty() ){
       LOG << "error: couldn't find any files in directory: "
 		      << testDirName << endl;
@@ -629,8 +631,9 @@ int main(int argc, char *argv[]) {
 	if ( outS == 0 ){
 	  if ( wantOUT ){
 	    if ( options.doXMLin ){
-	      if ( !outPath.empty() )
+	      if ( !outPath.empty() ){
 		outName = outPath + name + ".out";
+	      }
 	    }
 	    else {
 	      outName = outPath + name + ".out";
@@ -654,13 +657,16 @@ int main(int argc, char *argv[]) {
 	string xmlOutName = XMLoutFileName;
 	if ( xmlOutName.empty() ){
 	  if ( !xmlDirName.empty() ){
-	    if ( name.rfind(".xml") == string::npos )
+	    if ( name.rfind(".xml") == string::npos ){
 	      xmlOutName = xmlPath + name + ".xml";
-	    else
+	    }
+	    else {
 	      xmlOutName = xmlPath + name;
+	    }
 	  }
-	  else if ( options.doXMLout )
+	  else if ( options.doXMLout ){
 	    xmlOutName = name + ".xml"; // do not clobber the inputdir!
+	  }
 	}
 	if ( !xmlOutName.empty() ){
 	  if ( options.doRetry && TiCC::isFile( xmlOutName ) ){
@@ -759,8 +765,9 @@ int main(int argc, char *argv[]) {
       try {
 	// Create the socket
 	Sockets::ServerSocket server;
-	if ( !server.connect( options.listenport ) )
+	if ( !server.connect( options.listenport ) ){
 	  throw( runtime_error( "starting server on port " + options.listenport + " failed" ) );
+	}
 	if ( !server.listen( 5 ) ) {
 	  // maximum of 5 pending requests
 	  throw( runtime_error( "listen(5) failed" ) );

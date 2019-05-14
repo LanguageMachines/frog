@@ -153,8 +153,9 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
 
 void UctoTokenizer::setUttMarker( const string& u ) {
   if ( tokenizer ){
-    if ( !u.empty() )
+    if ( !u.empty() ){
       tokenizer->setEosMarker( u );
+    }
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
@@ -181,8 +182,9 @@ void UctoTokenizer::setQuoteDetection( bool b ) {
 
 void UctoTokenizer::setInputEncoding( const std::string & enc ){
   if ( tokenizer ){
-    if ( !enc.empty() )
+    if ( !enc.empty() ){
       tokenizer->setInputEncoding( enc );
+    }
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
@@ -191,8 +193,9 @@ void UctoTokenizer::setInputEncoding( const std::string & enc ){
 
 void UctoTokenizer::setInputClass( const std::string& cls ){
   if ( tokenizer ){
-    if ( !cls.empty() )
+    if ( !cls.empty() ){
       tokenizer->setInputClass( cls );
+    }
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
@@ -201,8 +204,9 @@ void UctoTokenizer::setInputClass( const std::string& cls ){
 
 void UctoTokenizer::setOutputClass( const std::string& cls ){
   if ( tokenizer ){
-    if ( !cls.empty() )
+    if ( !cls.empty() ){
       tokenizer->setOutputClass( cls );
+    }
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
@@ -211,8 +215,9 @@ void UctoTokenizer::setOutputClass( const std::string& cls ){
 
 void UctoTokenizer::setDocID( const std::string& id ){
   if ( tokenizer ){
-    if ( !id.empty() )
+    if ( !id.empty() ){
       tokenizer->setDocID( id );
+    }
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
@@ -303,8 +308,9 @@ string UctoTokenizer::tokenizeStream( istream& is ){
     vector<Tokenizer::Token> toks = tokenizer->tokenizeOneSentence( is );
     return tokenizer->getString( toks );
   }
-  else
+  else {
     throw runtime_error( "ucto tokenizer not initialized" );
+  }
 }
 
 vector<Tokenizer::Token> UctoTokenizer::tokenize_stream_next( ){

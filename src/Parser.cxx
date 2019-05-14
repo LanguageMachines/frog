@@ -838,8 +838,9 @@ parseData Parser::prepareParse( frog_data& fd ){         //     |
       string multi_mods;
       for ( size_t k = i; k <= fd.mwus[i]; ++k ){
 	icu::UnicodeString tmp = TiCC::UnicodeFromUTF8( fd.units[k].word );
-	if ( filter )
+	if ( filter ){
 	  tmp = filter->filter( tmp );
+	}
 	string ms = TiCC::UnicodeToUTF8( tmp );
 	// the word may contain spaces, remove them all!
 	ms.erase(remove_if(ms.begin(), ms.end(), ::isspace), ms.end());

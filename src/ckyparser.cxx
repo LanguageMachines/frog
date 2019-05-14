@@ -47,8 +47,9 @@ ostream& operator<<( ostream& os, const Constraint* c ){
   if ( c ){
     c->put( os );
   }
-  else
+  else {
     os << "None";
+  }
   return os;
 }
 

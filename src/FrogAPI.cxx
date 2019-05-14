@@ -290,8 +290,9 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	  myMbma = new Mbma(theErrLog,theDbgLog);
 	  stat = myMbma->init( configuration );
 	  if ( stat ) {
-	    if ( options.doDeepMorph )
+	    if ( options.doDeepMorph ){
 	      myMbma->setDeepMorph(true);
+	    }
 	  }
 	}
 	if ( stat && options.doMwu ){
@@ -386,8 +387,9 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	  try {
 	    myMbma = new Mbma(theErrLog,theDbgLog);
 	    mbaStat = myMbma->init( configuration );
-	    if ( options.doDeepMorph )
+	    if ( options.doDeepMorph ){
 	      myMbma->setDeepMorph(true);
+	    }
 	  }
 	  catch ( const exception& e ){
 	    mbaWhat = e.what();
@@ -731,9 +733,9 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
         string s;
         while ( conn.read(s) ){
 	  result += s + "\n";
-
-	  if ( s.empty() )
+	  if ( s.empty() ){
 	    break;
+	  }
         }
         if ( result.size() < 50 ){
             // a FoLia doc must be at least a few 100 bytes
@@ -761,8 +763,9 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
         else {
 	  string line;
 	  while( conn.read(line) ){
-	    if ( line == "EOT" )
+	    if ( line == "EOT" ){
 	      break;
+	    }
 	    data += line + "\n";
 	  }
         }
@@ -1693,12 +1696,14 @@ void FrogAPI::FrogFile( const string& infilename,
     string xmlOutFile = xmlOutF;
     if ( !xmlOutFile.empty() ){
       if ( TiCC::match_back( infilename, ".gz" ) ){
-	if ( !TiCC::match_back( xmlOutFile, ".gz" ) )
+	if ( !TiCC::match_back( xmlOutFile, ".gz" ) ){
 	  xmlOutFile += ".gz";
+	}
       }
       else if ( TiCC::match_back( infilename, ".bz2" ) ){
-	if ( !TiCC::match_back( xmlOutFile, ".bz2" ) )
+	if ( !TiCC::match_back( xmlOutFile, ".bz2" ) ){
 	  xmlOutFile += ".bz2";
+	}
       }
     }
     run_folia_engine( infilename, os, xmlOutFile );

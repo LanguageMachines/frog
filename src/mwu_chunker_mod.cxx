@@ -151,8 +151,9 @@ bool Mwu::init( const TiCC::Configuration& config ) {
     mwu_tagset = val;
   }
   string charFile = config.lookUp( "char_filter_file", "tagger" );
-  if ( charFile.empty() )
+  if ( charFile.empty() ){
     charFile = config.lookUp( "char_filter_file" );
+  }
   if ( !charFile.empty() ){
     charFile = prefix( config.configDir(), charFile );
     filter = new TiCC::UniFilter();
@@ -299,8 +300,9 @@ void Mwu::Classify(){
       }
     } //match found
     else {
-      if( debug > 1 )
+      if( debug > 1 ) {
 	DBG <<"MWU:check: no match" << endl;
+      }
     }
   } //for (i < max)
   if (matchLength > 0 ) {

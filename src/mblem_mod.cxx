@@ -69,8 +69,9 @@ bool Mblem::fill_ts_map( const string& file ){
   }
   string line;
   while ( getline( is, line ) ){
-    if ( line.empty() || line[0] == '#' )
+    if ( line.empty() || line[0] == '#' ){
       continue;
+    }
     vector<string> parts = TiCC::split( line );
     if ( parts.size() != 3 ){
       LOG << "invalid line in: '" << file << "' (expected 3 parts)" << endl;
@@ -98,22 +99,23 @@ bool Mblem::init( const TiCC::Configuration& config ) {
   if ( val.empty() ){
     _version = "1.0";
   }
-  else
+  else {
     _version = val;
+  }
   val = config.lookUp( "set", "mblem" );
   if ( val.empty() ){
     tagset = "http://ilk.uvt.nl/folia/sets/frog-mblem-nl";
   }
-  else
+  else {
     tagset = val;
-
+  }
   val = config.lookUp( "set", "tagger" );
   if ( val.empty() ){
     POS_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
   }
-  else
+  else {
     POS_tagset = val;
-
+  }
   string transName = config.lookUp( "transFile", "mblem" );
   if ( !transName.empty() ){
     transName = prefix( config.configDir(), transName );
@@ -121,13 +123,15 @@ bool Mblem::init( const TiCC::Configuration& config ) {
     cerr << "skipping : " << transName << endl;
   }
   string treeName = config.lookUp( "treeFile", "mblem"  );
-  if ( treeName.empty() )
+  if ( treeName.empty() ){
     treeName = "mblem.tree";
+  }
   treeName = prefix( config.configDir(), treeName );
 
   string charFile = config.lookUp( "char_filter_file", "mblem" );
-  if ( charFile.empty() )
+  if ( charFile.empty() ){
     charFile = config.lookUp( "char_filter_file" );
+  }
   if ( !charFile.empty() ){
     charFile = prefix( config.configDir(), charFile );
     filter = new TiCC::UniFilter();
@@ -137,8 +141,9 @@ bool Mblem::init( const TiCC::Configuration& config ) {
   string tokenStripFile = config.lookUp( "token_strip_file", "mblem" );
   if ( !tokenStripFile.empty() ){
     tokenStripFile = prefix( config.configDir(), tokenStripFile );
-    if ( !fill_ts_map( tokenStripFile ) )
+    if ( !fill_ts_map( tokenStripFile ) ){
       return false;
+    }
   }
 
   string one_one_tagS = config.lookUp( "one_one_tags", "mblem" );
@@ -163,9 +168,10 @@ bool Mblem::init( const TiCC::Configuration& config ) {
   }
 
   string opts = config.lookUp( "timblOpts", "mblem" );
-  if ( opts.empty() )
+  if ( opts.empty() ){
     opts = "-a1";
-  //make it silent
+  }
+  // make it silent
   opts += " +vs -vf -F TABBED";
   //Read in (igtree) data
   myLex = new Timbl::TimblAPI(opts);
