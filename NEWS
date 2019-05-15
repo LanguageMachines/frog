@@ -1,3 +1,30 @@
+0.16 - 2018-05-15
+[Ko vd Sloot]
+This is the last release using pre FoLiA 2.0
+It includes a total rework of the Frog Internals, aiming at better
+maintainability and hoping for a speedup and a smaller memory footprint.
+This work will continue in the upcoming release for FoLiA 2.0
+
+Major Changes:
+* total rework. Not using a FoLiA document as the internal datastructure anymore
+  but a FrogData structure.
+* use folia::engine for all FoLiA processing
+* -Q option is NOT supported anymore. It was unreliable anyway
+* builds on the newest ucto versions only
+* fix for https://github.com/proycon/LaMachine/issues//135
+          https://github.com/LanguageMachines/frog/issues/66
+* handles some corner cases in FoLiA better
+* lots of code cleanup
+* numerous small fixes ( e.g. in NER and MBMA results)
+* improved working of --languages option
+* avoid invalid FoLiA: https://github.com/LanguageMachines/frog/issues/60
+* fixed memory leaks
+* better handling of weird FoLiA
+
+[Maarten van Gompel]
+* added skeleton for new Frog documentation
+
+
 0.15 - 2018-05-16
 [Ko vd Sloot]
 * ucto_tokenizer_mod: removed call of (useless) ucto:setSentenceDetection(true)
