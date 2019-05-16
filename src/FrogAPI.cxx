@@ -769,7 +769,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	    data += line + "\n";
 	  }
         }
-	// So dat will contain the COMPLETE input,
+	// So data will contain the COMPLETE input,
 	// OR a FoLiA Document (which should be valid)
 	// OR a sequence of lines, forming sentences and paragraphs
         if ( options.debugFlag > 5 ){
