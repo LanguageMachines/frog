@@ -55,8 +55,9 @@ bool CGNTagger::fillSubSetTable( const string& sub_file,
   LOG << "reading subsets from " << sub_file << endl;
   string line;
   while ( getline( sis, line ) ){
-    if ( line.empty() || line[0] == '#' )
+    if ( line.empty() || line[0] == '#' ){
       continue;
+    }
     vector<string> att_val = TiCC::split_at( line, "=", 2 );
     if ( att_val.size() != 2 ){
       LOG << "invalid line in:'" << sub_file << "' : " << line << endl;
@@ -76,8 +77,9 @@ bool CGNTagger::fillSubSetTable( const string& sub_file,
     }
     LOG << "reading constraints from " << const_file << endl;
     while ( getline( cis, line ) ){
-      if ( line.empty() || line[0] == '#' )
+      if ( line.empty() || line[0] == '#' ){
 	continue;
+      }
       vector<string> att_val = TiCC::split_at( line, "=", 2 );
       if ( att_val.size() != 2 ){
 	LOG << "invalid line in:'" << sub_file << "' : " << line << endl;
@@ -133,11 +135,11 @@ bool CGNTagger::init( const TiCC::Configuration& config ){
   return true;
 }
 
-void CGNTagger::addDeclaration( folia::Document& doc ) const {
-  doc.declare( folia::AnnotationType::POS,
-	       tagset,
-	       "annotator='frog-mbpos-" + _version
-	       + "', annotatortype='auto', datetime='" + getTime() + "'");
+void CGNTagger::add_declaration( folia::Document& doc,
+				 folia::processor *proc ) const {
+  folia::KWargs args;
+  args["processor"] = proc->id();
+  doc.declare( folia::AnnotationType::POS, tagset, args );
 }
 
 string CGNTagger::getSubSet( const string& val, const string& head, const string& fullclass ) const {

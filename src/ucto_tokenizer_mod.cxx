@@ -101,8 +101,9 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     if ( val.empty() ){
       val = config.lookUp( "debug" );
     }
-    if ( !val.empty() )
+    if ( !val.empty() ){
       debug = TiCC::stringTo<int>( val );
+    }
     if ( debug > 1 ){
       tokenizer->setDebug( debug );
     }
@@ -115,6 +116,7 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     if ( !languages.empty() ){
       language_list = TiCC::split_at( languages, "," );
       LOG << "Language List ="  << language_list << endl;
+      tokenizer->setLangDetection(true);
     }
     // when a language (list) is specified on the command line,
     // it overrules the language from the config file
@@ -140,9 +142,6 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
       if ( !language_list.empty() ){
 	tokenizer->setLanguage( language_list[0] );
       }
-      else {
-	tokenizer->setLanguage( "none" );
-      }
     }
     textredundancy = config.lookUp( "textredundancy", "tokenizer" );
     if ( !textredundancy.empty() ){
@@ -154,8 +153,9 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
 
 void UctoTokenizer::setUttMarker( const string& u ) {
   if ( tokenizer ){
-    if ( !u.empty() )
+    if ( !u.empty() ){
       tokenizer->setEosMarker( u );
+    }
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
@@ -182,8 +182,9 @@ void UctoTokenizer::setQuoteDetection( bool b ) {
 
 void UctoTokenizer::setInputEncoding( const std::string & enc ){
   if ( tokenizer ){
-    if ( !enc.empty() )
+    if ( !enc.empty() ){
       tokenizer->setInputEncoding( enc );
+    }
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
@@ -192,8 +193,9 @@ void UctoTokenizer::setInputEncoding( const std::string & enc ){
 
 void UctoTokenizer::setInputClass( const std::string& cls ){
   if ( tokenizer ){
-    if ( !cls.empty() )
+    if ( !cls.empty() ){
       tokenizer->setInputClass( cls );
+    }
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
@@ -202,8 +204,9 @@ void UctoTokenizer::setInputClass( const std::string& cls ){
 
 void UctoTokenizer::setOutputClass( const std::string& cls ){
   if ( tokenizer ){
-    if ( !cls.empty() )
+    if ( !cls.empty() ){
       tokenizer->setOutputClass( cls );
+    }
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
@@ -212,8 +215,9 @@ void UctoTokenizer::setOutputClass( const std::string& cls ){
 
 void UctoTokenizer::setDocID( const std::string& id ){
   if ( tokenizer ){
-    if ( !id.empty() )
+    if ( !id.empty() ){
       tokenizer->setDocID( id );
+    }
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
@@ -274,6 +278,20 @@ bool UctoTokenizer::getPassThru() const {
   }
 }
 
+void UctoTokenizer::add_provenance( folia::Document& doc,
+				    folia::processor *main ) const {
+  if ( !tokenizer ){
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+  if ( tokenizer->getPassThru() ){
+    tokenizer->add_provenance_passthru( &doc, main );
+  }
+  else {
+    tokenizer->add_provenance_setting( &doc, main );
+    tokenizer->add_provenance_structure( &doc, main );
+  }
+}
+
 vector<string> UctoTokenizer::tokenize( const string& line ){
   if ( tokenizer ){
     tokenizer->reset();
@@ -290,62 +308,28 @@ string UctoTokenizer::tokenizeStream( istream& is ){
     vector<Tokenizer::Token> toks = tokenizer->tokenizeOneSentence( is );
     return tokenizer->getString( toks );
   }
-  else
+  else {
     throw runtime_error( "ucto tokenizer not initialized" );
-}
-
-frog_data create_fd( vector<Tokenizer::Token>& tokens ){
-  frog_data result;
-  int quotelevel = 0;
-  while ( !tokens.empty() ){
-    const auto tok = tokens.front();
-    tokens.erase(tokens.begin());
-    frog_record tmp;
-    tmp.word = TiCC::UnicodeToUTF8(tok.us);
-    tmp.token_class = TiCC::UnicodeToUTF8(tok.type);
-    tmp.no_space = (tok.role & Tokenizer::TokenRole::NOSPACE);
-    tmp.language = tok.lang_code;
-    tmp.new_paragraph = (tok.role & Tokenizer::TokenRole::NEWPARAGRAPH);
-    result.units.push_back( tmp );
-    if ( (tok.role & Tokenizer::TokenRole::BEGINQUOTE) ){
-      ++quotelevel;
-    }
-    if ( (tok.role & Tokenizer::TokenRole::ENDQUOTE) ){
-      --quotelevel;
-    }
-    if ( (tok.role & Tokenizer::TokenRole::ENDOFSENTENCE) ){
-      // we are at ENDOFSENTENCE.
-      // when quotelevel == 0, we step out, until the next call
-      if ( quotelevel == 0 ){
-     	break;
-      }
-    }
   }
-  return result;
 }
 
-frog_data UctoTokenizer::tokenize_stream_next( ){
+vector<Tokenizer::Token> UctoTokenizer::tokenize_stream_next( ){
   // this is non greedy. Might be called multiple times to consume
   // the whole stream
   // will return tokens upto an ENDOFSENTENCE token or out of data
   if ( tokenizer) {
-    vector<Tokenizer::Token> new_toks = tokenizer->tokenizeOneSentence( *cur_is );
-    // add new tokens to the queue
-    queue.insert( queue.end(), new_toks.begin(), new_toks.end() );
-    frog_data result = create_fd( queue ); // may leave entries in the queue
-    return result;
+    return tokenizer->tokenizeOneSentence( *cur_is );
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
   }
 }
 
-frog_data UctoTokenizer::tokenize_stream( istream& is ){
+vector<Tokenizer::Token> UctoTokenizer::tokenize_stream( istream& is ){
   ///  restart the tokenizer on stream @is
   ///  and calls tokenizer_stream_next() for the first results
   if ( tokenizer ){
     cur_is = &is;
-    queue.clear();
     return tokenize_stream_next();
   }
   else {
@@ -353,9 +337,10 @@ frog_data UctoTokenizer::tokenize_stream( istream& is ){
   }
 }
 
-frog_data UctoTokenizer::tokenize_line( const string& line ){
+vector<Tokenizer::Token> UctoTokenizer::tokenize_line( const string& line,
+						       const string& lang ){
   if ( tokenizer ){
-    tokenizer->tokenizeLine( line ); // will consume whole line!
+    tokenizer->tokenizeLine( line, lang ); // will consume whole line!
     return tokenize_line_next(); // returns next sentence in the line
   }
   else {
@@ -363,15 +348,35 @@ frog_data UctoTokenizer::tokenize_line( const string& line ){
   }
 }
 
-frog_data UctoTokenizer::tokenize_line_next() {
+vector<Tokenizer::Token> UctoTokenizer::tokenize_line_next() {
   if ( tokenizer ){
-    vector<Tokenizer::Token> tokens = tokenizer->popSentence();
-    return create_fd( tokens );
+    return tokenizer->popSentence();
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
   }
 }
+
+string UctoTokenizer::get_data_version() const{
+  if ( tokenizer ){
+    return tokenizer->get_data_version();
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
+bool UctoTokenizer::get_setting_info( const std::string& lang,
+				      std::string& name,
+				      std::string& version ) const {
+  if ( tokenizer ){
+    return tokenizer->get_setting_info( lang, name, version );
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
 
 string get_parent_id( folia::FoliaElement *el ){
   if ( !el ){
@@ -386,12 +391,22 @@ string get_parent_id( folia::FoliaElement *el ){
 }
 
 vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
-					       const string& textclass,
-					       const string& tok_set,
 					       const frog_data& fd ) const {
+  string textclass = tokenizer->getOutputClass();
+  string tok_set;
+  if ( fd.language.empty() ){
+    tok_set = "passthru";
+  }
+  else if ( fd.language != "default" ){
+    tok_set = "tokconfig-" + fd.language;
+  }
+  else {
+    tok_set = "tokconfig-nld";
+  }
   vector<folia::Word*> wv;
   if (  debug > 5 ){
     DBG << "add_words\n" << fd << endl;
+    DBG << "sentence has tekst: " << s->str(textclass) << endl;
   }
   for ( const auto& word : fd.units ){
     if (  debug > 5 ){
@@ -409,16 +424,20 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
     if ( textclass != "current" ){
       args["textclass"] = textclass;
     }
-    if ( !tok_set.empty() ){
-      args["set"] = tok_set;
-    }
+    args["set"] = tok_set;
     folia::Word *w;
 #pragma omp critical (foliaupdate)
     {
       if (  debug > 5 ){
 	DBG << "create Word(" << args << ") = " << word.word << endl;
       }
-      w = new folia::Word( args, s->doc() );
+      try {
+	w = new folia::Word( args, s->doc() );
+      }
+      catch ( const exception& e ){
+	cerr << "Word(" << args << ") creation failed: " << e.what() << endl;
+	exit(EXIT_FAILURE);
+      }
       w->settext( word.word, textclass );
       if (  debug > 5 ){
 	DBG << "add_result, create a word, done:" << w << endl;
@@ -426,6 +445,10 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
       s->append( w );
     }
     wv.push_back( w );
+  }
+  if (  debug > 5 ){
+    DBG << "add_result, finished sentence:" << s << endl;
+    DBG << "Sentence tekst: " << s->str(textclass) << endl;
   }
   return wv;
 }

@@ -41,6 +41,7 @@
 #include "ticcutils/ServerBase.h"
 
 #include "libfolia/folia.h"
+#include "ucto/tokenize.h"
 
 #include "frog/Frog-util.h"
 #include "frog/FrogData.h"
@@ -64,6 +65,7 @@ class FrogOptions {
   bool doIOB;
   bool doNER;
   bool doParse;
+  bool doTagger;
   bool doSentencePerLine;
   bool doQuoteDetection;
   bool doDirTest;
@@ -85,9 +87,11 @@ class FrogOptions {
   std::string docid;
   std::string inputclass;
   std::string outputclass;
-  std::string language;
+  std::string default_language;
+  std::set<std::string> languages;
   std::string textredundancy;
   unsigned int maxParserTokens;
+  std::string command;
 
   FrogOptions();
  private:
@@ -107,17 +111,19 @@ class FrogAPI {
   void FrogFile( const std::string&, std::ostream&, const std::string& );
   void FrogServer( Sockets::ServerSocket &conn );
   void FrogInteractive();
-  bool frog_sentence( frog_data&, const size_t );
-  void run_folia_processor( const std::string&,
-			    std::ostream&,
-			    const std::string& = "" );
-  void run_text_processor( const std::string&,
-			   std::ostream&,
-			   const std::string& = "" );
+  frog_data frog_sentence( std::vector<Tokenizer::Token>&,
+			   const size_t );
+  void run_folia_engine( const std::string&,
+			 std::ostream&,
+			 const std::string& = "" );
+  void run_text_engine( const std::string&,
+			std::ostream&,
+			const std::string& = "" );
   folia::FoliaElement* start_document( const std::string&,
 				  folia::Document *& ) const;
   folia::FoliaElement *append_to_folia( folia::FoliaElement *,
-					const frog_data& ) const;
+					const frog_data&,
+					unsigned int& ) const;
   std::string Frogtostring( const std::string& );
   std::string Frogtostringfromfile( const std::string& );
 
@@ -134,6 +140,7 @@ class FrogAPI {
   void add_parse_result( folia::Sentence *,
 			 const frog_data&,
 			 const std::vector<folia::Word*>& ) const;
+  folia::processor *add_provenance( folia::Document& ) const;
   void test_version( const std::string&, double );
   // functions
   void FrogStdin( bool prompt );

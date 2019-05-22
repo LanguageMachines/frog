@@ -86,46 +86,26 @@ namespace CLEX {
   };
 
   Type toCLEX( const string& s ){
-    if ( s == "N" )
-      return N;
-    else if ( s == "A" )
-      return A;
-    else if ( s == "Q" )
-      return Q;
-    else if ( s == "V" )
-      return V;
-    else if ( s == "D" )
-      return D;
-    else if ( s == "O" )
-      return O;
-    else if ( s == "B" )
-      return B;
-    else if ( s == "P" )
-      return P;
-    else if ( s == "C" )
-      return C;
-    else if ( s == "I" )
-      return I;
-    else if ( s == "X" )
-      return X;
-    else if ( s == "Z" )
-      return Z;
-    else if ( s == "PN" )
-      return PN;
-    else if ( s == "*" )
-      return AFFIX;
-    else if ( s == "x" )
-      return XAFFIX;
-    else if ( s == "^" )
-      return GLUE;
-    else if ( s == "0" )
-      return NEUTRAL;
-    else if ( s == "SPEC" )
-      return SPEC;
-    else if ( s == "LET" )
-      return LET;
-    else
-      return UNASS;
+    if ( s == "N" ) return N;
+    else if ( s == "A" )    return A;
+    else if ( s == "Q" )    return Q;
+    else if ( s == "V" )    return V;
+    else if ( s == "D" )    return D;
+    else if ( s == "O" )    return O;
+    else if ( s == "B" )    return B;
+    else if ( s == "P" )    return P;
+    else if ( s == "C" )    return C;
+    else if ( s == "I" )    return I;
+    else if ( s == "X" )    return X;
+    else if ( s == "Z" )    return Z;
+    else if ( s == "PN" )   return PN;
+    else if ( s == "*" )    return AFFIX;
+    else if ( s == "x" )    return XAFFIX;
+    else if ( s == "^" )    return GLUE;
+    else if ( s == "0" )    return NEUTRAL;
+    else if ( s == "SPEC" ) return SPEC;
+    else if ( s == "LET" )  return LET;
+    return UNASS;
   }
 
   Type toCLEX( const char c ){
@@ -136,44 +116,25 @@ namespace CLEX {
 
   string toString( const Type& t ){
     switch ( t ){
-    case N:
-      return "N";
-    case A:
-      return "A";
-    case Q:
-      return "Q";
-    case V:
-      return "V";
-    case D:
-      return "D";
-    case O:
-      return "O";
-    case B:
-      return "B";
-    case P:
-      return "P";
-    case C:
-      return "C";
-    case I:
-      return "I";
-    case X:
-      return "X";
-    case Z:
-      return "Z";
-    case PN:
-      return "PN";
-    case AFFIX:
-      return "*";
-    case XAFFIX:
-      return "x";
-    case GLUE:
-      return "^";
-    case NEUTRAL:
-      return "0";
-    case SPEC:
-      return "SPEC";
-    case LET:
-      return "LET";
+    case N:       return "N";
+    case A:       return "A";
+    case Q:       return "Q";
+    case V:       return "V";
+    case D:       return "D";
+    case O:       return "O";
+    case B:       return "B";
+    case P:       return "P";
+    case C:       return "C";
+    case I:       return "I";
+    case X:       return "X";
+    case Z:       return "Z";
+    case PN:      return "PN";
+    case AFFIX:   return "*";
+    case XAFFIX:  return "x";
+    case GLUE:    return "^";
+    case NEUTRAL: return "0";
+    case SPEC:    return "SPEC";
+    case LET:     return "LET";
     default:
       return "/";
     }

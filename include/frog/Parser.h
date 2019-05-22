@@ -61,7 +61,7 @@ class Parser {
       };
   ~Parser();
   bool init( const TiCC::Configuration& );
-  void addDeclaration( folia::Document& ) const;
+  void add_provenance( folia::Document& doc, folia::processor * ) const;
   void Parse( frog_data&, TimerBlock& );
   parseData prepareParse( frog_data& );
   void add_result( const frog_data&,
@@ -82,7 +82,7 @@ class Parser {
   bool isInit;
   TiCC::LogStream *errLog;
   TiCC::LogStream *dbgLog;
-  std::string version;
+  std::string _version;
   std::string dep_tagset;
   std::string POS_tagset;
   std::string MWU_tagset;

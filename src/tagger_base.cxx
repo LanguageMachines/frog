@@ -73,8 +73,9 @@ bool BaseTagger::fill_map( const string& file, map<string,string>& mp ){
   }
   string line;
   while( getline( is, line ) ){
-    if ( line.empty() || line[0] == '#' )
+    if ( line.empty() || line[0] == '#' ){
       continue;
+    }
     vector<string> parts;
     size_t num = TiCC::split_at( line, parts, "\t" );
     if ( num != 2 ){
@@ -126,17 +127,19 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
     return false;
   }
   string settings;
-  if ( val[0] == '/' ) // an absolute path
+  if ( val[0] == '/' ) { // an absolute path
     settings = val;
-  else
+  }
+  else {
     settings =  config.configDir() + val;
-
+  }
   val = config.lookUp( "version", _label );
   if ( val.empty() ){
     _version = "1.0";
   }
-  else
+  else {
     _version = val;
+  }
   val = config.lookUp( "set", _label );
   if ( val.empty() ){
     LOG << "missing 'set' declaration in config" << endl;
@@ -146,16 +149,18 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
     tagset = val;
   }
   string charFile = config.lookUp( "char_filter_file", _label );
-  if ( charFile.empty() )
+  if ( charFile.empty() ){
     charFile = config.lookUp( "char_filter_file" );
+  }
   if ( !charFile.empty() ){
     charFile = prefix( config.configDir(), charFile );
     filter = new TiCC::UniFilter();
     filter->fill( charFile );
   }
   string tokFile = config.lookUp( "token_trans_file", _label );
-  if ( tokFile.empty() )
+  if ( tokFile.empty() ){
     tokFile = config.lookUp( "token_trans_file" );
+  }
   if ( !tokFile.empty() ){
     tokFile = prefix( config.configDir(), tokFile );
     if ( !fill_map( tokFile, token_tag_map ) ){
@@ -179,18 +184,33 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   return tagger->isInit();
 }
 
+void BaseTagger::add_provenance( folia::Document& doc,
+				 folia::processor *main ) const {
+  if ( !main ){
+    throw logic_error( _label + "::add_provenance() without parent proc." );
+  }
+  folia::KWargs args;
+  args["name"] = _label;
+  args["id"] = _label + ".1";
+  args["version"] = _version;
+  args["begindatetime"] = "now()";
+  folia::processor *proc = doc.add_processor( args, main );
+  add_declaration( doc, proc );
+}
+
+
 vector<TagResult> BaseTagger::tagLine( const string& line ){
-  if ( tagger )
+  if ( tagger ){
     return tagger->TagLine(line);
-  else
-    throw runtime_error( _label + "-tagger is not initialized" );
+  }
+  throw runtime_error( _label + "-tagger is not initialized" );
 }
 
 string BaseTagger::set_eos_mark( const std::string& eos ){
-  if ( tagger )
+  if ( tagger ){
     return tagger->set_eos_mark( eos );
-  else
-    throw runtime_error( _label + "-tagger is not initialized" );
+  }
+  throw runtime_error( _label + "-tagger is not initialized" );
 }
 
 string BaseTagger::extract_sentence( const vector<folia::Word*>& swords,
@@ -203,8 +223,9 @@ string BaseTagger::extract_sentence( const vector<folia::Word*>& swords,
     {
       word = sword->text( textclass );
     }
-    if ( filter )
+    if ( filter ){
       word = filter->filter( word );
+    }
     string word_s = TiCC::UnicodeToUTF8( word );
     // the word may contain spaces, remove them all!
     word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());

@@ -56,7 +56,7 @@ class Mblem {
   explicit Mblem( TiCC::LogStream *, TiCC::LogStream * =0 );
   ~Mblem();
   bool init( const TiCC::Configuration& );
-  void addDeclaration( folia::Document& ) const;
+  void add_provenance( folia::Document&, folia::processor * ) const;
   void Classify( frog_record& );
   void Classify( const icu::UnicodeString& );
   std::vector<std::pair<std::string,std::string> > getResult() const;

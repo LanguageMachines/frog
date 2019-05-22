@@ -49,11 +49,13 @@ using namespace std;
 using namespace icu;
 using namespace Timbl;
 using namespace Tagger;
+using TiCC::operator<<;
 
 TiCC::LogStream my_default_log( cerr, "", StampMessage ); // fall-back
 TiCC::LogStream *theErrLog = &my_default_log;  // fill the externals
 
 vector<string> fileNames;
+bool usewordlist = false;
 bool useTagger = true;
 bool useTokenizer = true;
 string output_name;
@@ -70,6 +72,9 @@ void usage( ) {
        << "Options:n" << endl;
   cout << "\t============= INPUT MODE (mandatory, choose one) ========================\n"
        << "\t -t <testfile>    Run mblem on this file\n"
+       << "\t --wordlist <wordfile>    Run on a wordlist. Produces a lemma list\n"
+       << "\t -o <outputfile>    write results in 'outputfile'\n"
+
        << "\t --notokenizer    Don't use a tokenizer, so assume all text is tokenized already.\n"
        << "\t --notagger       Don't use a tagger to disambiguate, so give ALL variants.\n"
        << "\t -c <filename>    Set configuration file (default " << configFileName << ")\n"
@@ -122,7 +127,13 @@ bool parse_args( TiCC::CL_Options& Opts ) {
     }
     output_name = value;
   }
-
+  useTagger = !Opts.is_present( "notagger" );
+  useTokenizer = !Opts.is_present( "notokenizer" );
+  usewordlist = Opts.is_present( "wordlist" );
+  if ( usewordlist ){
+    useTagger = false;
+    useTokenizer = false;
+  }
   if ( Opts.extract( 't', value ) ){
     ifstream is( value );
     if ( !is ){
@@ -134,8 +145,6 @@ bool parse_args( TiCC::CL_Options& Opts ) {
   else {
     fileNames = Opts.getMassOpts();
   };
-  useTagger = !Opts.is_present( "notagger" );
-  useTokenizer = !Opts.is_present( "notokenizer" );
   return true;
 }
 
@@ -166,6 +175,10 @@ bool init(){
 void Test( istream& in, ostream& os ){
   string line;
   while ( getline( in, line ) ){
+    if ( line.empty() ) {
+      os << endl;
+      continue;
+    }
     vector<string> sentences;
     if ( useTokenizer ){
       sentences = tokenizer.tokenize( line );
@@ -191,21 +204,54 @@ void Test( istream& in, ostream& os ){
 	}
       }
       else {
-	vector<string> parts = TiCC::split( s );
-	for ( const auto& w : parts ){
-	  UnicodeString uWord = TiCC::UnicodeFromUTF8(w);
-	  myMblem.Classify( uWord );
-	  vector<pair<string,string> > res = myMblem.getResult();
-	  string line = w + "\t";
-	  for ( const auto& p : res ){
-	    line += p.first + "[" + p.second + "]/";
+	string line = s;
+	if ( usewordlist ){
+	  if ( line[0] == '"' ){
+	    line.erase(line.begin());
 	  }
-	  line.erase(line.length()-1);
-	  line += "\n";
-	  os << line;
+	  if ( line.back() == '"' ){
+	    line.pop_back();
+	  }
+	  vector<string> parts = TiCC::split( line );
+	  if ( parts.size() > 1 ){
+	    cerr << "skipping multiword " << s << endl;
+	  }
+	  else {
+	    UnicodeString uWord = TiCC::UnicodeFromUTF8(parts[0]);
+	    myMblem.Classify( uWord );
+	    vector<pair<string,string> > res = myMblem.getResult();
+	    string line =  parts[0] + ",";
+	    set<string> out_set;
+	    for ( const auto& p : res ){
+	      if ( p.first != parts[0] || out_set.empty() ){
+		out_set.insert( p.first );
+	      }
+	    }
+	    for ( const auto& s : out_set ){
+	      line += s + ",";
+	    }
+	    os << line;
+	  }
+	}
+	else {
+	  vector<string> parts = TiCC::split( s );
+	  for ( const auto& w : parts ){
+	    UnicodeString uWord = TiCC::UnicodeFromUTF8(w);
+	    myMblem.Classify( uWord );
+	    vector<pair<string,string> > res = myMblem.getResult();
+	    string line = w + "\t";
+	    for ( const auto& p : res ){
+	      line += p.first + "[" + p.second + "]/";
+	    }
+	    line.erase(line.length()-1);
+	    line += "\n";
+	    os << line;
+	  }
 	}
       }
-      os << "<utt>\n\n";
+      if ( !usewordlist ){
+	os << "<utt>\n\n";
+      }
     }
     os << "\n";
   }
@@ -221,7 +267,7 @@ int main(int argc, char *argv[]) {
        << "Radboud University" << endl
        << "ILK   - Induction of Linguistic Knowledge Research Group,"
        << "Tilburg University" << endl;
-  TiCC::CL_Options Opts("c:t:hVd:o:", "version,notagger,notokenizer");
+  TiCC::CL_Options Opts("c:t:hVd:o:", "version,notagger,notokenizer,wordlist");
   try {
     Opts.init(argc, argv);
   }

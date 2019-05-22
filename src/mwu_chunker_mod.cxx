@@ -151,8 +151,9 @@ bool Mwu::init( const TiCC::Configuration& config ) {
     mwu_tagset = val;
   }
   string charFile = config.lookUp( "char_filter_file", "tagger" );
-  if ( charFile.empty() )
+  if ( charFile.empty() ){
     charFile = config.lookUp( "char_filter_file" );
+  }
   if ( !charFile.empty() ){
     charFile = prefix( config.configDir(), charFile );
     filter = new TiCC::UniFilter();
@@ -187,11 +188,21 @@ ostream &operator<<( ostream& os, const Mwu& mwu ){
   return os;
 }
 
-void Mwu::addDeclaration( folia::Document& doc ) const {
-  doc.declare( folia::AnnotationType::ENTITY,
-	       mwu_tagset,
-	       "annotator='frog-mwu-" + _version
-	       + "', annotatortype='auto', datetime='" + getTime() + "'");
+void Mwu::add_provenance( folia::Document& doc,
+			    folia::processor *main ) const {
+  string _label = "mwu";
+  if ( !main ){
+    throw logic_error( "mwu::add_provenance() without arguments." );
+  }
+  folia::KWargs args;
+  args["name"] = _label;
+  args["id"] = _label + ".1";
+  args["version"] = _version;
+  args["begindatetime"] = "now()";
+  folia::processor *proc = doc.add_processor( args, main );
+  args.clear();
+  args["processor"] = proc->id();
+  doc.declare( folia::AnnotationType::ENTITY, mwu_tagset, args );
 }
 
 void Mwu::Classify( frog_data& sent ){
@@ -289,8 +300,9 @@ void Mwu::Classify(){
       }
     } //match found
     else {
-      if( debug > 1 )
+      if( debug > 1 ) {
 	DBG <<"MWU:check: no match" << endl;
+      }
     }
   } //for (i < max)
   if (matchLength > 0 ) {

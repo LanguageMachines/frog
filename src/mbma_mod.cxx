@@ -622,14 +622,23 @@ void Mbma::assign_compounds(){
   }
 }
 
-void Mbma::addDeclaration( folia::Document& doc ) const {
-  doc.declare( folia::AnnotationType::MORPHOLOGICAL, mbma_tagset,
-	       "annotator='frog-mbma-" + _version +
-	       + "', annotatortype='auto', datetime='" + getTime() + "'");
+void Mbma::add_provenance( folia::Document& doc,
+			   folia::processor *main ) const {
+  string _label = "mbma";
+  if ( !main ){
+    throw logic_error( "mbma::add_provenance() without arguments." );
+  }
+  folia::KWargs args;
+  args["name"] = _label;
+  args["id"] = _label + ".1";
+  args["version"] = _version;
+  args["begindatetime"] = "now()";
+  folia::processor *proc = doc.add_processor( args, main );
+  args.clear();
+  args["processor"] = proc->id();
+  doc.declare( folia::AnnotationType::MORPHOLOGICAL, mbma_tagset, args );
   if ( doDeepMorph ){
-    doc.declare( folia::AnnotationType::POS, clex_tagset,
-		 "annotator='frog-mbma-" + _version +
-		 + "', annotatortype='auto', datetime='" + getTime() + "'");
+    doc.declare( folia::AnnotationType::POS, clex_tagset, args );
   }
 }
 

@@ -59,8 +59,9 @@ void getFileNames( const string& dirName,
 		   const string& ext,
 		   set<string>& fileNames ){
   DIR *dir = opendir( dirName.c_str() );
-  if ( !dir )
+  if ( !dir ){
     return;
+  }
   else {
     struct stat sb;
     struct dirent *entry = readdir( dir );

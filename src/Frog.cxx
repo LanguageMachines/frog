@@ -147,7 +147,7 @@ bool parse_args( TiCC::CL_Options& Opts,
 		 TiCC::LogStream* theErrLog ){
   // process the command line and fill FrogOptions to initialize the API
   // also fill some globals we use for our own main.
-
+  options.command = Opts.toString();
   // is a language-list specified? Default is dutch
   string language;
   string languages;
@@ -157,7 +157,8 @@ bool parse_args( TiCC::CL_Options& Opts,
     // ok no languages parameter.
     // use a (default) configfile. Dutch
     configFileName = FrogAPI::defaultConfigFile("nld");
-    language = "none";
+    language = "nld";
+    options.languages.insert( "nld" );
   }
   else {
     vector<string> lang_v = TiCC::split_at( languages, "," );
@@ -167,6 +168,9 @@ bool parse_args( TiCC::CL_Options& Opts,
       return false;
     }
     language = lang_v[0]; // the first mentioned is the default.
+    for ( const auto& l : lang_v ){
+      options.languages.insert( l );
+    }
     if ( lang_v.size() > 1 ){
       cerr << "WARNING: you used the --language=" << languages << " option"
 	   << " with more then one language " << endl
@@ -184,7 +188,7 @@ bool parse_args( TiCC::CL_Options& Opts,
       cerr << "using fallback configuration file: " << configFileName << endl;
     }
   }
-  options.language = language;
+  options.default_language = language;
   // override default config settings when a configfile is specified
   Opts.extract( 'c',  configFileName );
   if ( configuration.fill( configFileName ) ){
@@ -192,6 +196,14 @@ bool parse_args( TiCC::CL_Options& Opts,
     string vers = configuration.lookUp( "version" );
     if ( !vers.empty() ){
       LOG << "configuration version = " << vers << endl;
+    }
+    string languages = configuration.getatt( "languages", "tokenizer" );
+    if ( !languages.empty() ){
+      vector<string> lang_v = TiCC::split_at( languages, "," );
+      options.default_language = lang_v[0];
+      for ( const auto& l : lang_v ){
+	options.languages.insert( l );
+      }
     }
   }
   else {
@@ -276,20 +288,30 @@ bool parse_args( TiCC::CL_Options& Opts,
   }
   if ( Opts.extract( "skip", value )) {
     string skip = value;
-    if ( skip.find_first_of("tT") != string::npos )
+    if ( skip.find_first_of("tT") != string::npos ){
       options.doTok = false;
-    if ( skip.find_first_of("lL") != string::npos )
+    }
+    if ( skip.find_first_of("lL") != string::npos ){
       options.doLemma = false;
-    if ( skip.find_first_of("aA") != string::npos )
+    }
+    if ( skip.find_first_of("aA") != string::npos ){
       options.doMorph = false;
-    if ( skip.find_first_of("mM") != string::npos )
+    }
+    if ( skip.find_first_of("mM") != string::npos ){
       options.doMwu = false;
-    if ( skip.find_first_of("cC") != string::npos )
+    }
+    if ( skip.find_first_of("cC") != string::npos ){
       options.doIOB = false;
-    if ( skip.find_first_of("nN") != string::npos )
+    }
+    if ( skip.find_first_of("nN") != string::npos ){
       options.doNER = false;
-    if ( skip.find_first_of("pP") != string::npos )
+    }
+    if ( skip.find_first_of("gG") != string::npos ){
+      options.doTagger = false;
+    }
+    if ( skip.find_first_of("pP") != string::npos ){
       options.doParse = false;
+    }
     else if ( !options.doMwu ){
       LOG << " Parser disabled, because MWU is deselected" << endl;
       options.doParse = false;
@@ -454,10 +476,12 @@ bool parse_args( TiCC::CL_Options& Opts,
 
   Opts.extract ("uttmarker", options.uttmark );
   if ( !testDirName.empty() ){
-    if ( options.doXMLin )
+    if ( options.doXMLin ){
       getFileNames( testDirName, ".xml", fileNames );
-    else
+    }
+    else {
       getFileNames( testDirName, "", fileNames );
+    }
     if ( fileNames.empty() ){
       LOG << "error: couldn't find any files in directory: "
 		      << testDirName << endl;
@@ -607,8 +631,9 @@ int main(int argc, char *argv[]) {
 	if ( outS == 0 ){
 	  if ( wantOUT ){
 	    if ( options.doXMLin ){
-	      if ( !outPath.empty() )
+	      if ( !outPath.empty() ){
 		outName = outPath + name + ".out";
+	      }
 	    }
 	    else {
 	      outName = outPath + name + ".out";
@@ -632,13 +657,16 @@ int main(int argc, char *argv[]) {
 	string xmlOutName = XMLoutFileName;
 	if ( xmlOutName.empty() ){
 	  if ( !xmlDirName.empty() ){
-	    if ( name.rfind(".xml") == string::npos )
+	    if ( name.rfind(".xml") == string::npos ){
 	      xmlOutName = xmlPath + name + ".xml";
-	    else
+	    }
+	    else {
 	      xmlOutName = xmlPath + name;
+	    }
 	  }
-	  else if ( options.doXMLout )
+	  else if ( options.doXMLout ){
 	    xmlOutName = name + ".xml"; // do not clobber the inputdir!
+	  }
 	}
 	if ( !xmlOutName.empty() ){
 	  if ( options.doRetry && TiCC::isFile( xmlOutName ) ){
@@ -737,8 +765,9 @@ int main(int argc, char *argv[]) {
       try {
 	// Create the socket
 	Sockets::ServerSocket server;
-	if ( !server.connect( options.listenport ) )
+	if ( !server.connect( options.listenport ) ){
 	  throw( runtime_error( "starting server on port " + options.listenport + " failed" ) );
+	}
 	if ( !server.listen( 5 ) ) {
 	  // maximum of 5 pending requests
 	  throw( runtime_error( "listen(5) failed" ) );

@@ -99,10 +99,10 @@ bool Parser::init( const TiCC::Configuration& configuration ){
   }
   val = configuration.lookUp( "version", "parser" );
   if ( val.empty() ){
-    version = "1.0";
+    _version = "1.0";
   }
   else {
-    version = val;
+    _version = val;
   }
   val = configuration.lookUp( "set", "parser" );
   if ( val.empty() ){
@@ -779,10 +779,20 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
 }
 
 
-void Parser::addDeclaration( folia::Document& doc ) const {
-  doc.declare( folia::AnnotationType::DEPENDENCY, dep_tagset,
-	       "annotator='frog-depparse-" + version
-	       + "', annotatortype='auto'");
+void Parser::add_provenance( folia::Document& doc, folia::processor *main ) const {
+  string _label = "dep-parser";
+  if ( !main ){
+    throw logic_error( "Parser::add_provenance() without arguments." );
+  }
+  folia::KWargs args;
+  args["name"] = _label;
+  args["id"] = _label + ".1";
+  args["version"] = _version;
+  args["begindatetime"] = "now()";
+  folia::processor *proc = doc.add_processor( args, main );
+  args.clear();
+  args["processor"] = proc->id();
+  doc.declare( folia::AnnotationType::DEPENDENCY, dep_tagset, args );
 }
 
 void extract( const string& tv, string& head, string& mods ){
@@ -828,8 +838,9 @@ parseData Parser::prepareParse( frog_data& fd ){         //     |
       string multi_mods;
       for ( size_t k = i; k <= fd.mwus[i]; ++k ){
 	icu::UnicodeString tmp = TiCC::UnicodeFromUTF8( fd.units[k].word );
-	if ( filter )
+	if ( filter ){
 	  tmp = filter->filter( tmp );
+	}
 	string ms = TiCC::UnicodeToUTF8( tmp );
 	// the word may contain spaces, remove them all!
 	ms.erase(remove_if(ms.begin(), ms.end(), ::isspace), ms.end());
@@ -944,9 +955,9 @@ void Parser::add_result( const frog_data& fd,
     args["generate_id"] = s->id();
   }
   args["set"] = getTagset();
-  if ( textclass != "current" ){
-    args["textclass"] = textclass;
-  }
+  // if ( textclass != "current" ){
+  //   args["textclass"] = textclass;
+  // }
   folia::DependenciesLayer *el = new folia::DependenciesLayer( args, s->doc() );
   s->append( el );
   for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
