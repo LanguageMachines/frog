@@ -567,7 +567,7 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
   vector<folia::Word*> wv = tokenizer->add_words( sent,
 						  fd );
   string la;
-  if ( sent->hasannotation<folia::LangAnnotation>() ){
+  if ( sent->has_annotation<folia::LangAnnotation>() ){
     la = sent->annotation<folia::LangAnnotation>()->cls();
   }
   if ( options.debugFlag > 1 ){
@@ -1602,7 +1602,7 @@ void FrogAPI::run_folia_engine( const string& infilename,
   }
   folia::Document &doc = *engine.doc();
   if ( !options.default_language.empty() ){
-    if ( doc.metadatatype() == "native" ){
+    if ( doc.metadata_type() == "native" ){
       doc.set_metadata( "language", options.default_language );
     }
   }
