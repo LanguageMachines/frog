@@ -35,6 +35,7 @@
 #include <signal.h>
 #include <string>
 #include <cstring>
+#include <random>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -552,6 +553,19 @@ void KillServerFun( int Signal ){
   }
 }
 
+unsigned long long random64(){
+  static std::random_device rd;
+  static std::uniform_int_distribution<unsigned long long> dis;
+  static std::mt19937_64 gen(rd());
+  return dis(gen);
+}
+
+string num8(){
+  stringstream ss;
+  ss << random64() << endl;
+  string result = ss.str();
+  return result.substr(0,8);
+}
 
 int main(int argc, char *argv[]) {
   cerr << "frog " << VERSION << " (c) CLTS, ILK 1998 - 2019" << endl
@@ -591,7 +605,7 @@ int main(int argc, char *argv[]) {
     };
     Opts.extract( "debugfile", db_filename );
     if ( db_filename.empty() ){
-      db_filename = "frog.debug";
+      db_filename = "frog." + num8() + ".debug";
     }
     the_dbg_stream = new ofstream( db_filename );
     theDbgLog = new TiCC::LogStream( *the_dbg_stream, "frog-", StampMessage );
