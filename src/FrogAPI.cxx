@@ -509,6 +509,11 @@ FrogAPI::~FrogAPI() {
 
 folia::processor *FrogAPI::add_provenance( folia::Document& doc ) const {
   string _label = "frog";
+  vector<folia::processor *> procs = doc.get_processors_by_name( _label );
+  if ( !procs.empty() ){
+    cerr << "unable to run frog on already frogged documents!" << endl;
+    exit(1);
+  }
   folia::processor *proc = doc.get_processor( _label );
   if ( !proc ){
     folia::KWargs args;
@@ -521,7 +526,7 @@ folia::processor *FrogAPI::add_provenance( folia::Document& doc ) const {
     proc = doc.add_processor( args );
     proc->get_system_defaults();
   }
-  if ( true || options.debugFlag > 4 ){
+  if ( options.debugFlag > 4 ){
     DBG << "add_provenance(), using processor: " << proc->id() << endl;
   }
   tokenizer->add_provenance( doc, proc ); // unconditional
@@ -1589,7 +1594,7 @@ void FrogAPI::run_folia_engine( const string& infilename,
   if ( options.inputclass == options.outputclass ){
     tokenizer->setFiltering(false);
   }
-  if ( true || options.debugFlag > 0 ){
+  if ( options.debugFlag > 0 ){
     DBG << "run_folia_engine(" << infilename << "," << xmlOutFile << ")" << endl;
   }
   if ( xmlOutFile.empty() ){
