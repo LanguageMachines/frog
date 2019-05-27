@@ -287,8 +287,18 @@ void UctoTokenizer::add_provenance( folia::Document& doc,
     tokenizer->add_provenance_passthru( &doc, main );
   }
   else {
-    tokenizer->add_provenance_setting( &doc, main );
-    tokenizer->add_provenance_structure( &doc, main );
+    folia::processor *p = tokenizer->add_provenance_setting( &doc, main );
+    if ( p ){
+      cerr << "FOUND processor: " << p << endl;
+      tokenizer->add_provenance_structure( &doc, main );
+    }
+    else {
+      cerr << "\nWARNING: cannot tokenize: " << doc.filename()
+	   << ". It has been processed with ucto before! \n"
+	   << "  Falling back to passthru mode. (you might consider using "
+	   << "--skip=t)\n" << endl;
+      tokenizer->setPassThru( true );
+    }
   }
 }
 
@@ -329,6 +339,7 @@ vector<Tokenizer::Token> UctoTokenizer::tokenize_stream( istream& is ){
   ///  restart the tokenizer on stream @is
   ///  and calls tokenizer_stream_next() for the first results
   if ( tokenizer ){
+    tokenizer->reset();
     cur_is = &is;
     return tokenize_stream_next();
   }
@@ -340,6 +351,7 @@ vector<Tokenizer::Token> UctoTokenizer::tokenize_stream( istream& is ){
 vector<Tokenizer::Token> UctoTokenizer::tokenize_line( const string& line,
 						       const string& lang ){
   if ( tokenizer ){
+    tokenizer->reset();
     tokenizer->tokenizeLine( line, lang ); // will consume whole line!
     return tokenize_line_next(); // returns next sentence in the line
   }

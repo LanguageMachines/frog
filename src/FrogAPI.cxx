@@ -513,6 +513,7 @@ folia::processor *FrogAPI::add_provenance( folia::Document& doc ) const {
   if ( !proc ){
     folia::KWargs args;
     args["name"] = _label;
+    //    args["id"] = _label + "." + folia::randnum(8);
     args["id"] = _label + ".1";
     args["command"] = "frog " + options.command;
     args["version"] = PACKAGE_VERSION;
@@ -520,7 +521,7 @@ folia::processor *FrogAPI::add_provenance( folia::Document& doc ) const {
     proc = doc.add_processor( args );
     proc->get_system_defaults();
   }
-  if ( options.debugFlag > 4 ){
+  if ( true || options.debugFlag > 4 ){
     DBG << "add_provenance(), using processor: " << proc->id() << endl;
   }
   tokenizer->add_provenance( doc, proc ); // unconditional
@@ -1348,10 +1349,10 @@ void FrogAPI::handle_one_sentence( ostream& os,
       DBG << "handle_one_sentence() untokenized string: '" << text << "'" << endl;
     }
     vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text );
-    cerr << "text:" << text << " size=" << wv.size() << endl;
-    cerr << "tokens:" << toks << " size=" << toks.size() << endl;
+    // cerr << "text:" << text << " size=" << wv.size() << endl;
+    // cerr << "tokens:" << toks << " size=" << toks.size() << endl;
     frog_data res = frog_sentence( toks, s_cnt );
-    cerr << "res:" << res << " size=" << res.size() << endl;
+    //    cerr << "res:" << res << " size=" << res.size() << endl;
     if ( res.size() > 0 ){
       if ( !options.noStdOut ){
 	show_results( os, res );
@@ -1588,7 +1589,7 @@ void FrogAPI::run_folia_engine( const string& infilename,
   if ( options.inputclass == options.outputclass ){
     tokenizer->setFiltering(false);
   }
-  if ( options.debugFlag > 0 ){
+  if ( true || options.debugFlag > 0 ){
     DBG << "run_folia_engine(" << infilename << "," << xmlOutFile << ")" << endl;
   }
   if ( xmlOutFile.empty() ){

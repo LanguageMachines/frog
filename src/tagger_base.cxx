@@ -191,6 +191,7 @@ void BaseTagger::add_provenance( folia::Document& doc,
   }
   folia::KWargs args;
   args["name"] = _label;
+  //  args["id"] = _label + "." + folia::randnum(8) + ".1";
   args["id"] = _label + ".1";
   args["version"] = _version;
   args["begindatetime"] = "now()";
