@@ -558,7 +558,9 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
 					      folia::Document *& doc ) const {
   doc = new folia::Document( "xml:id='" + id + "'" );
   doc->addStyle( "text/xsl", "folia.xsl" );
-  DBG << "start document!!!" << endl;
+  if ( options.debugFlag > 1 ){
+    DBG << "start document!!!" << endl;
+  }
   add_provenance( *doc );
   folia::KWargs args;
   args["xml:id"] = doc->id() + ".text";
