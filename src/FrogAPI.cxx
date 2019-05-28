@@ -1530,7 +1530,11 @@ void FrogAPI::handle_one_text_parent( ostream& os,
 	timers.tokTimer.stop();
       }
       if ( options.doXMLout ){
-	if ( sents.size() > 1 ){
+	if ( sents.size() == 0 ){
+	  // might happen in rare cases
+	  // just skip
+	}
+	else if ( sents.size() > 1 ){
 	  // multiple sentences. We need an extra Paragraph.
 	  folia::KWargs args;
 	  string e_id = e->id();
