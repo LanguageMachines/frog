@@ -576,16 +576,18 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
   if ( sent->has_annotation<folia::LangAnnotation>() ){
     la = sent->annotation<folia::LangAnnotation>()->cls();
   }
+  //string def_lang = options.default_language;
+  string def_lang = tokenizer->default_language();
   if ( options.debugFlag > 1 ){
     DBG << "append_to_sentence()" << endl;
     DBG << "fd.language = " << fd.language << endl;
-    DBG << "options.default_language = " << options.default_language << endl;
+    DBG << "default_language = " << def_lang << endl;
     DBG << "sentence language = '" << la << "'" << endl;
   }
   if ( la.empty()
        && !fd.language.empty()
        && fd.language != "default"
-       && fd.language != options.default_language ){
+       && fd.language != def_lang ){
     //
     // so the language is non default, and not set
     //
@@ -595,7 +597,7 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     }
     return;
   }
-  if ( !la.empty() && la != options.default_language ){
+  if ( !la.empty() && la != def_lang ){
     //
     // so the language is set, and it is NOT the default language
     // Don't process any further
@@ -690,8 +692,10 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
 
 void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
 			       const frog_data& fd ) const {
+  string def_lang = tokenizer->default_language();
+  //string def_lang = options.default_language;
   if ( fd.language != "default"
-       && fd.language != options.default_language ){
+       && fd.language != def_lang ){
     if ( options.debugFlag > 0 ){
       DBG << "append_words() SKIP a sentence: " << fd.language << endl;
     }
@@ -1030,18 +1034,20 @@ frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
   }
   frog_data sentence = extract_fd( sent );
   string lan = get_language( sentence );
+  //string def_lang = options.default_language;
+  string def_lang = tokenizer->default_language();
   if ( options.debugFlag > 0 ){
     DBG << "frog_sentence() on a part. (lang=" << lan << ")" << endl;
     DBG << "frog_data:\n" << sentence << endl;
-    DBG << "options.default_language=" << options.default_language << endl;
+    DBG << "default_language=" << def_lang << endl;
   }
-  if ( !options.default_language.empty()
+  if ( !def_lang.empty()
        && !lan.empty()
        && lan != "default"
-       && lan != options.default_language ){
+       && lan != def_lang ){
     if ( options.debugFlag > 0 ){
       DBG << "skipping sentence " << s_count << " (different language: " << lan
-	   << " --language=" << options.default_language << ")" << endl;
+	   << " --language=" << def_lang << ")" << endl;
     }
     return sentence;
   }
@@ -1371,7 +1377,8 @@ void FrogAPI::handle_one_sentence( ostream& os,
     string text = s->str(options.inputclass);
     string sent_lang =  s->language();
     if ( sent_lang.empty() ){
-      sent_lang = options.default_language;
+      //      sent_lang = options.default_language;
+      sent_lang = tokenizer->default_language();
     }
     if ( options.debugFlag > 0 ){
       DBG << "handle_one_sentence() from string: '" << text << "' (lang="
@@ -1611,9 +1618,11 @@ void FrogAPI::run_folia_engine( const string& infilename,
     engine.set_debug( true );
   }
   folia::Document &doc = *engine.doc();
-  if ( !options.default_language.empty() ){
+  string def_lang = tokenizer->default_language();
+  //string def_lang = options.default_language;
+  if ( !def_lang.empty() ){
     if ( doc.metadata_type() == "native" ){
-      doc.set_metadata( "language", options.default_language );
+      doc.set_metadata( "language", def_lang );
     }
   }
   add_provenance( doc );

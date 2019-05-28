@@ -402,6 +402,15 @@ string get_parent_id( folia::FoliaElement *el ){
   }
 }
 
+string UctoTokenizer::default_language() const {
+  if ( tokenizer ){
+    return tokenizer->getLanguage();
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
 vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
 					       const frog_data& fd ) const {
   string textclass = tokenizer->getOutputClass();
@@ -413,7 +422,7 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
     tok_set = "tokconfig-" + fd.language;
   }
   else {
-    tok_set = "tokconfig-nld";
+    tok_set = "tokconfig-" + default_language();
   }
   vector<folia::Word*> wv;
   if (  debug > 5 ){
