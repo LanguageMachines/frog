@@ -289,7 +289,7 @@ void UctoTokenizer::add_provenance( folia::Document& doc,
   else {
     folia::processor *p = tokenizer->add_provenance_setting( &doc, main );
     if ( p ){
-      cerr << "FOUND processor: " << p << endl;
+      //      cerr << "FOUND processor: " << p << endl;
       tokenizer->add_provenance_structure( &doc, main );
     }
     else {
