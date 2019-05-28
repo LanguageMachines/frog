@@ -164,7 +164,7 @@ bool parse_args( TiCC::CL_Options& Opts,
   else {
     vector<string> lang_v = TiCC::split_at( languages, "," );
     if ( lang_v.empty() ){
-      cerr<< "invalid value in --languages=" << languages
+      cerr<< "invalid value in --language=" << languages
 	  << " option. " << endl;
       return false;
     }
