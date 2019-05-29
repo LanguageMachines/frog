@@ -1,6 +1,10 @@
 0.17 - 2018-05-29
 [Ko vd Sloot]
 This release supports FoLiA 2.0
+* some bug fixes
+  - trust the tokenizer to get the default language
+  - don't stumble upon empty sentences introduced by a non-breaking-space
+  - provenance data is added for all the modules
 
 0.16 - 2018-05-15
 [Ko vd Sloot]
