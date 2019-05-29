@@ -9,7 +9,7 @@ ner_SOURCES = ner_prog.cxx
 
 LDADD = libfrog.la
 lib_LTLIBRARIES = libfrog.la
-libfrog_la_LDFLAGS = -version-info 1:0:0
+libfrog_la_LDFLAGS = -version-info 2:0:0
 
 libfrog_la_SOURCES = FrogAPI.cxx FrogData.cxx \
 	mbma_rule.cxx mbma_mod.cxx mbma_brackets.cxx clex.cxx \
