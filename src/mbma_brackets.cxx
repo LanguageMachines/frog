@@ -385,7 +385,7 @@ icu::UnicodeString BracketLeaf::pretty_put() const {
        &&  status() != Status::FAILED
        && cls != CLEX::UNASS
        && cls != CLEX::NEUTRAL ){
-    LOG << this << " " << this->status() << endl;
+    //    LOG << this << " " << this->status() << endl;
     string s = CLEX::get_tDescr(cls);
     if ( s != "/" ){
       result += s;
