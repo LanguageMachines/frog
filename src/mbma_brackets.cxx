@@ -634,8 +634,8 @@ Compound::Type BracketNest::getCompoundType(){
 	 && st1 != Status::PARTICIPLE ){
       switch ( tag1 ){
       case CLEX::N:
-	if ( st2 == Status::STEM && tag2 == CLEX::N
-	     && st3 == Status::STEM && tag3 == CLEX::N ){
+	if ( ( st2 == Status::STEM || st2 == Status::COMPLEX ) && tag2 == CLEX::N
+	     && (st3 == Status::STEM || st3 == Status::COMPLEX ) && tag3 == CLEX::N ){
 	  compound = Compound::Type::NNN;
 	}
 	else if ( st1 != Status::DERIVATIONAL && st2 == Status::STEM &&
