@@ -298,6 +298,9 @@ void UctoTokenizer::add_provenance( folia::Document& doc,
 	   << "  Falling back to passthru mode. (you might consider using "
 	   << "--skip=t)\n" << endl;
       tokenizer->setPassThru( true );
+      folia::KWargs args;
+      args["annotator"] = "ucto";
+      doc.declare( folia::AnnotationType::TOKEN, "passthru", args );
     }
   }
 }
