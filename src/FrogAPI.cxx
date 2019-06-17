@@ -1345,6 +1345,17 @@ void FrogAPI::handle_one_sentence( ostream& os,
   if  ( options.debugFlag > 1 ){
     DBG << "handle_one_sentence: " << s << endl;
   }
+  string sent_lang =  s->language();
+  if ( sent_lang.empty() ){
+    sent_lang = tokenizer->default_language();
+  }
+  if ( options.languages.find( sent_lang ) == options.languages.end() ){
+    // ignore this language!
+    if ( options.debugFlag > 0 ){
+      DBG << sent_lang << " NOT in: " << options.languages << endl;
+    }
+    return;
+  }
   vector<folia::Word*> wv;
   wv = s->words( options.inputclass );
   if ( wv.empty() ){
@@ -1379,20 +1390,9 @@ void FrogAPI::handle_one_sentence( ostream& os,
   }
   else {
     string text = s->str(options.inputclass);
-    string sent_lang =  s->language();
-    if ( sent_lang.empty() ){
-      sent_lang = tokenizer->default_language();
-    }
     if ( options.debugFlag > 0 ){
       DBG << "handle_one_sentence() from string: '" << text << "' (lang="
 	  << sent_lang << ")" << endl;
-    }
-    if ( options.languages.find( sent_lang ) == options.languages.end() ){
-      // ignore this language!
-      if ( options.debugFlag > 0 ){
-	DBG << sent_lang << " NOT in: " << options.languages << endl;
-      }
-      return;
     }
     timers.tokTimer.start();
     vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text, sent_lang );
