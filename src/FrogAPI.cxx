@@ -696,7 +696,8 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
   if ( fd.language != "default"
        && fd.language != def_lang ){
     if ( options.debugFlag > 0 ){
-      DBG << "append_words() SKIP a sentence: " << fd.language << endl;
+      DBG << "append_words() SKIP a sentence (different language: "
+	  << fd.language << "), default= " << def_lang << endl;
     }
   }
   else {
@@ -987,9 +988,11 @@ string FrogAPI::Frogtostringfromfile( const string& name ){
 }
 
 string get_language( frog_data& fd ){
-  fd.language = "none";
+  fd.language = "default";
   for ( const auto& r : fd.units ){
-    fd.language = r.language;
+    if ( !r.language.empty() ){
+      fd.language = r.language;
+    }
     break;
   }
   return fd.language;
@@ -1036,8 +1039,8 @@ frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
   string def_lang = tokenizer->default_language();
   if ( options.debugFlag > 0 ){
     DBG << "frog_sentence() on a part. (lang=" << lan << ")" << endl;
-    DBG << "frog_data:\n" << sentence << endl;
     DBG << "default_language=" << def_lang << endl;
+    DBG << "frog_data:\n" << sentence << endl;
   }
   if ( !def_lang.empty()
        && !lan.empty()
@@ -1052,7 +1055,7 @@ frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
   else {
     timers.frogTimer.start();
     if ( options.debugFlag > 5 ){
-      DBG << "Frogging sentence:" << sentence << endl;
+      DBG << "Frogging sentence:\n" << sentence << endl;
       DBG << "tokenized text = " << sentence.sentence() << endl;
     }
     bool all_well = true;
@@ -1180,6 +1183,9 @@ frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
       }
     }
     timers.frogTimer.stop();
+    if ( options.debugFlag > 5 ){
+      DBG << "Frogged one sentence:\n" << sentence << endl;
+    }
     return sentence;
   }
 }
