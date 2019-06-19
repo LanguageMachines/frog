@@ -1,4 +1,12 @@
-0.17 - 2018-05-29
+0.18 - 2019-06-19
+[Ko vd Sloot]
+Bug fixes and enhancements:
+* provenance uses new 'generate_id' option in libfolia:processor
+* solved problems when frogging partly tokenized FoLiA
+* solved problems when processing with --skip=t
+* small improvememt in compound detection (still more to do...)
+
+0.17 - 2019-05-29
 [Ko vd Sloot]
 This release supports FoLiA 2.0
 * some bug fixes
@@ -6,7 +14,7 @@ This release supports FoLiA 2.0
   - don't stumble upon empty sentences introduced by a non-breaking-space
   - provenance data is added for all the modules
 
-0.16 - 2018-05-15
+0.16 - 2019-05-15
 [Ko vd Sloot]
 This is the last release using pre FoLiA 2.0
 It includes a total rework of the Frog Internals, aiming at better
