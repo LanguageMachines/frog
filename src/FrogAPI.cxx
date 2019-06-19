@@ -1258,9 +1258,6 @@ void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
       os << fd.morph_string;
     }
   }
-  else {
-    os << Tab;
-  }
   if ( options.doTagger ){
     if ( fd.tag.empty() ){
       os << Tab << Tab << fixed << showpoint << std::setprecision(6) << 1.0;
