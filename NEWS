@@ -4,7 +4,7 @@ Bug fixes and enhancements:
 * provenance uses new 'generate_id' option in libfolia:processor
 * solved problems when frogging partly tokenized FoLiA
 * solved problems when processing with --skip=t
-* small improvememt in compound detection (still more to do...)
+* small improvement in compound detection (still more to do...)
 
 0.17 - 2019-05-29
 [Ko vd Sloot]
