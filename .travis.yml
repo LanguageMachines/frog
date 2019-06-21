@@ -37,7 +37,7 @@ matrix:
 
     - os: osx
       compiler: clang++
-      cache: ccache
+      cache:
         directories:
           - $HOME/Library/Caches/Homebrew
       before_cache:
