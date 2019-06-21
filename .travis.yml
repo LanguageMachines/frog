@@ -74,49 +74,49 @@ before_install:
 
   - export PATH="/usr/lib/ccache/bin/:/usr/local/opt/ccache/libexec/:$PATH"
 
-  - git clone --depth=1 --single-branch hhttps://github.com/LanguageMachines/ticcutils
+  - git clone --depth=1 --single-branch https://github.com/LanguageMachines/ticcutils
   - cd ticcutils
   - bash bootstrap.sh
   - ./configure $OPENMPFLAG
   - make
   - sudo make install
   - cd ..
-  - git clone --depth=1 --single-branch hhttps://github.com/LanguageMachines/libfolia
+  - git clone --depth=1 --single-branch https://github.com/LanguageMachines/libfolia
   - cd libfolia
   - bash bootstrap.sh
   - ./configure $OPENMPFLAG
   - make
   - sudo make install
   - cd ..
-  - git clone --depth=1 --single-branch hhttps://github.com/LanguageMachines/uctodata
+  - git clone --depth=1 --single-branch https://github.com/LanguageMachines/uctodata
   - cd uctodata
   - bash bootstrap.sh
   - ./configure $OPENMPFLAG
   - make
   - sudo make install
   - cd ..
-  - git clone --depth=1 --single-branch hhttps://github.com/LanguageMachines/ucto
+  - git clone --depth=1 --single-branch https://github.com/LanguageMachines/ucto
   - cd ucto
   - bash bootstrap.sh
   - ./configure $OPENMPFLAG
   - make
   - sudo make install
   - cd ..
-  - git clone --depth=1 --single-branch hhttps://github.com/LanguageMachines/timbl
+  - git clone --depth=1 --single-branch https://github.com/LanguageMachines/timbl
   - cd timbl
   - bash bootstrap.sh
   - ./configure $OPENMPFLAG
   - make
   - sudo make install
   - cd ..
-  - git clone --depth=1 --single-branch hhttps://github.com/LanguageMachines/mbt
+  - git clone --depth=1 --single-branch https://github.com/LanguageMachines/mbt
   - cd mbt
   - bash bootstrap.sh
   - ./configure $OPENMPFLAG
   - make
   - sudo make install
   - cd ..
-  - git clone --depth=1 --single-branch hhttps://github.com/LanguageMachines/frogdata
+  - git clone --depth=1 --single-branch https://github.com/LanguageMachines/frogdata
   - cd frogdata
   - bash bootstrap.sh
   - ./configure $OPENMPFLAG
