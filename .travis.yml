@@ -6,7 +6,6 @@ group: edge
 branches:
   only:
     - master
-    - folia2.0
 
 notifications:
   irc:
@@ -39,9 +38,12 @@ matrix:
     - os: osx
       compiler: clang++
       cache: ccache
+        directories:
+          - $HOME/Library/Caches/Homebrew
+      before_cache:
+        - brew cleanup
       env:
         - SCAN=echo
-
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
@@ -56,75 +58,71 @@ before_install:
       brew install pkg-config;
       brew install autoconf-archive;
       brew install telnet;
-      brew outdated || brew upgrade libxml2;
-      brew outdated || brew install bzip2;
-      brew outdated || brew install zlib;
+      brew install libxml2;
+      brew install bzip2;
+      brew install zlib;
       brew install libtar;
       brew install cppcheck;
       brew install ccache;
       brew install libtextcat;
-      brew outdated boost || brew upgrade boost;
-      brew outdated icu4c || brew install icu4c;
+      brew install icu4c;
       brew install llvm;
       export PATH="/usr/local/opt/llvm/bin:$PATH";
       export LDFLAGS="-L/usr/local/opt/llvm/lib";
       export CXXFLAGS="-I/usr/local/opt/llvm/include";
     fi
 
-  - export PATH="/usr/lib/ccache/bin/:$PATH"
+  - export PATH="/usr/lib/ccache/bin/:/usr/local/opt/ccache/libexec/:$PATH"
 
-  - git clone https://github.com/LanguageMachines/ticcutils
+  - git clone --depth=1 --single-branch hhttps://github.com/LanguageMachines/ticcutils
   - cd ticcutils
   - bash bootstrap.sh
   - ./configure $OPENMPFLAG
   - make
   - sudo make install
   - cd ..
-  - git clone https://github.com/LanguageMachines/libfolia
+  - git clone --depth=1 --single-branch hhttps://github.com/LanguageMachines/libfolia
   - cd libfolia
-  - if [ "$TRAVIS_BRANCH" == "folia2.0" ]; then git checkout folia2.0; fi
   - bash bootstrap.sh
   - ./configure $OPENMPFLAG
   - make
   - sudo make install
   - cd ..
-  - git clone https://github.com/LanguageMachines/uctodata
+  - git clone --depth=1 --single-branch hhttps://github.com/LanguageMachines/uctodata
   - cd uctodata
   - bash bootstrap.sh
   - ./configure $OPENMPFLAG
   - make
   - sudo make install
   - cd ..
-  - git clone https://github.com/LanguageMachines/ucto
+  - git clone --depth=1 --single-branch hhttps://github.com/LanguageMachines/ucto
   - cd ucto
-  - if [ "$TRAVIS_BRANCH" == "folia2.0" ]; then git checkout folia2.0; fi
   - bash bootstrap.sh
   - ./configure $OPENMPFLAG
   - make
   - sudo make install
   - cd ..
-  - git clone https://github.com/LanguageMachines/timbl
+  - git clone --depth=1 --single-branch hhttps://github.com/LanguageMachines/timbl
   - cd timbl
   - bash bootstrap.sh
   - ./configure $OPENMPFLAG
   - make
   - sudo make install
   - cd ..
-  - git clone https://github.com/LanguageMachines/mbt
+  - git clone --depth=1 --single-branch hhttps://github.com/LanguageMachines/mbt
   - cd mbt
   - bash bootstrap.sh
   - ./configure $OPENMPFLAG
   - make
   - sudo make install
   - cd ..
-  - git clone https://github.com/LanguageMachines/frogdata
+  - git clone --depth=1 --single-branch hhttps://github.com/LanguageMachines/frogdata
   - cd frogdata
   - bash bootstrap.sh
   - ./configure $OPENMPFLAG
   - make
   - sudo make install
   - cd ..
-  - if [ "$TRAVIS_BRANCH" == "folia2.0" ]; then git checkout folia2.0; fi
 
 install:
   - bash bootstrap.sh
@@ -138,9 +136,8 @@ install:
 script:
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
   - make check
-  - git clone https://github.com/LanguageMachines/frogtests.git;
+  - git clone  --depth=1 --single-branch https://github.com/LanguageMachines/frogtests.git;
   - cd frogtests
-  - if [ "$TRAVIS_BRANCH" == "folia2.0" ]; then git checkout folia2.0; fi
   - frog_bin=/usr/local/bin ./testall >&2
 
 after_failure:
