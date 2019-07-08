@@ -1611,12 +1611,13 @@ void FrogAPI::run_folia_engine( const string& infilename,
   if ( xmlOutFile.empty() ){
     options.noStdOut = false;
   }
-  folia::TextEngine engine( infilename );
-  engine.setup( options.inputclass, true );
+  folia::TextEngine engine;
   if  (options.debugFlag > 8){
     engine.set_dbg_stream( theDbgLog );
     engine.set_debug( true );
   }
+  engine.init_doc( infilename );
+  engine.setup( options.inputclass, true );
   folia::Document &doc = *engine.doc();
   string def_lang = tokenizer->default_language();
   if ( !def_lang.empty() ){
