@@ -41,6 +41,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include "unicode/schriter.h"
 #include "config.h"
 #ifdef HAVE_OPENMP
 #include <omp.h>
@@ -1336,6 +1337,23 @@ frog_record extract_from_word( const folia::Word* word,
   return rec;
 }
 
+UnicodeString replace_spaces( const UnicodeString& in ) {
+  UnicodeString result;
+  StringCharacterIterator sit(in);
+  while ( sit.hasNext() ){
+    UChar32 c = sit.current32();
+    if ( u_isspace(c)) {
+      result += '_';
+    }
+    else {
+      result += c;
+    }
+    sit.next32();
+  }
+  return result;
+}
+
+
 void FrogAPI::handle_one_sentence( ostream& os,
 				   folia::Sentence *s,
 				   const size_t s_cnt ){
@@ -1363,9 +1381,9 @@ void FrogAPI::handle_one_sentence( ostream& os,
     // assume unfrogged yet
     string text;
     for ( const auto& w : wv ){
-      string tmp = w->str( options.inputclass );
-      replace( tmp.begin(), tmp.end(), ' ', '_' );
-      text += tmp + " ";
+      UnicodeString tmp = w->unicode( options.inputclass );
+      tmp = replace_spaces( tmp );
+      text += TiCC::UnicodeToUTF8(tmp) + " ";
     }
     if  ( options.debugFlag > 1 ){
       DBG << "handle_one_sentence() on existing words" << endl;
@@ -1472,8 +1490,8 @@ void FrogAPI::handle_one_text_parent( ostream& os,
   if ( e->xmltag() == "w" ){
     // already tokenized into words!
     folia::Word *word = dynamic_cast<folia::Word*>(e);
-    string text = word->str( options.inputclass );
-    replace( text.begin(), text.end(), ' ', '_' );
+    UnicodeString utext = word->unicode( options.inputclass );
+    string text = TiCC::UnicodeToUTF8(replace_spaces( utext ));
     vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text );
     frog_data res = frog_sentence( toks, ++sentence_done );
     if ( !options.noStdOut ){
