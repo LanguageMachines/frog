@@ -113,12 +113,10 @@ class FrogAPI {
   void FrogInteractive();
   frog_data frog_sentence( std::vector<Tokenizer::Token>&,
 			   const size_t );
-  void run_folia_engine( const std::string&,
-			 std::ostream&,
-			 const std::string& = "" );
-  void run_text_engine( const std::string&,
-			std::ostream&,
-			const std::string& = "" );
+  folia::Document *run_folia_engine( const std::string&,
+				     std::ostream& );
+  folia::Document *run_text_engine( const std::string&,
+				    std::ostream& );
   folia::FoliaElement* start_document( const std::string&,
 				  folia::Document *& ) const;
   folia::FoliaElement *append_to_folia( folia::FoliaElement *,

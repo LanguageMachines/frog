@@ -733,9 +733,6 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
 }
 
 void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
-  if ( options.doXMLout ){
-    options.noStdOut = true;
-  }
   try {
     while ( conn.isValid() ) {
       ostringstream output_stream;
@@ -749,9 +746,9 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	  }
         }
         if ( result.size() < 50 ){
-            // a FoLia doc must be at least a few 100 bytes
-            // so this is wrong. Just bail out
-            throw( runtime_error( "read garbage" ) );
+	  // a FoLia doc must be at least a few 100 bytes
+	  // so this is clearly wrong. Just bail out
+	  throw( runtime_error( "read garbage" ) );
         }
         if ( options.debugFlag > 5 ){
 	  DBG << "received data [" << result << "]" << endl;
@@ -760,7 +757,12 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	ofstream os( tmp_file );
 	os << result << endl;
 	os.close();
-	run_folia_engine( tmp_file, output_stream );
+	folia::Document *xml = run_folia_engine( tmp_file, output_stream );
+	if ( xml && options.doXMLout ){
+	  xml->set_kanon(options.doKanon);
+	  output_stream << xml;
+	  delete xml;
+	}
 	LOG << "Done Processing XML... " << endl;
       }
       else {
@@ -1617,17 +1619,13 @@ void FrogAPI::handle_one_text_parent( ostream& os,
   }
 }
 
-void FrogAPI::run_folia_engine( const string& infilename,
-				ostream& output_stream,
-				const string& xmlOutFile ){
+folia::Document *FrogAPI::run_folia_engine( const string& infilename,
+					    ostream& output_stream ){
   if ( options.inputclass == options.outputclass ){
     tokenizer->setFiltering(false);
   }
   if ( options.debugFlag > 0 ){
-    DBG << "run_folia_engine(" << infilename << "," << xmlOutFile << ")" << endl;
-  }
-  if ( xmlOutFile.empty() ){
-    options.noStdOut = false;
+    DBG << "run_folia_engine(" << infilename << ")" << endl;
   }
   folia::TextEngine engine;
   if  (options.debugFlag > 8){
@@ -1664,26 +1662,22 @@ void FrogAPI::run_folia_engine( const string& infilename,
     LOG << "document contains no text in the desired inputclass: "
 	<< options.inputclass << endl;
     LOG << "NO result!" << endl;
-    return;
+    return 0;
   }
-  if ( !xmlOutFile.empty() ){
-    engine.save( xmlOutFile, options.doKanon );
-    LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
+  if ( options.doXMLout ){
+    return engine.doc(true);
   }
-  else if ( options.doXMLout ){
-    engine.save( output_stream, options.doKanon );
-  }
+  return 0;
 }
 
-void FrogAPI::run_text_engine( const string& infilename,
-			       ostream& os,
-			       const string& xmlOutFile ){
+folia::Document *FrogAPI::run_text_engine( const string& infilename,
+					   ostream& os ){
   ifstream test_file( infilename );
   int i = 0;
   folia::Document *doc = 0;
   folia::FoliaElement *root = 0;
   unsigned int par_count = 0;
-  if ( !xmlOutFile.empty() ){
+  if ( options.doXMLout ){
     string doc_id = infilename;
     if ( options.docid != "untitled" ){
       doc_id = options.docid;
@@ -1700,7 +1694,7 @@ void FrogAPI::run_text_engine( const string& infilename,
     if ( !options.noStdOut ){
       show_results( os, res );
     }
-    if ( !xmlOutFile.empty() ){
+    if ( options.doXMLout ){
       root = append_to_folia( root, res, par_count );
     }
     if  (options.debugFlag > 0){
@@ -1710,11 +1704,7 @@ void FrogAPI::run_text_engine( const string& infilename,
     toks = tokenizer->tokenize_stream_next();
     timers.tokTimer.stop();
   }
-  if ( !xmlOutFile.empty() && doc ){
-    doc->save( xmlOutFile, options.doKanon );
-    LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
-    delete doc;
-  }
+  return doc;
 }
 
 void FrogAPI::FrogFile( const string& infilename,
@@ -1727,10 +1717,11 @@ void FrogAPI::FrogFile( const string& infilename,
     // auto detect (compressed) xml.
     xml_in = true;
   }
+  string xmlOutFile = xmlOutF;
   timers.reset();
+  folia::Document *result = 0;
   if ( xml_in ){
     // when the inputfile is .bz2 or .gz, we use the same compression on output
-    string xmlOutFile = xmlOutF;
     if ( !xmlOutFile.empty() ){
       if ( TiCC::match_back( infilename, ".gz" ) ){
 	if ( !TiCC::match_back( xmlOutFile, ".gz" ) ){
@@ -1743,10 +1734,15 @@ void FrogAPI::FrogFile( const string& infilename,
 	}
       }
     }
-    run_folia_engine( infilename, os, xmlOutFile );
+    result = run_folia_engine( infilename, os );
   }
   else {
-    run_text_engine( infilename, os, xmlOutF );
+    result = run_text_engine( infilename, os );
+  }
+  if ( result ){
+    result->save( xmlOutFile, options.doKanon );
+    LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
+    delete result;
   }
   if ( !options.hide_timers ){
     LOG << "tokenisation took:  " << timers.tokTimer << endl;
