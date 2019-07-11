@@ -108,11 +108,15 @@ class FrogAPI {
   ~FrogAPI();
   static std::string defaultConfigDir( const std::string& ="" );
   static std::string defaultConfigFile( const std::string& ="" );
-  void FrogFile( const std::string&, std::ostream&, const std::string& );
+  folia::Document *FrogFile( const std::string&, std::ostream& );
   void FrogServer( Sockets::ServerSocket &conn );
   void FrogInteractive();
   frog_data frog_sentence( std::vector<Tokenizer::Token>&,
 			   const size_t );
+  std::string Frogtostring( const std::string& );
+  std::string Frogtostringfromfile( const std::string& );
+
+ private:
   folia::Document *run_folia_engine( const std::string&,
 				     std::ostream& );
   folia::Document *run_text_engine( const std::string&,
@@ -122,10 +126,6 @@ class FrogAPI {
   folia::FoliaElement *append_to_folia( folia::FoliaElement *,
 					const frog_data&,
 					unsigned int& ) const;
-  std::string Frogtostring( const std::string& );
-  std::string Frogtostringfromfile( const std::string& );
-
- private:
   void add_ner_result( folia::Sentence *,
 		       const frog_data&,
 		       const std::vector<folia::Word*>& ) const;

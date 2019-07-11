@@ -618,7 +618,7 @@ int main(int argc, char *argv[]) {
         outS = new ofstream( outputFileName );
       }
       if ( fileNames.size() > 1 ){
-	LOG << "start procesessing " << fileNames.size() << " files..." << endl;
+	LOG << "start processing " << fileNames.size() << " files..." << endl;
       }
       for ( auto const& name : fileNames ){
 	string testName = testDirName + name;
@@ -688,12 +688,11 @@ int main(int argc, char *argv[]) {
 	  LOG << "running some extra Frog tests...." << endl;
 	  if ( testName.find( ".xml" ) != string::npos ){
 	    options.doXMLin = true;
+	    options.doXMLout = true;
 	  }
 	  else {
 	    options.doXMLin = false;
-	  }
-	  if ( !xmlOutName.empty() && xmlOutName.find( ".xml" ) != string::npos ){
-	    options.doXMLout = true;
+	    options.doXMLout = false;
 	  }
 	  LOG << "Start test: " << testName << endl;
 	  stringstream ss;
@@ -715,15 +714,83 @@ int main(int argc, char *argv[]) {
 	    LOG << "test OK!" << endl;
 	  }
 	  LOG << "Done with:" << testName << endl;
+
+	  //
+	  // also test FoLiA in en text out
+	  {
+	    if ( testName.find( ".xml" ) != string::npos ){
+	      options.doXMLin = true;
+	      options.doXMLout = false;
+	    }
+	    LOG << "Start test: " << testName << endl;
+	    stringstream ss;
+	    ifstream is( testName );
+	    string line;
+	    while ( getline( is, line ) ){
+	      ss << line << endl;
+	    }
+	    string s1 = frog.Frogtostring( ss.str() );
+	    *outS << "STRING 1 " << endl;
+	    *outS << s1 << endl;
+	    string s2 = frog.Frogtostringfromfile( testName );
+	    *outS << "STRING 2 " << endl;
+	    *outS << s2 << endl;
+	    if ( s1 != s2 ){
+	      LOG << "FAILED test :" << testName << endl;
+	    }
+	    else {
+	      LOG << "test OK!" << endl;
+	    }
+	    LOG << "Done with:" << testName << endl;
+	  }
+	  //
+	  // and even text in and FoLiA out
+	  {
+	    if ( testName.find( ".xml" ) == string::npos ){
+	      options.doXMLin = false;
+	      options.doXMLout = true;
+	    }
+	    LOG << "Start test: " << testName << endl;
+	    stringstream ss;
+	    ifstream is( testName );
+	    string line;
+	    while ( getline( is, line ) ){
+	      ss << line << endl;
+	    }
+	    options.docid = "test";
+	    string s1 = frog.Frogtostring( ss.str() );
+	    *outS << "STRING 1 " << endl;
+	    *outS << s1 << endl;
+	    string s2 = frog.Frogtostringfromfile( testName );
+	    *outS << "STRING 2 " << endl;
+	    *outS << s2 << endl;
+	    if ( s1 != s2 ){
+	      LOG << "FAILED test :" << testName << endl;
+	    }
+	    else {
+	      LOG << "test OK!" << endl;
+	    }
+	    LOG << "Done with:" << testName << endl;
+	  }
 	}
 	else {
+	  folia::Document *result = 0;
 	  try {
-	    frog.FrogFile( testName, *outS, xmlOutName );
+	    result = frog.FrogFile( testName, *outS );
 	  }
 	  catch ( exception& e ){
 	    LOG << "problem frogging: " << name << endl
 		<< e.what() << endl;
 	    continue;
+	  }
+	  if ( !xmlOutName.empty() ){
+	    if ( !result ){
+	      LOG << "FAILED to create FoLiA??" << endl;
+	    }
+	    else {
+	      result->save( xmlOutName );
+	      LOG << "FoLiA stored in " << xmlOutName << endl;
+	    }
 	  }
 	  if ( !outName.empty() ){
 	    LOG << "results stored in " << outName << endl;

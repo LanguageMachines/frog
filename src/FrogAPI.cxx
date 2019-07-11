@@ -969,24 +969,32 @@ string FrogAPI::Frogtostring( const string& s ){
   if ( s.empty() ){
     return s;
   }
-  options.hide_timers = true;
   string tmp_file = tmpnam(0);
   ofstream os( tmp_file );
   os << s << endl;
   os.close();
-  stringstream ss;
-  FrogFile( tmp_file, ss, "" );
-  return ss.str();
+  return Frogtostringfromfile( tmp_file );
 }
 
-string FrogAPI::Frogtostringfromfile( const string& name ){
+string FrogAPI::Frogtostringfromfile( const string& infilename ){
   /// Parse a file, Frog it and return the result as a string.
   /// @name: The filename.
   /// @return the results of frogging. Depending of the current frog settings
   /// the inputfile can be interpreted as XML, an the ouput will be XML or
   /// tab separated
+  options.hide_timers = true;
+  bool old_val = options.noStdOut;
   stringstream ss;
-  FrogFile( name, ss, "" );
+  if ( options.doXMLout ){
+    options.noStdOut = true;
+  }
+  folia::Document *result = FrogFile( infilename, ss );
+  options.noStdOut = old_val;
+  if ( result ){
+    result->set_kanon( options.doKanon );
+    ss << result;
+    delete result;
+  }
   return ss.str();
 }
 
@@ -1665,7 +1673,7 @@ folia::Document *FrogAPI::run_folia_engine( const string& infilename,
     return 0;
   }
   if ( options.doXMLout ){
-    return engine.doc(true);
+    return engine.doc(true); //disconnect from the engine!
   }
   return 0;
 }
@@ -1707,9 +1715,9 @@ folia::Document *FrogAPI::run_text_engine( const string& infilename,
   return doc;
 }
 
-void FrogAPI::FrogFile( const string& infilename,
-			ostream& os,
-			const string& xmlOutF ) {
+folia::Document *FrogAPI::FrogFile( const string& infilename,
+				    ostream& os ){
+  folia::Document *result = 0;
   bool xml_in = options.doXMLin;
   if ( TiCC::match_back( infilename, ".xml.gz" )
        || TiCC::match_back( infilename, ".xml.bz2" )
@@ -1717,32 +1725,12 @@ void FrogAPI::FrogFile( const string& infilename,
     // auto detect (compressed) xml.
     xml_in = true;
   }
-  string xmlOutFile = xmlOutF;
   timers.reset();
-  folia::Document *result = 0;
   if ( xml_in ){
-    // when the inputfile is .bz2 or .gz, we use the same compression on output
-    if ( !xmlOutFile.empty() ){
-      if ( TiCC::match_back( infilename, ".gz" ) ){
-	if ( !TiCC::match_back( xmlOutFile, ".gz" ) ){
-	  xmlOutFile += ".gz";
-	}
-      }
-      else if ( TiCC::match_back( infilename, ".bz2" ) ){
-	if ( !TiCC::match_back( xmlOutFile, ".bz2" ) ){
-	  xmlOutFile += ".bz2";
-	}
-      }
-    }
     result = run_folia_engine( infilename, os );
   }
   else {
     result = run_text_engine( infilename, os );
-  }
-  if ( result ){
-    result->save( xmlOutFile, options.doKanon );
-    LOG << "resulting FoLiA doc saved in " << xmlOutFile << endl;
-    delete result;
   }
   if ( !options.hide_timers ){
     LOG << "tokenisation took:  " << timers.tokTimer << endl;
@@ -1772,6 +1760,7 @@ void FrogAPI::FrogFile( const string& infilename,
     }
     LOG << "Frogging in total took: " << timers.frogTimer + timers.tokTimer << endl;
   }
+  return result;
 }
 
 // the functions below here are ONLY used by TSCAN.
