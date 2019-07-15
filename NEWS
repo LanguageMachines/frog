@@ -1,5 +1,13 @@
+0.18.2 - 2019-07-15
+[Ko vd Sloot]
+Bug fix release:
+* Fixes for:
+  - https://github.com/LanguageMachines/frog/issues/75
+  - https://github.com/LanguageMachines/frog/issues/77
+
 0.18.1 - 2019-06-19
-Bug fix release.
+[Ko vd Sloot]
+Bug fix release:
 "tabbed" output contained 1 tab to much when --skip=a was specified
 
 0.18 - 2019-06-19
