@@ -793,7 +793,10 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	folia::FoliaElement *root = 0;
 	unsigned int par_count = 0;
 	if ( options.doXMLout ){
-	  string doc_id = "untitled";
+	  string doc_id = options.docid;
+	  if ( doc_id.empty() ){
+	    doc_id = "untitled";
+	  }
 	  root = start_document( doc_id, doc );
 	}
 	timers.tokTimer.start();
