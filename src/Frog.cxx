@@ -198,9 +198,9 @@ bool parse_args( TiCC::CL_Options& Opts,
     if ( !vers.empty() ){
       LOG << "configuration version = " << vers << endl;
     }
-    string languages = configuration.getatt( "languages", "tokenizer" );
-    if ( !languages.empty() ){
-      vector<string> lang_v = TiCC::split_at( languages, "," );
+    string langs = configuration.getatt( "languages", "tokenizer" );
+    if ( !langs.empty() ){
+      vector<string> lang_v = TiCC::split_at( langs, "," );
       options.default_language = lang_v[0];
       for ( const auto& l : lang_v ){
 	options.languages.insert( l );
@@ -216,20 +216,20 @@ bool parse_args( TiCC::CL_Options& Opts,
   if ( !languages.empty() ){
     configuration.setatt( "languages", languages, "tokenizer" );
   }
-  string value;
+  string opt_val;
   // debug opts
-  if ( Opts.extract ('d', value) ) {
-    if ( !TiCC::stringTo<int>( value, options.debugFlag ) ){
+  if ( Opts.extract ('d', opt_val) ) {
+    if ( !TiCC::stringTo<int>( opt_val, options.debugFlag ) ){
       LOG << "-d value should be an integer" << endl;
       return false;
     }
-    configuration.setatt( "debug", value );
+    configuration.setatt( "debug", opt_val );
   }
   else {
     configuration.setatt( "debug", "0" );
   }
-  if ( Opts.extract( "debug", value ) ) {
-    vector<string> vec = TiCC::split_at( value, "," );
+  if ( Opts.extract( "debug", opt_val ) ) {
+    vector<string> vec = TiCC::split_at( opt_val, "," );
     for ( const auto& val : vec ){
       char mod = val[0];
       string value = val.substr(1);
@@ -287,8 +287,8 @@ bool parse_args( TiCC::CL_Options& Opts,
     LOG << "Quote detection is NOT supported!" << endl;
     return false;
   }
-  if ( Opts.extract( "skip", value )) {
-    string skip = value;
+  if ( Opts.extract( "skip", opt_val )) {
+    string skip = opt_val;
     if ( skip.find_first_of("tT") != string::npos ){
       options.doTok = false;
     }
@@ -328,15 +328,15 @@ bool parse_args( TiCC::CL_Options& Opts,
   options.noStdOut = Opts.extract( "nostdout" );
   Opts.extract( 'e', options.encoding );
 
-  if ( Opts.extract( "max-parser-tokens", value ) ){
-    if ( !TiCC::stringTo<unsigned int>( value, options.maxParserTokens ) ){
+  if ( Opts.extract( "max-parser-tokens", opt_val ) ){
+    if ( !TiCC::stringTo<unsigned int>( opt_val, options.maxParserTokens ) ){
       LOG << "max-parser-tokens value should be an integer" << endl;
       return false;
     }
   }
 
-  if ( Opts.extract( "ner-override", value ) ){
-    configuration.setatt( "ner_override", value, "NER" );
+  if ( Opts.extract( "ner-override", opt_val ) ){
+    configuration.setatt( "ner_override", opt_val, "NER" );
   }
   options.doServer = Opts.extract('S', options.listenport );
 
@@ -344,20 +344,20 @@ bool parse_args( TiCC::CL_Options& Opts,
   if ( options.doServer ) {
     // run in one thread in server mode, forking is too expensive for lots of small snippets
     options.numThreads =  1;
-    Opts.extract( "threads", value ); //discard threads option
+    Opts.extract( "threads", opt_val ); //discard threads option
   }
-  else if ( Opts.extract( "threads", value ) ){
+  else if ( Opts.extract( "threads", opt_val ) ){
     int num;
-    if ( !TiCC::stringTo<int>( value, num ) || num < 1 ){
+    if ( !TiCC::stringTo<int>( opt_val, num ) || num < 1 ){
       LOG << "threads value should be a positive integer" << endl;
       return false;
     }
     options.numThreads = num;
   }
 #else
-  if ( Opts.extract( "threads", value ) ){
+  if ( Opts.extract( "threads", opt_val ) ){
     LOG << "WARNING!\n---> There is NO OpenMP support enabled\n"
-		    << "---> --threads=" << value << " is ignored.\n"
+		    << "---> --threads=" << opt_val << " is ignored.\n"
 		    << "---> Will continue on just 1 thread." << endl;
   }
 #endif
@@ -426,16 +426,16 @@ bool parse_args( TiCC::CL_Options& Opts,
   options.test_API = Opts.extract("TESTAPI");
 
   options.doXMLin = false;
-  if ( Opts.extract ('x', value ) ){
+  if ( Opts.extract ('x', opt_val ) ){
     options.doXMLin = true;
-    if ( !value.empty() ){
+    if ( !opt_val.empty() ){
       if ( !xmlDirName.empty() || !testDirName.empty() ){
 	LOG << "-x may not provide a value when --testdir or --xmldir is provided" << endl;
 	return false;
       }
-      TestFileName = value;
+      TestFileName = opt_val;
       if ( !TiCC::isFile( TestFileName ) ){
-	LOG << "input stream " << value << " is not readable" << endl;
+	LOG << "input stream " << opt_val << " is not readable" << endl;
 	return false;
       }
     }
@@ -694,27 +694,28 @@ int main(int argc, char *argv[]) {
 	    options.doXMLin = false;
 	    options.doXMLout = false;
 	  }
-	  LOG << "Start test: " << testName << endl;
-	  stringstream ss;
-	  ifstream is( testName );
-	  string line;
-	  while ( getline( is, line ) ){
-	    ss << line << endl;
+	  {
+	    LOG << "Start test: " << testName << endl;
+	    stringstream ss;
+	    ifstream is( testName );
+	    string line;
+	    while ( getline( is, line ) ){
+	      ss << line << endl;
+	    }
+	    string s1 = frog.Frogtostring( ss.str() );
+	    *outS << "STRING 1 " << endl;
+	    *outS << s1 << endl;
+	    string s2 = frog.Frogtostringfromfile( testName );
+	    *outS << "STRING 2 " << endl;
+	    *outS << s2 << endl;
+	    if ( s1 != s2 ){
+	      LOG << "FAILED test :" << testName << endl;
+	    }
+	    else {
+	      LOG << "test OK!" << endl;
+	    }
+	    LOG << "Done with:" << testName << endl;
 	  }
-	  string s1 = frog.Frogtostring( ss.str() );
-	  *outS << "STRING 1 " << endl;
-	  *outS << s1 << endl;
-	  string s2 = frog.Frogtostringfromfile( testName );
-	  *outS << "STRING 2 " << endl;
-	  *outS << s2 << endl;
-	  if ( s1 != s2 ){
-	    LOG << "FAILED test :" << testName << endl;
-	  }
-	  else {
-	    LOG << "test OK!" << endl;
-	  }
-	  LOG << "Done with:" << testName << endl;
-
 	  //
 	  // also test FoLiA in en text out
 	  {
