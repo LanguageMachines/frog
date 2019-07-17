@@ -900,7 +900,7 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
     throw runtime_error( "Parser is not initialized!" );
   }
   if ( fd.empty() ){
-    LOG << "unable to parse an analisis without words" << endl;
+    LOG << "unable to parse an analysis without words" << endl;
     return;
   }
   timers.prepareTimer.start();
