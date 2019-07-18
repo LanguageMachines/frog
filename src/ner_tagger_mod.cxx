@@ -385,7 +385,6 @@ void NERTagger::post_process( frog_data& sentence,
     if (debug > 1){
       DBG << "NER = " << ners[i].first << endl;
     }
-    vector<string> ner;
     if ( ners[i].first == "O" ){
       if ( !entity.empty() ){
 	// end the previous entity
