@@ -32,11 +32,14 @@
 #include "frog/tagger_base.h"
 
 #include <algorithm>
+#include "ticcutils/SocketBasics.h"
+#include "ticcutils/PrettyPrint.h"
 #include "frog/Frog-util.h"
 
 using namespace std;
 using namespace Tagger;
 using namespace icu;
+using TiCC::operator<<;
 
 #define LOG *TiCC::Log(err_log)
 #define DBG *TiCC::Log(dbg_log)
@@ -94,7 +97,25 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
     LOG << _label << "-tagger is already initialized!" << endl;
     return false;
   }
-  string val = config.lookUp( "debug", _label );
+  string val = config.lookUp( "host", _label );
+  if ( !val.empty() ){
+    // assume we must use a MBT server for tagging
+    host = val;
+    val = config.lookUp( "port", _label );
+    if ( val.empty() ){
+      LOG << "missing 'port' settings for host= " << host << endl;
+      return false;
+    }
+    port = val;
+  }
+  else {
+    val = config.lookUp( "port", _label );
+    if ( !val.empty() ){
+      LOG << "missing 'host' settings for port= " << port << endl;
+      return false;
+    }
+  }
+  val = config.lookUp( "debug", _label );
   if ( val.empty() ){
     val = config.lookUp( "debug" );
   }
@@ -179,9 +200,16 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   if ( debug > 1 ){
     DBG << _label << "-tagger textclass= " << textclass << endl;
   }
-  string init = "-s " + settings + " -vcf";
-  tagger = new MbtAPI( init, *dbg_log );
-  return tagger->isInit();
+  if ( host.empty() ){
+    string init = "-s " + settings + " -vcf";
+    tagger = new MbtAPI( init, *dbg_log );
+    return tagger->isInit();
+  }
+  else {
+    LOG << "expecting tagger for " << _label << " on "
+	<< host << ":" << port << endl;
+    return true;
+  }
 }
 
 void BaseTagger::add_provenance( folia::Document& doc,
@@ -198,15 +226,56 @@ void BaseTagger::add_provenance( folia::Document& doc,
   add_declaration( doc, proc );
 }
 
+vector<TagResult> BaseTagger::parse_result( const string& input ) const {
+  vector<TagResult> result;  string line = input;
+  LOG << "parse_result(" << line << ")" << endl;
+  if ( line.find("Welcome to the Mbt server." ) == 0 ){
+    line.erase( 0, 27 );
+    LOG << "LINE is NOW:'" << line << endl;
+    result = Tagger::StringToTR( line );
+  }
+  else {
+    LOG << "ODD" << endl;
+  }
+  return result;
+}
+
+vector<TagResult> BaseTagger::call_server( const string& line ) const {
+  Sockets::ClientSocket client;
+  if ( !client.connect( host, port ) ){
+    LOG << "failed to open connection, " << _label << "::" << host
+	<< ":" << port << endl
+	<< "Reason: " << client.getMessage() << endl;
+    exit( EXIT_FAILURE );
+  }
+  LOG << "calling " << _label << "-server" << endl;
+  client.write( line + "\n\n" );
+  string result;
+  string s;
+  while ( client.read(s) ){
+    result += s + "\n";
+  }
+  LOG << "received data [" << result << "]" << endl;
+  return parse_result( result );
+}
 
 vector<TagResult> BaseTagger::tagLine( const string& line ){
-  if ( tagger ){
+  if ( !host.empty() ){
+    LOG << "calling server('" << line << "'" << endl;
+    return call_server(line);
+  }
+  else if ( tagger ){
     return tagger->TagLine(line);
   }
   throw runtime_error( _label + "-tagger is not initialized" );
 }
 
 string BaseTagger::set_eos_mark( const std::string& eos ){
+  if ( !host.empty() ){
+    // just ignore??
+    LOG << "cannot change EOS mark for external server!" << endl;
+    return "";
+  }
   if ( tagger ){
     return tagger->set_eos_mark( eos );
   }
@@ -284,7 +353,7 @@ void BaseTagger::Classify( frog_data& sent ){
   if ( debug > 1 ){
     DBG << _label << "-tagger in: " << sentence << endl;
   }
-  _tag_result = tagger->TagLine(sentence);
+  _tag_result = tagLine(sentence);
   if ( _tag_result.size() != sent.size() ){
     LOG << _label << "-tagger mismatch between number of words and the tagger result." << endl;
     LOG << "words according to sentence: " << endl;
