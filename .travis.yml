@@ -138,7 +138,11 @@ script:
   - make check
   - git clone  --depth=1 --single-branch https://github.com/LanguageMachines/frogtests.git;
   - cd frogtests
-  - frog_bin=/usr/local/bin ./testall >&2
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      frog_bin=/usr/local/bin ./testmac >&2
+    else
+      frog_bin=/usr/local/bin ./testall >&2
+    fi
 
 after_failure:
   - for file in *.diff; do echo DIFF in $file; cat $file; done
