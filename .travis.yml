@@ -138,10 +138,11 @@ script:
   - make check
   - git clone  --depth=1 --single-branch https://github.com/LanguageMachines/frogtests.git;
   - cd frogtests
+  - export frog_bin=/usr/local/bin
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      frog_bin=/usr/local/bin ./testmac >&2
+      ./testmac >&2 ;
     else
-      frog_bin=/usr/local/bin ./testall >&2
+      ./testall >&2 ;
     fi
 
 after_failure:
