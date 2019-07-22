@@ -930,7 +930,7 @@ void FrogAPI::FrogInteractive(){
 	  data = line + "\n";
 	}
 	while ( !eof ){
-	  char *input = readline( prompt );
+	  input = readline( prompt );
 	  if ( !input ){
 	    eof = true;
 	    break;
@@ -1574,12 +1574,12 @@ void FrogAPI::handle_one_text_parent( ostream& os,
 	}
 	else if ( sents.size() > 1 ){
 	  // multiple sentences. We need an extra Paragraph.
-	  folia::KWargs args;
+	  folia::KWargs p_args;
 	  string e_id = e->id();
 	  if ( !e_id.empty() ){
-	    args["generate_id"] = e_id;
+	    p_args["generate_id"] = e_id;
 	  }
-	  folia::Paragraph *p = new folia::Paragraph( args, e->doc() );
+	  folia::Paragraph *p = new folia::Paragraph( p_args, e->doc() );
 	  e->append( p );
 	  for ( const auto& sent : sents ){
 	    folia::KWargs args;
@@ -1799,7 +1799,7 @@ string flatten( const string& s ){
     bpos = s.find_first_of( "[", epos+1 );
     bpos = s.find_first_not_of( "[", bpos );
     while ( bpos != string::npos ){
-      string::size_type epos = s.find_first_of( "]", bpos );
+      epos = s.find_first_of( "]", bpos );
       if ( epos == string::npos ){
 	break;
       }
@@ -1815,8 +1815,8 @@ string flatten( const string& s ){
 }
 
 vector<string> get_full_morph_analysis( folia::Word* w,
-                                       const string& cls,
-                                       bool flat ){
+					const string& cls,
+					bool make_flat ){
   vector<string> result;
   vector<folia::MorphologyLayer*> layers
     = w->annotations<folia::MorphologyLayer>( Mbma::mbma_tagset );
@@ -1826,10 +1826,10 @@ vector<string> get_full_morph_analysis( folia::Word* w,
     bool is_deep = false;
     if ( m.size() == 1 ) {
       // check for top layer from deep morph analysis
-      string str  = m[0]->feat( "structure" );
+      string str = m[0]->feat( "structure" );
       if ( !str.empty() ){
 	is_deep = true;
-	if ( flat ){
+	if ( make_flat ){
 	  str = flatten(str);
 	}
 	result.push_back( str );
@@ -1838,8 +1838,7 @@ vector<string> get_full_morph_analysis( folia::Word* w,
     if ( !is_deep ){
       // flat structure
       string morph;
-      vector<folia::Morpheme*> m
-	= layer->select<folia::Morpheme>( Mbma::mbma_tagset );
+      m = layer->select<folia::Morpheme>( Mbma::mbma_tagset );
       for ( const auto& mor : m ){
 	string txt = TiCC::UnicodeToUTF8( mor->text( cls ) );
 	morph += "[" + txt + "]";
