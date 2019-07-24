@@ -115,6 +115,16 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
       return false;
     }
   }
+  val = config.lookUp( "type", _label );
+  if ( !val.empty() ){
+    if ( val == "enriched" ){
+      enriched = true;
+    }
+    else {
+      LOG << "only 'type=enriched' is valid. found type=" << val << endl;
+      return false;
+    }
+  }
   val = config.lookUp( "debug", _label );
   if ( val.empty() ){
     val = config.lookUp( "debug" );
@@ -232,7 +242,7 @@ vector<TagResult> BaseTagger::parse_result( const string& input ) const {
   if ( line.find("Welcome to the Mbt server." ) == 0 ){
     line.erase( 0, 27 );
     LOG << "LINE is NOW:'" << line << endl;
-    result = Tagger::StringToTR( line );
+    result = Tagger::StringToTR( line, enriched );
   }
   else {
     LOG << "ODD" << endl;

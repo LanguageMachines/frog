@@ -89,10 +89,11 @@ void IOBTagger::Classify( frog_data& swords ){
     }
     text_block += "\t??\n";
   }
+  text_block += "<utt>\n";
   if ( debug ){
     DBG << "TAGGING TEXT_BLOCK\n" << text_block << endl;
   }
-  _tag_result = tagger->TagLine( text_block );
+  _tag_result = tagLine( text_block );
   if ( debug ){
     DBG << "IOB tagger out: " << endl;
     for ( size_t i=0; i < _tag_result.size(); ++i ){
