@@ -51,6 +51,8 @@ BaseTagger::BaseTagger( TiCC::LogStream *errlog,
   tagger = 0;
   filter = 0;
   _label = label;
+  enriched = false;
+  do_json = false;
   err_log = new TiCC::LogStream( errlog, _label + "-tagger-" );
   if ( dbglog ){
     dbg_log = new TiCC::LogStream( dbglog, _label + "-tagger-" );
@@ -122,6 +124,16 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
     }
     else {
       LOG << "only 'type=enriched' is valid. found type=" << val << endl;
+      return false;
+    }
+  }
+  val = config.lookUp( "protocol", _label );
+  if ( !val.empty() ){
+    if ( val == "json" ){
+      do_json = true;
+    }
+    else {
+      LOG << "only 'protocol=json' is valid. found protocol=" << val << endl;
       return false;
     }
   }
@@ -259,14 +271,23 @@ vector<TagResult> BaseTagger::call_server( const string& line ) const {
     exit( EXIT_FAILURE );
   }
   LOG << "calling " << _label << "-server" << endl;
-  client.write( line + "\n\n" );
-  string result;
-  string s;
-  while ( client.read(s) ){
-    result += s + "\n";
+  if ( do_json ){
+    string line;
+    // create json struct
+    // send it to the server
+    // receive json
+    return Tagger::json_to_TR( line );
   }
-  LOG << "received data [" << result << "]" << endl;
-  return parse_result( result );
+  else {
+    client.write( line + "\n\n" );
+    string result;
+    string s;
+    while ( client.read(s) ){
+      result += s + "\n";
+    }
+    LOG << "received data [" << result << "]" << endl;
+    return parse_result( result );
+  }
 }
 
 vector<TagResult> BaseTagger::tagLine( const string& line ){
