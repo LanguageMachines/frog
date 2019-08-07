@@ -543,6 +543,97 @@ bool parse_args( TiCC::CL_Options& Opts,
   return true;
 }
 
+void FrogAPI::run_api_tests( const string& testName, ostream& outS ){
+  LOG << "running some extra Frog tests...." << endl;
+  if ( testName.find( ".xml" ) != string::npos ){
+    options.doXMLin = true;
+    options.doXMLout = true;
+  }
+  else {
+    options.doXMLin = false;
+    options.doXMLout = false;
+  }
+  {
+    LOG << "Start test: " << testName << endl;
+    stringstream ss;
+    ifstream is( testName );
+    string line;
+    while ( getline( is, line ) ){
+      ss << line << endl;
+    }
+    string s1 = Frogtostring( ss.str() );
+    outS << "STRING 1 " << endl;
+    outS << s1 << endl;
+    string s2 = Frogtostringfromfile( testName );
+    outS << "STRING 2 " << endl;
+    outS << s2 << endl;
+    if ( s1 != s2 ){
+      LOG << "FAILED test :" << testName << endl;
+    }
+    else {
+      LOG << "test OK!" << endl;
+    }
+    LOG << "Done with:" << testName << endl;
+  }
+  //
+  // also test FoLiA in en text out
+  {
+    if ( testName.find( ".xml" ) != string::npos ){
+      options.doXMLin = true;
+      options.doXMLout = false;
+    }
+    LOG << "Start test: " << testName << endl;
+    stringstream ss;
+    ifstream is( testName );
+    string line;
+    while ( getline( is, line ) ){
+      ss << line << endl;
+    }
+    string s1 = Frogtostring( ss.str() );
+    outS << "STRING 1 " << endl;
+    outS << s1 << endl;
+    string s2 = Frogtostringfromfile( testName );
+    outS << "STRING 2 " << endl;
+    outS << s2 << endl;
+    if ( s1 != s2 ){
+      LOG << "FAILED test :" << testName << endl;
+    }
+    else {
+      LOG << "test OK!" << endl;
+    }
+    LOG << "Done with:" << testName << endl;
+  }
+  //
+  // and even text in and FoLiA out
+  {
+    if ( testName.find( ".xml" ) == string::npos ){
+      options.doXMLin = false;
+      options.doXMLout = true;
+    }
+    LOG << "Start test: " << testName << endl;
+    stringstream ss;
+    ifstream is( testName );
+    string line;
+    while ( getline( is, line ) ){
+      ss << line << endl;
+    }
+    options.docid = "test";
+    string s1 = Frogtostring( ss.str() );
+    outS << "STRING 1 " << endl;
+    outS << s1 << endl;
+    string s2 = Frogtostringfromfile( testName );
+    outS << "STRING 2 " << endl;
+    outS << s2 << endl;
+    if ( s1 != s2 ){
+      LOG << "FAILED test :" << testName << endl;
+    }
+    else {
+      LOG << "test OK!" << endl;
+    }
+    LOG << "Done with:" << testName << endl;
+  }
+}
+
 static bool StillRunning = true;
 
 void KillServerFun( int Signal ){
@@ -685,94 +776,7 @@ int main(int argc, char *argv[]) {
 	}
 	LOG << TiCC::Timer::now() << " Frogging " << testName << endl;
 	if ( options.test_API ){
-	  LOG << "running some extra Frog tests...." << endl;
-	  if ( testName.find( ".xml" ) != string::npos ){
-	    options.doXMLin = true;
-	    options.doXMLout = true;
-	  }
-	  else {
-	    options.doXMLin = false;
-	    options.doXMLout = false;
-	  }
-	  {
-	    LOG << "Start test: " << testName << endl;
-	    stringstream ss;
-	    ifstream is( testName );
-	    string line;
-	    while ( getline( is, line ) ){
-	      ss << line << endl;
-	    }
-	    string s1 = frog.Frogtostring( ss.str() );
-	    *outS << "STRING 1 " << endl;
-	    *outS << s1 << endl;
-	    string s2 = frog.Frogtostringfromfile( testName );
-	    *outS << "STRING 2 " << endl;
-	    *outS << s2 << endl;
-	    if ( s1 != s2 ){
-	      LOG << "FAILED test :" << testName << endl;
-	    }
-	    else {
-	      LOG << "test OK!" << endl;
-	    }
-	    LOG << "Done with:" << testName << endl;
-	  }
-	  //
-	  // also test FoLiA in en text out
-	  {
-	    if ( testName.find( ".xml" ) != string::npos ){
-	      options.doXMLin = true;
-	      options.doXMLout = false;
-	    }
-	    LOG << "Start test: " << testName << endl;
-	    stringstream ss;
-	    ifstream is( testName );
-	    string line;
-	    while ( getline( is, line ) ){
-	      ss << line << endl;
-	    }
-	    string s1 = frog.Frogtostring( ss.str() );
-	    *outS << "STRING 1 " << endl;
-	    *outS << s1 << endl;
-	    string s2 = frog.Frogtostringfromfile( testName );
-	    *outS << "STRING 2 " << endl;
-	    *outS << s2 << endl;
-	    if ( s1 != s2 ){
-	      LOG << "FAILED test :" << testName << endl;
-	    }
-	    else {
-	      LOG << "test OK!" << endl;
-	    }
-	    LOG << "Done with:" << testName << endl;
-	  }
-	  //
-	  // and even text in and FoLiA out
-	  {
-	    if ( testName.find( ".xml" ) == string::npos ){
-	      options.doXMLin = false;
-	      options.doXMLout = true;
-	    }
-	    LOG << "Start test: " << testName << endl;
-	    stringstream ss;
-	    ifstream is( testName );
-	    string line;
-	    while ( getline( is, line ) ){
-	      ss << line << endl;
-	    }
-	    options.docid = "test";
-	    string s1 = frog.Frogtostring( ss.str() );
-	    *outS << "STRING 1 " << endl;
-	    *outS << s1 << endl;
-	    string s2 = frog.Frogtostringfromfile( testName );
-	    *outS << "STRING 2 " << endl;
-	    *outS << s2 << endl;
-	    if ( s1 != s2 ){
-	      LOG << "FAILED test :" << testName << endl;
-	    }
-	    else {
-	      LOG << "test OK!" << endl;
-	    }
-	    LOG << "Done with:" << testName << endl;
-	  }
+	  frog.run_api_tests( testName, *outS );
 	}
 	else {
 	  folia::Document *result = 0;
