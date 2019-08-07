@@ -1652,28 +1652,32 @@ folia::Document *FrogAPI::run_folia_engine( const string& infilename,
       doc.set_metadata( "language", def_lang );
     }
   }
-  add_provenance( doc );
-  int sentence_done = 0;
-  folia::FoliaElement *p = 0;
-  while ( (p = engine.next_text_parent() ) ){
-    if ( options.debugFlag > 3 ){
-      DBG << "next text parent: " << p << endl;
-    }
-    handle_one_text_parent( output_stream, p, sentence_done );
-    if ( options.debugFlag > 0 ){
-      DBG << "done with sentence " << sentence_done << endl;
-    }
-    if ( engine.next() ){
-      if ( options.debugFlag > 1 ){
-	DBG << "looping for more ..." << endl;
-      }
-    }
-  }
-  if ( sentence_done == 0 ){
+  if ( engine.text_parent_count() == 0 ){
     LOG << "document contains no text in the desired inputclass: "
 	<< options.inputclass << endl;
-    LOG << "NO result!" << endl;
-    return 0;
+    LOG << "NO real frogging is done!" << endl;
+  }
+  else {
+    add_provenance( doc );
+    int sentence_done = 0;
+    folia::FoliaElement *p = 0;
+    while ( (p = engine.next_text_parent() ) ){
+      if ( options.debugFlag > 3 ){
+	DBG << "next text parent: " << p << endl;
+      }
+      handle_one_text_parent( output_stream, p, sentence_done );
+      if ( options.debugFlag > 0 ){
+	DBG << "done with sentence " << sentence_done << endl;
+      }
+      if ( engine.next() ){
+	if ( options.debugFlag > 1 ){
+	  DBG << "looping for more ..." << endl;
+	}
+      }
+    }
+    if ( sentence_done == 0 ){
+      LOG << "Strange: didn't process any sentence...." << endl;
+    }
   }
   if ( options.doXMLout ){
     return engine.doc(true); //disconnect from the engine!
@@ -1764,6 +1768,97 @@ folia::Document *FrogAPI::FrogFile( const string& infilename,
     LOG << "Frogging in total took: " << timers.frogTimer + timers.tokTimer << endl;
   }
   return result;
+}
+
+void FrogAPI::run_api_tests( const string& testName, ostream& outS ){
+  LOG << "running some extra Frog tests...." << endl;
+  if ( testName.find( ".xml" ) != string::npos ){
+    options.doXMLin = true;
+    options.doXMLout = true;
+  }
+  else {
+    options.doXMLin = false;
+    options.doXMLout = false;
+  }
+  {
+    LOG << "Start test: " << testName << endl;
+    stringstream ss;
+    ifstream is( testName );
+    string line;
+    while ( getline( is, line ) ){
+      ss << line << endl;
+    }
+    string s1 = Frogtostring( ss.str() );
+    outS << "STRING 1 " << endl;
+    outS << s1 << endl;
+    string s2 = Frogtostringfromfile( testName );
+    outS << "STRING 2 " << endl;
+    outS << s2 << endl;
+    if ( s1 != s2 ){
+      LOG << "FAILED test :" << testName << endl;
+    }
+    else {
+      LOG << "test OK!" << endl;
+    }
+    LOG << "Done with:" << testName << endl;
+  }
+  //
+  // also test FoLiA in en text out
+  {
+    if ( testName.find( ".xml" ) != string::npos ){
+      options.doXMLin = true;
+      options.doXMLout = false;
+    }
+    LOG << "Start test: " << testName << endl;
+    stringstream ss;
+    ifstream is( testName );
+    string line;
+    while ( getline( is, line ) ){
+      ss << line << endl;
+    }
+    string s1 = Frogtostring( ss.str() );
+    outS << "STRING 1 " << endl;
+    outS << s1 << endl;
+    string s2 = Frogtostringfromfile( testName );
+    outS << "STRING 2 " << endl;
+    outS << s2 << endl;
+    if ( s1 != s2 ){
+      LOG << "FAILED test :" << testName << endl;
+    }
+    else {
+      LOG << "test OK!" << endl;
+    }
+    LOG << "Done with:" << testName << endl;
+  }
+  //
+  // and even text in and FoLiA out
+  {
+    if ( testName.find( ".xml" ) == string::npos ){
+      options.doXMLin = false;
+      options.doXMLout = true;
+    }
+    LOG << "Start test: " << testName << endl;
+    stringstream ss;
+    ifstream is( testName );
+    string line;
+    while ( getline( is, line ) ){
+      ss << line << endl;
+    }
+    options.docid = "test";
+    string s1 = Frogtostring( ss.str() );
+    outS << "STRING 1 " << endl;
+    outS << s1 << endl;
+    string s2 = Frogtostringfromfile( testName );
+    outS << "STRING 2 " << endl;
+    outS << s2 << endl;
+    if ( s1 != s2 ){
+      LOG << "FAILED test :" << testName << endl;
+    }
+    else {
+      LOG << "test OK!" << endl;
+    }
+    LOG << "Done with:" << testName << endl;
+  }
 }
 
 // the functions below here are ONLY used by TSCAN.
