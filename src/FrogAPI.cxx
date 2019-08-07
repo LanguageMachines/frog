@@ -1652,28 +1652,32 @@ folia::Document *FrogAPI::run_folia_engine( const string& infilename,
       doc.set_metadata( "language", def_lang );
     }
   }
-  add_provenance( doc );
-  int sentence_done = 0;
-  folia::FoliaElement *p = 0;
-  while ( (p = engine.next_text_parent() ) ){
-    if ( options.debugFlag > 3 ){
-      DBG << "next text parent: " << p << endl;
-    }
-    handle_one_text_parent( output_stream, p, sentence_done );
-    if ( options.debugFlag > 0 ){
-      DBG << "done with sentence " << sentence_done << endl;
-    }
-    if ( engine.next() ){
-      if ( options.debugFlag > 1 ){
-	DBG << "looping for more ..." << endl;
-      }
-    }
-  }
-  if ( sentence_done == 0 ){
+  if ( engine.text_parent_count() == 0 ){
     LOG << "document contains no text in the desired inputclass: "
 	<< options.inputclass << endl;
-    LOG << "NO result!" << endl;
-    return 0;
+    LOG << "NO real frogging is done!" << endl;
+  }
+  else {
+    add_provenance( doc );
+    int sentence_done = 0;
+    folia::FoliaElement *p = 0;
+    while ( (p = engine.next_text_parent() ) ){
+      if ( options.debugFlag > 3 ){
+	DBG << "next text parent: " << p << endl;
+      }
+      handle_one_text_parent( output_stream, p, sentence_done );
+      if ( options.debugFlag > 0 ){
+	DBG << "done with sentence " << sentence_done << endl;
+      }
+      if ( engine.next() ){
+	if ( options.debugFlag > 1 ){
+	  DBG << "looping for more ..." << endl;
+	}
+      }
+    }
+    if ( sentence_done == 0 ){
+      LOG << "Strange: didn't process any sentence...." << endl;
+    }
   }
   if ( options.doXMLout ){
     return engine.doc(true); //disconnect from the engine!
