@@ -1645,19 +1645,19 @@ folia::Document *FrogAPI::run_folia_engine( const string& infilename,
   }
   engine.init_doc( infilename );
   engine.setup( options.inputclass, true );
-  folia::Document &doc = *engine.doc();
-  string def_lang = tokenizer->default_language();
-  if ( !def_lang.empty() ){
-    if ( doc.metadata_type() == "native" ){
-      doc.set_metadata( "language", def_lang );
-    }
-  }
   if ( engine.text_parent_count() == 0 ){
     LOG << "document contains no text in the desired inputclass: "
 	<< options.inputclass << endl;
     LOG << "NO real frogging is done!" << endl;
   }
   else {
+    folia::Document &doc = *engine.doc();
+    string def_lang = tokenizer->default_language();
+    if ( !def_lang.empty() ){
+      if ( doc.metadata_type() == "native" ){
+	doc.set_metadata( "language", def_lang );
+      }
+    }
     add_provenance( doc );
     int sentence_done = 0;
     folia::FoliaElement *p = 0;
