@@ -116,6 +116,7 @@ class FrogAPI {
   std::string Frogtostring( const std::string& );
   std::string Frogtostringfromfile( const std::string& );
   void run_api_tests( const std::string&, std::ostream& );
+
  private:
   folia::Document *run_folia_engine( const std::string&,
 				     std::ostream& );

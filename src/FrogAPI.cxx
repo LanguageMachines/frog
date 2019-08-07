@@ -1645,19 +1645,19 @@ folia::Document *FrogAPI::run_folia_engine( const string& infilename,
   }
   engine.init_doc( infilename );
   engine.setup( options.inputclass, true );
-  folia::Document &doc = *engine.doc();
-  string def_lang = tokenizer->default_language();
-  if ( !def_lang.empty() ){
-    if ( doc.metadata_type() == "native" ){
-      doc.set_metadata( "language", def_lang );
-    }
-  }
   if ( engine.text_parent_count() == 0 ){
     LOG << "document contains no text in the desired inputclass: "
 	<< options.inputclass << endl;
     LOG << "NO real frogging is done!" << endl;
   }
   else {
+    folia::Document &doc = *engine.doc();
+    string def_lang = tokenizer->default_language();
+    if ( !def_lang.empty() ){
+      if ( doc.metadata_type() == "native" ){
+	doc.set_metadata( "language", def_lang );
+      }
+    }
     add_provenance( doc );
     int sentence_done = 0;
     folia::FoliaElement *p = 0;
@@ -1768,6 +1768,97 @@ folia::Document *FrogAPI::FrogFile( const string& infilename,
     LOG << "Frogging in total took: " << timers.frogTimer + timers.tokTimer << endl;
   }
   return result;
+}
+
+void FrogAPI::run_api_tests( const string& testName, ostream& outS ){
+  LOG << "running some extra Frog tests...." << endl;
+  if ( testName.find( ".xml" ) != string::npos ){
+    options.doXMLin = true;
+    options.doXMLout = true;
+  }
+  else {
+    options.doXMLin = false;
+    options.doXMLout = false;
+  }
+  {
+    LOG << "Start test: " << testName << endl;
+    stringstream ss;
+    ifstream is( testName );
+    string line;
+    while ( getline( is, line ) ){
+      ss << line << endl;
+    }
+    string s1 = Frogtostring( ss.str() );
+    outS << "STRING 1 " << endl;
+    outS << s1 << endl;
+    string s2 = Frogtostringfromfile( testName );
+    outS << "STRING 2 " << endl;
+    outS << s2 << endl;
+    if ( s1 != s2 ){
+      LOG << "FAILED test :" << testName << endl;
+    }
+    else {
+      LOG << "test OK!" << endl;
+    }
+    LOG << "Done with:" << testName << endl;
+  }
+  //
+  // also test FoLiA in en text out
+  {
+    if ( testName.find( ".xml" ) != string::npos ){
+      options.doXMLin = true;
+      options.doXMLout = false;
+    }
+    LOG << "Start test: " << testName << endl;
+    stringstream ss;
+    ifstream is( testName );
+    string line;
+    while ( getline( is, line ) ){
+      ss << line << endl;
+    }
+    string s1 = Frogtostring( ss.str() );
+    outS << "STRING 1 " << endl;
+    outS << s1 << endl;
+    string s2 = Frogtostringfromfile( testName );
+    outS << "STRING 2 " << endl;
+    outS << s2 << endl;
+    if ( s1 != s2 ){
+      LOG << "FAILED test :" << testName << endl;
+    }
+    else {
+      LOG << "test OK!" << endl;
+    }
+    LOG << "Done with:" << testName << endl;
+  }
+  //
+  // and even text in and FoLiA out
+  {
+    if ( testName.find( ".xml" ) == string::npos ){
+      options.doXMLin = false;
+      options.doXMLout = true;
+    }
+    LOG << "Start test: " << testName << endl;
+    stringstream ss;
+    ifstream is( testName );
+    string line;
+    while ( getline( is, line ) ){
+      ss << line << endl;
+    }
+    options.docid = "test";
+    string s1 = Frogtostring( ss.str() );
+    outS << "STRING 1 " << endl;
+    outS << s1 << endl;
+    string s2 = Frogtostringfromfile( testName );
+    outS << "STRING 2 " << endl;
+    outS << s2 << endl;
+    if ( s1 != s2 ){
+      LOG << "FAILED test :" << testName << endl;
+    }
+    else {
+      LOG << "test OK!" << endl;
+    }
+    LOG << "Done with:" << testName << endl;
+  }
 }
 
 // the functions below here are ONLY used by TSCAN.
