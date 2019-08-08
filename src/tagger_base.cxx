@@ -349,11 +349,11 @@ vector<TagResult> BaseTagger::tagLine( const string& line ){
 
 vector<TagResult> BaseTagger::tagLine( const vector<tag_entry>& to_do ){
   //  if ( debug > 1 ){
-    DBG << "TAGGING TEXT_BLOCK\n" << endl;
-    for ( const auto& it : to_do ){
-      DBG << it.word << "\t" << it.enrichment << "\t" << endl;
-    }
-    //  }
+  DBG << "TAGGING TEXT_BLOCK\n" << endl;
+  for ( const auto& it : to_do ){
+    DBG << it.word << "\t" << it.enrichment << "\t" << endl;
+  }
+  //  }
   if ( !host.empty() ){
     LOG << "calling server" << endl;
     return call_server(to_do);
@@ -367,8 +367,11 @@ vector<TagResult> BaseTagger::tagLine( const vector<tag_entry>& to_do ){
       block += e.word;
       if ( !e.enrichment.empty() ){
 	block += "\t" + e.enrichment;
+	block += "\t??\n";
       }
-      block += "\t??\n";
+      else {
+	block += " ";
+      }
     }
     block += "<utt>\n"; // should use tagger.eosmark??
     return tagger->TagLine( block );
@@ -411,7 +414,7 @@ void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
   }
 }
 
-vector <tag_entry> BaseTagger::extract_sentence( const frog_data& sent ){
+vector<tag_entry> BaseTagger::extract_sentence( const frog_data& sent ){
   vector<tag_entry> result;
   for ( const auto& sword : sent.units ){
     icu::UnicodeString word = TiCC::UnicodeFromUTF8(sword.word);
