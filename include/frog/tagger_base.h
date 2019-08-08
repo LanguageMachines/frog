@@ -41,6 +41,12 @@
 #include "ucto/tokenize.h"
 #include "frog/FrogData.h"
 
+class tag_entry {
+public:
+  std::string word;
+  std::string enrichment;
+};
+
 class BaseTagger {
  public:
   explicit BaseTagger( TiCC::LogStream *,
@@ -56,19 +62,17 @@ class BaseTagger {
   std::string set_eos_mark( const std::string& );
   bool fill_map( const std::string&, std::map<std::string,std::string>& );
   std::vector<Tagger::TagResult> tagLine( const std::string& );
+  std::vector<Tagger::TagResult> tagLine( const std::vector<tag_entry>& );
   std::string version() const { return _version; };
  private:
-  std::string extract_sentence( const std::vector<folia::Word*>&,
-				std::vector<std::string>& );
-  std::string extract_sentence( const frog_data&,
-				std::vector<std::string>& );
+  std::string extract_sentence( const frog_data& );
  protected:
   void extract_words_tags(  const std::vector<folia::Word *>&,
 			    const std::string&,
 			    std::vector<std::string>&,
 			    std::vector<std::string>& );
   std::vector<Tagger::TagResult> parse_result( const std::string& ) const;
-  std::vector<Tagger::TagResult> call_server( const std::string& ) const;
+  std::vector<Tagger::TagResult> call_server( const std::vector<tag_entry>& ) const;
   int debug;
   std::string _label;
   std::string tagset;

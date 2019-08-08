@@ -74,26 +74,24 @@ void IOBTagger::Classify( frog_data& swords ){
       ptags.push_back( w.tag );
     }
   }
-  string text_block;
+
+  vector<tag_entry> to_do;
   string prev = "_";
   for ( size_t i=0; i < swords.size(); ++i ){
-    string word = words[i];
-    string pos = ptags[i];
-    text_block += word + "\t" + prev + "\t" + pos + "\t";
-    prev = pos;
+    tag_entry ta;
+    ta.word = words[i];
+    ta.enrichment = prev;
+    prev = ptags[i];
+    ta.enrichment += "\t" + ptags[i];
     if ( i < swords.size() - 1 ){
-      text_block += ptags[i+1];
+      ta.enrichment += "\t" + ptags[i+1];
     }
     else {
-      text_block += "_";
+      ta.enrichment += "\t_";
     }
-    text_block += "\t??\n";
+    to_do.push_back( ta );
   }
-  text_block += "<utt>\n";
-  if ( debug ){
-    DBG << "TAGGING TEXT_BLOCK\n" << text_block << endl;
-  }
-  _tag_result = tagLine( text_block );
+  _tag_result = tagLine( to_do );
   if ( debug ){
     DBG << "IOB tagger out: " << endl;
     for ( size_t i=0; i < _tag_result.size(); ++i ){

@@ -34,6 +34,7 @@
 #include <algorithm>
 #include "ticcutils/SocketBasics.h"
 #include "ticcutils/PrettyPrint.h"
+#include "json/json.hpp"
 #include "frog/Frog-util.h"
 
 using namespace std;
@@ -262,7 +263,7 @@ vector<TagResult> BaseTagger::parse_result( const string& input ) const {
   return result;
 }
 
-vector<TagResult> BaseTagger::call_server( const string& line ) const {
+vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
   Sockets::ClientSocket client;
   if ( !client.connect( host, port ) ){
     LOG << "failed to open connection, " << _label << "::" << host
@@ -279,7 +280,17 @@ vector<TagResult> BaseTagger::call_server( const string& line ) const {
     return Tagger::json_to_TR( line );
   }
   else {
-    client.write( line + "\n\n" );
+    string block;
+    for ( const auto& e: tv ){
+      block += e.word;
+      if ( !e.enrichment.empty() ){
+	block += "\t" + e.enrichment + "\t??\n";
+      }
+      else {
+	block != " ";
+      }
+    }
+    client.write( block + "\n\n" );
     string result;
     string s;
     while ( client.read(s) ){
@@ -291,14 +302,41 @@ vector<TagResult> BaseTagger::call_server( const string& line ) const {
 }
 
 vector<TagResult> BaseTagger::tagLine( const string& line ){
+  if ( !tagger ){
+    throw runtime_error( _label + "-tagger is not initialized" );
+  }
+  if ( debug > 1 ){
+    DBG << "TAGGING LINE: " << line << endl;
+  }
+  return tagger->TagLine( line );
+}
+
+vector<TagResult> BaseTagger::tagLine( const vector<tag_entry>& to_do ){
+  //  if ( debug > 1 ){
+    DBG << "TAGGING TEXT_BLOCK\n" << endl;
+    for ( const auto& it : to_do ){
+      DBG << it.word << "\t" << it.enrichment << "\t" << endl;
+    }
+    //  }
   if ( !host.empty() ){
-    LOG << "calling server('" << line << "'" << endl;
-    return call_server(line);
+    LOG << "calling server" << endl;
+    return call_server(to_do);
   }
-  else if ( tagger ){
-    return tagger->TagLine(line);
+  else {
+    if ( !tagger ){
+      throw runtime_error( _label + "-tagger is not initialized" );
+    }
+    string block;
+    for ( const auto& e: to_do ){
+      block += e.word;
+      if ( !e.enrichment.empty() ){
+	block += "\t" + e.enrichment;
+      }
+      block += "\t??\n";
+    }
+    block += "<utt>\n"; // should use tagger.eosmark??
+    return tagger->TagLine( block );
   }
-  throw runtime_error( _label + "-tagger is not initialized" );
 }
 
 string BaseTagger::set_eos_mark( const std::string& eos ){
@@ -311,30 +349,6 @@ string BaseTagger::set_eos_mark( const std::string& eos ){
     return tagger->set_eos_mark( eos );
   }
   throw runtime_error( _label + "-tagger is not initialized" );
-}
-
-string BaseTagger::extract_sentence( const vector<folia::Word*>& swords,
-				     vector<string>& words ){
-  words.clear();
-  string sentence;
-  for ( const auto& sword : swords ){
-    UnicodeString word;
-#pragma omp critical (foliaupdate)
-    {
-      word = sword->text( textclass );
-    }
-    if ( filter ){
-      word = filter->filter( word );
-    }
-    string word_s = TiCC::UnicodeToUTF8( word );
-    // the word may contain spaces, remove them all!
-    word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
-    sentence += word_s;
-    if ( &sword != &swords.back() ){
-      sentence += " ";
-    }
-  }
-  return sentence;
 }
 
 void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
@@ -361,9 +375,7 @@ void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
   }
 }
 
-string BaseTagger::extract_sentence( const frog_data& sent,
-				     vector<string>& words ){
-  words.clear();
+string BaseTagger::extract_sentence( const frog_data& sent ){
   string sentence;
   for ( const auto& sword : sent.units ){
     icu::UnicodeString word = TiCC::UnicodeFromUTF8(sword.word);
@@ -380,7 +392,8 @@ string BaseTagger::extract_sentence( const frog_data& sent,
 }
 
 void BaseTagger::Classify( frog_data& sent ){
-  string sentence = extract_sentence( sent, _words );
+  _words.clear();
+  string sentence = extract_sentence( sent );
   if ( debug > 1 ){
     DBG << _label << "-tagger in: " << sentence << endl;
   }

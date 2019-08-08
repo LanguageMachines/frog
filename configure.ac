@@ -137,6 +137,9 @@ PKG_CHECK_MODULES([ucto], [ucto >= 0.15] )
 CXXFLAGS="$CXXFLAGS $ucto_CFLAGS"
 LIBS="$ucto_LIBS $LIBS"
 
+PKG_CHECK_MODULES([json], [json >= 0.1] )
+CXXFLAGS="$CXXFLAGS $json_CFLAGS"
+
 UCTO_VERSION=`pkg-config --modversion ucto`
 UCTO_INT="${UCTO_VERSION//.}" # no dots
 UCTO_INT=$((10#$UCTO_INT))    # no leading 0 (that's octal)
