@@ -263,6 +263,31 @@ vector<TagResult> BaseTagger::parse_result( const string& input ) const {
   return result;
 }
 
+nlohmann::json create_json( const vector<tag_entry>& tv ){
+  if ( tv.size() == 1 ){
+    nlohmann::json result;
+    result["word"] = tv[0].word;
+    if ( !tv[0].enrichment.empty() ){
+      result["enrichment"] = tv[0].enrichment;
+      result["tag"] = "??";
+    }
+    return result;
+  }
+  else {
+    nlohmann::json result = nlohmann::json::array();
+    for ( const auto& it : tv ){
+      nlohmann::json one_entry;
+      one_entry["word"] = it.word;
+      if ( !it.enrichment.empty() ){
+	one_entry["enrichment"] = it.enrichment;
+	one_entry["tag"] = "??";
+      }
+      result.push_back( one_entry );
+    }
+    return result;
+  }
+}
+
 vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
   Sockets::ClientSocket client;
   if ( !client.connect( host, port ) ){
@@ -273,10 +298,21 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
   }
   LOG << "calling " << _label << "-server" << endl;
   if ( do_json ){
-    string line;
     // create json struct
+    nlohmann::json my_json = create_json( tv );
+    cerr << "created json" << my_json << endl;
     // send it to the server
+    string line = my_json.dump();
+    LOG << "sending json data:" << line << endl;
+    client.write( line );
     // receive json
+    client.read( line );
+    LOG << "received line:" << line << "" << endl;
+    if ( line.find("Welcome to the Mbt server." ) == 0 ){
+      client.read( line );
+      LOG << "received line:" << line << "" << endl;
+    }
+    LOG << "received json data:" << line << endl;
     return Tagger::json_to_TR( line );
   }
   else {
@@ -375,8 +411,8 @@ void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
   }
 }
 
-string BaseTagger::extract_sentence( const frog_data& sent ){
-  string sentence;
+vector <tag_entry> BaseTagger::extract_sentence( const frog_data& sent ){
+  vector<tag_entry> result;
   for ( const auto& sword : sent.units ){
     icu::UnicodeString word = TiCC::UnicodeFromUTF8(sword.word);
     if ( filter ){
@@ -385,19 +421,29 @@ string BaseTagger::extract_sentence( const frog_data& sent ){
     string word_s = TiCC::UnicodeToUTF8( word );
     // the word may contain spaces, remove them all!
     word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
-    sentence += word_s;
-    sentence += " ";
+    tag_entry entry;
+    entry.word = word_s;
+    result.push_back( entry );
   }
-  return sentence;
+  return result;
+}
+
+ostream& operator<<( ostream&os, const tag_entry& e ){
+  os << e.word;
+  if ( !e.enrichment.empty() ){
+    os << "\t" << e.enrichment;
+  }
+  os << endl;
+  return os;
 }
 
 void BaseTagger::Classify( frog_data& sent ){
   _words.clear();
-  string sentence = extract_sentence( sent );
+  vector<tag_entry> to_do = extract_sentence( sent );
   if ( debug > 1 ){
-    DBG << _label << "-tagger in: " << sentence << endl;
+    DBG << _label << "-tagger in: " << to_do << endl;
   }
-  _tag_result = tagLine(sentence);
+  _tag_result = tagLine( to_do );
   if ( _tag_result.size() != sent.size() ){
     LOG << _label << "-tagger mismatch between number of words and the tagger result." << endl;
     LOG << "words according to sentence: " << endl;

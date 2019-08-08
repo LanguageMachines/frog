@@ -324,6 +324,7 @@ void NERTagger::Classify( frog_data& swords ){
       else {
 	entry.enrichment += "\t_";
       }
+      to_do.push_back( entry );
     }
     _tag_result = tagLine( to_do );
     if ( debug > 1 ){

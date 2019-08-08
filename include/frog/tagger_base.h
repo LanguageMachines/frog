@@ -65,7 +65,7 @@ class BaseTagger {
   std::vector<Tagger::TagResult> tagLine( const std::vector<tag_entry>& );
   std::string version() const { return _version; };
  private:
-  std::string extract_sentence( const frog_data& );
+  std::vector<tag_entry> extract_sentence( const frog_data& );
  protected:
   void extract_words_tags(  const std::vector<folia::Word *>&,
 			    const std::string&,
