@@ -269,7 +269,6 @@ nlohmann::json create_json( const vector<tag_entry>& tv ){
     result["word"] = tv[0].word;
     if ( !tv[0].enrichment.empty() ){
       result["enrichment"] = tv[0].enrichment;
-      result["tag"] = "??";
     }
     return result;
   }
@@ -280,7 +279,6 @@ nlohmann::json create_json( const vector<tag_entry>& tv ){
       one_entry["word"] = it.word;
       if ( !it.enrichment.empty() ){
 	one_entry["enrichment"] = it.enrichment;
-	one_entry["tag"] = "??";
       }
       result.push_back( one_entry );
     }
@@ -302,7 +300,7 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
     nlohmann::json my_json = create_json( tv );
     cerr << "created json" << my_json << endl;
     // send it to the server
-    string line = my_json.dump();
+    string line = my_json.dump() + "\n";
     LOG << "sending json data:" << line << endl;
     client.write( line );
     // receive json
@@ -310,10 +308,18 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
     LOG << "received line:" << line << "" << endl;
     if ( line.find("Welcome to the Mbt server." ) == 0 ){
       client.read( line );
-      LOG << "received line:" << line << "" << endl;
+      LOG << "received json line:" << line << "" << endl;
     }
-    LOG << "received json data:" << line << endl;
-    return Tagger::json_to_TR( line );
+    try {
+      my_json = nlohmann::json::parse( line );
+    }
+    catch ( const exception& e ){
+      LOG << "json parsing failed on '" << line << "':"
+	   << e.what() << endl;
+      abort();
+    }
+    LOG << "received json data:" << my_json << endl;
+    return Tagger::json_to_TR( my_json );
   }
   else {
     string block;
