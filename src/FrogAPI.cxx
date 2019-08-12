@@ -1405,15 +1405,20 @@ void FrogAPI::handle_one_sentence( ostream& os,
     vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text );
     // cerr << "text:" << text << " size=" << wv.size() << endl;
     // cerr << "tokens:" << toks << " size=" << toks.size() << endl;
-    frog_data res = frog_sentence( toks, s_cnt );
-    //    cerr << "res:" << res << " size=" << res.size() << endl;
-    if ( res.size() > 0 ){
-      if ( !options.noStdOut ){
-	show_results( os, res );
+    if ( toks.size() > 0 ){
+      frog_data res = frog_sentence( toks, s_cnt );
+      //    cerr << "res:" << res << " size=" << res.size() << endl;
+      if ( res.size() > 0 ){
+	if ( !options.noStdOut ){
+	  show_results( os, res );
+	}
+	if ( options.doXMLout ){
+	  append_to_words( wv, res );
+	}
       }
-      if ( options.doXMLout ){
-	append_to_words( wv, res );
-      }
+    }
+    else {
+      LOG << "no tokens lef " << endl;
     }
   }
   else {
@@ -1476,6 +1481,9 @@ void FrogAPI::handle_one_paragraph( ostream& os,
 	  p->append( s );
 	  append_to_sentence( s, res );
 	}
+	if ( toks.size() == 0 ){
+	  break;
+	}
 	res = frog_sentence( toks, ++sentence_done );
       }
       timers.tokTimer.start();
@@ -1506,14 +1514,16 @@ void FrogAPI::handle_one_text_parent( ostream& os,
     UnicodeString utext = word->unicode( options.inputclass );
     string text = TiCC::UnicodeToUTF8(replace_spaces( utext ));
     vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text );
-    frog_data res = frog_sentence( toks, ++sentence_done );
-    if ( !options.noStdOut ){
-      show_results( os, res );
-    }
-    if ( options.doXMLout ){
-      vector<folia::Word*> wv;
-      wv.push_back( word );
-      append_to_words( wv, res );
+    if ( toks.size() > 0 ){
+      frog_data res = frog_sentence( toks, ++sentence_done );
+      if ( !options.noStdOut ){
+	show_results( os, res );
+      }
+      if ( options.doXMLout ){
+	vector<folia::Word*> wv;
+	wv.push_back( word );
+	append_to_words( wv, res );
+      }
     }
   }
   else if ( e->xmltag() == "s" ){
