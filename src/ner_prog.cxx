@@ -141,7 +141,7 @@ void Test( istream& in ){
     cout << "processing: " << sentence << endl;
     vector<TagResult> tagv = tagger.tagLine(sentence);
     for ( const auto& tr : tagv ){
-      cout << tr.word() << "\t" << tr.assignedTag() << endl;
+      cout << tr.word() << "\t" << tr.assigned_tag() << endl;
     }
     cout << "<utt>" << endl << endl;
   }

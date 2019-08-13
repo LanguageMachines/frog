@@ -74,30 +74,29 @@ void IOBTagger::Classify( frog_data& swords ){
       ptags.push_back( w.tag );
     }
   }
-  string text_block;
+
+  vector<tag_entry> to_do;
   string prev = "_";
   for ( size_t i=0; i < swords.size(); ++i ){
-    string word = words[i];
-    string pos = ptags[i];
-    text_block += word + "\t" + prev + "\t" + pos + "\t";
-    prev = pos;
+    tag_entry ta;
+    ta.word = words[i];
+    ta.enrichment = prev;
+    prev = ptags[i];
+    ta.enrichment += "\t" + ptags[i];
     if ( i < swords.size() - 1 ){
-      text_block += ptags[i+1];
+      ta.enrichment += "\t" + ptags[i+1];
     }
     else {
-      text_block += "_";
+      ta.enrichment += "\t_";
     }
-    text_block += "\t??\n";
+    to_do.push_back( ta );
   }
-  if ( debug ){
-    DBG << "TAGGING TEXT_BLOCK\n" << text_block << endl;
-  }
-  _tag_result = tagger->TagLine( text_block );
+  _tag_result = tagLine( to_do );
   if ( debug ){
     DBG << "IOB tagger out: " << endl;
     for ( size_t i=0; i < _tag_result.size(); ++i ){
       DBG << "[" << i << "] : word=" << _tag_result[i].word()
-	  << " tag=" << _tag_result[i].assignedTag()
+	  << " tag=" << _tag_result[i].assigned_tag()
 	  << " confidence=" << _tag_result[i].confidence() << endl;
     }
   }
@@ -110,7 +109,7 @@ void IOBTagger::post_process( frog_data& words ){
   }
   string last_tag;
   for ( size_t i=0; i < _tag_result.size(); ++i ){
-    string tag = _tag_result[i].assignedTag();
+    string tag = _tag_result[i].assigned_tag();
     if ( tag[0] == 'I' ){
       // make sure that we start a new 'sequence' with a B
       if ( last_tag.empty() ){

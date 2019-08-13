@@ -125,9 +125,13 @@ PKG_CHECK_MODULES([timbl], [timbl >= 6.4.4] )
 CXXFLAGS="$CXXFLAGS $timbl_CFLAGS"
 LIBS="$timbl_LIBS $LIBS"
 
-PKG_CHECK_MODULES([mbt], [mbt >= 3.2.14] )
+PKG_CHECK_MODULES([mbt], [mbt >= 3.5] )
 CXXFLAGS="$CXXFLAGS $mbt_CFLAGS"
 LIBS="$mbt_LIBS $LIBS"
+
+PKG_CHECK_MODULES([mbtserver], [mbtserver >= 0.13] )
+CXXFLAGS="$CXXFLAGS $mbtserver_CFLAGS"
+LIBS="$mbtserver_LIBS $LIBS"
 
 PKG_CHECK_MODULES([folia],[folia >= 2.3])
 CXXFLAGS="$CXXFLAGS $folia_CFLAGS"
@@ -136,6 +140,9 @@ LIBS="$folia_LIBS $LIBS"
 PKG_CHECK_MODULES([ucto], [ucto >= 0.15] )
 CXXFLAGS="$CXXFLAGS $ucto_CFLAGS"
 LIBS="$ucto_LIBS $LIBS"
+
+PKG_CHECK_MODULES([json], [json >= 0.1] )
+CXXFLAGS="$CXXFLAGS $json_CFLAGS"
 
 UCTO_VERSION=`pkg-config --modversion ucto`
 UCTO_INT="${UCTO_VERSION//.}" # no dots

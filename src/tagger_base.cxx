@@ -32,11 +32,16 @@
 #include "frog/tagger_base.h"
 
 #include <algorithm>
+#include "ticcutils/SocketBasics.h"
+#include "ticcutils/PrettyPrint.h"
+#include "json/json.hpp"
+#include "mbtserver/MbtServerBase.h"
 #include "frog/Frog-util.h"
 
 using namespace std;
 using namespace Tagger;
 using namespace icu;
+using TiCC::operator<<;
 
 #define LOG *TiCC::Log(err_log)
 #define DBG *TiCC::Log(dbg_log)
@@ -94,7 +99,29 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
     LOG << _label << "-tagger is already initialized!" << endl;
     return false;
   }
-  string val = config.lookUp( "debug", _label );
+  string val = config.lookUp( "host", _label );
+  if ( !val.empty() ){
+    // assume we must use a MBT server for tagging
+    host = val;
+    val = config.lookUp( "port", _label );
+    if ( val.empty() ){
+      LOG << "missing 'port' settings for host= " << host << endl;
+      return false;
+    }
+    port = val;
+    val = config.lookUp( "base", _label );
+    if ( !val.empty() ){
+      base = val;
+    }
+  }
+  else {
+    val = config.lookUp( "port", _label );
+    if ( !val.empty() ){
+      LOG << "missing 'host' settings for port= " << port << endl;
+      return false;
+    }
+  }
+  val = config.lookUp( "debug", _label );
   if ( val.empty() ){
     val = config.lookUp( "debug" );
   }
@@ -179,9 +206,16 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   if ( debug > 1 ){
     DBG << _label << "-tagger textclass= " << textclass << endl;
   }
-  string init = "-s " + settings + " -vcf";
-  tagger = new MbtAPI( init, *dbg_log );
-  return tagger->isInit();
+  if ( host.empty() ){
+    string init = "-s " + settings + " -vcf";
+    tagger = new MbtAPI( init, *dbg_log );
+    return tagger->isInit();
+  }
+  else {
+    LOG << "using " << _label << "-tagger on "
+	<< host << ":" << port << endl;
+    return true;
+  }
 }
 
 void BaseTagger::add_provenance( folia::Document& doc,
@@ -198,43 +232,128 @@ void BaseTagger::add_provenance( folia::Document& doc,
   add_declaration( doc, proc );
 }
 
+nlohmann::json create_json( const vector<tag_entry>& tv ){
+  if ( tv.size() == 1 ){
+    nlohmann::json result;
+    result["word"] = tv[0].word;
+    if ( !tv[0].enrichment.empty() ){
+      result["enrichment"] = tv[0].enrichment;
+    }
+    return result;
+  }
+  else {
+    nlohmann::json result = nlohmann::json::array();
+    for ( const auto& it : tv ){
+      nlohmann::json one_entry;
+      one_entry["word"] = it.word;
+      if ( !it.enrichment.empty() ){
+	one_entry["enrichment"] = it.enrichment;
+      }
+      result.push_back( one_entry );
+    }
+    return result;
+  }
+}
+
+vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
+  Sockets::ClientSocket client;
+  if ( !client.connect( host, port ) ){
+    LOG << "failed to open connection, " << _label << "::" << host
+	<< ":" << port << endl
+	<< "Reason: " << client.getMessage() << endl;
+    exit( EXIT_FAILURE );
+  }
+  DBG << "calling " << _label << "-server" << endl;
+  if ( !base.empty() ){
+    nlohmann::json out_json;
+    out_json["base"] = base;
+    string line = out_json.dump() + "\n";
+    DBG << "sending BASE json data:" << line << endl;
+    client.write( line );
+  }
+  // create json struct
+  nlohmann::json my_json = create_json( tv );
+  DBG << "created json" << my_json << endl;
+  // send it to the server
+  string line = my_json.dump() + "\n";
+  DBG << "sending json data:" << line << endl;
+  client.write( line );
+  // receive json
+  client.read( line );
+  DBG << "received line:" << line << "" << endl;
+  if ( line.find("Welcome to the Mbt server." ) == 0 ){
+    client.read( line );
+    DBG << "received json line:" << line << "" << endl;
+    if ( !base.empty() ){
+      client.read( line );
+      DBG << "received json line:" << line << "" << endl;
+      client.read( line );
+      DBG << "received json line:" << line << "" << endl;
+    }
+  }
+  try {
+    my_json = nlohmann::json::parse( line );
+  }
+  catch ( const exception& e ){
+    LOG << "json parsing failed on '" << line << "':"
+	<< e.what() << endl;
+    abort();
+  }
+  DBG << "received json data:" << my_json << endl;
+  return MbtServer::json_to_TR( my_json );
+}
 
 vector<TagResult> BaseTagger::tagLine( const string& line ){
-  if ( tagger ){
-    return tagger->TagLine(line);
+  if ( !tagger ){
+    throw runtime_error( _label + "-tagger is not initialized" );
   }
-  throw runtime_error( _label + "-tagger is not initialized" );
+  if ( debug > 1 ){
+    DBG << "TAGGING LINE: " << line << endl;
+  }
+  return tagger->TagLine( line );
+}
+
+vector<TagResult> BaseTagger::tagLine( const vector<tag_entry>& to_do ){
+  //  if ( debug > 1 ){
+  DBG << "TAGGING TEXT_BLOCK\n" << endl;
+  for ( const auto& it : to_do ){
+    DBG << it.word << "\t" << it.enrichment << "\t" << endl;
+  }
+  //  }
+  if ( !host.empty() ){
+    DBG << "calling server" << endl;
+    return call_server(to_do);
+  }
+  else {
+    if ( !tagger ){
+      throw runtime_error( _label + "-tagger is not initialized" );
+    }
+    string block;
+    for ( const auto& e: to_do ){
+      block += e.word;
+      if ( !e.enrichment.empty() ){
+	block += "\t" + e.enrichment;
+	block += "\t??\n";
+      }
+      else {
+	block += " ";
+      }
+    }
+    block += "<utt>\n"; // should use tagger.eosmark??
+    return tagger->TagLine( block );
+  }
 }
 
 string BaseTagger::set_eos_mark( const std::string& eos ){
+  if ( !host.empty() ){
+    // just ignore??
+    LOG << "cannot change EOS mark for external server!" << endl;
+    return "";
+  }
   if ( tagger ){
     return tagger->set_eos_mark( eos );
   }
   throw runtime_error( _label + "-tagger is not initialized" );
-}
-
-string BaseTagger::extract_sentence( const vector<folia::Word*>& swords,
-				     vector<string>& words ){
-  words.clear();
-  string sentence;
-  for ( const auto& sword : swords ){
-    UnicodeString word;
-#pragma omp critical (foliaupdate)
-    {
-      word = sword->text( textclass );
-    }
-    if ( filter ){
-      word = filter->filter( word );
-    }
-    string word_s = TiCC::UnicodeToUTF8( word );
-    // the word may contain spaces, remove them all!
-    word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
-    sentence += word_s;
-    if ( &sword != &swords.back() ){
-      sentence += " ";
-    }
-  }
-  return sentence;
 }
 
 void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
@@ -261,10 +380,8 @@ void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
   }
 }
 
-string BaseTagger::extract_sentence( const frog_data& sent,
-				     vector<string>& words ){
-  words.clear();
-  string sentence;
+vector<tag_entry> BaseTagger::extract_sentence( const frog_data& sent ){
+  vector<tag_entry> result;
   for ( const auto& sword : sent.units ){
     icu::UnicodeString word = TiCC::UnicodeFromUTF8(sword.word);
     if ( filter ){
@@ -273,18 +390,29 @@ string BaseTagger::extract_sentence( const frog_data& sent,
     string word_s = TiCC::UnicodeToUTF8( word );
     // the word may contain spaces, remove them all!
     word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
-    sentence += word_s;
-    sentence += " ";
+    tag_entry entry;
+    entry.word = word_s;
+    result.push_back( entry );
   }
-  return sentence;
+  return result;
+}
+
+ostream& operator<<( ostream&os, const tag_entry& e ){
+  os << e.word;
+  if ( !e.enrichment.empty() ){
+    os << "\t" << e.enrichment;
+  }
+  os << endl;
+  return os;
 }
 
 void BaseTagger::Classify( frog_data& sent ){
-  string sentence = extract_sentence( sent, _words );
+  _words.clear();
+  vector<tag_entry> to_do = extract_sentence( sent );
   if ( debug > 1 ){
-    DBG << _label << "-tagger in: " << sentence << endl;
+    DBG << _label << "-tagger in: " << to_do << endl;
   }
-  _tag_result = tagger->TagLine(sentence);
+  _tag_result = tagLine( to_do );
   if ( _tag_result.size() != sent.size() ){
     LOG << _label << "-tagger mismatch between number of words and the tagger result." << endl;
     LOG << "words according to sentence: " << endl;
@@ -301,7 +429,7 @@ void BaseTagger::Classify( frog_data& sent ){
     DBG << _label + "-tagger out: " << endl;
     for ( size_t i=0; i < _tag_result.size(); ++i ){
       DBG << "[" << i << "] : word=" << _tag_result[i].word()
-	  << " tag=" << _tag_result[i].assignedTag()
+	  << " tag=" << _tag_result[i].assigned_tag()
 	  << " confidence=" << _tag_result[i].confidence() << endl;
     }
   }

@@ -304,37 +304,34 @@ void NERTagger::Classify( frog_data& swords ){
     string text_block;
     string prev = "_";
     string prevN = "_";
+    vector<tag_entry> to_do;
     for ( size_t i=0; i < swords.size(); ++i ){
-      string word = words[i];
-      string pos = pos_tags[i];
-      text_block += word + "\t" + prev + "\t" + pos + "\t";
-      prev = pos;
+      tag_entry entry;
+      entry.word = words[i];
+      entry.enrichment = prev + "\t" + pos_tags[i];
+      prev = pos_tags[i];
       if ( i < swords.size() - 1 ){
-	text_block += pos_tags[i+1];
+	entry.enrichment += "\t" + pos_tags[i+1];
       }
       else {
-	text_block += "_";
+	entry.enrichment += "\t_";
       }
-      string ktag = gazet_tags[i];
-      text_block += "\t" + prevN + "\t" + ktag + "\t";
-      prevN = ktag;
+      entry.enrichment += "\t" + prevN + "\t" + gazet_tags[i];
+      prevN = gazet_tags[i];
       if ( i < swords.size() - 1 ){
-	text_block += gazet_tags[i+1];
+	entry.enrichment += "\t" + gazet_tags[i+1];
       }
       else {
-	text_block += "_";
+	entry.enrichment += "\t_";
       }
-      text_block += "\t??\n";
+      to_do.push_back( entry );
     }
-    if ( debug > 1 ){
-      DBG << "TAGGING TEXT_BLOCK\n" << text_block << endl;
-    }
-    _tag_result = tagger->TagLine( text_block );
+    _tag_result = tagLine( to_do );
     if ( debug > 1 ){
       DBG << "NER tagger out: " << endl;
       for ( size_t i=0; i < _tag_result.size(); ++i ){
 	DBG << "[" << i << "] : word=" << _tag_result[i].word()
-	    << " tag=" << _tag_result[i].assignedTag()
+	    << " tag=" << _tag_result[i].assigned_tag()
 	    << " confidence=" << _tag_result[i].confidence() << endl;
       }
     }
@@ -343,7 +340,7 @@ void NERTagger::Classify( frog_data& swords ){
     // (the MBT tagger may deliver those)
     string last;
     for ( const auto& tag : _tag_result ){
-      string assigned = tag.assignedTag();
+      string assigned = tag.assigned_tag();
       if ( assigned == "O" ){
 	last = "";
       }
