@@ -35,6 +35,7 @@
 #include "ticcutils/SocketBasics.h"
 #include "ticcutils/PrettyPrint.h"
 #include "json/json.hpp"
+#include "mbtserver/MbtServerBase.h"
 #include "frog/Frog-util.h"
 
 using namespace std;
@@ -52,7 +53,6 @@ BaseTagger::BaseTagger( TiCC::LogStream *errlog,
   tagger = 0;
   filter = 0;
   _label = label;
-  enriched = false;
   err_log = new TiCC::LogStream( errlog, _label + "-tagger-" );
   if ( dbglog ){
     dbg_log = new TiCC::LogStream( dbglog, _label + "-tagger-" );
@@ -118,16 +118,6 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
     val = config.lookUp( "port", _label );
     if ( !val.empty() ){
       LOG << "missing 'host' settings for port= " << port << endl;
-      return false;
-    }
-  }
-  val = config.lookUp( "type", _label );
-  if ( !val.empty() ){
-    if ( val == "enriched" ){
-      enriched = true;
-    }
-    else {
-      LOG << "only 'type=enriched' is supported. found type=" << val << endl;
       return false;
     }
   }
@@ -242,20 +232,6 @@ void BaseTagger::add_provenance( folia::Document& doc,
   add_declaration( doc, proc );
 }
 
-vector<TagResult> BaseTagger::parse_result( const string& input ) const {
-  vector<TagResult> result;  string line = input;
-  LOG << "parse_result(" << line << ")" << endl;
-  if ( line.find("Welcome to the Mbt server." ) == 0 ){
-    line.erase( 0, 27 );
-    LOG << "LINE is NOW:'" << line << endl;
-    result = Tagger::StringToTR( line, enriched );
-  }
-  else {
-    LOG << "ODD" << endl;
-  }
-  return result;
-}
-
 nlohmann::json create_json( const vector<tag_entry>& tv ){
   if ( tv.size() == 1 ){
     nlohmann::json result;
@@ -324,7 +300,7 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
     abort();
   }
   DBG << "received json data:" << my_json << endl;
-  return Tagger::json_to_TR( my_json );
+  return MbtServer::json_to_TR( my_json );
 }
 
 vector<TagResult> BaseTagger::tagLine( const string& line ){
@@ -453,7 +429,7 @@ void BaseTagger::Classify( frog_data& sent ){
     DBG << _label + "-tagger out: " << endl;
     for ( size_t i=0; i < _tag_result.size(); ++i ){
       DBG << "[" << i << "] : word=" << _tag_result[i].word()
-	  << " tag=" << _tag_result[i].assignedTag()
+	  << " tag=" << _tag_result[i].assigned_tag()
 	  << " confidence=" << _tag_result[i].confidence() << endl;
     }
   }

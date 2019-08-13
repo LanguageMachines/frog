@@ -96,7 +96,7 @@ void IOBTagger::Classify( frog_data& swords ){
     DBG << "IOB tagger out: " << endl;
     for ( size_t i=0; i < _tag_result.size(); ++i ){
       DBG << "[" << i << "] : word=" << _tag_result[i].word()
-	  << " tag=" << _tag_result[i].assignedTag()
+	  << " tag=" << _tag_result[i].assigned_tag()
 	  << " confidence=" << _tag_result[i].confidence() << endl;
     }
   }
@@ -109,7 +109,7 @@ void IOBTagger::post_process( frog_data& words ){
   }
   string last_tag;
   for ( size_t i=0; i < _tag_result.size(); ++i ){
-    string tag = _tag_result[i].assignedTag();
+    string tag = _tag_result[i].assigned_tag();
     if ( tag[0] == 'I' ){
       // make sure that we start a new 'sequence' with a B
       if ( last_tag.empty() ){

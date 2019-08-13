@@ -192,9 +192,9 @@ void Test( istream& in, ostream& os ){
 	for ( const auto& tr : tagrv ){
 	  UnicodeString uWord = TiCC::UnicodeFromUTF8(tr.word());
 	  myMblem.Classify( uWord );
-	  myMblem.filterTag( tr.assignedTag() );
+	  myMblem.filterTag( tr.assigned_tag() );
 	  vector<pair<string,string> > res = myMblem.getResult();
-	  string line = tr.word() + " {" + tr.assignedTag() + "}\t";
+	  string line = tr.word() + " {" + tr.assigned_tag() + "}\t";
 	  for ( const auto& p : res ){
 	    line += p.first + "[" + p.second + "]/";
 	  }

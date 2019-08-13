@@ -331,7 +331,7 @@ void NERTagger::Classify( frog_data& swords ){
       DBG << "NER tagger out: " << endl;
       for ( size_t i=0; i < _tag_result.size(); ++i ){
 	DBG << "[" << i << "] : word=" << _tag_result[i].word()
-	    << " tag=" << _tag_result[i].assignedTag()
+	    << " tag=" << _tag_result[i].assigned_tag()
 	    << " confidence=" << _tag_result[i].confidence() << endl;
       }
     }
@@ -340,7 +340,7 @@ void NERTagger::Classify( frog_data& swords ){
     // (the MBT tagger may deliver those)
     string last;
     for ( const auto& tag : _tag_result ){
-      string assigned = tag.assignedTag();
+      string assigned = tag.assigned_tag();
       if ( assigned == "O" ){
 	last = "";
       }

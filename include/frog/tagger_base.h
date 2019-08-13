@@ -71,7 +71,6 @@ class BaseTagger {
 			    const std::string&,
 			    std::vector<std::string>&,
 			    std::vector<std::string>& );
-  std::vector<Tagger::TagResult> parse_result( const std::string& ) const;
   std::vector<Tagger::TagResult> call_server( const std::vector<tag_entry>& ) const;
   int debug;
   std::string _label;
@@ -83,7 +82,6 @@ class BaseTagger {
   std::string base;
   std::string host;
   std::string port;
-  bool enriched;
   MbtAPI *tagger;
   TiCC::UniFilter *filter;
   std::vector<std::string> _words;

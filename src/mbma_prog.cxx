@@ -186,7 +186,7 @@ void Test( istream& in ){
 	vector<TagResult> tagv = tagger.tagLine( s );
 	for ( const auto& tr : tagv ){
 	  UnicodeString uWord = TiCC::UnicodeFromUTF8( tr.word() );
-	  vector<string> v = TiCC::split_at_first_of( tr.assignedTag(), "(,)" );
+	  vector<string> v = TiCC::split_at_first_of( tr.assigned_tag(), "(,)" );
 	  if ( v.empty() ){
 	    throw runtime_error( "error: tag not in right format " );
 	  }
@@ -198,7 +198,7 @@ void Test( istream& in ){
 	  myMbma.filterHeadTag( head );
 	  myMbma.filterSubTags( v );
 	  myMbma.assign_compounds();
-	  cout << tr.word() << " {" << tr.assignedTag() << "}\t";
+	  cout << tr.word() << " {" << tr.assigned_tag() << "}\t";
 	  vector<pair<string,string>> res = myMbma.getResults();
 	  if ( res.size() == 0 ){
 	    cout << "[" << uWord << "]";

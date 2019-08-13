@@ -173,7 +173,7 @@ string CGNTagger::getSubSet( const string& val, const string& head, const string
 void CGNTagger::post_process( frog_data& words ){
   for ( size_t i=0; i < _tag_result.size(); ++i ){
     addTag( words.units[i],
-	    _tag_result[i].assignedTag(),
+	    _tag_result[i].assigned_tag(),
 	    _tag_result[i].confidence() );
   }
 }
