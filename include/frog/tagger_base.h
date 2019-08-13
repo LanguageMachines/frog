@@ -80,6 +80,7 @@ class BaseTagger {
   std::string textclass;
   TiCC::LogStream *err_log;
   TiCC::LogStream *dbg_log;
+  std::string base;
   std::string host;
   std::string port;
   bool enriched;

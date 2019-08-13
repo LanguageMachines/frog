@@ -110,6 +110,10 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
       return false;
     }
     port = val;
+    val = config.lookUp( "base", _label );
+    if ( !val.empty() ){
+      base = val;
+    }
   }
   else {
     val = config.lookUp( "port", _label );
@@ -124,7 +128,7 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
       enriched = true;
     }
     else {
-      LOG << "only 'type=enriched' is valid. found type=" << val << endl;
+      LOG << "only 'type=enriched' is supported. found type=" << val << endl;
       return false;
     }
   }
@@ -296,6 +300,13 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
   }
   LOG << "calling " << _label << "-server" << endl;
   if ( do_json ){
+    if ( !base.empty() ){
+      nlohmann::json out_json;
+      out_json["base"] = base;
+      string line = out_json.dump() + "\n";
+      LOG << "sending BASE json data:" << line << endl;
+      client.write( line );
+    }
     // create json struct
     nlohmann::json my_json = create_json( tv );
     cerr << "created json" << my_json << endl;
@@ -309,6 +320,12 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
     if ( line.find("Welcome to the Mbt server." ) == 0 ){
       client.read( line );
       LOG << "received json line:" << line << "" << endl;
+      if ( !base.empty() ){
+	client.read( line );
+	LOG << "received json line:" << line << "" << endl;
+	client.read( line );
+	LOG << "received json line:" << line << "" << endl;
+      }
     }
     try {
       my_json = nlohmann::json::parse( line );
@@ -322,6 +339,11 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
     return Tagger::json_to_TR( my_json );
   }
   else {
+    if ( !base.empty() ){
+      string line = "base=" + base + "\n";
+      LOG << "sending BASE json data:" << line << endl;
+      client.write( line );
+    }
     string block;
     for ( const auto& e: tv ){
       block += e.word;
