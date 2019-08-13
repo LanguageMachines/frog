@@ -84,7 +84,6 @@ class BaseTagger {
   std::string host;
   std::string port;
   bool enriched;
-  bool do_json;
   MbtAPI *tagger;
   TiCC::UniFilter *filter;
   std::vector<std::string> _words;

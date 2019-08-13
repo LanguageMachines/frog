@@ -53,7 +53,6 @@ BaseTagger::BaseTagger( TiCC::LogStream *errlog,
   filter = 0;
   _label = label;
   enriched = false;
-  do_json = false;
   err_log = new TiCC::LogStream( errlog, _label + "-tagger-" );
   if ( dbglog ){
     dbg_log = new TiCC::LogStream( dbglog, _label + "-tagger-" );
@@ -129,16 +128,6 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
     }
     else {
       LOG << "only 'type=enriched' is supported. found type=" << val << endl;
-      return false;
-    }
-  }
-  val = config.lookUp( "protocol", _label );
-  if ( !val.empty() ){
-    if ( val == "json" ){
-      do_json = true;
-    }
-    else {
-      LOG << "only 'protocol=json' is valid. found protocol=" << val << endl;
       return false;
     }
   }
@@ -233,7 +222,7 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
     return tagger->isInit();
   }
   else {
-    LOG << "expecting tagger for " << _label << " on "
+    LOG << "using " << _label << "-tagger on "
 	<< host << ":" << port << endl;
     return true;
   }
@@ -298,71 +287,44 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
 	<< "Reason: " << client.getMessage() << endl;
     exit( EXIT_FAILURE );
   }
-  LOG << "calling " << _label << "-server" << endl;
-  if ( do_json ){
-    if ( !base.empty() ){
-      nlohmann::json out_json;
-      out_json["base"] = base;
-      string line = out_json.dump() + "\n";
-      LOG << "sending BASE json data:" << line << endl;
-      client.write( line );
-    }
-    // create json struct
-    nlohmann::json my_json = create_json( tv );
-    cerr << "created json" << my_json << endl;
-    // send it to the server
-    string line = my_json.dump() + "\n";
-    LOG << "sending json data:" << line << endl;
+  DBG << "calling " << _label << "-server" << endl;
+  if ( !base.empty() ){
+    nlohmann::json out_json;
+    out_json["base"] = base;
+    string line = out_json.dump() + "\n";
+    DBG << "sending BASE json data:" << line << endl;
     client.write( line );
-    // receive json
+  }
+  // create json struct
+  nlohmann::json my_json = create_json( tv );
+  DBG << "created json" << my_json << endl;
+  // send it to the server
+  string line = my_json.dump() + "\n";
+  DBG << "sending json data:" << line << endl;
+  client.write( line );
+  // receive json
+  client.read( line );
+  DBG << "received line:" << line << "" << endl;
+  if ( line.find("Welcome to the Mbt server." ) == 0 ){
     client.read( line );
-    LOG << "received line:" << line << "" << endl;
-    if ( line.find("Welcome to the Mbt server." ) == 0 ){
-      client.read( line );
-      LOG << "received json line:" << line << "" << endl;
-      if ( !base.empty() ){
-	client.read( line );
-	LOG << "received json line:" << line << "" << endl;
-	client.read( line );
-	LOG << "received json line:" << line << "" << endl;
-      }
-    }
-    try {
-      my_json = nlohmann::json::parse( line );
-    }
-    catch ( const exception& e ){
-      LOG << "json parsing failed on '" << line << "':"
-	   << e.what() << endl;
-      abort();
-    }
-    LOG << "received json data:" << my_json << endl;
-    return Tagger::json_to_TR( my_json );
-  }
-  else {
+    DBG << "received json line:" << line << "" << endl;
     if ( !base.empty() ){
-      string line = "base=" + base + "\n";
-      LOG << "sending BASE json data:" << line << endl;
-      client.write( line );
+      client.read( line );
+      DBG << "received json line:" << line << "" << endl;
+      client.read( line );
+      DBG << "received json line:" << line << "" << endl;
     }
-    string block;
-    for ( const auto& e: tv ){
-      block += e.word;
-      if ( !e.enrichment.empty() ){
-	block += "\t" + e.enrichment + "\t??\n";
-      }
-      else {
-	block != " ";
-      }
-    }
-    client.write( block + "\n\n" );
-    string result;
-    string s;
-    while ( client.read(s) ){
-      result += s + "\n";
-    }
-    LOG << "received data [" << result << "]" << endl;
-    return parse_result( result );
   }
+  try {
+    my_json = nlohmann::json::parse( line );
+  }
+  catch ( const exception& e ){
+    LOG << "json parsing failed on '" << line << "':"
+	<< e.what() << endl;
+    abort();
+  }
+  DBG << "received json data:" << my_json << endl;
+  return Tagger::json_to_TR( my_json );
 }
 
 vector<TagResult> BaseTagger::tagLine( const string& line ){
@@ -383,7 +345,7 @@ vector<TagResult> BaseTagger::tagLine( const vector<tag_entry>& to_do ){
   }
   //  }
   if ( !host.empty() ){
-    LOG << "calling server" << endl;
+    DBG << "calling server" << endl;
     return call_server(to_do);
   }
   else {
