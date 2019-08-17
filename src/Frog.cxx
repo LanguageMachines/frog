@@ -582,11 +582,13 @@ int main(int argc, char *argv[]) {
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
       // we already did show what we wanted.
+      delete theErrLog;
       return EXIT_SUCCESS;
     }
     if ( Opts.is_present( 'h' )
 	 || Opts.is_present( "help" ) ) {
       usage();
+      delete theErrLog;
       return EXIT_SUCCESS;
     };
     Opts.extract( "debugfile", db_filename );
