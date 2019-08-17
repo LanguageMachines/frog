@@ -101,9 +101,9 @@ if test $TEXTCAT_FOUND = 1; then
 fi
 
 if test $TEXTCAT_FOUND = 0; then
-   AC_MSG_ERROR( [no working libtextcat or libexttextcat found!] )
+  AC_MSG_ERROR( [no working libtextcat or libexttextcat found!] )
 else
-   AC_DEFINE([HAVE_TEXTCAT], [1], [textcat])
+  AC_DEFINE([HAVE_TEXTCAT], [1], [textcat])
 fi
 
 PKG_CHECK_MODULES([XML2], [libxml-2.0 >= 2.6.16] )

@@ -1,6 +1,7 @@
 ---   # frog.yml
 sudo: required
 group: edge
+dist: bionic
 
 # whitelist
 branches:
@@ -21,14 +22,12 @@ language: cpp
 matrix:
   include:
     - os: linux
-      dist: xenial
       compiler: g++
       cache: ccache
       env:
         - SCAN=echo
 
     - os: linux
-      dist: trusty
       compiler: clang++
       cache: ccache
       env:
@@ -50,8 +49,8 @@ before_install:
       sudo apt-get update;
       sudo apt-get install pkg-config autoconf-archive autotools-dev ccache;
       sudo apt-get install cppcheck libicu-dev libxml2-dev libbz2-dev;
-      sudo apt-get install zlib1g-dev libtar-dev libboost-dev;
-      sudo apt-get install libboost-regex-dev expect libexttextcat-dev;
+      sudo apt-get install zlib1g-dev libtar-dev;
+      sudo apt-get install expect libexttextcat-dev;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew update;
