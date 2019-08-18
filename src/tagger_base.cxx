@@ -34,7 +34,7 @@
 #include <algorithm>
 #include "ticcutils/SocketBasics.h"
 #include "ticcutils/PrettyPrint.h"
-#include "json/json.hpp"
+#include "ticcutils/json.hpp"
 #include "mbtserver/MbtServerBase.h"
 #include "frog/Frog-util.h"
 

@@ -116,7 +116,7 @@ LIBS="$ICU_LIBS $LIBS"
 
 AX_LIB_READLINE
 
-PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.21] )
+PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.22] )
 
 CXXFLAGS="$CXXFLAGS $ticcutils_CFLAGS"
 LIBS="$ticcutils_LIBS $LIBS"
@@ -140,9 +140,6 @@ LIBS="$folia_LIBS $LIBS"
 PKG_CHECK_MODULES([ucto], [ucto >= 0.15] )
 CXXFLAGS="$CXXFLAGS $ucto_CFLAGS"
 LIBS="$ucto_LIBS $LIBS"
-
-PKG_CHECK_MODULES([json], [json >= 0.1] )
-CXXFLAGS="$CXXFLAGS $json_CFLAGS"
 
 UCTO_VERSION=`pkg-config --modversion ucto`
 UCTO_INT="${UCTO_VERSION//.}" # no dots
