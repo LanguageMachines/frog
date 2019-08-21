@@ -147,28 +147,23 @@ void IOBTagger::addTag( frog_record& fd,
 void IOBTagger::add_result( const frog_data& fd,
 			    const vector<folia::Word*>& wv ) const {
   folia::Sentence* s = wv[0]->sentence();
-  folia::ChunkingLayer *el = 0;
+  folia::ChunkingLayer *el = s->annotation<folia::ChunkingLayer>(tagset);
   folia::Chunk *iob = 0;
   double iob_conf = 0.0; //accummulated confidence
   size_t i = 0;
   for ( const auto& word : fd.units ){
     if ( word.iob_tag[0] == 'B' ){
       if ( el == 0 ){
-	try {
-	  el = s->annotation<folia::ChunkingLayer>(tagset);
+	// create a layer, we need it
+	folia::KWargs args;
+	args["set"] = getTagset();
+	if ( !s->id().empty() ){
+	  args["generate_id"] = s->id();
 	}
-	catch(...){
-	  // create a layer, we need it
-	  folia::KWargs args;
-	  args["set"] = getTagset();
-	  if ( !s->id().empty() ){
-	    args["generate_id"] = s->id();
-	  }
 #pragma omp critical (foliaupdate)
-	  {
-	    el = new folia::ChunkingLayer( args, s->doc() );
-	    s->append(el);
-	  }
+	{
+	  el = new folia::ChunkingLayer( args, s->doc() );
+	  s->append(el);
 	}
       }
       // a new entity starts here
