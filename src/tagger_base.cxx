@@ -41,6 +41,8 @@
 using namespace std;
 using namespace Tagger;
 using namespace icu;
+using namespace nlohmann;
+
 using TiCC::operator<<;
 
 #define LOG *TiCC::Log(err_log)
@@ -232,9 +234,9 @@ void BaseTagger::add_provenance( folia::Document& doc,
   add_declaration( doc, proc );
 }
 
-nlohmann::json create_json( const vector<tag_entry>& tv ){
+json create_json( const vector<tag_entry>& tv ){
   if ( tv.size() == 1 ){
-    nlohmann::json result;
+    json result;
     result["word"] = tv[0].word;
     if ( !tv[0].enrichment.empty() ){
       result["enrichment"] = tv[0].enrichment;
@@ -242,9 +244,9 @@ nlohmann::json create_json( const vector<tag_entry>& tv ){
     return result;
   }
   else {
-    nlohmann::json result = nlohmann::json::array();
+    json result = json::array();
     for ( const auto& it : tv ){
-      nlohmann::json one_entry;
+      json one_entry;
       one_entry["word"] = it.word;
       if ( !it.enrichment.empty() ){
 	one_entry["enrichment"] = it.enrichment;
@@ -265,14 +267,14 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
   }
   DBG << "calling " << _label << "-server" << endl;
   if ( !base.empty() ){
-    nlohmann::json out_json;
+    json out_json;
     out_json["base"] = base;
     string line = out_json.dump() + "\n";
     DBG << "sending BASE json data:" << line << endl;
     client.write( line );
   }
   // create json struct
-  nlohmann::json my_json = create_json( tv );
+  json my_json = create_json( tv );
   DBG << "created json" << my_json << endl;
   // send it to the server
   string line = my_json.dump() + "\n";
@@ -292,7 +294,7 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
     }
   }
   try {
-    my_json = nlohmann::json::parse( line );
+    my_json = json::parse( line );
   }
   catch ( const exception& e ){
     LOG << "json parsing failed on '" << line << "':"
