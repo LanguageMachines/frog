@@ -571,6 +571,12 @@ int main(int argc, char *argv[]) {
   std::ios_base::sync_with_stdio(false);
   FrogOptions options;
   string db_filename;
+  string remove_command = "find frog.*.debug -mtime +1 -exec rm {} \\;";
+  cerr << "removing old debug files using: '" << remove_command << "'" << endl;
+  int ret = system( remove_command.c_str() );
+  if ( ret != 0 ){
+    cerr << "result of removing: " << ret << endl;
+  }
   try {
     TiCC::CL_Options Opts("c:e:o:t:T:x::X::nQhVd:S:",
 			  "textclass:,inputclass:,outputclass:,testdir:,"
