@@ -83,6 +83,8 @@ class Mbma {
   void init_cgn( const std::string&, const std::string& );
   void getResult( frog_record&, const icu::UnicodeString&, const std::string& ) const;
   std::vector<std::string> make_instances( const icu::UnicodeString& word );
+  void call_server( const std::vector<std::string>&,
+		    std::vector<std::string>& );
   CLEX::Type getFinalTag( const std::list<BaseBracket*>& );
   int debugFlag;
   void store_morphemes( frog_record&, const std::vector<std::string>& ) const;
@@ -104,6 +106,9 @@ class Mbma {
   TiCC::LogStream *errLog;
   TiCC::LogStream *dbgLog;
   TiCC::UniFilter *filter;
+  std::string _host;
+  std::string _port;
+  std::string _base;
   bool filter_diac;
   bool doDeepMorph;
 };

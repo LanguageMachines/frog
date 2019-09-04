@@ -44,10 +44,13 @@
 #include "ticcutils/StringOps.h"
 #include "ticcutils/PrettyPrint.h"
 #include "ticcutils/Unicode.h"
+#include "ticcutils/SocketBasics.h"
+#include "ticcutils/json.hpp"
 #include "frog/Frog-util.h"
 #include "frog/FrogData.h"
 
 using namespace std;
+using namespace nlohmann;
 using TiCC::operator<<;
 
 const long int LEFT =  6; // left context
@@ -124,7 +127,32 @@ void Mbma::init_cgn( const string& main, const string& sub ) {
 bool Mbma::init( const TiCC::Configuration& config ) {
   LOG << "Initiating morphological analyzer..." << endl;
   debugFlag = 0;
-  string val = config.lookUp( "debug", "mbma" );
+  string val = config.lookUp( "host", "mbma" );
+  if ( !val.empty() ){
+    // assume we must use a Timbl Server for the MBMA
+    _host = val;
+    val = config.lookUp( "port", "mbma" );
+    if ( val.empty() ){
+      LOG << "missing 'port' settings for host= " << _host << endl;
+      return false;
+    }
+    _port = val;
+    val = config.lookUp( "base", "mbma" );
+    if ( val.empty() ){
+      LOG << "missing 'base' settings for host= " << _host << endl;
+      return false;
+    }
+    _base = val;
+  }
+  else {
+    val = config.lookUp( "base", "mbma" ) + ":"
+      + config.lookUp( "port", "mbma" );
+    if ( val.size() > 1 ){
+      LOG << "missing 'host' settings for base:port " << val << endl;
+      return false;
+    }
+  }
+  val = config.lookUp( "debug", "mbma" );
   if ( val.empty() ){
     val = config.lookUp( "debug" );
   }
@@ -185,11 +213,6 @@ bool Mbma::init( const TiCC::Configuration& config ) {
     filter = new TiCC::UniFilter();
     filter->fill( charFile );
   }
-  string tfName = config.lookUp( "treeFile", "mbma" );
-  if ( tfName.empty() ){
-    tfName = "mbma.igtree";
-  }
-  MTreeFilename = prefix( config.configDir(), tfName );
   string dof = config.lookUp( "filter_diacritics", "mbma" );
   if ( !dof.empty() ){
     filter_diac = TiCC::stringTo<bool>( dof );
@@ -203,14 +226,25 @@ bool Mbma::init( const TiCC::Configuration& config ) {
     textclass = "current";
   }
 
-  //Read in (igtree) data
-  string opts = config.lookUp( "timblOpts", "mbma" );
-  if ( opts.empty() ){
-    opts = "-a1";
+  if ( _host.empty() ){
+    // so classic monolytic run
+    string tfName = config.lookUp( "treeFile", "mbma" );
+    if ( tfName.empty() ){
+      tfName = "mbma.igtree";
+    }
+    MTreeFilename = prefix( config.configDir(), tfName );
+    //Read in (igtree) data
+    string opts = config.lookUp( "timblOpts", "mbma" );
+    if ( opts.empty() ){
+      opts = "-a1";
+    }
+    opts += " +vs -vf"; // make Timbl run quietly
+    MTree = new Timbl::TimblAPI(opts);
+    return MTree->GetInstanceBase(MTreeFilename);
   }
-  opts += " +vs -vf"; // make Timbl run quietly
-  MTree = new Timbl::TimblAPI(opts);
-  return MTree->GetInstanceBase(MTreeFilename);
+  else {
+    return true;
+  }
 }
 
 void Mbma::cleanUp(){
@@ -836,6 +870,82 @@ void Mbma::Classify( frog_record& fd ){
   }
 }
 
+void Mbma::call_server( const vector<string>& insts,
+			vector<string>& classes ){
+  Sockets::ClientSocket client;
+  if ( !client.connect( _host, _port ) ){
+    LOG << "failed to open connection, " << _host
+	<< ":" << _port << endl
+	<< "Reason: " << client.getMessage() << endl;
+    exit( EXIT_FAILURE );
+  }
+  LOG << "calling MBMA-server" << endl;
+  string line;
+  client.read( line );
+  json response;
+  try {
+    response = json::parse( line );
+  }
+  catch ( const exception& e ){
+    LOG << "json parsing failed on '" << line << "':"
+	<< e.what() << endl;
+    abort();
+  }
+  //  LOG << "received json data:" << response.dump(2) << endl;
+  if ( !_base.empty() ){
+    json out_json;
+    out_json["command"] = "base";
+    out_json["param"] = _base;
+    string line = out_json.dump() + "\n";
+    //    LOG << "sending BASE json data:" << line << endl;
+    client.write( line );
+    client.read( line );
+    json response;
+    try {
+      response = json::parse( line );
+    }
+    catch ( const exception& e ){
+      LOG << "json parsing failed on '" << line << "':"
+	  << e.what() << endl;
+      abort();
+    }
+    //    LOG << "received json data:" << response.dump(2) << endl;
+  }
+  // create json struct
+  json query;
+  query["command"] = "classify";
+  json arr = json::array();
+  for ( const auto& i : insts ){
+    arr.push_back( i );
+  }
+  query["params"] = arr;
+  //  LOG << "send json" << query.dump(2) << endl;
+  // send it to the server
+  line = query.dump() + "\n";
+  client.write( line );
+  // receive json
+  client.read( line );
+  //  LOG << "received line:" << line << "" << endl;
+  try {
+    response = json::parse( line );
+  }
+  catch ( const exception& e ){
+    LOG << "json parsing failed on '" << line << "':"
+	<< e.what() << endl;
+    abort();
+  }
+  //  LOG << "received json data:" << response.dump(2) << endl;
+  assert( response.size() == insts.size() );
+  if ( response.size() == 1 ){
+    classes.push_back( response["category"] );
+  }
+  else {
+    for ( const auto& it : response.items() ){
+      classes.push_back( it.value()["category"] );
+    }
+  }
+}
+
 void Mbma::Classify( const icu::UnicodeString& word ){
   clearAnalysis();
   icu::UnicodeString uWord = word;
@@ -845,16 +955,23 @@ void Mbma::Classify( const icu::UnicodeString& word ){
   vector<string> insts = make_instances( uWord );
   vector<string> classes;
   classes.reserve( insts.size() );
-  int i = 0;
-  for ( auto const& inst : insts ) {
-    string ans;
-    MTree->Classify( inst, ans );
-    if ( debugFlag > 1){
-      DBG << "itt #" << i+1 << " " << insts[i] << " ==> " << ans
-		    << ", depth=" << MTree->matchDepth() << endl;
-      ++i;
+  //  LOG << "made instances: " << insts << endl;
+  if ( !_host.empty() ){
+    LOG << "Calling server: "<< endl;
+    call_server( insts, classes );
+  }
+  else {
+    int i = 0;
+    for ( auto const& inst : insts ) {
+      string ans;
+      MTree->Classify( inst, ans );
+      if ( debugFlag > 1){
+	DBG << "itt #" << i+1 << " " << insts[i] << " ==> " << ans
+	    << ", depth=" << MTree->matchDepth() << endl;
+	++i;
+      }
+      classes.push_back( ans);
     }
-    classes.push_back( ans);
   }
 
   // fix for 1st char class ==0
