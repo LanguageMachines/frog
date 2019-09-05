@@ -37,9 +37,12 @@
 #include "timbl/TimblAPI.h"
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Configuration.h"
+#include "ticcutils/SocketBasics.h"
+#include "ticcutils/json.hpp"
 #include "frog/Frog-util.h"
 
 using namespace std;
+using namespace nlohmann;
 
 #define LOG *TiCC::Log(errLog)
 #define DBG *TiCC::Log(dbgLog)
@@ -88,7 +91,32 @@ bool Mblem::fill_ts_map( const string& file ){
 bool Mblem::init( const TiCC::Configuration& config ) {
   LOG << "Initiating lemmatizer..." << endl;
   debug = 0;
-  string val = config.lookUp( "debug", "mblem" );
+  string val = config.lookUp( "host", "mblem" );
+  if ( !val.empty() ){
+    // assume we must use a Timbl Server for the MBLEM
+    _host = val;
+    val = config.lookUp( "port", "mblem" );
+    if ( val.empty() ){
+      LOG << "missing 'port' settings for host= " << _host << endl;
+      return false;
+    }
+    _port = val;
+    val = config.lookUp( "base", "mblem" );
+    if ( val.empty() ){
+      LOG << "missing 'base' settings for host= " << _host << endl;
+      return false;
+    }
+    _base = val;
+  }
+  else {
+    val = config.lookUp( "base", "mblem" ) + ":"
+      + config.lookUp( "port", "mblem" );
+    if ( val.size() > 1 ){
+      LOG << "missing 'host' settings for base:port " << val << endl;
+      return false;
+    }
+  }
+  val = config.lookUp( "debug", "mblem" );
   if ( val.empty() ){
     val = config.lookUp( "debug" );
   }
@@ -362,11 +390,81 @@ void Mblem::Classify( frog_record& fd ){
   }
 }
 
+string Mblem::call_server( const string& instance ){
+  Sockets::ClientSocket client;
+  if ( !client.connect( _host, _port ) ){
+    LOG << "failed to open connection, " << _host
+	<< ":" << _port << endl
+	<< "Reason: " << client.getMessage() << endl;
+    exit( EXIT_FAILURE );
+  }
+  LOG << "calling MBLEM-server" << endl;
+  string line;
+  client.read( line );
+  json response;
+  try {
+    response = json::parse( line );
+  }
+  catch ( const exception& e ){
+    LOG << "json parsing failed on '" << line << "':"
+	<< e.what() << endl;
+    abort();
+  }
+  //  LOG << "received json data:" << response.dump(2) << endl;
+  if ( !_base.empty() ){
+    json out_json;
+    out_json["command"] = "base";
+    out_json["param"] = _base;
+    string line = out_json.dump() + "\n";
+    //    LOG << "sending BASE json data:" << line << endl;
+    client.write( line );
+    client.read( line );
+    json response;
+    try {
+      response = json::parse( line );
+    }
+    catch ( const exception& e ){
+      LOG << "json parsing failed on '" << line << "':"
+	  << e.what() << endl;
+      abort();
+    }
+    //    LOG << "received json data:" << response.dump(2) << endl;
+  }
+  // create json struct
+  json query;
+  query["command"] = "classify";
+  query["param"] = instance;
+  //  LOG << "send json" << query.dump(2) << endl;
+  // send it to the server
+  line = query.dump() + "\n";
+  client.write( line );
+  // receive json
+  client.read( line );
+  //  LOG << "received line:" << line << "" << endl;
+  try {
+    response = json::parse( line );
+  }
+  catch ( const exception& e ){
+    LOG << "json parsing failed on '" << line << "':"
+	<< e.what() << endl;
+    abort();
+  }
+  //  LOG << "received json data:" << response.dump(2) << endl;
+  string result = response["category"];
+  //  LOG << "extracted result " << result << endl;
+  return result;
+}
+
 void Mblem::Classify( const icu::UnicodeString& uWord ){
   mblemResult.clear();
   string inst = make_instance(uWord);
   string classString;
-  myLex->Classify( inst, classString );
+  if ( !_host.empty() ){
+    classString = call_server( inst );
+  }
+  else {
+    myLex->Classify( inst, classString );
+  }
   if ( debug > 1){
     DBG << "class: " << classString  << endl;
   }
