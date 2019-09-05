@@ -148,7 +148,7 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       ./testmac >&2 ;
     else
-      ./testall >&2 ;
+      ./testall.sh >&2 ;
     fi
 
 after_failure:
