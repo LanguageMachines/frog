@@ -35,6 +35,7 @@
 #include <unistd.h>
 #include <cstdlib>
 #include <string>
+#include <map>
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -42,6 +43,8 @@
 #include "config.h"
 #include "ticcutils/Configuration.h"
 #include "ticcutils/PrettyPrint.h"
+#include "ticcutils/SocketBasics.h"
+#include "ticcutils/json.hpp"
 #include "timbl/TimblAPI.h"
 #include "frog/Frog-util.h"
 #include "frog/csidp.h"
@@ -49,9 +52,10 @@
 using namespace std;
 
 using TiCC::operator<<;
+using namespace nlohmann;
 
 #define LOG *TiCC::Log(errLog)
-#define DBG *TiCC::Log(dbgLog)
+#define DBG *TiCC::Dbg(dbgLog)
 
 struct parseData {
   void clear() { words.clear(); heads.clear(); mods.clear(); mwus.clear(); }
@@ -146,41 +150,81 @@ bool Parser::init( const TiCC::Configuration& configuration ){
       problem = true;
     }
   }
-  val = configuration.lookUp( "pairsFile", "parser" );
+
+  val = configuration.lookUp( "host", "parser" );
   if ( !val.empty() ){
-    pairsFileName = prefix( cDir, val );
+    // so using an external parser server
+    _host = val;
+    val = configuration.lookUp( "port", "parser" );
+    if ( !val.empty() ){
+      _port = val;
+    }
+    else {
+      LOG << "missing port option" << endl;
+      problem = true;
+    }
+    val = configuration.lookUp( "pairs_base", "parser" );
+    if ( !val.empty() ){
+      _pairs_base = val;
+    }
+    else {
+      LOG << "missing pairs_base option" << endl;
+      problem = true;
+    }
+    val = configuration.lookUp( "dirs_base", "parser" );
+    if ( !val.empty() ){
+      _dirs_base = val;
+    }
+    else {
+      LOG << "missing dirs_base option" << endl;
+      problem = true;
+    }
+    val = configuration.lookUp( "rels_base", "parser" );
+    if ( !val.empty() ){
+      _rels_base = val;
+    }
+    else {
+      LOG << "missing rels_base option" << endl;
+      problem = true;
+    }
   }
   else {
-    LOG << "missing pairsFile option" << endl;
-    problem = true;
-  }
-  val = configuration.lookUp( "pairsOptions", "parser" );
-  if ( !val.empty() ){
-    pairsOptions = val;
-  }
-  val = configuration.lookUp( "dirFile", "parser" );
-  if ( !val.empty() ){
-    dirFileName = prefix( cDir, val );
-  }
-  else {
-    LOG << "missing dirFile option" << endl;
-    problem = true;
-  }
-  val = configuration.lookUp( "dirOptions", "parser" );
-  if ( !val.empty() ){
-    dirOptions = val;
-  }
-  val = configuration.lookUp( "relsFile", "parser" );
-  if ( !val.empty() ){
-    relsFileName = prefix( cDir, val );
-  }
-  else {
-    LOG << "missing relsFile option" << endl;
-    problem = true;
-  }
-  val = configuration.lookUp( "relsOptions", "parser" );
-  if ( !val.empty() ){
-    relsOptions = val;
+    val = configuration.lookUp( "pairsFile", "parser" );
+    if ( !val.empty() ){
+      pairsFileName = prefix( cDir, val );
+    }
+    else {
+      LOG << "missing pairsFile option" << endl;
+      problem = true;
+    }
+    val = configuration.lookUp( "pairsOptions", "parser" );
+    if ( !val.empty() ){
+      pairsOptions = val;
+    }
+    val = configuration.lookUp( "dirFile", "parser" );
+    if ( !val.empty() ){
+      dirFileName = prefix( cDir, val );
+    }
+    else {
+      LOG << "missing dirFile option" << endl;
+      problem = true;
+    }
+    val = configuration.lookUp( "dirOptions", "parser" );
+    if ( !val.empty() ){
+      dirOptions = val;
+    }
+    val = configuration.lookUp( "relsFile", "parser" );
+    if ( !val.empty() ){
+      relsFileName = prefix( cDir, val );
+    }
+    else {
+      LOG << "missing relsFile option" << endl;
+      problem = true;
+    }
+    val = configuration.lookUp( "relsOptions", "parser" );
+    if ( !val.empty() ){
+      relsOptions = val;
+    }
   }
   if ( problem ) {
     return false;
@@ -194,36 +238,38 @@ bool Parser::init( const TiCC::Configuration& configuration ){
     textclass = "current";
   }
   bool happy = true;
-  pairs = new Timbl::TimblAPI( pairsOptions );
-  if ( pairs->Valid() ){
-    LOG << "reading " <<  pairsFileName << endl;
-    happy = pairs->GetInstanceBase( pairsFileName );
-  }
-  else {
-    LOG << "creating Timbl for pairs failed:"
-		   << pairsOptions << endl;
-    happy = false;
-  }
-  if ( happy ){
-    dir = new Timbl::TimblAPI( dirOptions );
-    if ( dir->Valid() ){
-      LOG << "reading " <<  dirFileName << endl;
-      happy = dir->GetInstanceBase( dirFileName );
+  if ( _host.empty() ){
+    pairs = new Timbl::TimblAPI( pairsOptions );
+    if ( pairs->Valid() ){
+      LOG << "reading " <<  pairsFileName << endl;
+      happy = pairs->GetInstanceBase( pairsFileName );
     }
     else {
-      LOG << "creating Timbl for dir failed:" << dirOptions << endl;
+      LOG << "creating Timbl for pairs failed:"
+	  << pairsOptions << endl;
       happy = false;
     }
     if ( happy ){
-      rels = new Timbl::TimblAPI( relsOptions );
-      if ( rels->Valid() ){
-	LOG << "reading " <<  relsFileName << endl;
-	happy = rels->GetInstanceBase( relsFileName );
+      dir = new Timbl::TimblAPI( dirOptions );
+      if ( dir->Valid() ){
+	LOG << "reading " <<  dirFileName << endl;
+	happy = dir->GetInstanceBase( dirFileName );
       }
       else {
-	LOG << "creating Timbl for rels failed:"
-		       << relsOptions << endl;
+	LOG << "creating Timbl for dir failed:" << dirOptions << endl;
 	happy = false;
+      }
+      if ( happy ){
+	rels = new Timbl::TimblAPI( relsOptions );
+	if ( rels->Valid() ){
+	  LOG << "reading " <<  relsFileName << endl;
+	  happy = rels->GetInstanceBase( relsFileName );
+	}
+	else {
+	  LOG << "creating Timbl for rels failed:"
+	      << relsOptions << endl;
+	  happy = false;
+	}
       }
     }
   }
@@ -879,6 +925,100 @@ void timbl( Timbl::TimblAPI* tim,
   }
 }
 
+vector<pair<string,double>> parse_vd( const string& ds ){
+  vector<pair<string,double>> result;
+  vector<string> parts = TiCC::split_at_first_of( ds, "{,}" );
+  for ( const auto& p : parts ){
+    vector<string> sd = TiCC::split( p );
+    assert( sd.size() == 2 );
+    result.push_back( make_pair( sd[0], TiCC::stringTo<double>( sd[1] ) ) );
+  }
+  return result;
+}
+
+void Parser::timbl_server( const string& base,
+			   const vector<string>& instances,
+			   vector<timbl_result>& results ){
+  results.clear();
+
+  Sockets::ClientSocket client;
+  if ( !client.connect( _host, _port ) ){
+    LOG << "failed to open connection, " << _host
+	<< ":" << _port << endl
+	<< "Reason: " << client.getMessage() << endl;
+    exit( EXIT_FAILURE );
+  }
+  LOG << "calling " << base << " server" << endl;
+  string line;
+  client.read( line );
+  json response;
+  try {
+    response = json::parse( line );
+  }
+  catch ( const exception& e ){
+    LOG << "json parsing failed on '" << line << "':"
+	<< e.what() << endl;
+    abort();
+  }
+  DBG << "received json data:" << response.dump(2) << endl;
+
+  json out_json;
+  out_json["command"] = "base";
+  out_json["param"] = base;
+  string out_line = out_json.dump() + "\n";
+  DBG << "sending BASE json data:" << out_line << endl;
+  client.write( out_line );
+  client.read( line );
+  try {
+    response = json::parse( line );
+  }
+  catch ( const exception& e ){
+    LOG << "json parsing failed on '" << line << "':"
+	<< e.what() << endl;
+    abort();
+  }
+  DBG << "received json data:" << response.dump(2) << endl;
+
+  // create json query struct
+  json query;
+  query["command"] = "classify";
+  json arr = json::array();
+  for ( const auto& i : instances ){
+    arr.push_back( i );
+  }
+  query["params"] = arr;
+  DBG << "send json" << query.dump(2) << endl;
+  // send it to the server
+  line = query.dump() + "\n";
+  client.write( line );
+  // receive json
+  client.read( line );
+  DBG << "received line:" << line << "" << endl;
+  try {
+    response = json::parse( line );
+  }
+  catch ( const exception& e ){
+    LOG << "json parsing failed on '" << line << "':"
+	<< e.what() << endl;
+    abort();
+  }
+  DBG << "received json data:" << response.dump(2) << endl;
+  if ( !response.is_array() ){
+    string cat = response["category"];
+    double conf = response.value("confidence",0.0);
+    vector<pair<string,double>> vd = parse_vd(response["distribution"]);
+    results.push_back( timbl_result( cat, conf, vd ) );
+  }
+  else {
+    for ( const auto& it : response.items() ){
+      string cat = it.value()["category"];
+      double conf = it.value().value("confidence",0.0);
+      vector<pair<string,double>> vd = parse_vd( it.value()["distribution"] );
+      results.push_back( timbl_result( cat, conf, vd ) );
+    }
+  }
+}
+
 void appendParseResult( frog_data& fd,
 			const vector<parsrel>& res ){
   vector<int> nums;
@@ -915,21 +1055,36 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
       {
 	timers.pairsTimer.start();
 	vector<string> instances = createPairInstances( pd );
-	timbl( pairs, instances, p_results );
+	if ( _host.empty() ){
+	  timbl( pairs, instances, p_results );
+	}
+	else {
+	  timbl_server( _pairs_base, instances, p_results );
+	}
 	timers.pairsTimer.stop();
       }
 #pragma omp section
       {
 	timers.dirTimer.start();
 	vector<string> instances = createDirInstances( pd );
-	timbl( dir, instances, d_results );
+	if ( _host.empty() ){
+	  timbl( dir, instances, d_results );
+	}
+	else {
+	  timbl_server( _dirs_base, instances, d_results );
+	}
 	timers.dirTimer.stop();
       }
 #pragma omp section
       {
 	timers.relsTimer.start();
 	vector<string> instances = createRelInstances( pd );
-	timbl( rels, instances, r_results );
+	if ( _host.empty() ){
+	  timbl( rels, instances, r_results );
+	}
+	else {
+	  timbl_server( _rels_base, instances, r_results );
+	}
 	timers.relsTimer.stop();
       }
   }

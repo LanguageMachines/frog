@@ -44,6 +44,7 @@
 
 using namespace std;
 
+#define LOG *TiCC::Log(dbglog)
 #define DBG *TiCC::Dbg(dbglog)
 
 unordered_map<string,double> split_dist( const vector< pair<string,double>>& dist ){
@@ -66,6 +67,7 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
 					 TiCC::LogStream *dbglog ){
   vector<const Constraint*> constraints;
   vector<timbl_result>::const_iterator pit = p_res.begin();
+  //  LOG << "formulate WSCP, step 1" << endl;
   for ( size_t dependent_id = 1;
 	dependent_id <= sent_len;
 	++dependent_id ){
@@ -78,6 +80,7 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
     }
   }
 
+  //  LOG << "formulate WSCP, step 2" << endl;
   for ( size_t dependent_id = 1;
 	dependent_id <= sent_len;
 	++dependent_id ) {
@@ -101,6 +104,7 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
     }
   }
 
+  //  LOG << "formulate WSCP, step 3" << endl;
   vector<timbl_result>::const_iterator dit = d_res.begin();
   vector<timbl_result>::const_iterator rit = r_res.begin();
   for ( size_t token_id = 1;
@@ -128,6 +132,7 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
       ++rit;
     }
   }
+  //  LOG << "formulate WSCP, Done" << endl;
   return constraints;
 }
 
@@ -140,6 +145,12 @@ timbl_result::timbl_result( const string& cls,
     _dist.push_back( make_pair(it->second->Value()->Name(),it->second->Weight()) );
     ++it;
   }
+}
+
+timbl_result::timbl_result( const string& cls,
+			    double conf,
+			    const vector< pair<string,double> >& vd ):
+  _cls(cls), _confidence(conf), _dist(vd) {
 }
 
 vector<parsrel> parse( const vector<timbl_result>& p_res,

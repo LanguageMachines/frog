@@ -45,6 +45,7 @@
 
 struct parseData;
 class TimerBlock;
+class timbl_result;
 
 class Parser {
  public:
@@ -73,6 +74,9 @@ class Parser {
   std::vector<std::string> createPairInstances( const parseData& );
   std::vector<std::string> createDirInstances( const parseData& );
   std::vector<std::string> createRelInstances( const parseData& );
+  void timbl_server( const std::string&,
+		     const std::vector<std::string>&,
+		     std::vector<timbl_result>& );
 
   Timbl::TimblAPI *pairs;
   Timbl::TimblAPI *dir;
@@ -88,6 +92,11 @@ class Parser {
   std::string MWU_tagset;
   std::string textclass;
   TiCC::UniFilter *filter;
+  std::string _host;
+  std::string _port;
+  std::string _pairs_base;
+  std::string _dirs_base;
+  std::string _rels_base;
   Parser( const Parser& ){}; // inhibit copies
 };
 

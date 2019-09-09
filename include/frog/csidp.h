@@ -8,6 +8,9 @@ class timbl_result {
   timbl_result( const std::string& cls,
 		double conf,
 		const Timbl::ValueDistribution* );
+  timbl_result( const std::string& cls,
+		double conf,
+		const std::vector<std::pair<std::string,double>>& );
   std::string cls() const { return _cls; };
   double confidence() const { return _confidence; };
   std::vector< std::pair<std::string,double> > dist() const { return _dist; };
