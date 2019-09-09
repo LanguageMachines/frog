@@ -101,29 +101,8 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
     LOG << _label << "-tagger is already initialized!" << endl;
     return false;
   }
-  string val = config.lookUp( "host", _label );
-  if ( !val.empty() ){
-    // assume we must use a MBT server for tagging
-    host = val;
-    val = config.lookUp( "port", _label );
-    if ( val.empty() ){
-      LOG << "missing 'port' settings for host= " << host << endl;
-      return false;
-    }
-    port = val;
-    val = config.lookUp( "base", _label );
-    if ( !val.empty() ){
-      base = val;
-    }
-  }
-  else {
-    val = config.lookUp( "port", _label );
-    if ( !val.empty() ){
-      LOG << "missing 'host' settings for port= " << port << endl;
-      return false;
-    }
-  }
-  val = config.lookUp( "debug", _label );
+  string settings;
+  string val = config.lookUp( "debug", _label );
   if ( val.empty() ){
     val = config.lookUp( "debug" );
   }
@@ -150,17 +129,34 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   default:
     dbg_log->setlevel(LogExtreme);
   }
-  val = config.lookUp( "settings", _label );
-  if ( val.empty() ){
-    LOG << "Unable to find settings for: " << _label << endl;
-    return false;
-  }
-  string settings;
-  if ( val[0] == '/' ) { // an absolute path
-    settings = val;
+  val = config.lookUp( "host", _label );
+  if ( !val.empty() ){
+    // assume we must use a MBT server for tagging
+    host = val;
+    val = config.lookUp( "port", _label );
+    if ( val.empty() ){
+      LOG << "missing 'port' settings for host= " << host << endl;
+      return false;
+    }
+    port = val;
+    val = config.lookUp( "base", _label );
+    if ( !val.empty() ){
+      base = val;
+    }
   }
   else {
-    settings =  config.configDir() + val;
+    val = config.lookUp( "settings", _label );
+    if ( val.empty() ){
+      LOG << "Unable to find settings for: " << _label << endl;
+      return false;
+    }
+    string settings;
+    if ( val[0] == '/' ) { // an absolute path
+      settings = val;
+    }
+    else {
+      settings = config.configDir() + val;
+    }
   }
   val = config.lookUp( "version", _label );
   if ( val.empty() ){
@@ -265,24 +261,34 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
 	<< "Reason: " << client.getMessage() << endl;
     exit( EXIT_FAILURE );
   }
-  DBG << "calling " << _label << "-server" << endl;
+  LOG << "calling " << _label << "-server" << endl;
   if ( !base.empty() ){
     json out_json;
+    //    out_json["command"] = "base";
     out_json["base"] = base;
     string line = out_json.dump() + "\n";
     DBG << "sending BASE json data:" << line << endl;
     client.write( line );
+    // json response;
+    // try {
+    //   response = json::parse( line );
+    // }
+    // catch ( const exception& e ){
+    //   LOG << "json parsing failed on '" << line << "':"
+    //  	  << e.what() << endl;
+    //   abort();
+    // }
   }
   // create json struct
   json my_json = create_json( tv );
-  DBG << "created json" << my_json << endl;
+  //  LOG << "created json" << my_json << endl;
   // send it to the server
   string line = my_json.dump() + "\n";
-  DBG << "sending json data:" << line << endl;
+  //  LOG << "sending json data:" << line << endl;
   client.write( line );
   // receive json
   client.read( line );
-  DBG << "received line:" << line << "" << endl;
+  //  LOG << "received line:" << line << "" << endl;
   if ( line.find("Welcome to the Mbt server." ) == 0 ){
     client.read( line );
     DBG << "received json line:" << line << "" << endl;
@@ -301,7 +307,7 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
 	<< e.what() << endl;
     abort();
   }
-  DBG << "received json data:" << my_json << endl;
+  //  LOG << "received json data:" << my_json << endl;
   return MbtServer::json_to_TR( my_json );
 }
 
