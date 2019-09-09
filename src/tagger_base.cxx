@@ -101,8 +101,29 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
     LOG << _label << "-tagger is already initialized!" << endl;
     return false;
   }
-  string settings;
-  string val = config.lookUp( "debug", _label );
+  string val = config.lookUp( "host", _label );
+  if ( !val.empty() ){
+    // assume we must use a MBT server for tagging
+    host = val;
+    val = config.lookUp( "port", _label );
+    if ( val.empty() ){
+      LOG << "missing 'port' settings for host= " << host << endl;
+      return false;
+    }
+    port = val;
+    val = config.lookUp( "base", _label );
+    if ( !val.empty() ){
+      base = val;
+    }
+  }
+  else {
+    val = config.lookUp( "port", _label );
+    if ( !val.empty() ){
+      LOG << "missing 'host' settings for port= " << port << endl;
+      return false;
+    }
+  }
+  val = config.lookUp( "debug", _label );
   if ( val.empty() ){
     val = config.lookUp( "debug" );
   }
@@ -129,28 +150,13 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   default:
     dbg_log->setlevel(LogExtreme);
   }
-  val = config.lookUp( "host", _label );
-  if ( !val.empty() ){
-    // assume we must use a MBT server for tagging
-    host = val;
-    val = config.lookUp( "port", _label );
-    if ( val.empty() ){
-      LOG << "missing 'port' settings for host= " << host << endl;
-      return false;
-    }
-    port = val;
-    val = config.lookUp( "base", _label );
-    if ( !val.empty() ){
-      base = val;
-    }
-  }
-  else {
+  string settings;
+  if ( host.empty() ){
     val = config.lookUp( "settings", _label );
     if ( val.empty() ){
       LOG << "Unable to find settings for: " << _label << endl;
       return false;
     }
-    string settings;
     if ( val[0] == '/' ) { // an absolute path
       settings = val;
     }
