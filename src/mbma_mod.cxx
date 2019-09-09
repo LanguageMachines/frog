@@ -957,7 +957,6 @@ void Mbma::Classify( const icu::UnicodeString& word ){
   classes.reserve( insts.size() );
   //  LOG << "made instances: " << insts << endl;
   if ( !_host.empty() ){
-    LOG << "Calling server: "<< endl;
     call_server( insts, classes );
   }
   else {
