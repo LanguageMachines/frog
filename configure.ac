@@ -3,7 +3,7 @@
 
 AC_PREREQ(2.59)
 #also adapt version number in codemeta.json
-AC_INIT([frog], [0.18.3], [lamasoftware@science.ru.nl]) #adapt version number in codemeta.json as well
+AC_INIT([frog], [0.18.4], [lamasoftware@science.ru.nl]) #adapt version number in codemeta.json as well
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_MACRO_DIR([m4])
@@ -125,7 +125,7 @@ PKG_CHECK_MODULES([timbl], [timbl >= 6.4.4] )
 CXXFLAGS="$CXXFLAGS $timbl_CFLAGS"
 LIBS="$timbl_LIBS $LIBS"
 
-PKG_CHECK_MODULES([mbt], [mbt >= 3.2.14] )
+PKG_CHECK_MODULES([mbt], [mbt >= 3.2.14 mbt < 3.5] )
 CXXFLAGS="$CXXFLAGS $mbt_CFLAGS"
 LIBS="$mbt_LIBS $LIBS"
 
