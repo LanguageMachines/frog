@@ -1418,7 +1418,7 @@ void FrogAPI::handle_one_sentence( ostream& os,
       }
     }
     else {
-      LOG << "no tokens lef " << endl;
+      LOG << "no tokens left " << endl;
     }
   }
   else {

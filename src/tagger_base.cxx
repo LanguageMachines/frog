@@ -237,26 +237,19 @@ void BaseTagger::add_provenance( folia::Document& doc,
 }
 
 json create_json( const vector<tag_entry>& tv ){
-  if ( tv.size() == 1 ){
-    json result;
-    result["word"] = tv[0].word;
-    if ( !tv[0].enrichment.empty() ){
-      result["enrichment"] = tv[0].enrichment;
+  json result;
+  result["command"] = "tag";
+  json arr = json::array();
+  for ( const auto& it : tv ){
+    json one_entry;
+    one_entry["word"] = it.word;
+    if ( !it.enrichment.empty() ){
+      one_entry["enrichment"] = it.enrichment;
     }
-    return result;
+    arr.push_back( one_entry );
   }
-  else {
-    json result = json::array();
-    for ( const auto& it : tv ){
-      json one_entry;
-      one_entry["word"] = it.word;
-      if ( !it.enrichment.empty() ){
-	one_entry["enrichment"] = it.enrichment;
-      }
-      result.push_back( one_entry );
-    }
-    return result;
-  }
+  result["sentence"] = arr;
+  return result;
 }
 
 vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
@@ -267,44 +260,57 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
 	<< "Reason: " << client.getMessage() << endl;
     exit( EXIT_FAILURE );
   }
-  LOG << "calling " << _label << "-server" << endl;
+  DBG << "calling " << _label << "-server, base=" << base << endl;
+  string line;
+  client.read( line );
+  json response;
+  try {
+    response = json::parse( line );
+  }
+  catch ( const exception& e ){
+    LOG << "json parsing failed on '" << line << "':"
+	<< e.what() << endl;
+    abort();
+  }
+  DBG << "got JSON " << response.dump(2) << endl;
+  if ( response["status"] != "ok" ){
+    LOG << "the client isn't OK" << endl;
+    abort();
+  }
   if ( !base.empty() ){
     json out_json;
-    //    out_json["command"] = "base";
-    out_json["base"] = base;
+    out_json["command"] = "base";
+    out_json["param"] = base;
     string line = out_json.dump() + "\n";
     DBG << "sending BASE json data:" << line << endl;
     client.write( line );
-    // json response;
-    // try {
-    //   response = json::parse( line );
-    // }
-    // catch ( const exception& e ){
-    //   LOG << "json parsing failed on '" << line << "':"
-    //  	  << e.what() << endl;
-    //   abort();
-    // }
+    client.read( line );
+    DBG << "received base data:" << line << endl;
+    json base_response;
+    try {
+      base_response = json::parse( line );
+    }
+    catch ( const exception& e ){
+      LOG << "json parsing failed on '" << line << "':"
+      	  << e.what() << endl;
+      abort();
+    }
+    DBG << "received json response:" << base_response << endl;
+    if ( response["status"] != "ok" ){
+      LOG << "the client isn't OK" << endl;
+      abort();
+    }
   }
-  // create json struct
+  // create json query struct
   json my_json = create_json( tv );
-  //  LOG << "created json" << my_json << endl;
+  DBG << "created json" << my_json << endl;
   // send it to the server
-  string line = my_json.dump() + "\n";
-  //  LOG << "sending json data:" << line << endl;
+  line = my_json.dump() + "\n";
+  DBG << "sending json data:" << line << endl;
   client.write( line );
   // receive json
   client.read( line );
-  //  LOG << "received line:" << line << "" << endl;
-  if ( line.find("Welcome to the Mbt server." ) == 0 ){
-    client.read( line );
-    DBG << "received json line:" << line << "" << endl;
-    if ( !base.empty() ){
-      client.read( line );
-      DBG << "received json line:" << line << "" << endl;
-      client.read( line );
-      DBG << "received json line:" << line << "" << endl;
-    }
-  }
+  DBG << "received line:" << line << "" << endl;
   try {
     my_json = json::parse( line );
   }
@@ -313,7 +319,7 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
 	<< e.what() << endl;
     abort();
   }
-  //  LOG << "received json data:" << my_json << endl;
+  DBmore G << "received json data:" << my_json << endl;
   return MbtServer::json_to_TR( my_json );
 }
 
