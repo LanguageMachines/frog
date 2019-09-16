@@ -1405,15 +1405,20 @@ void FrogAPI::handle_one_sentence( ostream& os,
     vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text );
     // cerr << "text:" << text << " size=" << wv.size() << endl;
     // cerr << "tokens:" << toks << " size=" << toks.size() << endl;
-    frog_data res = frog_sentence( toks, s_cnt );
-    //    cerr << "res:" << res << " size=" << res.size() << endl;
-    if ( res.size() > 0 ){
-      if ( !options.noStdOut ){
-	show_results( os, res );
+    if ( toks.size() > 0 ){
+      frog_data res = frog_sentence( toks, s_cnt );
+      //    cerr << "res:" << res << " size=" << res.size() << endl;
+      if ( res.size() > 0 ){
+	if ( !options.noStdOut ){
+	  show_results( os, res );
+	}
+	if ( options.doXMLout ){
+	  append_to_words( wv, res );
+	}
       }
-      if ( options.doXMLout ){
-	append_to_words( wv, res );
-      }
+    }
+    else {
+      LOG << "no tokens left " << endl;
     }
   }
   else {
@@ -1475,6 +1480,9 @@ void FrogAPI::handle_one_paragraph( ostream& os,
 	  folia::Sentence *s = new folia::Sentence( args, p->doc() );
 	  p->append( s );
 	  append_to_sentence( s, res );
+	}
+	if ( toks.size() == 0 ){
+	  break;
 	}
 	res = frog_sentence( toks, ++sentence_done );
       }
