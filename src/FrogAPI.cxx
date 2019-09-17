@@ -1786,11 +1786,11 @@ vector<string> get_compound_analysis( folia::Word* word ){
       layer->select<folia::Morpheme>( Mbma::mbma_tagset, false );
     if ( m.size() == 1 ) {
       // check for top layer compound
-      try {
-	folia::PosAnnotation *tag = m[0]->annotation<folia::PosAnnotation>( Mbma::clex_tagset );
+      folia::PosAnnotation *tag = m[0]->annotation<folia::PosAnnotation>( Mbma::clex_tagset );
+      if ( tag ){
 	result.push_back( tag->feat( "compound" ) ); // might be empty
       }
-      catch (...){
+      else {
 	result.push_back( "" ); // pad with empty strings
       }
     }
