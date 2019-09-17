@@ -319,7 +319,7 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
 	<< e.what() << endl;
     abort();
   }
-  DBmore G << "received json data:" << my_json << endl;
+  DBG << "received json data:" << my_json << endl;
   return MbtServer::json_to_TR( my_json );
 }
 
