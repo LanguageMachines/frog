@@ -350,7 +350,24 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
 }
 
 vector<TagResult> BaseTagger::tagLine( const string& line ){
-  if ( !tagger ){
+  if ( !host.empty() ){
+    vector<tag_entry> to_do;
+    vector<string> v = TiCC::split( line );
+    for ( const auto& w : v ){
+      icu::UnicodeString word = TiCC::UnicodeFromUTF8(w);
+      if ( filter ){
+	word = filter->filter( word );
+      }
+      string word_s = TiCC::UnicodeToUTF8( word );
+      // the word may contain spaces, remove them all!
+      word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
+      tag_entry entry;
+      entry.word = word_s;
+      to_do.push_back( entry );
+    }
+    return tagLine( to_do );
+  }
+  else if ( !tagger ){
     throw runtime_error( _label + "-tagger is not initialized" );
   }
   if ( debug > 1 ){
