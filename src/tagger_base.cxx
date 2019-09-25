@@ -252,6 +252,32 @@ json create_json( const vector<tag_entry>& tv ){
   return result;
 }
 
+vector<TagResult> json_to_TR( const json& in ){
+  vector<TagResult> result;
+  for ( auto& i : in ){
+    TagResult tr;
+    tr.set_word( i["word"] );
+    if ( i.find("known") != i.end() ){
+      tr.set_known( i["known"] == "true" );
+    }
+    tr.set_tag( i["tag"] );
+    if ( i.find("confidence") != i.end() ){
+      tr.set_confidence( i["confidence"] );;
+    }
+    if ( i.find("distance") != i.end() ){
+      tr.set_distance( i["distance"] );
+    }
+    if ( i.find("distribution") != i.end() ){
+      tr.set_distribution( i["distribution"] );
+    }
+    if ( i.find("enrichment") != i.end() ){
+      tr.set_enrichment( i["enrichment"] );
+    }
+    result.push_back( tr );
+  }
+  return result;
+}
+
 vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
   Sockets::ClientSocket client;
   if ( !client.connect( host, port ) ){
@@ -320,7 +346,7 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
     abort();
   }
   DBG << "received json data:" << my_json << endl;
-  return MbtServer::json_to_TR( my_json );
+  return json_to_TR( my_json );
 }
 
 vector<TagResult> BaseTagger::tagLine( const string& line ){
