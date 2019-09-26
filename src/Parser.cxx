@@ -273,6 +273,9 @@ bool Parser::init( const TiCC::Configuration& configuration ){
       }
     }
   }
+  else {
+    LOG << "using Parser Timbl's on " << _host << ":" << _port << endl;
+  }
   isInit = happy;
   return happy;
 }
@@ -1000,6 +1003,7 @@ void Parser::timbl_server( const string& base,
   catch ( const exception& e ){
     LOG << "json parsing failed on '" << line << "':"
 	<< e.what() << endl;
+    LOG << "the request to the server was: '" <<  query.dump(2) << "'" << endl;
     abort();
   }
   DBG << "received json data:" << response.dump(2) << endl;
