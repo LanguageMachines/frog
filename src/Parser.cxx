@@ -948,7 +948,7 @@ void Parser::timbl_server( const string& base,
 	<< "Reason: " << client.getMessage() << endl;
     exit( EXIT_FAILURE );
   }
-  LOG << "calling " << base << " server" << endl;
+  DBG << "calling " << base << " server" << endl;
   string line;
   client.read( line );
   json response;

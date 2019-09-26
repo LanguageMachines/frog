@@ -879,7 +879,7 @@ void Mbma::call_server( const vector<string>& insts,
 	<< "Reason: " << client.getMessage() << endl;
     exit( EXIT_FAILURE );
   }
-  LOG << "calling MBMA-server" << endl;
+  DBG << "calling MBMA-server" << endl;
   string line;
   client.read( line );
   json response;

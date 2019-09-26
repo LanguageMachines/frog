@@ -398,7 +398,7 @@ string Mblem::call_server( const string& instance ){
 	<< "Reason: " << client.getMessage() << endl;
     exit( EXIT_FAILURE );
   }
-  LOG << "calling MBLEM-server" << endl;
+  DBG << "calling MBLEM-server" << endl;
   string line;
   client.read( line );
   json response;
