@@ -1037,6 +1037,167 @@ void appendParseResult( frog_data& fd,
   }
 }
 
+//#define TEST_ALPINO_SERVER
+#ifdef TEST_ALPINO_SERVER
+
+xmlDoc *alpino_server_parse( frog_data& fd ){
+  string host = "localhost"; // config.lookUp( "host", "alpino" );
+  string port = "8004"; // config.lookUp( "port", "alpino" );
+  Sockets::ClientSocket client;
+  if ( !client.connect( host, port ) ){
+    cerr << "failed to open Alpino connection: "<< host << ":" << port << endl;
+    cerr << "Reason: " << client.getMessage() << endl;
+    exit( EXIT_FAILURE );
+  }
+  //  cerr << "start input loop" << endl;
+  string txt = fd.sentence();
+  client.write( txt + "\n\n" );
+  string result;
+  string s;
+  while ( client.read(s) ){
+    result += s + "\n";
+  }
+#ifdef DEBUG_ALPINO
+  cerr << "received data [" << result << "]" << endl;
+#endif
+  xmlDoc *doc = xmlReadMemory( result.c_str(), result.length(),
+			       0, 0, XML_PARSE_NOBLANKS );
+  return doc;
+}
+
+struct dp_tree {
+  int id;
+  int begin;
+  int end;
+  string rel;
+  dp_tree *link;
+  dp_tree *next;
+};
+
+void print_node( const dp_tree *node ){
+  if ( node ){
+    cerr << node->id << " [" << node->begin << "," << node->end << "] "
+	 << node->rel;
+  }
+}
+
+void print_nodes( int indent, const dp_tree *store ){
+  const dp_tree *pnt = store;
+  while ( pnt ){
+    cerr << std::string(indent, '-');
+    print_node( pnt );
+    cerr << endl;
+    print_nodes( indent+3, pnt->link );
+    pnt = pnt->next;
+  }
+}
+
+int extract_hd( const dp_tree *node ){
+  const dp_tree *pnt = node->link;
+  while ( pnt ){
+    if ( pnt->rel == "hd" ){
+      return pnt->end;
+    }
+    pnt = pnt->next;
+  }
+  return 0;
+}
+
+void extract_dp2( const dp_tree *store ){
+  const dp_tree *pnt = store->link;
+  while ( pnt ){
+    if ( pnt->rel == "hd" ){
+      cerr << store->begin << "\t" << store->rel << endl;
+    }
+    else {
+      cerr << pnt->begin << "\t" << pnt->rel << endl;
+    }
+    pnt = pnt->next;
+  }
+}
+
+void extract_dp( const dp_tree *store, int root ){
+  const dp_tree *pnt = store;
+  while ( pnt ){
+    if ( pnt->rel == "top" ){
+      extract_dp( pnt->link, root );
+    }
+    else if ( pnt->rel == "--" ){
+      if ( pnt->begin+1 == pnt->end ){
+	cerr << pnt->begin << "\t" << "punct" << endl;
+      }
+      else {
+	int bla = extract_hd( pnt );
+	extract_dp( pnt->link, bla );
+      }
+    }
+    else if ( pnt->begin+1 == pnt->end ){
+      if ( pnt->rel == "hd" ){
+	cerr << 0 << "\t" << "ROOT" << endl;
+      }
+      else {
+	cerr << root << "\t" << pnt->rel << endl;
+      }
+    }
+    else {
+      extract_dp2( pnt );
+    }
+    pnt = pnt->next;
+  }
+}
+
+dp_tree *parse_node( xmlNode *node ){
+  auto atts = TiCC::getAttributes( node );
+  //  cerr << "attributes: " << atts << endl;
+  dp_tree *dp = new dp_tree();
+  dp->id = TiCC::stringTo<int>( atts["id"] );
+  dp->begin = TiCC::stringTo<int>( atts["begin"] );
+  dp->end = TiCC::stringTo<int>( atts["end"] );
+  dp->rel = atts["rel"];
+  dp->link = 0;
+  dp->next = 0;
+  return dp;
+}
+
+dp_tree *parse_nodes( xmlNode *node ){
+  dp_tree *result = 0;
+  xmlNode *pnt = node;
+  dp_tree *last = 0;
+  while ( pnt ){
+    if ( TiCC::Name( pnt ) == "node" ){
+      dp_tree *parsed = parse_node( pnt );
+      // cerr << "parsed ";
+      // print_node( parsed );
+      if ( result == 0 ){
+	result = parsed;
+	last = result;
+      }
+      else {
+	last->next = parsed;
+	last = last->next;
+      }
+      if ( pnt->children ){
+	dp_tree *childs = parse_nodes( pnt->children );
+	last->link = childs;
+      }
+    }
+    pnt = pnt->next;
+  }
+  return result;
+}
+
+void extract_dp( xmlDoc *alp_doc ){
+  string txtfile = "/tmp/debug.xml";
+  xmlSaveFormatFileEnc( txtfile.c_str(), alp_doc, "UTF8", 1 );
+  xmlNode *top_node = TiCC::xPath( alp_doc, "//node[@rel='top']" );
+  dp_tree *dp = parse_nodes( top_node );
+  cerr << endl << "done parsing, dp nodes:" << endl;
+  print_nodes( 0, dp );
+  extract_dp( dp, 0 );
+}
+
+#endif
+
 void Parser::Parse( frog_data& fd, TimerBlock& timers ){
   timers.parseTimer.start();
   if ( !isInit ){
@@ -1047,6 +1208,11 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
     LOG << "unable to parse an analysis without words" << endl;
     return;
   }
+#ifdef TEST_ALIPNO_SERVER
+  xmlDoc *parsed = alpino_server_parse( fd );
+  cerr << "got XML" << endl;
+  extract_dp( parsed );
+#endif
   timers.prepareTimer.start();
   parseData pd = prepareParse( fd );
   timers.prepareTimer.stop();
