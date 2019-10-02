@@ -1069,16 +1069,21 @@ struct dp_tree {
   int id;
   int begin;
   int end;
+  int word_index;
   string word;
   string rel;
   dp_tree *link;
   dp_tree *next;
+  ~dp_tree(){ delete link; delete next; };
 };
 
 ostream& operator<<( ostream& os, const dp_tree *node ){
   if ( node ){
     os << node->rel << "[" << node->begin << "," << node->end << "] ("
        << node->word << ")";
+    if ( node->word_index > 0 ){
+      os << "#" << node->word_index;
+    }
   }
   else {
     os << "null";
@@ -1106,11 +1111,24 @@ const dp_tree *extract_hd( const dp_tree *node ){
   return 0;
 }
 
-void extract_dp( const dp_tree *store, const dp_tree *root, const string& h ){
-  const dp_tree *pnt = store;
-  //  cerr << "LOOP over: " << pnt << endl;
+int mwu_size( const dp_tree *node ){
+  int result = 0;
+  dp_tree *pnt = node->link;
   while ( pnt ){
-    //    cerr << "\tLOOP: " << pnt->rel << endl;
+    if ( pnt->rel == "mwp" ){
+      ++result;
+    }
+    pnt = pnt->next;
+  }
+  return result;
+}
+
+void extract_dp( const dp_tree *store, const dp_tree *root,
+		 const string& h, int compensate ){
+  const dp_tree *pnt = store;
+  cerr << "LOOP over: " << pnt << endl;
+  while ( pnt ){
+    cerr << "\tLOOP: " << pnt->rel << endl;
     if ( pnt->begin+1 == pnt->end ){
       if ( pnt == root ){
 	if ( root->rel == "--"  ){
@@ -1123,20 +1141,20 @@ void extract_dp( const dp_tree *store, const dp_tree *root, const string& h ){
 	}
 	else {
 	  cerr << "THAT C ";
-	  cerr << store->begin << "\t" << h << endl;
+	  cerr << store->begin - compensate << "\t" << h << endl;
 	}
       }
       else if ( root && root->end > 0 ){
 	cerr << "THOSE A ";
-	cerr << root->end << "\t" << pnt->rel << endl;
+	cerr << root->end - compensate << "\t" << pnt->rel << endl;
       }
       else if ( pnt->rel == "--" ){
 	cerr << "THOSE B ";
-	cerr << pnt->begin << "\tpunct" << endl;
+	cerr << pnt->begin - compensate << "\tpunct" << endl;
       }
       else {
 	cerr << "THOSE C ";
-	cerr << pnt->begin << "\t" << pnt->rel << endl;
+	cerr << pnt->begin - compensate << "\t" << pnt->rel << endl;
       }
     }
     else {
@@ -1148,14 +1166,14 @@ void extract_dp( const dp_tree *store, const dp_tree *root, const string& h ){
 	if ( new_root ){
 	  cerr << pnt->rel << ", root at this level: " << new_root << endl;
 	}
-	extract_dp( pnt->link, new_root, pnt->rel );
+	extract_dp( pnt->link, new_root, pnt->rel, compensate );
       }
     }
     pnt = pnt->next;
   }
 }
 
-dp_tree *parse_node( xmlNode *node ){
+dp_tree *parse_node( xmlNode *node, int& index ){
   auto atts = TiCC::getAttributes( node );
   //  cerr << "attributes: " << atts << endl;
   dp_tree *dp = new dp_tree();
@@ -1164,18 +1182,21 @@ dp_tree *parse_node( xmlNode *node ){
   dp->end = TiCC::stringTo<int>( atts["end"] );
   dp->rel = atts["rel"];
   dp->word = atts["word"];
+  if ( !dp->word.empty() ){
+    dp->word_index = ++index;
+  }
   dp->link = 0;
   dp->next = 0;
   return dp;
 }
 
-dp_tree *parse_nodes( xmlNode *node ){
+dp_tree *parse_nodes( xmlNode *node, int& index ){
   dp_tree *result = 0;
   xmlNode *pnt = node;
   dp_tree *last = 0;
   while ( pnt ){
     if ( TiCC::Name( pnt ) == "node" ){
-      dp_tree *parsed = parse_node( pnt );
+      dp_tree *parsed = parse_node( pnt, index );
       // cerr << "parsed ";
       // print_node( parsed );
       if ( result == 0 ){
@@ -1187,10 +1208,47 @@ dp_tree *parse_nodes( xmlNode *node ){
 	last = last->next;
       }
       if ( pnt->children ){
-	dp_tree *childs = parse_nodes( pnt->children );
+	dp_tree *childs = parse_nodes( pnt->children, index );
 	last->link = childs;
       }
     }
+    pnt = pnt->next;
+  }
+  return result;
+}
+
+dp_tree *resolve_mwus( dp_tree *in,
+		       int& new_index,
+		       int& compensate ){
+  dp_tree *result = in;
+  dp_tree *pnt = in;
+  while ( pnt ){
+    if ( pnt->link && pnt->link->rel == "mwp" ){
+      dp_tree *tmp = pnt->link;
+      pnt->word = tmp->word;
+      pnt->word_index = tmp->word_index;
+      int count = 0;
+      tmp = tmp->next;
+      while ( tmp ){
+	++count;
+	pnt->word += "_" + tmp->word;
+	tmp = tmp->next;
+      }
+      tmp = pnt->link;
+      pnt->link = 0;
+      delete tmp;
+      ++new_index;
+      pnt->end = pnt->begin+1;
+      compensate = count;
+    }
+    else {
+      pnt->begin -= compensate;
+      pnt->end -= compensate;
+      if ( !pnt->word.empty() ){
+	pnt->word_index = ++new_index;
+      }
+    }
+    pnt->link = resolve_mwus( pnt->link, new_index, compensate );
     pnt = pnt->next;
   }
   return result;
@@ -1200,11 +1258,17 @@ void extract_dp( xmlDoc *alp_doc ){
   string txtfile = "/tmp/debug.xml";
   xmlSaveFormatFileEnc( txtfile.c_str(), alp_doc, "UTF8", 1 );
   xmlNode *top_node = TiCC::xPath( alp_doc, "//node[@rel='top']" );
-  dp_tree *dp = parse_nodes( top_node );
+  int index = 0;
+  dp_tree *dp = parse_nodes( top_node, index );
   cerr << endl << "done parsing, dp nodes:" << endl;
   print_nodes( 0, dp );
+  index = 0;
+  int compensate = 0;
+  dp = resolve_mwus( dp, index, compensate );
+  cerr << endl << "done resolving, dp nodes:" << endl;
+  print_nodes( 0, dp );
   if ( dp->rel == "top" ){
-    extract_dp( dp->link, 0, "BUG" );
+    extract_dp( dp->link, 0, "BUG", 0 );
   }
   else {
     cerr << "PANIEK!, geen top node" << endl;
