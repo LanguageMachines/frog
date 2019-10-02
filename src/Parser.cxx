@@ -1106,6 +1106,9 @@ const dp_tree *extract_hd( const dp_tree *node ){
     if ( pnt->rel == "hd" ){
       return pnt;
     }
+    else if ( pnt->rel == "crd" ){
+      return pnt;
+    }
     pnt = pnt->next;
   }
   return 0;
@@ -1124,37 +1127,44 @@ int mwu_size( const dp_tree *node ){
 }
 
 void extract_dp( const dp_tree *store, const dp_tree *root,
-		 const string& h, int compensate ){
+		 const string& h,
+		 vector<pair<string,int>>& result ){
   const dp_tree *pnt = store;
-  cerr << "LOOP over: " << pnt << endl;
+  //  cerr << "LOOP over: " << pnt << endl;
   while ( pnt ){
-    cerr << "\tLOOP: " << pnt->rel << endl;
+    //    cerr << "\tLOOP: " << pnt->rel << endl;
     if ( pnt->begin+1 == pnt->end ){
       if ( pnt == root ){
 	if ( root->rel == "--"  ){
-	  cerr << "THAT A ";
-	  cerr << "0\tROOT" << endl;
+	  //	  cerr << "THAT A ";
+	  //	  cerr << "0\tROOT" << endl;
+	  result.push_back( make_pair("ROOT",0) );
 	}
 	else if ( h == "--" ){
-	  cerr << "THAT B ";
-	  cerr << "0\tROOT" << endl;
+	  //	  cerr << "THAT B ";
+	  //	  cerr << "0\tROOT" << endl;
+	  result.push_back( make_pair("ROOT",0) );
 	}
 	else {
-	  cerr << "THAT C ";
-	  cerr << store->begin - compensate << "\t" << h << endl;
+	  //	  cerr << "THAT C ";
+	  //	  cerr << store->begin << "\t" << h << endl;
+	  result.push_back( make_pair(h,store->begin ) );
 	}
       }
       else if ( root && root->end > 0 ){
-	cerr << "THOSE A ";
-	cerr << root->end - compensate << "\t" << pnt->rel << endl;
+	//	cerr << "THOSE A ";
+	result.push_back( make_pair(pnt->rel,root->end ) );
+	//	cerr << root->end << "\t" << pnt->rel << endl;
       }
       else if ( pnt->rel == "--" ){
-	cerr << "THOSE B ";
-	cerr << pnt->begin - compensate << "\tpunct" << endl;
+	//	cerr << "THOSE B ";
+	result.push_back( make_pair("punct",pnt->begin ) );
+	//	cerr << pnt->begin << "\tpunct" << endl;
       }
       else {
-	cerr << "THOSE C ";
-	cerr << pnt->begin - compensate << "\t" << pnt->rel << endl;
+	//	cerr << "THOSE C ";
+	result.push_back( make_pair(pnt->rel, pnt->begin ) );
+	//	cerr << pnt->begin << "\t" << pnt->rel << endl;
       }
     }
     else {
@@ -1163,10 +1173,10 @@ void extract_dp( const dp_tree *store, const dp_tree *root,
 	//   cerr << "DADA " << root->end << "\t" << pnt->rel << endl;
 	// }
 	const dp_tree *new_root = extract_hd( pnt );
-	if ( new_root ){
-	  cerr << pnt->rel << ", root at this level: " << new_root << endl;
-	}
-	extract_dp( pnt->link, new_root, pnt->rel, compensate );
+	// if ( new_root ){
+	//   cerr << pnt->rel << ", root at this level: " << new_root << endl;
+	// }
+	extract_dp( pnt->link, new_root, pnt->rel, result );
       }
     }
     pnt = pnt->next;
@@ -1254,25 +1264,27 @@ dp_tree *resolve_mwus( dp_tree *in,
   return result;
 }
 
-void extract_dp( xmlDoc *alp_doc ){
+ vector<pair<string,int>> extract_dp( xmlDoc *alp_doc ){
   string txtfile = "/tmp/debug.xml";
   xmlSaveFormatFileEnc( txtfile.c_str(), alp_doc, "UTF8", 1 );
   xmlNode *top_node = TiCC::xPath( alp_doc, "//node[@rel='top']" );
   int index = 0;
   dp_tree *dp = parse_nodes( top_node, index );
-  cerr << endl << "done parsing, dp nodes:" << endl;
-  print_nodes( 0, dp );
+  //  cerr << endl << "done parsing, dp nodes:" << endl;
+  //  print_nodes( 0, dp );
   index = 0;
   int compensate = 0;
   dp = resolve_mwus( dp, index, compensate );
   cerr << endl << "done resolving, dp nodes:" << endl;
   print_nodes( 0, dp );
+  vector<pair<string,int>> result;
   if ( dp->rel == "top" ){
-    extract_dp( dp->link, 0, "BUG", 0 );
+    extract_dp( dp->link, 0, "BUG", result );
   }
   else {
     cerr << "PANIEK!, geen top node" << endl;
   }
+  return result;
 }
 
 #endif
@@ -1290,7 +1302,12 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
 #ifdef TEST_ALPINO_SERVER
   xmlDoc *parsed = alpino_server_parse( fd );
   cerr << "got XML" << endl;
-  extract_dp( parsed );
+  vector<pair<string,int>> solution = extract_dp( parsed );
+  int count = 0;
+  for( const auto& sol: solution ){
+    cerr << ++count << "\t" << sol.second << "\t" << sol.first << endl;
+  }
+  cerr << endl;
 #endif
   timers.prepareTimer.start();
   parseData pd = prepareParse( fd );
