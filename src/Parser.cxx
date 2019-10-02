@@ -1069,78 +1069,87 @@ struct dp_tree {
   int id;
   int begin;
   int end;
+  string word;
   string rel;
   dp_tree *link;
   dp_tree *next;
 };
 
-void print_node( const dp_tree *node ){
+ostream& operator<<( ostream& os, const dp_tree *node ){
   if ( node ){
-    cerr << node->id << " [" << node->begin << "," << node->end << "] "
-	 << node->rel;
+    os << node->rel << "[" << node->begin << "," << node->end << "] ("
+       << node->word << ")";
   }
+  else {
+    os << "null";
+  }
+  return os;
 }
 
 void print_nodes( int indent, const dp_tree *store ){
   const dp_tree *pnt = store;
   while ( pnt ){
-    cerr << std::string(indent, '-');
-    print_node( pnt );
-    cerr << endl;
+    cerr << std::string(indent, ' ') << pnt << endl;
     print_nodes( indent+3, pnt->link );
     pnt = pnt->next;
   }
 }
 
-int extract_hd( const dp_tree *node ){
+const dp_tree *extract_hd( const dp_tree *node ){
   const dp_tree *pnt = node->link;
   while ( pnt ){
     if ( pnt->rel == "hd" ){
-      return pnt->end;
+      return pnt;
     }
     pnt = pnt->next;
   }
   return 0;
 }
 
-void extract_dp2( const dp_tree *store ){
-  const dp_tree *pnt = store->link;
-  while ( pnt ){
-    if ( pnt->rel == "hd" ){
-      cerr << store->begin << "\t" << store->rel << endl;
-    }
-    else {
-      cerr << pnt->begin << "\t" << pnt->rel << endl;
-    }
-    pnt = pnt->next;
-  }
-}
-
-void extract_dp( const dp_tree *store, int root ){
+void extract_dp( const dp_tree *store, const dp_tree *root, const string& h ){
   const dp_tree *pnt = store;
+  //  cerr << "LOOP over: " << pnt << endl;
   while ( pnt ){
-    if ( pnt->rel == "top" ){
-      extract_dp( pnt->link, root );
-    }
-    else if ( pnt->rel == "--" ){
-      if ( pnt->begin+1 == pnt->end ){
-	cerr << pnt->begin << "\t" << "punct" << endl;
+    //    cerr << "\tLOOP: " << pnt->rel << endl;
+    if ( pnt->begin+1 == pnt->end ){
+      if ( pnt == root ){
+	if ( root->rel == "--"  ){
+	  cerr << "THAT A ";
+	  cerr << "0\tROOT" << endl;
+	}
+	else if ( h == "--" ){
+	  cerr << "THAT B ";
+	  cerr << "0\tROOT" << endl;
+	}
+	else {
+	  cerr << "THAT C ";
+	  cerr << store->begin << "\t" << h << endl;
+	}
+      }
+      else if ( root && root->end > 0 ){
+	cerr << "THOSE A ";
+	cerr << root->end << "\t" << pnt->rel << endl;
+      }
+      else if ( pnt->rel == "--" ){
+	cerr << "THOSE B ";
+	cerr << pnt->begin << "\tpunct" << endl;
       }
       else {
-	int bla = extract_hd( pnt );
-	extract_dp( pnt->link, bla );
-      }
-    }
-    else if ( pnt->begin+1 == pnt->end ){
-      if ( pnt->rel == "hd" ){
-	cerr << 0 << "\t" << "ROOT" << endl;
-      }
-      else {
-	cerr << root << "\t" << pnt->rel << endl;
+	cerr << "THOSE C ";
+	cerr << pnt->begin << "\t" << pnt->rel << endl;
       }
     }
     else {
-      extract_dp2( pnt );
+      if ( pnt->link ){
+	// if ( root ){
+	//   cerr << "DADA " << root->end << "\t" << pnt->rel << endl;
+	// }
+	const dp_tree *new_root = extract_hd( pnt );
+	if ( new_root ){
+	  cerr << pnt->rel << ", root at this level: " << new_root << endl;
+	}
+	extract_dp( pnt->link, new_root, pnt->rel );
+      }
     }
     pnt = pnt->next;
   }
@@ -1154,6 +1163,7 @@ dp_tree *parse_node( xmlNode *node ){
   dp->begin = TiCC::stringTo<int>( atts["begin"] );
   dp->end = TiCC::stringTo<int>( atts["end"] );
   dp->rel = atts["rel"];
+  dp->word = atts["word"];
   dp->link = 0;
   dp->next = 0;
   return dp;
@@ -1193,7 +1203,12 @@ void extract_dp( xmlDoc *alp_doc ){
   dp_tree *dp = parse_nodes( top_node );
   cerr << endl << "done parsing, dp nodes:" << endl;
   print_nodes( 0, dp );
-  extract_dp( dp, 0 );
+  if ( dp->rel == "top" ){
+    extract_dp( dp->link, 0, "BUG" );
+  }
+  else {
+    cerr << "PANIEK!, geen top node" << endl;
+  }
 }
 
 #endif
@@ -1208,7 +1223,7 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
     LOG << "unable to parse an analysis without words" << endl;
     return;
   }
-#ifdef TEST_ALIPNO_SERVER
+#ifdef TEST_ALPINO_SERVER
   xmlDoc *parsed = alpino_server_parse( fd );
   cerr << "got XML" << endl;
   extract_dp( parsed );
