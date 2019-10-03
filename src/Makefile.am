@@ -14,7 +14,7 @@ libfrog_la_LDFLAGS = -version-info 2:0:0
 libfrog_la_SOURCES = FrogAPI.cxx FrogData.cxx \
 	mbma_rule.cxx mbma_mod.cxx mbma_brackets.cxx clex.cxx \
 	mblem_mod.cxx csidp.cxx ckyparser.cxx \
-	Frog-util.cxx mwu_chunker_mod.cxx Parser.cxx \
+	Frog-util.cxx mwu_chunker_mod.cxx Parser.cxx AlpinoParser.cxx \
 	tagger_base.cxx cgn_tagger_mod.cxx \
 	iob_tagger_mod.cxx \
 	ner_tagger_mod.cxx \
