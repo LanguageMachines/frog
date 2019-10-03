@@ -55,7 +55,8 @@ class Parser {
     rels(0),
     maxDepSpan( 0 ),
     isInit( false ),
-    filter( 0 )
+    filter( 0 ),
+    _do_alpino(false)
       {
 	errLog = new TiCC::LogStream(errlog, "parser-");
 	dbgLog = new TiCC::LogStream(dbglog, "parser-dbg-");
@@ -97,6 +98,7 @@ class Parser {
   std::string _pairs_base;
   std::string _dirs_base;
   std::string _rels_base;
+  bool _do_alpino;
   Parser( const Parser& ){}; // inhibit copies
 };
 

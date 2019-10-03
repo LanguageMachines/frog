@@ -118,6 +118,7 @@ FrogOptions::FrogOptions() {
   doXMLin =  false;
   doXMLout =  false;
   doKanon =  false;
+  doAlpino =  false;
   test_API =  false;
   hide_timers = false;
   interactive = false;

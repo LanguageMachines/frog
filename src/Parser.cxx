@@ -40,8 +40,6 @@
 #include <fstream>
 #include <algorithm>
 
-//#define TEST_ALPINO_SERVER
-
 #include "config.h"
 #include "ticcutils/Configuration.h"
 #include "ticcutils/PrettyPrint.h"
@@ -50,9 +48,7 @@
 #include "timbl/TimblAPI.h"
 #include "frog/Frog-util.h"
 #include "frog/csidp.h"
-#ifdef TEST_ALPINO_SERVER
 #include "frog/AlpinoParser.h"
-#endif
 
 using namespace std;
 
@@ -141,6 +137,10 @@ bool Parser::init( const TiCC::Configuration& configuration ){
     charFile = prefix( configuration.configDir(), charFile );
     filter = new TiCC::UniFilter();
     filter->fill( charFile );
+  }
+  val = configuration.lookUp( "alpino", "parser" );
+  if ( !val.empty() ){
+    _do_alpino = true;
   }
   val = configuration.lookUp( "maxDepSpan", "parser" );
   if ( !val.empty() ){
@@ -1052,16 +1052,17 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
     LOG << "unable to parse an analysis without words" << endl;
     return;
   }
-#ifdef TEST_ALPINO_SERVER
-  xmlDoc *parsed = alpino_server_parse( fd );
-  cerr << "got XML" << endl;
-  vector<pair<string,int>> solution = extract_dp( parsed );
-  int count = 0;
-  for( const auto& sol: solution ){
-    cerr << ++count << "\t" << sol.second << "\t" << sol.first << endl;
+
+  if ( _do_alpino ){
+    cerr << "Testing Alpino parsing" << endl;
+    xmlDoc *parsed = alpino_server_parse( fd );
+    vector<pair<string,int>> solution = extract_dp( parsed );
+    int count = 0;
+    for( const auto& sol: solution ){
+      cerr << ++count << "\t" << sol.second << "\t" << sol.first << endl;
+    }
+    cerr << endl;
   }
-  cerr << endl;
-#endif
   timers.prepareTimer.start();
   parseData pd = prepareParse( fd );
   timers.prepareTimer.stop();

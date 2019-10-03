@@ -339,6 +339,10 @@ bool parse_args( TiCC::CL_Options& Opts,
     configuration.setatt( "ner_override", opt_val, "NER" );
   }
   options.doServer = Opts.extract('S', options.listenport );
+  options.doAlpino = Opts.extract("alpino");
+  if ( options.doAlpino ){
+    configuration.setatt( "alpino", "true", "parser" );
+  }
 
 #ifdef HAVE_OPENMP
   if ( options.doServer ) {
@@ -583,7 +587,7 @@ int main(int argc, char *argv[]) {
 			  "uttmarker:,max-parser-tokens:,textredundancy:,"
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
 			  "help,language:,retry,nostdout,ner-override:,"
-			  "debug:,keep-parser-files,version,threads:,"
+			  "debug:,keep-parser-files,version,threads:,alpino,"
 			  "override:,KANON,TESTAPI,debugfile:");
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){

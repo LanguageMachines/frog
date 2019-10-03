@@ -77,9 +77,10 @@ class FrogOptions {
   bool doKanon;
   bool test_API;
   bool hide_timers;
-  int debugFlag;
   bool interactive;
+  bool doAlpino;
   int numThreads;
+  int debugFlag;
 
   std::string encoding;
   std::string uttmark;
