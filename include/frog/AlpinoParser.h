@@ -57,6 +57,6 @@ xmlDoc *alpino_server_parse( frog_data& fd );
 
 void print_nodes( int indent, const dp_tree *store );
 
-std::vector<std::pair<std::string,int>> extract_dp( xmlDoc * );
+std::vector<std::pair<std::string,int>> extract_dp( xmlDoc *, int );
 
 #endif

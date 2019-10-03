@@ -122,64 +122,83 @@ int mwu_size( const dp_tree *node ){
   return result;
 }
 
-void extract_dp( const dp_tree *store, const dp_tree *root,
-		 const string& h,
+//#define DEBUG_EXTRACT
+
+void extract_dp( const dp_tree *store,
 		 vector<pair<string,int>>& result ){
-  const dp_tree *pnt = store;
-  //  cerr << "LOOP over: " << pnt << endl;
+  const dp_tree *pnt = store->link;
+  if ( !pnt ){
+    return;
+  }
+  const dp_tree *my_root = extract_hd( store );
+#ifdef DEBUG_EXTRACT
+  cerr << "LOOP over: " << store << "head= " << my_root << endl;
+#endif
   while ( pnt ){
-    //    cerr << "\tLOOP: " << pnt->rel << endl;
+#ifdef DEBUG_EXTRACT
+    cerr << "\tLOOP: " << pnt->rel << " head=" << my_root << endl;
+#endif
     if ( pnt->begin+1 == pnt->end ){
-      if ( pnt == root ){
-	if ( root->rel == "--"  ){
-	  //	  cerr << "THAT A ";
-	  //	  cerr << "0\tROOT" << endl;
-	  result.push_back( make_pair("ROOT",0) );
+      if ( pnt == my_root ){
+	// we found the 'head'
+#ifdef DEBUG_EXTRACT
+	cerr << "found head " << endl;
+#endif
+	if ( my_root->rel == "--"  ){
+	  // so at top level
+#ifdef DEBUG_EXTRACT_A
+	  cerr << "THAT A ";
+	  cerr << "0\tROOT" << endl;
+#endif
+	  result[pnt->end] = make_pair("ROOT",0);
 	}
-	else if ( h == "--" ){
-	  //	  cerr << "THAT B ";
-	  //	  cerr << "0\tROOT" << endl;
-	  result.push_back( make_pair("ROOT",0) );
+	else if ( store->rel == "--" ){
+	  // also top level
+#ifdef DEBUG_EXTRACT_A
+	  cerr << "THAT B ";
+	  cerr << "0\tROOT" << endl;
+#endif
+	  result[pnt->end] = make_pair("ROOT",0);
 	}
 	else {
-	  //	  cerr << "THAT C ";
-	  //	  cerr << store->begin << "\t" << h << endl;
-	  result.push_back( make_pair(h,store->begin ) );
+	  // the head gets it's parents category and number
+#ifdef DEBUG_EXTRACT
+	  cerr << "THAT C ";
+	  cerr << store->begin << "\t" << store->rel << endl;
+#endif
+	  result[pnt->end] = make_pair(store->rel,store->begin );
 	}
       }
-      else if ( root && root->end > 0 ){
-	//	cerr << "THOSE A ";
-	result.push_back( make_pair(pnt->rel,root->end ) );
-	//	cerr << root->end << "\t" << pnt->rel << endl;
+      else if ( my_root && my_root->end > 0 ){
+#ifdef DEBUG_EXTRACT
+	cerr << "THOSE A ";
+	cerr << my_root->end << "\t" << pnt->rel << endl;
+#endif
+	result[pnt->end] = make_pair(pnt->rel,my_root->end );
       }
       else if ( pnt->rel == "--" ){
-	//	cerr << "THOSE B ";
-	result.push_back( make_pair("punct",pnt->begin ) );
-	//	cerr << pnt->begin << "\tpunct" << endl;
+#ifdef DEBUG_EXTRACT
+	cerr << "THOSE B ";
+	cerr << pnt->begin << "\tpunct" << endl;
+#endif
+	result[pnt->end] = make_pair("punct",pnt->begin);
       }
       else {
-	//	cerr << "THOSE C ";
-	result.push_back( make_pair(pnt->rel, pnt->begin ) );
-	//	cerr << pnt->begin << "\t" << pnt->rel << endl;
+#ifdef DEBUG_EXTRACT
+	cerr << "THOSE C ";
+	cerr << pnt->begin << "\t" << pnt->rel << endl;
+#endif
+	result[pnt->end] = make_pair(pnt->rel, pnt->begin);
       }
     }
     else {
-      if ( pnt->link ){
-	// if ( root ){
-	//   cerr << "DADA " << root->end << "\t" << pnt->rel << endl;
-	// }
-	const dp_tree *new_root = extract_hd( pnt );
-	// if ( new_root ){
-	//   cerr << pnt->rel << ", root at this level: " << new_root << endl;
-	// }
-	extract_dp( pnt->link, new_root, pnt->rel, result );
-      }
+      extract_dp( pnt, result );
     }
     pnt = pnt->next;
   }
 }
 
-dp_tree *parse_node( xmlNode *node, int& index ){
+dp_tree *parse_node( xmlNode *node ){
   auto atts = TiCC::getAttributes( node );
   //  cerr << "attributes: " << atts << endl;
   dp_tree *dp = new dp_tree();
@@ -189,20 +208,20 @@ dp_tree *parse_node( xmlNode *node, int& index ){
   dp->rel = atts["rel"];
   dp->word = atts["word"];
   if ( !dp->word.empty() ){
-    dp->word_index = ++index;
+    dp->word_index = dp->end;
   }
   dp->link = 0;
   dp->next = 0;
   return dp;
 }
 
-dp_tree *parse_nodes( xmlNode *node, int& index ){
+dp_tree *parse_nodes( xmlNode *node ){
   dp_tree *result = 0;
   xmlNode *pnt = node;
   dp_tree *last = 0;
   while ( pnt ){
     if ( TiCC::Name( pnt ) == "node" ){
-      dp_tree *parsed = parse_node( pnt, index );
+      dp_tree *parsed = parse_node( pnt );
       // cerr << "parsed ";
       // print_node( parsed );
       if ( result == 0 ){
@@ -214,7 +233,7 @@ dp_tree *parse_nodes( xmlNode *node, int& index ){
 	last = last->next;
       }
       if ( pnt->children ){
-	dp_tree *childs = parse_nodes( pnt->children, index );
+	dp_tree *childs = parse_nodes( pnt->children );
 	last->link = childs;
       }
     }
@@ -224,11 +243,11 @@ dp_tree *parse_nodes( xmlNode *node, int& index ){
 }
 
 dp_tree *resolve_mwus( dp_tree *in,
-		       int& new_index,
 		       int& compensate ){
   dp_tree *result = in;
   dp_tree *pnt = in;
   while ( pnt ){
+    cerr << "bekijk " << pnt << endl;
     if ( pnt->link && pnt->link->rel == "mwp" ){
       dp_tree *tmp = pnt->link;
       pnt->word = tmp->word;
@@ -243,7 +262,6 @@ dp_tree *resolve_mwus( dp_tree *in,
       tmp = pnt->link;
       pnt->link = 0;
       delete tmp;
-      ++new_index;
       pnt->end = pnt->begin+1;
       compensate = count;
     }
@@ -251,31 +269,65 @@ dp_tree *resolve_mwus( dp_tree *in,
       pnt->begin -= compensate;
       pnt->end -= compensate;
       if ( !pnt->word.empty() ){
-	pnt->word_index = ++new_index;
+	pnt->word_index -= compensate;
       }
     }
-    pnt->link = resolve_mwus( pnt->link, new_index, compensate );
+    pnt->link = resolve_mwus( pnt->link, compensate );
     pnt = pnt->next;
   }
   return result;
 }
 
-vector<pair<string,int>> extract_dp( xmlDoc *alp_doc ){
+map<int,dp_tree*> serialize_top( dp_tree *in ){
+  map<int,dp_tree*> result;
+  dp_tree *pnt = in->link;
+  // only loop over nodes direcly under the top node!
+  while ( pnt ){
+    result[pnt->begin] = pnt;
+    pnt = pnt->next;
+  }
+  auto it = result.begin();
+  while ( it != result.end() ) {
+    auto nit = next(it);
+    dp_tree *next = 0;
+    if ( nit != result.end() ){
+      next = nit->second;
+    }
+    cerr << "hang " << next << " achter " << it->second << endl;
+    it->second->next = next;
+    ++it;
+  }
+  in->link = result.begin()->second;
+  return result;
+}
+
+dp_tree *resolve_mwus( dp_tree *in ){
+  map<int,dp_tree*> top_nodes = serialize_top( in );
+  cerr << "after serialize: ";
+  print_nodes(4, in );
+  cerr << endl;
+  int compensate = 0;
+  for ( const auto& it : top_nodes ){
+    cerr << "voor resolve MWU's " << it.first << endl;
+    resolve_mwus( it.second, compensate );
+    break;
+  }
+  return in;
+}
+
+vector<pair<string,int>> extract_dp( xmlDoc *alp_doc, int sent_len ){
   string txtfile = "/tmp/debug.xml";
   xmlSaveFormatFileEnc( txtfile.c_str(), alp_doc, "UTF8", 1 );
   xmlNode *top_node = TiCC::xPath( alp_doc, "//node[@rel='top']" );
-  int index = 0;
-  dp_tree *dp = parse_nodes( top_node, index );
-  //  cerr << endl << "done parsing, dp nodes:" << endl;
-  //  print_nodes( 0, dp );
-  index = 0;
-  int compensate = 0;
-  dp = resolve_mwus( dp, index, compensate );
+  dp_tree *dp = parse_nodes( top_node );
+  cerr << endl << "done parsing, dp nodes:" << endl;
+  print_nodes( 0, dp );
+  dp = resolve_mwus( dp );
   cerr << endl << "done resolving, dp nodes:" << endl;
   print_nodes( 0, dp );
-  vector<pair<string,int>> result;
+  vector<pair<string,int>> result(sent_len);
   if ( dp->rel == "top" ){
-    extract_dp( dp->link, 0, "BUG", result );
+    extract_dp( dp, result );
   }
   else {
     cerr << "PANIEK!, geen top node" << endl;

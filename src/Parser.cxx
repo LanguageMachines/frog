@@ -1056,10 +1056,14 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
   if ( _do_alpino ){
     cerr << "Testing Alpino parsing" << endl;
     xmlDoc *parsed = alpino_server_parse( fd );
-    vector<pair<string,int>> solution = extract_dp( parsed );
+    vector<pair<string,int>> solution = extract_dp( parsed, fd.size()+1 );
     int count = 0;
     for( const auto& sol: solution ){
-      cerr << ++count << "\t" << sol.second << "\t" << sol.first << endl;
+      if ( count == 0 ){
+	++count;
+	continue;
+      }
+      cerr << count++ << "\t" << sol.second << "\t" << sol.first << endl;
     }
     cerr << endl;
   }
