@@ -1063,6 +1063,10 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
 	++count;
 	continue;
       }
+      if ( sol.second == 0 && sol.first.empty() ){
+	++count;
+	continue;
+      }
       cerr << count++ << "\t" << sol.second << "\t" << sol.first << endl;
     }
     cerr << endl;

@@ -123,6 +123,7 @@ int mwu_size( const dp_tree *node ){
 }
 
 //#define DEBUG_EXTRACT
+//#define DEBUG_EXTRACT_A
 
 void extract_dp( const dp_tree *store,
 		 vector<pair<string,int>>& result ){
@@ -247,7 +248,7 @@ dp_tree *resolve_mwus( dp_tree *in,
   dp_tree *result = in;
   dp_tree *pnt = in;
   while ( pnt ){
-    cerr << "bekijk " << pnt << endl;
+    //    cerr << "bekijk " << pnt << endl;
     if ( pnt->link && pnt->link->rel == "mwp" ){
       dp_tree *tmp = pnt->link;
       pnt->word = tmp->word;
@@ -293,7 +294,7 @@ map<int,dp_tree*> serialize_top( dp_tree *in ){
     if ( nit != result.end() ){
       next = nit->second;
     }
-    cerr << "hang " << next << " achter " << it->second << endl;
+    //    cerr << "hang " << next << " achter " << it->second << endl;
     it->second->next = next;
     ++it;
   }
@@ -303,12 +304,12 @@ map<int,dp_tree*> serialize_top( dp_tree *in ){
 
 dp_tree *resolve_mwus( dp_tree *in ){
   map<int,dp_tree*> top_nodes = serialize_top( in );
-  cerr << "after serialize: ";
-  print_nodes(4, in );
-  cerr << endl;
+  //  cerr << "after serialize: ";
+  //  print_nodes(4, in );
+  //  cerr << endl;
   int compensate = 0;
   for ( const auto& it : top_nodes ){
-    cerr << "voor resolve MWU's " << it.first << endl;
+    //    cerr << "voor resolve MWU's " << it.first << endl;
     resolve_mwus( it.second, compensate );
     break;
   }
