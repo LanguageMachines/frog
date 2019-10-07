@@ -294,12 +294,18 @@ vector<parsrel> extract(list<pair<const dp_tree*,const dp_tree*>>& l ){
       // not a word but an aggregate
       const dp_tree *my_head = extract_hd( it.first );
       //      cerr << "TEMP ROOT=" << my_head << endl;
-      pos = my_head->word_index;
-      rel = it.first->rel;
-      dep = it.second->word_index;
+      if ( !my_head ){
+	cerr << "PANIC" << endl;
+	pos = 0;
+      }
+      else {
+	pos = my_head->word_index;
+	rel = it.first->rel;
+	dep = it.second->word_index;
 #ifdef DEBUG_EXTRACT
-      cerr << "B match[" << pos << "] " << rel << " " << dep << endl;
+	cerr << "B match[" << pos << "] " << rel << " " << dep << endl;
 #endif
+      }
     }
     else if ( it.first->rel == "hd"
 	      || it.first->rel == "crd" ){
