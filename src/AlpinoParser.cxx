@@ -85,18 +85,6 @@ const dp_tree *extract_hd( const dp_tree *node ){
   return 0;
 }
 
-int mwu_size( const dp_tree *node ){
-  int result = 0;
-  dp_tree *pnt = node->link;
-  while ( pnt ){
-    if ( pnt->rel == "mwp" ){
-      ++result;
-    }
-    pnt = pnt->next;
-  }
-  return result;
-}
-
 dp_tree *parse_node( xmlNode *node ){
   auto atts = TiCC::getAttributes( node );
   //  cerr << "attributes: " << atts << endl;
@@ -144,12 +132,19 @@ dp_tree *parse_nodes( xmlNode *node ){
 //#define DEBUG_MWU
 
 dp_tree *resolve_mwus( dp_tree *in,
-		       int& compensate ){
+		       int& compensate,
+		       int& restart,
+		       frog_data& fd ){
   dp_tree *result = in;
   dp_tree *pnt = in;
+#ifdef DEBUG_MWU
+  cerr << "RESOLVE MWUS" << endl;
+  cerr << "compensate = " << compensate << " restart=" << restart << endl;
+#endif
   while ( pnt ){
 #ifdef DEBUG_MWU
-    cerr << "bekijk " << pnt << endl;
+    cerr << "bekijk " << pnt << " compensate=" << compensate << endl;
+    cerr << "begin=" << pnt->begin << " restart=" << restart << endl;
 #endif
     if ( pnt->link && pnt->link->rel == "mwp" ){
       dp_tree *tmp = pnt->link;
@@ -159,6 +154,7 @@ dp_tree *resolve_mwus( dp_tree *in,
       tmp = tmp->next;
       while ( tmp ){
 	++count;
+	++restart;
 	pnt->word += "_" + tmp->word;
 	tmp = tmp->next;
       }
@@ -167,8 +163,10 @@ dp_tree *resolve_mwus( dp_tree *in,
       delete tmp;
       pnt->end = pnt->begin+1;
       compensate = count;
+      restart += count;
+      fd.mwus[tmp->word_index-1] = tmp->word_index + count-1;
     }
-    else if ( pnt->end <= compensate ){
+    else if ( pnt->begin <= restart ){
       // ignore?
     }
     else {
@@ -178,7 +176,7 @@ dp_tree *resolve_mwus( dp_tree *in,
 	pnt->word_index -= compensate;
       }
     }
-    pnt->link = resolve_mwus( pnt->link, compensate );
+    pnt->link = resolve_mwus( pnt->link, compensate, restart, fd );
     pnt = pnt->next;
   }
   return result;
@@ -207,17 +205,18 @@ map<int,dp_tree*> serialize_top( dp_tree *in ){
   return result;
 }
 
-dp_tree *resolve_mwus( dp_tree *in ){
+dp_tree *resolve_mwus( dp_tree *in, frog_data& fd ){
   map<int,dp_tree*> top_nodes = serialize_top( in );
   //  cerr << "after serialize: ";
   //  print_nodes(4, in );
   //  cerr << endl;
   int compensate = 0;
+  int restart = 0;
   for ( const auto& it : top_nodes ){
 #ifdef DEBUG_MWU
     cerr << "voor resolve MWU's " << it.first << endl;
 #endif
-    resolve_mwus( it.second, compensate );
+    resolve_mwus( it.second, compensate, restart, fd );
     break;
   }
   return in;
@@ -342,16 +341,21 @@ vector<parsrel> extract(list<pair<const dp_tree*,const dp_tree*>>& l ){
   return result;
 }
 
-vector<parsrel> extract_dp( xmlDoc *alp_doc ){
+vector<parsrel> extract_dp( xmlDoc *alp_doc,
+			    frog_data& fd ){
   string txtfile = "/tmp/debug.xml";
   xmlSaveFormatFileEnc( txtfile.c_str(), alp_doc, "UTF8", 1 );
   xmlNode *top_node = TiCC::xPath( alp_doc, "//node[@rel='top']" );
   dp_tree *dp = parse_nodes( top_node );
+#if defined(DEBUG_EXTRACT) || defined(DEBUG_MWU)
   cerr << endl << "done parsing, dp nodes:" << endl;
   print_nodes( 0, dp );
-  dp = resolve_mwus( dp );
+#endif
+  dp = resolve_mwus( dp, fd );
+#if defined(DEBUG_EXTRACT) || defined(DEBUG_MWU)
   cerr << endl << "done resolving, dp nodes:" << endl;
   print_nodes( 0, dp );
+#endif
   list<pair<const dp_tree*,const dp_tree*>> result;
   if ( dp->rel == "top" ){
     extract_dependencies( result, dp, 0 );
@@ -363,7 +367,13 @@ vector<parsrel> extract_dp( xmlDoc *alp_doc ){
   else {
     cerr << "PANIEK!, geen top node" << endl;
   }
-  return extract(result);
+  fd.resolve_mwus();
+#ifdef DEBUG_EXTRACT
+  cerr << "FD: Na resolve " << endl;
+  cerr << fd << endl;
+#endif
+  vector<parsrel> pr = extract(result);
+  return pr;
 }
 
 vector<parsrel> alpino_server_parse( frog_data& fd ){
@@ -375,7 +385,9 @@ vector<parsrel> alpino_server_parse( frog_data& fd ){
     cerr << "Reason: " << client.getMessage() << endl;
     exit( EXIT_FAILURE );
   }
-  //  cerr << "start input loop" << endl;
+#ifdef DEBUG_ALPINO
+  cerr << "start Alpino input loop" << endl;
+#endif
   string txt = fd.sentence();
   client.write( txt + "\n\n" );
   string result;
@@ -388,5 +400,5 @@ vector<parsrel> alpino_server_parse( frog_data& fd ){
 #endif
   xmlDoc *doc = xmlReadMemory( result.c_str(), result.length(),
 			       0, 0, XML_PARSE_NOBLANKS );
-  return extract_dp(doc);
+  return extract_dp(doc,fd);
 }

@@ -1033,6 +1033,9 @@ void appendParseResult( frog_data& fd,
   vector<int> nums;
   vector<string> roles;
   for ( const auto& it : res ){
+    if ( it.head == 0 && it.deprel.empty() ){
+      continue;
+    }
     nums.push_back( it.head );
     roles.push_back( it.deprel );
   }
@@ -1041,6 +1044,8 @@ void appendParseResult( frog_data& fd,
     fd.mw_units[i].parse_role = roles[i];
   }
 }
+
+//#define DEBUG_ALPINO
 
 void Parser::Parse( frog_data& fd, TimerBlock& timers ){
   timers.parseTimer.start();
@@ -1054,23 +1059,34 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
   }
 
   if ( _do_alpino ){
+#ifdef DEBUG_ALPINO
     cerr << "Testing Alpino parsing" << endl;
-    frog_data local_fd = fd;
-    vector<parsrel> solution = alpino_server_parse( local_fd );
+    cerr << "voor server_parse:" << endl << fd << endl;
+#endif
+    vector<parsrel> solution = alpino_server_parse( fd );
+#ifdef DEBUG_ALPINO
+    cerr << "NA server_parse:" << endl << fd << endl;
     int count = 0;
     for( const auto& sol: solution ){
       if ( count == 0 ){
-	++count;
+     	++count;
 	continue;
       }
       if ( sol.head == 0 && sol.deprel.empty() ){
-	++count;
-	continue;
+     	++count;
+     	continue;
       }
-      cerr << count << "\t" << local_fd.units[count-1].word << "\t" << sol.head << "\t" << sol.deprel << endl;
+      cerr << count << "\t" << fd.mw_units[count-1].word << "\t" << sol.head << "\t" << sol.deprel << endl;
       ++count;
     }
     cerr << endl;
+#endif
+    appendParseResult( fd, solution );
+#ifdef DEBUG_ALPINO
+    cerr << "NA appending:" << endl << fd << endl;
+#endif
+    // we are already done!
+    return;
   }
   timers.prepareTimer.start();
   parseData pd = prepareParse( fd );
