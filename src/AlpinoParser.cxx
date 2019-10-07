@@ -48,31 +48,6 @@ using TiCC::operator<<;
 
 //#define DEBUG_ALPINO
 
-xmlDoc *alpino_server_parse( frog_data& fd ){
-  string host = "localhost"; // config.lookUp( "host", "alpino" );
-  string port = "8004"; // config.lookUp( "port", "alpino" );
-  Sockets::ClientSocket client;
-  if ( !client.connect( host, port ) ){
-    cerr << "failed to open Alpino connection: "<< host << ":" << port << endl;
-    cerr << "Reason: " << client.getMessage() << endl;
-    exit( EXIT_FAILURE );
-  }
-  //  cerr << "start input loop" << endl;
-  string txt = fd.sentence();
-  client.write( txt + "\n\n" );
-  string result;
-  string s;
-  while ( client.read(s) ){
-    result += s + "\n";
-  }
-#ifdef DEBUG_ALPINO
-  cerr << "received data [" << result << "]" << endl;
-#endif
-  xmlDoc *doc = xmlReadMemory( result.c_str(), result.length(),
-			       0, 0, XML_PARSE_NOBLANKS );
-  return doc;
-}
-
 ostream& operator<<( ostream& os, const dp_tree *node ){
   if ( node ){
     os << node->rel << "[" << node->begin << "," << node->end << "] ("
@@ -122,83 +97,6 @@ int mwu_size( const dp_tree *node ){
   return result;
 }
 
-//#define DEBUG_EXTRACT
-//#define DEBUG_EXTRACT_A
-
-void extract_dp( const dp_tree *store,
-		 vector<pair<string,int>>& result ){
-  const dp_tree *pnt = store->link;
-  if ( !pnt ){
-    return;
-  }
-  const dp_tree *my_root = extract_hd( store );
-#ifdef DEBUG_EXTRACT
-  cerr << "LOOP over: " << store << "head= " << my_root << endl;
-#endif
-  while ( pnt ){
-#ifdef DEBUG_EXTRACT
-    cerr << "\tLOOP: " << pnt->rel << " head=" << my_root << endl;
-#endif
-    if ( pnt->begin+1 == pnt->end ){
-      if ( pnt == my_root ){
-	// we found the 'head'
-#ifdef DEBUG_EXTRACT
-	cerr << "found head " << endl;
-#endif
-	if ( my_root->rel == "--"  ){
-	  // so at top level
-#ifdef DEBUG_EXTRACT_A
-	  cerr << "THAT A ";
-	  cerr << "0\tROOT" << endl;
-#endif
-	  result[pnt->end] = make_pair("ROOT",0);
-	}
-	else if ( store->rel == "--" ){
-	  // also top level
-#ifdef DEBUG_EXTRACT_A
-	  cerr << "THAT B ";
-	  cerr << "0\tROOT" << endl;
-#endif
-	  result[pnt->end] = make_pair("ROOT",0);
-	}
-	else {
-	  // the head gets it's parents category and number
-#ifdef DEBUG_EXTRACT
-	  cerr << "THAT C ";
-	  cerr << store->begin << "\t" << store->rel << endl;
-#endif
-	  result[pnt->end] = make_pair(store->rel,store->begin );
-	}
-      }
-      else if ( my_root && my_root->end > 0 ){
-#ifdef DEBUG_EXTRACT
-	cerr << "THOSE A ";
-	cerr << my_root->end << "\t" << pnt->rel << endl;
-#endif
-	result[pnt->end] = make_pair(pnt->rel,my_root->end );
-      }
-      else if ( pnt->rel == "--" ){
-#ifdef DEBUG_EXTRACT
-	cerr << "THOSE B ";
-	cerr << pnt->begin << "\tpunct" << endl;
-#endif
-	result[pnt->end] = make_pair("punct",pnt->begin);
-      }
-      else {
-#ifdef DEBUG_EXTRACT
-	cerr << "THOSE C ";
-	cerr << pnt->begin << "\t" << pnt->rel << endl;
-#endif
-	result[pnt->end] = make_pair(pnt->rel, pnt->begin);
-      }
-    }
-    else {
-      extract_dp( pnt, result );
-    }
-    pnt = pnt->next;
-  }
-}
-
 dp_tree *parse_node( xmlNode *node ){
   auto atts = TiCC::getAttributes( node );
   //  cerr << "attributes: " << atts << endl;
@@ -243,12 +141,16 @@ dp_tree *parse_nodes( xmlNode *node ){
   return result;
 }
 
+//#define DEBUG_MWU
+
 dp_tree *resolve_mwus( dp_tree *in,
 		       int& compensate ){
   dp_tree *result = in;
   dp_tree *pnt = in;
   while ( pnt ){
-    //    cerr << "bekijk " << pnt << endl;
+#ifdef DEBUG_MWU
+    cerr << "bekijk " << pnt << endl;
+#endif
     if ( pnt->link && pnt->link->rel == "mwp" ){
       dp_tree *tmp = pnt->link;
       pnt->word = tmp->word;
@@ -265,6 +167,9 @@ dp_tree *resolve_mwus( dp_tree *in,
       delete tmp;
       pnt->end = pnt->begin+1;
       compensate = count;
+    }
+    else if ( pnt->end <= compensate ){
+      // ignore?
     }
     else {
       pnt->begin -= compensate;
@@ -309,14 +214,135 @@ dp_tree *resolve_mwus( dp_tree *in ){
   //  cerr << endl;
   int compensate = 0;
   for ( const auto& it : top_nodes ){
-    //    cerr << "voor resolve MWU's " << it.first << endl;
+#ifdef DEBUG_MWU
+    cerr << "voor resolve MWU's " << it.first << endl;
+#endif
     resolve_mwus( it.second, compensate );
     break;
   }
   return in;
 }
 
-vector<pair<string,int>> extract_dp( xmlDoc *alp_doc, int sent_len ){
+//#define DEBUG_EXTRACT
+
+void extract_dependencies( list<pair<const dp_tree*,const dp_tree*>>& result,
+			   const dp_tree *store,
+			   const dp_tree *root ){
+  const dp_tree *pnt = store->link;
+  if ( !pnt ){
+    return;
+  }
+  const dp_tree *my_root = extract_hd( store );
+#ifdef DEBUG_EXTRACT
+  cerr << "LOOP over: " << store << "head= " << my_root << endl;
+#endif
+  while ( pnt ){
+    if ( pnt == my_root ){
+      result.push_back( make_pair(pnt,root) );
+    }
+    else {
+      result.push_back( make_pair(pnt, my_root) );
+    }
+    extract_dependencies( result, pnt, pnt );
+    pnt = pnt->next;
+  }
+}
+
+vector<parsrel> extract(list<pair<const dp_tree*,const dp_tree*>>& l ){
+  vector<parsrel> result(l.size());
+  for ( const auto& it : l ){
+#ifdef DEBUG_EXTRACT
+    cerr << "bekijk: " << it << endl;
+#endif
+    int pos = 0;
+    int dep = 0;
+    string rel;
+    if ( it.second == 0 ){
+      // root node
+      if ( it.first->word.empty() ){
+	if ( it.first->link
+	     && it.first->rel != "--" ){
+#ifdef DEBUG_EXTRACT
+	  cerr << "AHA   some special thing: " << it.first->rel << endl;
+#endif
+	  // not a word but an aggregate
+	  const dp_tree *my_head = extract_hd( it.first );
+	  if ( my_head ){
+	    //      cerr << "TEMP ROOT=" << my_head << endl;
+	    pos = my_head->word_index;
+	    rel = "ROOT";
+	    dep = 0;
+	  }
+	  else {
+	    continue;
+	  }
+	}
+	else {
+	  continue;
+	  // ignore this
+	}
+      }
+      else {
+	pos = it.first->word_index;
+	rel = "punct";
+	dep = it.first->begin;
+#ifdef DEBUG_EXTRACT
+	cerr << "A match[" << pos << "] " << rel << " " << dep << endl;
+#endif
+      }
+    }
+    else if ( it.first->word.empty() ){
+      // not a word but an aggregate
+      const dp_tree *my_head = extract_hd( it.first );
+      //      cerr << "TEMP ROOT=" << my_head << endl;
+      pos = my_head->word_index;
+      rel = it.first->rel;
+      dep = it.second->word_index;
+#ifdef DEBUG_EXTRACT
+      cerr << "B match[" << pos << "] " << rel << " " << dep << endl;
+#endif
+    }
+    else if ( it.first->rel == "hd"
+	      || it.first->rel == "crd" ){
+      if ( it.second->rel == "--" ){
+	pos = it.first->word_index;
+	rel = "ROOT";
+	dep = 0;
+#ifdef DEBUG_EXTRACT
+	cerr << "C match[" << pos << "] " << rel << " " << dep << endl;
+#endif
+      }
+      else {
+	pos = it.first->word_index;
+	rel = it.second->rel;
+	dep = it.second->end;
+#ifdef DEBUG_EXTRACT
+	cerr << "D match[" << pos << "] " << rel << " " << dep << endl;
+#endif
+      }
+    }
+    else {
+      pos = it.first->word_index;
+      rel = it.first->rel;
+      dep = it.second->word_index;
+#ifdef DEBUG_EXTRACT
+      cerr << "E match[" << pos << "] " << rel << " " << dep << endl;
+#endif
+    }
+    if ( result[pos].deprel.empty() ){
+#ifdef DEBUG_EXTRACT
+      cerr << "store[" << pos << "] " << rel << " " << dep << endl;
+#endif
+      parsrel tmp;
+      tmp.head = dep;
+      tmp.deprel = rel;
+      result[pos] = tmp;
+    }
+  }
+  return result;
+}
+
+vector<parsrel> extract_dp( xmlDoc *alp_doc ){
   string txtfile = "/tmp/debug.xml";
   xmlSaveFormatFileEnc( txtfile.c_str(), alp_doc, "UTF8", 1 );
   xmlNode *top_node = TiCC::xPath( alp_doc, "//node[@rel='top']" );
@@ -326,12 +352,41 @@ vector<pair<string,int>> extract_dp( xmlDoc *alp_doc, int sent_len ){
   dp = resolve_mwus( dp );
   cerr << endl << "done resolving, dp nodes:" << endl;
   print_nodes( 0, dp );
-  vector<pair<string,int>> result(sent_len);
+  list<pair<const dp_tree*,const dp_tree*>> result;
   if ( dp->rel == "top" ){
-    extract_dp( dp, result );
+    extract_dependencies( result, dp, 0 );
+    // cerr << "found dependencies: "<< endl;
+    // for ( const auto& it : result ){
+    //   cerr << it.first << " " << it.second << endl;
+    // }
   }
   else {
     cerr << "PANIEK!, geen top node" << endl;
   }
-  return result;
+  return extract(result);
+}
+
+vector<parsrel> alpino_server_parse( frog_data& fd ){
+  string host = "localhost"; // config.lookUp( "host", "alpino" );
+  string port = "8004"; // config.lookUp( "port", "alpino" );
+  Sockets::ClientSocket client;
+  if ( !client.connect( host, port ) ){
+    cerr << "failed to open Alpino connection: "<< host << ":" << port << endl;
+    cerr << "Reason: " << client.getMessage() << endl;
+    exit( EXIT_FAILURE );
+  }
+  //  cerr << "start input loop" << endl;
+  string txt = fd.sentence();
+  client.write( txt + "\n\n" );
+  string result;
+  string s;
+  while ( client.read(s) ){
+    result += s + "\n";
+  }
+#ifdef DEBUG_ALPINO
+  cerr << "received data [" << result << "]" << endl;
+#endif
+  xmlDoc *doc = xmlReadMemory( result.c_str(), result.length(),
+			       0, 0, XML_PARSE_NOBLANKS );
+  return extract_dp(doc);
 }

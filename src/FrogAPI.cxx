@@ -1245,57 +1245,59 @@ void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
   /// This done in a backward compatible manor to older Frog versions
   ///
   os << fd.word << Tab;
-  if ( options.doLemma ){
-    if ( !fd.lemmas.empty() ){
-      os << fd.lemmas[0];
+  if ( !options.doAlpino ){
+    if ( options.doLemma ){
+      if ( !fd.lemmas.empty() ){
+	os << fd.lemmas[0];
+      }
+      else {
+	os << Tab;
+      }
     }
     else {
       os << Tab;
     }
-  }
-  else {
     os << Tab;
-  }
-  os << Tab;
-  if ( options.doMorph ){
-    if ( fd.morphs.empty() ){
-      if ( !fd.deep_morph_string.empty() ){
-	os << fd.deep_morph_string << Tab;
-	if ( fd.compound_string == "0"  ){
-	  os << "0";
+    if ( options.doMorph ){
+      if ( fd.morphs.empty() ){
+	if ( !fd.deep_morph_string.empty() ){
+	  os << fd.deep_morph_string << Tab;
+	  if ( fd.compound_string == "0"  ){
+	    os << "0";
+	  }
+	  else {
+	    os << fd.compound_string + "-compound";
+	  }
 	}
-	else {
-	  os << fd.compound_string + "-compound";
-	}
+      }
+      else {
+	os << fd.morph_string;
+      }
+    }
+    if ( options.doTagger ){
+      if ( fd.tag.empty() ){
+	os << Tab << Tab << fixed << showpoint << std::setprecision(6) << 1.0;
+      }
+      else {
+	os << Tab << fd.tag << Tab
+	   << fixed << showpoint << std::setprecision(6) << fd.tag_confidence;
       }
     }
     else {
-      os << fd.morph_string;
+      os << Tab << Tab << Tab;
     }
-  }
-  if ( options.doTagger ){
-    if ( fd.tag.empty() ){
-      os << Tab << Tab << fixed << showpoint << std::setprecision(6) << 1.0;
+    if ( options.doNER ){
+      os << Tab << TiCC::uppercase(fd.ner_tag);
     }
     else {
-      os << Tab << fd.tag << Tab
-	 << fixed << showpoint << std::setprecision(6) << fd.tag_confidence;
+      os << Tab << Tab;
     }
-  }
-  else {
-    os << Tab << Tab << Tab;
-  }
-  if ( options.doNER ){
-    os << Tab << TiCC::uppercase(fd.ner_tag);
-  }
-  else {
-    os << Tab << Tab;
-  }
-  if ( options.doIOB ){
-    os << Tab << fd.iob_tag;
-  }
-  else {
-    os << Tab << Tab;
+    if ( options.doIOB ){
+      os << Tab << fd.iob_tag;
+    }
+    else {
+      os << Tab << Tab;
+    }
   }
   if ( options.doParse ){
     if ( fd.parse_index == -1 ){

@@ -36,6 +36,7 @@
 #include <vector>
 #include <set>
 #include <libxml/tree.h>
+#include "frog/ckyparser.h"
 
 class frog_data;
 
@@ -53,10 +54,6 @@ struct dp_tree {
 
 std::ostream& operator<<( std::ostream& os, const dp_tree *node );
 
-xmlDoc *alpino_server_parse( frog_data& fd );
-
-void print_nodes( int indent, const dp_tree *store );
-
-std::vector<std::pair<std::string,int>> extract_dp( xmlDoc *, int );
+std::vector<parsrel> alpino_server_parse( frog_data& fd );
 
 #endif
