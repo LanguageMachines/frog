@@ -47,7 +47,7 @@ using namespace std;
 using TiCC::operator<<;
 
 //#define DEBUG_ALPIN
-//#define DEBUG_MWU
+#define DEBUG_MWU
 //#define DEBUG_EXTRACT
 
 ostream& operator<<( ostream& os, const dp_tree *node ){
@@ -164,7 +164,6 @@ dp_tree *resolve_mwus( dp_tree *in,
       tmp = tmp->next;
       while ( tmp ){
 	++count;
-	++restart;
 	pnt->word += "_" + tmp->word;
 	tmp = tmp->next;
       }
@@ -172,11 +171,11 @@ dp_tree *resolve_mwus( dp_tree *in,
       pnt->link = 0;
       pnt->end = pnt->begin+1;
       compensate = count;
-      restart += count;
-      fd.mwus[tmp->word_index-1] = tmp->word_index + count;
+      restart = pnt->end;
+      fd.mwus[tmp->word_index-1] = tmp->word_index + count-1;
       delete tmp;
     }
-    else if ( pnt->begin <= restart ){
+    else if ( pnt->begin < restart ){
       // ignore?
     }
     else {
@@ -187,7 +186,6 @@ dp_tree *resolve_mwus( dp_tree *in,
       }
     }
     pnt->link = resolve_mwus( pnt->link, compensate, restart, fd );
-    ++restart;
     pnt = pnt->next;
   }
   return result;
@@ -304,8 +302,8 @@ vector<parsrel> extract(list<pair<const dp_tree*,const dp_tree*>>& l ){
       const dp_tree *my_head = extract_hd( it.first );
       //      cerr << "TEMP ROOT=" << my_head << endl;
       if ( !my_head ){
-	cerr << "PANIC" << endl;
-	pos = 0;
+	//	cerr << "PANIC" << it << endl;
+	pos = -1;
       }
       else {
 	pos = my_head->word_index;
@@ -344,7 +342,7 @@ vector<parsrel> extract(list<pair<const dp_tree*,const dp_tree*>>& l ){
       cerr << "E match[" << pos << "] " << rel << " " << dep << endl;
 #endif
     }
-    if ( result[pos].deprel.empty() ){
+    if ( pos >= 0 && result[pos].deprel.empty() ){
 #ifdef DEBUG_EXTRACT
       cerr << "store[" << pos << "] " << rel << " " << dep << endl;
 #endif

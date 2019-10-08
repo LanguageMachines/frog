@@ -1076,7 +1076,7 @@ void appendParseResult( frog_data& fd,
   }
 }
 
-//#define DEBUG_ALPINO
+#define DEBUG_ALPINO
 
 void Parser::Parse( frog_data& fd, TimerBlock& timers ){
   timers.parseTimer.start();
