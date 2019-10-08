@@ -299,6 +299,10 @@ bool parse_args( TiCC::CL_Options& Opts,
       options.doMorph = false;
     }
     if ( skip.find_first_of("mM") != string::npos ){
+      if ( options.doAlpino ){
+	LOG << "option skip=m conflicts with --alpino" << endl;
+	return false;
+      }
       options.doMwu = false;
     }
     if ( skip.find_first_of("cC") != string::npos ){
@@ -311,9 +315,13 @@ bool parse_args( TiCC::CL_Options& Opts,
       options.doTagger = false;
     }
     if ( skip.find_first_of("pP") != string::npos ){
+      if ( options.doAlpino ){
+	LOG << "option skip=p conflicts with --alpino" << endl;
+	return false;
+      }
       options.doParse = false;
     }
-    else if ( !options.doMwu ){
+    else if ( !options.doMwu && options.doParse ){
       LOG << " Parser disabled, because MWU is deselected" << endl;
       options.doParse = false;
     }
@@ -341,6 +349,8 @@ bool parse_args( TiCC::CL_Options& Opts,
   options.doServer = Opts.extract('S', options.listenport );
   options.doAlpino = Opts.extract("alpino");
   if ( options.doAlpino ){
+    options.doParse = false;
+    options.doMwu = false;
     configuration.setatt( "alpino", "true", "parser" );
   }
 

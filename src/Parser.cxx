@@ -58,6 +58,10 @@ using namespace nlohmann;
 #define LOG *TiCC::Log(errLog)
 #define DBG *TiCC::Dbg(dbgLog)
 
+const string alpino_tagset = "http://ilk.uvt.nl/folia/sets/alpino-parse-nl";
+const string alpino_mwu_tagset = "http://ilk.uvt.nl/folia/sets/alpino-mwu-nl";
+
+
 struct parseData {
   void clear() { words.clear(); heads.clear(); mods.clear(); mwus.clear(); }
   vector<string> words;
@@ -833,6 +837,31 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
 }
 
 
+void Parser::add_alpino_provenance( folia::Document& doc,
+				    folia::processor *main ) const {
+  string _label = "alpino-parser";
+  if ( !main ){
+    throw logic_error( "Parser::add_alpino_provenance() without arguments." );
+  }
+  folia::KWargs args;
+  args["name"] = _label;
+  args["generate_id"] = "auto()";
+  args["version"] = _version;
+  args["begindatetime"] = "now()";
+  folia::processor *proc = doc.add_processor( args, main );
+  args.clear();
+  args["processor"] = proc->id();
+  doc.declare( folia::AnnotationType::DEPENDENCY, alpino_tagset, args );
+  args["name"] = "alpino-mwu";
+  args["generate_id"] = "auto()";
+  args["version"] = _version;
+  args["begindatetime"] = "now()";
+  proc = doc.add_processor( args, main );
+  args.clear();
+  args["processor"] = proc->id();
+  doc.declare( folia::AnnotationType::ENTITY, alpino_mwu_tagset, args );
+}
+
 void Parser::add_provenance( folia::Document& doc, folia::processor *main ) const {
   string _label = "dep-parser";
   if ( !main ){
@@ -1039,6 +1068,8 @@ void appendParseResult( frog_data& fd,
     nums.push_back( it.head );
     roles.push_back( it.deprel );
   }
+  // cerr << "NUMS=" << nums << endl;
+  // cerr << "roles=" << roles << endl;
   for ( size_t i = 0; i < nums.size(); ++i ){
     fd.mw_units[i].parse_index = nums[i];
     fd.mw_units[i].parse_role = roles[i];
@@ -1085,6 +1116,7 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
 #ifdef DEBUG_ALPINO
     cerr << "NA appending:" << endl << fd << endl;
 #endif
+    timers.parseTimer.stop();
     // we are already done!
     return;
   }
@@ -1146,6 +1178,44 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
   timers.parseTimer.stop();
 }
 
+void Parser::add_alpino_mwu( const frog_data& fd,
+			     const vector<folia::Word*>& wv ) const {
+  folia::Sentence *s = wv[0]->sentence();
+  folia::KWargs args;
+  if ( !s->id().empty() ){
+    args["generate_id"] = s->id();
+  }
+  args["set"] = alpino_mwu_tagset;
+  folia::EntitiesLayer *el;
+#pragma omp critical (foliaupdate)
+  {
+    el = new folia::EntitiesLayer( args, s->doc() );
+    s->append( el );
+  }
+  for ( const auto& mwu : fd.mwus ){
+    if ( !el->id().empty() ){
+      args["generate_id"] = el->id();
+    }
+    if ( textclass != "current" ){
+      args["textclass"] = textclass;
+    }
+#pragma omp critical (foliaupdate)
+    {
+      folia::Entity *e = new folia::Entity( args, s->doc() );
+      el->append( e );
+      for ( size_t pos = mwu.first; pos <= mwu.second; ++pos ){
+	e->append( wv[pos] );
+      }
+    }
+  }
+}
+
+void Parser::add_alpino_result( const frog_data& fd,
+				const vector<folia::Word*>& wv ) const {
+  add_result( fd, wv );
+  add_alpino_mwu( fd, wv );
+}
+
 void Parser::add_result( const frog_data& fd,
 			 const vector<folia::Word*>& wv ) const {
   //  DBG << "Parser::add_result:" << endl << fd << endl;
@@ -1154,7 +1224,12 @@ void Parser::add_result( const frog_data& fd,
   if ( !s->id().empty() ){
     args["generate_id"] = s->id();
   }
-  args["set"] = getTagset();
+  if ( _do_alpino ){
+    args["set"] = alpino_tagset;
+  }
+  else {
+    args["set"] = getTagset();
+  }
   // if ( textclass != "current" ){
   //   args["textclass"] = textclass;
   // }
@@ -1170,16 +1245,24 @@ void Parser::add_result( const frog_data& fd,
       if ( textclass != "current" ){
 	args["textclass"] = textclass;
       }
-      args["set"] = getTagset();
+      if ( _do_alpino ){
+	args["set"] = alpino_tagset;
+      }
+      else {
+	args["set"] = getTagset();
+      }
       folia::Dependency *e = new folia::Dependency( args, s->doc() );
       el->append( e );
       args.clear();
       // if ( textclass != "current" ){
       // 	args["textclass"] = textclass;
       // }
+      //      LOG << "wv.size=" << wv.size() << endl;
       folia::Headspan *dh = new folia::Headspan( args );
       size_t head_index = fd.mw_units[pos].parse_index-1;
+      //      LOG << "head_index=" << head_index << endl;
       for ( auto const& i : fd.mw_units[head_index].parts ){
+	//	LOG << "i=" << i << endl;
 	dh->append( wv[i] );
       }
       e->append( dh );

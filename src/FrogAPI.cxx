@@ -297,7 +297,11 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	    }
 	  }
 	}
-	if ( stat && options.doMwu ){
+	if ( stat && options.doAlpino ){
+	  myParser = new Parser(theErrLog,theDbgLog);
+	  stat = myParser->init( configuration );
+	}
+	else if ( stat && options.doMwu ){
 	  myMwu = new Mwu(theErrLog,theDbgLog);
 	  stat = myMwu->init( configuration );
 	  if ( stat && options.doParse ){
@@ -438,7 +442,21 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       }
 #pragma omp section
       {
-	if ( options.doMwu ){
+	if ( options.doAlpino ){
+	  TiCC::Timer initTimer;
+	  initTimer.start();
+	  try {
+	    myParser = new Parser( theErrLog, theDbgLog );
+	    parStat = myParser->init( configuration );
+	    initTimer.stop();
+	    LOG << "init Parse took: " << initTimer << endl;
+	  }
+	  catch ( const exception& e ){
+	    parWhat = e.what();
+	    parStat = false;
+	  }
+	}
+	else if ( options.doMwu ){
 	  try {
 	    myMwu = new Mwu( theErrLog, theDbgLog );
 	    mwuStat = myMwu->init( configuration );
@@ -549,7 +567,10 @@ folia::processor *FrogAPI::add_provenance( folia::Document& doc ) const {
   if ( options.doMwu ){
     myMwu->add_provenance( doc, proc );
   }
-  if ( options.doParse ){
+  if ( options.doAlpino ){
+    myParser->add_alpino_provenance( doc, proc );
+  }
+  else if ( options.doParse ){
     myParser->add_provenance( doc, proc );
   }
   return proc;
@@ -627,7 +648,16 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     if ( options.doNER ){
       myNERTagger->add_result( fd, wv );
     }
-    if ( options.doParse ){
+    if ( options.doAlpino ){
+      if ( options.maxParserTokens != 0
+	   && fd.size() > options.maxParserTokens ){
+	DBG << "no parse results added. sentence too long" << endl;
+      }
+      else {
+	myParser->add_alpino_result( fd, wv );
+      }
+    }
+    else if ( options.doParse ){
       if ( options.maxParserTokens != 0
 	   && fd.size() > options.maxParserTokens ){
 	DBG << "no parse results added. sentence too long" << endl;
@@ -721,7 +751,16 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
     if ( options.doMwu && !fd.mwus.empty() ){
       myMwu->add_result( fd, wv );
     }
-    if ( options.doParse && wv.size() > 1 ){
+    if ( options.doAlpino ){
+      if ( options.maxParserTokens != 0
+	   && wv.size() > options.maxParserTokens ){
+	DBG << "no parse results added. sentence too long" << endl;
+      }
+      else {
+	myParser->add_alpino_result( fd, wv );
+      }
+    }
+    else if ( options.doParse && wv.size() > 1 ){
       if ( options.maxParserTokens != 0
 	   && wv.size() > options.maxParserTokens ){
 	DBG << "no parse results added. sentence too long" << endl;
@@ -1174,15 +1213,14 @@ frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
     if ( !all_well ){
       throw runtime_error( exs );
     }
-    if ( options.doMwu && !options.doAlpino ){
-      // when using Alpino, we use the MWU's as Alpino points them out
+    if ( options.doMwu ){
       if ( !sentence.empty() ){
 	timers.mwuTimer.start();
 	myMwu->Classify( sentence );
 	timers.mwuTimer.stop();
       }
     }
-    if ( options.doParse ){
+    if ( options.doAlpino || options.doParse ){
       if ( options.maxParserTokens == 0
 	   || sentence.size() <= options.maxParserTokens ){
 	myParser->Parse( sentence, timers );
@@ -1298,7 +1336,7 @@ void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
   else {
     os << Tab << Tab;
   }
-  if ( options.doParse ){
+  if ( options.doParse || options.doAlpino ){
     if ( fd.parse_index == -1 ){
       os << Tab << "0" << Tab << "ROOT"; // bit strange, but backward compatible
     }
@@ -1769,7 +1807,11 @@ folia::Document *FrogAPI::FrogFile( const string& infilename,
     if ( options.doMwu ){
       LOG << "MWU resolving took: " << timers.mwuTimer << endl;
     }
-    if ( options.doParse ){
+    if ( options.doAlpino ){
+      LOG << "Parsing (prepare) took: " << timers.prepareTimer << endl;
+      LOG << "Parsing (total)   took: " << timers.parseTimer << endl;
+    }
+    else if ( options.doParse ){
       LOG << "Parsing (prepare) took: " << timers.prepareTimer << endl;
       LOG << "Parsing (pairs)   took: " << timers.pairsTimer << endl;
       LOG << "Parsing (rels)    took: " << timers.relsTimer << endl;

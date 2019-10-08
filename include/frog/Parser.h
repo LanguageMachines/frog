@@ -64,10 +64,15 @@ class Parser {
   ~Parser();
   bool init( const TiCC::Configuration& );
   void add_provenance( folia::Document& doc, folia::processor * ) const;
+  void add_alpino_provenance( folia::Document& doc, folia::processor * ) const;
   void Parse( frog_data&, TimerBlock& );
   parseData prepareParse( frog_data& );
   void add_result( const frog_data&,
 		   const std::vector<folia::Word*>& ) const;
+  void add_alpino_result( const frog_data&,
+			  const std::vector<folia::Word*>& ) const;
+  void add_alpino_mwu( const frog_data& fd,
+		       const std::vector<folia::Word*>& ) const;
 
   std::vector<std::string> createParserInstances( const parseData& );
   std::string getTagset() const { return dep_tagset; };

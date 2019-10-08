@@ -46,7 +46,9 @@ using namespace std;
 
 using TiCC::operator<<;
 
-//#define DEBUG_ALPINO
+//#define DEBUG_ALPIN
+//#define DEBUG_MWU
+//#define DEBUG_EXTRACT
 
 ostream& operator<<( ostream& os, const dp_tree *node ){
   if ( node ){
@@ -80,6 +82,9 @@ const dp_tree *extract_hd( const dp_tree *node ){
     else if ( pnt->rel == "crd" ){
       return pnt;
     }
+    else if ( pnt->rel == "cmp" ){
+      return pnt;
+    }
     pnt = pnt->next;
   }
   return 0;
@@ -111,13 +116,20 @@ dp_tree *parse_nodes( xmlNode *node ){
       dp_tree *parsed = parse_node( pnt );
       // cerr << "parsed ";
       // print_node( parsed );
-      if ( result == 0 ){
-	result = parsed;
-	last = result;
+      if ( parsed->begin+1 < parsed->end
+	   && pnt->children == NULL ){
+	// an aggregate with NO children.
+	// just leave it out
       }
       else {
-	last->next = parsed;
-	last = last->next;
+	if ( result == 0 ){
+	  result = parsed;
+	  last = result;
+	}
+	else {
+	  last->next = parsed;
+	  last = last->next;
+	}
       }
       if ( pnt->children ){
 	dp_tree *childs = parse_nodes( pnt->children );
@@ -128,8 +140,6 @@ dp_tree *parse_nodes( xmlNode *node ){
   }
   return result;
 }
-
-//#define DEBUG_MWU
 
 dp_tree *resolve_mwus( dp_tree *in,
 		       int& compensate,
@@ -163,7 +173,7 @@ dp_tree *resolve_mwus( dp_tree *in,
       pnt->end = pnt->begin+1;
       compensate = count;
       restart += count;
-      fd.mwus[tmp->word_index-1] = tmp->word_index + count-1;
+      fd.mwus[tmp->word_index-1] = tmp->word_index + count;
       delete tmp;
     }
     else if ( pnt->begin <= restart ){
@@ -177,6 +187,7 @@ dp_tree *resolve_mwus( dp_tree *in,
       }
     }
     pnt->link = resolve_mwus( pnt->link, compensate, restart, fd );
+    ++restart;
     pnt = pnt->next;
   }
   return result;
@@ -221,8 +232,6 @@ dp_tree *resolve_mwus( dp_tree *in, frog_data& fd ){
   }
   return in;
 }
-
-//#define DEBUG_EXTRACT
 
 void extract_dependencies( list<pair<const dp_tree*,const dp_tree*>>& result,
 			   const dp_tree *store,
@@ -308,7 +317,8 @@ vector<parsrel> extract(list<pair<const dp_tree*,const dp_tree*>>& l ){
       }
     }
     else if ( it.first->rel == "hd"
-	      || it.first->rel == "crd" ){
+	      || it.first->rel == "crd"
+	      || it.first->rel == "cmp" ){
       if ( it.second->rel == "--" ){
 	pos = it.first->word_index;
 	rel = "ROOT";
