@@ -247,6 +247,10 @@ bool Parser::init( const TiCC::Configuration& configuration ){
     textclass = "current";
   }
   bool happy = true;
+  if ( _do_alpino ){
+    isInit = happy;
+    return happy;
+  }
   if ( _host.empty() ){
     pairs = new Timbl::TimblAPI( pairsOptions );
     if ( pairs->Valid() ){
@@ -1076,7 +1080,7 @@ void appendParseResult( frog_data& fd,
   }
 }
 
-#define DEBUG_ALPINO
+//#define DEBUG_ALPINO
 
 void Parser::Parse( frog_data& fd, TimerBlock& timers ){
   timers.parseTimer.start();
@@ -1236,8 +1240,10 @@ void Parser::add_result( const frog_data& fd,
   folia::DependenciesLayer *el = new folia::DependenciesLayer( args, s->doc() );
   s->append( el );
   for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
+    //    DBG << "POS=" << pos << endl;
     string cls = fd.mw_units[pos].parse_role;
-    if ( cls != "ROOT" ){
+    int dep_id = fd.mw_units[pos].parse_index;
+    if ( cls != "ROOT" && dep_id != 0 ){
       if ( !el->id().empty() ){
 	args["generate_id"] = el->id();
       }
@@ -1259,10 +1265,11 @@ void Parser::add_result( const frog_data& fd,
       // }
       //      LOG << "wv.size=" << wv.size() << endl;
       folia::Headspan *dh = new folia::Headspan( args );
+      // DBG << "mw_units:" << fd.mw_units[pos] << endl;
       size_t head_index = fd.mw_units[pos].parse_index-1;
-      //      LOG << "head_index=" << head_index << endl;
+      // DBG << "head_index=" << head_index << endl;
       for ( auto const& i : fd.mw_units[head_index].parts ){
-	//	LOG << "i=" << i << endl;
+	// DBG << "i=" << i << endl;
 	dh->append( wv[i] );
       }
       e->append( dh );

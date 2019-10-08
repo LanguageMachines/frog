@@ -47,7 +47,7 @@ using namespace std;
 using TiCC::operator<<;
 
 //#define DEBUG_ALPIN
-#define DEBUG_MWU
+//#define DEBUG_MWU
 //#define DEBUG_EXTRACT
 
 ostream& operator<<( ostream& os, const dp_tree *node ){
