@@ -160,11 +160,11 @@ dp_tree *resolve_mwus( dp_tree *in,
       }
       tmp = pnt->link;
       pnt->link = 0;
-      delete tmp;
       pnt->end = pnt->begin+1;
       compensate = count;
       restart += count;
       fd.mwus[tmp->word_index-1] = tmp->word_index + count-1;
+      delete tmp;
     }
     else if ( pnt->begin <= restart ){
       // ignore?
