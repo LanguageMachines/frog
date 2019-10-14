@@ -178,9 +178,16 @@ void AlpinoParser::Parse( frog_data& fd, TimerBlock& timers ){
   cerr << "Testing Alpino parsing" << endl;
   cerr << "voor server_parse:" << endl << fd << endl;
 #endif
-  vector<parsrel> solution = alpino_server_parse( fd );
+  vector<parsrel> solution;
+  bool alpino_server = true;
+  if ( alpino_server ){
+    solution = alpino_server_parse( fd );
+  }
+  else {
+    solution = alpino_parse( fd );
+  }
 #ifdef DEBUG_ALPINO
-  cerr << "NA server_parse:" << endl << fd << endl;
+  cerr << "NA parse:" << endl << fd << endl;
   int count = 0;
   for( const auto& sol: solution ){
     if ( count == 0 ){
@@ -549,8 +556,8 @@ vector<parsrel> extract(list<pair<const dp_tree*,const dp_tree*>>& l ){
 
 vector<parsrel> extract_dp( xmlDoc *alp_doc,
 			    frog_data& fd ){
-  string txtfile = "/tmp/debug.xml";
-  xmlSaveFormatFileEnc( txtfile.c_str(), alp_doc, "UTF8", 1 );
+  // string txtfile = "/tmp/debug.xml";
+  // xmlSaveFormatFileEnc( txtfile.c_str(), alp_doc, "UTF8", 1 );
   xmlNode *top_node = TiCC::xPath( alp_doc, "//node[@rel='top']" );
   dp_tree *dp = parse_nodes( top_node );
 #if defined(DEBUG_EXTRACT) || defined(DEBUG_MWU)
@@ -582,12 +589,10 @@ vector<parsrel> extract_dp( xmlDoc *alp_doc,
   return pr;
 }
 
-vector<parsrel> alpino_server_parse( frog_data& fd ){
-  string host = "localhost"; // config.lookUp( "host", "alpino" );
-  string port = "8004"; // config.lookUp( "port", "alpino" );
+vector<parsrel> AlpinoParser::alpino_server_parse( frog_data& fd ){
   Sockets::ClientSocket client;
-  if ( !client.connect( host, port ) ){
-    cerr << "failed to open Alpino connection: "<< host << ":" << port << endl;
+  if ( !client.connect( _host, _port ) ){
+    cerr << "failed to open Alpino connection: "<< _host << ":" << _port << endl;
     cerr << "Reason: " << client.getMessage() << endl;
     exit( EXIT_FAILURE );
   }
@@ -607,4 +612,31 @@ vector<parsrel> alpino_server_parse( frog_data& fd ){
   xmlDoc *doc = xmlReadMemory( result.c_str(), result.length(),
 			       0, 0, XML_PARSE_NOBLANKS );
   return extract_dp(doc,fd);
+}
+
+vector<parsrel> AlpinoParser::alpino_parse( frog_data& fd ){
+#ifdef DEBUG_ALPINO
+  cerr << "calling Alpino input:" << fd.sentence() << endl;
+#endif
+  vector<parsrel> result;
+  string txt = fd.sentence();
+  string txt_file = tmpnam(0);
+  string tmp_dir = TiCC::dirname(txt_file)+"/";
+  txt_file = tmp_dir + "parse.txt";
+  ofstream os( txt_file );
+  os << txt;
+  os.close();
+  string parseCmd = "Alpino -veryfast -flag treebank " + tmp_dir +
+    " end_hook=xml -parse <  " + txt_file + " -notk > /dev/null 2>&1";
+  //  cerr << "run: " << parseCmd << endl;
+  int res = system( parseCmd.c_str() );
+  if ( res ){
+    cerr << "Alpino failed: RES = " << res << " : " << strerror(res) << endl;
+    return result;
+  }
+  remove( txt_file.c_str() );
+  string xmlfile = tmp_dir + "1.xml";
+  xmlDoc *xmldoc = xmlReadFile( xmlfile.c_str(), 0, XML_PARSE_NOBLANKS );
+  result = extract_dp(xmldoc,fd);
+  return result;
 }

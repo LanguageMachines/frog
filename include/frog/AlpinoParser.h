@@ -67,6 +67,9 @@ class AlpinoParser: public ParserBase {
 		   const std::vector<folia::Word*>& ) const;
   void add_mwus( const frog_data&,
 		 const std::vector<folia::Word*>& ) const;
+ private:
+  std::vector<parsrel> alpino_parse( frog_data& );
+  std::vector<parsrel> alpino_server_parse( frog_data& );
 };
 
 
