@@ -46,9 +46,201 @@ using namespace std;
 
 using TiCC::operator<<;
 
+#define LOG *TiCC::Log(errLog)
+#define DBG *TiCC::Dbg(dbgLog)
+
 //#define DEBUG_ALPIN
 //#define DEBUG_MWU
 //#define DEBUG_EXTRACT
+
+const string alpino_tagset = "http://ilk.uvt.nl/folia/sets/alpino-parse-nl";
+const string alpino_mwu_tagset = "http://ilk.uvt.nl/folia/sets/alpino-mwu-nl";
+
+void AlpinoParser::add_provenance( folia::Document& doc,
+				   folia::processor *main ) const {
+  string _label = "alpino-parser";
+  if ( !main ){
+    throw logic_error( "AlpinoParser::add_provenance() without arguments." );
+  }
+  folia::KWargs args;
+  args["name"] = _label;
+  args["generate_id"] = "auto()";
+  args["version"] = _version;
+  args["begindatetime"] = "now()";
+  folia::processor *proc = doc.add_processor( args, main );
+  args.clear();
+  args["processor"] = proc->id();
+  doc.declare( folia::AnnotationType::DEPENDENCY, alpino_tagset, args );
+  args["name"] = "alpino-mwu";
+  args["generate_id"] = "auto()";
+  args["version"] = _version;
+  args["begindatetime"] = "now()";
+  proc = doc.add_processor( args, main );
+  args.clear();
+  args["processor"] = proc->id();
+  doc.declare( folia::AnnotationType::ENTITY, alpino_mwu_tagset, args );
+}
+
+
+bool AlpinoParser::init( const TiCC::Configuration& configuration ){
+  filter = 0;
+  bool problem = false;
+  LOG << "initiating alpino parser ... " << endl;
+  string cDir = configuration.configDir();
+  string val = configuration.lookUp( "debug", "parser" );
+  if ( !val.empty() ){
+    int level;
+    if ( TiCC::stringTo<int>( val, level ) ){
+      if ( level > 5 ){
+	dbgLog->setlevel( LogLevel::LogDebug );
+      }
+    }
+  }
+  val = configuration.lookUp( "version", "parser" );
+  if ( val.empty() ){
+    _version = "1.0";
+  }
+  else {
+    _version = val;
+  }
+  val = configuration.lookUp( "set", "parser" );
+  if ( val.empty()
+       || val == "http://ilk.uvt.nl/folia/sets/frog-depparse-nl" ){
+    // remove all remains of the frog dependency parser
+    dep_tagset = alpino_tagset;
+  }
+  else {
+    dep_tagset = val;
+  }
+  val = configuration.lookUp( "set", "tagger" );
+  if ( val.empty() ){
+    POS_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
+  }
+  else {
+    POS_tagset = val;
+  }
+  string charFile = configuration.lookUp( "char_filter_file", "tagger" );
+  if ( charFile.empty() )
+    charFile = configuration.lookUp( "char_filter_file" );
+  if ( !charFile.empty() ){
+    charFile = prefix( configuration.configDir(), charFile );
+    filter = new TiCC::UniFilter();
+    filter->fill( charFile );
+  }
+
+  val = configuration.lookUp( "alpino_host", "parser" );
+  if ( !val.empty() ){
+    // so using an external Alpino server
+    _host = val;
+    val = configuration.lookUp( "alpino_port", "parser" );
+    if ( !val.empty() ){
+      _port = val;
+    }
+    else {
+      LOG << "missing port option" << endl;
+      problem = true;
+    }
+  }
+  else {
+    LOG << "--alpino onlyworks for an alpino server!" << endl;
+    problem = true;
+  }
+  if ( problem ) {
+    return false;
+  }
+
+  string cls = configuration.lookUp( "outputclass" );
+  if ( !cls.empty() ){
+    textclass = cls;
+  }
+  else {
+    textclass = "current";
+  }
+  LOG << "using Alpino Parser on " << _host << ":" << _port << endl;
+  isInit = true;
+  return true;
+}
+
+//#define DEBUG_ALPINO
+
+void AlpinoParser::Parse( frog_data& fd, TimerBlock& timers ){
+  timers.parseTimer.start();
+  if ( !isInit ){
+    LOG << "Parser is not initialized! EXIT!" << endl;
+    throw runtime_error( "Parser is not initialized!" );
+  }
+  if ( fd.empty() ){
+    LOG << "unable to parse an analysis without words" << endl;
+    return;
+  }
+
+#ifdef DEBUG_ALPINO
+  cerr << "Testing Alpino parsing" << endl;
+  cerr << "voor server_parse:" << endl << fd << endl;
+#endif
+  vector<parsrel> solution = alpino_server_parse( fd );
+#ifdef DEBUG_ALPINO
+  cerr << "NA server_parse:" << endl << fd << endl;
+  int count = 0;
+  for( const auto& sol: solution ){
+    if ( count == 0 ){
+      ++count;
+      continue;
+    }
+    if ( sol.head == 0 && sol.deprel.empty() ){
+      ++count;
+      continue;
+    }
+    cerr << count << "\t" << fd.mw_units[count-1].word << "\t" << sol.head << "\t" << sol.deprel << endl;
+    ++count;
+  }
+  cerr << endl;
+#endif
+  appendParseResult( fd, solution );
+#ifdef DEBUG_ALPINO
+  cerr << "NA appending:" << endl << fd << endl;
+#endif
+  timers.parseTimer.stop();
+}
+
+void AlpinoParser::add_mwus( const frog_data& fd,
+			     const vector<folia::Word*>& wv ) const {
+  folia::Sentence *s = wv[0]->sentence();
+  folia::KWargs args;
+  if ( !s->id().empty() ){
+    args["generate_id"] = s->id();
+  }
+  args["set"] = alpino_mwu_tagset;
+  folia::EntitiesLayer *el;
+#pragma omp critical (foliaupdate)
+  {
+    el = new folia::EntitiesLayer( args, s->doc() );
+    s->append( el );
+  }
+  for ( const auto& mwu : fd.mwus ){
+    if ( !el->id().empty() ){
+      args["generate_id"] = el->id();
+    }
+    if ( textclass != "current" ){
+      args["textclass"] = textclass;
+    }
+#pragma omp critical (foliaupdate)
+    {
+      folia::Entity *e = new folia::Entity( args, s->doc() );
+      el->append( e );
+      for ( size_t pos = mwu.first; pos <= mwu.second; ++pos ){
+	e->append( wv[pos] );
+      }
+    }
+  }
+}
+
+void AlpinoParser::add_result( const frog_data& fd,
+			 const vector<folia::Word*>& wv ) const {
+  ParserBase::add_result( fd, wv );
+  add_mwus( fd, wv );
+}
+
 
 ostream& operator<<( ostream& os, const dp_tree *node ){
   if ( node ){

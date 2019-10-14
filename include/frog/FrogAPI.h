@@ -50,7 +50,7 @@ class UctoTokenizer;
 class Mbma;
 class Mblem;
 class Mwu;
-class Parser;
+class ParserBase;
 class CGNTagger;
 class IOBTagger;
 class NERTagger;
@@ -169,7 +169,7 @@ class FrogAPI {
   Mbma *myMbma;
   Mblem *myMblem;
   Mwu *myMwu;
-  Parser *myParser;
+  ParserBase *myParser;
   CGNTagger *myCGNTagger;
   IOBTagger *myIOBTagger;
   NERTagger *myNERTagger;

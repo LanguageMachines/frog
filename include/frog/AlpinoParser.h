@@ -36,7 +36,7 @@
 #include <vector>
 #include <set>
 #include <libxml/tree.h>
-#include "frog/ckyparser.h"
+#include "frog/Parser.h"
 
 class frog_data;
 
@@ -55,5 +55,19 @@ struct dp_tree {
 std::ostream& operator<<( std::ostream& os, const dp_tree *node );
 
 std::vector<parsrel> alpino_server_parse( frog_data& fd );
+
+class AlpinoParser: public ParserBase {
+ public:
+  explicit AlpinoParser( TiCC::LogStream* errlog, TiCC::LogStream* dbglog ):
+  ParserBase( errlog, dbglog ){};
+  bool init( const TiCC::Configuration& );
+  void add_provenance( folia::Document& doc, folia::processor * ) const;
+  void Parse( frog_data&, TimerBlock& );
+  void add_result( const frog_data&,
+		   const std::vector<folia::Word*>& ) const;
+  void add_mwus( const frog_data&,
+		 const std::vector<folia::Word*>& ) const;
+};
+
 
 #endif

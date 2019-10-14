@@ -79,6 +79,7 @@
 #include "frog/iob_tagger_mod.h"
 #include "frog/ner_tagger_mod.h"
 #include "frog/Parser.h"
+#include "frog/AlpinoParser.h"
 
 
 using namespace std;
@@ -298,7 +299,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	  }
 	}
 	if ( stat && options.doAlpino ){
-	  myParser = new Parser(theErrLog,theDbgLog);
+	  myParser = new AlpinoParser(theErrLog,theDbgLog);
 	  stat = myParser->init( configuration );
 	}
 	else if ( stat && options.doMwu ){
@@ -446,7 +447,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	  TiCC::Timer initTimer;
 	  initTimer.start();
 	  try {
-	    myParser = new Parser( theErrLog, theDbgLog );
+	    myParser = new AlpinoParser( theErrLog, theDbgLog );
 	    parStat = myParser->init( configuration );
 	    initTimer.stop();
 	    LOG << "init Parse took: " << initTimer << endl;
@@ -568,7 +569,7 @@ folia::processor *FrogAPI::add_provenance( folia::Document& doc ) const {
     myMwu->add_provenance( doc, proc );
   }
   if ( options.doAlpino ){
-    myParser->add_alpino_provenance( doc, proc );
+    myParser->add_provenance( doc, proc );
   }
   else if ( options.doParse ){
     myParser->add_provenance( doc, proc );
@@ -648,16 +649,8 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     if ( options.doNER ){
       myNERTagger->add_result( fd, wv );
     }
-    if ( options.doAlpino ){
-      if ( options.maxParserTokens != 0
-	   && fd.size() > options.maxParserTokens ){
-	DBG << "no parse results added. sentence too long" << endl;
-      }
-      else {
-	myParser->add_alpino_result( fd, wv );
-      }
-    }
-    else if ( options.doParse ){
+    if ( options.doAlpino
+	 || options.doParse ){
       if ( options.maxParserTokens != 0
 	   && fd.size() > options.maxParserTokens ){
 	DBG << "no parse results added. sentence too long" << endl;
@@ -751,16 +744,9 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
     if ( options.doMwu && !fd.mwus.empty() ){
       myMwu->add_result( fd, wv );
     }
-    if ( options.doAlpino ){
-      if ( options.maxParserTokens != 0
-	   && wv.size() > options.maxParserTokens ){
-	DBG << "no parse results added. sentence too long" << endl;
-      }
-      else {
-	myParser->add_alpino_result( fd, wv );
-      }
-    }
-    else if ( options.doParse && wv.size() > 1 ){
+    if ( ( options.doAlpino
+	   || options.doParse )
+	 && wv.size() > 1 ){
       if ( options.maxParserTokens != 0
 	   && wv.size() > options.maxParserTokens ){
 	DBG << "no parse results added. sentence too long" << endl;

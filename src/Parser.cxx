@@ -48,7 +48,7 @@
 #include "timbl/TimblAPI.h"
 #include "frog/Frog-util.h"
 #include "frog/csidp.h"
-#include "frog/AlpinoParser.h"
+#include "frog/Parser.h"
 
 using namespace std;
 
@@ -57,10 +57,6 @@ using namespace nlohmann;
 
 #define LOG *TiCC::Log(errLog)
 #define DBG *TiCC::Dbg(dbgLog)
-
-const string alpino_tagset = "http://ilk.uvt.nl/folia/sets/alpino-parse-nl";
-const string alpino_mwu_tagset = "http://ilk.uvt.nl/folia/sets/alpino-mwu-nl";
-
 
 struct parseData {
   void clear() { words.clear(); heads.clear(); mods.clear(); mwus.clear(); }
@@ -141,10 +137,6 @@ bool Parser::init( const TiCC::Configuration& configuration ){
     charFile = prefix( configuration.configDir(), charFile );
     filter = new TiCC::UniFilter();
     filter->fill( charFile );
-  }
-  val = configuration.lookUp( "alpino", "parser" );
-  if ( !val.empty() ){
-    _do_alpino = true;
   }
   val = configuration.lookUp( "maxDepSpan", "parser" );
   if ( !val.empty() ){
@@ -247,10 +239,6 @@ bool Parser::init( const TiCC::Configuration& configuration ){
     textclass = "current";
   }
   bool happy = true;
-  if ( _do_alpino ){
-    isInit = happy;
-    return happy;
-  }
   if ( _host.empty() ){
     pairs = new Timbl::TimblAPI( pairsOptions );
     if ( pairs->Valid() ){
@@ -840,32 +828,6 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
   return r_instances;
 }
 
-
-void Parser::add_alpino_provenance( folia::Document& doc,
-				    folia::processor *main ) const {
-  string _label = "alpino-parser";
-  if ( !main ){
-    throw logic_error( "Parser::add_alpino_provenance() without arguments." );
-  }
-  folia::KWargs args;
-  args["name"] = _label;
-  args["generate_id"] = "auto()";
-  args["version"] = _version;
-  args["begindatetime"] = "now()";
-  folia::processor *proc = doc.add_processor( args, main );
-  args.clear();
-  args["processor"] = proc->id();
-  doc.declare( folia::AnnotationType::DEPENDENCY, alpino_tagset, args );
-  args["name"] = "alpino-mwu";
-  args["generate_id"] = "auto()";
-  args["version"] = _version;
-  args["begindatetime"] = "now()";
-  proc = doc.add_processor( args, main );
-  args.clear();
-  args["processor"] = proc->id();
-  doc.declare( folia::AnnotationType::ENTITY, alpino_mwu_tagset, args );
-}
-
 void Parser::add_provenance( folia::Document& doc, folia::processor *main ) const {
   string _label = "dep-parser";
   if ( !main ){
@@ -1080,8 +1042,6 @@ void appendParseResult( frog_data& fd,
   }
 }
 
-//#define DEBUG_ALPINO
-
 void Parser::Parse( frog_data& fd, TimerBlock& timers ){
   timers.parseTimer.start();
   if ( !isInit ){
@@ -1093,37 +1053,6 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
     return;
   }
 
-  if ( _do_alpino ){
-#ifdef DEBUG_ALPINO
-    cerr << "Testing Alpino parsing" << endl;
-    cerr << "voor server_parse:" << endl << fd << endl;
-#endif
-    vector<parsrel> solution = alpino_server_parse( fd );
-#ifdef DEBUG_ALPINO
-    cerr << "NA server_parse:" << endl << fd << endl;
-    int count = 0;
-    for( const auto& sol: solution ){
-      if ( count == 0 ){
-     	++count;
-	continue;
-      }
-      if ( sol.head == 0 && sol.deprel.empty() ){
-     	++count;
-     	continue;
-      }
-      cerr << count << "\t" << fd.mw_units[count-1].word << "\t" << sol.head << "\t" << sol.deprel << endl;
-      ++count;
-    }
-    cerr << endl;
-#endif
-    appendParseResult( fd, solution );
-#ifdef DEBUG_ALPINO
-    cerr << "NA appending:" << endl << fd << endl;
-#endif
-    timers.parseTimer.stop();
-    // we are already done!
-    return;
-  }
   timers.prepareTimer.start();
   parseData pd = prepareParse( fd );
   timers.prepareTimer.stop();
@@ -1182,58 +1111,15 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
   timers.parseTimer.stop();
 }
 
-void Parser::add_alpino_mwu( const frog_data& fd,
+void ParserBase::add_result( const frog_data& fd,
 			     const vector<folia::Word*>& wv ) const {
-  folia::Sentence *s = wv[0]->sentence();
-  folia::KWargs args;
-  if ( !s->id().empty() ){
-    args["generate_id"] = s->id();
-  }
-  args["set"] = alpino_mwu_tagset;
-  folia::EntitiesLayer *el;
-#pragma omp critical (foliaupdate)
-  {
-    el = new folia::EntitiesLayer( args, s->doc() );
-    s->append( el );
-  }
-  for ( const auto& mwu : fd.mwus ){
-    if ( !el->id().empty() ){
-      args["generate_id"] = el->id();
-    }
-    if ( textclass != "current" ){
-      args["textclass"] = textclass;
-    }
-#pragma omp critical (foliaupdate)
-    {
-      folia::Entity *e = new folia::Entity( args, s->doc() );
-      el->append( e );
-      for ( size_t pos = mwu.first; pos <= mwu.second; ++pos ){
-	e->append( wv[pos] );
-      }
-    }
-  }
-}
-
-void Parser::add_alpino_result( const frog_data& fd,
-				const vector<folia::Word*>& wv ) const {
-  add_result( fd, wv );
-  add_alpino_mwu( fd, wv );
-}
-
-void Parser::add_result( const frog_data& fd,
-			 const vector<folia::Word*>& wv ) const {
   //  DBG << "Parser::add_result:" << endl << fd << endl;
   folia::Sentence *s = wv[0]->sentence();
   folia::KWargs args;
   if ( !s->id().empty() ){
     args["generate_id"] = s->id();
   }
-  if ( _do_alpino ){
-    args["set"] = alpino_tagset;
-  }
-  else {
-    args["set"] = getTagset();
-  }
+  args["set"] = getTagset();
   // if ( textclass != "current" ){
   //   args["textclass"] = textclass;
   // }
@@ -1251,12 +1137,7 @@ void Parser::add_result( const frog_data& fd,
       if ( textclass != "current" ){
 	args["textclass"] = textclass;
       }
-      if ( _do_alpino ){
-	args["set"] = alpino_tagset;
-      }
-      else {
-	args["set"] = getTagset();
-      }
+      args["set"] = getTagset();
       folia::Dependency *e = new folia::Dependency( args, s->doc() );
       el->append( e );
       args.clear();
