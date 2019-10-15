@@ -86,7 +86,6 @@ bool AlpinoParser::init( const TiCC::Configuration& configuration ){
   filter = 0;
   bool problem = false;
   LOG << "initiating alpino parser ... " << endl;
-  string cDir = configuration.configDir();
   string val = configuration.lookUp( "debug", "parser" );
   if ( !val.empty() ){
     int level;
