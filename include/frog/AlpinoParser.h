@@ -59,7 +59,9 @@ std::vector<parsrel> alpino_server_parse( frog_data& fd );
 class AlpinoParser: public ParserBase {
  public:
   explicit AlpinoParser( TiCC::LogStream* errlog, TiCC::LogStream* dbglog ):
-  ParserBase( errlog, dbglog ){};
+  ParserBase( errlog, dbglog ),
+    _alpino_server(false)
+      {};
   bool init( const TiCC::Configuration& );
   void add_provenance( folia::Document& doc, folia::processor * ) const;
   void Parse( frog_data&, TimerBlock& );
@@ -70,6 +72,7 @@ class AlpinoParser: public ParserBase {
  private:
   std::vector<parsrel> alpino_parse( frog_data& );
   std::vector<parsrel> alpino_server_parse( frog_data& );
+  bool _alpino_server;
 };
 
 

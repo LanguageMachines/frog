@@ -141,9 +141,19 @@ bool AlpinoParser::init( const TiCC::Configuration& configuration ){
       problem = true;
     }
   }
+  val = configuration.lookUp( "alpinoserver", "parser" );
+  _alpino_server = ( val == "true" );
+  if ( _alpino_server ){
+    if ( _host.empty() ){
+      LOG << "missing 'alpino_host' value in configuration" << endl;
+      problem = true;
+    }
+    else {
+      LOG << "using Alpino Parser on " << _host << ":" << _port << endl;
+    }
+  }
   else {
-    LOG << "--alpino onlyworks for an alpino server!" << endl;
-    problem = true;
+    LOG << "using locally installed Alpino." << endl;
   }
   if ( problem ) {
     return false;
@@ -156,7 +166,6 @@ bool AlpinoParser::init( const TiCC::Configuration& configuration ){
   else {
     textclass = "current";
   }
-  LOG << "using Alpino Parser on " << _host << ":" << _port << endl;
   isInit = true;
   return true;
 }
@@ -179,12 +188,19 @@ void AlpinoParser::Parse( frog_data& fd, TimerBlock& timers ){
   cerr << "voor server_parse:" << endl << fd << endl;
 #endif
   vector<parsrel> solution;
-  bool alpino_server = true;
-  if ( alpino_server ){
+  if ( _alpino_server ){
     solution = alpino_server_parse( fd );
+    if ( solution.empty() ){
+      LOG << "parsing failed" << endl;
+      throw runtime_error( "Is the Alpino Parser running?" );
+    }
   }
   else {
     solution = alpino_parse( fd );
+    if ( solution.empty() ){
+      LOG << "parsing failed" << endl;
+      throw runtime_error( "Is the Alpino runtime installed?" );
+    }
   }
 #ifdef DEBUG_ALPINO
   cerr << "NA parse:" << endl << fd << endl;

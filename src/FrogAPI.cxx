@@ -119,6 +119,7 @@ FrogOptions::FrogOptions() {
   doXMLin =  false;
   doXMLout =  false;
   doKanon =  false;
+  doAlpinoServer = false;
   doAlpino =  false;
   test_API =  false;
   hide_timers = false;
@@ -568,10 +569,7 @@ folia::processor *FrogAPI::add_provenance( folia::Document& doc ) const {
   if ( options.doMwu ){
     myMwu->add_provenance( doc, proc );
   }
-  if ( options.doAlpino ){
-    myParser->add_provenance( doc, proc );
-  }
-  else if ( options.doParse ){
+  if ( options.doAlpino || options.doParse ){
     myParser->add_provenance( doc, proc );
   }
   return proc;

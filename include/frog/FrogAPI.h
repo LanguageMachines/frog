@@ -78,6 +78,7 @@ class FrogOptions {
   bool test_API;
   bool hide_timers;
   bool interactive;
+  bool doAlpinoServer;
   bool doAlpino;
   int numThreads;
   int debugFlag;

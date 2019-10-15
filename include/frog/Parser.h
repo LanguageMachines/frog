@@ -51,7 +51,7 @@ class timbl_result;
 class ParserBase {
  public:
   explicit ParserBase( TiCC::LogStream* errlog, TiCC::LogStream* dbglog ):
-    isInit( false ),
+  isInit( false ),
     filter( 0 )
       {
 	errLog = new TiCC::LogStream(errlog, "parser-");

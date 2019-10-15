@@ -300,7 +300,8 @@ bool parse_args( TiCC::CL_Options& Opts,
     }
     if ( skip.find_first_of("mM") != string::npos ){
       if ( options.doAlpino ){
-	LOG << "option skip=m conflicts with --alpino" << endl;
+	LOG << "option skip=m conflicts with --alpino or --alpinoserver"
+	    << endl;
 	return false;
       }
       options.doMwu = false;
@@ -316,7 +317,8 @@ bool parse_args( TiCC::CL_Options& Opts,
     }
     if ( skip.find_first_of("pP") != string::npos ){
       if ( options.doAlpino ){
-	LOG << "option skip=p conflicts with --alpino" << endl;
+	LOG << "option skip=p conflicts with --alpino or --alpinoserver"
+	    << endl;
 	return false;
       }
       options.doParse = false;
@@ -347,13 +349,21 @@ bool parse_args( TiCC::CL_Options& Opts,
     configuration.setatt( "ner_override", opt_val, "NER" );
   }
   options.doServer = Opts.extract('S', options.listenport );
-  options.doAlpino = Opts.extract("alpino");
+  options.doAlpinoServer = Opts.extract("alpinoserver");
+  if ( options.doAlpinoServer ){
+    if ( Opts.extract("alpino") ){
+      // ok, just ignore
+    }
+    options.doAlpino = true;
+    configuration.setatt( "alpinoserver", "true", "parser" );
+  }
+  else {
+    options.doAlpino = Opts.extract("alpino");
+  }
   if ( options.doAlpino ){
     options.doParse = false;
     options.doMwu = false;
-    configuration.setatt( "alpino", "true", "parser" );
   }
-
 #ifdef HAVE_OPENMP
   if ( options.doServer ) {
     // run in one thread in server mode, forking is too expensive for lots of small snippets
@@ -598,7 +608,7 @@ int main(int argc, char *argv[]) {
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
 			  "help,language:,retry,nostdout,ner-override:,"
 			  "debug:,keep-parser-files,version,threads:,alpino,"
-			  "override:,KANON,TESTAPI,debugfile:");
+			  "alpinoserver,override:,KANON,TESTAPI,debugfile:");
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
       // we already did show what we wanted.
