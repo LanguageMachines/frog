@@ -148,11 +148,32 @@ bool AlpinoParser::init( const TiCC::Configuration& configuration ){
       problem = true;
     }
     else {
-      LOG << "using Alpino Parser on " << _host << ":" << _port << endl;
+      string mess = check_server( _host, _port, "Alpino" );
+      if ( !mess.empty() ){
+	LOG << "FAILED to find a server for the Alpino parser:" << endl;
+	LOG << mess << endl;
+	LOG << "Alpino server not running??" << endl;
+	problem = true;
+      }
+      else {
+	LOG << "using Alpino Parser on " << _host << ":" << _port << endl;
+      }
     }
   }
   else {
-    LOG << "using locally installed Alpino." << endl;
+    string cmd = "which Alpino > /dev/null 2>&1";
+    int res = system( cmd.c_str() );
+    if ( res ){
+      string outline = "Cannot find Alpino executable!\n"
+	"possible solution:\n"
+	"export ALPINO_HOME=$HOME/Alpino\n"
+	"export PATH=$PATH:$ALPINO_HOME/bin\n";
+      LOG << outline << endl;
+      problem = true;
+    }
+    else {
+      LOG << "using locally installed Alpino." << endl;
+    }
   }
   if ( problem ) {
     return false;

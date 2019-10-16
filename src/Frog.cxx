@@ -118,7 +118,8 @@ void usage( ) {
        << "\t============= MODULE SELECTION ==========================================\n"
        << "\t --skip=[mptncla]    Skip Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"
        << "\t============= CONFIGURATION OPTIONS =====================================\n"
-       << "\t -c <filename>    Set configuration file (default " << FrogAPI::defaultConfigFile() << ")\n"
+       << "\t -c <filename> OR --config=<filename>\n"
+       << "\t\t Set configuration file (default " << FrogAPI::defaultConfigFile() << ")\n"
        << "\t --override <section>.<parameter>=<value>    Override a configuration option, can be used multiple times\n"
        << "\t --language <language-list>  Set the languages. e.g. --language=nld,eng,por"
        << "\t\t The first language in the list will be the default. (default dutch).\n"
@@ -191,7 +192,9 @@ bool parse_args( TiCC::CL_Options& Opts,
   }
   options.default_language = language;
   // override default config settings when a configfile is specified
-  Opts.extract( 'c',  configFileName );
+  if ( !Opts.extract( 'c',  configFileName ) ){
+    Opts.extract( "config",  configFileName );
+  }
   if ( configuration.fill( configFileName ) ){
     LOG << "config read from: " << configFileName << endl;
     string vers = configuration.lookUp( "version" );
@@ -603,7 +606,8 @@ int main(int argc, char *argv[]) {
   }
   try {
     TiCC::CL_Options Opts("c:e:o:t:T:x::X::nQhVd:S:",
-			  "textclass:,inputclass:,outputclass:,testdir:,"
+			  "config:,testdir:,"
+			  "textclass:,inputclass:,outputclass:,"
 			  "uttmarker:,max-parser-tokens:,textredundancy:,"
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
 			  "help,language:,retry,nostdout,ner-override:,"

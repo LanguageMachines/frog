@@ -104,13 +104,13 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   string val = config.lookUp( "host", _label );
   if ( !val.empty() ){
     // assume we must use a MBT server for tagging
-    host = val;
+    _host = val;
     val = config.lookUp( "port", _label );
     if ( val.empty() ){
-      LOG << "missing 'port' settings for host= " << host << endl;
+      LOG << "missing 'port' settings for host= " << _host << endl;
       return false;
     }
-    port = val;
+    _port = val;
     val = config.lookUp( "base", _label );
     if ( !val.empty() ){
       base = val;
@@ -119,7 +119,7 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   else {
     val = config.lookUp( "port", _label );
     if ( !val.empty() ){
-      LOG << "missing 'host' settings for port= " << port << endl;
+      LOG << "missing 'host' settings for port= " << _port << endl;
       return false;
     }
   }
@@ -151,7 +151,7 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
     dbg_log->setlevel(LogExtreme);
   }
   string settings;
-  if ( host.empty() ){
+  if ( _host.empty() ){
     val = config.lookUp( "settings", _label );
     if ( val.empty() ){
       LOG << "Unable to find settings for: " << _label << endl;
@@ -210,15 +210,24 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   if ( debug > 1 ){
     DBG << _label << "-tagger textclass= " << textclass << endl;
   }
-  if ( host.empty() ){
+  if ( _host.empty() ){
     string init = "-s " + settings + " -vcf";
     tagger = new MbtAPI( init, *dbg_log );
     return tagger->isInit();
   }
   else {
-    LOG << "using " << _label << "-tagger on "
-	<< host << ":" << port << endl;
-    return true;
+    string mess = check_server( _host, _port, _label );
+    if ( !mess.empty() ){
+      LOG << "FAILED to find an " << _label << " server:" << endl;
+      LOG << mess << endl;
+      LOG << "mbtserver not running??" << endl;
+      return false;
+    }
+    else {
+      LOG << "using " << _label << "-tagger on "
+	  << _host << ":" << _port << endl;
+      return true;
+    }
   }
 }
 
@@ -280,9 +289,9 @@ vector<TagResult> json_to_TR( const json& in ){
 
 vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
   Sockets::ClientSocket client;
-  if ( !client.connect( host, port ) ){
-    LOG << "failed to open connection, " << _label << "::" << host
-	<< ":" << port << endl
+  if ( !client.connect( _host, _port ) ){
+    LOG << "failed to open connection, " << _label << "::" << _host
+	<< ":" << _port << endl
 	<< "Reason: " << client.getMessage() << endl;
     exit( EXIT_FAILURE );
   }
@@ -350,7 +359,7 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
 }
 
 vector<TagResult> BaseTagger::tagLine( const string& line ){
-  if ( !host.empty() ){
+  if ( !_host.empty() ){
     vector<tag_entry> to_do;
     vector<string> v = TiCC::split( line );
     for ( const auto& w : v ){
@@ -383,7 +392,7 @@ vector<TagResult> BaseTagger::tagLine( const vector<tag_entry>& to_do ){
     DBG << it.word << "\t" << it.enrichment << "\t" << endl;
   }
   //  }
-  if ( !host.empty() ){
+  if ( !_host.empty() ){
     DBG << "calling server" << endl;
     return call_server(to_do);
   }
@@ -408,7 +417,7 @@ vector<TagResult> BaseTagger::tagLine( const vector<tag_entry>& to_do ){
 }
 
 string BaseTagger::set_eos_mark( const std::string& eos ){
-  if ( !host.empty() ){
+  if ( !_host.empty() ){
     // just ignore??
     LOG << "cannot change EOS mark for external server!" << endl;
     return "";

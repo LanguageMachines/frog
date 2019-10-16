@@ -275,7 +275,16 @@ bool Parser::init( const TiCC::Configuration& configuration ){
     }
   }
   else {
-    LOG << "using Parser Timbl's on " << _host << ":" << _port << endl;
+    string mess = check_server( _host, _port, "DependencyParser" );
+    if ( !mess.empty() ){
+      LOG << "FAILED to find a server for the Dependency parser:" << endl;
+      LOG << mess << endl;
+      LOG << "timblserver not running??" << endl;
+      happy = false;
+    }
+    else {
+      LOG << "using Parser Timbl's on " << _host << ":" << _port << endl;
+    }
   }
   isInit = happy;
   return happy;

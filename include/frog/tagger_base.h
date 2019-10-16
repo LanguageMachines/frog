@@ -80,8 +80,8 @@ class BaseTagger {
   TiCC::LogStream *err_log;
   TiCC::LogStream *dbg_log;
   std::string base;
-  std::string host;
-  std::string port;
+  std::string _host;
+  std::string _port;
   MbtAPI *tagger;
   TiCC::UniFilter *filter;
   std::vector<std::string> _words;

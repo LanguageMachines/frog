@@ -207,8 +207,17 @@ bool Mblem::init( const TiCC::Configuration& config ) {
     return myLex->GetInstanceBase(treeName);
   }
   else {
-    LOG << "using MBLEM Timbl on " << _host << ":" << _port << endl;
-    return true;
+    string mess = check_server( _host, _port, "MBLEM" );
+    if ( !mess.empty() ){
+      LOG << "FAILED to find an MBLEM server:" << endl;
+      LOG << mess << endl;
+      LOG << "timblserver not running??" << endl;
+      return false;
+    }
+    else {
+      LOG << "using MBLEM Timbl on " << _host << ":" << _port << endl;
+      return true;
+    }
   }
 }
 
