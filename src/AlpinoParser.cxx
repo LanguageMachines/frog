@@ -505,11 +505,14 @@ vector<parsrel> extract(list<pair<const dp_tree*,const dp_tree*>>& l ){
 	     && it.first->rel != "--" ){
 #ifdef DEBUG_EXTRACT
 	  cerr << "AHA   some special thing: " << it.first->rel << endl;
+	  cerr << "          IN            : " << it << endl;
 #endif
 	  // not a word but an aggregate
 	  const dp_tree *my_head = extract_hd( it.first );
 	  if ( my_head ){
-	    //      cerr << "TEMP ROOT=" << my_head << endl;
+#ifdef DEBUG_EXTRACT
+	    cerr << "TEMP ROOT=" << my_head << endl;
+#endif
 	    pos = my_head->word_index;
 	    rel = "ROOT";
 	    dep = 0;
