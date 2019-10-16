@@ -740,6 +740,7 @@ int main(int argc, char *argv[]) {
 	    else {
 	      result->save( xmlOutName );
 	      LOG << "FoLiA stored in " << xmlOutName << endl;
+	      delete result;
 	    }
 	  }
 	  if ( !outName.empty() ){
