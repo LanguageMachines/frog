@@ -104,13 +104,13 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   string val = config.lookUp( "host", _label );
   if ( !val.empty() ){
     // assume we must use a MBT server for tagging
-    host = val;
+    _host = val;
     val = config.lookUp( "port", _label );
     if ( val.empty() ){
-      LOG << "missing 'port' settings for host= " << host << endl;
+      LOG << "missing 'port' settings for host= " << _host << endl;
       return false;
     }
-    port = val;
+    _port = val;
     val = config.lookUp( "base", _label );
     if ( !val.empty() ){
       base = val;
@@ -119,7 +119,7 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   else {
     val = config.lookUp( "port", _label );
     if ( !val.empty() ){
-      LOG << "missing 'host' settings for port= " << port << endl;
+      LOG << "missing 'host' settings for port= " << _port << endl;
       return false;
     }
   }
@@ -151,7 +151,7 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
     dbg_log->setlevel(LogExtreme);
   }
   string settings;
-  if ( host.empty() ){
+  if ( _host.empty() ){
     val = config.lookUp( "settings", _label );
     if ( val.empty() ){
       LOG << "Unable to find settings for: " << _label << endl;
@@ -210,15 +210,24 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   if ( debug > 1 ){
     DBG << _label << "-tagger textclass= " << textclass << endl;
   }
-  if ( host.empty() ){
+  if ( _host.empty() ){
     string init = "-s " + settings + " -vcf";
     tagger = new MbtAPI( init, *dbg_log );
     return tagger->isInit();
   }
   else {
-    LOG << "using " << _label << "-tagger on "
-	<< host << ":" << port << endl;
-    return true;
+    string mess = check_server( _host, _port, _label );
+    if ( !mess.empty() ){
+      LOG << "FAILED to find an " << _label << " server:" << endl;
+      LOG << mess << endl;
+      LOG << "mbtserver not running??" << endl;
+      return false;
+    }
+    else {
+      LOG << "using " << _label << "-tagger on "
+	  << _host << ":" << _port << endl;
+      return true;
+    }
   }
 }
 
@@ -237,74 +246,106 @@ void BaseTagger::add_provenance( folia::Document& doc,
 }
 
 json create_json( const vector<tag_entry>& tv ){
-  if ( tv.size() == 1 ){
-    json result;
-    result["word"] = tv[0].word;
-    if ( !tv[0].enrichment.empty() ){
-      result["enrichment"] = tv[0].enrichment;
+  json result;
+  result["command"] = "tag";
+  json arr = json::array();
+  for ( const auto& it : tv ){
+    json one_entry;
+    one_entry["word"] = it.word;
+    if ( !it.enrichment.empty() ){
+      one_entry["enrichment"] = it.enrichment;
     }
-    return result;
+    arr.push_back( one_entry );
   }
-  else {
-    json result = json::array();
-    for ( const auto& it : tv ){
-      json one_entry;
-      one_entry["word"] = it.word;
-      if ( !it.enrichment.empty() ){
-	one_entry["enrichment"] = it.enrichment;
-      }
-      result.push_back( one_entry );
+  result["sentence"] = arr;
+  return result;
+}
+
+vector<TagResult> json_to_TR( const json& in ){
+  vector<TagResult> result;
+  for ( auto& i : in ){
+    TagResult tr;
+    tr.set_word( i["word"] );
+    if ( i.find("known") != i.end() ){
+      tr.set_known( i["known"] == "true" );
     }
-    return result;
+    tr.set_tag( i["tag"] );
+    if ( i.find("confidence") != i.end() ){
+      tr.set_confidence( i["confidence"] );;
+    }
+    if ( i.find("distance") != i.end() ){
+      tr.set_distance( i["distance"] );
+    }
+    if ( i.find("distribution") != i.end() ){
+      tr.set_distribution( i["distribution"] );
+    }
+    if ( i.find("enrichment") != i.end() ){
+      tr.set_enrichment( i["enrichment"] );
+    }
+    result.push_back( tr );
   }
+  return result;
 }
 
 vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
   Sockets::ClientSocket client;
-  if ( !client.connect( host, port ) ){
-    LOG << "failed to open connection, " << _label << "::" << host
-	<< ":" << port << endl
+  if ( !client.connect( _host, _port ) ){
+    LOG << "failed to open connection, " << _label << "::" << _host
+	<< ":" << _port << endl
 	<< "Reason: " << client.getMessage() << endl;
     exit( EXIT_FAILURE );
   }
-  LOG << "calling " << _label << "-server" << endl;
+  DBG << "calling " << _label << "-server, base=" << base << endl;
+  string line;
+  client.read( line );
+  json response;
+  try {
+    response = json::parse( line );
+  }
+  catch ( const exception& e ){
+    LOG << "json parsing failed on '" << line << "':"
+	<< e.what() << endl;
+    abort();
+  }
+  DBG << "got JSON " << response.dump(2) << endl;
+  if ( response["status"] != "ok" ){
+    LOG << "the client isn't OK" << endl;
+    abort();
+  }
   if ( !base.empty() ){
     json out_json;
-    //    out_json["command"] = "base";
-    out_json["base"] = base;
+    out_json["command"] = "base";
+    out_json["param"] = base;
     string line = out_json.dump() + "\n";
     DBG << "sending BASE json data:" << line << endl;
     client.write( line );
-    // json response;
-    // try {
-    //   response = json::parse( line );
-    // }
-    // catch ( const exception& e ){
-    //   LOG << "json parsing failed on '" << line << "':"
-    //  	  << e.what() << endl;
-    //   abort();
-    // }
+    client.read( line );
+    DBG << "received base data:" << line << endl;
+    json base_response;
+    try {
+      base_response = json::parse( line );
+    }
+    catch ( const exception& e ){
+      LOG << "json parsing failed on '" << line << "':"
+      	  << e.what() << endl;
+      abort();
+    }
+    DBG << "received json response:" << base_response << endl;
+    if ( response["status"] != "ok" ){
+      LOG << "the client isn't OK" << endl;
+      abort();
+    }
   }
-  // create json struct
+  // create json query struct
   json my_json = create_json( tv );
-  //  LOG << "created json" << my_json << endl;
+  DBG << "created json" << my_json << endl;
   // send it to the server
-  string line = my_json.dump() + "\n";
-  //  LOG << "sending json data:" << line << endl;
+  line = my_json.dump() + "\n";
+  DBG << "sending json data:" << line << endl;
   client.write( line );
   // receive json
   client.read( line );
-  //  LOG << "received line:" << line << "" << endl;
-  if ( line.find("Welcome to the Mbt server." ) == 0 ){
-    client.read( line );
-    DBG << "received json line:" << line << "" << endl;
-    if ( !base.empty() ){
-      client.read( line );
-      DBG << "received json line:" << line << "" << endl;
-      client.read( line );
-      DBG << "received json line:" << line << "" << endl;
-    }
-  }
+  DBG << "received line:" << line << "" << endl;
   try {
     my_json = json::parse( line );
   }
@@ -313,12 +354,29 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
 	<< e.what() << endl;
     abort();
   }
-  //  LOG << "received json data:" << my_json << endl;
-  return MbtServer::json_to_TR( my_json );
+  DBG << "received json data:" << my_json << endl;
+  return json_to_TR( my_json );
 }
 
 vector<TagResult> BaseTagger::tagLine( const string& line ){
-  if ( !tagger ){
+  if ( !_host.empty() ){
+    vector<tag_entry> to_do;
+    vector<string> v = TiCC::split( line );
+    for ( const auto& w : v ){
+      icu::UnicodeString word = TiCC::UnicodeFromUTF8(w);
+      if ( filter ){
+	word = filter->filter( word );
+      }
+      string word_s = TiCC::UnicodeToUTF8( word );
+      // the word may contain spaces, remove them all!
+      word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
+      tag_entry entry;
+      entry.word = word_s;
+      to_do.push_back( entry );
+    }
+    return tagLine( to_do );
+  }
+  else if ( !tagger ){
     throw runtime_error( _label + "-tagger is not initialized" );
   }
   if ( debug > 1 ){
@@ -334,7 +392,7 @@ vector<TagResult> BaseTagger::tagLine( const vector<tag_entry>& to_do ){
     DBG << it.word << "\t" << it.enrichment << "\t" << endl;
   }
   //  }
-  if ( !host.empty() ){
+  if ( !_host.empty() ){
     DBG << "calling server" << endl;
     return call_server(to_do);
   }
@@ -359,7 +417,7 @@ vector<TagResult> BaseTagger::tagLine( const vector<tag_entry>& to_do ){
 }
 
 string BaseTagger::set_eos_mark( const std::string& eos ){
-  if ( !host.empty() ){
+  if ( !_host.empty() ){
     // just ignore??
     LOG << "cannot change EOS mark for external server!" << endl;
     return "";

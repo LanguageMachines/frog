@@ -454,17 +454,6 @@ ostream& operator<< ( ostream& os, const BaseBracket *c ){
   return os;
 }
 
-void prettyP( ostream& os, const list<BaseBracket*>& v ){
-  os << "[";
-  for ( auto const& it : v ){
-    os << it;
-    if ( &it != &v.back() ){
-      os << " ";
-    }
-  }
-  os << "]";
-}
-
 bool BracketNest::testMatch( list<BaseBracket*>& result,
 			     const list<BaseBracket*>::iterator& rpos,
 			     list<BaseBracket*>::iterator& bpos ){

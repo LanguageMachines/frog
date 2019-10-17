@@ -42,47 +42,31 @@
 #include "ucto/tokenize.h"
 #include "timbl/TimblAPI.h"
 #include "frog/FrogData.h"
+#include "frog/ckyparser.h" // only for struct parsrel....
 
 struct parseData;
 class TimerBlock;
 class timbl_result;
 
-class Parser {
+class ParserBase {
  public:
-  explicit Parser( TiCC::LogStream* errlog, TiCC::LogStream* dbglog ):
-  pairs(0),
-    dir(0),
-    rels(0),
-    maxDepSpan( 0 ),
-    isInit( false ),
+  explicit ParserBase( TiCC::LogStream* errlog, TiCC::LogStream* dbglog ):
+  isInit( false ),
     filter( 0 )
       {
 	errLog = new TiCC::LogStream(errlog, "parser-");
 	dbgLog = new TiCC::LogStream(dbglog, "parser-dbg-");
       };
-  ~Parser();
-  bool init( const TiCC::Configuration& );
-  void add_provenance( folia::Document& doc, folia::processor * ) const;
-  void Parse( frog_data&, TimerBlock& );
-  parseData prepareParse( frog_data& );
-  void add_result( const frog_data&,
-		   const std::vector<folia::Word*>& ) const;
-
+  virtual ~ParserBase(){};
+  virtual bool init( const TiCC::Configuration& ) = 0;
+  virtual void add_provenance( folia::Document& doc,
+			       folia::processor * ) const =0;
+  virtual void Parse( frog_data&, TimerBlock& ) = 0;
+  virtual void add_result( const frog_data&,
+			   const std::vector<folia::Word*>& ) const;
   std::vector<std::string> createParserInstances( const parseData& );
   std::string getTagset() const { return dep_tagset; };
- private:
-  std::vector<std::string> createPairInstances( const parseData& );
-  std::vector<std::string> createDirInstances( const parseData& );
-  std::vector<std::string> createRelInstances( const parseData& );
-  void timbl_server( const std::string&,
-		     const std::vector<std::string>&,
-		     std::vector<timbl_result>& );
-
-  Timbl::TimblAPI *pairs;
-  Timbl::TimblAPI *dir;
-  Timbl::TimblAPI *rels;
-  std::string maxDepSpanS;
-  size_t maxDepSpan;
+ protected:
   bool isInit;
   TiCC::LogStream *errLog;
   TiCC::LogStream *dbgLog;
@@ -94,11 +78,38 @@ class Parser {
   TiCC::UniFilter *filter;
   std::string _host;
   std::string _port;
+  ParserBase( const ParserBase& ){}; // inhibit copies
+};
+
+class Parser: public ParserBase {
+ public:
+  explicit Parser( TiCC::LogStream* errlog, TiCC::LogStream* dbglog ):
+  ParserBase( errlog, dbglog ),
+    maxDepSpan( 0 ),
+    pairs(0),
+    dir(0),
+    rels(0) {};
+  ~Parser();
+  bool init( const TiCC::Configuration& );
+  void add_provenance( folia::Document& doc, folia::processor * ) const;
+  parseData prepareParse( frog_data& );
+  void Parse( frog_data&, TimerBlock& );
+ private:
+  std::vector<std::string> createPairInstances( const parseData& );
+  std::vector<std::string> createDirInstances( const parseData& );
+  std::vector<std::string> createRelInstances( const parseData& );
+  void timbl_server( const std::string&,
+		     const std::vector<std::string>&,
+		     std::vector<timbl_result>& );
+  std::string maxDepSpanS;
+  size_t maxDepSpan;
+  Timbl::TimblAPI *pairs;
+  Timbl::TimblAPI *dir;
+  Timbl::TimblAPI *rels;
   std::string _pairs_base;
   std::string _dirs_base;
   std::string _rels_base;
-  Parser( const Parser& ){}; // inhibit copies
 };
 
-
+void appendParseResult( frog_data&, const std::vector<parsrel>& );
 #endif

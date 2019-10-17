@@ -39,8 +39,11 @@
 #include "ticcutils/Timer.h"
 
 std::string prefix( const std::string&, const std::string& );
-std::string getTime();
 void getFileNames( const std::string&, const std::string&, std::set<std::string>& );
+
+std::string check_server( const std::string&,
+			  const std::string&,
+			  const std::string& = "" );
 
 class TimerBlock{
 public:

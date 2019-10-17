@@ -50,7 +50,7 @@ class UctoTokenizer;
 class Mbma;
 class Mblem;
 class Mwu;
-class Parser;
+class ParserBase;
 class CGNTagger;
 class IOBTagger;
 class NERTagger;
@@ -77,9 +77,11 @@ class FrogOptions {
   bool doKanon;
   bool test_API;
   bool hide_timers;
-  int debugFlag;
   bool interactive;
+  bool doAlpinoServer;
+  bool doAlpino;
   int numThreads;
+  int debugFlag;
 
   std::string encoding;
   std::string uttmark;
@@ -168,7 +170,7 @@ class FrogAPI {
   Mbma *myMbma;
   Mblem *myMblem;
   Mwu *myMwu;
-  Parser *myParser;
+  ParserBase *myParser;
   CGNTagger *myCGNTagger;
   IOBTagger *myIOBTagger;
   NERTagger *myNERTagger;

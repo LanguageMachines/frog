@@ -34,7 +34,7 @@
 #include <set>
 #include <string>
 #include <ostream>
-
+#include "ticcutils/SocketBasics.h"
 #include "config.h"
 
 #include <sys/types.h>
@@ -83,15 +83,19 @@ void getFileNames( const string& dirName,
   }
 }
 
-#endif
-
-string getTime() {
-  time_t Time;
-  time(&Time);
-  tm curtime;
-  localtime_r(&Time,&curtime);
-  char buf[256];
-  strftime( buf, 100, "%Y-%m-%dT%X", &curtime );
-  string res = buf;
-  return res;
+string check_server( const string& host,
+		     const string& port,
+		     const string& name ){
+  string outline;
+  Sockets::ClientSocket client;
+  if ( !client.connect( host, port ) ){
+    outline = "cannot open connection, " + host + ":" + port;
+    if ( !name.empty() ){
+      outline += " for " + name + " module";
+    }
+    outline += "\nmessage: (" + client.getMessage() + ")" ;
+  }
+  return outline;
 }
+
+#endif

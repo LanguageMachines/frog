@@ -147,7 +147,7 @@ bool NERTagger::read_gazets( const string& name,
   string file_name = name;
   string lookup_dir = config_dir;
   if ( name[0] != '/' ) {
-    file_name = config_dir + "/" + file_name;
+    file_name = prefix( config_dir, file_name );
   }
   else {
     lookup_dir = TiCC::dirname( file_name );

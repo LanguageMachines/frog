@@ -118,7 +118,8 @@ void usage( ) {
        << "\t============= MODULE SELECTION ==========================================\n"
        << "\t --skip=[mptncla]    Skip Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"
        << "\t============= CONFIGURATION OPTIONS =====================================\n"
-       << "\t -c <filename>    Set configuration file (default " << FrogAPI::defaultConfigFile() << ")\n"
+       << "\t -c <filename> OR --config=<filename>\n"
+       << "\t\t Set configuration file (default " << FrogAPI::defaultConfigFile() << ")\n"
        << "\t --override <section>.<parameter>=<value>    Override a configuration option, can be used multiple times\n"
        << "\t --language <language-list>  Set the languages. e.g. --language=nld,eng,por"
        << "\t\t The first language in the list will be the default. (default dutch).\n"
@@ -191,7 +192,9 @@ bool parse_args( TiCC::CL_Options& Opts,
   }
   options.default_language = language;
   // override default config settings when a configfile is specified
-  Opts.extract( 'c',  configFileName );
+  if ( !Opts.extract( 'c',  configFileName ) ){
+    Opts.extract( "config",  configFileName );
+  }
   if ( configuration.fill( configFileName ) ){
     LOG << "config read from: " << configFileName << endl;
     string vers = configuration.lookUp( "version" );
@@ -299,6 +302,11 @@ bool parse_args( TiCC::CL_Options& Opts,
       options.doMorph = false;
     }
     if ( skip.find_first_of("mM") != string::npos ){
+      if ( options.doAlpino ){
+	LOG << "option skip=m conflicts with --alpino or --alpinoserver"
+	    << endl;
+	return false;
+      }
       options.doMwu = false;
     }
     if ( skip.find_first_of("cC") != string::npos ){
@@ -311,9 +319,14 @@ bool parse_args( TiCC::CL_Options& Opts,
       options.doTagger = false;
     }
     if ( skip.find_first_of("pP") != string::npos ){
+      if ( options.doAlpino ){
+	LOG << "option skip=p conflicts with --alpino or --alpinoserver"
+	    << endl;
+	return false;
+      }
       options.doParse = false;
     }
-    else if ( !options.doMwu ){
+    else if ( !options.doMwu && options.doParse ){
       LOG << " Parser disabled, because MWU is deselected" << endl;
       options.doParse = false;
     }
@@ -339,7 +352,21 @@ bool parse_args( TiCC::CL_Options& Opts,
     configuration.setatt( "ner_override", opt_val, "NER" );
   }
   options.doServer = Opts.extract('S', options.listenport );
-
+  options.doAlpinoServer = Opts.extract("alpinoserver");
+  if ( options.doAlpinoServer ){
+    if ( Opts.extract("alpino") ){
+      // ok, just ignore
+    }
+    options.doAlpino = true;
+    configuration.setatt( "alpinoserver", "true", "parser" );
+  }
+  else {
+    options.doAlpino = Opts.extract("alpino");
+  }
+  if ( options.doAlpino ){
+    options.doParse = false;
+    options.doMwu = false;
+  }
 #ifdef HAVE_OPENMP
   if ( options.doServer ) {
     // run in one thread in server mode, forking is too expensive for lots of small snippets
@@ -579,12 +606,13 @@ int main(int argc, char *argv[]) {
   }
   try {
     TiCC::CL_Options Opts("c:e:o:t:T:x::X::nQhVd:S:",
-			  "textclass:,inputclass:,outputclass:,testdir:,"
+			  "config:,testdir:,"
+			  "textclass:,inputclass:,outputclass:,"
 			  "uttmarker:,max-parser-tokens:,textredundancy:,"
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
 			  "help,language:,retry,nostdout,ner-override:,"
-			  "debug:,keep-parser-files,version,threads:,"
-			  "override:,KANON,TESTAPI,debugfile:");
+			  "debug:,keep-parser-files,version,threads:,alpino,"
+			  "alpinoserver,override:,KANON,TESTAPI,debugfile:");
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
       // we already did show what we wanted.
@@ -712,6 +740,7 @@ int main(int argc, char *argv[]) {
 	    else {
 	      result->save( xmlOutName );
 	      LOG << "FoLiA stored in " << xmlOutName << endl;
+	      delete result;
 	    }
 	  }
 	  if ( !outName.empty() ){

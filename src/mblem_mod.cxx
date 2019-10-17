@@ -195,15 +195,30 @@ bool Mblem::init( const TiCC::Configuration& config ) {
     textclass = "current";
   }
 
-  string opts = config.lookUp( "timblOpts", "mblem" );
-  if ( opts.empty() ){
-    opts = "-a1";
+  if ( _host.empty() ){
+    string opts = config.lookUp( "timblOpts", "mblem" );
+    if ( opts.empty() ){
+      opts = "-a1";
+    }
+    // make it silent
+    opts += " +vs -vf -F TABBED";
+    //Read in (igtree) data
+    myLex = new Timbl::TimblAPI(opts);
+    return myLex->GetInstanceBase(treeName);
   }
-  // make it silent
-  opts += " +vs -vf -F TABBED";
-  //Read in (igtree) data
-  myLex = new Timbl::TimblAPI(opts);
-  return myLex->GetInstanceBase(treeName);
+  else {
+    string mess = check_server( _host, _port, "MBLEM" );
+    if ( !mess.empty() ){
+      LOG << "FAILED to find an MBLEM server:" << endl;
+      LOG << mess << endl;
+      LOG << "timblserver not running??" << endl;
+      return false;
+    }
+    else {
+      LOG << "using MBLEM Timbl on " << _host << ":" << _port << endl;
+      return true;
+    }
+  }
 }
 
 Mblem::~Mblem(){
@@ -398,7 +413,9 @@ string Mblem::call_server( const string& instance ){
 	<< "Reason: " << client.getMessage() << endl;
     exit( EXIT_FAILURE );
   }
-  LOG << "calling MBLEM-server" << endl;
+  if ( debug > 1 ){
+    DBG << "calling MBLEM-server" << endl;
+  }
   string line;
   client.read( line );
   json response;

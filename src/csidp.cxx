@@ -43,6 +43,7 @@
 
 
 using namespace std;
+using TiCC::operator<<;
 
 #define LOG *TiCC::Log(dbglog)
 #define DBG *TiCC::Dbg(dbglog)
@@ -161,6 +162,8 @@ vector<parsrel> parse( const vector<timbl_result>& p_res,
 		       TiCC::LogStream *dbglog ){
   vector<const Constraint*> constraints
     = formulateWCSP( d_res, r_res, p_res, parse_size, maxDist, dbglog );
+  DBG << "constraints: " << endl;
+  DBG << constraints << endl;
   CKYParser parser( parse_size, constraints, dbglog );
   parser.parse();
   vector<parsrel> result( parse_size );

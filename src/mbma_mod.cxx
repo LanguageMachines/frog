@@ -243,7 +243,17 @@ bool Mbma::init( const TiCC::Configuration& config ) {
     return MTree->GetInstanceBase(MTreeFilename);
   }
   else {
-    return true;
+    string mess = check_server( _host, _port, "MBMA" );
+    if ( !mess.empty() ){
+      LOG << "FAILED to find an MBMA server:" << endl;
+      LOG << mess << endl;
+      LOG << "timblserver not running??" << endl;
+      return false;
+    }
+    else {
+      LOG << "using MBMA Timbl on " << _host << ":" << _port << endl;
+      return true;
+    }
   }
 }
 
@@ -879,7 +889,9 @@ void Mbma::call_server( const vector<string>& insts,
 	<< "Reason: " << client.getMessage() << endl;
     exit( EXIT_FAILURE );
   }
-  LOG << "calling MBMA-server" << endl;
+  if ( debugFlag > 1 ){
+    DBG << "calling MBMA-server" << endl;
+  }
   string line;
   client.read( line );
   json response;
