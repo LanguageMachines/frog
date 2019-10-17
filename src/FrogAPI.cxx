@@ -777,7 +777,7 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
         if ( options.debugFlag > 5 ){
 	  DBG << "received data [" << result << "]" << endl;
 	}
-	string tmp_file = tmpnam(0);
+	string tmp_file = tempname("frog");
 	ofstream os( tmp_file );
 	os << result << endl;
 	os.close();
@@ -996,7 +996,7 @@ string FrogAPI::Frogtostring( const string& s ){
   if ( s.empty() ){
     return s;
   }
-  string tmp_file = tmpnam(0);
+  string tmp_file = tempname("frog");
   ofstream os( tmp_file );
   os << s << endl;
   os.close();

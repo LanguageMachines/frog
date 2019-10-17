@@ -294,9 +294,6 @@ Parser::~Parser(){
   delete rels;
   delete dir;
   delete pairs;
-  delete errLog;
-  delete dbgLog;
-  delete filter;
 }
 
 vector<string> Parser::createPairInstances( const parseData& pd ){
@@ -1118,6 +1115,12 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
   timers.csiTimer.stop();
   appendParseResult( fd, res );
   timers.parseTimer.stop();
+}
+
+ParserBase::~ParserBase(){
+  delete errLog;
+  delete dbgLog;
+  delete filter;
 }
 
 void ParserBase::add_result( const frog_data& fd,

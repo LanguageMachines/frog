@@ -489,7 +489,7 @@ void extract_dependencies( list<pair<const dp_tree*,const dp_tree*>>& result,
   }
 }
 
-vector<parsrel> extract(list<pair<const dp_tree*,const dp_tree*>>& l ){
+vector<parsrel> extract( list<pair<const dp_tree*,const dp_tree*>>& l ){
   vector<parsrel> result(l.size());
   for ( const auto& it : l ){
 #ifdef DEBUG_EXTRACT
@@ -617,7 +617,7 @@ vector<parsrel> extract_dp( xmlDoc *alp_doc,
     // }
   }
   else {
-    cerr << "PANIEK!, geen top node" << endl;
+    throw runtime_error( "PANIEK!, geen top node" );
   }
   fd.resolve_mwus();
 #ifdef DEBUG_EXTRACT
@@ -625,6 +625,7 @@ vector<parsrel> extract_dp( xmlDoc *alp_doc,
   cerr << fd << endl;
 #endif
   vector<parsrel> pr = extract(result);
+  delete dp;
   return pr;
 }
 
@@ -659,7 +660,7 @@ vector<parsrel> AlpinoParser::alpino_parse( frog_data& fd ){
 #endif
   vector<parsrel> result;
   string txt = fd.sentence();
-  string txt_file = tmpnam(0);
+  string txt_file = tempname("alpino");
   string tmp_dir = TiCC::dirname(txt_file)+"/";
   txt_file = tmp_dir + "parse.txt";
   ofstream os( txt_file );
@@ -677,5 +678,6 @@ vector<parsrel> AlpinoParser::alpino_parse( frog_data& fd ){
   string xmlfile = tmp_dir + "1.xml";
   xmlDoc *xmldoc = xmlReadFile( xmlfile.c_str(), 0, XML_PARSE_NOBLANKS );
   result = extract_dp(xmldoc,fd);
+  xmlFreeDoc( xmldoc );
   return result;
 }

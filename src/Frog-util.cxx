@@ -31,6 +31,7 @@
 
 #include "frog/Frog-util.h"
 
+#include <cstring>
 #include <set>
 #include <string>
 #include <ostream>
@@ -44,6 +45,18 @@
 #endif
 
 using namespace std;
+
+string tempname( const string& label ){
+  string temp = "/tmp/" + label + "XXXXXX";
+  char *filename = strdup(temp.c_str());
+  if ( mkstemp(filename) < 0 ){
+    throw runtime_error( "unable to create a temporary file" );
+  }
+  //  cerr << "created temporary file: " << filename << endl;
+  string result = filename;
+  free( filename );
+  return result;
+}
 
 string prefix( const string& path, const string& fn ){
   if ( fn.find( "/" ) == string::npos && !path.empty() ){
