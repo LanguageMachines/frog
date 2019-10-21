@@ -50,7 +50,7 @@ using TiCC::operator<<;
 #define LOG *TiCC::Log(errLog)
 #define DBG *TiCC::Dbg(dbgLog)
 
-//#define DEBUG_ALPIN
+//#define DEBUG_ALPINO
 //#define DEBUG_MWU
 //#define DEBUG_EXTRACT
 
@@ -191,8 +191,6 @@ bool AlpinoParser::init( const TiCC::Configuration& configuration ){
   return true;
 }
 
-//#define DEBUG_ALPINO
-
 void AlpinoParser::Parse( frog_data& fd, TimerBlock& timers ){
   timers.parseTimer.start();
   if ( !isInit ){
@@ -285,6 +283,11 @@ void AlpinoParser::add_result( const frog_data& fd,
   add_mwus( fd, wv );
 }
 
+dp_tree::~dp_tree() {
+  //  cerr << "deleting dp_tree: " << this << endl;
+  delete link;
+  delete next;
+}
 
 ostream& operator<<( ostream& os, const dp_tree *node ){
   if ( node ){
@@ -340,6 +343,7 @@ dp_tree *parse_node( xmlNode *node ){
   }
   dp->link = 0;
   dp->next = 0;
+  //  cerr << "created dp_tree: " << dp << endl;
   return dp;
 }
 
@@ -356,6 +360,7 @@ dp_tree *parse_nodes( xmlNode *node ){
 	   && pnt->children == NULL ){
 	// an aggregate with NO children.
 	// just leave it out
+	delete parsed;
       }
       else {
 	if ( result == 0 ){
@@ -390,6 +395,7 @@ dp_tree *resolve_mwus( dp_tree *in,
   while ( pnt ){
 #ifdef DEBUG_MWU
     cerr << "bekijk " << pnt << " compensate=" << compensate << endl;
+
     cerr << "begin=" << pnt->begin << " restart=" << restart << endl;
 #endif
     if ( pnt->link && pnt->link->rel == "mwp" ){
