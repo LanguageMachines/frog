@@ -675,7 +675,7 @@ vector<parsrel> AlpinoParser::alpino_parse( frog_data& fd ){
     cerr << "Alpino failed: RES = " << res << " : " << strerror(res) << endl;
     return result;
   }
-  remove( txt_file.c_str() );
+  TiCC::erase( txt_file );
   string xmlfile = tmp_dir + "1.xml";
   xmlDoc *xmldoc = xmlReadFile( xmlfile.c_str(), 0, XML_PARSE_NOBLANKS );
   result = extract_dp(xmldoc,fd);
