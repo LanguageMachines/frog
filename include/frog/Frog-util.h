@@ -49,8 +49,6 @@ std::string check_server( const std::string&,
 			  const std::string&,
 			  const std::string& = "" );
 
-std::string tempname( const std::string& );
-
 class TimerBlock{
 public:
   TiCC::Timer parseTimer;

@@ -39,6 +39,7 @@
 #include "ticcutils/StringOps.h"
 #include "ticcutils/PrettyPrint.h"
 #include "ticcutils/SocketBasics.h"
+#include "ticcutils/FileUtils.h"
 #include "frog/Frog-util.h"
 #include "frog/FrogData.h"
 
@@ -660,7 +661,7 @@ vector<parsrel> AlpinoParser::alpino_parse( frog_data& fd ){
 #endif
   vector<parsrel> result;
   string txt = fd.sentence();
-  string txt_file = tempname("alpino");
+  string txt_file = TiCC::tempname("alpino");
   string tmp_dir = TiCC::dirname(txt_file)+"/";
   txt_file = tmp_dir + "parse.txt";
   ofstream os( txt_file );

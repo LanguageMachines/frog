@@ -116,7 +116,7 @@ LIBS="$ICU_LIBS $LIBS"
 
 AX_LIB_READLINE
 
-PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.22] )
+PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.23] )
 
 CXXFLAGS="$CXXFLAGS $ticcutils_CFLAGS"
 LIBS="$ticcutils_LIBS $LIBS"
