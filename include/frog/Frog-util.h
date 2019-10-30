@@ -35,11 +35,15 @@
 #include <set>
 #include <ostream>
 #include <string>
+#include <string>
 
 #include "ticcutils/Timer.h"
 
-std::string prefix( const std::string&, const std::string& );
-void getFileNames( const std::string&, const std::string&, std::set<std::string>& );
+std::string prefix( const std::string&,
+		    const std::string& );
+void getFileNames( const std::string&,
+		   const std::string&,
+		   std::set<std::string>& );
 
 std::string check_server( const std::string&,
 			  const std::string&,

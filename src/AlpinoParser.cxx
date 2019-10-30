@@ -39,6 +39,7 @@
 #include "ticcutils/StringOps.h"
 #include "ticcutils/PrettyPrint.h"
 #include "ticcutils/SocketBasics.h"
+#include "ticcutils/FileUtils.h"
 #include "frog/Frog-util.h"
 #include "frog/FrogData.h"
 
@@ -49,7 +50,7 @@ using TiCC::operator<<;
 #define LOG *TiCC::Log(errLog)
 #define DBG *TiCC::Dbg(dbgLog)
 
-//#define DEBUG_ALPIN
+//#define DEBUG_ALPINO
 //#define DEBUG_MWU
 //#define DEBUG_EXTRACT
 
@@ -190,8 +191,6 @@ bool AlpinoParser::init( const TiCC::Configuration& configuration ){
   return true;
 }
 
-//#define DEBUG_ALPINO
-
 void AlpinoParser::Parse( frog_data& fd, TimerBlock& timers ){
   timers.parseTimer.start();
   if ( !isInit ){
@@ -284,6 +283,11 @@ void AlpinoParser::add_result( const frog_data& fd,
   add_mwus( fd, wv );
 }
 
+dp_tree::~dp_tree() {
+  //  cerr << "deleting dp_tree: " << this << endl;
+  delete link;
+  delete next;
+}
 
 ostream& operator<<( ostream& os, const dp_tree *node ){
   if ( node ){
@@ -339,6 +343,7 @@ dp_tree *parse_node( xmlNode *node ){
   }
   dp->link = 0;
   dp->next = 0;
+  //  cerr << "created dp_tree: " << dp << endl;
   return dp;
 }
 
@@ -355,6 +360,7 @@ dp_tree *parse_nodes( xmlNode *node ){
 	   && pnt->children == NULL ){
 	// an aggregate with NO children.
 	// just leave it out
+	delete parsed;
       }
       else {
 	if ( result == 0 ){
@@ -389,6 +395,7 @@ dp_tree *resolve_mwus( dp_tree *in,
   while ( pnt ){
 #ifdef DEBUG_MWU
     cerr << "bekijk " << pnt << " compensate=" << compensate << endl;
+
     cerr << "begin=" << pnt->begin << " restart=" << restart << endl;
 #endif
     if ( pnt->link && pnt->link->rel == "mwp" ){
@@ -489,7 +496,7 @@ void extract_dependencies( list<pair<const dp_tree*,const dp_tree*>>& result,
   }
 }
 
-vector<parsrel> extract(list<pair<const dp_tree*,const dp_tree*>>& l ){
+vector<parsrel> extract( list<pair<const dp_tree*,const dp_tree*>>& l ){
   vector<parsrel> result(l.size());
   for ( const auto& it : l ){
 #ifdef DEBUG_EXTRACT
@@ -617,7 +624,7 @@ vector<parsrel> extract_dp( xmlDoc *alp_doc,
     // }
   }
   else {
-    cerr << "PANIEK!, geen top node" << endl;
+    throw runtime_error( "PANIEK!, geen top node" );
   }
   fd.resolve_mwus();
 #ifdef DEBUG_EXTRACT
@@ -625,6 +632,7 @@ vector<parsrel> extract_dp( xmlDoc *alp_doc,
   cerr << fd << endl;
 #endif
   vector<parsrel> pr = extract(result);
+  delete dp;
   return pr;
 }
 
@@ -659,7 +667,7 @@ vector<parsrel> AlpinoParser::alpino_parse( frog_data& fd ){
 #endif
   vector<parsrel> result;
   string txt = fd.sentence();
-  string txt_file = tmpnam(0);
+  string txt_file = TiCC::tempname("alpino");
   string tmp_dir = TiCC::dirname(txt_file)+"/";
   txt_file = tmp_dir + "parse.txt";
   ofstream os( txt_file );
@@ -673,9 +681,10 @@ vector<parsrel> AlpinoParser::alpino_parse( frog_data& fd ){
     cerr << "Alpino failed: RES = " << res << " : " << strerror(res) << endl;
     return result;
   }
-  remove( txt_file.c_str() );
+  TiCC::erase( txt_file );
   string xmlfile = tmp_dir + "1.xml";
   xmlDoc *xmldoc = xmlReadFile( xmlfile.c_str(), 0, XML_PARSE_NOBLANKS );
   result = extract_dp(xmldoc,fd);
+  xmlFreeDoc( xmldoc );
   return result;
 }

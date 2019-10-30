@@ -57,7 +57,7 @@ class ParserBase {
 	errLog = new TiCC::LogStream(errlog, "parser-");
 	dbgLog = new TiCC::LogStream(dbglog, "parser-dbg-");
       };
-  virtual ~ParserBase(){};
+  virtual ~ParserBase();
   virtual bool init( const TiCC::Configuration& ) = 0;
   virtual void add_provenance( folia::Document& doc,
 			       folia::processor * ) const =0;

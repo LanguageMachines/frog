@@ -31,6 +31,7 @@
 
 #include "frog/Frog-util.h"
 
+#include <cstring>
 #include <set>
 #include <string>
 #include <ostream>

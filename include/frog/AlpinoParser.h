@@ -49,7 +49,7 @@ struct dp_tree {
   std::string rel;
   dp_tree *link;
   dp_tree *next;
-  ~dp_tree(){ delete link; delete next; };
+  ~dp_tree();
 };
 
 std::ostream& operator<<( std::ostream& os, const dp_tree *node );
