@@ -48,9 +48,9 @@ the order specified here:
 
 -  ``timbl``\  [5]_ - The memory-based classifier engine
 
--  ``mbt``\  [7]_ - The memory-based tagger
+-  ``mbt``\  [6]_ - The memory-based tagger
 
--  ``frogdata``\  [8]_ - Datafiles needed to run Frog
+-  ``frogdata``\  [7]_ - Datafiles needed to run Frog
 
 You will also need the following 3rd party dependencies:
 
