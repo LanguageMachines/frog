@@ -32,17 +32,6 @@ packaged separately.
 
 -  Stable releases [1]_:
    https://github.com/LanguageMachines/frog/releases/
-1	In	in	[in]	VZ(init)	0.987660	O	B-PP	0	ROOT
-2	’41	'41	['41]	TW(hoofd,vrij)	0.719498	O	B-NP	1	obj1
-3	werd	worden	[word]	WW(pv,verl,ev)	0.999799	O	B-VP	0	ROOT
-4	aan	aan	[aan]	VZ(init)	0.996734	O	B-PP	10	mod
-5	de	de	[de]	LID(bep,stan,rest)	0.999964	O	B-NP	6	det
-6	stamkaart	stamkaart	[stam][kaart]	N(soort,ev,basis,zijd,stan)	0.996536	O	I-NP	4	obj1
-7	een	een	[een]	LID(onbep,stan,agr)	0.995147	O	B-NP	9	det
-8	z.g.	z.g.	[z.g.]	ADJ(prenom,basis,met-e,stan)	0.500000	O	I-NP	9	mod
-9	inlegvel	inlegvel	[in][leg][vel]	N(soort,ev,basis,zijd,stan)	1.000000	O	I-NP	10	obj1
-10	toegevoegd	toevoegen	[toe][ge][voeg][d]	WW(vd,vrij,zonder)	0.998549	O	B-VP	3	vc
-11	.	.	[.]	LET()	1.000000	O	O	10	punct
 
 -  Frog data repository: https://github.com/LanguageMachines/frogdata/
    (required dependency!)
@@ -273,18 +262,7 @@ clients can connect over TCP. The server mode is started using the
 ``-S <port>`` option. Note that options like ``-n`` and ``–skip`` are
 valid in this mode too.
 
-You can for example1	In	in	[in]	VZ(init)	0.987660	O	B-PP	0	ROOT
-2	’41	'41	['41]	TW(hoofd,vrij)	0.719498	O	B-NP	1	obj1
-3	werd	worden	[word]	WW(pv,verl,ev)	0.999799	O	B-VP	0	ROOT
-4	aan	aan	[aan]	VZ(init)	0.996734	O	B-PP	10	mod
-5	de	de	[de]	LID(bep,stan,rest)	0.999964	O	B-NP	6	det
-6	stamkaart	stamkaart	[stam][kaart]	N(soort,ev,basis,zijd,stan)	0.996536	O	I-NP	4	obj1
-7	een	een	[een]	LID(onbep,stan,agr)	0.995147	O	B-NP	9	det
-8	z.g.	z.g.	[z.g.]	ADJ(prenom,basis,met-e,stan)	0.500000	O	I-NP	9	mod
-9	inlegvel	inlegvel	[in][leg][vel]	N(soort,ev,basis,zijd,stan)	1.000000	O	I-NP	10	obj1
-10	toegevoegd	toevoegen	[toe][ge][voeg][d]	WW(vd,vrij,zonder)	0.998549	O	B-VP	3	vc
-11	.	.	[.]	LET()	1.000000	O	O	10	punct
- start a Frog server on port 12345 as follows:
+You can for example start a Frog server on port 12345 as follows:
 ``$ frog -S 12345``.
 
 The simple protocol clients should adhere to is as follows:
