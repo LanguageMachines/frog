@@ -109,7 +109,7 @@ Part-of-Speech Tagger
 ~~~~~~~~~~~~~~~~~~~~~
 
 The Part-of-Speech tagger uses the tag set of *Corpus Gesproken
-Nederlands (CNG)* :raw-latex:`\cite{vanEynde2004}`. It has 12 main PoS
+Nederlands (CNG)* [vanEynde2004]_. It has 12 main PoS
 tags (shown in table [tab-pos-tags]) and detailed features for type,
 gender, number, case, position, degree, and tense.
 
@@ -239,7 +239,7 @@ Dependency Parser
 ~~~~~~~~~~~~~~~~~~
 
 The Constraint-satisfaction inference-based dependency parser (CSI-DP)
-:raw-latex:`\cite{Canisius+2006}` predicts grammatical relations between
+[Canisius+2006]_ predicts grammatical relations between
 pairs of tokens. In each token pair relation, one token is the head and
 the other is the dependent. Together these relations represent the
 syntactic tree of the sentence. One token, usually the main verb in he
@@ -260,7 +260,7 @@ The noun *team* is the head in three relations: the determiner(det)
 prepositional phrase *van* is correctly assigned to the head noun *team*
 but the phrase *aan* is mistakenly linked to *politie* instead of the
 root verb *bevestigt*. Linking prepositional phrases is a hard task for
-parsers :raw-latex:`\cite{atterer2007}`. More details on the
+parsers [atterer2007]_. More details on the
 architecture of the CSI-DP can be found in section [sec-bg-dep]
 
 +------+--------------------+------+---------+
