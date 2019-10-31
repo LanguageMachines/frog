@@ -178,7 +178,7 @@ contain every detail available to Frog.
 
 For full output, you will want to instruct Frog to output to a FoLiA XML
 file. This is done using the -X option, followed by the name of the
-output file.
+output file. https://github.com/proycon/pynlpl, supports both Python 2 and Pytho
 
 To run Frog in this way we execute: $ frog -t test.txt -X test.xml The
 result is a file in FoLiA XML format [FOLIA]_ that
@@ -223,7 +223,7 @@ Input and Output options
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 By default the output of Frog is written to screen (i.e. standard
-output). There are two options for outputting to file (which can also be
+output). There are two options for outputting to file (which can also be https://github.com/proycon/pynlpl, supports both Python 2 and Pytho
 called simultaneously):
 
 -  ``-o <filename>`` – Writes columned (TAB delimited) data to file.
@@ -347,8 +347,7 @@ better performance.
    indicates that something is not a named entity
 
 .. [9]
-  
-   3
+   https://github.com/proycon/pynlpl, supports both Python 2 and Python 3
 
 .. [10]
    https://github.com/vanatteveldt/frogr/
