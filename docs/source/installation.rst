@@ -113,19 +113,31 @@ Frog will present the output as shown in example [ex-frog-out] below:
 
 [ex-frog-out]
 
-::
-
-   1	In	        in	[in]	VZ(init)	0.987660	O	B-PP	0	ROOT
-   2	’41	     '41	['41]	TW(hoofd,vrij)	0.719498	O	B-NP	1	obj1
-   3	werd	      worden	[word]	WW(pv,verl,ev)	0.999799	O	B-VP	0	ROOT
-   4	aan	      aan	[aan]	VZ(init)	0.996734	O	B-PP	10	mod
-   5	de	         de	[de]	LID(bep,stan,rest)	0.999964	O	B-NP	6	det
-   6	stamkaart	stamkaart	[stam][kaart]	N(soort,ev,basis,zijd,stan)	0.996536	O	I-NP	4	obj1
-   7	een	een	[een]	LID(onbep,stan,agr)	0.995147	O	B-NP	9	det
-   8	z.g.	z.g.	[z.g.]	ADJ(prenom,basis,met-e,stan)	0.500000	O	I-NP	9	mod
-   9	inlegvel	   inlegvel	[in][leg][vel]	N(soort,ev,basis,zijd,stan)	1.000000	O	I-NP	10	obj1
-  10	toegevoegd	toevoegen	[toe][ge][voeg][d]	WW(vd,vrij,zonder)	0.998549	O	B-VP	3	vc
-  11	.	         .	[.]	LET()	1.000000	O	O	10	punct
++---+-----------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 1 |      2    |   3       |   4                |     5                        |     6    | 7 |   8  | 9 |   10 |
++===+===========+===========+====================+==============================+==========+===+======+===+======+
+| 1 | In        | in        | [in]               | VZ(init)                     | 0.987660 | O | B-PP | 0 | ROOT |
++---+-----------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 2 | ’41       | '41       |['41]               | TW(hoofd,vrij)               | 0.719498 | O | B-NP | 1 | obj1 |
++---+-----------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 3 | werd      | worden    | [word]             | WW(pv,verl,ev)               | 0.999799 | O | B-VP | 0 | ROOT |
++---+-----------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 4 | aan       | aan       | [aan]              | VZ(init)                     | 0.996734 | O | B-PP |10 | mod  |
++---+-----------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 5 | de        | de        | [de]               | LID(bep,stan,rest)           | 0.999964 | O | B-NP | 6 | det  |
++---+-----------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 6 | stamkaart | stamkaart |	[stam][kaart]      | N(soort,ev,basis,zijd,stan)  | 0.996536 | O | I-NP | 4 | obj1 |
++---+-----------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 7 | een       | een       | [een]              | LID(onbep,stan,agr)          | 0.995147 | O | B-NP | 9 | det  |
++---+-----------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 8 | z.g.      | z.g.      | [z.g.]             | ADJ(prenom,basis,met-e,stan) | 0.500000 | O | I-NP | 9 | mod  |
++---+-----------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 9 | inlegvel  | inlegvel  | [in][leg][vel]	    | N(soort,ev,basis,zijd,stan)  | 1.000000 | O | I-NP |10 | obj1 |
++---+-----------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 10| toegevoegd| toevoegen | [toe][ge][voeg][d] | WW(vd,vrij,zonder)           | 0.998549 | O | B-VP | 3 | vc   |
++---+-----------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 11| .         | .	       | [.]                | LET()                        | 1.000000 | O | O    |10 | punct|
++---+-----------+-----------+--------------------+------------------------------+----------+---+------+---+------+
 
 The ten TAB-delimited columns in the output of Frog contain the
 information we list below. This columned output is intended for quick
@@ -172,7 +184,29 @@ For full output, you wi1	In	in	[in]	VZ(init)	0.987660	O	B-PP	0	ROOT
 5	de	de	[de]	LID(bep,stan,rest)	0.999964	O	B-NP	6	det
 6	stamkaart	stamkaart	[stam][kaart]	N(soort,ev,basis,zijd,stan)	0.996536	O	I-NP	4	obj1
 7	een	een	[een]	LID(onbep,stan,agr)	0.995147	O	B-NP	9	det
+8	z.g.	z.g.	[z.g.]	ADJ(prenom,basis,me1	In	in	[in]	VZ(init)	0.987660	O	B-PP	0	ROOT
+2	’41	'41	['41]	TW(hoofd,vrij)	0.719498	O	B-NP	1	obj1
+3	werd	worden	[word]	WW(pv,verl,ev)	0.999799	O	B-VP	0	ROOT
+4	aan	aan	[aan]	VZ(init)	0.996734	O	B-PP	10	mod
+5	de	de	[de]	LID(bep,stan,rest)	0.999964	O	B-NP	6	det
+6	stamkaart	stamkaart	[stam][kaart]	N(soort,ev,basis,zijd,stan)	0.996536	O	I-NP	4	obj1
+7	een	een	[een]	LID(onbep,stan,agr)	0.995147	O	B-NP	9	det
 8	z.g.	z.g.	[z.g.]	ADJ(prenom,basis,met-e,stan)	0.500000	O	I-NP	9	mod
+9	inlegvel	inlegvel	[in][leg][vel]	N(soort,ev,basis,zijd,stan)	1.000000	O	I-NP	10	obj1
+10	toegevoegd	toevoegen	[toe][ge][voeg]1	In	in	[in]	VZ(init)	0.987660	O	B-PP	0	ROOT
+2	’41	'41	['41]	TW(hoofd,vrij)	0.719498	O	B-NP	1	obj1
+3	werd	worden	[word]	WW(pv,verl,ev)	0.999799	O	B-VP	0	ROOT
+4	aan	aan	[aan]	VZ(init)	0.996734	O	B-PP	10	mod
+5	de	de	[de]	LID(bep,stan,rest)	0.999964	O	B-NP	6	det
+6	stamkaart	stamkaart	[stam][kaart]	N(soort,ev,basis,zijd,stan)	0.996536	O	I-NP	4	obj1
+7	een	een	[een]	LID(onbep,stan,agr)	0.995147	O	B-NP	9	det
+8	z.g.	z.g.	[z.g.]	ADJ(prenom,basis,met-e,stan)	0.500000	O	I-NP	9	mod
+9	inlegvel	inlegvel	[in][leg][vel]	N(soort,ev,basis,zijd,stan)	1.000000	O	I-NP	10	obj1
+10	toegevoegd	toevoegen	[toe][ge][voeg][d]	WW(vd,vrij,zonder)	0.998549	O	B-VP	3	vc
+11	.	.	[.]	LET()	1.000000	O	O	10	punct
+[d]	WW(vd,vrij,zonder)	0.998549	O	B-VP	3	vc
+11	.	.	[.]	LET()	1.000000	O	O	10	punct
+t-e,stan)	0.500000	O	I-NP	9	mod
 9	inlegvel	inlegvel	[in][leg][vel]	N(soort,ev,basis,zijd,stan)	1.000000	O	I-NP	10	obj1
 10	toegevoegd	toevoegen	[toe][ge][voeg][d]	WW(vd,vrij,zonder)	0.998549	O	B-VP	3	vc
 11	.	.	[.]	LET()	1.000000	O	O	10	punct
@@ -188,7 +222,18 @@ programming libraries, and other tools, can be found on
 https://proycon.github.io/folia. We show an example of the XML structure
 for the token *aangesneden* in example [ex-xml-tok] and explain the
 details of this structure in section [sec-usage]. Each of these layers
-of linguistic output will be discussed in more detail in the next
+of linguistic output will be discussed1	In	in	[in]	VZ(init)	0.987660	O	B-PP	0	ROOT
+2	’41	'41	['41]	TW(hoofd,vrij)	0.719498	O	B-NP	1	obj1
+3	werd	worden	[word]	WW(pv,verl,ev)	0.999799	O	B-VP	0	ROOT
+4	aan	aan	[aan]	VZ(init)	0.996734	O	B-PP	10	mod
+5	de	de	[de]	LID(bep,stan,rest)	0.999964	O	B-NP	6	det
+6	stamkaart	stamkaart	[stam][kaart]	N(soort,ev,basis,zijd,stan)	0.996536	O	I-NP	4	obj1
+7	een	een	[een]	LID(onbep,stan,agr)	0.995147	O	B-NP	9	det
+8	z.g.	z.g.	[z.g.]	ADJ(prenom,basis,met-e,stan)	0.500000	O	I-NP	9	mod
+9	inlegvel	inlegvel	[in][leg][vel]	N(soort,ev,basis,zijd,stan)	1.000000	O	I-NP	10	obj1
+10	toegevoegd	toevoegen	[toe][ge][voeg][d]	WW(vd,vrij,zonder)	0.998549	O	B-VP	3	vc
+11	.	.	[.]	LET()	1.000000	O	O	10	punct
+ in more detail in the next
 chapters.
 
 [ex-xml-tok]
