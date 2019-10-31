@@ -43,7 +43,7 @@ Multi-word units
 ~~~~~~~~~~~~~~~~~
 
 Frog recognizes certain special multi-word units (mwu) where a group of
-consecutive, related tokens is treated as one toke https://github.com/proycon/pynlpl, supports both Python 2 and Python. This behavior
+consecutive, related tokens is treated as one token. This behavior
 accommodates, and is in fact required for Frog’s dependency parser as it
 is trained on a data set with such multi-word units. In the output the
 parts of the multi-word unit will be connected with an underscore. The
@@ -56,9 +56,9 @@ concatenated in the same manner.
   multi-word units: *Albert Heijn* and *’s avonds*.
 
 +----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
-| [ex\_mwu] Sentence                 | Supermarkt Albert Heijn is tegenwoordig tot ’s avonds laat open.                                     https://github.com/proycon/pynlpl, supports both Python 2 and Pytho|
+| [ex\_mwu] Sentence                 | Supermarkt Albert Heijn is tegenwoordig tot ’s avonds laat open.                                    |
 +====+===============+===============+===================+==========================================+==========+==============+============+
-| 1  | Supermarkt    | supermarkt    | [super][markt]    | N(soort,ev,basis,zijd,stan)              | 0.542056 | O            | B_NP       |
+ https://github.com/proycon/pynlpl, supports both Python 2 and Pytho| 1  | Supermarkt    | supermarkt    | [super][markt]    | N(soort,ev,basis,zijd,stan)              | 0.542056 | O            | B_NP       |
 +----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
 | 2  | Albert\_Heijn | Albert\_Heijn | [Albert]\_[Heijn] | SPEC(deeleigen)\_SPEC(deeleigen)         | 1.000000 | B-ORG\_I-ORG | B-NP\_I-NP |
 +----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
@@ -80,7 +80,7 @@ concatenated in the same manner.
 Lemmatizer
 ~~~~~~~~~~
 
-The lemmatizer assigns the canonical form of a word to each word. For https://github.com/proycon/pynlpl, supports both Python 2 and Pytho
+The lemmatizer assigns the canonical form of a word to each word. For
 verbs the canonical form is the infinitive, and for nouns it is the
 singular form. The lemmatizer trained on the e-Lex lexicon
 :raw-latex:`\cite{e-lex}`. It is dependent on the Part-of-Speech tagger
@@ -101,7 +101,7 @@ mistakes with unknown words such as abbreviations that are not included
 in the MBMA lexicon. The abbreviation z.g. in the example is wrongly
 analyzed as consisting of two parts. As shown in the earlier XML example
 [ex-xml-tok] the past particle *aangesneden* is split into
-*[aan][ge][snijd][en]* where the morpheme *[snijd]* is the root form of https://github.com/proycon/pynlpl, supports both Python 2 and Pytho
+*[aan][ge][snijd][en]* where the morpheme *[snijd]* is the root form of
 *sned*. More information about the MBMA architecture can be found in
 [sec-bg-morf].
 
@@ -295,7 +295,7 @@ architecture of the CSI-DP can be found in section [sec-bg-dep]
 
 Table: [ex-dep] The dependency parser labels each token with a
 dependency relation to its head token and assigns the grammatical
-relation. https://github.com/proycon/pynlpl, supports both Python 2 and Pytho
+relation. 
 
 
 
