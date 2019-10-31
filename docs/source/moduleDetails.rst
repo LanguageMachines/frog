@@ -43,7 +43,7 @@ Multi-word units
 ~~~~~~~~~~~~~~~~~
 
 Frog recognizes certain special multi-word units (mwu) where a group of
-consecutive, related tokens is treated as one token. This behavior
+consecutive, related tokens is treated as one toke https://github.com/proycon/pynlpl, supports both Python 2 and Python. This behavior
 accommodates, and is in fact required for Frog’s dependency parser as it
 is trained on a data set with such multi-word units. In the output the
 parts of the multi-word unit will be connected with an underscore. The
@@ -56,31 +56,31 @@ concatenated in the same manner.
   multi-word units: *Albert Heijn* and *’s avonds*.
 
 +----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
-| [ex\_mwu] Sentence | Supermarkt Albert Heijn is tegenwoordig tot ’s avonds laat open.                                                    |                                                 |                                       
+| [ex\_mwu] Sentence | Supermarkt Albert Heijn is tegenwoordig tot ’s avonds laat open.                                                    |
 +====+===============+===============+===================+==========================================+==========+==============+============+
 | 1  | Supermarkt    | supermarkt    | [super][markt]    | N(soort,ev,basis,zijd,stan)              | 0.542056 | O            | B_NP       |
 +----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
 | 2  | Albert\_Heijn | Albert\_Heijn | [Albert]\_[Heijn] | SPEC(deeleigen)\_SPEC(deeleigen)         | 1.000000 | B-ORG\_I-ORG | B-NP\_I-NP |
 +----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
-| 3  | is            | zijn          | [zijn]            | WW(pv,tgw,ev)                            | 0.999150 | O            | B-VP       |                                                         
+| 3  | is            | zijn          | [zijn]            | WW(pv,tgw,ev)                            | 0.999150 | O            | B-VP       |
 +----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
-| 4  | tegenwoordig  | tegenwoordig  | [tegenwoordig]    | ADJ(vrij,basis,zonder)                   | 0.994033 | O            | B-ADVP     |                               
+| 4  | tegenwoordig  | tegenwoordig  | [tegenwoordig]    | ADJ(vrij,basis,zonder)                   | 0.994033 | O            | B-ADVP     |
 +----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
 | 5  | tot           | tot           | [tot]             | VZ(init)                                 | 0.964286 | O            | B-PP       |
 ---------------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
 | 6  | ’s\_avonds    | ’s\_avond     | [’s]\_[avond][s]  | LID(bep,gen,evmo)\_N(soort,ev,basis,gen) | 0.962560 | O\_O         | O\_B-ADVP  |
 +----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
-| 7  | laat          | laat          | [laat]            | ADJ(vrij,basis,zonder)                   | 1.000000 | O            | B-VP       |                                                               
+| 7  | laat          | laat          | [laat]            | ADJ(vrij,basis,zonder)                   | 1.000000 | O            | B-VP       |
 +----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
 | 8  | open          | open          | [open]            | ADJ(vrij,basis,zonder)                   | 0.983755 | O            | B-ADJP     |                                                       
 +----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
-| 9  | .             | .             | [.]               | LET()                                    | 1.000000 | O            | O          |                                                                                   
+| 9  | .             | .             | [.]               | LET()                                    | 1.000000 | O            | O          |
 +----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
 
 Lemmatizer
 ~~~~~~~~~~
 
-The lemmatizer assigns the canonical form of a word to each word. For
+The lemmatizer assigns the canonical form of a word to each word. For https://github.com/proycon/pynlpl, supports both Python 2 and Pytho
 verbs the canonical form is the infinitive, and for nouns it is the
 singular form. The lemmatizer trained on the e-Lex lexicon
 :raw-latex:`\cite{e-lex}`. It is dependent on the Part-of-Speech tagger
