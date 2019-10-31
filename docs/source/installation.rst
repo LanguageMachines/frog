@@ -50,6 +50,8 @@ the order specified here:
 
 -  ``mbt``\  [7]_ - The memory-based tagger
 
+-  ``frogdata``\  [8]_ - Datafiles needed to run Frog
+
 You will also need the following 3rd party dependencies:
 
 -  **icu** - A C++ library for Unicode and Globalization support. On
@@ -138,7 +140,7 @@ contain every detail available to Frog.
     distribution
 
 7. Named entity type
-    in BIO-encoding [7]_
+    in BIO-encoding [9]_
 
 8. Base phrase chunk
     in BIO-encoding
@@ -259,11 +261,11 @@ Communicating with Frog on such a low-level may not be necessary, as
 there are already some libraries available to communicate with Frog for
 several programming languages:
 
--  Python – **pynlpl.clients.frogclient**\  [9]_
+-  Python – **pynlpl.clients.frogclient**\  [10]_
 
--  R – **frogr**\  [9]_ – by Wouter van Atteveldt
+-  R – **frogr**\  [11]_ – by Wouter van Atteveldt
 
--  Go – **grof**\  [10]_ – by Machiel Molenaar
+-  Go – **grof**\  [12]_ – by Machiel Molenaar
 
 The following example shows how to communicate with the Frog server from
 Python using the Frog client in PyNLPl, which can generally be installed
@@ -312,18 +314,21 @@ better performance.
    https://languagemachines.github.io/mbt
 
 .. [7]
+   https://github.com/LanguageMachines/frogdata
+
+.. [8]
    B (begin) indicates the begin of the named entity, I (inside)
    indicates the continuation of a named entity, and O (outside)
    indicates that something is not a named entity
 
-.. [8]
+.. [9]
    https://github.com/proycon/pynlpl, supports both Python 2 and Python
    3
 
-.. [9]
+.. [10]
    https://github.com/vanatteveldt/frogr/
 
-.. [10]
+.. [12]
    https://github.com/Machiel/gorf
 
 
