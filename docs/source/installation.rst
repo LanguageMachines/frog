@@ -69,6 +69,7 @@ You will also need the following 3rd party dependencies:
 The actual compilation proceeds by entering the Frog directory and
 issuing the following commands:
 
+::
     $ bash bootstrap.sh
     $ ./configure
     $ make
@@ -108,6 +109,8 @@ een z.g. inlegvel toegevoegd.*
 We run Frog as follows: $ frog -t test.txt
 
 Frog will present the output as shown in example [ex-frog-out] below:
+
+[ex-frog-out]
 
 +----+------------+-----------+--------------------+------------------------------+----------+---+------+---+------+
 | 1  |      2     |   3       |   4                |     5                        |     6    | 7 |   8  | 9 |   10 |
@@ -162,7 +165,7 @@ contain every detail available to Frog.
     distribution
 
 7. Named entity type
-    in BIO-encoding [9]_
+    in BIO-encoding [8]_
 
 8. Base phrase chunk
     in BIO-encoding
@@ -170,7 +173,7 @@ contain every detail available to Frog.
 9. Token number of head word
     in dependency graph (according to the Frog parser)
 
-10 Dependency relation type
+10. Dependency relation type
     of the word with head word
 
 For full output, you will want to instruct Frog to output to a FoLiA XML
@@ -253,7 +256,7 @@ interactive mode.
 To exit this mode, type CTRL-D.
 
 Server mode
-~~~~~~~~~~~~~
+~~~~~~~~~~~
 
 Frog offers a server mode that launches it as a daemon to which multiple
 clients can connect over TCP. The server mode is started using the
@@ -283,11 +286,11 @@ Communicating with Frog on such a low-level may not be necessary, as
 there are already some libraries available to communicate with Frog for
 several programming languages:
 
--  Python – **pynlpl.clients.frogclient**\  [10]_
+-  Python – **pynlpl.clients.frogclient**\  [9]_
 
--  R – **frogr**\  [11]_ – by Wouter van Atteveldt
+-  R – **frogr**\  [10]_ – by Wouter van Atteveldt
 
--  Go – **grof**\  [12]_ – by Machiel Molenaar
+-  Go – **gorf**\  [11]_ – by Machiel Molenaar
 
 The following example shows how to communicate with the Frog server from
 Python using the Frog client in PyNLPl, which can generally be installed
@@ -344,13 +347,13 @@ better performance.
    indicates that something is not a named entity
 
 .. [9]
-   https://github.com/proycon/pynlpl, supports both Python 2 and Python
+  
    3
 
 .. [10]
    https://github.com/vanatteveldt/frogr/
 
-.. [12]
+.. [11]
    https://github.com/Machiel/gorf
 
 
