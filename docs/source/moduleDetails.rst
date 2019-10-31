@@ -58,7 +58,7 @@ concatenated in the same manner.
 +----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
 | [ex\_mwu] Sentence                 | Supermarkt Albert Heijn is tegenwoordig tot ’s avonds laat open.                                    |
 +====+===============+===============+===================+==========================================+==========+==============+============+
- https://github.com/proycon/pynlpl, supports both Python 2 and Pytho| 1  | Supermarkt    | supermarkt    | [super][markt]    | N(soort,ev,basis,zijd,stan)              | 0.542056 | O            | B_NP       |
+| 1  | Supermarkt    | supermarkt    | [super][markt]    | N(soort,ev,basis,zijd,stan)              | 0.542056 | O            | B_NP       |
 +----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
 | 2  | Albert\_Heijn | Albert\_Heijn | [Albert]\_[Heijn] | SPEC(deeleigen)\_SPEC(deeleigen)         | 1.000000 | B-ORG\_I-ORG | B-NP\_I-NP |
 +----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
