@@ -18,7 +18,7 @@ to UTF-8 as well.
 Tokenizer
 ~~~~~~~~~~
 
-Frog uses the tokenization software *Ucto* :raw-latex:`\cite{UCTO}` for
+Frog uses the tokenization software *Ucto* [UCTO]_ for
 sentence boundary detection and to separate punctuation from words. In
 general, recognizing sentence boundaries and punctuation is a simple
 task but recognizing names and abbreviations is essential to perfom this
@@ -83,7 +83,7 @@ Lemmatizer
 The lemmatizer assigns the canonical form of a word to each word. For
 verbs the canonical form is the infinitive, and for nouns it is the
 singular form. The lemmatizer trained on the e-Lex lexicon
-:raw-latex:`\cite{e-lex}`. It is dependent on the Part-of-Speech tagger
+[ELEX]_. It is dependent on the Part-of-Speech tagger
 as it uses both the word form and the assigned PoS tag to disambiguate
 between different candidate lemmas. For example the word *zakken* used
 as a noun has the lemma *zak* while the verb has lemma *zakken*. Section
@@ -109,7 +109,7 @@ Part-of-Speech Tagger
 ~~~~~~~~~~~~~~~~~~~~~
 
 The Part-of-Speech tagger uses the tag set of *Corpus Gesproken
-Nederlands (CNG)* [vanEynde2004]_. It has 12 main PoS
+Nederlands (CNG)* [POS2004]_. It has 12 main PoS
 tags (shown in table [tab-pos-tags]) and detailed features for type,
 gender, number, case, position, degree, and tense.
 
@@ -245,7 +245,7 @@ the other is the dependent. Together these relations represent the
 syntactic tree of the sentence. One token, usually the main verb in he
 sentence, forms the root of the tree and the other tokens depend on the
 root in a direct or indirect relation. CSI-DP is trained on the Alpino
-treebank :raw-latex:`\cite{Bouma+01}` for Dutch and uses the Alpino
+treebank [Alpino]_ for Dutch and uses the Alpino
 syntactic labels listed in appendix [app-dep]. In the plain text output
 of Frog ( example [ex-frog-out]) the dependency information is presented
 in the last two columns. The one-but-last column shows number of the
