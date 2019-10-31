@@ -48,8 +48,6 @@ the order specified here:
 
 -  ``timbl``\  [5]_ - The memory-based classifier engine
 
--  ``timblserver``\  [6]_ - For server functionality around Timbl
-
 -  ``mbt``\  [7]_ - The memory-based tagger
 
 You will also need the following 3rd party dependencies:
@@ -59,6 +57,9 @@ You will also need the following 3rd party dependencies:
 
 -  **libxml2** - An XML library. On Debian/Ubuntu systems install the
    package ``libxml2-dev``.
+
+-  **textcat** - A library for language detection. On Debian/Ubuntu systems install the
+   package ``libexttextcat-dev``.
 
 -  A sane build environment with a C++ compiler (e.g. gcc or clang),
    autotools, autoconf-archive, libtool, pkg-config
@@ -137,7 +138,7 @@ contain every detail available to Frog.
     distribution
 
 7. Named entity type
-    in BIO-encoding [8]_
+    in BIO-encoding [7]_
 
 8. Base phrase chunk
     in BIO-encoding
@@ -260,9 +261,9 @@ several programming languages:
 
 -  Python – **pynlpl.clients.frogclient**\  [9]_
 
--  R – **frogr**\  [10]_ – by Wouter van Atteveldt
+-  R – **frogr**\  [9]_ – by Wouter van Atteveldt
 
--  Go – **grof**\  [11]_ – by Machiel Molenaar
+-  Go – **grof**\  [10]_ – by Machiel Molenaar
 
 The following example shows how to communicate with the Frog server from
 Python using the Frog client in PyNLPl, which can generally be installed
@@ -308,24 +309,21 @@ better performance.
    https://languagemachines.github.io/timbl
 
 .. [6]
-   https://github.com/LanguageMachines/timblserver
-
-.. [7]
    https://languagemachines.github.io/mbt
 
-.. [8]
+.. [7]
    B (begin) indicates the begin of the named entity, I (inside)
    indicates the continuation of a named entity, and O (outside)
    indicates that something is not a named entity
 
-.. [9]
+.. [8]
    https://github.com/proycon/pynlpl, supports both Python 2 and Python
    3
 
-.. [10]
+.. [9]
    https://github.com/vanatteveldt/frogr/
 
-.. [11]
+.. [10]
    https://github.com/Machiel/gorf
 
 
