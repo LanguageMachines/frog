@@ -56,7 +56,7 @@ concatenated in the same manner.
   multi-word units: *Albert Heijn* and *’s avonds*.
 
 +----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
-| [ex\_mwu] Sentence                 | Supermarkt Albert Heijn is tegenwoordig tot ’s avonds laat open.                                                    |
+| [ex\_mwu] Sentence                 | Supermarkt Albert Heijn is tegenwoordig tot ’s avonds laat open.                                     https://github.com/proycon/pynlpl, supports both Python 2 and Pytho|
 +====+===============+===============+===================+==========================================+==========+==============+============+
 | 1  | Supermarkt    | supermarkt    | [super][markt]    | N(soort,ev,basis,zijd,stan)              | 0.542056 | O            | B_NP       |
 +----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
