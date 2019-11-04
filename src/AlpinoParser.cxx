@@ -666,25 +666,31 @@ vector<parsrel> AlpinoParser::alpino_parse( frog_data& fd ){
   cerr << "calling Alpino input:" << fd.sentence() << endl;
 #endif
   vector<parsrel> result;
-  string txt = fd.sentence();
-  string txt_file = TiCC::tempname("alpino");
+  // take care of the odd case where the sentence contains '|' or '%'
+  // Alpino doesn't like that!
+  string txt = "|" + fd.sentence();
+  string txt_file = TiCC::tempname("alpino-parse.txt.");
   string tmp_dir = TiCC::dirname(txt_file)+"/";
-  txt_file = tmp_dir + "parse.txt";
   ofstream os( txt_file );
   os << txt;
   os.close();
   string parseCmd = "Alpino -veryfast -flag treebank " + tmp_dir +
     " end_hook=xml -parse <  " + txt_file + " -notk > /dev/null 2>&1";
-  //  cerr << "run: " << parseCmd << endl;
+#ifdef DEBUG_ALPINO
+  cerr << "run: " << parseCmd << endl;
+#endl
   int res = system( parseCmd.c_str() );
   if ( res ){
     cerr << "Alpino failed: RES = " << res << " : " << strerror(res) << endl;
     return result;
   }
+#ifndef DEBUG_ALPINO
   TiCC::erase( txt_file );
+#endif
   string xmlfile = tmp_dir + "1.xml";
   xmlDoc *xmldoc = xmlReadFile( xmlfile.c_str(), 0, XML_PARSE_NOBLANKS );
   result = extract_dp(xmldoc,fd);
   xmlFreeDoc( xmldoc );
+  TiCC::erase( xmlfile );
   return result;
 }
