@@ -678,7 +678,7 @@ vector<parsrel> AlpinoParser::alpino_parse( frog_data& fd ){
     " end_hook=xml -parse <  " + txt_file + " -notk > /dev/null 2>&1";
 #ifdef DEBUG_ALPINO
   cerr << "run: " << parseCmd << endl;
-#endl
+#endif
   int res = system( parseCmd.c_str() );
   if ( res ){
     cerr << "Alpino failed: RES = " << res << " : " << strerror(res) << endl;
