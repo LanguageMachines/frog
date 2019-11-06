@@ -685,14 +685,14 @@ vector<parsrel> AlpinoParser::alpino_parse( frog_data& fd ){
     return result;
   }
 #ifndef DEBUG_ALPINO
-  //  TiCC::erase( txt_file );
+  TiCC::erase( input_file );
 #endif
   string xml_file = tmp_dir + tmp_str + ".xml";
   xmlDoc *xmldoc = xmlReadFile( xml_file.c_str(), 0, XML_PARSE_NOBLANKS );
   result = extract_dp(xmldoc,fd);
   xmlFreeDoc( xmldoc );
 #ifndef DEBUG_ALPINO
-  //  TiCC::erase( xml_file );
+  TiCC::erase( xml_file );
 #endif
   return result;
 }
