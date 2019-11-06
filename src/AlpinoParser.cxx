@@ -666,16 +666,16 @@ vector<parsrel> AlpinoParser::alpino_parse( frog_data& fd ){
   cerr << "calling Alpino input:" << fd.sentence() << endl;
 #endif
   vector<parsrel> result;
-  // take care of the odd case where the sentence contains '|' or '%'
-  // Alpino doesn't like that!
-  string txt = "|" + fd.sentence();
-  string txt_file = TiCC::tempname("alpino-parse.txt.");
-  string tmp_dir = TiCC::dirname(txt_file)+"/";
-  ofstream os( txt_file );
+  string input_file = TiCC::tempname("alpino-parse.txt.");
+  string tmp_dir = TiCC::dirname(input_file)+"/";
+  string tmp_str = input_file.substr( input_file.size()-6 );
+  string txt = tmp_str + "|" + fd.sentence();
+  //    Alpino will use tmp_str for the output filename.
+  ofstream os( input_file );
   os << txt;
   os.close();
   string parseCmd = "Alpino -veryfast -flag treebank " + tmp_dir +
-    " end_hook=xml -parse <  " + txt_file + " -notk > /dev/null 2>&1";
+    " end_hook=xml -parse <  " + input_file + " -notk > /dev/null 2>&1";
 #ifdef DEBUG_ALPINO
   cerr << "run: " << parseCmd << endl;
 #endif
@@ -685,12 +685,14 @@ vector<parsrel> AlpinoParser::alpino_parse( frog_data& fd ){
     return result;
   }
 #ifndef DEBUG_ALPINO
-  TiCC::erase( txt_file );
+  //  TiCC::erase( txt_file );
 #endif
-  string xmlfile = tmp_dir + "1.xml";
-  xmlDoc *xmldoc = xmlReadFile( xmlfile.c_str(), 0, XML_PARSE_NOBLANKS );
+  string xml_file = tmp_dir + tmp_str + ".xml";
+  xmlDoc *xmldoc = xmlReadFile( xml_file.c_str(), 0, XML_PARSE_NOBLANKS );
   result = extract_dp(xmldoc,fd);
   xmlFreeDoc( xmldoc );
-  TiCC::erase( xmlfile );
+#ifndef DEBUG_ALPINO
+  //  TiCC::erase( xml_file );
+#endif
   return result;
 }
