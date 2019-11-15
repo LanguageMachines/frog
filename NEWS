@@ -1,3 +1,11 @@
+0.19.1 - 2019-11-15
+[Ko vd Sloot]
+* fixed an overseen incompatability problem with the new libfolia.
+   (https://github.com/proycon/tscan/issues/13)
+* removed dependency on MbtServer
+* Some documentation updates
+* improved using Alpino, using unique filenames now.
+
 0.19 - 2019-10-21
 [Ko vd Sloot]
 * added code to use al locally installed Alpino parser
