@@ -1,4 +1,4 @@
-.TH frog 1 "2017 may 1"
+.TH frog 1 "2019 nov 18"
 
 .SH NAME
 frog \- Dutch Natural Language Toolkit
@@ -8,8 +8,11 @@ frog [options]
 frog \-t test\-file
 
 .SH DESCRIPTION
-frog is an integration of memory\(hy-based natural language processing (NLP) modules developed for Dutch.
-frog's current version will tokenize, tag, lemmatize, and morphologically segment word tokens in Dutch text files, add IOB chunks and will assign a dependency graph to each sentence.
+frog is an integration of memory\(hy-based natural language processing (NLP)
+modules developed for Dutch.
+frog's current version will tokenize, tag, lemmatize, and morphologically
+segment word tokens in Dutch text files, add IOB chunks and will assign a
+dependency graph to each sentence.
 
 .SH OPTIONS
 
@@ -21,7 +24,9 @@ set the configuration using 'file'
 .BR \-\-debug =<modele><level>,...
 .RS
 set debug level per module.
-Tagger (T), Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi\(hyWord Units (m), Named Entity Recognition (n), or Parser (p).
+Tagger (T), Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a),
+Chunker (c), Multi\(hyWord Units (m), Named Entity Recognition (n),
+or Parser (p).
 
 (e.g. \-\-debug=l5,n3 sets the level for the Lemmatizer to 5 and for the NER
 to 3 )
@@ -35,7 +40,8 @@ set global debug level. (for all modules)
 
 .BR \-\-deep\(hymorph
 .RS
-generate a deep morphological analisys and add it to the XML. This also includes compound information.
+generate a deep morphological analisys and add it to the XML. This also
+includes compound information.
 The default tabbed output is also more detailed in the Morpheme field.
 
 .RE
@@ -81,12 +87,14 @@ Especially useful when XML output is specified with \-X or \-\-xmldir.
 
 .BR \-o " <file>"
 .RS
-send 'tabbed' output to 'file' instead of stdout. Defaults to the name of the inputfile with '.out' appended.
+send 'tabbed' output to 'file' instead of stdout. Defaults to the name of the
+inputfile with '.out' appended.
 .RE
 
 .BR \-\-outputdir " <dir>"
 .RS
-send all output to 'dir' instead of stdout. Creates filenames from the inputfilename(s) with '.out' appended.
+send all output to 'dir' instead of stdout. Creates filenames from the
+inputfilename(s) with '.out' appended.
 .RE
 
 .BR \-\-retry
@@ -100,7 +108,9 @@ file names. (so this has no effect if neither \-o, \-\-outputdir, \-X or
 
 .BR \-\-skip =[aclmnpt]
 .RS
-skip parts of the process: Tokenizer (t), Chunker (c), Lemmatizer (l), Morphological Analyzer (a), Multi\(hyWord unit (m), Named\(hyEntity recognizer (n) or Parser (p)
+skip parts of the process: Tokenizer (t), Chunker (c), Lemmatizer (l),
+Morphological Analyzer (a), Multi\(hyWord unit (m),
+Named\(hyEntity recognizer (n) or Parser (p)
 .RE
 
 .BR \-\-alpino
@@ -134,7 +144,8 @@ interactive mode.
 
 .BR \-x " <xmlfile>"
 .RS
-process 'xmlfile', which is supposed to be in FoLiA format! If 'xmlfile' is empty, and
+process 'xmlfile', which is supposed to be in FoLiA format! If 'xmlfile' is
+empty, and
 .BR \-\-testdir =<dir>
 is provided, all '.xml' files in 'dir' will be processed as FoLia XML.
 .RE
@@ -161,7 +172,8 @@ Preferably this is another class then the inputclass.
 
 .BR \-\-testdir =<dir>
 .RS
-process all files in 'dir'. When the input mode is XML, only '.xml' files are teken from 'dir'. see also
+process all files in 'dir'. When the input mode is XML, only '.xml' files are
+teken from 'dir'. see also
 .B \-\-outputdir
 .RE
 
@@ -188,12 +200,14 @@ show version info
 
 .BR \-\-xmldir =<dir>
 .RS
-generate FoLiA XML output and send it to 'dir'. Creates filenames from the inputfilename with '.xml' appended. (Except when it already ends with '.xml')
+generate FoLiA XML output and send it to 'dir'. Creates filenames from the
+inputfilename with '.xml' appended. (Except when it already ends with '.xml')
 .RE
 
 .BR \-X " <file>"
 .RS
-generate FoLiA XML output and send it to 'file'. Defaults to the name of the inputfile(s) with '.xml' appended. (Except when it already ends with '.xml')
+generate FoLiA XML output and send it to 'file'. Defaults to the name of the
+inputfile(s) with '.xml' appended. (Except when it already ends with '.xml')
 .RE
 
 .BR \-\-id "=<id>"
