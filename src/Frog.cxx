@@ -100,48 +100,52 @@ void usage( ) {
        << "\t -t <testfile>          Run frog on this file\n"
        << "\t -x <testfile>          Run frog on this FoLiA XML file. Or the files from 'testdir'\n"
        << "\t --textclass=<cls>      use the specified class to search for text in the the FoLiA docs. (default 'current').\n"
-       << "\t\t\t the same value is used for output too.\n"
+       << "\t                        the same value is used for output too.\n"
        << "\t --inputclass=<cls>     use the specified class to search for text in the the FoLiA docs. (default 'current') \n"
        << "\t --outputclass=<cls>    use the specified class to output text in the the FoLia docs. (default 'inputclass') \n"
        << "\t --testdir=<directory>  All files in this dir will be tested\n"
-       << "\t --uttmarker=<mark>     utterances are separated by 'mark' symbols"
-       << "\t                        (default none)\n"
+       << "\t --uttmarker=<mark>     utterances are separated by 'mark' symbols (default none)\n"
        << "\t -n                     Assume input file to hold one sentence per line\n"
        << "\t --retry                assume frog is running again on the same input,\n"
        << "\t                        already done files are skipped. (detected on the basis of already existing output files)\n"
        << "\t --max-parser-tokens=<n> inhibit parsing when a sentence contains over 'n' tokens. (default: 500, needs already 16Gb of memory!)\n"
-       << "\t -Q                   Enable quote detection in tokeniser. (NOT SUPPORTED AT THE MOMENT)\n"
+       << "\t --alpino               use a locally installed Alpino parser\n"
+       << "\t --alpino=server        use a remote installed Alpino server\n"
+       << "\t                        (as specified in the frog configuration file \n"
+       << "\t -Q                     Enable quote detection in tokeniser. (NOT SUPPORTED AT THE MOMENT)\n"
        << "\t-T or --textredundancy=[full|minimal|none]  - set text redundancy level in the tokenizer for text nodes in FoLiA output: " << endl
-       << "\t                    'full' - add text to all levels: <p> <s> <w> etc." << endl
-       << "\t                    'minimal' - don't introduce text on higher levels, but retain what is already there." << endl
-       << "\t                    'none' - only introduce text on <w>, AND remove all text from higher levels" << endl
+       << "\t                        'full' - add text to all levels: <p> <s> <w> etc." << endl
+       << "\t                        'minimal' - don't introduce text on higher levels, but retain what is already there." << endl
+       << "\t                        'none' - only introduce text on <w>, AND remove all text from higher levels" << endl
        << "\t============= MODULE SELECTION ==========================================\n"
-       << "\t --skip=[mptncla]    Skip Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"
+       << "\t --skip=[mptncla]       Skip Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c)\n,"
+       << "\t                        Multi-Word Units (m), Named Entity Recognition (n), or Parser (p)\n"
        << "\t============= CONFIGURATION OPTIONS =====================================\n"
        << "\t -c <filename> OR --config=<filename>\n"
-       << "\t\t Set configuration file (default " << FrogAPI::defaultConfigFile() << ")\n"
+       << "\t                        Set configuration file (default " << FrogAPI::defaultConfigFile() << ")\n"
        << "\t --override <section>.<parameter>=<value>    Override a configuration option, can be used multiple times\n"
-       << "\t --language <language-list>  Set the languages. e.g. --language=nld,eng,por"
-       << "\t\t The first language in the list will be the default. (default dutch).\n"
+       << "\t --language <language-list>  Set the languages. e.g. --language=nld,eng,por\n"
+       << "\t                        The first language in the list will be the default. (default dutch).\n"
        << "\t============= OUTPUT OPTIONS ============================================\n"
-       << "\t -o <outputfile>	    Output columned output to file, instead of default stdout\n"
-       << "\t --nostdout            suppress columned output to stdout\n"
-       << "\t -X <xmlfile>          Output also to an XML file in FoLiA format\n"
-       << "\t --id=<docid>          Document ID, used in FoLiA output. (Default 'untitled')\n"
-       << "\t --outputdir=<dir>     Output to dir, instead of default stdout\n"
-       << "\t --xmldir=<dir>        Use 'dir' to output FoliA XML to.\n"
-       << "\t --deep-morph          add deep morphological information to the output\n"
+       << "\t -o <outputfile>	     Output columned output to file, instead of default stdout\n"
+       << "\t --nostdout             suppress columned output to stdout\n"
+       << "\t -X <xmlfile>           Output also to an XML file in FoLiA format\n"
+       << "\t --id=<docid>           Document ID, used in FoLiA output. (Default 'untitled')\n"
+       << "\t --outputdir=<dir>      Output to dir, instead of default stdout\n"
+       << "\t --xmldir=<dir>         Use 'dir' to output FoliA XML to.\n"
+       << "\t --deep-morph           add deep morphological information to the output\n"
        << "\t============= OTHER OPTIONS ============================================\n"
-       << "\t -h or --help          give some help.\n"
-       << "\t -V or --version       Show version info.\n"
+       << "\t -h or --help           give some help.\n"
+       << "\t -V or --version        Show version info.\n"
        << "\t -d <debug level>  (for more verbosity)\n"
        << "\t --debug=<module><level>,<module><level>... (eg --debug=l5,n3) \n"
-       << "\t\t Set debug value for Tagger (T), Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi-Word Units (m), Named Entity Recognition (n), or Parser (p) \n"
-       << "\t -S <port>             Run as server instead of reading from testfile\n"
+       << "\t                        Set debug value for Tagger (T), Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c),\n"
+       << "\t                        Multi-Word Units (m), Named Entity Recognition (n), or Parser (p)\n"
+       << "\t -S <port>              Run as server instead of reading from testfile\n"
 #ifdef HAVE_OPENMP
-       << "\t --threads=<n>         Use a maximum of 'n' threads. Default: 8. \n"
+       << "\t --threads=<n>          Use a maximum of 'n' threads. Default: 8. \n"
 #endif
-       << "\t                       (but always 1 for server mode)\n";
+       << "\t                         (but always 1 for server mode)\n";
 }
 
 bool parse_args( TiCC::CL_Options& Opts,
@@ -303,7 +307,7 @@ bool parse_args( TiCC::CL_Options& Opts,
     }
     if ( skip.find_first_of("mM") != string::npos ){
       if ( options.doAlpino ){
-	LOG << "option skip=m conflicts with --alpino or --alpinoserver"
+	LOG << "option skip=m conflicts with --alpino"
 	    << endl;
 	return false;
       }
@@ -320,7 +324,7 @@ bool parse_args( TiCC::CL_Options& Opts,
     }
     if ( skip.find_first_of("pP") != string::npos ){
       if ( options.doAlpino ){
-	LOG << "option skip=p conflicts with --alpino or --alpinoserver"
+	LOG << "option skip=p conflicts with --alpino"
 	    << endl;
 	return false;
       }
@@ -352,16 +356,18 @@ bool parse_args( TiCC::CL_Options& Opts,
     configuration.setatt( "ner_override", opt_val, "NER" );
   }
   options.doServer = Opts.extract('S', options.listenport );
-  options.doAlpinoServer = Opts.extract("alpinoserver");
-  if ( options.doAlpinoServer ){
-    if ( Opts.extract("alpino") ){
-      // ok, just ignore
+  options.doAlpino = Opts.extract("alpino", opt_val);
+  if ( options.doAlpino ){
+    if ( !opt_val.empty() ){
+      if ( opt_val == "server" ){
+	options.doAlpinoServer = true;
+	configuration.setatt( "alpinoserver", "true", "parser" );
+      }
+      else {
+	LOG << "unsupported value for --alpino: " << opt_val << endl;
+	return false;
+      }
     }
-    options.doAlpino = true;
-    configuration.setatt( "alpinoserver", "true", "parser" );
-  }
-  else {
-    options.doAlpino = Opts.extract("alpino");
   }
   if ( options.doAlpino ){
     options.doParse = false;
@@ -611,8 +617,8 @@ int main(int argc, char *argv[]) {
 			  "uttmarker:,max-parser-tokens:,textredundancy:,"
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
 			  "help,language:,retry,nostdout,ner-override:,"
-			  "debug:,keep-parser-files,version,threads:,alpino,"
-			  "alpinoserver,override:,KANON,TESTAPI,debugfile:");
+			  "debug:,keep-parser-files,version,threads:,alpino::,"
+			  "override:,KANON,TESTAPI,debugfile:");
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
       // we already did show what we wanted.
