@@ -13,7 +13,7 @@ frog's current version will tokenize, tag, lemmatize, and morphologically segmen
 
 .SH OPTIONS
 
-.BR \-c " <configfile>"
+.BR \-c " <file>  or " \-\-config =<file>
 .RS
 set the configuration using 'file'
 .RE
@@ -21,7 +21,7 @@ set the configuration using 'file'
 .BR \-\-debug =<modele><level>,...
 .RS
 set debug level per module.
-Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi\(hyWord Units (m), Named Entity Recognition (n), or Parser (p).
+Tagger (T), Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi\(hyWord Units (m), Named Entity Recognition (n), or Parser (p).
 
 (e.g. \-\-debug=l5,n3 sets the level for the Lemmatizer to 5 and for the NER
 to 3 )
@@ -50,12 +50,7 @@ set input encoding. (default UTF8)
 give some help
 .RE
 
-.BR \-\-keep\-parser\-files =[yes|no]
-.RS
-keep the intermediate files from the parser. Last sentence only!
-.RE
-
-.BR \-\-language='comma separated list of languages'
+.BR \-\-language= <comma\ separated\ list\ of\ languages>
 .RS
 Set the languages to work on. This parameter is also passed to the tokenizer.
 The strings are assumed to be ISO 639\-2 codes.
@@ -80,13 +75,13 @@ signal end of input.
 suppress the collumned output to stdout. (when no outputfile is specified with
 \-o or \-\-outputdir)
 
-Especially useful when XML output is speifies with \-X or \-\-xmldir.
+Especially useful when XML output is specified with \-X or \-\-xmldir.
 .RE
 
 
 .BR \-o " <file>"
 .RS
-send output to 'file' instead of stdout. Defaults to the name of the inputfile with '.out' appended.
+send 'tabbed' output to 'file' instead of stdout. Defaults to the name of the inputfile with '.out' appended.
 .RE
 
 .BR \-\-outputdir " <dir>"
@@ -110,19 +105,20 @@ skip parts of the process: Tokenizer (t), Chunker (c), Lemmatizer (l), Morpholog
 
 .BR \-Q
 .RS
-Enable quotedetection in the tokenizer. May run havock!
+Enable quotedetection in the tokenizer. NOT USED.
 .RE
 
 .BR \-S " <port>"
 .RS
-Run a server on 'port'
+Run Frog as a server on 'port'
 .RE
 
 .BR \-t " <file>"
 .RS
 process 'file'.
 
-When \-t is omitted, Frog will run in interactive mode.
+When \-t is omitted, Frog will run on <file> if present, otherwise in
+interactive mode.
 .RE
 
 .BR \-x " <xmlfile>"
@@ -160,7 +156,7 @@ process all files in 'dir'. When the input mode is XML, only '.xml' files are te
 
 .BR \-\-tmpdir =<dir>
 .RS
-location to store intermediate files. Default /tmp.
+location to store intermediate files. Default /tmp. NOT USED!
 .RE
 
 .BR \-\-uttmarker =<mark>
@@ -193,7 +189,8 @@ generate FoLiA XML output and send it to 'file'. Defaults to the name of the inp
 .RS
 When
 .BR \-X
-for FoLia is given, use 'id' to give the doc an ID.
+for FoLia is given, use 'id' to give the doc an ID. The default is an xml:id
+based on the filename
 .RE
 
 
