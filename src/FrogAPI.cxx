@@ -1217,7 +1217,7 @@ frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
 	    << sentence.size()
 	    << ") then set with the --max-parser-tokens="
 	    << options.maxParserTokens << " option." << endl;
-	DBG << 	"Sentence is too long: " << s_count << endl
+	DBG << 	"Sentence " << s_count << " is too long: " << endl
 	    << sentence.sentence(true) << endl;
       }
     }
@@ -1355,24 +1355,6 @@ void FrogAPI::show_results( ostream& os,
     }
   }
   os << endl;
-}
-
-frog_record extract_from_word( const folia::Word* word,
-			       const string& textclass ){
-  frog_record rec;
-  rec.word = word->str(textclass);
-  folia::KWargs atts = word->collectAttributes();
-  if ( atts.find( "space" ) != atts.end() ){
-    rec.no_space = true;
-  }
-  if ( atts.find( "class" ) != atts.end() ){
-    rec.token_class = atts["class"];
-  }
-  else {
-    rec.token_class = "WORD";
-  }
-  rec.language = word->language();
-  return rec;
 }
 
 UnicodeString replace_spaces( const UnicodeString& in ) {
@@ -1902,7 +1884,8 @@ void FrogAPI::run_api_tests( const string& testName, ostream& outS ){
 
 // the functions below here are ONLY used by TSCAN.
 // the should be moved there probably
-// =======================================================================
+// The problem beeing that tscan has no knowledge about the `Mbma::mbma_tagset`
+// ===========================================================================
 vector<string> get_compound_analysis( folia::Word* word ){
   vector<string> result;
   vector<folia::MorphologyLayer*> layers
