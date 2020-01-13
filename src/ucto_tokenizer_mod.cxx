@@ -189,6 +189,15 @@ void UctoTokenizer::setQuoteDetection( bool b ) {
   }
 }
 
+void UctoTokenizer::setWordCorrection( bool b ) {
+  if ( tokenizer ) {
+    tokenizer->setWordCorrection( b );
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
 void UctoTokenizer::setInputEncoding( const std::string & enc ){
   if ( tokenizer ){
     if ( !enc.empty() ){
@@ -482,4 +491,15 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
     DBG << "Sentence tekst: " << s->str(textclass) << endl;
   }
   return wv;
+}
+
+vector<Tokenizer::Token> UctoTokenizer::correct_words( folia::FoliaElement *elt,
+						       vector<folia::Word*>& wv ){
+  if ( tokenizer ){
+    return tokenizer->correct_words( elt, wv );
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+
 }

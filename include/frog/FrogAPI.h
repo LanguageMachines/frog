@@ -92,6 +92,7 @@ class FrogOptions {
   std::string default_language;
   std::set<std::string> languages;
   std::string textredundancy;
+  bool correct_words;
   unsigned int maxParserTokens;
   std::string command;
 
