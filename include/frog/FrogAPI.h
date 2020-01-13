@@ -160,7 +160,9 @@ class FrogAPI {
   void append_to_sentence( folia::Sentence *, const frog_data& ) const;
   void append_to_words( const std::vector<folia::Word*>&,
 			const frog_data& ) const;
-
+  void handle_word_vector( std::ostream&,
+			   const std::vector<folia::Word*>&,
+			   const size_t );
   // data
   const TiCC::Configuration& configuration;
   FrogOptions& options;
