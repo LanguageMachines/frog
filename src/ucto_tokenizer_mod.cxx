@@ -496,7 +496,8 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
 vector<Tokenizer::Token> UctoTokenizer::correct_words( folia::FoliaElement *elt,
 						       vector<folia::Word*>& wv ){
   if ( tokenizer ){
-    return tokenizer->correct_words( elt, wv );
+    vector<folia::FoliaElement*> ev( wv.begin(), wv.end() );
+    return tokenizer->correct_elements( elt, ev );
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
