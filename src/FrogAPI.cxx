@@ -1427,7 +1427,7 @@ void FrogAPI::handle_word_vector( ostream& os,
 	<< " because it contains untokenized Words."
 	<< endl;
     if ( !options.correct_words ) {
-      LOG << " (you might try --correctwords)"
+      LOG << " (you might try --allow-word-corrections)"
 	  << endl;
     }
     exit( EXIT_FAILURE );

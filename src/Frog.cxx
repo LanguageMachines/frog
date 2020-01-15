@@ -103,7 +103,7 @@ void usage( ) {
        << "\t                        the same value is used for output too.\n"
        << "\t --inputclass=<cls>     use the specified class to search for text in the the FoLiA docs. (default 'current') \n"
        << "\t --outputclass=<cls>    use the specified class to output text in the the FoLia docs. (default 'inputclass') \n"
-       << "\t --correctwords         allow the tokenizer to correct <w> nodes. (FoLiA only)\n"
+       << "\t --allow-word-corrections         allow the tokenizer to correct <w> nodes. (FoLiA only)\n"
        << "\t --testdir=<directory>  All files in this dir will be tested\n"
        << "\t --uttmarker=<mark>     utterances are separated by 'mark' symbols (default none)\n"
        << "\t -n                     Assume input file to hold one sentence per line\n"
@@ -293,7 +293,7 @@ bool parse_args( TiCC::CL_Options& Opts,
     options.textredundancy = redundancy;
   }
   options.doSentencePerLine = Opts.extract( 'n' );
-  options.correct_words = Opts.extract( "correctwords" );
+  options.correct_words = Opts.extract( "allow-word-corrections" );
   options.doQuoteDetection = Opts.extract( 'Q' );
   if (  options.doQuoteDetection ){
     LOG << "Quote detection is NOT supported!" << endl;
@@ -623,7 +623,8 @@ int main(int argc, char *argv[]) {
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
 			  "help,language:,retry,nostdout,ner-override:,"
 			  "debug:,keep-parser-files,version,threads:,alpino::,"
-			  "override:,KANON,TESTAPI,debugfile:,correctwords");
+			  "override:,KANON,TESTAPI,debugfile:,"
+			  "allow-word-corrections");
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
       // we already did show what we wanted.
