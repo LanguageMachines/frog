@@ -834,7 +834,6 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	vector<Tokenizer::Token> toks = tokenizer->tokenize_line( data );
 	timers.tokTimer.stop();
 	while ( toks.size() > 0 ){
-	  DBG << "voor frog_sentence 1 " << endl;
 	  frog_data sent = frog_sentence( toks, 1 );
 	  if ( options.doXMLout ){
 	    root = append_to_folia( root, sent, par_count );
@@ -909,7 +908,6 @@ void FrogAPI::FrogStdin( bool prompt ) {
     }
     vector<Tokenizer::Token> toks = tokenizer->tokenize_line( data );
     while ( toks.size() > 0 ){
-      DBG << "voor frog_sentence 2 " << endl;
       frog_data res = frog_sentence( toks, 1 );
       show_results( cout, res );
       toks = tokenizer->tokenize_line_next();
@@ -982,7 +980,6 @@ void FrogAPI::FrogInteractive(){
 	cout << "Processing... '" << data << "'" << endl;
 	vector<Tokenizer::Token> toks = tokenizer->tokenize_line( data );
 	while ( !toks.empty() ){
-	  DBG << "voor frog_sentence 3 " << endl;
 	  frog_data res = frog_sentence( toks, 1 );
 	  show_results( cout, res );
 	  toks = tokenizer->tokenize_line_next();
@@ -1410,7 +1407,6 @@ void FrogAPI::handle_word_vector( ostream& os,
   // cerr << "text:" << text << " size=" << wv.size() << endl;
   // cerr << "tokens:" << toks << " size=" << toks.size() << endl;
   if ( toks.size() == wv.size() ){
-    DBG << "voor frog_sentence 4 " << endl;
     frog_data res = frog_sentence( toks, s_cnt );
     //    cerr << "res:" << res << " size=" << res.size() << endl;
     if ( res.size() > 0 ){
@@ -1470,7 +1466,6 @@ void FrogAPI::handle_one_sentence( ostream& os,
     vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text, sent_lang );
     timers.tokTimer.stop();
     while ( toks.size() > 0 ){
-      DBG << "voor frog_sentence 5 " << endl;
       frog_data sent = frog_sentence( toks, s_cnt );
       if ( !options.noStdOut ){
 	show_results( os, sent );
@@ -1507,7 +1502,6 @@ void FrogAPI::handle_one_paragraph( ostream& os,
       vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text );
       timers.tokTimer.stop();
       while ( toks.size() > 0 ){
-	DBG << "voor frog_sentence 6 " << endl;
 	frog_data res = frog_sentence( toks, ++sentence_done );
 	while ( !res.empty() ){
 	  if ( !options.noStdOut ){
@@ -1526,7 +1520,6 @@ void FrogAPI::handle_one_paragraph( ostream& os,
 	  if ( toks.size() == 0 ){
 	    break;
 	  }
-	  DBG << "voor frog_sentence 7 " << endl;
 	  res = frog_sentence( toks, ++sentence_done );
 	}
 	timers.tokTimer.start();
@@ -1562,7 +1555,6 @@ void FrogAPI::handle_one_text_parent( ostream& os,
     string text = TiCC::UnicodeToUTF8(replace_spaces( utext ));
     vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text );
     if ( toks.size() > 0 ){
-      DBG << "voor frog_sentence 8 " << endl;
       frog_data res = frog_sentence( toks, ++sentence_done );
       if ( !options.noStdOut ){
 	show_results( os, res );
@@ -1616,7 +1608,6 @@ void FrogAPI::handle_one_text_parent( ostream& os,
       timers.tokTimer.stop();
       vector<frog_data> sents;
       while ( toks.size() > 0 ){
-	DBG << "voor frog_sentence 9 " << endl;
 	frog_data res = frog_sentence( toks, ++sentence_done );
 	sents.push_back( res );
 	if ( !options.noStdOut ){
@@ -1764,7 +1755,6 @@ folia::Document *FrogAPI::run_text_engine( const string& infilename,
   vector<Tokenizer::Token> toks = tokenizer->tokenize_stream( test_file );
   timers.tokTimer.stop();
   while ( toks.size() > 0 ){
-    DBG << "voor frog_sentence 10 " << endl;
     frog_data res = frog_sentence( toks, ++i );
     if ( !options.noStdOut ){
       show_results( os, res );
