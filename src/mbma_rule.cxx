@@ -351,19 +351,23 @@ bool Rule::performEdits(){
 	if ( (k + j) < rules.size() ){
 	  if ( rules[k+j].uchar != cur->del[j] ){
 	    UnicodeString tmp(cur->del[j]);
-	    LOG << "Hmm: deleting " << cur->del << " is impossible. ("
-			      << rules[k+j].uchar << " != " << tmp
-			      << ")." << endl;
-	    LOG << "Reject rule: " << this << endl;
+	    if ( debugFlag > 0 ){
+	      LOG << "Hmm: deleting " << cur->del << " is impossible. ("
+		  << rules[k+j].uchar << " != " << tmp
+		  << ")." << endl;
+	      LOG << "Reject rule: " << this << endl;
+	    }
 	    return false;
 	  }
 	}
 	else {
 	  UnicodeString tmp(cur->del[j]);
-	  LOG << "Hmm: deleting " << cur->del
-			    << " is impossible. (beyond end of the rule)"
-			    << endl;
-	  LOG << "Reject rule: " << this << endl;
+	  if ( debugFlag > 0 ){
+	    LOG << "Hmm: deleting " << cur->del
+		<< " is impossible. (beyond end of the rule)"
+		<< endl;
+	    LOG << "Reject rule: " << this << endl;
+	  }
 	  return false;
 	}
       }
