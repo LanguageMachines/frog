@@ -81,9 +81,10 @@
 #include "frog/ner_tagger_mod.h"
 #include "frog/Parser.h"
 #include "frog/AlpinoParser.h"
-
+#include "ticcutils/json.hpp"
 
 using namespace std;
+using namespace nlohmann;
 using namespace Tagger;
 using TiCC::operator<<;
 
@@ -119,6 +120,8 @@ FrogOptions::FrogOptions() {
   doServer = false;
   doXMLin =  false;
   doXMLout =  false;
+  doJSONin = false;
+  doJSONout = false;
   doKanon =  false;
   doAlpinoServer = false;
   doAlpino =  false;
@@ -1340,27 +1343,105 @@ void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
   }
 }
 
+void FrogAPI::output_to_json( json& result, const frog_record& fd ) const {
+  ///
+  /// format a frog_record fd into a json structure
+  ///
+  result["word"] = fd.word;
+  if ( options.doLemma
+       && !fd.lemmas.empty() ){
+    result["lemma"] = fd.lemmas[0];
+  }
+  if ( options.doMorph ){
+    if ( fd.morphs.empty() ){
+      if ( !fd.deep_morph_string.empty() ){
+	result["morph"] = fd.deep_morph_string;
+	if ( fd.compound_string != "0"  ){
+	  result["compound"] = fd.compound_string;
+	}
+      }
+    }
+    else {
+      result["morph"] = fd.morph_string;
+    }
+  }
+  if ( options.doTagger ){
+    json tag;
+    tag["tag"] = fd.tag;
+    if ( fd.tag.empty() ){
+      tag["confidence"] = 1.0;
+    }
+    else {
+      tag["confidence"] = fd.tag_confidence;
+    }
+    result["tag"] = tag;
+  }
+  if ( options.doNER ){
+    result["NER"] = TiCC::uppercase(fd.ner_tag);
+  }
+  if ( options.doIOB ){
+    result["chunking"] = fd.iob_tag;
+  }
+  if ( options.doParse || options.doAlpino ){
+    json parse;
+    parse["parse_index"] = fd.parse_index;
+    parse["parse_role"] = fd.parse_role;
+    result["parse"] = parse;
+  }
+}
+
+void FrogAPI::output_JSON( ostream& os,
+			   const frog_data& fd ) const {
+  json out_json = json::array();
+  if ( fd.mw_units.empty() ){
+    for ( size_t pos=0; pos < fd.units.size(); ++pos ){
+      json part;
+      part["index"] = pos+1;
+      json result;
+      output_to_json( result, fd.units[pos] );
+      part["result"] = result;
+      out_json.push_back( part );
+    }
+  }
+  else {
+    for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
+      json part;
+      part["index"] = pos+1;
+      json result;
+      output_to_json( result, fd.mw_units[pos] );
+      part["result"] = result;
+      out_json.push_back( part );
+    }
+  }
+  os << std::setw(4) << out_json << endl;
+}
+
 void FrogAPI::show_results( ostream& os,
 			    const frog_data& fd ) const {
   ///
   /// output a frog_data structure @fd in tabbed format to stream @os
   /// This done in a backward compatible manor to older Frog versions
   ///
-  if ( fd.mw_units.empty() ){
-    for ( size_t pos=0; pos < fd.units.size(); ++pos ){
-      os << pos+1 << Tab;
-      output_tabbed( os, fd.units[pos] );
-      os << endl;
-    }
+  if ( options.doJSONout ){
+    output_JSON( os, fd );
   }
   else {
-    for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
-      os << pos+1 << Tab;
-      output_tabbed( os, fd.mw_units[pos] );
-      os << endl;
+    if ( fd.mw_units.empty() ){
+      for ( size_t pos=0; pos < fd.units.size(); ++pos ){
+	os << pos+1 << Tab;
+	output_tabbed( os, fd.units[pos] );
+	os << endl;
+      }
     }
+    else {
+      for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
+	os << pos+1 << Tab;
+	output_tabbed( os, fd.mw_units[pos] );
+	os << endl;
+      }
+    }
+    os << endl;
   }
-  os << endl;
 }
 
 UnicodeString replace_spaces( const UnicodeString& in ) {

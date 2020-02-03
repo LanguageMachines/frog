@@ -73,6 +73,8 @@ class FrogOptions {
   bool noStdOut;
   bool doXMLin;
   bool doXMLout;
+  bool doJSONin;
+  bool doJSONout;
   bool doServer;
   bool doKanon;
   bool test_API;
@@ -146,8 +148,14 @@ class FrogAPI {
   void test_version( const std::string&, double );
   // functions
   void FrogStdin( bool prompt );
-  void output_tabbed( std::ostream&, const frog_record& ) const;
-  void show_results( std::ostream&, const frog_data& ) const;
+  void output_tabbed( std::ostream&,
+		      const frog_record& ) const;
+  void output_to_json( nlohmann::json&,
+		      const frog_record& ) const;
+  void output_JSON( std::ostream& os,
+		    const frog_data& fd ) const;
+  void show_results( std::ostream&,
+		     const frog_data& ) const;
   void handle_one_paragraph( std::ostream&,
 			     folia::Paragraph*,
 			     int& );

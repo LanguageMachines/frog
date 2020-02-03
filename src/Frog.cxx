@@ -67,6 +67,7 @@ using namespace std;
 string testDirName;
 string outputFileName;
 bool wantOUT;
+bool JSON_out;
 string XMLoutFileName;
 string outputDirName;
 string xmlDirName;
@@ -138,6 +139,7 @@ void usage( ) {
        << "\t --outputdir=<dir>      Output to dir, instead of default stdout\n"
        << "\t --xmldir=<dir>         Use 'dir' to output FoliA XML to.\n"
        << "\t --deep-morph           add deep morphological information to the output\n"
+       << "\t --JSON                 Output JSON in stead of Tabbed\n"
        << "\t ============= OTHER OPTIONS ============================================\n"
        << "\t -h or --help           give some help.\n"
        << "\t -V or --version        Show version info.\n"
@@ -425,6 +427,7 @@ bool parse_args( TiCC::CL_Options& Opts,
     }
   };
   wantOUT = false;
+  JSON_out = false;
   if ( Opts.extract( "outputdir", outputDirName )) {
     if ( outputDirName.back() != '/' ){
       outputDirName += "/";
@@ -438,6 +441,17 @@ bool parse_args( TiCC::CL_Options& Opts,
   else if ( Opts.extract( 'o', outputFileName ) ){
     wantOUT = true;
   };
+  if ( Opts.extract( "JSON" ) ){
+    if ( wantOUT ){
+      JSON_out = true;
+    }
+    else {
+      LOG << "JSON option only valid in combination with '-o' or '--outputdir'"
+	  << endl;
+      return false;
+    }
+  };
+  options.doJSONout = JSON_out;
   options.doXMLout = false;
   Opts.extract( "id", options.docid );
   if ( !options.docid.empty() ){
@@ -623,7 +637,7 @@ int main(int argc, char *argv[]) {
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
 			  "help,language:,retry,nostdout,ner-override:,"
 			  "debug:,keep-parser-files,version,threads:,alpino::,"
-			  "override:,KANON,TESTAPI,debugfile:,"
+			  "override:,KANON,TESTAPI,debugfile:,JSON,"
 			  "allow-word-corrections");
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
