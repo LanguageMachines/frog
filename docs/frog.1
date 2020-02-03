@@ -1,4 +1,4 @@
-.TH frog 1 "2017 may 1"
+.TH frog 1 "2019 nov 18"
 
 .SH NAME
 frog \- Dutch Natural Language Toolkit
@@ -8,12 +8,15 @@ frog [options]
 frog \-t test\-file
 
 .SH DESCRIPTION
-frog is an integration of memory\(hy-based natural language processing (NLP) modules developed for Dutch.
-frog's current version will tokenize, tag, lemmatize, and morphologically segment word tokens in Dutch text files, add IOB chunks and will assign a dependency graph to each sentence.
+frog is an integration of memory\(hy-based natural language processing (NLP)
+modules developed for Dutch.
+frog's current version will tokenize, tag, lemmatize, and morphologically
+segment word tokens in Dutch text files, add IOB chunks and will assign a
+dependency graph to each sentence.
 
 .SH OPTIONS
 
-.BR \-c " <configfile>"
+.BR \-c " <file>  or " \-\-config =<file>
 .RS
 set the configuration using 'file'
 .RE
@@ -21,7 +24,9 @@ set the configuration using 'file'
 .BR \-\-debug =<modele><level>,...
 .RS
 set debug level per module.
-Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c), Multi\(hyWord Units (m), Named Entity Recognition (n), or Parser (p).
+Tagger (T), Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a),
+Chunker (c), Multi\(hyWord Units (m), Named Entity Recognition (n),
+or Parser (p).
 
 (e.g. \-\-debug=l5,n3 sets the level for the Lemmatizer to 5 and for the NER
 to 3 )
@@ -35,7 +40,8 @@ set global debug level. (for all modules)
 
 .BR \-\-deep\(hymorph
 .RS
-generate a deep morphological analisys and add it to the XML. This also includes compound information.
+generate a deep morphological analisys and add it to the XML. This also
+includes compound information.
 The default tabbed output is also more detailed in the Morpheme field.
 
 .RE
@@ -50,12 +56,7 @@ set input encoding. (default UTF8)
 give some help
 .RE
 
-.BR \-\-keep\-parser\-files =[yes|no]
-.RS
-keep the intermediate files from the parser. Last sentence only!
-.RE
-
-.BR \-\-language='comma separated list of languages'
+.BR \-\-language= <comma\ separated\ list\ of\ languages>
 .RS
 Set the languages to work on. This parameter is also passed to the tokenizer.
 The strings are assumed to be ISO 639\-2 codes.
@@ -80,18 +81,20 @@ signal end of input.
 suppress the collumned output to stdout. (when no outputfile is specified with
 \-o or \-\-outputdir)
 
-Especially useful when XML output is speifies with \-X or \-\-xmldir.
+Especially useful when XML output is specified with \-X or \-\-xmldir.
 .RE
 
 
 .BR \-o " <file>"
 .RS
-send output to 'file' instead of stdout. Defaults to the name of the inputfile with '.out' appended.
+send 'tabbed' output to 'file' instead of stdout. Defaults to the name of the
+inputfile with '.out' appended.
 .RE
 
 .BR \-\-outputdir " <dir>"
 .RS
-send all output to 'dir' instead of stdout. Creates filenames from the inputfilename(s) with '.out' appended.
+send all output to 'dir' instead of stdout. Creates filenames from the
+inputfilename(s) with '.out' appended.
 .RE
 
 .BR \-\-retry
@@ -105,29 +108,44 @@ file names. (so this has no effect if neither \-o, \-\-outputdir, \-X or
 
 .BR \-\-skip =[aclmnpt]
 .RS
-skip parts of the process: Tokenizer (t), Chunker (c), Lemmatizer (l), Morphological Analyzer (a), Multi\(hyWord unit (m), Named\(hyEntity recognizer (n) or Parser (p)
+skip parts of the process: Tokenizer (t), Chunker (c), Lemmatizer (l),
+Morphological Analyzer (a), Multi\(hyWord unit (m),
+Named\(hyEntity recognizer (n) or Parser (p)
+.RE
+
+.BR \-\-alpino
+.RS
+Use a locally installed Alpino parser
+.RE
+
+.BR \-\-alpino =server
+.RS
+use a remote installed Alpino server, as specified in the frog configuration
+file.
 .RE
 
 .BR \-Q
 .RS
-Enable quotedetection in the tokenizer. May run havock!
+Enable quotedetection in the tokenizer. NOT USED.
 .RE
 
 .BR \-S " <port>"
 .RS
-Run a server on 'port'
+Run Frog as a server on 'port'
 .RE
 
 .BR \-t " <file>"
 .RS
 process 'file'.
 
-When \-t is omitted, Frog will run in interactive mode.
+When \-t is omitted, Frog will run on <file> if present, otherwise in
+interactive mode.
 .RE
 
 .BR \-x " <xmlfile>"
 .RS
-process 'xmlfile', which is supposed to be in FoLiA format! If 'xmlfile' is empty, and
+process 'xmlfile', which is supposed to be in FoLiA format! If 'xmlfile' is
+empty, and
 .BR \-\-testdir =<dir>
 is provided, all '.xml' files in 'dir' will be processed as FoLia XML.
 .RE
@@ -154,13 +172,14 @@ Preferably this is another class then the inputclass.
 
 .BR \-\-testdir =<dir>
 .RS
-process all files in 'dir'. When the input mode is XML, only '.xml' files are teken from 'dir'. see also
+process all files in 'dir'. When the input mode is XML, only '.xml' files are
+teken from 'dir'. see also
 .B \-\-outputdir
 .RE
 
 .BR \-\-tmpdir =<dir>
 .RS
-location to store intermediate files. Default /tmp.
+location to store intermediate files. Default /tmp. NOT USED!
 .RE
 
 .BR \-\-uttmarker =<mark>
@@ -181,19 +200,22 @@ show version info
 
 .BR \-\-xmldir =<dir>
 .RS
-generate FoLiA XML output and send it to 'dir'. Creates filenames from the inputfilename with '.xml' appended. (Except when it already ends with '.xml')
+generate FoLiA XML output and send it to 'dir'. Creates filenames from the
+inputfilename with '.xml' appended. (Except when it already ends with '.xml')
 .RE
 
 .BR \-X " <file>"
 .RS
-generate FoLiA XML output and send it to 'file'. Defaults to the name of the inputfile(s) with '.xml' appended. (Except when it already ends with '.xml')
+generate FoLiA XML output and send it to 'file'. Defaults to the name of the
+inputfile(s) with '.xml' appended. (Except when it already ends with '.xml')
 .RE
 
 .BR \-\-id "=<id>"
 .RS
 When
 .BR \-X
-for FoLia is given, use 'id' to give the doc an ID.
+for FoLia is given, use 'id' to give the doc an ID. The default is an xml:id
+based on the filename
 .RE
 
 

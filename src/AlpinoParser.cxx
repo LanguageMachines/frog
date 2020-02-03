@@ -1,6 +1,6 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  Copyright (c) 2006 - 2019
+  Copyright (c) 2006 - 2020
   CLST  - Radboud University
   ILK   - Tilburg University
 
@@ -666,25 +666,33 @@ vector<parsrel> AlpinoParser::alpino_parse( frog_data& fd ){
   cerr << "calling Alpino input:" << fd.sentence() << endl;
 #endif
   vector<parsrel> result;
-  string txt = fd.sentence();
-  string txt_file = TiCC::tempname("alpino");
-  string tmp_dir = TiCC::dirname(txt_file)+"/";
-  txt_file = tmp_dir + "parse.txt";
-  ofstream os( txt_file );
+  string input_file = TiCC::tempname("alpino-parse.txt.");
+  string tmp_dir = TiCC::dirname(input_file)+"/";
+  string tmp_str = input_file.substr( input_file.size()-6 );
+  string txt = tmp_str + "|" + fd.sentence();
+  //    Alpino will use tmp_str for the output filename.
+  ofstream os( input_file );
   os << txt;
   os.close();
   string parseCmd = "Alpino -veryfast -flag treebank " + tmp_dir +
-    " end_hook=xml -parse <  " + txt_file + " -notk > /dev/null 2>&1";
-  //  cerr << "run: " << parseCmd << endl;
+    " end_hook=xml -parse <  " + input_file + " -notk > /dev/null 2>&1";
+#ifdef DEBUG_ALPINO
+  cerr << "run: " << parseCmd << endl;
+#endif
   int res = system( parseCmd.c_str() );
   if ( res ){
     cerr << "Alpino failed: RES = " << res << " : " << strerror(res) << endl;
     return result;
   }
-  TiCC::erase( txt_file );
-  string xmlfile = tmp_dir + "1.xml";
-  xmlDoc *xmldoc = xmlReadFile( xmlfile.c_str(), 0, XML_PARSE_NOBLANKS );
+#ifndef DEBUG_ALPINO
+  TiCC::erase( input_file );
+#endif
+  string xml_file = tmp_dir + tmp_str + ".xml";
+  xmlDoc *xmldoc = xmlReadFile( xml_file.c_str(), 0, XML_PARSE_NOBLANKS );
   result = extract_dp(xmldoc,fd);
   xmlFreeDoc( xmldoc );
+#ifndef DEBUG_ALPINO
+  TiCC::erase( xml_file );
+#endif
   return result;
 }

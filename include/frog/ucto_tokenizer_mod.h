@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006 - 2019
+  Copyright (c) 2006 - 2020
   CLST  - Radboud University
   ILK   - Tilburg University
 
@@ -51,6 +51,7 @@ class UctoTokenizer {
   void setOutputClass( const std::string& );
   void setDocID( const std::string& );
   void setTextRedundancy( const std::string& );
+  void setWordCorrection( bool );
   std::string get_data_version() const;
   std::string default_language() const;
   bool get_setting_info( const std::string&, std::string&, std::string& ) const;
@@ -63,6 +64,8 @@ class UctoTokenizer {
   std::vector<folia::Word*> add_words( folia::Sentence *,
 				       const frog_data& ) const;
   void add_provenance( folia::Document& , folia::processor * ) const;
+  std::vector<Tokenizer::Token> correct_words( folia::FoliaElement *,
+					       std::vector<folia::Word*>& );
  private:
   std::istream *cur_is;
   Tokenizer::TokenizerClass *tokenizer;

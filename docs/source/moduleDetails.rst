@@ -18,7 +18,7 @@ to UTF-8 as well.
 Tokenizer
 ~~~~~~~~~~
 
-Frog uses the tokenization software *Ucto* :raw-latex:`\cite{UCTO}` for
+Frog uses the tokenization software *Ucto* [UCTO]_ for
 sentence boundary detection and to separate punctuation from words. In
 general, recognizing sentence boundaries and punctuation is a simple
 task but recognizing names and abbreviations is essential to perfom this
@@ -55,29 +55,27 @@ concatenated in the same manner.
   token. We shown an example sentence in [ex\_mwu] that has two
   multi-word units: *Albert Heijn* and *’s avonds*.
 
-+----------------+-------------------------------------------------------------------------------------------------------------------------+
-| [ex\_mwu] S:   | Supermarkt Albert Heijn is tegenwoordig tot ’s avonds laat open.                                                        |
-+----------------+-------------------------------------------------------------------------------------------------------------------------+
-|                |                                                                                                                         |
-+----------------+-------------------------------------------------------------------------------------------------------------------------+
-| 1              | Supermarkt supermarkt [super][markt] N(soort,ev,basis,zijd,stan) 0.542056 O B-NP 3 su                                   |
-+----------------+-------------------------------------------------------------------------------------------------------------------------+
-| 2              | Albert\_Heijn Albert\_Heijn [Albert]\_[Heijn] SPEC(deeleigen)\_SPEC(deeleigen) 1.000000 B-ORG\_I-ORG B-NP\_I-NP 1 app   |
-+----------------+-------------------------------------------------------------------------------------------------------------------------+
-| 3              | is zijn [zijn] WW(pv,tgw,ev) 0.999150 O B-VP ROOT                                                                       |
-+----------------+-------------------------------------------------------------------------------------------------------------------------+
-| 4              | tegenwoordig tegenwoordig [tegenwoordig] ADJ(vrij,basis,zonder) 0.994033 O B-ADVP 3 predc                               |
-+----------------+-------------------------------------------------------------------------------------------------------------------------+
-| 5              | tot tot [tot] VZ(init) 0.964286 O B-PP None                                                                             |
-+----------------+-------------------------------------------------------------------------------------------------------------------------+
-| 6              | ’s\_avonds ’s\_avond [’s]\_[avond][s] LID(bep,gen,evmo)\_N(soort,ev,basis,gen) 0.962560 O\_O O\_B-ADVP 5 obj1           |
-+----------------+-------------------------------------------------------------------------------------------------------------------------+
-| 7              | laat laat [laat] ADJ(vrij,basis,zonder) 1.000000 O B-VP 8 mod                                                           |
-+----------------+-------------------------------------------------------------------------------------------------------------------------+
-| 8              | open open [open] ADJ(vrij,basis,zonder) 0.983755 O B-ADJP 3 predc                                                       |
-+----------------+-------------------------------------------------------------------------------------------------------------------------+
-| 9              | . . [.] LET() 1.000000 O O 8 punct                                                                                      |
-+----------------+-------------------------------------------------------------------------------------------------------------------------+
++----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
+| [ex\_mwu] Sentence                 | Supermarkt Albert Heijn is tegenwoordig tot ’s avonds laat open.                                    |
++====+===============+===============+===================+==========================================+==========+==============+============+
+| 1  | Supermarkt    | supermarkt    | [super][markt]    | N(soort,ev,basis,zijd,stan)              | 0.542056 | O            | B_NP       |
++----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
+| 2  | Albert\_Heijn | Albert\_Heijn | [Albert]\_[Heijn] | SPEC(deeleigen)\_SPEC(deeleigen)         | 1.000000 | B-ORG\_I-ORG | B-NP\_I-NP |
++----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
+| 3  | is            | zijn          | [zijn]            | WW(pv,tgw,ev)                            | 0.999150 | O            | B-VP       |
++----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
+| 4  | tegenwoordig  | tegenwoordig  | [tegenwoordig]    | ADJ(vrij,basis,zonder)                   | 0.994033 | O            | B-ADVP     |
++----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
+| 5  | tot           | tot           | [tot]             | VZ(init)                                 | 0.964286 | O            | B-PP       |
++----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
+| 6  | ’s\_avonds    | ’s\_avond     | [’s]\_[avond][s]  | LID(bep,gen,evmo)\_N(soort,ev,basis,gen) | 0.962560 | O\_O         | O\_B-ADVP  |
++----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
+| 7  | laat          | laat          | [laat]            | ADJ(vrij,basis,zonder)                   | 1.000000 | O            | B-VP       |
++----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
+| 8  | open          | open          | [open]            | ADJ(vrij,basis,zonder)                   | 0.983755 | O            | B-ADJP     |                                                       
++----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
+| 9  | .             | .             | [.]               | LET()                                    | 1.000000 | O            | O          |
++----+---------------+---------------+-------------------+------------------------------------------+----------+--------------+------------+
 
 Lemmatizer
 ~~~~~~~~~~
@@ -85,7 +83,7 @@ Lemmatizer
 The lemmatizer assigns the canonical form of a word to each word. For
 verbs the canonical form is the infinitive, and for nouns it is the
 singular form. The lemmatizer trained on the e-Lex lexicon
-:raw-latex:`\cite{e-lex}`. It is dependent on the Part-of-Speech tagger
+[ELEX]_. It is dependent on the Part-of-Speech tagger
 as it uses both the word form and the assigned PoS tag to disambiguate
 between different candidate lemmas. For example the word *zakken* used
 as a noun has the lemma *zak* while the verb has lemma *zakken*. Section
@@ -111,7 +109,7 @@ Part-of-Speech Tagger
 ~~~~~~~~~~~~~~~~~~~~~
 
 The Part-of-Speech tagger uses the tag set of *Corpus Gesproken
-Nederlands (CNG)* :raw-latex:`\cite{vanEynde2004}`. It has 12 main PoS
+Nederlands (CNG)* [POS2004]_. It has 12 main PoS
 tags (shown in table [tab-pos-tags]) and detailed features for type,
 gender, number, case, position, degree, and tense.
 
@@ -241,13 +239,13 @@ Dependency Parser
 ~~~~~~~~~~~~~~~~~~
 
 The Constraint-satisfaction inference-based dependency parser (CSI-DP)
-:raw-latex:`\cite{Canisius+2006}` predicts grammatical relations between
+[Canisius+2006]_ predicts grammatical relations between
 pairs of tokens. In each token pair relation, one token is the head and
 the other is the dependent. Together these relations represent the
 syntactic tree of the sentence. One token, usually the main verb in he
 sentence, forms the root of the tree and the other tokens depend on the
 root in a direct or indirect relation. CSI-DP is trained on the Alpino
-treebank :raw-latex:`\cite{Bouma+01}` for Dutch and uses the Alpino
+treebank [Alpino]_ for Dutch and uses the Alpino
 syntactic labels listed in appendix [app-dep]. In the plain text output
 of Frog ( example [ex-frog-out]) the dependency information is presented
 in the last two columns. The one-but-last column shows number of the
@@ -262,7 +260,7 @@ The noun *team* is the head in three relations: the determiner(det)
 prepositional phrase *van* is correctly assigned to the head noun *team*
 but the phrase *aan* is mistakenly linked to *politie* instead of the
 root verb *bevestigt*. Linking prepositional phrases is a hard task for
-parsers :raw-latex:`\cite{atterer2007}`. More details on the
+parsers [atterer2007]_. More details on the
 architecture of the CSI-DP can be found in section [sec-bg-dep]
 
 +------+--------------------+------+---------+
@@ -297,7 +295,7 @@ architecture of the CSI-DP can be found in section [sec-bg-dep]
 
 Table: [ex-dep] The dependency parser labels each token with a
 dependency relation to its head token and assigns the grammatical
-relation.
+relation. 
 
 
 

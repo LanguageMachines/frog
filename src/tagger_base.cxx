@@ -1,6 +1,6 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  Copyright (c) 2006 - 2019
+  Copyright (c) 2006 - 2020
   CLST  - Radboud University
   ILK   - Tilburg University
 
@@ -35,7 +35,6 @@
 #include "ticcutils/SocketBasics.h"
 #include "ticcutils/PrettyPrint.h"
 #include "ticcutils/json.hpp"
-#include "mbtserver/MbtServerBase.h"
 #include "frog/Frog-util.h"
 
 using namespace std;

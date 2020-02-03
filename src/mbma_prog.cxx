@@ -1,6 +1,6 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  Copyright (c) 2006 - 2019
+  Copyright (c) 2006 - 2020
   CLST  - Radboud University
   ILK   - Tilburg University
 
@@ -252,7 +252,7 @@ void Test( istream& in ){
 
 int main(int argc, char *argv[]) {
   std::ios_base::sync_with_stdio(false);
-  cerr << "mbma " << VERSION << " (c) CLTS, ILK 2014 - 2019" << endl;
+  cerr << "mbma " << VERSION << " (c) CLTS, ILK 2014 - 2020" << endl;
   cerr << "CLST  - Centre for Language and Speech Technology,"
        << "Radboud University" << endl
        << "ILK   - Induction of Linguistic Knowledge Research Group,"

@@ -404,13 +404,13 @@ References
 
 .. [Canisius+2006]  Canisius, Sander, Toine Bogers, Antal van den Bosch, Jeroen Geertzen, and Erik Tjong Kim Sang. 2006. Dependency parsing by inference over high-recall dependency predictions. In Proceedings of the Tenth Conference on Computational Natural Language Learning, CoNLL-X ’06, pages 176–180, Stroudsburg, PA, USA. Association for Computational Linguistics.
 
-..[MBT] Daelemans, W., J. Zavrel, A. Van den Bosch, and K. Van der Sloot. 2010. MBT: Memory-based tagger, version 3.2, reference guide. Technical Report ILK Research Group Technical Report Series 10-04, ILK, Tilburg University, The Netherlands.
+.. [MBT] Daelemans, W., J. Zavrel, A. Van den Bosch, and K. Van der Sloot. 2010. MBT: Memory-based tagger, version 3.2, reference guide. Technical Report ILK Research Group Technical Report Series 10-04, ILK, Tilburg University, The Netherlands.
 
-..[Timbl] Daelemans, W., J. Zavrel, K. Van der Sloot, and A. Van den Bosch. 2004. TiMBL: Tilburg Memory Based Learner, version 6.3, reference manual. Technical Report ILK Research Group Technical Report Series 10-01, ILK, Tilburg University, The Netherlands.
+.. [Timbl] Daelemans, W., J. Zavrel, K. Van der Sloot, and A. Van den Bosch. 2004. TiMBL: Tilburg Memory Based Learner, version 6.3, reference manual. Technical Report ILK Research Group Technical Report Series 10-01, ILK, Tilburg University, The Netherlands.
 
 .. [Daelemans1999] Daelemans, Walter, Sabine Buchholz, and Jorn Veenstra. 1999. Memory-based shallow parsing. In Proceedings of CoNLL-99, pages 53–60.
 
-..[NERmanual] Desmet, Bart and Veronique Hoste. 2009. Named Entity Annotatierichtlijnen voor het Nederlands. Technical Report LT3 09.01.,  LT3, University Ghent, Belgium.
+.. [NERmanual] Desmet, Bart and Veronique Hoste. 2009. Named Entity Annotatierichtlijnen voor het Nederlands. Technical Report LT3 09.01.,  LT3, University Ghent, Belgium.
 
 
 .. [Eisner2000]   Eisner, Jason, 2000. Bilexical grammars and their cubic-time parsing algorithms, pages 29–61. Springer.  Haque, R., S. Kumar Naskar, A. Van den Bosch, and A. Way. 2011. Integrating source-language context into phrase-based statistical machine translation. Machine Translation, 25(3):239–285, September.

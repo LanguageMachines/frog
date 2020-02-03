@@ -48,9 +48,9 @@ the order specified here:
 
 -  ``timbl``\  [5]_ - The memory-based classifier engine
 
--  ``timblserver``\  [6]_ - For server functionality around Timbl
+-  ``mbt``\  [6]_ - The memory-based tagger
 
--  ``mbt``\  [7]_ - The memory-based tagger
+-  ``frogdata``\  [7]_ - Datafiles needed to run Frog
 
 You will also need the following 3rd party dependencies:
 
@@ -60,6 +60,9 @@ You will also need the following 3rd party dependencies:
 -  **libxml2** - An XML library. On Debian/Ubuntu systems install the
    package ``libxml2-dev``.
 
+-  **textcat** - A library for language detection. On Debian/Ubuntu systems install the
+   package ``libexttextcat-dev``.
+
 -  A sane build environment with a C++ compiler (e.g. gcc or clang),
    autotools, autoconf-archive, libtool, pkg-config
 
@@ -67,15 +70,14 @@ The actual compilation proceeds by entering the Frog directory and
 issuing the following commands:
 
 ::
-
     $ bash bootstrap.sh
     $ ./configure
     $ make
     $ sudo make install
 
 | To install in a non-standard location (``/usr/local/`` by default),
-  you may use
-| the ``–prefix=/desired/installation/path/`` option.
+  you may use the ``–prefix`` option in the configure step:
+| ``./configure –prefix=/desired/installation/path/``.
 
 
 Quick start guide
@@ -109,6 +111,32 @@ We run Frog as follows: $ frog -t test.txt
 Frog will present the output as shown in example [ex-frog-out] below:
 
 [ex-frog-out]
+
++----+------------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 1  |      2     |   3       |   4                |     5                        |     6    | 7 |   8  | 9 |   10 |
++====+============+===========+====================+==============================+==========+===+======+===+======+
+| 1  | In         | in        | [in]               | VZ(init)                     | 0.987660 | O | B-PP | 0 | ROOT |
++----+------------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 2  | ’41        | '41       |['41]               | TW(hoofd,vrij)               | 0.719498 | O | B-NP | 1 | obj1 |
++----+------------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 3  | werd       | worden    | [word]             | WW(pv,verl,ev)               | 0.999799 | O | B-VP | 0 | ROOT |
++----+------------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 4  | aan        | aan       | [aan]              | VZ(init)                     | 0.996734 | O | B-PP |10 | mod  |
++----+------------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 5  | de         | de        | [de]               | LID(bep,stan,rest)           | 0.999964 | O | B-NP | 6 | det  |
++----+------------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 6  | stamkaart  | stamkaart | [stam][kaart]      | N(soort,ev,basis,zijd,stan)  | 0.996536 | O | I-NP | 4 | obj1 |
++----+------------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 7  | een        | een       | [een]              | LID(onbep,stan,agr)          | 0.995147 | O | B-NP | 9 | det  |
++----+------------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 8  | z.g.       | z.g.      | [z.g.]             | ADJ(prenom,basis,met-e,stan) | 0.500000 | O | I-NP | 9 | mod  |
++----+------------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 9  | inlegvel   | inlegvel  | [in][leg][vel]     | N(soort,ev,basis,zijd,stan)  | 1.000000 | O | I-NP |10 | obj1 |
++----+------------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 10 | toegevoegd | toevoegen | [toe][ge][voeg][d] | WW(vd,vrij,zonder)           | 0.998549 | O | B-VP | 3 | vc   |
++----+------------+-----------+--------------------+------------------------------+----------+---+------+---+------+
+| 11 |  .         | .         | [.]                | LET()                        | 1.000000 | O | O    |10 | punct|
++----+------------+-----------+--------------------+------------------------------+----------+---+------+---+------+
 
 The ten TAB-delimited columns in the output of Frog contain the
 information we list below. This columned output is intended for quick
@@ -145,12 +173,12 @@ contain every detail available to Frog.
 9. Token number of head word
     in dependency graph (according to the Frog parser)
 
-10 Dependency relation type
+10. Dependency relation type
     of the word with head word
 
 For full output, you will want to instruct Frog to output to a FoLiA XML
 file. This is done using the -X option, followed by the name of the
-output file.
+output file. https://github.com/proycon/pynlpl, supports both Python 2 and Pytho
 
 To run Frog in this way we execute: $ frog -t test.txt -X test.xml The
 result is a file in FoLiA XML format [FOLIA]_ that
@@ -195,7 +223,7 @@ Input and Output options
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 By default the output of Frog is written to screen (i.e. standard
-output). There are two options for outputting to file (which can also be
+output). There are two options for outputting to file (which can also be https://github.com/proycon/pynlpl, supports both Python 2 and Pytho
 called simultaneously):
 
 -  ``-o <filename>`` – Writes columned (TAB delimited) data to file.
@@ -228,7 +256,7 @@ interactive mode.
 To exit this mode, type CTRL-D.
 
 Server mode
-~~~~~~~~~~~~~
+~~~~~~~~~~~
 
 Frog offers a server mode that launches it as a daemon to which multiple
 clients can connect over TCP. The server mode is started using the
@@ -262,7 +290,7 @@ several programming languages:
 
 -  R – **frogr**\  [10]_ – by Wouter van Atteveldt
 
--  Go – **grof**\  [11]_ – by Machiel Molenaar
+-  Go – **gorf**\  [11]_ – by Machiel Molenaar
 
 The following example shows how to communicate with the Frog server from
 Python using the Frog client in PyNLPl, which can generally be installed
@@ -308,10 +336,10 @@ better performance.
    https://languagemachines.github.io/timbl
 
 .. [6]
-   https://github.com/LanguageMachines/timblserver
+   https://languagemachines.github.io/mbt
 
 .. [7]
-   https://languagemachines.github.io/mbt
+   https://github.com/LanguageMachines/frogdata
 
 .. [8]
    B (begin) indicates the begin of the named entity, I (inside)
@@ -319,8 +347,7 @@ better performance.
    indicates that something is not a named entity
 
 .. [9]
-   https://github.com/proycon/pynlpl, supports both Python 2 and Python
-   3
+   https://github.com/proycon/pynlpl, supports both Python 2 and Python 3
 
 .. [10]
    https://github.com/vanatteveldt/frogr/

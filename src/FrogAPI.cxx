@@ -1,6 +1,6 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  Copyright (c) 2006 - 2019
+  Copyright (c) 2006 - 2020
   CLST  - Radboud University
   ILK   - Tilburg University
 
@@ -140,6 +140,7 @@ FrogOptions::FrogOptions() {
   inputclass="current";
   outputclass="current";
   textredundancy="minimal";
+  correct_words = false;
   debugFlag = 0;
 }
 
@@ -269,6 +270,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
       tokenizer->setInputClass( options.inputclass );
       tokenizer->setOutputClass( options.outputclass );
       tokenizer->setTextRedundancy( options.textredundancy );
+      tokenizer->setWordCorrection( options.correct_words );
       myCGNTagger = new CGNTagger( theErrLog,theDbgLog );
       stat = myCGNTagger->init( configuration );
       if ( stat ){
@@ -375,6 +377,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 	  tokenizer->setInputClass( options.inputclass );
 	  tokenizer->setOutputClass( options.outputclass );
 	  tokenizer->setTextRedundancy( options.textredundancy );
+	  tokenizer->setWordCorrection( options.correct_words );
 	}
       }
 #pragma omp section
@@ -1074,6 +1077,9 @@ frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
     DBG << "tokens:\n" << sent << endl;
   }
   frog_data sentence = extract_fd( sent );
+  if ( options.debugFlag > 0 ){
+    DBG << "sentence:\n" << sentence << endl;
+  }
   string lan = get_language( sentence );
   string def_lang = tokenizer->default_language();
   if ( options.debugFlag > 0 ){
@@ -1217,13 +1223,13 @@ frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
 	    << sentence.size()
 	    << ") then set with the --max-parser-tokens="
 	    << options.maxParserTokens << " option." << endl;
-	DBG << 	"Sentence is too long: " << s_count << endl
+	DBG << 	"Sentence " << s_count << " is too long: " << endl
 	    << sentence.sentence(true) << endl;
       }
     }
     timers.frogTimer.stop();
     if ( options.debugFlag > 5 ){
-      DBG << "Frogged one sentence:\n" << sentence << endl;
+      DBG << "Frogged one sentence:" << endl << sentence << endl;
     }
     return sentence;
   }
@@ -1357,24 +1363,6 @@ void FrogAPI::show_results( ostream& os,
   os << endl;
 }
 
-frog_record extract_from_word( const folia::Word* word,
-			       const string& textclass ){
-  frog_record rec;
-  rec.word = word->str(textclass);
-  folia::KWargs atts = word->collectAttributes();
-  if ( atts.find( "space" ) != atts.end() ){
-    rec.no_space = true;
-  }
-  if ( atts.find( "class" ) != atts.end() ){
-    rec.token_class = atts["class"];
-  }
-  else {
-    rec.token_class = "WORD";
-  }
-  rec.language = word->language();
-  return rec;
-}
-
 UnicodeString replace_spaces( const UnicodeString& in ) {
   UnicodeString result;
   StringCharacterIterator sit(in);
@@ -1391,6 +1379,56 @@ UnicodeString replace_spaces( const UnicodeString& in ) {
   return result;
 }
 
+void FrogAPI::handle_word_vector( ostream& os,
+				  const vector<folia::Word*>& wv_in,
+				  const size_t s_cnt ){
+  folia::FoliaElement *s = wv_in[0]->parent();
+  vector<folia::Word*> wv =  wv_in;
+  vector<Tokenizer::Token> toks;
+  if ( options.correct_words ){
+    // we are allowed to let the tokenizer correct those
+    toks = tokenizer->correct_words( s, wv );
+    wv = s->words();
+  }
+  else {
+    // assume unfrogged BUT tokenized!
+    string text;
+    for ( const auto& w : wv ){
+      UnicodeString tmp = w->unicode( options.inputclass );
+      tmp = replace_spaces( tmp );
+      text += TiCC::UnicodeToUTF8(tmp) + " ";
+    }
+    if  ( options.debugFlag > 1 ){
+      DBG << "handle_one_sentence() on existing words" << endl;
+      DBG << "handle_one_sentence() untokenized string: '" << text << "'" << endl;
+    }
+    toks = tokenizer->tokenize_line( text );
+  }
+  // cerr << "text:" << text << " size=" << wv.size() << endl;
+  // cerr << "tokens:" << toks << " size=" << toks.size() << endl;
+  if ( toks.size() == wv.size() ){
+    frog_data res = frog_sentence( toks, s_cnt );
+    //    cerr << "res:" << res << " size=" << res.size() << endl;
+    if ( res.size() > 0 ){
+      if ( !options.noStdOut ){
+	show_results( os, res );
+      }
+      if ( options.doXMLout ){
+	append_to_words( wv, res );
+      }
+    }
+  }
+  else {
+    LOG << s->doc()->filename() << ": unable to frog sentence: " << s->id()
+	<< " because it contains untokenized Words."
+	<< endl;
+    if ( !options.correct_words ) {
+      LOG << " (you might try --allow-word-corrections)"
+	  << endl;
+    }
+    exit( EXIT_FAILURE );
+  }
+}
 
 void FrogAPI::handle_one_sentence( ostream& os,
 				   folia::Sentence *s,
@@ -1416,35 +1454,7 @@ void FrogAPI::handle_one_sentence( ostream& os,
   }
   if ( !wv.empty() ){
     // there are already words.
-    // assume unfrogged yet
-    string text;
-    for ( const auto& w : wv ){
-      UnicodeString tmp = w->unicode( options.inputclass );
-      tmp = replace_spaces( tmp );
-      text += TiCC::UnicodeToUTF8(tmp) + " ";
-    }
-    if  ( options.debugFlag > 1 ){
-      DBG << "handle_one_sentence() on existing words" << endl;
-      DBG << "handle_one_sentence() untokenized string: '" << text << "'" << endl;
-    }
-    vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text );
-    // cerr << "text:" << text << " size=" << wv.size() << endl;
-    // cerr << "tokens:" << toks << " size=" << toks.size() << endl;
-    if ( toks.size() > 0 ){
-      frog_data res = frog_sentence( toks, s_cnt );
-      //    cerr << "res:" << res << " size=" << res.size() << endl;
-      if ( res.size() > 0 ){
-	if ( !options.noStdOut ){
-	  show_results( os, res );
-	}
-	if ( options.doXMLout ){
-	  append_to_words( wv, res );
-	}
-      }
-    }
-    else {
-      LOG << "no tokens left " << endl;
-    }
+    handle_word_vector( os, wv, s_cnt );
   }
   else {
     string text = s->str(options.inputclass);
@@ -1483,37 +1493,42 @@ void FrogAPI::handle_one_paragraph( ostream& os,
   }
   if ( sv.empty() ){
     // No Sentence, so only words OR just text
-    string text = p->str(options.inputclass);
-    if ( options.debugFlag > 0 ){
-      DBG << "handle_one_paragraph:" << text << endl;
-    }
-    timers.tokTimer.start();
-    vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text );
-    timers.tokTimer.stop();
-    while ( toks.size() > 0 ){
-      frog_data res = frog_sentence( toks, ++sentence_done );
-      while ( !res.empty() ){
-	if ( !options.noStdOut ){
-	  show_results( os, res );
-	}
-	if ( options.doXMLout ){
-	  folia::KWargs args;
-	  string p_id = p->id();
-	  if ( !p_id.empty() ){
-	    args["generate_id"] = p_id;
-	  }
-	  folia::Sentence *s = new folia::Sentence( args, p->doc() );
-	  p->append( s );
-	  append_to_sentence( s, res );
-	}
-	if ( toks.size() == 0 ){
-	  break;
-	}
-	res = frog_sentence( toks, ++sentence_done );
+    if ( wv.empty() ){
+      string text = p->str(options.inputclass);
+      if ( options.debugFlag > 0 ){
+	DBG << "handle_one_paragraph:" << text << endl;
       }
       timers.tokTimer.start();
-      toks = tokenizer->tokenize_line_next();
+      vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text );
       timers.tokTimer.stop();
+      while ( toks.size() > 0 ){
+	frog_data res = frog_sentence( toks, ++sentence_done );
+	while ( !res.empty() ){
+	  if ( !options.noStdOut ){
+	    show_results( os, res );
+	  }
+	  if ( options.doXMLout ){
+	    folia::KWargs args;
+	    string p_id = p->id();
+	    if ( !p_id.empty() ){
+	      args["generate_id"] = p_id;
+	    }
+	    folia::Sentence *s = new folia::Sentence( args, p->doc() );
+	    p->append( s );
+	    append_to_sentence( s, res );
+	  }
+	  if ( toks.size() == 0 ){
+	    break;
+	  }
+	  res = frog_sentence( toks, ++sentence_done );
+	}
+	timers.tokTimer.start();
+	toks = tokenizer->tokenize_line_next();
+	timers.tokTimer.stop();
+      }
+    }
+    else {
+      handle_word_vector( os, wv, sentence_done );
     }
   }
   else {
@@ -1902,7 +1917,8 @@ void FrogAPI::run_api_tests( const string& testName, ostream& outS ){
 
 // the functions below here are ONLY used by TSCAN.
 // the should be moved there probably
-// =======================================================================
+// The problem beeing that tscan has no knowledge about the `Mbma::mbma_tagset`
+// ===========================================================================
 vector<string> get_compound_analysis( folia::Word* word ){
   vector<string> result;
   vector<folia::MorphologyLayer*> layers
@@ -1912,11 +1928,11 @@ vector<string> get_compound_analysis( folia::Word* word ){
       layer->select<folia::Morpheme>( Mbma::mbma_tagset, false );
     if ( m.size() == 1 ) {
       // check for top layer compound
-      try {
-	folia::PosAnnotation *tag = m[0]->annotation<folia::PosAnnotation>( Mbma::clex_tagset );
+      folia::PosAnnotation *tag = m[0]->annotation<folia::PosAnnotation>( Mbma::clex_tagset );
+      if ( tag ){
 	result.push_back( tag->feat( "compound" ) ); // might be empty
       }
-      catch (...){
+      else {
 	result.push_back( "" ); // pad with empty strings
       }
     }

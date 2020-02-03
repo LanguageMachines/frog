@@ -1,6 +1,6 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  Copyright (c) 2006 - 2019
+  Copyright (c) 2006 - 2020
   CLST  - Radboud University
   ILK   - Tilburg University
 
@@ -183,6 +183,15 @@ void UctoTokenizer::setSentencePerLineInput( bool b ) {
 void UctoTokenizer::setQuoteDetection( bool b ) {
   if ( tokenizer ) {
     tokenizer->setQuoteDetection( b );
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
+void UctoTokenizer::setWordCorrection( bool b ) {
+  if ( tokenizer ) {
+    tokenizer->setWordCorrection( b );
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
@@ -482,4 +491,16 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
     DBG << "Sentence tekst: " << s->str(textclass) << endl;
   }
   return wv;
+}
+
+vector<Tokenizer::Token> UctoTokenizer::correct_words( folia::FoliaElement *elt,
+						       vector<folia::Word*>& wv ){
+  if ( tokenizer ){
+    vector<folia::FoliaElement*> ev( wv.begin(), wv.end() );
+    return tokenizer->correct_elements( elt, ev );
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+
 }
