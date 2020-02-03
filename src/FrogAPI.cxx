@@ -1374,10 +1374,10 @@ void FrogAPI::output_to_json( json& result, const frog_record& fd ) const {
     else {
       tag["confidence"] = fd.tag_confidence;
     }
-    result["tag"] = tag;
+    result["pos"] = tag;
   }
   if ( options.doNER ){
-    result["NER"] = TiCC::uppercase(fd.ner_tag);
+    result["ner"] = TiCC::uppercase(fd.ner_tag);
   }
   if ( options.doIOB ){
     result["chunking"] = fd.iob_tag;
