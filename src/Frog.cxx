@@ -427,7 +427,6 @@ bool parse_args( TiCC::CL_Options& Opts,
     }
   };
   wantOUT = false;
-  JSON_out = false;
   if ( Opts.extract( "outputdir", outputDirName )) {
     if ( outputDirName.back() != '/' ){
       outputDirName += "/";
@@ -441,17 +440,7 @@ bool parse_args( TiCC::CL_Options& Opts,
   else if ( Opts.extract( 'o', outputFileName ) ){
     wantOUT = true;
   };
-  if ( Opts.extract( "JSON" ) ){
-    if ( wantOUT ){
-      JSON_out = true;
-    }
-    else {
-      LOG << "JSON option only valid in combination with '-o' or '--outputdir'"
-	  << endl;
-      return false;
-    }
-  };
-  options.doJSONout = JSON_out;
+  options.doJSONout = Opts.extract( "JSON" );
   options.doXMLout = false;
   Opts.extract( "id", options.docid );
   if ( !options.docid.empty() ){
