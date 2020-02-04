@@ -1343,11 +1343,13 @@ void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
   }
 }
 
-void FrogAPI::output_to_json( json& result, const frog_record& fd ) const {
+json FrogAPI::convert_to_json( const frog_record& fd ) const {
   ///
   /// format a frog_record fd into a json structure
   ///
+  json result;
   result["word"] = fd.word;
+  result["token"] = fd.token_class;
   if ( options.doLemma
        && !fd.lemmas.empty() ){
     result["lemma"] = fd.lemmas[0];
@@ -1377,10 +1379,16 @@ void FrogAPI::output_to_json( json& result, const frog_record& fd ) const {
     result["pos"] = tag;
   }
   if ( options.doNER ){
-    result["ner"] = TiCC::uppercase(fd.ner_tag);
+    json tag;
+    tag["tag"] = TiCC::uppercase(fd.ner_tag);
+    tag["confidence"] = fd.ner_confidence;
+    result["ner"] = tag;
   }
   if ( options.doIOB ){
-    result["chunking"] = fd.iob_tag;
+    json tag;
+    tag["tag"] = fd.iob_tag;
+    tag["confidence"] = fd.iob_confidence;
+    result["chunking"] = tag;
   }
   if ( options.doParse || options.doAlpino ){
     json parse;
@@ -1388,6 +1396,7 @@ void FrogAPI::output_to_json( json& result, const frog_record& fd ) const {
     parse["parse_role"] = fd.parse_role;
     result["parse"] = parse;
   }
+  return result;
 }
 
 void FrogAPI::output_JSON( ostream& os,
@@ -1395,21 +1404,15 @@ void FrogAPI::output_JSON( ostream& os,
   json out_json = json::array();
   if ( fd.mw_units.empty() ){
     for ( size_t pos=0; pos < fd.units.size(); ++pos ){
-      json part;
+      json part = convert_to_json( fd.units[pos] );
       part["index"] = pos+1;
-      json result;
-      output_to_json( result, fd.units[pos] );
-      part["result"] = result;
       out_json.push_back( part );
     }
   }
   else {
     for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
-      json part;
+      json part = convert_to_json( fd.mw_units[pos] );
       part["index"] = pos+1;
-      json result;
-      output_to_json( result, fd.mw_units[pos] );
-      part["result"] = result;
       out_json.push_back( part );
     }
   }

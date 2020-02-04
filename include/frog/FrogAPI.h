@@ -150,8 +150,7 @@ class FrogAPI {
   void FrogStdin( bool prompt );
   void output_tabbed( std::ostream&,
 		      const frog_record& ) const;
-  void output_to_json( nlohmann::json&,
-		      const frog_record& ) const;
+  nlohmann::json convert_to_json( const frog_record& ) const;
   void output_JSON( std::ostream& os,
 		    const frog_data& fd ) const;
   void show_results( std::ostream&,
