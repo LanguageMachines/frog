@@ -36,6 +36,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include "ticcutils/json.hpp"
 
 class BaseBracket;
 
@@ -43,6 +44,7 @@ class frog_record {
  public:
   frog_record();
   ~frog_record();
+  nlohmann::json to_json() const;
   std::string word;
   std::string clean_word;
   std::string token_class;

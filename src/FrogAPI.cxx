@@ -1343,80 +1343,24 @@ void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
   }
 }
 
-json FrogAPI::convert_to_json( const frog_record& fd ) const {
-  ///
-  /// format a frog_record fd into a json structure
-  ///
-  json result;
-  result["word"] = fd.word;
-  result["token"] = fd.token_class;
-  if ( options.doLemma
-       && !fd.lemmas.empty() ){
-    result["lemma"] = fd.lemmas[0];
-  }
-  if ( options.doMorph ){
-    if ( fd.morphs.empty() ){
-      if ( !fd.deep_morph_string.empty() ){
-	result["morph"] = fd.deep_morph_string;
-	if ( fd.compound_string != "0"  ){
-	  result["compound"] = fd.compound_string;
-	}
-      }
-    }
-    else {
-      result["morph"] = fd.morph_string;
-    }
-  }
-  if ( options.doTagger ){
-    json tag;
-    tag["tag"] = fd.tag;
-    if ( fd.tag.empty() ){
-      tag["confidence"] = 1.0;
-    }
-    else {
-      tag["confidence"] = fd.tag_confidence;
-    }
-    result["pos"] = tag;
-  }
-  if ( options.doNER ){
-    json tag;
-    tag["tag"] = TiCC::uppercase(fd.ner_tag);
-    tag["confidence"] = fd.ner_confidence;
-    result["ner"] = tag;
-  }
-  if ( options.doIOB ){
-    json tag;
-    tag["tag"] = fd.iob_tag;
-    tag["confidence"] = fd.iob_confidence;
-    result["chunking"] = tag;
-  }
-  if ( options.doParse || options.doAlpino ){
-    json parse;
-    parse["parse_index"] = fd.parse_index;
-    parse["parse_role"] = fd.parse_role;
-    result["parse"] = parse;
-  }
-  return result;
-}
-
 void FrogAPI::output_JSON( ostream& os,
 			   const frog_data& fd ) const {
   json out_json = json::array();
   if ( fd.mw_units.empty() ){
     for ( size_t pos=0; pos < fd.units.size(); ++pos ){
-      json part = convert_to_json( fd.units[pos] );
+      json part = fd.units[pos].to_json();
       part["index"] = pos+1;
       out_json.push_back( part );
     }
   }
   else {
     for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
-      json part = convert_to_json( fd.mw_units[pos] );
+      json part = fd.mw_units[pos].to_json();
       part["index"] = pos+1;
       out_json.push_back( part );
     }
   }
-  os << std::setw(4) << out_json << endl;
+  os << std::setw(2) << out_json << endl;
 }
 
 void FrogAPI::show_results( ostream& os,

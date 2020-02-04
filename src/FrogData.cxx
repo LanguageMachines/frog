@@ -32,10 +32,12 @@
 #include <iostream>
 #include <iomanip>
 #include "ticcutils/PrettyPrint.h"
+#include "ticcutils/StringOps.h"
 #include "frog/FrogData.h"
 #include "frog/mbma_brackets.h"
 
 using namespace std;
+using namespace nlohmann;
 using TiCC::operator<<;
 
 frog_record::frog_record():
@@ -55,6 +57,55 @@ frog_record::~frog_record(){
     delete dm;
   }
 }
+
+json frog_record::to_json() const {
+  ///
+  /// format a frog_record fd into a json structure
+  ///
+  json result;
+  result["word"] = word;
+  if ( !token_class.empty() ){
+    result["token"] = token_class;
+  }
+  if ( !lemmas.empty() ){
+    result["lemma"] = lemmas[0];
+  }
+  if ( !deep_morph_string.empty() ){
+    result["deep_morph"] = deep_morph_string;
+    if ( compound_string != "0"  ){
+      result["compound"] = compound_string;
+    }
+  }
+  else if ( !morph_string.empty() ){
+    result["morph"] = morph_string;
+  }
+  if ( !tag.empty() ){
+    json tg;
+    tg["tag"] = tag;
+    tg["confidence"] = tag_confidence;
+    result["pos"] = tg;
+  }
+  if ( !ner_tag.empty() && ner_confidence > 0.0 ){
+    json tg;
+    tg["tag"] = TiCC::uppercase(ner_tag);
+    tg["confidence"] = ner_confidence;
+    result["ner"] = tg;
+  }
+  if ( !iob_tag.empty() ){
+    json tg;
+    tg["tag"] = iob_tag;
+    tg["confidence"] = iob_confidence;
+    result["chunking"] = tg;
+  }
+  if ( !parse_role.empty() ){
+    json parse;
+    parse["parse_index"] = parse_index;
+    parse["parse_role"] = parse_role;
+    result["parse"] = parse;
+  }
+  return result;
+}
+
 
 const string TAB = "\t";
 
