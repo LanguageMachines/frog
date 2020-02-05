@@ -65,14 +65,22 @@ json frog_record::to_json() const {
   json result;
   result["word"] = word;
   if ( !token_class.empty() ){
-    result["token"] = token_class;
+    json tok;
+    tok["token"] = token_class;
+    if ( no_space ){
+      tok["space"] = false;
+    }
+    if ( new_paragraph ){
+      tok["new_paragraph"] = true;
+    }
+    result["ucto"] = tok;
   }
   if ( !lemmas.empty() ){
     result["lemma"] = lemmas[0];
   }
   if ( !deep_morph_string.empty() ){
     result["deep_morph"] = deep_morph_string;
-    if ( compound_string != "0"  ){
+    if ( compound_string.find("0") == string::npos ){
       result["compound"] = compound_string;
     }
   }
