@@ -84,6 +84,7 @@ class FrogOptions {
   bool doAlpino;
   int numThreads;
   int debugFlag;
+  int JSON_pp;
 
   std::string encoding;
   std::string uttmark;
@@ -151,7 +152,8 @@ class FrogAPI {
   void output_tabbed( std::ostream&,
 		      const frog_record& ) const;
   void output_JSON( std::ostream& os,
-		    const frog_data& fd ) const;
+		    const frog_data& fd,
+		    int = 0 ) const;
   void show_results( std::ostream&,
 		     const frog_data& ) const;
   void handle_one_paragraph( std::ostream&,

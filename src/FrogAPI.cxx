@@ -145,6 +145,7 @@ FrogOptions::FrogOptions() {
   textredundancy="minimal";
   correct_words = false;
   debugFlag = 0;
+  JSON_pp = 0;
 }
 
 void FrogAPI::test_version( const string& where, double minimum ){
@@ -1344,7 +1345,8 @@ void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
 }
 
 void FrogAPI::output_JSON( ostream& os,
-			   const frog_data& fd ) const {
+			   const frog_data& fd,
+			   int pp_val ) const {
   json out_json = json::array();
   if ( fd.mw_units.empty() ){
     for ( size_t pos=0; pos < fd.units.size(); ++pos ){
@@ -1360,7 +1362,7 @@ void FrogAPI::output_JSON( ostream& os,
       out_json.push_back( part );
     }
   }
-  os << std::setw(2) << out_json << endl;
+  os << std::setw(pp_val) << out_json << endl;
 }
 
 void FrogAPI::show_results( ostream& os,
@@ -1370,7 +1372,7 @@ void FrogAPI::show_results( ostream& os,
   /// This done in a backward compatible manor to older Frog versions
   ///
   if ( options.doJSONout ){
-    output_JSON( os, fd );
+    output_JSON( os, fd, options.JSON_pp );
   }
   else {
     if ( fd.mw_units.empty() ){
