@@ -67,7 +67,6 @@ using namespace std;
 string testDirName;
 string outputFileName;
 bool wantOUT;
-bool JSON_out;
 string XMLoutFileName;
 string outputDirName;
 string xmlDirName;
@@ -139,7 +138,8 @@ void usage( ) {
        << "\t --outputdir=<dir>      Output to dir, instead of default stdout\n"
        << "\t --xmldir=<dir>         Use 'dir' to output FoliA XML to.\n"
        << "\t --deep-morph           add deep morphological information to the output\n"
-       << "\t --JSON=n               Output JSON instead of Tabbed.\n"
+       << "\t --JSONin               The input is JSON. Implies JSONout too! (server mode only)\n"
+       << "\t --JSONout=n            Output JSON instead of Tabbed.\n"
        << "\t                        When n != 0, use it for pretty-printing the output. (default n=0) \n"
        << "\t ============= OTHER OPTIONS ============================================\n"
        << "\t -h or --help           give some help.\n"
@@ -364,6 +364,11 @@ bool parse_args( TiCC::CL_Options& Opts,
     configuration.setatt( "ner_override", opt_val, "NER" );
   }
   options.doServer = Opts.extract('S', options.listenport );
+  options.doJSONin = Opts.extract( "JSONin" );
+  if ( options.doJSONin && !options.doServer ){
+    LOG << "option JSONin is only allowed for server mode. (-S option)" << endl;
+    return false;
+  }
   options.doAlpino = Opts.extract("alpino", opt_val);
   if ( options.doAlpino ){
     if ( !opt_val.empty() ){
@@ -442,7 +447,7 @@ bool parse_args( TiCC::CL_Options& Opts,
     wantOUT = true;
   };
   string json_pps;
-  options.doJSONout = Opts.extract( "JSON", json_pps );
+  options.doJSONout = Opts.extract( "JSONout", json_pps );
   if ( options.doJSONout ){
     if ( json_pps.empty() ){
       options.JSON_pp = 0;
@@ -451,12 +456,17 @@ bool parse_args( TiCC::CL_Options& Opts,
       int tmp;
       if ( !TiCC::stringTo<int>( json_pps, tmp )
 	   || tmp < 0 ){
-	LOG << "--JSON value should be an integer >=0 " << endl;
+	LOG << "--JSONout value should be an integer >=0 " << endl;
 	return false;
       }
       else {
 	options.JSON_pp = tmp;
       }
+    }
+  }
+  else {
+    if ( options.doJSONin ){
+      options.doJSONout = true;
     }
   }
   options.doXMLout = false;
@@ -644,7 +654,7 @@ int main(int argc, char *argv[]) {
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
 			  "help,language:,retry,nostdout,ner-override:,"
 			  "debug:,keep-parser-files,version,threads:,alpino::,"
-			  "override:,KANON,TESTAPI,debugfile:,JSON::,"
+			  "override:,KANON,TESTAPI,debugfile:,JSONin,JSONout::,"
 			  "allow-word-corrections");
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){

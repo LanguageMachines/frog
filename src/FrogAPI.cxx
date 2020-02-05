@@ -797,6 +797,36 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	}
 	LOG << "Done Processing XML... " << endl;
       }
+      else if ( options.doJSONin ){
+	json the_json;
+	string json_line;
+	// read data from the connection
+	if ( !conn.read( json_line ) ){
+	  throw( runtime_error( "read failed" ) );
+	}
+	try {
+	  the_json = json::parse( json_line );
+	}
+	catch ( const exception& e ){
+	  cerr << "json parsing failed on '" << json_line + "':"
+	       << e.what() << endl;
+	  throw runtime_error( "json failure" );
+	}
+	DBG << "Read JSON: " << the_json << endl;
+	for( const auto& it : the_json ){
+	  string data = it["sentence"];
+	  timers.tokTimer.stop();
+	  vector<Tokenizer::Token> toks = tokenizer->tokenize_line( data );
+	  timers.tokTimer.stop();
+	  while ( toks.size() > 0 ){
+	    frog_data sent = frog_sentence( toks, 1 );
+	    show_results( output_stream, sent );
+	  }
+	  timers.tokTimer.start();
+	  toks = tokenizer->tokenize_line_next();
+	  timers.tokTimer.stop();
+	}
+      }
       else {
         string data = "";
         if ( options.doSentencePerLine ){
@@ -855,11 +885,22 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	}
 	//	DBG << "Done Processing... " << endl;
       }
-      if (!conn.write( (output_stream.str()) ) || !(conn.write("READY\n\n"))  ){
-	if (options.debugFlag > 5 ) {
-	  DBG << "socket " << conn.getMessage() << endl;
+      if ( options.doJSONout ){
+	if (!conn.write( output_stream.str() ) ){
+	  if (options.debugFlag > 5 ) {
+	    DBG << "socket " << conn.getMessage() << endl;
+	  }
+	  throw( runtime_error( "JSON write to client failed" ) );
 	}
-	throw( runtime_error( "write to client failed" ) );
+      }
+      else {
+	if (!conn.write( output_stream.str() )
+	    || !(conn.write("READY\n\n"))  ){
+	  if (options.debugFlag > 5 ) {
+	    DBG << "socket " << conn.getMessage() << endl;
+	  }
+	  throw( runtime_error( "write to client failed" ) );
+	}
       }
     }
   }
