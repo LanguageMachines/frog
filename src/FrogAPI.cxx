@@ -730,6 +730,13 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
 folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
 					       const frog_data& fd,
 					       unsigned int& p_count ) const {
+  /// append Frog results to a folia element.
+  /*!
+    \param root The FoliaElement to append to
+    \param fd The frog_data structure which holds all results
+    \param p_count the current paragraph count. Can be updated.
+    \return the root element OR a newly created folia::Paragraph under that root
+   */
   if ( !root || !root->doc() ){
     return 0;
   }
@@ -779,6 +786,13 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
 
 void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
 			       const frog_data& fd ) const {
+  /// add all Frogged information to a vector of folia::Words
+  /*!
+    \param wv The result vector of folia::Word elements
+    \param fd The frog_data structure which holds all results
+
+    the arity of both parameters should be equal!
+  */
   string def_lang = tokenizer->default_language();
   if ( fd.language != "default"
        && fd.language != def_lang ){
