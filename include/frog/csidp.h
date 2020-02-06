@@ -35,11 +35,11 @@
 
 class timbl_result {
  public:
-  timbl_result( const std::string& cls,
-		double conf,
+  timbl_result( const std::string&,
+		double,
 		const Timbl::ValueDistribution* );
-  timbl_result( const std::string& cls,
-		double conf,
+  timbl_result( const std::string&,
+		double,
 		const std::vector<std::pair<std::string,double>>& );
   std::string cls() const { return _cls; };
   double confidence() const { return _confidence; };

@@ -91,6 +91,7 @@ using TiCC::operator<<;
 #define LOG *TiCC::Log(theErrLog)
 #define DBG *TiCC::Log(theDbgLog)
 
+/// the FoLiA setname for languages
 const string ISO_SET = "http://raw.github.com/proycon/folia/master/setdefinitions/iso639_3.foliaset";
 
 string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
@@ -168,19 +169,26 @@ FrogOptions::FrogOptions() {
   JSON_pp = 0;
 }
 
-void FrogAPI::test_version( const string& where, double minimum ){
-  string version = configuration.lookUp( "version", where );
+void FrogAPI::test_version( const string& module, double minimum ){
+  /// check if a module in the Frog Configuration is at least at the
+  /// requested version level
+  /*!
+    \param module whick module to check
+    \param minumum the minimum level
+    This function will throw on a mismatch
+  */
+  string version = configuration.lookUp( "version", module );
   double v = 0.0;
   if ( !version.empty() ){
     if ( !TiCC::stringTo( version, v ) ){
       v = 0.5;
     }
   }
-  if ( where == "IOB" ){
+  if ( module == "IOB" ){
     if ( v < minimum ){
-      LOG << "[[" << where << "]] Wrong FrogData!. "
+      LOG << "[[" << module << "]] Wrong FrogData!. "
 	  << "Expected version " << minimum << " or higher for module: "
-	  << where << endl;
+	  << module << endl;
       if ( version.empty() ) {
 	LOG << "but no version info was found!." << endl;
       }
@@ -190,11 +198,11 @@ void FrogAPI::test_version( const string& where, double minimum ){
       throw runtime_error( "Frog initialization failed" );
     }
   }
-  else if ( where == "NER" ){
+  else if ( module == "NER" ){
     if ( v < minimum ){
-      LOG << "[[" << where << "]] Wrong FrogData!. "
+      LOG << "[[" << module << "]] Wrong FrogData!. "
 	  << "Expected version " << minimum << " or higher for module: "
-	  << where << endl;
+	  << module << endl;
       if ( version.empty() ) {
 	LOG << "but no version info was found!." << endl;
       }
@@ -205,7 +213,7 @@ void FrogAPI::test_version( const string& where, double minimum ){
     }
   }
   else {
-    throw logic_error( "unknown where:" + where );
+    throw logic_error( "unknown module:" + module );
   }
 }
 
@@ -226,6 +234,18 @@ FrogAPI::FrogAPI( FrogOptions &opt,
   myNERTagger(0),
   tokenizer(0)
 {
+  /// Initialize an FrogAPI class
+  /*!
+    \param opt FrogOptions. Already set or adapted by parsing 'conf'
+    \param conf A TiCC::Configuration.
+    The configuration is set from the command-line or by parsing a config file
+    \param err_log A LogStream for error messages
+    \param dbg_log A LogStream for debugging purposes
+
+    This will throw on problems with 'opt' or 'conf'
+
+    Otherwise a fully instantiated Frog will be available for further use
+  */
   // for some modules init can take a long time
   // so first make sure it will not fail on some trivialities
   //
@@ -547,6 +567,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 }
 
 FrogAPI::~FrogAPI() {
+  /// Destructor. Clears all resources
   delete myMbma;
   delete myMblem;
   delete myMwu;
@@ -558,6 +579,11 @@ FrogAPI::~FrogAPI() {
 }
 
 folia::processor *FrogAPI::add_provenance( folia::Document& doc ) const {
+  /// add Frog provenance information to a FoLiA::Document.
+  /*!
+    \param doc The folia::Document.
+    \return an instantiated folia::processor associated with Frog
+   */
   string _label = "frog";
   vector<folia::processor *> procs = doc.get_processors_by_name( _label );
   if ( !procs.empty() ){
@@ -605,6 +631,12 @@ folia::processor *FrogAPI::add_provenance( folia::Document& doc ) const {
 
 folia::FoliaElement* FrogAPI::start_document( const string& id,
 					      folia::Document *& doc ) const {
+  /// Initialize a FoLiA::Document
+  /*!
+    \param id The Document ID to use
+    \param doc The created folia::Document
+    \return a pointer to the top \<text\> node of the Document.
+   */
   doc = new folia::Document( "xml:id='" + id + "'" );
   doc->addStyle( "text/xsl", "folia.xsl" );
   if ( options.debugFlag > 1 ){
@@ -620,9 +652,13 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
 
 void FrogAPI::append_to_sentence( folia::Sentence *sent,
 				  const frog_data& fd ) const {
-  // add tokenization, when applicable
-  vector<folia::Word*> wv = tokenizer->add_words( sent,
-						  fd );
+  /// add the results from frogging to a folia::Sentence
+  /*!
+    \param sent The sentence to add to
+    \param fd The frog_data structure which holds all results
+
+   */
+  vector<folia::Word*> wv = tokenizer->add_words( sent, fd );
   string la;
   if ( sent->has_annotation<folia::LangAnnotation>() ){
     la = sent->annotation<folia::LangAnnotation>()->cls();

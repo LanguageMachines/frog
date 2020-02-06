@@ -150,7 +150,7 @@ timbl_result::timbl_result( const string& cls,
 
 timbl_result::timbl_result( const string& cls,
 			    double conf,
-			    const vector< pair<string,double> >& vd ):
+			    const vector<std::pair<string,double>>& vd ):
   _cls(cls), _confidence(conf), _dist(vd) {
 }
 

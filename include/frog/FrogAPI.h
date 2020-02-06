@@ -83,7 +83,7 @@ class FrogOptions {
   bool doXMLin;              ///< do we have FoLiA input?
   bool doXMLout;             ///< do we want FoLiA output?
   bool doJSONin;             ///< do we have JSON input?
-  /*!< This is only supported for the Server mode of Frog
+  /*!< This is only supported for the Server mode of Frog,
     it implies JSON output too.
    */
   bool doJSONout;            ///< do we want JSON output?
@@ -137,13 +137,13 @@ of input encodings. The default is UTF8. The output will always be in UTF8.
   std::string textredundancy; ///< determines how much text is added in the FoLiA
   /*!< possible values are 'full', 'minimal' and 'none'.
 
-    when 'none': no text (\<t\>) nodes are added to higher structure nodes like
+    'none': no text (\<t\>) nodes are added to higher structure nodes like
     \<s\> and \<p\>.
 
-    when 'minimal': text is added to the structure above \<w\>. Mostly \<s\>
+    'minimal': text is added to the structure above \<w\>. Mostly \<s\>
     nodes
 
-    when 'full': text is added to all structure nodes. This might result in a
+    'full': text is added to all structure nodes. This might result in a
     lot of (redundant) text.
 
    */
@@ -162,7 +162,8 @@ maximum of 500 words PER SENTENC. Which is already a lot!
   FrogOptions( const FrogOptions & );
 };
 
-
+/// This is the API class which can be used to set up Frog and run it on files,
+/// strings, TCP sockets or a terminal.
 class FrogAPI {
  public:
   FrogAPI( FrogOptions&,
@@ -246,14 +247,12 @@ class FrogAPI {
   UctoTokenizer *tokenizer;
 };
 
-// the functions below here are ONLY used by TSCAN.
-// the should be moved there probably
-// =======================================================================
-
+/// this function is only used by TSCAN. But moving it there is hard
+/// because of a lot of dependencies
 std::vector<std::string> get_full_morph_analysis( folia::Word *, bool = false );
+
+/// this function is only used by TSCAN. But moving it there is hard
+/// because of a lot of dependencies
 std::vector<std::string> get_compound_analysis( folia::Word * );
-//std::vector<std::string> get_full_morph_analysis( folia::Word *,
-//						  const std::string&,
-//						  bool = false );
 
 #endif
