@@ -355,7 +355,7 @@ vector<Tokenizer::Token> UctoTokenizer::tokenize_stream_next( ){
 }
 
 vector<Tokenizer::Token> UctoTokenizer::tokenize_stream( istream& is ){
-  ///  restart the tokenizer on stream @is
+  ///  restart the tokenizer on stream 'is'
   ///  and calls tokenizer_stream_next() for the first results
   if ( tokenizer ){
     tokenizer->reset();

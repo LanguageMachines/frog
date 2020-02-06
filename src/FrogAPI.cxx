@@ -96,25 +96,45 @@ const string ISO_SET = "http://raw.github.com/proycon/folia/master/setdefinition
 string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
 string configFileName = configDir + "frog.cfg";
 
-string FrogAPI::defaultConfigDir( const string& lang ){
-  if ( lang.empty() ){
+string FrogAPI::defaultConfigDir( const string& language ){
+  /// return the default location of the configuration files
+  /*!
+    \param language use this to find the configuration for this language
+    \return a string representing the (language specific) path
+  */
+  //! The location of the configuration files is determined at installation
+  //! of the package. All languages are supposed to be in sub-directories
+  if ( language.empty() ){
     return configDir;
   }
   else {
-    return configDir+lang+"/";
+    return configDir+language+"/";
   }
 }
 
-string FrogAPI::defaultConfigFile( const string& lang ){
-  return defaultConfigDir( lang ) + "frog.cfg";
+string FrogAPI::defaultConfigFile( const string& language ){
+  /// return the filename for the default configuration
+  /*!
+    \param language use this to find the configuration for this language
+    \return a string representing (language specific) default filename
+  */
+  //! The location of the configuration files is determined at installation
+  //! of the package. All languages are supposed to be in sub-directories
+  return defaultConfigDir( language ) + "frog.cfg";
 }
 
 FrogOptions::FrogOptions() {
-  doTok = doLemma = doMorph = doMwu = doIOB = doNER = doParse = doTagger = true;
+  doTok = true;
+  doLemma = true;
+  doMorph = true;
+  doMwu = true;
+  doIOB = true;
+  doNER = true;
+  doParse = true;
+  doTagger = true;
   doDeepMorph = false;
   doSentencePerLine = false;
   doQuoteDetection = false;
-  doDirTest = false;
   doRetry = false;
   noStdOut = false;
   doServer = false;
@@ -1038,10 +1058,12 @@ void FrogAPI::FrogInteractive(){
 
 string FrogAPI::Frogtostring( const string& s ){
   /// Parse a string, Frog it and return the result as a string.
-  /// @s: an UTF8 decoded string. May be multilined.
-  /// @return the results of frogging. Depending of the current frog settings
-  /// the input can be interpreted as XML, an the ouput will be XML or
-  /// tab separated
+  /*!
+    \param s: an UTF8 decoded string. May be multilined.
+    \return the results of frogging. Depending of the current frog settings
+    the input can be interpreted as XML, an the ouyput will be XML or
+    tab separated
+  */
   if ( s.empty() ){
     return s;
   }

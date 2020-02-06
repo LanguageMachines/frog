@@ -416,7 +416,6 @@ bool parse_args( TiCC::CL_Options& Opts,
   }
   string TestFileName;
   if ( Opts.extract( "testdir", TestFileName ) ) {
-    options.doDirTest = true;
     testDirName = TestFileName;
     if ( testDirName.back() != '/' ){
       testDirName += "/";

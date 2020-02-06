@@ -211,10 +211,13 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
 }
 
 string frog_data::sentence( bool tokenized ) const {
-  ///
   /// extract the sentence from a frog_data structure by concatenating
   /// the words in the units. Normally separated by spaces.
-  /// When @tokenized is true, the 'no_space' value is taken into account.
+  /*!
+    \param tokenized When true, the 'no_space' value is taken into account.
+    \return a UTF8 string of the orginal words, separated by 1 space
+    except when the no_space value is set AND 'tokenized' is true
+   */
   string result;
   for ( const auto& it : units ){
     result += it.word;
