@@ -247,12 +247,7 @@ class FrogAPI {
   UctoTokenizer *tokenizer;
 };
 
-/// this function is only used by TSCAN. But moving it there is hard
-/// because of a lot of dependencies
-std::vector<std::string> get_full_morph_analysis( folia::Word *, bool = false );
-
-/// this function is only used by TSCAN. But moving it there is hard
-/// because of a lot of dependencies
+std::vector<std::string> get_full_morph_analysis( folia::Word *, bool=false );
 std::vector<std::string> get_compound_analysis( folia::Word * );
 
 #endif

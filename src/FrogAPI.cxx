@@ -1217,6 +1217,19 @@ frog_data extract_fd( vector<Tokenizer::Token>& tokens ){
 
 frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
 				  const size_t s_count ){
+  /// extract a frog_data structure, representing 1 frogged sentence
+  /*!
+    \param sent a list of Tokenizer::Token
+    \param s_count holds the sentence count
+    \return a frog_data structure representing 1 totally frogged sentence.
+
+    This function is reentrant and should be called multiple times until the
+    whole 'sent' list is consument.
+    s_count is incremented for every returned frog_data element.
+
+    All enabled Frog modules are run on the frog_data structure.
+
+  */
   if ( options.debugFlag > 0 ){
     DBG << "tokens:\n" << sent << endl;
   }
@@ -1380,6 +1393,13 @@ frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
 }
 
 string filter_non_NC( const string& filename ){
+  /// Filter out characters that would be invalid as an XML NCname
+  /*!
+    \param filename a string representing a filename
+    \return a string where troublesome characters are skipped or replaced
+
+    see https://www.w3.org/TR/xmlschema-2/#NCName for more information
+  */
   string result;
   bool at_start = true;
   for ( size_t i=0; i < filename.length(); ++i ){
@@ -1414,10 +1434,14 @@ string filter_non_NC( const string& filename ){
 const string Tab = "\t";
 
 void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
-  ///
-  /// output a frog_record @fd in tabbed format to stream @os
-  /// This done in a backward compatible manor to older Frog versions
-  ///
+  /// output a frog_record in tabbed format
+  /*!
+    \param os the output stream
+    \param fd the record to display
+
+    This function is used as part of outputting a complete frog_data structure
+    in show_results
+  */
   os << fd.word << Tab;
   if ( options.doLemma ){
     if ( !fd.lemmas.empty() ){
@@ -1487,6 +1511,15 @@ void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
 void FrogAPI::output_JSON( ostream& os,
 			   const frog_data& fd,
 			   int pp_val ) const {
+  /// output a frog_data structure as JSON
+  /*!
+    \param os the output stream
+    \param fd the frog_data to display
+    \param pp_val value to use for formatted output.
+
+    If pp_val is 0, the whole JSON is output as a (very) long string.
+    If pp_val > 0, the JSON is formatted neatly with pp_val as indentation
+  */
   json out_json = json::array();
   if ( fd.mw_units.empty() ){
     for ( size_t pos=0; pos < fd.units.size(); ++pos ){
@@ -1507,10 +1540,13 @@ void FrogAPI::output_JSON( ostream& os,
 
 void FrogAPI::show_results( ostream& os,
 			    const frog_data& fd ) const {
-  ///
-  /// output a frog_data structure @fd in tabbed format to stream @os
-  /// This done in a backward compatible manor to older Frog versions
-  ///
+  /// output a frog_data structure to a stream.
+  /*!
+    \param os the outputstream
+    \param fd the structure to display
+
+    Depending on Frog settings, the output can be 'tabbed' or JSON
+  */
   if ( options.doJSONout ){
     output_JSON( os, fd, options.JSON_pp );
   }
@@ -1534,6 +1570,14 @@ void FrogAPI::show_results( ostream& os,
 }
 
 UnicodeString replace_spaces( const UnicodeString& in ) {
+  /// replace spaces by underscores
+  /*!
+    \param in an Unicode string with embedded spaces
+    \return an Unicode string where all spaces have been replaced by an
+    underscore
+
+    'spaces' are detected using the ICU u_ispace() function
+  */
   UnicodeString result;
   StringCharacterIterator sit(in);
   while ( sit.hasNext() ){
@@ -1552,6 +1596,12 @@ UnicodeString replace_spaces( const UnicodeString& in ) {
 void FrogAPI::handle_word_vector( ostream& os,
 				  const vector<folia::Word*>& wv_in,
 				  const size_t s_cnt ){
+  /// run frog on a vector of folia::Word as extracted from a document
+  /*!
+    \param os stream for output
+    \param wv_in the Word list to handle
+    \param s_cnt the sentence count
+  */
   folia::FoliaElement *s = wv_in[0]->parent();
   vector<folia::Word*> wv =  wv_in;
   vector<Tokenizer::Token> toks;
@@ -1603,10 +1653,16 @@ void FrogAPI::handle_word_vector( ostream& os,
 void FrogAPI::handle_one_sentence( ostream& os,
 				   folia::Sentence *s,
 				   const size_t s_cnt ){
+  /// run frog on a folia::Sentence as extracted from a document
+  /*!
+    \param os stream for output
+    \param s the Sentence to handle
+    \param s_cnt the sentence count
+  */
   if  ( options.debugFlag > 1 ){
     DBG << "handle_one_sentence: " << s << endl;
   }
-  string sent_lang =  s->language();
+  string sent_lang = s->language();
   if ( sent_lang.empty() ){
     sent_lang = tokenizer->default_language();
   }
@@ -1617,8 +1673,7 @@ void FrogAPI::handle_one_sentence( ostream& os,
     }
     return;
   }
-  vector<folia::Word*> wv;
-  wv = s->words( options.inputclass );
+  vector<folia::Word*> wv = s->words( options.inputclass );
   if ( wv.empty() ){
     wv = s->words();
   }
@@ -1653,8 +1708,15 @@ void FrogAPI::handle_one_sentence( ostream& os,
 void FrogAPI::handle_one_paragraph( ostream& os,
 				    folia::Paragraph *p,
 				    int& sentence_done ){
-  // a Paragraph may contain both Word and Sentence nodes
-  // if so, the Sentences should be handled separately
+  /// run frog on a folia::Paragraph as extracted from a document
+  /*!
+    \param os stream for output
+    \param p the Paragraph to handle
+    \param sentence_done holds the number of sentences done, may be incremented
+
+    a Paragraph may contain both Word and Sentence nodes
+    if so, the Sentences should be handled separately
+  */
   vector<folia::Word*> wv = p->select<folia::Word>(false);
   vector<folia::Sentence*> sv = p->select<folia::Sentence>(false);
   if ( options.debugFlag > 1 ){
@@ -1712,12 +1774,16 @@ void FrogAPI::handle_one_paragraph( ostream& os,
 void FrogAPI::handle_one_text_parent( ostream& os,
 				      folia::FoliaElement *e,
 				      int& sentence_done ){
-  ///
-  /// input is a FoLiA element @e containing text.
-  /// this can be a Word, Sentence, Paragraph or some other element
-  /// In the latter case, we construct a Sentence from the text, and
-  /// a Paragraph if more then one Sentence is found
-  ///
+  /// genric function to handle text from FoliaElements
+  /*!
+    \param os output stream for the results
+    \param e a FoLiA element containing text.
+    \param sentence_done holds the number of sentences done, may be incremented
+
+    The input 'e' this can be a Word, Sentence, Paragraph or some other element
+    In the latter case, we construct a Sentence from the text, and
+    a Paragraph if more then one Sentence is found
+  */
   if ( e->xmltag() == "w" ){
     // already tokenized into words!
     folia::Word *word = dynamic_cast<folia::Word*>(e);
@@ -1852,6 +1918,17 @@ void FrogAPI::handle_one_text_parent( ostream& os,
 
 folia::Document *FrogAPI::run_folia_engine( const string& infilename,
 					    ostream& output_stream ){
+  /// Run frog on a FoLiA XML file
+  /*!
+    \param infilename the name of the inputfile containing FoLiA
+    \param output_stream the stream to output tabbed/JSON to.
+    \return a Frogged FoLiA Document
+
+    using folia::TextEngine, this function will loop through all relevant
+    parents of <t> nodes in the document specified by infilename.
+    The strings in those nodes will be frogged, and they are enriched with all
+    found information, like POS, lemma etc.
+  */
   if ( options.inputclass == options.outputclass ){
     tokenizer->setFiltering(false);
   }
@@ -1907,6 +1984,15 @@ folia::Document *FrogAPI::run_folia_engine( const string& infilename,
 
 folia::Document *FrogAPI::run_text_engine( const string& infilename,
 					   ostream& os ){
+  /// Run frog on a TEXT file
+  /*!
+    \param infilename the name of the inputfile containing text
+    \param os the stream to output tabbed/JSON to.
+    \return a Frogged FoLiA Document
+
+    this function will loop all text in the inputfile, using the tokenizer to
+    detect Paragraphs and Sentences and creating a FoLiA document on the fly
+  */
   ifstream test_file( infilename );
   int i = 0;
   folia::Document *doc = 0;
@@ -1944,6 +2030,16 @@ folia::Document *FrogAPI::run_text_engine( const string& infilename,
 
 folia::Document *FrogAPI::FrogFile( const string& infilename,
 				    ostream& os ){
+  /// generic function to Frog a file
+  /*!
+    \param infilename the input file-name
+    \param os the outputstream
+    \return a Frogged Document. May be empty if XML output is not required
+
+    This function autodetects FoLiA files vs. text files and will run Frog
+    for the respective types.
+   */
+
   folia::Document *result = 0;
   bool xml_in = options.doXMLin;
   if ( TiCC::match_back( infilename, ".xml.gz" )
@@ -1995,6 +2091,11 @@ folia::Document *FrogAPI::FrogFile( const string& infilename,
 }
 
 void FrogAPI::run_api_tests( const string& testName, ostream& outS ){
+  /// Helper function to run some specific tests for the API
+  /*!
+    \param testName a file to test on
+    \param outS an output stream for the results
+  */
   LOG << "running some extra Frog tests...." << endl;
   if ( testName.find( ".xml" ) != string::npos ){
     options.doXMLin = true;
@@ -2085,11 +2186,17 @@ void FrogAPI::run_api_tests( const string& testName, ostream& outS ){
   }
 }
 
-// the functions below here are ONLY used by TSCAN.
-// the should be moved there probably
-// The problem beeing that tscan has no knowledge about the `Mbma::mbma_tagset`
-// ===========================================================================
 vector<string> get_compound_analysis( folia::Word* word ){
+  /// extract compound information from the deep_morph analysis in word
+  /*!
+    \param word the folia::Word to extract from
+    \return a vector of strings with compound information
+
+    this function is ONLY used by TSCAN atm.
+
+    moving it there is problematic because tscan has no knowledge about the
+    `Mbma::mbma_tagset`
+  */
   vector<string> result;
   vector<folia::MorphologyLayer*> layers
     = word->annotations<folia::MorphologyLayer>( Mbma::mbma_tagset );
@@ -2111,6 +2218,11 @@ vector<string> get_compound_analysis( folia::Word* word ){
 }
 
 string flatten( const string& s ){
+  /// helper function to 'flatten out' bracketed morpheme strings
+  /*!
+    \param s a bracketed string of morphemes
+    \return a string with multiple '[' and ']' reduced to single occurrences
+  */
   string result;
   string::size_type bpos = s.find_first_not_of( "[" );
   if ( bpos != string::npos ){
@@ -2134,12 +2246,24 @@ string flatten( const string& s ){
   return result;
 }
 
-vector<string> get_full_morph_analysis( folia::Word* w,
+vector<string> get_full_morph_analysis( folia::Word *word,
 					const string& cls,
 					bool make_flat ){
+  /// extract a full morpheme analysis from the deep_morph analysis in word
+  /*!
+    \param word the folia::Word to extract from
+    \param cls the textclass to use
+    \param make_flat When 'true' remove extra brackets
+    \return a vector of strings with flattended morpheme information
+
+    this function is ONLY used by TSCAN atm.
+
+    moving it there is problematic because tscan has no knowledge about the
+    `Mbma::mbma_tagset`
+  */
   vector<string> result;
   vector<folia::MorphologyLayer*> layers
-    = w->annotations<folia::MorphologyLayer>( Mbma::mbma_tagset );
+    = word->annotations<folia::MorphologyLayer>( Mbma::mbma_tagset );
   for ( const auto& layer : layers ){
     vector<folia::Morpheme*> m =
       layer->select<folia::Morpheme>( Mbma::mbma_tagset, false );
@@ -2169,6 +2293,17 @@ vector<string> get_full_morph_analysis( folia::Word* w,
   return result;
 }
 
-vector<string> get_full_morph_analysis( folia::Word* w, bool flat ){
-  return get_full_morph_analysis( w, "current", flat );
+vector<string> get_full_morph_analysis( folia::Word *word, bool make_flat ){
+  /// extract a full morpheme analysis from the deep_morph analysis in word
+  /*!
+    \param word the folia::Word to extract from
+    \param make_flat When 'true' remove extra brackets
+    \return a vector of strings with flattended morpheme information
+
+    this function is ONLY used by TSCAN atm.
+
+    moving it there is problematic because tscan has no knowledge about the
+    `Mbma::mbma_tagset`
+  */
+  return get_full_morph_analysis( word, "current", make_flat );
 }
