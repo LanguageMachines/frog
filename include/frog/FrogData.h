@@ -85,11 +85,9 @@ class frog_data {
   std::vector<frog_record> units;    ///< the records that make up the sentence
   std::vector<frog_record> mw_units; ///< the MWU records that make up the sentence
   std::map<size_t,size_t> mwus;      ///> maps that stores MWU start and end pos
- private:
-  std::string language;              ///> the language of all units
 };
 
-std::ostream& operator<<( std::ostream&, const frog_record& );
-std::ostream& operator<<( std::ostream&, const frog_data& );
+std::ostream& operator<<( std::ostream& os, const frog_record& fr);
+std::ostream& operator<<( std::ostream& os, const frog_data& fd);
 
 #endif

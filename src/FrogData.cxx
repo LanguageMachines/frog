@@ -40,6 +40,7 @@ using namespace std;
 using namespace nlohmann;
 using TiCC::operator<<;
 
+/// default constructor
 frog_record::frog_record():
   no_space(false),
   new_paragraph(false),
@@ -52,6 +53,7 @@ frog_record::frog_record():
   parse_index(-1)
 {}
 
+/// default destructor
 frog_record::~frog_record(){
   for( const auto& dm : deep_morphs ){
     delete dm;
@@ -59,9 +61,10 @@ frog_record::~frog_record(){
 }
 
 json frog_record::to_json() const {
-  ///
   /// format a frog_record fd into a json structure
-  ///
+  /*!
+    \return an JSON structure
+  */
   json result;
   result["word"] = word;
   if ( !token_class.empty() ){
@@ -117,22 +120,28 @@ json frog_record::to_json() const {
 
 const string TAB = "\t";
 
-ostream& operator<<( ostream& os, const frog_record& fd ){
-  os << fd.word << TAB;
-  if ( !fd.lemmas.empty() ){
-    os << fd.lemmas[0];
+ostream& operator<<( ostream& os, const frog_record& fr ){
+  /// output a frog_record structure to a stream
+  /*!
+    \param os output stream
+    \param fr the record to output
+    \return the stream
+  */
+  os << fr.word << TAB;
+  if ( !fr.lemmas.empty() ){
+    os << fr.lemmas[0];
   }
   os << TAB;
-  if ( fd.morphs.empty() ){
-    if ( !fd.deep_morph_string.empty() ){
-      os << fd.deep_morph_string;
+  if ( fr.morphs.empty() ){
+    if ( !fr.deep_morph_string.empty() ){
+      os << fr.deep_morph_string;
     }
     else {
-      if ( !fd.deep_morphs.empty() ){
-	for ( const auto nm : fd.deep_morphs ){
+      if ( !fr.deep_morphs.empty() ){
+	for ( const auto nm : fr.deep_morphs ){
 	  os << "[" << nm << "]";
 	  break; // first alternative only!
-	  // if ( &nm != &fd.deep_morphs.back() ){
+	  // if ( &nm != &fr.deep_morphs.back() ){
 	  //   os << "/";
 	  // }
 	}
@@ -140,30 +149,40 @@ ostream& operator<<( ostream& os, const frog_record& fd ){
     }
   }
   else {
-    if ( !fd.morph_string.empty() ){
-      os << fd.morph_string;
+    if ( !fr.morph_string.empty() ){
+      os << fr.morph_string;
     }
     else {
-      for ( const auto nm : fd.morphs ){
+      for ( const auto nm : fr.morphs ){
 	for ( auto const& m : nm ){
 	  os << m;
 	}
 	break; // first alternative only!
-	// if ( &nm != &fd.morphs.back() ){
-	//   os << "/";
-	// }
       }
     }
   }
-  os << TAB << fd.tag << TAB << fixed << showpoint << std::setprecision(6) << fd.tag_confidence;
-  os << TAB << fd.ner_tag; // << TAB << fd.ner_confidence;
-  os << TAB << fd.iob_tag; // << TAB << fd.iob_confidence;
-  os << TAB << fd.parse_index;
-  os << TAB << fd.parse_role;
+  os << TAB << fr.tag << TAB << fixed << showpoint << std::setprecision(6) << fr.tag_confidence;
+  os << TAB << fr.ner_tag; // << TAB << fr.ner_confidence;
+  os << TAB << fr.iob_tag; // << TAB << fr.iob_confidence;
+  os << TAB << fr.parse_index;
+  os << TAB << fr.parse_role;
   return os;
 }
 
 frog_record merge( const frog_data& fd, size_t start, size_t finish ){
+  /// merge a range of records of an frog_data structure into the first one
+  /*!
+    \param fd the frog_data structure
+    \param start index of the first record in the structure to merge
+    \param finish index of the last record in the structure to merge
+    \return the new merged record
+
+    all information from the records \e start +1 to \em finish is merged into
+    the record at position \e start. Strings are concatenated using an
+    underscore ('_') which is the way Frog has always displayed MWU's
+
+    \note merging is only done for the first (default) lemma and morpheme
+   */
   // cerr << "merge a FD of size:" << fd.units.size() << " with start=" << start
   //      << " and finish=" << finish << endl;
   frog_record result = fd.units[start];
@@ -216,7 +235,7 @@ string frog_data::sentence( bool tokenized ) const {
   /*!
     \param tokenized When true, the 'no_space' value is taken into account.
     \return a UTF8 string of the orginal words, separated by 1 space
-    except when the no_space value is set AND 'tokenized' is true
+    except when the no_space value is set AND \e tokenized is true
    */
   string result;
   for ( const auto& it : units ){
@@ -229,6 +248,7 @@ string frog_data::sentence( bool tokenized ) const {
 }
 
 void frog_data::resolve_mwus(){
+  /// resolve MWU's by merging them into the first record of the MWU
   mw_units.clear();
   for ( size_t pos=0; pos < units.size(); ++pos ){
     if ( mwus.find( pos ) == mwus.end() ){
@@ -250,6 +270,12 @@ void frog_data::resolve_mwus(){
 }
 
 ostream& operator<<( ostream& os, const frog_data& fd ){
+  /// output a frog_data structure to a stream
+  /*!
+    \param os output stream
+    \param fd the record to output
+    \return the stream
+  */
   if ( fd.mw_units.empty() ){
     for ( size_t pos=0; pos < fd.units.size(); ++pos ){
       os << pos+1 << TAB << fd.units[pos] << endl;
@@ -264,10 +290,20 @@ ostream& operator<<( ostream& os, const frog_data& fd ){
 }
 
 void frog_data::append( const frog_record& fr ){
+  /// add a frog_record to the frog_data structure
+  /*!
+    \param fr the record to add.
+  */
   units.push_back( fr );
 }
 
 string frog_data::get_language() const {
+  /// return the language of the frog_data structure
+  /*!
+    \return a string
+    loop through all records and return the first non-default language value
+    returns "default" when nothing was found
+   */
   string result = "default";
   for ( const auto& r : units ){
     if ( !r.language.empty() ){
