@@ -59,6 +59,11 @@ const string alpino_mwu_tagset = "http://ilk.uvt.nl/folia/sets/alpino-mwu-nl";
 
 void AlpinoParser::add_provenance( folia::Document& doc,
 				   folia::processor *main ) const {
+  /// add provenance data for the AlpinoParser to the Frog provenance
+  /*!
+    \param doc the current folia::Document
+    \param main a pointer to the provenance processor of Frog
+  */
   string _label = "alpino-parser";
   if ( !main ){
     throw logic_error( "AlpinoParser::add_provenance() without arguments." );
@@ -84,6 +89,10 @@ void AlpinoParser::add_provenance( folia::Document& doc,
 
 
 bool AlpinoParser::init( const TiCC::Configuration& configuration ){
+  /// initaliaze an AlpinoParser class from a configuration
+  /*!
+    \param configuration the configuration to use
+  */
   filter = 0;
   bool problem = false;
   LOG << "initiating alpino parser ... " << endl;
@@ -192,6 +201,16 @@ bool AlpinoParser::init( const TiCC::Configuration& configuration ){
 }
 
 void AlpinoParser::Parse( frog_data& fd, TimerBlock& timers ){
+  /// parse a frog_data structure using Alpino
+  /*!
+    \param fd the frog_data structure
+    \param timers used for storing timing information
+
+    this function will use an Alpino Server or a locally installed Alpino
+    executable, depending on the current options and settings.
+
+    The results are stored in the \e fd parameter
+  */
   timers.parseTimer.start();
   if ( !isInit ){
     LOG << "Parser is not initialized! EXIT!" << endl;
@@ -247,6 +266,15 @@ void AlpinoParser::Parse( frog_data& fd, TimerBlock& timers ){
 
 void AlpinoParser::add_mwus( const frog_data& fd,
 			     const vector<folia::Word*>& wv ) const {
+  /// add the MWU's stored in a frog_data record as folia Entities
+  /*!
+    \param fd the frog_data structure to use
+    \param wv the list of folia::Word nodes that was parsed into the \e fd
+    frog_data structure
+
+    So we create an entities layer on the Sentence above the Word vector
+    and add all words as MWU entities in that layer
+  */
   folia::Sentence *s = wv[0]->sentence();
   folia::KWargs args;
   if ( !s->id().empty() ){
@@ -278,18 +306,24 @@ void AlpinoParser::add_mwus( const frog_data& fd,
 }
 
 void AlpinoParser::add_result( const frog_data& fd,
-			 const vector<folia::Word*>& wv ) const {
+			       const vector<folia::Word*>& wv ) const {
+  /// add the parser information in \e fd as Dependencies and Entities to
+  /// the FoLiA
+  /*!
+    \param fd the frog_data structure with all information
+    \param wv the list of folia::Word nodes that was parsed into the \e fd
+    frog_data structure
+   */
   ParserBase::add_result( fd, wv );
   add_mwus( fd, wv );
 }
 
-dp_tree::~dp_tree() {
-  //  cerr << "deleting dp_tree: " << this << endl;
-  delete link;
-  delete next;
-}
-
 ostream& operator<<( ostream& os, const dp_tree *node ){
+  /// print out one dp_tree structure node
+  /*!
+    \param os the output stream
+    \param node the node to print
+   */
   if ( node ){
     os << node->rel << "[" << node->begin << "," << node->end << "] ("
        << node->word << ")";
@@ -304,6 +338,11 @@ ostream& operator<<( ostream& os, const dp_tree *node ){
 }
 
 void print_nodes( int indent, const dp_tree *store ){
+  /// recursively pretty print out a dp_tree tree to stderr
+  /*!
+    \param indent indentation level
+    \param store the top node to print
+   */
   const dp_tree *pnt = store;
   while ( pnt ){
     cerr << std::string(indent, ' ') << pnt << endl;
@@ -313,6 +352,13 @@ void print_nodes( int indent, const dp_tree *store ){
 }
 
 const dp_tree *extract_hd( const dp_tree *node ){
+  /// search a dp_tree for a head node
+  /*!
+    \param node the top node to start searching
+    \return the dp_tree structure holding a head
+
+    a head is defined as a node with a \e rel value of 'hd', 'crd' ot 'cmp'
+   */
   const dp_tree *pnt = node->link;
   while ( pnt ){
     if ( pnt->rel == "hd" ){
@@ -330,6 +376,10 @@ const dp_tree *extract_hd( const dp_tree *node ){
 }
 
 dp_tree *parse_node( xmlNode *node ){
+  /// convert a node in an Alpino XML tree into a much simpler dp_tree node
+  /*!
+    \param node The Alpino XML node to parse
+  */
   auto atts = TiCC::getAttributes( node );
   //  cerr << "attributes: " << atts << endl;
   dp_tree *dp = new dp_tree();
@@ -348,6 +398,10 @@ dp_tree *parse_node( xmlNode *node ){
 }
 
 dp_tree *parse_nodes( xmlNode *node ){
+  /// recurively convert an Alpino XML tree into a much simpler dp_tree tree
+  /*!
+    \param node The Alpino XML node to parse
+  */
   dp_tree *result = 0;
   xmlNode *pnt = node;
   dp_tree *last = 0;
@@ -386,6 +440,24 @@ dp_tree *resolve_mwus( dp_tree *in,
 		       int& compensate,
 		       int& restart,
 		       frog_data& fd ){
+  /// extract MWU information into frog_data.
+  /*!
+    \param in the dp_tree to search through
+    \param compensate complicated
+    \param restart complicated
+    \param fd the frog_data structure to register the MWU in.
+    \return the modified dp_tree
+
+    this function searches the dp_tree for MWUS (rel='mwp').
+    It will merge the found MWU words in a modified dp_tree AND register
+    the start and finish indexes of the mwu in \e fd
+
+    The indices of the MWU's in dp_tree are not always consecutively, so
+    we have to check that using \e restart.
+
+    Also, after modifying the tree, the indices are wrong by the size of the
+    MWU. so we need to compensate for that too.
+   */
   dp_tree *result = in;
   dp_tree *pnt = in;
 #ifdef DEBUG_MWU
@@ -434,6 +506,7 @@ dp_tree *resolve_mwus( dp_tree *in,
 }
 
 map<int,dp_tree*> serialize_top( dp_tree *in ){
+  /// No clue atm
   map<int,dp_tree*> result;
   dp_tree *pnt = in->link;
   // only loop over nodes direcly under the top node!
@@ -457,6 +530,7 @@ map<int,dp_tree*> serialize_top( dp_tree *in ){
 }
 
 dp_tree *resolve_mwus( dp_tree *in, frog_data& fd ){
+  /// moielijk moeilijk
   map<int,dp_tree*> top_nodes = serialize_top( in );
   //  cerr << "after serialize: ";
   //  print_nodes(4, in );
@@ -476,6 +550,7 @@ dp_tree *resolve_mwus( dp_tree *in, frog_data& fd ){
 void extract_dependencies( list<pair<const dp_tree*,const dp_tree*>>& result,
 			   const dp_tree *store,
 			   const dp_tree *root ){
+  /// recursively extract all head-dependent pairs form store
   const dp_tree *pnt = store->link;
   if ( !pnt ){
     return;
@@ -497,6 +572,11 @@ void extract_dependencies( list<pair<const dp_tree*,const dp_tree*>>& result,
 }
 
 vector<parsrel> extract( list<pair<const dp_tree*,const dp_tree*>>& l ){
+  /// convert a list of head-dependent pairs into a list of parsrel records
+  /*!
+    \param l a list of head-dependent pairs
+    \return a list of parsrel records
+   */
   vector<parsrel> result(l.size());
   for ( const auto& it : l ){
 #ifdef DEBUG_EXTRACT
@@ -602,6 +682,13 @@ vector<parsrel> extract( list<pair<const dp_tree*,const dp_tree*>>& l ){
 
 vector<parsrel> extract_dp( xmlDoc *alp_doc,
 			    frog_data& fd ){
+  /// extract a list of parsrel records from an Alpino XML file and resolve
+  /// MWU's
+  /*!
+    \param alp_doc an Alpino XML document
+    \param fd a frog_data structure to receive the MWU information
+    \return a list for parsrel records
+   */
   // string txtfile = "/tmp/debug.xml";
   // xmlSaveFormatFileEnc( txtfile.c_str(), alp_doc, "UTF8", 1 );
   xmlNode *top_node = TiCC::xPath( alp_doc, "//node[@rel='top']" );
