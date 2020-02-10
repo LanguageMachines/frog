@@ -39,6 +39,9 @@
 #include "ticcutils/json.hpp"
 
 class BaseBracket;
+namespace Tokenizer {
+  class Token;
+}
 
 class frog_record {
  public:
@@ -69,16 +72,19 @@ class frog_record {
 };
 
 class frog_data {
+  friend frog_data extract_fd( std::vector<Tokenizer::Token>& );
  public:
   size_t size() const { return units.size(); };
   bool empty() const { return units.size() == 0; };
   void resolve_mwus();
   void append( const frog_record& );
+  std::string get_language() const;
   std::string sentence( bool = false ) const;
-  std::string language; // the language of all units
   std::vector<frog_record> units;
   std::vector<frog_record> mw_units;
   std::map<size_t,size_t> mwus; // maps a start pos to end pos
+ private:
+  std::string language; // the language of all units
 };
 
 std::ostream& operator<<( std::ostream&, const frog_record& );

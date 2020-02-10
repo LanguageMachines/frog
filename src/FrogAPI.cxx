@@ -664,20 +664,21 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     la = sent->annotation<folia::LangAnnotation>()->cls();
   }
   string def_lang = tokenizer->default_language();
+  string detected_lang = fd.get_language();
   if ( options.debugFlag > 1 ){
     DBG << "append_to_sentence()" << endl;
-    DBG << "fd.language = " << fd.language << endl;
+    DBG << "fd.language = " << detected_lang << endl;
     DBG << "default_language = " << def_lang << endl;
     DBG << "sentence language = '" << la << "'" << endl;
   }
   if ( la.empty()
-       && !fd.language.empty()
-       && fd.language != "default"
-       && fd.language != def_lang ){
+       && !detected_lang.empty()
+       && detected_lang != "default"
+       && detected_lang != def_lang ){
     //
     // so the language is non default, and not set
     //
-    Tokenizer::set_language( sent, fd.language );
+    Tokenizer::set_language( sent, detected_lang );
     if ( options.textredundancy == "full" ){
       sent->settext( sent->str(options.inputclass), options.inputclass );
     }
@@ -788,17 +789,18 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
 			       const frog_data& fd ) const {
   /// add all Frogged information to a vector of folia::Words
   /*!
-    \param wv The result vector of folia::Word elements
+    \param wv The vector of folia::Word elements
     \param fd The frog_data structure which holds all results
 
     the arity of both parameters should be equal!
   */
   string def_lang = tokenizer->default_language();
-  if ( fd.language != "default"
-       && fd.language != def_lang ){
+  string detected_lang = fd.get_language();
+  if ( detected_lang != "default"
+       && detected_lang != def_lang ){
     if ( options.debugFlag > 0 ){
       DBG << "append_words() SKIP a sentence (different language: "
-	  << fd.language << "), default= " << def_lang << endl;
+	  << detected_lang << "), default= " << def_lang << endl;
     }
   }
   else {
@@ -835,6 +837,14 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
 }
 
 void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
+  /// Run a server
+  /*!
+    \param conn A Sockets::ServerSocket object to connect to
+
+    The 'conn' object should be correctly set up using the right parameters.
+    Depending on the Frog settings we can serve text, FoLiA and JSON.
+    At the moment only TCP connections are supported.
+  */
   try {
     while ( conn.isValid() ) {
       ostringstream output_stream;
@@ -981,6 +991,13 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 }
 
 void FrogAPI::FrogStdin( bool prompt ) {
+  /// run frog on stdin, output to stdout
+  /*!
+    \param prompt Use a prompt. fixed to the string 'frog>'
+
+    This is the fallback when FrogInteractive is used on NON-tty devices
+    (e.g. a pipe) OR when Frog is build without READLINE support.
+  */
   if ( prompt ){
     cout << "frog>"; cout.flush();
   }
@@ -1037,6 +1054,14 @@ void FrogAPI::FrogStdin( bool prompt ) {
 }
 
 void FrogAPI::FrogInteractive(){
+  /// Run an interactive frog on a terminal or a pipe.
+  /*! Normally READLINE support is used to set up an interactive session to
+    communicate with a user on a terminal.
+
+    On non-terminal devices (like a pipe) frog wil just consume input from the
+    input device and output to the output device.
+    This is also the fallback when READLINE support is not available.
+   */
   bool isTTY = isatty(0);
 #ifdef NO_READLINE
   FrogStdin(isTTY);
@@ -1110,9 +1135,10 @@ string FrogAPI::Frogtostring( const string& s ){
   /// Parse a string, Frog it and return the result as a string.
   /*!
     \param s: an UTF8 decoded string. May be multilined.
-    \return the results of frogging. Depending of the current frog settings
-    the input can be interpreted as XML, an the ouyput will be XML or
-    tab separated
+    \return the results of frogging.
+
+    Depending of the current frog settings the input can be interpreted as XML,
+    an the output will be XML or tab separated
   */
   if ( s.empty() ){
     return s;
@@ -1126,10 +1152,13 @@ string FrogAPI::Frogtostring( const string& s ){
 
 string FrogAPI::Frogtostringfromfile( const string& infilename ){
   /// Parse a file, Frog it and return the result as a string.
-  /// @name: The filename.
-  /// @return the results of frogging. Depending of the current frog settings
-  /// the inputfile can be interpreted as XML, an the ouput will be XML or
-  /// tab separated
+  /*!
+    \param infilename The filename.
+    \return the results of frogging as an UTF8 string.
+
+    Depending of the current frog settings the inputfile can be interpreted as
+    XML, and the output will be XML or tab separated.
+  */
   options.hide_timers = true;
   bool old_val = options.noStdOut;
   stringstream ss;
@@ -1146,18 +1175,16 @@ string FrogAPI::Frogtostringfromfile( const string& infilename ){
   return ss.str();
 }
 
-string get_language( frog_data& fd ){
-  fd.language = "default";
-  for ( const auto& r : fd.units ){
-    if ( !r.language.empty() ){
-      fd.language = r.language;
-    }
-    break;
-  }
-  return fd.language;
-}
-
 frog_data extract_fd( vector<Tokenizer::Token>& tokens ){
+  /// extract a frog_data structure from a list of Tokens
+  /*!
+    \param tokens a list of Tokenizer::Token
+    \return the new frog_data structure
+
+    The tokens list may span multiple sentences and paragraphs; this function
+    will return the data for a single sentence and must be called multiple times
+    until the whole list is consumed.
+   */
   frog_data result;
   int quotelevel = 0;
   while ( !tokens.empty() ){
@@ -1197,7 +1224,7 @@ frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
   if ( options.debugFlag > 0 ){
     DBG << "sentence:\n" << sentence << endl;
   }
-  string lan = get_language( sentence );
+  string lan = sentence.get_language();
   string def_lang = tokenizer->default_language();
   if ( options.debugFlag > 0 ){
     DBG << "frog_sentence() on a part. (lang=" << lan << ")" << endl;

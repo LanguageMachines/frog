@@ -434,11 +434,12 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
 					       const frog_data& fd ) const {
   string textclass = tokenizer->getOutputClass();
   string tok_set;
-  if ( tokenizer->getPassThru() || fd.language.empty() ){
+  string lang = fd.get_language();
+  if ( tokenizer->getPassThru() || lang.empty() ){
     tok_set = "passthru";
   }
-  else if ( fd.language != "default" ){
-    tok_set = "tokconfig-" + fd.language;
+  else if ( lang != "default" ){
+    tok_set = "tokconfig-" + lang;
   }
   else {
     tok_set = "tokconfig-" + default_language();

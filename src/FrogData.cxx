@@ -266,3 +266,13 @@ ostream& operator<<( ostream& os, const frog_data& fd ){
 void frog_data::append( const frog_record& fr ){
   units.push_back( fr );
 }
+
+string frog_data::get_language() const {
+  string result = "default";
+  for ( const auto& r : units ){
+    if ( !r.language.empty() ){
+      return r.language;
+    }
+  }
+  return result;
+}
