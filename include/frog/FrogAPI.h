@@ -231,23 +231,23 @@ class FrogAPI {
 			   const std::vector<folia::Word*>&,
 			   const size_t );
   // data
-  const TiCC::Configuration& configuration;
-  FrogOptions& options;
-  TiCC::LogStream *theErrLog;
-  TiCC::LogStream *theDbgLog;
-  TimerBlock timers;
-  // pointers to all the modules
-  Mbma *myMbma;
-  Mblem *myMblem;
-  Mwu *myMwu;
-  ParserBase *myParser;
-  CGNTagger *myCGNTagger;
-  IOBTagger *myIOBTagger;
-  NERTagger *myNERTagger;
-  UctoTokenizer *tokenizer;
+  const TiCC::Configuration& configuration; ///< the configuration
+  FrogOptions& options;                     ///< all runtime options
+  TiCC::LogStream *theErrLog;               ///< the stream to send errors to
+  TiCC::LogStream *theDbgLog;               ///< the stream to send debug info
+  TimerBlock timers;                        ///< all runtime timers
+  Mbma *myMbma;             ///< pointer to the MBMA module
+  Mblem *myMblem;           ///< pointer to the MBLEM module
+  Mwu *myMwu;               ///< pointer to the MWU module
+  ParserBase *myParser;     ///< pointer to the CKY parser module
+  CGNTagger *myCGNTagger;   ///< pointer to the CGN tagger
+  IOBTagger *myIOBTagger;   ///< pointer to the IOB chunker
+  NERTagger *myNERTagger;   ///< pointer to the NER
+  UctoTokenizer *tokenizer; ///< pointer to the Ucot tokenizer
 };
 
-std::vector<std::string> get_full_morph_analysis( folia::Word *, bool=false );
-std::vector<std::string> get_compound_analysis( folia::Word * );
+std::vector<std::string> get_full_morph_analysis( folia::Word *word,
+						  bool make_flat=false );
+std::vector<std::string> get_compound_analysis( folia::Word *word );
 
 #endif

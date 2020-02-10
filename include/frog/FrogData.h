@@ -43,34 +43,36 @@ namespace Tokenizer {
   class Token;
 }
 
+/// a simple datastructure to hold all frogged information of one word
 class frog_record {
  public:
   frog_record();
   ~frog_record();
   nlohmann::json to_json() const;
-  std::string word;
-  std::string clean_word;
-  std::string token_class;
-  std::string language;
-  bool no_space;
-  bool new_paragraph;
-  std::string tag;
-  double tag_confidence;
-  std::string iob_tag;
-  double iob_confidence;
-  std::string ner_tag;
-  double ner_confidence;
-  std::vector<std::string> lemmas;
-  std::vector<std::vector<std::string>> morphs;
-  std::vector<const BaseBracket*> deep_morphs;
-  std::string compound_string;   // string representation of first compound
-  std::string morph_string;      // string representation of first morph
-  std::string deep_morph_string; // string representation of first deep_morph
-  int parse_index;
-  std::string parse_role;
-  std::set<size_t> parts;
+  std::string word;          ///< the word in UTF8
+  std::string clean_word;    ///< lowercased word (MBMA only)
+  std::string token_class;   ///< the assigned token class of the word
+  std::string language;      ///< the deteected language of the word
+  bool no_space;             ///< was there a space after the word?
+  bool new_paragraph;        ///< did the tokenizer detect a paragraph here?
+  std::string tag;           ///< the assigned POS tag
+  double tag_confidence;     ///< the confidence of the POS tag
+  std::string iob_tag;       ///< the assigned IOB tag
+  double iob_confidence;     ///< the confidence of the IOB tag
+  std::string ner_tag;       ///< the assigned NER tag
+  double ner_confidence;     ///< the confidence of the NER tag
+  std::vector<std::string> lemmas;  ///< a list of possible lemma's
+  std::vector<std::vector<std::string>> morphs; ///< the morph analysis
+  std::vector<const BaseBracket*> deep_morphs;  ///< pointers to the deep morphemes
+  std::string compound_string;   ///< string representation of first compound
+  std::string morph_string;      ///< string representation of first morph
+  std::string deep_morph_string; ///< string representation of first deep_morph
+  int parse_index;           ///< label of the dependency
+  std::string parse_role;    ///< role of the dependency
+  std::set<size_t> parts;    ///< set of indeces a MWU is made of (MWU only)
 };
 
+/// a datastructure to hold all frogged information of one Sentence
 class frog_data {
   friend frog_data extract_fd( std::vector<Tokenizer::Token>& );
  public:
@@ -80,11 +82,11 @@ class frog_data {
   void append( const frog_record& );
   std::string get_language() const;
   std::string sentence( bool = false ) const;
-  std::vector<frog_record> units;
-  std::vector<frog_record> mw_units;
-  std::map<size_t,size_t> mwus; // maps a start pos to end pos
+  std::vector<frog_record> units;    ///< the records that make up the sentence
+  std::vector<frog_record> mw_units; ///< the MWU records that make up the sentence
+  std::map<size_t,size_t> mwus;      ///> maps that stores MWU start and end pos
  private:
-  std::string language; // the language of all units
+  std::string language;              ///> the language of all units
 };
 
 std::ostream& operator<<( std::ostream&, const frog_record& );
