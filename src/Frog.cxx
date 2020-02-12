@@ -621,6 +621,29 @@ void KillServerFun( int Signal ){
   }
 }
 
+unsigned long long random64(){
+  /// generate a 64 bit random number
+  static std::random_device rd;
+  static std::uniform_int_distribution<unsigned long long> dis;
+  static std::mt19937_64 gen(rd());
+  return dis(gen);
+}
+
+string randnum( int len ){
+  /// generate a rather random string of length \e len
+  /*!
+    \param len The length of the output string
+
+    We generate a 64 bit random number an convert is to a string.
+    Then this string is truncated at \em len characters. (which means that
+    the result migth be NOT unique!)
+  */
+  stringstream ss;
+  ss << random64() << endl;
+  string result = ss.str();
+  return result.substr(0,len);
+}
+
 int main(int argc, char *argv[]) {
   cerr << "frog " << VERSION << " (c) CLTS, ILK 1998 - 2020" << endl
        << "CLST  - Centre for Language and Speech Technology,"
@@ -669,7 +692,7 @@ int main(int argc, char *argv[]) {
     };
     Opts.extract( "debugfile", db_filename );
     if ( db_filename.empty() ){
-      db_filename = "frog." + folia::randnum(8) + ".debug";
+      db_filename = "frog." + randnum(8) + ".debug";
     }
     the_dbg_stream = new ofstream( db_filename );
     theDbgLog = new TiCC::LogStream( *the_dbg_stream, "frog-", StampMessage );
