@@ -56,7 +56,16 @@ NERTagger::NERTagger( TiCC::LogStream *l, TiCC::LogStream *d ):
 }
 
 bool NERTagger::init( const TiCC::Configuration& config ){
-  if ( !BaseTagger::init( config ) ){
+  /// initalize a NER tagger from 'config'
+  /*!
+    \param config the TiCC::Configuration
+    \return true on succes, false otherwise
+
+    first BaseTagger::init() is called to set generic values,
+    then the NER specific values for the gazeteer file-names etc. are
+    added and the files are read.
+  */
+ if ( !BaseTagger::init( config ) ){
     return false;
   }
   string val = config.lookUp( "max_ner_size", "NER" );
@@ -248,12 +257,23 @@ vector<string> NERTagger::create_ner_list( const vector<string>& words,
 
 void NERTagger::add_declaration( folia::Document& doc,
 				 folia::processor *proc ) const {
+  /// add ENTITY annotation as an AnnotationType to the document
+  /*!
+    \param doc the Document the add to
+    \param proc the processor to add
+  */
   folia::KWargs args;
   args["processor"] = proc->id();
   doc.declare( folia::AnnotationType::ENTITY, tagset, args );
 }
 
 void NERTagger::Classify( frog_data& swords ){
+  /// Tag one sentence, given in frog_data format
+  /*!
+    \param swords the frog_data structure to analyze
+
+    When tagging succeeds, 'swords' will be extended with the tag results
+   */
   if ( debug ){
     DBG << "classify from DATA" << endl;
   }
@@ -372,8 +392,13 @@ void NERTagger::Classify( frog_data& swords ){
 void NERTagger::post_process( frog_data& sentence,
 			      const vector<tc_pair>& ners ){
   /// finish the NER processs by updating 'sentence'
-  /// \param sentence a frog_data structure to update with NER info
-  /// \param ners a sequence of NE tags (maybe 'O') with their confidence
+  /*!
+    \param sentence a frog_data structure to update with NER info
+    \param ners a sequence of NE tags (maybe 'O') with their confidence
+
+    This is a specialized version local to NERTagger. Don't use the norma;
+    post_process()
+  */
   if ( sentence.size() == 0 ) {
     return;
   }
@@ -420,6 +445,19 @@ void NERTagger::post_process( frog_data& sentence,
 void NERTagger::addEntity( frog_data& sent,
 			   const size_t pos,
 			   const vector<tc_pair>& entity ){
+  /// add a NER entity to the frog_data structure
+  /*!
+    \param sent The frog_data to extend with NER info
+    \param pos the curent position
+    \param entity a Ner entity which may span several tc_pairs
+
+    A Named Entity can span several TAGS with each a confidence.
+    The confidence of the NE is calculated as the mean of the confidences
+    of those tags.
+
+    The NE tags and that mean confidence ias assigned to the proper locations
+    in the 'sent' structure.
+  */
   double c = 0;
   for ( auto const& val : entity ){
     c += val.second;
@@ -436,10 +474,23 @@ void NERTagger::addEntity( frog_data& sent,
 
 
 void NERTagger::post_process( frog_data& ){
+  /// This implements BaseTagger::post_process by DISALLOWING it.
   throw logic_error( "NER tagger call undefined postprocess() member" );
 }
 
 string to_tag( const string& label, bool inside ){
+  /// convert a label into a result tag
+  /*!
+    \param label the label as a string
+    \param inside are we 'inside' the tag or at the begin?
+    \return the result tag
+
+    There are several cases:
+
+    * The label is ambiguous, like "loc+org". then we return "O"
+    * The label is usable like 'org'. Then we return 'I-org' when 'inside' or
+    'B-org' othwerwise
+  */
   vector<string> parts = TiCC::split_at( label, "+" );
   if ( parts.size() > 1 ){
     // undecided
@@ -461,7 +512,16 @@ string to_tag( const string& label, bool inside ){
 void NERTagger::merge_override( vector<tc_pair>& tags,
 				const vector<tc_pair>& overrides,
 				bool unconditional,
-				const vector<string>& POS_tags ) const{
+				const vector<string>& POS_tags ) const {
+  /// merge overrides into the tc_pair vector
+  /*!
+    \param tags the list of tc_pair to merge into
+    \param overrides the override information (from gazeteers and such)
+    \param unconditional when true, prefer the information from overrides,
+    otherwise only override when there was no tag assigned yet
+    \param POS_tags a list of POS-tags. When this list is non-empty, only
+    override when it contains a N or a SPEC tag.
+   */
   string label;
   for ( size_t i=0; i < tags.size(); ++i ){
     if ( overrides[i].first != "O"
@@ -528,11 +588,17 @@ void NERTagger::merge_override( vector<tc_pair>& tags,
 
 
 bool NERTagger::Generate( const std::string& opt_line ){
+  /// generate a new tagger using opt_line
   return tagger->GenerateTagger( opt_line );
 }
 
 void NERTagger::add_result( const frog_data& fd,
 			    const vector<folia::Word*>& wv ) const {
+  /// add the NER tags in 'fd' to the FoLiA list of Word
+  /*!
+    \param fd The tagged results
+    \param wv The folia:Word vector
+   */
   folia::Sentence *s = wv[0]->sentence();
   folia::EntitiesLayer *el = 0;
   folia::Entity *ner = 0;
@@ -563,7 +629,7 @@ void NERTagger::add_result( const frog_data& fd,
       folia::KWargs args;
       args["set"] = getTagset();
       args["generate_id"] = el->id();
-      args["class"] = word.ner_tag.substr(2);
+      args["class"] = word.ner_tag.substr(2); // strip the B-
       args["confidence"] = TiCC::toString(word.ner_confidence);
       if ( textclass != "current" ){
 	args["textclass"] = textclass;

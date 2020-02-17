@@ -561,7 +561,7 @@ ostream& operator<<( ostream& os, const tag_entry& e ){
 void BaseTagger::Classify( frog_data& sent ){
   /// Tag one sentence, give in frog_data format
   /*!
-    \param sent the frog_date structure to analyze
+    \param sent the frog_data structure to analyze
 
     When tagging succeeds, 'sent' will be extended with the tag results
    */
