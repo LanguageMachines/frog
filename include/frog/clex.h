@@ -65,8 +65,6 @@ namespace CLEX {
   std::string toString( const Type& );
   Type toCLEX( const std::string& );
   Type toCLEX( const char );
-  extern const std::map<CLEX::Type,std::string> tagNames;
-  extern const std::map<char,std::string> iNames;
   const std::string& get_iDescr( char c );
   const std::string& get_tDescr( CLEX::Type t );
 }
