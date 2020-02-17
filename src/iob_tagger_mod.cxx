@@ -91,7 +91,7 @@ void IOBTagger::Classify( frog_data& swords ){
     }
     to_do.push_back( ta );
   }
-  _tag_result = tagLine( to_do );
+  _tag_result = tag_entries( to_do );
   if ( debug ){
     DBG << "IOB tagger out: " << endl;
     for ( size_t i=0; i < _tag_result.size(); ++i ){

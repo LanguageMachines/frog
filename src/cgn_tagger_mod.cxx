@@ -41,12 +41,31 @@ using TiCC::operator<<;
 #define LOG *TiCC::Log(err_log)
 #define DBG *TiCC::Log(dbg_log)
 
-
+/// default value for the name of the CGN subsets file
 static string subsets_file = "subsets.cgn";
+/// default value for the name of the CGN constraints file
 static string constraints_file = "constraints.cgn";
 
 bool CGNTagger::fillSubSetTable( const string& sub_file,
 				 const string& const_file ){
+  /// read als the CGN subsets and constraints
+  /*!
+    \param sub_file The name of the subsets file
+    \param const_file The name of the constraints file
+    \return true on succes, false otherwise
+
+    /// The subsets file is in the format:
+    /// subset = val1,...,valn
+    /// like :
+    ///   ntype = soort, eigen
+    ///   getal = ev, mv, getal
+    ///
+    /// The constraints file is in the format:
+    /// value=POS1,POS2
+    /// like:
+    ///   getal = VNW, N
+    ///   pvagr = WW
+  */
   ifstream sis( sub_file );
   if ( !sis ){
     LOG << "unable to open subsets file: " << sub_file << endl;
@@ -96,6 +115,15 @@ bool CGNTagger::fillSubSetTable( const string& sub_file,
 }
 
 bool CGNTagger::init( const TiCC::Configuration& config ){
+  /// initalize a CGN tagger from 'config'
+  /*!
+    \param config the TiCC::Configuration
+    \return true on succes, false otherwise
+
+    first BaseTagger::init() is called to set generic values,
+    then the CGN specific values for subset and constraints file-names are
+    added and those files are read, except when these have the value 'ignore'
+  */
   if (  debug > 1 ){
     DBG << "INIT CGN Tagger." << endl;
   }
@@ -137,12 +165,42 @@ bool CGNTagger::init( const TiCC::Configuration& config ){
 
 void CGNTagger::add_declaration( folia::Document& doc,
 				 folia::processor *proc ) const {
+  /// add POS annotation as an AnnotationType to the document
+  /*!
+    \param doc the Document the add to
+    \param proc the processor to add
+  */
   folia::KWargs args;
   args["processor"] = proc->id();
   doc.declare( folia::AnnotationType::POS, tagset, args );
 }
 
-string CGNTagger::getSubSet( const string& val, const string& head, const string& fullclass ) const {
+string CGNTagger::getSubSet( const string& val,
+			     const string& head,
+			     const string& fullclass ) const {
+  /// get a specific subset value. (FoLiA output only)
+  /*!
+    \param val the val to look up
+    \param head the head of the CGN POS-tag
+    \param fullclass the original full CGN tag, used for error messages only
+    \return a string with the found value or throws when there is a problem
+    \note for a well-trained CGN tagger, all values should belong to a subset
+    AND there may never be a constraints conflict
+
+    A fullclass may be N(soort,ev,basis,zijd,stan), so the head is N.
+
+    For every value in 'soort,ev,basis,zijd,stan' we lookup the
+    subset in the cgn_subsets, and when the constraints on the head
+    are satisfied we return the subset.
+
+    For instance: 'soort' is found in the subsets to belong to the subset
+    'ntype' and there are no 'head' constrainst on ntype, so the lookup
+    for 'soort' yields 'ntype'
+
+    And would the fullclass have been VNW(betr,pron,stan,vol,persoon,getal)
+    then the subset for 'getal' is 'getal' AND the constraints for 'getal'
+    are 'VNW, N', so these are satisfied and the result is 'getal'
+*/
   auto it = cgnSubSets.find( val );
   if ( it == cgnSubSets.end() ){
     throw folia::ValueError( "unknown cgn subset for class: '" + val + "', full class is: '" + fullclass + "'" );
@@ -171,6 +229,10 @@ string CGNTagger::getSubSet( const string& val, const string& head, const string
 }
 
 void CGNTagger::post_process( frog_data& words ){
+  /// add the found tagging results to the frog_data structure
+  /*!
+    \param words The frog_data structure to extend
+  */
   for ( size_t i=0; i < _tag_result.size(); ++i ){
     addTag( words.units[i],
 	    _tag_result[i].assigned_tag(),
@@ -181,6 +243,19 @@ void CGNTagger::post_process( frog_data& words ){
 void CGNTagger::addTag( frog_record& fd,
 			const string& inputTag,
 			double confidence ){
+  /// add a tag/confidence pair to a frog_record
+  /*!
+    \param fd The record to add to
+    \param inputTag the POS tag to add
+    \param confidence the confidence value for the inputTag
+
+    \note EXCEPTIONS:
+    The confidence will be ignored for SPEC POS tags (1.0) is used then.
+
+    Also a token_tag_map may be used to POST correct the found tags for specific
+    Ucto token_classes. e.g. an EMOTICON will migt be translated to a SPEC(SYMB)
+    or a PUNCTUATION to a LET()
+  */
 #pragma omp critical (dataupdate)
   {
     fd.tag = inputTag;
@@ -211,6 +286,12 @@ void CGNTagger::addTag( frog_record& fd,
 
 void CGNTagger::add_tags( const vector<folia::Word*>& wv,
 			  const frog_data& fd ) const {
+  /// add the tagger results to the folia:Word list
+  /*!
+    \param wv The folia::Word vector to add to
+    \param fd the frog_data structure with the tagger results
+
+  */
   assert( wv.size() == fd.size() );
   size_t pos = 0;
   for ( const auto& word : fd.units ){

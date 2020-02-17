@@ -326,7 +326,7 @@ void NERTagger::Classify( frog_data& swords ){
       }
       to_do.push_back( entry );
     }
-    _tag_result = tagLine( to_do );
+    _tag_result = tag_entries( to_do );
     if ( debug > 1 ){
       DBG << "NER tagger out: " << endl;
       for ( size_t i=0; i < _tag_result.size(); ++i ){
