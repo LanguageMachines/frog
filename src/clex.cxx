@@ -221,7 +221,13 @@ namespace CLEX {
   }
 
   const string empty = "";
+
   const string& get_iDescr( char c ) {
+    /// get the description related to the inflection symbol 'c'
+    /*!
+      \param c a character value for the inflexion
+      \return a description, may be empty
+    */
     const auto& it = iNames.find(c);
     if ( it != iNames.end() ){
       return it->second;
@@ -232,6 +238,11 @@ namespace CLEX {
   }
 
   const std::string& get_tDescr( CLEX::Type t ) {
+    /// get the description related to the CLEX::Type symbol 't'
+    /*!
+      \param t a CLEX::Type
+      \return a description, may be empty
+    */
     const auto& it = tagNames.find(t);
     if ( it != tagNames.end() ){
       return it->second;
