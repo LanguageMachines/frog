@@ -38,29 +38,33 @@
 using namespace std;
 
 namespace CLEX {
-  map<CLEX::Type,string> tagNames = {
-    {CLEX::N, "noun" },
+
+  /// a harcoded table with a mapping for CLEX::Type to a description
+  const map<CLEX::Type,string> tagNames = {
     {CLEX::A, "adjective"},
+    {CLEX::B, "adverb"},
+    {CLEX::C, "conjunction"},
+    {CLEX::D, "article"},
+    {CLEX::I, "interjection"},
+    {CLEX::N, "noun" },
+    {CLEX::O, "pronoun"},
+    {CLEX::P, "preposition"},
     {CLEX::Q, "quantifier-numeral"},
     {CLEX::V, "verb"},
-    {CLEX::D, "article"},
-    {CLEX::O, "pronoun"},
-    {CLEX::B, "adverb"},
-    {CLEX::P, "preposition"},
-    {CLEX::C, "conjunction"},
-    {CLEX::I, "interjection"},
+    {CLEX::LET, "letter"},
+    {CLEX::PN, "proper-noun"},
+    {CLEX::SPEC, "special"},
     {CLEX::X, "unanalysed"},
     {CLEX::Z, "expression-part"},
-    {CLEX::PN, "proper-noun"},
     {CLEX::AFFIX, "affix"},
     {CLEX::XAFFIX,"x-affix"},
     {CLEX::NEUTRAL, "neutral"},
-    {CLEX::SPEC, "special"},
-    {CLEX::LET, "letter"},
     {CLEX::UNASS, "unassigned"}
   };
 
-  map<char,string> iNames = {
+  /// a hardcodes table with a mapping from inflection codes to a readable
+  /// string
+  const map<char,string> iNames = {
     // the inflection names
     {'X', ""},
     {'s', "separated"},
@@ -86,6 +90,11 @@ namespace CLEX {
   };
 
   Type toCLEX( const string& s ){
+    /// convert a string to a CLEX::Type
+    /*!
+      \param s a string
+      \return the CLEX::Type, may be UNASS when no translation is found
+     */
     if ( s == "N" ) return N;
     else if ( s == "A" )    return A;
     else if ( s == "Q" )    return Q;
@@ -109,12 +118,23 @@ namespace CLEX {
   }
 
   Type toCLEX( const char c ){
+    /// convert a character  to a CLEX::Type
+    /*!
+      \param c a character
+      \return the CLEX::Type, may be UNASS when no translation is found
+     */
     string s;
     s += c;
     return toCLEX(s);
   }
 
   string toString( const Type& t ){
+    /// convert a CLEX::Type to a string
+    /*!
+      \param t a CLEX::Type value
+      \return a string representing the type, in a format that can be converted
+      back to the type using toCLEX()
+    */
     switch ( t ){
     case N:       return "N";
     case A:       return "A";
@@ -140,18 +160,23 @@ namespace CLEX {
     }
   }
 
-  bool isBasicClass( const Type& t ){
+  bool is_CELEX_base( const Type& t ){
+    /// check if the type is a CELEX class
+    /*!
+      \param t a CLEX::Type
+      \return true if so, otherwise false
+     */
     switch ( t ){
-    case N:
     case A:
+    case B:
+    case C:
+    case D:
+    case I:
+    case N:
+    case O:
+    case P:
     case Q:
     case V:
-    case D:
-    case O:
-    case B:
-    case P:
-    case C:
-    case I:
     case X:
     case Z:
       return true;
@@ -161,6 +186,11 @@ namespace CLEX {
   }
 
   Type select_tag( const char ch ){
+    /// select the CELEX base associated with a character code
+    /*!
+      \param ch a character code
+      \return a CLEX::Type. may be UNASS when no translation is found
+     */
     Type result = CLEX::UNASS;
     switch( ch ){
     case 'm':
@@ -190,7 +220,29 @@ namespace CLEX {
     return result;
   }
 
+  const string empty = "";
+  const string& get_iDescr( char c ) {
+    const auto& it = iNames.find(c);
+    if ( it != iNames.end() ){
+      return it->second;
+    }
+    else {
+      return empty;
+    }
+  }
+
+  const std::string& get_tDescr( CLEX::Type t ) {
+    const auto& it = tagNames.find(t);
+    if ( it != tagNames.end() ){
+      return it->second;
+    }
+    else {
+      return empty;
+    }
+  }
+
 }
+
 
 ostream& operator<<( ostream& os, const CLEX::Type& t ){
   os << toString( t );

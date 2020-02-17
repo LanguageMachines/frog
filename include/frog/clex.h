@@ -37,17 +37,38 @@
 #include <map>
 
 namespace CLEX {
-  enum Type { UNASS, N, A, Q, V, D, O, B, P, C, I, X, Z, PN, AFFIX, XAFFIX,
-	      GLUE, SPEC, LET, NEUTRAL };
-  bool isBasicClass( const Type& );
+  /// all possible CELEX tags and action properties
+  enum Type {
+    UNASS,  ///< unknow value
+    A,      ///< Adjective (CELEX tag)
+    B,      ///< Adverb (CELEX tag)
+    C,      ///< Conjunction (CELEX tag)
+    D,      ///< Article (CELEX tag)
+    I,      ///< Interjection (CELEX tag)
+    N,      ///< Noun (CELEX tag)
+    O,      ///< Pronoun (CELEX tag)
+    P,      ///< Preposition (CELEX tag)
+    Q,      ///< Numeral (CELEX tag)
+    V,      ///< Verb (CELEX tag)
+    LET,    ///< Letter (not in CELEX)
+    PN,     ///< Proper Noun (not in CELEX)
+    SPEC,   ///< Special (not in CELEX)
+    X,      ///< Unanalysed
+    Z,      ///< Expresssion-part
+    AFFIX,  ///< affix property
+    XAFFIX, ///< x-affix property
+    GLUE,   ///< Glue property
+    NEUTRAL ///< No action
+  };
+  bool is_CELEX_base( const Type& );
   Type select_tag( const char ch );
   std::string toString( const Type& );
   Type toCLEX( const std::string& );
   Type toCLEX( const char );
-  extern std::map<CLEX::Type,std::string> tagNames;
-  extern std::map<char,std::string> iNames;
-  inline const std::string& get_iDescr( char c ) { return iNames[c]; }
-  inline const std::string& get_tDescr( CLEX::Type t ) {  return tagNames[t]; }
+  extern const std::map<CLEX::Type,std::string> tagNames;
+  extern const std::map<char,std::string> iNames;
+  const std::string& get_iDescr( char c );
+  const std::string& get_tDescr( CLEX::Type t );
 }
 
 std::ostream& operator<<( std::ostream&, const CLEX::Type& );
