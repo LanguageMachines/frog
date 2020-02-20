@@ -378,7 +378,8 @@ void UctoTokenizer::add_provenance( folia::Document& doc,
   /*!
     \param doc the FoLiA document to add to
     \param main the processor to use (presumably the Frog processor)
-  */  if ( !tokenizer ){
+  */
+  if ( !tokenizer ){
     throw runtime_error( "ucto tokenizer not initialized" );
   }
   if ( tokenizer->getPassThru() ){

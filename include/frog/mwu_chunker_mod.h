@@ -74,7 +74,7 @@ class Mwu {
   bool init( const TiCC::Configuration& );
   void add_provenance( folia::Document&, folia::processor * ) const;
   void Classify( frog_data& );
-  void add( frog_record&, size_t );
+  void add( frog_record& );
   void add_result( const frog_data&,
 		   const std::vector<folia::Word*>& ) const;
   std::string getTagset() const { return mwu_tagset; };
