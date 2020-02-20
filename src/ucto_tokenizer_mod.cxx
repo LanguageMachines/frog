@@ -500,7 +500,7 @@ vector<Tokenizer::Token> UctoTokenizer::tokenize_line( const string& buffer,
    */
   if ( tokenizer ){
     tokenizer->reset();
-    tokenizer->tokenizeLine( line, lang ); // will consume whole line!
+    tokenizer->tokenizeLine( buffer, lang ); // will consume whole line!
     return tokenize_line_next(); // returns next sentence in the line
   }
   else {
@@ -587,6 +587,10 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
     \param s The parent to attach too
     \param fd The frog_data structure with the needed information
     \return a list of newly created folia::Word elements
+
+    this function should be used when creating FoLiA output, and it assumes
+    that the tokenizer allready filled in all required fields in the frog_data
+    structure
    */
   string textclass = tokenizer->getOutputClass();
   string tok_set;
@@ -651,7 +655,16 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
 }
 
 vector<Tokenizer::Token> UctoTokenizer::correct_words( folia::FoliaElement *elt,
-						       vector<folia::Word*>& wv ){
+						       const vector<folia::Word*>& wv ){
+  /// correct Word elements in the FoLiA based on results found by the tokenizer
+  /*!
+    \param elt the FoliaElement which is the parent for correction
+    \param wv The input Word vector, (of which elt is the parent)
+
+    the input Word vector might represent a 'word' like "gisteren?". The
+    tokenizer will split this into "gisteren" and "?" and this function
+    will handle this by creating a correction with 2 words as \<new\>
+   */
   if ( tokenizer ){
     vector<folia::FoliaElement*> ev( wv.begin(), wv.end() );
     return tokenizer->correct_elements( elt, ev );

@@ -65,7 +65,7 @@ class UctoTokenizer {
 				       const frog_data& ) const;
   void add_provenance( folia::Document& , folia::processor * ) const;
   std::vector<Tokenizer::Token> correct_words( folia::FoliaElement *,
-					       std::vector<folia::Word*>& );
+					       const std::vector<folia::Word*>& );
  private:
   std::istream *cur_is;
   Tokenizer::TokenizerClass *tokenizer;
