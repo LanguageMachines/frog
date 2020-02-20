@@ -110,7 +110,7 @@ void usage( ) {
        << "\t --retry                assume frog is running again on the same input,\n"
        << "\t                        already done files are skipped. (detected on the basis of already existing output files)\n"
        << "\t --max-parser-tokens=<n> inhibit parsing when a sentence contains over 'n' tokens. (default: 500, needs already 16Gb of memory!)\n"
-    //       << "\t -Q                     Enable quote detection in tokeniser.\n"
+    //       << "\t -Q                     Enable quote detection in tokenizer.\n"
        << "\t -T or --textredundancy=[full|minimal|none]\n"
        << "\t                        Set the text redundancy level in the tokenizer for text nodes in FoLiA output: \n"
        << "\t                        'full' - add text to all levels: <p> <s> <w> etc.\n"
