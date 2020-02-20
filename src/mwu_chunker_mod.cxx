@@ -50,19 +50,16 @@ using namespace std;
 #define DBG *TiCC::Log(dbgLog)
 
 mwuAna::mwuAna( const string& wrd,
-		const string& tag,
-		const string& glue_tag,
+		bool glue_tag,
 		size_t index ){
   /// create a mwu Analysis record
   /*!
     \param wrd The text of the word
-    \param tag The POS tag of the word
-    \param glue_tag the configured tag that by default leads to WMU's
+    \param glue_tag was a \e 'glue' tag detected?
     \param index The (initial) position in the sentence
    */
-  spec = false;
   word = wrd;
-  spec = ( tag == glue_tag );
+  spec = glue_tag;
   mwu_start = mwu_end = index;
 }
 
@@ -110,15 +107,16 @@ void Mwu::reset(){
 void Mwu::add( frog_record& fd ){
   /// add a mwuAna record to this Mwu
   /*!
-    \param fd The frog_data structure wikt the information to use
+    \param fd The frog_data structure with the information to use
    */
   icu::UnicodeString tmp = TiCC::UnicodeFromUTF8(fd.word);
   if ( filter ){
     tmp = filter->filter( tmp );
   }
   string txt = TiCC::UnicodeToUTF8( tmp );
+  bool glue = ( fd.tag == glue_tag );
   size_t index = mWords.size();
-  mWords.push_back( new mwuAna( txt, fd.tag, glue_tag, index ) );
+  mWords.push_back( new mwuAna( txt, glue, index ) );
 }
 
 bool Mwu::read_mwus( const string& fname) {
@@ -149,7 +147,7 @@ bool Mwu::read_mwus( const string& fname) {
 }
 
 bool Mwu::init( const TiCC::Configuration& config ) {
-  /// initialize the Mwe using a Configuration structure
+  /// initialize the Mwu using a Configuration structure
   /*!
     \param config the configuration to use
    */
@@ -249,14 +247,17 @@ void Mwu::add_provenance( folia::Document& doc,
 
 void Mwu::Classify( frog_data& sent ){
   /// run the Mwu classifier on e sentence in frog_data format
+  /*!
+    \param sent a frog_data structure with unresolved MWU's
+   */
   reset();
-  /// setup the Mwu
+  // setup the Mwu
   for ( auto& word : sent.units ){
     add( word );
   }
-  /// collect mwu's
+  // collect mwu's
   Classify();
-  ///  take over the mwu postions in the frog_data
+  //  take over the mwu postions in the frog_data
   for ( const auto& mword : mWords ){
     if ( mword->mwu_start != mword->mwu_end ){
       sent.mwus[mword->mwu_start] = mword->mwu_end;
@@ -382,7 +383,7 @@ void Mwu::Classify(){
 
 void Mwu::add_result( const frog_data& fd,
 		      const vector<folia::Word*>& wv ) const {
-  /// add the mwu's in 'fd' as Entiteis to the parent of the list of Word
+  /// add the mwu's in \e fd as Entities to the parent of the \e wv list of Word
   /*!
     \param fd The tagged results
     \param wv The folia:Word vector

@@ -44,6 +44,7 @@ using namespace std;
 #define DBG *TiCC::Dbg(ckyLog)
 
 ostream& operator<<( ostream& os, const Constraint* c ){
+  /// output a Constraint (debug only)
   if ( c ){
     c->put( os );
   }
@@ -54,23 +55,27 @@ ostream& operator<<( ostream& os, const Constraint* c ){
 }
 
 ostream& operator<<( ostream& os, const Constraint& c ){
+  /// output a Constraint (debug only)
   return os << &c;
 }
 
 using TiCC::operator<<;
 
 void HasIncomingRel::put( ostream& os ) const {
+  /// output a HasIncomingRel (debug only)
   Constraint::put( os );
   os << " incoming rel=" << relType;
 }
 
 
 void HasDependency::put( ostream& os ) const {
+  /// output a HasDependency (debug only)
   Constraint::put( os );
   os << " dependency rel=" << relType << " head=" << headType;
 }
 
 void DependencyDirection::put( ostream & os ) const {
+  /// output a DependencyDirection (debug only)
   Constraint::put( os );
   os << " direction=" << " " << direction;
 }
@@ -81,15 +86,21 @@ CKYParser::CKYParser( size_t num,
 		      TiCC::LogStream* log ):
   numTokens(num)
 {
-  inDepConstraints.resize( numTokens + 1 );
-  outDepConstraints.resize( numTokens + 1 );
-  edgeConstraints.resize( numTokens + 1 );
+  /// initalialize a CKYparser
+  /*!
+    \param num The number of tokens to parse
+    \param constraints A Constraints vector
+    \param log a LogStream for (debug) messages.
+   */
+  inDepConstraints.resize( numTokens + 1 );  // 1 dimensional array
+  outDepConstraints.resize( numTokens + 1 ); // 1 dimensional array
+  edgeConstraints.resize( numTokens + 1 );   // 2 dimensional array
   for ( auto& it : edgeConstraints ){
-    it.resize( numTokens + 1 );
+    it.resize( numTokens + 1 ); // second dimension
   }
-  chart.resize( numTokens +1 );
+  chart.resize( numTokens +1 ); // 2 dimensional array
   for ( auto& it : chart ){
-    it.resize( numTokens + 1 );
+    it.resize( numTokens + 1 ); // second dimension
   }
   for ( const auto& constraint : constraints ){
     addConstraint( constraint );
@@ -99,6 +110,12 @@ CKYParser::CKYParser( size_t num,
 
 
 void CKYParser::addConstraint( const Constraint *c ){
+  /// add a Constraint to our parser
+  /*!
+    \param c the Constraint to add.
+
+    Depending on the Constraint Type we add \e c to one of our stacks
+   */
   switch ( c->type() ){
   case Constraint::Incoming:
     inDepConstraints[c->tIndex()].push_back( c );
@@ -117,9 +134,12 @@ void CKYParser::addConstraint( const Constraint *c ){
 
 string CKYParser::bestEdge( const SubTree& leftSubtree,
 			    const SubTree& rightSubtree,
-			    size_t headIndex, size_t depIndex,
+			    size_t headIndex,
+			    size_t depIndex,
 			    set<const Constraint*>& bestConstraints,
 			    double& bestScore ){
+  /// search the best edge
+  /// I dare not to comment....
   bestConstraints.clear();
   DBG << "BESTEDGE " << headIndex << " <> " << depIndex << endl;
   if ( headIndex == 0 ){
@@ -183,6 +203,8 @@ string CKYParser::bestEdge( const SubTree& leftSubtree,
 }
 
 void CKYParser::parse(){
+  /// run the parser
+  /// I dare not to comment
   for ( size_t k=1; k < numTokens + 2; ++k ){
     for( size_t s=0; s < numTokens + 1 - k; ++s ){
       size_t t = s + k;
@@ -271,7 +293,6 @@ void CKYParser::parse(){
     }
   }
 }
-
 
 void CKYParser::leftIncomplete( int s, int t, vector<parsrel>& pr ){
   int r = chart[s][t].l_False.r();

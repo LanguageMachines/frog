@@ -43,7 +43,7 @@
 class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );
  public:
-  mwuAna( const std::string&, const std::string&, const std::string&, size_t );
+  mwuAna( const std::string&, bool, size_t );
   virtual ~mwuAna() {};
 
   void merge( const mwuAna * );
@@ -77,8 +77,8 @@ class Mwu {
   void add( frog_record& );
   void add_result( const frog_data&,
 		   const std::vector<folia::Word*>& ) const;
+  /// return the value for \e mwu_tagset. (set via Configuration)
   std::string getTagset() const { return mwu_tagset; };
-  std::vector<mwuAna*>& getAna(){ return mWords; };
   std::string version() const { return _version; };
  private:
   bool readsettings( const std::string&, const std::string&);
