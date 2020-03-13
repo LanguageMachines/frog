@@ -111,6 +111,7 @@ void usage( ) {
        << "\t                        already done files are skipped. (detected on the basis of already existing output files)\n"
        << "\t --max-parser-tokens=<n> inhibit parsing when a sentence contains over 'n' tokens. (default: 500, needs already 16Gb of memory!)\n"
     //       << "\t -Q                     Enable quote detection in tokenizer.\n"
+       << "\t --JSONin               The input is JSON. Implies JSONout too! (server mode only)\n"
        << "\t -T or --textredundancy=[full|minimal|none]\n"
        << "\t                        Set the text redundancy level in the tokenizer for text nodes in FoLiA output: \n"
        << "\t                        'full' - add text to all levels: <p> <s> <w> etc.\n"
@@ -131,14 +132,13 @@ void usage( ) {
        << "\t                        Set the languages. e.g. --language=nld,eng,por\n"
        << "\t                        The first language in the list will be the default. (default dutch).\n"
        << "\t ============= OUTPUT OPTIONS ============================================\n"
-       << "\t -o <outputfile>	     Output columned output to file, instead of default stdout\n"
-       << "\t --nostdout             suppress columned output to stdout\n"
+       << "\t -o <outputfile>        Output Tab separated or JSON output to file, instead of default stdout\n"
+       << "\t --nostdout             suppress Tabbed/JSON output to stdout\n"
        << "\t -X <xmlfile>           Output also to an XML file in FoLiA format\n"
        << "\t --id=<docid>           Document ID, used in FoLiA output. (Default 'untitled')\n"
        << "\t --outputdir=<dir>      Output to dir, instead of default stdout\n"
        << "\t --xmldir=<dir>         Use 'dir' to output FoliA XML to.\n"
        << "\t --deep-morph           add deep morphological information to the output\n"
-       << "\t --JSONin               The input is JSON. Implies JSONout too! (server mode only)\n"
        << "\t --JSONout=n            Output JSON instead of Tabbed.\n"
        << "\t                        When n != 0, use it for pretty-printing the output. (default n=0) \n"
        << "\t ============= OTHER OPTIONS ============================================\n"
@@ -664,9 +664,7 @@ int main(int argc, char *argv[]) {
   string db_filename;
   string remove_command = "find frog.*.debug -mtime +1 -exec rm {} \\;";
   cerr << "removing old debug files using: '" << remove_command << "'" << endl;
-  int ret = system( remove_command.c_str() );
-  if ( ret != 0 ){
-    cerr << "result of removing: " << ret << endl;
+  if ( system( remove_command.c_str() ) ){
   }
   try {
     TiCC::CL_Options Opts("c:e:o:t:T:x::X::nQhVd:S:",
