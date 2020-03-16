@@ -496,6 +496,12 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
 			     const list<BaseBracket*>::iterator& rpos,
 			     list<BaseBracket*>::iterator& bpos ){
   /// test if the rule matches at a certain position
+  /*!
+    \param result the current result. A new match will be appended
+    \param rpos the position in the rules list we are at.
+    \param bpos output parameter to return the END postion of the match
+    \return true if it maches
+  */
   if ( debugFlag > 5 ){
     LOG << "test MATCH: rpos= " << *rpos << endl;
   }
