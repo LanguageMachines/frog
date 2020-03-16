@@ -38,8 +38,17 @@
 #include "ticcutils/LogStream.h"
 #include "frog/clex.h"
 
-enum Status { INFO, PARTICLE, PARTICIPLE, STEM, COMPLEX, INFLECTION,
-	      DERIVATIONAL, FAILED };
+/// The state of the MBMA structure
+enum Status {
+  INFO,          ///< The structure contains additional Information
+  PARTICLE,      ///< The structure describes a Particle
+  PARTICIPLE,    ///< The structure describes a Participle
+  STEM,          ///< The structure describes the Stem
+  COMPLEX,       ///< The structure describes a Complex Rule
+  INFLECTION,    ///< The structure describes an Inflection Rule
+  DERIVATIONAL,  ///< The structure describes a Drivational rule
+  FAILED         ///< The structure describes a Failed state
+};
 
 namespace Compound {
   enum Type : int {

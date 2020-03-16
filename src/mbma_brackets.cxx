@@ -50,6 +50,7 @@ using TiCC::operator<<;
 #define LOG *TiCC::Log(myLog)
 
 string toString( const Compound::Type& ct ){
+  /// return the string representation for the Compuund::Type
   switch ( ct ){
   case Compound::Type::NN:
     return "NN";
@@ -112,6 +113,7 @@ string toString( const Compound::Type& ct ){
 }
 
 Compound::Type stringToCompound( const string& s ){
+  /// give the Compound::Type for this string
   if ( s == "NN" ){
     return Compound::Type::NN;
   }
@@ -202,11 +204,13 @@ Compound::Type stringToCompound( const string& s ){
 }
 
 ostream& operator<<( ostream& os, const Compound::Type& ct ){
+  /// output a CompoundType to a stream
   os << toString( ct );
   return os;
 }
 
 string toString( const Status& st ){
+  /// return the string representation so a Status value
   switch ( st ){
   case Status::INFO:
     return "info";
@@ -230,15 +234,24 @@ string toString( const Status& st ){
 }
 
 ostream& operator<<( ostream& os, const Status& st ){
+  /// output a Status to a stream
   os << toString( st );
   return os;
 }
 
-BracketLeaf::BracketLeaf( const RulePart& p, int flag, TiCC::LogStream& l ):
-  BaseBracket(p.ResultClass, p.RightHand, flag, l ),
+BracketLeaf::BracketLeaf( const RulePart& p,
+			  int debug_flag,
+			  TiCC::LogStream& l ):
+  BaseBracket(p.ResultClass, p.RightHand, debug_flag, l ),
   glue(false),
   morph(p.morpheme )
 {
+  /// create a BracketLeaf object from a RulePart
+  /*!
+    \param p A Rulepart to create from
+    \param debug_flag the debug value
+    \param l a LogStream for messages
+  */
   ifpos = -1;
   if ( !p.inflect.empty() ){
     inflect = p.inflect;
@@ -282,32 +295,48 @@ BracketLeaf::BracketLeaf( const RulePart& p, int flag, TiCC::LogStream& l ):
 }
 
 BracketLeaf::BracketLeaf( CLEX::Type t,
-			  const icu::UnicodeString& us,
-			  int flag,
+			  const icu::UnicodeString& morpheme,
+			  int debug_flag,
 			  TiCC::LogStream& l ):
-  BaseBracket( t, vector<CLEX::Type>(), flag, l ),
-  morph( us )
+  BaseBracket( t, vector<CLEX::Type>(), debug_flag, l ),
+  morph( morpheme )
 {
+  /// create a BracketLeaf object from a CLEX::Type and a morpheme
+  /*!
+    \param t A CLEX::Type
+    \param morpheme the (Unicode) morpheme
+    \param debug_flag the debug value
+    \param l a LogStream for messages
+  */
   ifpos = -1;
   orig = toString( t );
   _status = Status::STEM;
 }
 
 BracketLeaf *BracketLeaf::clone() const{
+  /// make a copy of the BracketLeaf
   return new BracketLeaf( *this );
 }
 
 BracketNest::BracketNest( CLEX::Type t,
 			  Compound::Type c,
-			  int flag,
+			  int debug_flag,
 			  TiCC::LogStream& l ):
-  BaseBracket( t, flag, l ),
+  BaseBracket( t, debug_flag, l ),
   _compound( c )
 {
+  /// create a BracketNest object from a CLEX::Type and a CompoundType
+  /*!
+    \param t A CLEX::Type
+    \param c a Compound::Type
+    \param debug_flag the debug value
+    \param l a LogStream for messages
+  */
   _status = Status::COMPLEX;
 }
 
 BracketNest *BracketNest::clone() const {
+  /// make a deep copy of the Bracketnest
   BracketNest *result = new BracketNest( *this );
   for ( auto& it : result->parts ){
     it = it->clone();
@@ -316,6 +345,7 @@ BracketNest *BracketNest::clone() const {
 }
 
 BaseBracket *BracketNest::append( BaseBracket *t ){
+  /// append a Bracket structure to this Nest
   parts.push_back( t );
   return this;
 }
@@ -327,6 +357,7 @@ BracketNest::~BracketNest(){
 }
 
 icu::UnicodeString BaseBracket::put( bool full ) const {
+  /// create a Unicode string representation for this object
   icu::UnicodeString result = "[err?]";
   if ( full ){
     icu::UnicodeString s = TiCC::UnicodeFromUTF8(toString(cls));
@@ -336,6 +367,7 @@ icu::UnicodeString BaseBracket::put( bool full ) const {
 }
 
 icu::UnicodeString BaseBracket::pretty_put() const {
+  /// create a descriptive Unicode string representation for this object
   icu::UnicodeString result = "[err?]";
   icu::UnicodeString s = TiCC::UnicodeFromUTF8(CLEX::get_tDescr(cls));
   result += s;
@@ -343,6 +375,7 @@ icu::UnicodeString BaseBracket::pretty_put() const {
 }
 
 icu::UnicodeString BracketLeaf::put( bool full ) const {
+  /// create a Unicode string representation for this object
   icu::UnicodeString result;
   if ( !morph.isEmpty() ){
     result += "[";
@@ -367,6 +400,7 @@ icu::UnicodeString BracketLeaf::put( bool full ) const {
 }
 
 icu::UnicodeString BracketLeaf::pretty_put() const {
+  /// create a descriptive Unicode string representation for this object
   string result;
   if ( !morph.isEmpty() ){
     result += "[";
@@ -401,6 +435,7 @@ icu::UnicodeString BracketLeaf::pretty_put() const {
 }
 
 icu::UnicodeString BracketNest::put( bool full ) const {
+  /// create a Unicode string representation for this object
   icu::UnicodeString result = "[ ";
   for ( auto const& it : parts ){
     icu::UnicodeString m = it->put( full );
@@ -421,6 +456,7 @@ icu::UnicodeString BracketNest::put( bool full ) const {
 }
 
 icu::UnicodeString BracketNest::pretty_put( ) const {
+  /// create a descriptive Unicode string representation for this object
   icu::UnicodeString result;
   int cnt = 0;
   for ( auto const& it : parts ){
@@ -440,11 +476,13 @@ icu::UnicodeString BracketNest::pretty_put( ) const {
 }
 
 ostream& operator<< ( ostream& os, const BaseBracket& c ){
+  /// output a BaseBracket to a stream
   os << c.put();
   return os;
 }
 
 ostream& operator<< ( ostream& os, const BaseBracket *c ){
+  /// output a BaseBracket to a stream
   if ( c ){
     os << c->put();
   }
@@ -457,6 +495,7 @@ ostream& operator<< ( ostream& os, const BaseBracket *c ){
 bool BracketNest::testMatch( list<BaseBracket*>& result,
 			     const list<BaseBracket*>::iterator& rpos,
 			     list<BaseBracket*>::iterator& bpos ){
+  /// test if the rule matches at a certain position
   if ( debugFlag > 5 ){
     LOG << "test MATCH: rpos= " << *rpos << endl;
   }

@@ -47,6 +47,11 @@ using namespace nlohmann;
 #define LOG *TiCC::Log(errLog)
 #define DBG *TiCC::Log(dbgLog)
 
+/// create a Timbl based lemmatizer
+/*!
+  \param errlog a LogStream for errors
+  \param dbglog a LogStream for debugging
+*/
 Mblem::Mblem( TiCC::LogStream *errlog, TiCC::LogStream *dbglog ):
   myLex(0),
   punctuation( "?...,:;\\'`(){}[]%#+-_=/!" ),
@@ -65,6 +70,25 @@ Mblem::Mblem( TiCC::LogStream *errlog, TiCC::LogStream *dbglog ):
 }
 
 bool Mblem::fill_ts_map( const string& file ){
+  /// read 'token-strip' rules from a file
+  /*!
+    \param file name of the inputfile
+    \return true when no errors were detected
+
+    token-strip rules look like this:
+    \verbatim
+    SPEC(deeleigen)	QUOTE-SUFFIX	1
+    SPEC(deeleigen)	WORD-WITHSUFFIX	2
+    \endverbatim
+
+    What they express is this: When the tagger assigned a tag like
+    SPEC(deeleigen) AND the tokenizer assigned a class of QUOTE-SUFFIX, then
+    the lemma is given by stripping the last character. or last 2 for the second
+    rule.
+
+    This assures that the lemma for \e Jan's will be \e Jan and for \e Alex'
+    will be \e Alex
+   */
   ifstream is( file );
   if ( !is ){
     LOG << "Unable to open file: '" << file << "'" << endl;
@@ -89,6 +113,11 @@ bool Mblem::fill_ts_map( const string& file ){
 }
 
 bool Mblem::init( const TiCC::Configuration& config ) {
+  /// initialize the lemmatizer using the config
+  /*!
+    \param config the Configuration to use
+    \return true when no problems are detected
+  */
   LOG << "Initiating lemmatizer..." << endl;
   debug = 0;
   string val = config.lookUp( "host", "mblem" );
@@ -233,6 +262,11 @@ Mblem::~Mblem(){
 }
 
 string Mblem::make_instance( const icu::UnicodeString& in ) {
+  /// convert a Unicode string into an instance for Timbl
+  /*!
+    \param in the UnicodeString representing 1 word to lemmatize
+    \return an UTF8 string with an instance we can feed to Timbl
+  */
   if (debug > 2 ) {
     DBG << "making instance from: " << in << endl;
   }
@@ -257,6 +291,13 @@ string Mblem::make_instance( const icu::UnicodeString& in ) {
 }
 
 void Mblem::filterTag( const string& postag ){
+  /// filater all non-matching tags out of the mblem results
+  /*!
+    \param postag the tag, given by the CGN-tagger, that should match
+
+    Mblem produces a range of possible solutions with tags. We use the POS tag
+    given by the CGN tagger to remove all solutions with a different tag
+  */
   auto it = mblemResult.begin();
   while( it != mblemResult.end() ){
     string tag = it->getTag();
@@ -281,6 +322,10 @@ void Mblem::filterTag( const string& postag ){
 }
 
 void Mblem::makeUnique( ){
+  /// filter out all results that are equal
+  /*
+    should be called AFTER filterTag() and cleans out doubles
+  */
   auto it = mblemResult.begin();
   while( it != mblemResult.end() ){
     string lemma = it->getLemma();
@@ -315,6 +360,11 @@ void Mblem::makeUnique( ){
 
 void Mblem::add_provenance( folia::Document& doc,
 			    folia::processor *main ) const {
+  /// add provenance information to the FoLiA document
+  /*!
+    \param doc the foLiA document we are working on
+    \param main the main processor (presumably Frog) we want to add a new one to
+  */
   string _label = "mblem";
   if ( !main ){
     throw logic_error( "mblem::add_provenance() without arguments." );
@@ -331,6 +381,14 @@ void Mblem::add_provenance( folia::Document& doc,
 }
 
 void Mblem::Classify( frog_record& fd ){
+  /// add lemma information to the frog_data
+  /*!
+    \param fd The frog_data
+
+    this handles some special cases like ABBREVIATION, the token-strip rules
+    and the one-one rules.
+    All 'normal' cases are handled over to the Timbl classifier
+  */
   icu::UnicodeString uword;
   string pos;
   string token_class;
@@ -406,6 +464,11 @@ void Mblem::Classify( frog_record& fd ){
 }
 
 string Mblem::call_server( const string& instance ){
+  /// use a Timbl server to classify
+  /*!
+    \param instance The instance to give to Timbl
+    \return the lemma rule as returned by Timbl
+  */
   Sockets::ClientSocket client;
   if ( !client.connect( _host, _port ) ){
     LOG << "failed to open connection, " << _host
@@ -473,6 +536,12 @@ string Mblem::call_server( const string& instance ){
 }
 
 void Mblem::Classify( const icu::UnicodeString& uWord ){
+  /// give the lemma for 1 word
+  /*!
+    \param uWord a Unicode string with the word
+    the mblemResult struct will be filled with 1 or more (alternative) solutions
+    of a lemma + a POS-tag
+  */
   mblemResult.clear();
   string inst = make_instance(uWord);
   string classString;
@@ -625,6 +694,7 @@ void Mblem::Classify( const icu::UnicodeString& uWord ){
 }
 
 vector<pair<string,string> > Mblem::getResult() const {
+  /// extract the results into a list of lemma/tag pairs
   vector<pair<string,string> > result;
   for ( const auto& mbr : mblemResult ){
     result.push_back( make_pair( mbr.getLemma(),
@@ -635,6 +705,12 @@ vector<pair<string,string> > Mblem::getResult() const {
 
 void Mblem::add_lemmas( const vector<folia::Word*>& wv,
 			const frog_data& fd ) const {
+  /// add the lemma from 'fd' to the FoLiA list of Word
+  /*!
+    \param wv The folia:Word vector
+    \param fd the folia_data with added lemmatizer results
+  */
+  ///
   for ( size_t i=0; i < wv.size(); ++i ){
     folia::KWargs args;
     args["set"] = getTagset();

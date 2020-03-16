@@ -158,8 +158,14 @@ void usage( ) {
 bool parse_args( TiCC::CL_Options& Opts,
 		 FrogOptions& options,
 		 TiCC::LogStream* theErrLog ){
-  // process the command line and fill FrogOptions to initialize the API
-  // also fill some globals we use for our own main.
+  /// process the command line and fill FrogOptions to initialize the API
+  /// also fill some globals we use for our own main.
+  /*!
+    \param Opts The command line options we have received
+    \param options The FrogOptions structure we will fill
+    \param theErrLog the stream to send error messages to
+    return true on succes
+  */
   options.command = Opts.toString();
   // is a language-list specified? Default is dutch
   string language;
@@ -645,6 +651,7 @@ string randnum( int len ){
 }
 
 int main(int argc, char *argv[]) {
+  /// Frog's main program.
   cerr << "frog " << VERSION << " (c) CLTS, ILK 1998 - 2020" << endl
        << "CLST  - Centre for Language and Speech Technology,"
        << "Radboud University" << endl
