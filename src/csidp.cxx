@@ -175,17 +175,27 @@ timbl_result::timbl_result( const string& cls,
 vector<parsrel> parse( const vector<timbl_result>& p_res,
 		       const vector<timbl_result>& r_res,
 		       const vector<timbl_result>& d_res,
-		       size_t parse_size,
+		       size_t sent_len,
 		       int maxDist,
 		       TiCC::LogStream *dbg_log ){
+  /// run de CKY parser using these data
+  /*!
+    \param p_res the Timbl pairs outcome
+    \param r_res the Timbl rels outcome
+    \param d_res the Timbl dir outcome
+    \param sent_len the maximum sentence lenght
+    \param maxDist the maximum distance between dependents we allow
+    \param dbg_log the stream used for debugging
+    \return a vector of parsrel structures
+  */
   vector<const Constraint*> constraints
-    = formulateWCSP( d_res, r_res, p_res, parse_size, maxDist, dbg_log );
+    = formulateWCSP( d_res, r_res, p_res, sent_len, maxDist, dbg_log );
   DBG << "constraints: " << endl;
   DBG << constraints << endl;
-  CKYParser parser( parse_size, constraints, dbg_log );
+  CKYParser parser( sent_len, constraints, dbg_log );
   parser.parse();
-  vector<parsrel> result( parse_size );
-  parser.rightComplete(0, parse_size, result );
+  vector<parsrel> result( sent_len );
+  parser.rightComplete(0, sent_len, result );
   for ( const auto& constraint : constraints ){
     delete constraint;
   }

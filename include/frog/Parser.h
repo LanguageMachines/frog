@@ -98,9 +98,8 @@ class Parser: public ParserBase {
   std::vector<std::string> createPairInstances( const parseData& );
   std::vector<std::string> createDirInstances( const parseData& );
   std::vector<std::string> createRelInstances( const parseData& );
-  void timbl_server( const std::string&,
-		     const std::vector<std::string>&,
-		     std::vector<timbl_result>& );
+  std::vector<timbl_result> timbl_server( const std::string&,
+					  const std::vector<std::string>& );
   std::string maxDepSpanS;
   size_t maxDepSpan;
   Timbl::TimblAPI *pairs;
@@ -111,5 +110,6 @@ class Parser: public ParserBase {
   std::string _rels_base;
 };
 
-void appendParseResult( frog_data&, const std::vector<parsrel>& );
+void appendParseResult( frog_data& fd,
+			const std::vector<parsrel>& res );
 #endif
