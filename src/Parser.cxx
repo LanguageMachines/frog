@@ -58,6 +58,7 @@ using namespace nlohmann;
 #define LOG *TiCC::Log(errLog)
 #define DBG *TiCC::Dbg(dbgLog)
 
+/// structure to store pasring results
 struct parseData {
   void clear() { words.clear(); heads.clear(); mods.clear(); mwus.clear(); }
   vector<string> words;
@@ -67,6 +68,12 @@ struct parseData {
 };
 
 ostream& operator<<( ostream& os, const parseData& pd ){
+  /// output a parseData structure (debugging only)
+  /*!
+    \param os the output stream
+    \param pd the parseData to dump
+    \return the stream
+  */
   os << "pd words " << pd.words << endl;
   os << "pd heads " << pd.heads << endl;
   os << "pd mods " << pd.mods << endl;
@@ -81,6 +88,13 @@ ostream& operator<<( ostream& os, const parseData& pd ){
 }
 
 bool Parser::init( const TiCC::Configuration& configuration ){
+  /// initialize a Parser from the configuration
+  /*!
+    \param configuration the config to use
+    \return true on succes
+    extract all needed information from the configuration and setup the parser
+    by creating 3 Timbl instances
+  */
   filter = 0;
   string pairsFileName;
   string pairsOptions = "-a1 +D -G0 +vdb+di";
@@ -291,12 +305,18 @@ bool Parser::init( const TiCC::Configuration& configuration ){
 }
 
 Parser::~Parser(){
+  /// destructor
   delete rels;
   delete dir;
   delete pairs;
 }
 
 vector<string> Parser::createPairInstances( const parseData& pd ){
+  /// create a list of Instances for the 'pairs' Timbl
+  /*!
+    \param pd the parsedata structure with words, heads and modifiers
+    \return a list of string where every string is a Timbl test instance
+  */
   vector<string> instances;
   const vector<string>& words = pd.words;
   const vector<string>& heads = pd.heads;
@@ -441,6 +461,11 @@ vector<string> Parser::createPairInstances( const parseData& pd ){
 }
 
 vector<string> Parser::createDirInstances( const parseData& pd ){
+  /// create a list of Instances for the 'dir' Timbl
+  /*!
+    \param pd the parsedata structure with words, heads and modifiers
+    \return a list of string where every string is a Timbl test instance
+  */
   vector<string> d_instances;
   const vector<string>& words = pd.words;
   const vector<string>& heads = pd.heads;
@@ -653,6 +678,11 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
 }
 
 vector<string> Parser::createRelInstances( const parseData& pd ){
+  /// create a list of Instances for the 'rel' Timbl
+  /*!
+    \param pd the parsedata structure with words, heads and modifiers
+    \return a list of string where every string is a Timbl test instance
+  */
   vector<string> r_instances;
   const vector<string>& words = pd.words;
   const vector<string>& heads = pd.heads;
@@ -835,6 +865,7 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
 }
 
 void Parser::add_provenance( folia::Document& doc, folia::processor *main ) const {
+  /// add provenance information to the FoLiA document
   string _label = "dep-parser";
   if ( !main ){
     throw logic_error( "Parser::add_provenance() without arguments." );

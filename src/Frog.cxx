@@ -546,10 +546,10 @@ bool parse_args( TiCC::CL_Options& Opts,
   Opts.extract ("uttmarker", options.uttmark );
   if ( !testDirName.empty() ){
     if ( options.doXMLin ){
-      getFileNames( testDirName, ".xml", fileNames );
+      fileNames = getFileNames( testDirName, ".xml" );
     }
     else {
-      getFileNames( testDirName, "", fileNames );
+      fileNames = getFileNames( testDirName, "" );
     }
     if ( fileNames.empty() ){
       LOG << "error: couldn't find any files in directory: "

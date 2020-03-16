@@ -80,7 +80,7 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
     \param d_res results of the Timbl dist classifier
     \param r_res results of the Timbl relations classifier
     \param p_res results of the Timbl pairs classifier
-    \param sent_lenthe sentence length
+    \param sent_len the sentence length
     \param maxDist the maximum distance we still handle
     \param dbg_log a LogStream for debugging
    */

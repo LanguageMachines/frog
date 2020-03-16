@@ -687,7 +687,7 @@ vector<parsrel> extract_dp( xmlDoc *alp_doc,
   /*!
     \param alp_doc an Alpino XML document
     \param fd a frog_data structure to receive the MWU information
-    \return a list for parsrel records
+    \return a list of parsrel records
    */
   // string txtfile = "/tmp/debug.xml";
   // xmlSaveFormatFileEnc( txtfile.c_str(), alp_doc, "UTF8", 1 );
@@ -724,6 +724,15 @@ vector<parsrel> extract_dp( xmlDoc *alp_doc,
 }
 
 vector<parsrel> AlpinoParser::alpino_server_parse( frog_data& fd ){
+  /// parse a sentence into a group of parsrel records using an Alpino server
+  /*!
+    \param fd The frog_data record containing the information to parse
+    \return a vector of parsrel structures
+
+    This function connects to an Alpino server (which should be configured
+    correctly), handles it the sentence contained in \e fd and parses the
+    delivered XML to extract all dependency information
+  */
   Sockets::ClientSocket client;
   if ( !client.connect( _host, _port ) ){
     cerr << "failed to open Alpino connection: "<< _host << ":" << _port << endl;
@@ -749,6 +758,15 @@ vector<parsrel> AlpinoParser::alpino_server_parse( frog_data& fd ){
 }
 
 vector<parsrel> AlpinoParser::alpino_parse( frog_data& fd ){
+  /// parse a sentence into a group of parsrel records using a local ALpino
+  /*!
+    \param fd The frog_data record containing the information to parse
+    \return a vector of parsrel structures
+
+    This function uses a local Alpino porgram (which should be configured
+    correctly) by feeding it the sentence contained in \e fd and parses the
+    delivered XML to extract all dependency information
+  */
 #ifdef DEBUG_ALPINO
   cerr << "calling Alpino input:" << fd.sentence() << endl;
 #endif
