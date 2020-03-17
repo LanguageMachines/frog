@@ -50,7 +50,7 @@ using TiCC::operator<<;
 #define LOG *TiCC::Log(myLog)
 
 string toString( const Compound::Type& ct ){
-  /// return the string representation for the Compuund::Type
+  /// return the string representation for the Compound::Type
   switch ( ct ){
   case Compound::Type::NN:
     return "NN";
@@ -500,7 +500,7 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
     \param result the current result. A new match will be appended
     \param rpos the position in the rules list we are at.
     \param bpos output parameter to return the END postion of the match
-    \return true if it maches
+    \return true if it matches
   */
   if ( debugFlag > 5 ){
     LOG << "test MATCH: rpos= " << *rpos << endl;
@@ -558,6 +558,11 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
 }
 
 Compound::Type construct( const vector<CLEX::Type>& tags ){
+  /// construct a Compound::Type given a list of CLEX tags
+  /*!
+    \param tags a list of CLEX::Types
+    \return a Compound::Type
+  */
   string s;
   for ( const auto& t : tags ){
     s += toString( t );
@@ -571,6 +576,12 @@ Compound::Type construct( const vector<CLEX::Type>& tags ){
 }
 
 Compound::Type construct( const CLEX::Type tag1, const CLEX::Type tag2 ){
+  /// construct a Compound::Type given two CLEX tags
+  /*!
+    \param tag1 a CLEX::Type
+    \param tag2 a CLEX::Type
+    \return a Compound::Type
+  */
   vector<CLEX::Type> v;
   v.push_back( tag1 );
   v.push_back( tag2 );
@@ -578,6 +589,11 @@ Compound::Type construct( const CLEX::Type tag1, const CLEX::Type tag2 ){
 }
 
 Compound::Type BracketNest::getCompoundType(){
+  /// extract the Compound::Type
+  /*!
+    This function uses a lot of heuristics to determine get Compound::Type
+    given the elements in the BracketNest
+  */
   if ( debugFlag > 5 ){
     LOG << "get compoundType: " << this << endl;
     LOG << "#parts: " << parts.size() << endl;
@@ -787,6 +803,10 @@ Compound::Type BracketNest::getCompoundType(){
 }
 
 folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc ) const {
+  /// use the data in the Leaf to create a folia::Morpheme node
+  /*!
+    \param doc The FoLiA Document context
+  */
   string desc;
   int cnt = 0;
   return createMorpheme( doc, desc, cnt );
@@ -795,6 +815,12 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc ) const {
 folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 					      string& desc,
 					      int& cnt ) const {
+  /// use the data in the Leaf to create a folia::Morpheme node
+  /*!
+    \param doc The FoLiA Document context
+    \param desc a decriptien note to add
+    \param cnt a counter for the number of handled morphemes
+  */
   folia::Morpheme *result = 0;
   desc.clear();
   string::size_type pos = orig.find( "^" );
@@ -979,6 +1005,10 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 }
 
 folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc ) const {
+  /// use the data in the Leaf to create a folia::Morpheme node
+  /*!
+    \param doc The FoLiA Document context
+  */
   string desc;
   int cnt = 0;
   return createMorpheme( doc, desc, cnt );
@@ -987,6 +1017,12 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc ) const {
 folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
 					      string& desc,
 					      int& cnt ) const {
+  /// use the data in the Leaf to create a folia::Morpheme node
+  /*!
+    \param doc The FoLiA Document context
+    \param desc a decriptien note to add
+    \param cnt a counter for the number of handled morphemes
+  */
   folia::Morpheme *result = 0;
   folia::KWargs args;
   args["class"] = "complex";
@@ -1066,6 +1102,12 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
 
 list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& result,
 							const list<BaseBracket*>::iterator& rpos ){
+  /// try to resolve an Affix rule
+  /*!
+    \param result the output, matches might replace part of it by a new Nest
+    \param rpos start posotion for this search
+    \return an iterator where the next resolving step should start
+  */
   if ( debugFlag > 5 ){
     LOG << "resolve affix" << endl;
   }
@@ -1110,6 +1152,7 @@ list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& resu
 }
 
 void BracketNest::resolveNouns( ){
+  /// check for adjacent Nouns and replace by a new Nest
   if ( debugFlag > 5 ){
     LOG << "resolve NOUNS in:" << this << endl;
   }
@@ -1154,6 +1197,7 @@ void BracketNest::resolveNouns( ){
 
 list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
 						const list<BaseBracket*>::iterator& rpos ){
+  /// apply a glue rule
   if ( debugFlag > 5 ){
     LOG << "glue " << endl;
     LOG << "result IN : " << result << endl;
@@ -1224,6 +1268,7 @@ list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
 
 
 void BracketNest::resolveGlue( ){
+  /// resolve all glue rules
   list<BaseBracket*>::iterator it = parts.begin();
   while ( it != parts.end() ){
     // search for glue rules
@@ -1240,6 +1285,7 @@ void BracketNest::resolveGlue( ){
 }
 
 void BracketNest::resolveLead( ){
+  /// resolve rules starting with *
   list<BaseBracket*>::iterator it = parts.begin();
   while ( it != parts.end() ){
     // search for rules with a * at the begin
@@ -1265,6 +1311,7 @@ void BracketNest::resolveLead( ){
 }
 
 void BracketNest::resolveTail(){
+  /// resolve rules ending with *
   list<BaseBracket *>::iterator it = parts.begin();
   while ( it != parts.end() ){
     // search for rules with a * at the end
@@ -1297,6 +1344,7 @@ void BracketNest::resolveTail(){
 }
 
 void BracketNest::resolveMiddle(){
+  /// resolve rules with a * NOT at begin or end
   list<BaseBracket*>::iterator it = parts.begin();
   while ( it != parts.end() ){
     // now search for other rules with a * in the middle
@@ -1324,7 +1372,7 @@ void BracketNest::resolveMiddle(){
 }
 
 void BracketNest::clearEmptyNodes(){
-  // remove all nodes that don't have a morpheme or an inlection
+  /// remove all nodes that don't have a morpheme or an inflection
   if ( debugFlag > 5 ){
     LOG << "clear emptyNodes: " << this << endl;
   }
@@ -1359,6 +1407,9 @@ void BracketNest::clearEmptyNodes(){
 }
 
 CLEX::Type BracketNest::getFinalTag() {
+  /// get the result tag for this rule
+  // It is the last tag in the list, except for 'P' tags
+  //
   // LOG << "get Final Tag from: " << this << endl;
   CLEX::Type result_cls = CLEX::UNASS;
   auto it = parts.rbegin();

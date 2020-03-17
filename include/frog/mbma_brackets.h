@@ -50,6 +50,8 @@ enum Status {
   FAILED         ///< The structure describes a Failed state
 };
 
+/// a range off all 'possible' compound types. Not all of these ae actively
+/// assigned
 namespace Compound {
   enum Type : int {
     // NB and PB compounds don't exist
@@ -125,11 +127,26 @@ public:
   BracketLeaf *clone() const;
   icu::UnicodeString put( bool = true ) const;
   icu::UnicodeString pretty_put() const;
-  icu::UnicodeString morpheme() const { return morph; };
-  std::string inflection() const { return inflect; };
-  std::string original() const { return orig; };
-  int infixpos() const { return ifpos; };
-  bool isglue() const { return glue; };
+  icu::UnicodeString morpheme() const {
+    /// return the value of the morpheme
+    return morph;
+  };
+  std::string inflection() const {
+    /// return the value of the inflexion (if any)
+    return inflect;
+  };
+  std::string original() const {
+    /// return the original value befor processing
+    return orig;
+  };
+  int infixpos() const {
+    /// return the position of an infix
+    return ifpos;
+  };
+  bool isglue() const {
+    /// return tre if this is a glue tag
+    return glue;
+  };
   folia::Morpheme *createMorpheme( folia::Document * ) const;
   folia::Morpheme *createMorpheme( folia::Document *,
 				   std::string&, int& ) const;
