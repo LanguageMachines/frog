@@ -129,8 +129,9 @@ bool AlpinoParser::init( const TiCC::Configuration& configuration ){
     POS_tagset = val;
   }
   string charFile = configuration.lookUp( "char_filter_file", "tagger" );
-  if ( charFile.empty() )
+  if ( charFile.empty() ){
     charFile = configuration.lookUp( "char_filter_file" );
+  }
   if ( !charFile.empty() ){
     charFile = prefix( configuration.configDir(), charFile );
     filter = new TiCC::UniFilter();

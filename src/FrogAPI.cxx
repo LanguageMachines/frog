@@ -973,14 +973,12 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	  throw( runtime_error( "JSON write to client failed" ) );
 	}
       }
-      else {
-	if (!conn.write( output_stream.str() )
-	    || !(conn.write("READY\n\n"))  ){
-	  if (options.debugFlag > 5 ) {
-	    DBG << "socket " << conn.getMessage() << endl;
-	  }
-	  throw( runtime_error( "write to client failed" ) );
+      else if ( !conn.write( output_stream.str() )
+		|| !(conn.write("READY\n\n"))  ){
+	if (options.debugFlag > 5 ) {
+	  DBG << "socket " << conn.getMessage() << endl;
 	}
+	throw( runtime_error( "write to client failed" ) );
       }
     }
   }
