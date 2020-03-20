@@ -412,6 +412,12 @@ void Mbma::clearAnalysis(){
 
 Rule* Mbma::matchRule( const std::vector<std::string>& ana,
 		       const icu::UnicodeString& word ){
+  /// attempt to match an Analysis on a word
+  /*!
+    \param ana one analysis result, expanded from the Timbl classifier
+    \param word a Unicode Word to check
+    \return a matched Rule or 0
+  */
   Rule *rule = new Rule( ana, word, *errLog, *dbgLog, debugFlag );
   if ( rule->performEdits() ){
     rule->reduceZeroNodes();
@@ -440,6 +446,12 @@ Rule* Mbma::matchRule( const std::vector<std::string>& ana,
 
 vector<Rule*> Mbma::execute( const icu::UnicodeString& word,
 			     const vector<string>& classes ){
+  /// attempt to find matching Rules
+  /*!
+    \param word a word to check
+    \param classes the Timbl classifications
+    \return 0 or more matching Rules
+  */
   vector<vector<string> > allParts = generate_all_perms( classes );
   if ( debugFlag > 1 ){
     string out = "alternatives: word="
@@ -466,6 +478,12 @@ vector<Rule*> Mbma::execute( const icu::UnicodeString& word,
 void Mbma::addBracketMorph( folia::Word *word,
 			    const string& orig_word,
 			    const BaseBracket *brackets ) const {
+  /// add a (deep) Morpheme layer to the FoLiA Word
+  /*!
+    \param word the FoLiA Word
+    \param orig_word, an UTF8 string with the oriiginal word
+    \param brackets the nested structure describing the morphemes
+   */
   if (debugFlag > 1){
     DBG << "addBracketMorph(" << word << "," << orig_word << ","
 	<< brackets << ")" << endl;
@@ -499,10 +517,22 @@ void Mbma::addBracketMorph( folia::Word *word,
 }
 
 bool mbmacmp( Rule *m1, Rule *m2 ){
+  /// sorting function for Rule's
   return m1->getKey(false).length() > m2->getKey(false).length();
 }
 
 void Mbma::filterHeadTag( const string& head ){
+  /// reduce the Mbms analysis by removing all solutions where the head is not
+  /// matched
+  /*!
+    \param head the head-tag that is required
+    matching does not mean equality. We are a forgivingful in the sense that
+    \verbatim
+    N matches PN
+    A matches B and vv
+    A matches V
+    \endverbatim
+  */
   // first we select only the matching heads
   if (debugFlag > 1){
     DBG << "filter with head: " << head << endl;
@@ -576,6 +606,22 @@ void Mbma::filterHeadTag( const string& head ){
 }
 
 void Mbma::filterSubTags( const vector<string>& feats ){
+  /// reduce the analyses set based on sub-features
+  /*!
+    \param feats a list of subfeatures
+    when a candidate Rule has inflexion it should match a feature.
+
+    Other criteria: only take the highest confidence, and remove Rules that
+    yield the same analysis.
+
+    Example:
+    \verbatim
+    The word 'appel' is according to Mbma an N with inflection e ('enkelvoud')
+    The tagger will assign an N too, with features [soort,ev,basis,zijd,stan]
+    one of the features, 'ev' will match the 'e' inflection after translation
+    so this is a good reading
+    \endverbatim
+  */
   if ( analysis.size() < 1 ){
     if (debugFlag > 1){
       DBG << "analysis is empty so skip next filter" << endl;
@@ -695,7 +741,7 @@ void Mbma::filterSubTags( const vector<string>& feats ){
     }
     DBG << "" << endl;
   }
-  // Now we have a small list of unique and differtent analysis.
+  // Now we have a small list of unique and different analysis.
   // We assume the 'longest' analysis to be the best.
   // So we prefer '[ge][maak][t]' over '[gemaak][t]'
   // Therefor we sort on (unicode) string length
@@ -713,6 +759,7 @@ void Mbma::filterSubTags( const vector<string>& feats ){
 }
 
 void Mbma::assign_compounds(){
+  /// add compound information to the result
   for ( auto const& sit : analysis ){
     sit->compound = sit->brackets->getCompoundType();
   }
@@ -720,6 +767,11 @@ void Mbma::assign_compounds(){
 
 void Mbma::add_provenance( folia::Document& doc,
 			   folia::processor *main ) const {
+  /// add provenance information to the FoLiA document
+  /*!
+    \param doc the foLiA document we are working on
+    \param main the main processor (presumably Frog) we want to add a new one to
+  */
   string _label = "mbma";
   if ( !main ){
     throw logic_error( "mbma::add_provenance() without arguments." );
@@ -740,6 +792,7 @@ void Mbma::add_provenance( folia::Document& doc,
 
 void Mbma::store_morphemes( frog_record& fd,
 			    const vector<string>& morphemes ) const {
+  /// store the calculated morphemes in the FrogData
   vector<string> adapted;
   for ( const auto& m : morphemes ){
     adapted.push_back( "[" + m + "]" );
