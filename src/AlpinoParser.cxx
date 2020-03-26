@@ -377,9 +377,10 @@ const dp_tree *extract_hd( const dp_tree *node ){
 }
 
 dp_tree *parse_node( xmlNode *node ){
-  /// convert a node in an Alpino XML tree into a much simpler dp_tree node
+  /// convert a singel node in an Alpino XML tree into a much simpler dp_tree node
   /*!
     \param node The Alpino XML node to parse
+    \return a dp_tree structure with the essential information from Alpino
   */
   auto atts = TiCC::getAttributes( node );
   //  cerr << "attributes: " << atts << endl;
@@ -401,35 +402,37 @@ dp_tree *parse_node( xmlNode *node ){
 dp_tree *parse_nodes( xmlNode *node ){
   /// recurively convert an Alpino XML tree into a much simpler dp_tree tree
   /*!
-    \param node The Alpino XML node to parse
+    \param node The Alpino XML tree to parse
+    \return A dp_tree node tree
+
+    an Alpino XML tree is quite complex. We try to simplify it and extract only
+    what is needed.
   */
   dp_tree *result = 0;
   xmlNode *pnt = node;
-  dp_tree *last = 0;
+  dp_tree *last_added = 0;
   while ( pnt ){
     if ( TiCC::Name( pnt ) == "node" ){
       dp_tree *parsed = parse_node( pnt );
-      // cerr << "parsed ";
-      // print_node( parsed );
       if ( parsed->begin+1 < parsed->end
 	   && pnt->children == NULL ){
-	// an aggregate with NO children.
+	// an aggregate with NO children. No useful information here
 	// just leave it out
 	delete parsed;
       }
+      else if ( result == 0 ){
+	// first result.
+	result = parsed;
+	last_added = result;
+      }
       else {
-	if ( result == 0 ){
-	  result = parsed;
-	  last = result;
-	}
-	else {
-	  last->next = parsed;
-	  last = last->next;
-	}
+	// continue
+	last_added->next = parsed;
+	last_added = parsed;
       }
       if ( pnt->children ){
 	dp_tree *childs = parse_nodes( pnt->children );
-	last->link = childs;
+	last_added->link = childs;
       }
     }
     pnt = pnt->next;
@@ -458,7 +461,7 @@ dp_tree *resolve_mwus( dp_tree *in,
 
     Also, after modifying the tree, the indices are wrong by the size of the
     MWU. so we need to compensate for that too.
-   */
+  */
   dp_tree *result = in;
   dp_tree *pnt = in;
 #ifdef DEBUG_MWU
@@ -472,7 +475,9 @@ dp_tree *resolve_mwus( dp_tree *in,
     cerr << "begin=" << pnt->begin << " restart=" << restart << endl;
 #endif
     if ( pnt->link && pnt->link->rel == "mwp" ){
+      // this is an MWU
       dp_tree *tmp = pnt->link;
+      // first we construct a 'combined' word out of the MWU
       pnt->word = tmp->word;
       pnt->word_index = tmp->word_index;
       int count = 0;
@@ -482,18 +487,22 @@ dp_tree *resolve_mwus( dp_tree *in,
 	pnt->word += "_" + tmp->word;
 	tmp = tmp->next;
       }
+      // now we look in the MWU's children for the indices
       tmp = pnt->link;
-      pnt->link = 0;
+      pnt->link = 0; // cut the children
       pnt->end = pnt->begin+1;
-      compensate = count;
+      compensate = count; // remember the size of the MWU
       restart = pnt->end;
       fd.mwus[tmp->word_index-1] = tmp->word_index + count-1;
-      delete tmp;
+      // register the endpoint
+      delete tmp; // delete the children
     }
     else if ( pnt->begin < restart ){
-      // ignore?
+      // ignore this passed station
     }
     else {
+      // not an MWU: we might need to compensate for the 'shrinking' due to
+      // previous ones
       pnt->begin -= compensate;
       pnt->end -= compensate;
       if ( !pnt->word.empty() ){
@@ -506,12 +515,22 @@ dp_tree *resolve_mwus( dp_tree *in,
   return result;
 }
 
-map<int,dp_tree*> serialize_top( dp_tree *in ){
-  /// No clue atm
+dp_tree *enumerate_top( dp_tree *in ){
+  /// Enumerate the TOP nodes in the dp_tree
+  /*!
+    \param in the tree to enumerate
+    \return a pointer to the found top node
+
+    This also changes the linking order of the children under \e in.
+
+    These are NOT always sorted from low to high. We make it so and return
+    a pointer to the new top
+  */
   map<int,dp_tree*> result;
   dp_tree *pnt = in->link;
   // only loop over nodes direcly under the top node!
   while ( pnt ){
+    // rember the begin indices
     result[pnt->begin] = pnt;
     pnt = pnt->next;
   }
@@ -527,47 +546,59 @@ map<int,dp_tree*> serialize_top( dp_tree *in ){
     ++it;
   }
   in->link = result.begin()->second;
-  return result;
+  return result[0];
 }
 
 dp_tree *resolve_mwus( dp_tree *in, frog_data& fd ){
-  /// moielijk moeilijk
-  map<int,dp_tree*> top_nodes = serialize_top( in );
-  //  cerr << "after serialize: ";
-  //  print_nodes(4, in );
-  //  cerr << endl;
+  /// search for MWU's in the dp_tree and register them in the frog_data
+  /*!
+    \param in The dp_tree to analyze
+    \param fd the frog_data to fill
+    \return pointer to the (modified) input.
+   */
+  dp_tree* top_node = enumerate_top( in );
+#ifdef DEBUG_MWU
+  cerr << "after enumerate: ";
+  print_nodes(4, in );
+  cerr << endl;
+#endif
+#ifdef DEBUG_MWU
+  cerr << "voor resolve MWU's " << top_node << endl;
+#endif
   int compensate = 0;
   int restart = 0;
-  for ( const auto& it : top_nodes ){
-#ifdef DEBUG_MWU
-    cerr << "voor resolve MWU's " << it.first << endl;
-#endif
-    resolve_mwus( it.second, compensate, restart, fd );
-    break;
-  }
+  resolve_mwus( top_node, compensate, restart, fd );
   return in;
 }
 
 void extract_dependencies( list<pair<const dp_tree*,const dp_tree*>>& result,
 			   const dp_tree *store,
-			   const dp_tree *root ){
-  /// recursively extract all head-dependent pairs form store
+			   const dp_tree *top_root ){
+  /// recursively extract all head-dependent pairs from store
+  /*!
+    \param result an aggregated list of all dependency pairs found
+    \param store The tree to search through
+    \param top_root The ROOT node of this sequence. For the topmost store it
+    is 0
+  */
   const dp_tree *pnt = store->link;
   if ( !pnt ){
     return;
   }
-  const dp_tree *my_root = extract_hd( store );
+  const dp_tree *my_root = extract_hd( store ); // the root at this level
 #ifdef DEBUG_EXTRACT
   cerr << "LOOP over: " << store << "head= " << my_root << endl;
 #endif
   while ( pnt ){
     if ( pnt == my_root ){
-      result.push_back( make_pair(pnt,root) );
+      // when we find the root at this level, we add the top_root
+      result.push_back( make_pair(pnt,top_root) );
     }
     else {
+      // otherwise the current root
       result.push_back( make_pair(pnt, my_root) );
     }
-    extract_dependencies( result, pnt, pnt );
+    extract_dependencies( result, pnt, pnt ); // search deeper
     pnt = pnt->next;
   }
 }
@@ -576,8 +607,11 @@ vector<parsrel> extract( list<pair<const dp_tree*,const dp_tree*>>& l ){
   /// convert a list of head-dependent pairs into a list of parsrel records
   /*!
     \param l a list of head-dependent pairs
-    \return a list of parsrel records
-   */
+    \return a list of parsrel records. This to be able to use the same code
+    as for the build-in non-alpino parser.
+
+    This function does a lot of trickery to handle special nodes.
+  */
   vector<parsrel> result(l.size());
   for ( const auto& it : l ){
 #ifdef DEBUG_EXTRACT
@@ -690,8 +724,6 @@ vector<parsrel> extract_dp( xmlDoc *alp_doc,
     \param fd a frog_data structure to receive the MWU information
     \return a list of parsrel records
    */
-  // string txtfile = "/tmp/debug.xml";
-  // xmlSaveFormatFileEnc( txtfile.c_str(), alp_doc, "UTF8", 1 );
   xmlNode *top_node = TiCC::xPath( alp_doc, "//node[@rel='top']" );
   dp_tree *dp = parse_nodes( top_node );
 #if defined(DEBUG_EXTRACT) || defined(DEBUG_MWU)
@@ -706,13 +738,15 @@ vector<parsrel> extract_dp( xmlDoc *alp_doc,
   list<pair<const dp_tree*,const dp_tree*>> result;
   if ( dp->rel == "top" ){
     extract_dependencies( result, dp, 0 );
-    // cerr << "found dependencies: "<< endl;
-    // for ( const auto& it : result ){
-    //   cerr << it.first << " " << it.second << endl;
-    // }
+#if defined(DEBUG_EXTRACT) || defined(DEBUG_MWU)
+    cerr << "found dependencies: "<< endl;
+    for ( const auto& it : result ){
+      cerr << it.first << " " << it.second << endl;
+    }
+#endif
   }
   else {
-    throw runtime_error( "PANIEK!, geen top node" );
+    throw runtime_error( "PANIC, no top node" );
   }
   fd.resolve_mwus();
 #ifdef DEBUG_EXTRACT
