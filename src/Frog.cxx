@@ -661,7 +661,7 @@ int main(int argc, char *argv[]) {
   cerr << "based on [" << Tokenizer::VersionName() << ", "
        << folia::VersionName() << ", "
        << Timbl::VersionName() << ", "
-       << TimblServer::VersionName() << ", "
+       << TiCCServer::VersionName() << ", "
        << Tagger::VersionName() << "]" << endl;
   TiCC::LogStream *theErrLog
     = new TiCC::LogStream( cerr, "frog-", StampMessage );
