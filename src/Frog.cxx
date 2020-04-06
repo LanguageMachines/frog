@@ -862,7 +862,7 @@ int main(int argc, char *argv[]) {
 	  throw( runtime_error( "listen(5) failed" ) );
 	}
 	while ( StillRunning ) {
-	  Sockets::ServerSocket conn;
+	  Sockets::ClientSocket conn;
 	  if ( server.accept( conn ) ){
 	    LOG << "New connection..." << endl;
 	    int pid = fork();

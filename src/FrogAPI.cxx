@@ -38,6 +38,7 @@
 #include <string>
 #include <cstring>
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <fstream>
 #include <vector>
@@ -836,10 +837,10 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
   }
 }
 
-void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
+void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
   /// Run a server
   /*!
-    \param conn A Sockets::ServerSocket object to connect to
+    \param conn A Sockets::ClientSocket object to connect to
 
     The 'conn' object should be correctly set up using the right parameters.
     Depending on the Frog settings we can serve text, FoLiA and JSON.

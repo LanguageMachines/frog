@@ -174,7 +174,7 @@ class FrogAPI {
   static std::string defaultConfigDir( const std::string& ="" );
   static std::string defaultConfigFile( const std::string& ="" );
   folia::Document *FrogFile( const std::string&, std::ostream& );
-  void FrogServer( Sockets::ServerSocket &conn );
+  void FrogServer( Sockets::ClientSocket &conn );
   void FrogInteractive();
   frog_data frog_sentence( std::vector<Tokenizer::Token>&,
 			   const size_t );
