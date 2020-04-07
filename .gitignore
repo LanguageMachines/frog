@@ -18,6 +18,7 @@ libtool
 ltmain.sh
 stamp-h1
 test-driver
+frog.*.debug
 docs/Makefile
 docs/Makefile.in
 frog.pc

@@ -49,28 +49,47 @@ using namespace std;
 #define LOG *TiCC::Log(errLog)
 #define DBG *TiCC::Log(dbgLog)
 
-mwuAna::mwuAna( const string& txt,
-		const string& tag,
-		const string& glue_tag,
+mwuAna::mwuAna( const string& wrd,
+		bool glue_tag,
 		size_t index ){
-  spec = false;
-  word = txt;
-  spec = ( tag == glue_tag );
+  /// create a mwu Analysis record
+  /*!
+    \param wrd The text of the word
+    \param glue_tag was a \e 'glue' tag detected?
+    \param index The (initial) position in the sentence
+   */
+  word = wrd;
+  spec = glue_tag;
   mwu_start = mwu_end = index;
 }
 
 void mwuAna::merge( const mwuAna *add ){
+  /// merge two mwuAna records
+  /*
+    \param add the mwuAna to merge.
+
+    in fact we only take over the endpostion of add the other fields are
+    of no interest more, as the words are already resolved
+   */
   mwu_end = add->mwu_end;
   delete add;
 }
 
-Mwu::Mwu( TiCC::LogStream *errlog, TiCC::LogStream *dbglog ){
-  errLog = new TiCC::LogStream( errlog, "mwu-" );
-  dbgLog = new TiCC::LogStream( dbglog, "mwu-" );
+Mwu::Mwu( TiCC::LogStream *err_log, TiCC::LogStream *dbg_log ){
+  /// create a Mwu record (UNINITIALIZED yet)
+  /*!
+    \param err_log The LogStream for errors
+    \param dbg_log The LogStream for debugging
+
+    a call to Mwu::init() is needed to be able to use the Mwu classifier
+   */
+  errLog = new TiCC::LogStream( err_log, "mwu-" );
+  dbgLog = new TiCC::LogStream( dbg_log, "mwu-" );
   filter = 0;
 }
 
 Mwu::~Mwu(){
+  /// erase an Mwu record
   reset();
   delete errLog;
   delete dbgLog;
@@ -78,22 +97,33 @@ Mwu::~Mwu(){
 }
 
 void Mwu::reset(){
+  /// clear an Mwu record
   for ( const auto& it : mWords ){
     delete it;
   }
   mWords.clear();
 }
 
-void Mwu::add( frog_record& fd, size_t index ){
+void Mwu::add( frog_record& fd ){
+  /// add a mwuAna record to this Mwu
+  /*!
+    \param fd The frog_data structure with the information to use
+   */
   icu::UnicodeString tmp = TiCC::UnicodeFromUTF8(fd.word);
   if ( filter ){
     tmp = filter->filter( tmp );
   }
   string txt = TiCC::UnicodeToUTF8( tmp );
-  mWords.push_back( new mwuAna( txt, fd.tag, glue_tag, index ) );
+  bool glue = ( fd.tag == glue_tag );
+  size_t index = mWords.size();
+  mWords.push_back( new mwuAna( txt, glue, index ) );
 }
 
 bool Mwu::read_mwus( const string& fname) {
+  /// fill our table with MWU's
+  /*!
+    \param fname the file to reaf from
+   */
   LOG << "read mwus " + fname << endl;
   ifstream mwufile(fname, ios::in);
   if(mwufile.bad()){
@@ -117,6 +147,10 @@ bool Mwu::read_mwus( const string& fname) {
 }
 
 bool Mwu::init( const TiCC::Configuration& config ) {
+  /// initialize the Mwu using a Configuration structure
+  /*!
+    \param config the configuration to use
+   */
   LOG << "initiating mwuChunker..." << endl;
   debug = 0;
   string val = config.lookUp( "debug", "mwu" );
@@ -181,15 +215,22 @@ bool Mwu::init( const TiCC::Configuration& config ) {
 using TiCC::operator<<;
 
 ostream &operator<<( ostream& os, const Mwu& mwu ){
-  for ( size_t i = 0; i < mwu.mWords.size(); ++i )
+  /// output an Mwu (debugging only)
+  for ( size_t i = 0; i < mwu.mWords.size(); ++i ){
     os << i+1 << "\t" << mwu.mWords[i]->getWord()
        <<  "(" << mwu.mWords[i]->mwu_start << "," << mwu.mWords[i]->mwu_end
        << ")" << endl;
+  }
   return os;
 }
 
 void Mwu::add_provenance( folia::Document& doc,
 			    folia::processor *main ) const {
+  /// add provenance information for the tokenizer. (FoLiA output only)
+  /*!
+    \param doc the FoLiA document to add to
+    \param main the processor to use (presumably the Frog processor)
+  */
   string _label = "mwu";
   if ( !main ){
     throw logic_error( "mwu::add_provenance() without arguments." );
@@ -206,12 +247,18 @@ void Mwu::add_provenance( folia::Document& doc,
 }
 
 void Mwu::Classify( frog_data& sent ){
+  /// run the Mwu classifier on e sentence in frog_data format
+  /*!
+    \param sent a frog_data structure with unresolved MWU's
+   */
   reset();
-  size_t id=0;
+  // setup the Mwu
   for ( auto& word : sent.units ){
-    add( word, id++ );
+    add( word );
   }
+  // collect mwu's
   Classify();
+  //  take over the mwu postions in the frog_data
   for ( const auto& mword : mWords ){
     if ( mword->mwu_start != mword->mwu_end ){
       sent.mwus[mword->mwu_start] = mword->mwu_end;
@@ -221,6 +268,13 @@ void Mwu::Classify( frog_data& sent ){
 }
 
 void Mwu::Classify(){
+  /// examine the Mwu's internal mwuAna nodes to determine the spans of
+  /// all mwu's found
+  /*!
+    First we collect all 'glue tags' into MWU's
+
+    Second we do a lookup of the words in our table and keep the longest match
+   */
   if ( debug > 1 ) {
     DBG << "Starting mwu Classify" << endl;
   }
@@ -293,7 +347,7 @@ void Mwu::Classify(){
 	  DBG <<"MWU: no match" << endl;
 	}
       }
-      // we found a matching mwu, break out of loop thru sentence,
+      // we found a matching mwu, break out of the loop
       // do useful stuff, and recurse to find more mwus
       if ( matchLength > 0 ){
 	break;
@@ -330,6 +384,11 @@ void Mwu::Classify(){
 
 void Mwu::add_result( const frog_data& fd,
 		      const vector<folia::Word*>& wv ) const {
+  /// add the mwu's in \e fd as Entities to the parent of the \e wv list of Word
+  /*!
+    \param fd The tagged results
+    \param wv The folia:Word vector
+  */
   folia::Sentence *s = wv[0]->sentence();
   folia::KWargs args;
   if ( !s->id().empty() ){

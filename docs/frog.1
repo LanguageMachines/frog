@@ -1,4 +1,4 @@
-.TH frog 1 "2019 nov 18"
+.TH frog 1 "2020 mar 23"
 
 .SH NAME
 frog \- Dutch Natural Language Toolkit
@@ -8,11 +8,11 @@ frog [options]
 frog \-t test\-file
 
 .SH DESCRIPTION
-frog is an integration of memory\(hy-based natural language processing (NLP)
+Frog is an integration of memory\(hy-based natural language processing (NLP)
 modules developed for Dutch.
-frog's current version will tokenize, tag, lemmatize, and morphologically
-segment word tokens in Dutch text files, add IOB chunks and will assign a
-dependency graph to each sentence.
+Frog's current version will (optionally) tokenize, tag, lemmatize, and
+morphologically segment word tokens in Dutch text files, add IOB chunks,
+add Named Entities and will assign a dependency graph to each sentence.
 
 .SH OPTIONS
 
@@ -23,10 +23,10 @@ set the configuration using 'file'
 
 .BR \-\-debug =<modele><level>,...
 .RS
-set debug level per module.
+set debug level per module, indicated by a single letter:
 Tagger (T), Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a),
 Chunker (c), Multi\(hyWord Units (m), Named Entity Recognition (n),
-or Parser (p).
+or Parser (p). Diffrent modules must be separated by kommas.
 
 (e.g. \-\-debug=l5,n3 sets the level for the Lemmatizer to 5 and for the NER
 to 3 )
@@ -40,9 +40,10 @@ set global debug level. (for all modules)
 
 .BR \-\-deep\(hymorph
 .RS
-generate a deep morphological analisys and add it to the XML. This also
+generate a deep morphological analysis and add it to the XML. This also
 includes compound information.
-The default tabbed output is also more detailed in the Morpheme field.
+The default 'Tabbed' and JSON output is also more detailed in the Morpheme
+field.
 
 .RE
 
@@ -70,7 +71,7 @@ means: detect Dutch, English and Portuguese, with Dutch being the default.
 
 .BR \-n
 .RS
-assume inputfile to hold one sentence per line.
+assume inputfile to hold one sentence per line. (newline separators)
 
 Very useful when running interactive, otherwise an empty line is needed to
 signal end of input.
@@ -78,8 +79,8 @@ signal end of input.
 
 .BR \-\-nostdout
 .RS
-suppress the collumned output to stdout. (when no outputfile is specified with
-\-o or \-\-outputdir)
+suppress the 'Tabbed' or JSON output to stdout. (when no outputfile was
+specified with \-o or \-\-outputdir)
 
 Especially useful when XML output is specified with \-X or \-\-xmldir.
 .RE
@@ -87,14 +88,14 @@ Especially useful when XML output is specified with \-X or \-\-xmldir.
 
 .BR \-o " <file>"
 .RS
-send 'tabbed' output to 'file' instead of stdout. Defaults to the name of the
+send 'Tabbed' output to 'file' instead of stdout. Defaults to the name of the
 inputfile with '.out' appended.
 .RE
 
 .BR \-\-outputdir " <dir>"
 .RS
-send all output to 'dir' instead of stdout. Creates filenames from the
-inputfilename(s) with '.out' appended.
+send all 'Tabbed' or JSON output to 'dir' instead of stdout. Creates filenames
+from the inputfilename(s) with '.out' appended.
 .RE
 
 .BR \-\-retry
@@ -106,11 +107,12 @@ file names. (so this has no effect if neither \-o, \-\-outputdir, \-X or
 .RE
 
 
-.BR \-\-skip =[aclmnpt]
+.BR \-\-skip =[tlacnmp]
 .RS
-skip parts of the process: Tokenizer (t), Chunker (c), Lemmatizer (l),
-Morphological Analyzer (a), Multi\(hyWord unit (m),
-Named\(hyEntity recognizer (n) or Parser (p)
+skip parts of the process: Tokenizer (t), Lemmatizer (l), Morphological
+Analyzer (a), Chunker (c), Named Entity Recognition (n), Multi-Word Units (m) or Parser (p).
+
+Skipping the Multiword Unit implies disabling the Parser too.
 .RE
 
 .BR \-\-alpino
@@ -124,10 +126,10 @@ use a remote installed Alpino server, as specified in the frog configuration
 file.
 .RE
 
-.BR \-Q
-.RS
-Enable quotedetection in the tokenizer. NOT USED.
-.RE
+\" .BR \-Q
+\" .RS
+\" Enable quotedetection in the tokenizer. NOT USED.
+\" .RE
 
 .BR \-S " <port>"
 .RS
@@ -138,7 +140,8 @@ Run Frog as a server on 'port'
 .RS
 process 'file'.
 
-When \-t is omitted, Frog will run on <file> if present, otherwise in
+\-t can be omitted. Frog will run on any <file> found on the command-line.
+Wildcards are allowed too. When NO files are specied, Frog will in
 interactive mode.
 .RE
 
@@ -148,6 +151,13 @@ process 'xmlfile', which is supposed to be in FoLiA format! If 'xmlfile' is
 empty, and
 .BR \-\-testdir =<dir>
 is provided, all '.xml' files in 'dir' will be processed as FoLia XML.
+.RE
+
+.BR \-X " <xmlfile>"
+.RS
+When 'xmlfile' is specifies, creae a FoLiA XML output file with that name.
+
+When 'xmlfile' is empty, generate XML output for every inputfile.
 .RE
 
 .BR \-\-textclass "=<cls>"
@@ -218,6 +228,58 @@ for FoLia is given, use 'id' to give the doc an ID. The default is an xml:id
 based on the filename
 .RE
 
+.BR \-\-allow\-word\-corrections
+.RS
+Allow the
+.BR ucto
+tokenizer to apply simple corrections on words while processing FoLiA output.
+For instance splitting punctuation.
+.RE
+
+.BR \-\-max\-parser\-tokens "=<num>"
+.RS
+Limit the size of sentences to be handled by the Parser. (Default 500 words).
+
+The Parser is very memory consuming. 500 Words will already need 16Gb of RAM.
+.RE
+
+.BR \-\-JSONin
+.RS
+The input is in JSON format. Mainly for Server mode, but works on files too.
+
+This implies \-\-JSONout too!
+.RE
+
+.BR \-\-JSONout
+.RS
+Output will be in JSON instead of 'Tabbed'.
+.RE
+
+.BR \-\-JSONout "=<indent>"
+.RS
+Output will be in JSON instead of 'Tabbed'. The JSON will be idented by value
+ 'indent'. (Default is indent=0. Meaning al the JSON will be on 1 line)
+.RE
+
+.BR \-T
+or
+.BR \-\-textredundancy "=[full|medium|none]"
+.RS
+Set the text redundancy level in the tokenizer for text nodes in FoLiA output:
+.B full
+add text to all levels: <p> <s> <w> etc.
+.B minimal
+don't introduce text on higher levels, but retain what is already there.
+.B none
+only introduce text on <w>, AND remove all text from higher levels
+.RE
+
+.BR \-\-override "=<section>.<parameter>=<value>"
+.RS
+Overide a parameter from the configuration file with a different value.
+
+This option may be repeated several times.
+.RE
 
 .SH BUGS
 likely

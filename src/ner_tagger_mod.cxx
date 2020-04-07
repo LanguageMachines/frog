@@ -51,12 +51,27 @@ NERTagger::NERTagger( TiCC::LogStream *l, TiCC::LogStream *d ):
   BaseTagger( l, d, "NER" ),
   gazets_only(false),
   max_ner_size(20)
-{ gazet_ners.resize( max_ner_size + 1 );
+{
+  /// initialize a NERTagger instance
+  /*!
+    \param l a LogStream for errors
+    \param d a LogStream for debugging
+  */
+  gazet_ners.resize( max_ner_size + 1 );
   override_ners.resize( max_ner_size + 1 );
 }
 
 bool NERTagger::init( const TiCC::Configuration& config ){
-  if ( !BaseTagger::init( config ) ){
+  /// initalize a NER tagger from 'config'
+  /*!
+    \param config the TiCC::Configuration
+    \return true on succes, false otherwise
+
+    first BaseTagger::init() is called to set generic values,
+    then the NER specific values for the gazeteer file-names etc. are
+    added and the files are read.
+  */
+ if ( !BaseTagger::init( config ) ){
     return false;
   }
   string val = config.lookUp( "max_ner_size", "NER" );
@@ -90,6 +105,13 @@ bool NERTagger::fill_ners( const string& cat,
 			   const string& name,
 			   const string& config_dir,
 			   vector<unordered_map<string,set<string>>>& ners ){
+  /// fill known Named Entities from one gazeteer file
+  /*!
+    \param cat The NE categorie (like 'loc' or 'org')
+    \param name the filename to read
+    \param config_dir the directory to search for files
+    \param ners the structure to store the NE's in
+  */
   string file_name = name;
   if ( !TiCC::isFile( file_name ) ){
     file_name = config_dir + "/" + name;
@@ -144,6 +166,19 @@ bool NERTagger::fill_ners( const string& cat,
 bool NERTagger::read_gazets( const string& name,
 			     const string& config_dir,
 			     vector<unordered_map<string,set<string>>>& ners ){
+  /// fill known Named Entities from a list of gazeteer files
+  /*!
+    \param name the filename to read the gazeteer info from
+    \param config_dir the directory to search for files
+    \param ners the structure to store the NE's in
+
+    NE's are stored in a vector of maps, ranked on their length. So NE's of
+    length 1 ("London") are stored at position 1 and so on. ("dag van de arbeid"
+    at position 4).
+
+    the NE is stored in a map using as the mono-spaced string as key and adding
+    the cetagory in a set. (as categories can be ambiguous)
+  */
   string file_name = name;
   string lookup_dir = config_dir;
   if ( name[0] != '/' ) {
@@ -195,7 +230,8 @@ bool NERTagger::read_gazets( const string& name,
 }
 
 static vector<string> serialize( const vector<set<string>>& stags ){
-  // for every non empty set {el1,el2,..}, we compose a string like: el1+el2+...
+  /// for every non empty set {el1,el2,..} in stags we compose a string like:
+  /// el1+el2+...
   vector<string> ambitags( stags.size(), "O" );
   size_t pos = 0;
   for ( const auto& it : stags ){
@@ -213,6 +249,11 @@ static vector<string> serialize( const vector<set<string>>& stags ){
 
 vector<string> NERTagger::create_ner_list( const vector<string>& words,
 					   std::vector<std::unordered_map<std::string,std::set<std::string>>>& ners ){
+  /// create a list of ambitags given a range of words
+  /*!
+    \param words a sentence as a list of words
+    \param ners the NE structure to examine
+   */
   vector<set<string>> stags( words.size() );
   if ( debug > 1 ){
     DBG << "search for known NER's" << endl;
@@ -248,12 +289,23 @@ vector<string> NERTagger::create_ner_list( const vector<string>& words,
 
 void NERTagger::add_declaration( folia::Document& doc,
 				 folia::processor *proc ) const {
+  /// add ENTITY annotation as an AnnotationType to the document
+  /*!
+    \param doc the Document the add to
+    \param proc the processor to add
+  */
   folia::KWargs args;
   args["processor"] = proc->id();
   doc.declare( folia::AnnotationType::ENTITY, tagset, args );
 }
 
 void NERTagger::Classify( frog_data& swords ){
+  /// Tag one sentence, given in frog_data format
+  /*!
+    \param swords the frog_data structure to analyze
+
+    When tagging succeeds, 'swords' will be extended with the tag results
+   */
   if ( debug ){
     DBG << "classify from DATA" << endl;
   }
@@ -326,7 +378,7 @@ void NERTagger::Classify( frog_data& swords ){
       }
       to_do.push_back( entry );
     }
-    _tag_result = tagLine( to_do );
+    _tag_result = tag_entries( to_do );
     if ( debug > 1 ){
       DBG << "NER tagger out: " << endl;
       for ( size_t i=0; i < _tag_result.size(); ++i ){
@@ -371,8 +423,14 @@ void NERTagger::Classify( frog_data& swords ){
 
 void NERTagger::post_process( frog_data& sentence,
 			      const vector<tc_pair>& ners ){
-  /// @ners is a sequence of NE tags (maybe 'O') with their confidence
-  /// these are appended to the corresponding @sentence structure
+  /// finish the NER processs by updating 'sentence'
+  /*!
+    \param sentence a frog_data structure to update with NER info
+    \param ners a sequence of NE tags (maybe 'O') with their confidence
+
+    This is a specialized version local to NERTagger. Don't use the norma;
+    post_process()
+  */
   if ( sentence.size() == 0 ) {
     return;
   }
@@ -419,6 +477,19 @@ void NERTagger::post_process( frog_data& sentence,
 void NERTagger::addEntity( frog_data& sent,
 			   const size_t pos,
 			   const vector<tc_pair>& entity ){
+  /// add a NER entity to the frog_data structure
+  /*!
+    \param sent The frog_data to extend with NER info
+    \param pos the curent position
+    \param entity a Ner entity which may span several tc_pairs
+
+    A Named Entity can span several TAGS with each a confidence.
+    The confidence of the NE is calculated as the mean of the confidences
+    of those tags.
+
+    The NE tags and that mean confidence ias assigned to the proper locations
+    in the 'sent' structure.
+  */
   double c = 0;
   for ( auto const& val : entity ){
     c += val.second;
@@ -435,10 +506,23 @@ void NERTagger::addEntity( frog_data& sent,
 
 
 void NERTagger::post_process( frog_data& ){
+  /// This implements BaseTagger::post_process by DISALLOWING it.
   throw logic_error( "NER tagger call undefined postprocess() member" );
 }
 
 string to_tag( const string& label, bool inside ){
+  /// convert a label into a result tag
+  /*!
+    \param label the label as a string
+    \param inside are we 'inside' the tag or at the begin?
+    \return the result tag
+
+    There are several cases:
+
+    * The label is ambiguous, like "loc+org". then we return "O"
+    * The label is usable like 'org'. Then we return 'I-org' when 'inside' or
+    'B-org' othwerwise
+  */
   vector<string> parts = TiCC::split_at( label, "+" );
   if ( parts.size() > 1 ){
     // undecided
@@ -460,7 +544,16 @@ string to_tag( const string& label, bool inside ){
 void NERTagger::merge_override( vector<tc_pair>& tags,
 				const vector<tc_pair>& overrides,
 				bool unconditional,
-				const vector<string>& POS_tags ) const{
+				const vector<string>& POS_tags ) const {
+  /// merge overrides into the tc_pair vector
+  /*!
+    \param tags the list of tc_pair to merge into
+    \param overrides the override information (from gazeteers and such)
+    \param unconditional when true, prefer the information from overrides,
+    otherwise only override when there was no tag assigned yet
+    \param POS_tags a list of POS-tags. When this list is non-empty, only
+    override when it contains a N or a SPEC tag.
+   */
   string label;
   for ( size_t i=0; i < tags.size(); ++i ){
     if ( overrides[i].first != "O"
@@ -527,11 +620,17 @@ void NERTagger::merge_override( vector<tc_pair>& tags,
 
 
 bool NERTagger::Generate( const std::string& opt_line ){
+  /// generate a new tagger using opt_line
   return tagger->GenerateTagger( opt_line );
 }
 
 void NERTagger::add_result( const frog_data& fd,
 			    const vector<folia::Word*>& wv ) const {
+  /// add the NER tags in 'fd' to the FoLiA list of Word
+  /*!
+    \param fd The tagged results
+    \param wv The folia:Word vector
+   */
   folia::Sentence *s = wv[0]->sentence();
   folia::EntitiesLayer *el = 0;
   folia::Entity *ner = 0;
@@ -562,7 +661,7 @@ void NERTagger::add_result( const frog_data& fd,
       folia::KWargs args;
       args["set"] = getTagset();
       args["generate_id"] = el->id();
-      args["class"] = word.ner_tag.substr(2);
+      args["class"] = word.ner_tag.substr(2); // strip the B-
       args["confidence"] = TiCC::toString(word.ner_confidence);
       if ( textclass != "current" ){
 	args["textclass"] = textclass;

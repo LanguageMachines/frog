@@ -38,6 +38,7 @@
 #include <string>
 #include <cstring>
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <fstream>
 #include <vector>
@@ -81,44 +82,68 @@
 #include "frog/ner_tagger_mod.h"
 #include "frog/Parser.h"
 #include "frog/AlpinoParser.h"
-
+#include "ticcutils/json.hpp"
 
 using namespace std;
+using namespace nlohmann;
 using namespace Tagger;
 using TiCC::operator<<;
 
 #define LOG *TiCC::Log(theErrLog)
 #define DBG *TiCC::Log(theDbgLog)
 
+/// the FoLiA setname for languages
 const string ISO_SET = "http://raw.github.com/proycon/folia/master/setdefinitions/iso639_3.foliaset";
 
 string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
 string configFileName = configDir + "frog.cfg";
 
-string FrogAPI::defaultConfigDir( const string& lang ){
-  if ( lang.empty() ){
+string FrogAPI::defaultConfigDir( const string& language ){
+  /// return the default location of the configuration files
+  /*!
+    \param language use this to find the configuration for this language
+    \return a string representing the (language specific) path
+  */
+  //! The location of the configuration files is determined at installation
+  //! of the package. All languages are supposed to be in sub-directories
+  if ( language.empty() ){
     return configDir;
   }
   else {
-    return configDir+lang+"/";
+    return configDir+language+"/";
   }
 }
 
-string FrogAPI::defaultConfigFile( const string& lang ){
-  return defaultConfigDir( lang ) + "frog.cfg";
+string FrogAPI::defaultConfigFile( const string& language ){
+  /// return the filename for the default configuration
+  /*!
+    \param language use this to find the configuration for this language
+    \return a string representing (language specific) default filename
+  */
+  //! The location of the configuration files is determined at installation
+  //! of the package. All languages are supposed to be in sub-directories
+  return defaultConfigDir( language ) + "frog.cfg";
 }
 
 FrogOptions::FrogOptions() {
-  doTok = doLemma = doMorph = doMwu = doIOB = doNER = doParse = doTagger = true;
+  doTok = true;
+  doLemma = true;
+  doMorph = true;
+  doMwu = true;
+  doIOB = true;
+  doNER = true;
+  doParse = true;
+  doTagger = true;
   doDeepMorph = false;
   doSentencePerLine = false;
   doQuoteDetection = false;
-  doDirTest = false;
   doRetry = false;
   noStdOut = false;
   doServer = false;
   doXMLin =  false;
   doXMLout =  false;
+  doJSONin = false;
+  doJSONout = false;
   doKanon =  false;
   doAlpinoServer = false;
   doAlpino =  false;
@@ -142,21 +167,29 @@ FrogOptions::FrogOptions() {
   textredundancy="minimal";
   correct_words = false;
   debugFlag = 0;
+  JSON_pp = 0;
 }
 
-void FrogAPI::test_version( const string& where, double minimum ){
-  string version = configuration.lookUp( "version", where );
+void FrogAPI::test_version( const string& module, double minimum ){
+  /// check if a module in the Frog Configuration is at least at the
+  /// requested version level
+  /*!
+    \param module whick module to check
+    \param minumum the minimum level
+    This function will throw on a mismatch
+  */
+  string version = configuration.lookUp( "version", module );
   double v = 0.0;
   if ( !version.empty() ){
     if ( !TiCC::stringTo( version, v ) ){
       v = 0.5;
     }
   }
-  if ( where == "IOB" ){
+  if ( module == "IOB" ){
     if ( v < minimum ){
-      LOG << "[[" << where << "]] Wrong FrogData!. "
+      LOG << "[[" << module << "]] Wrong FrogData!. "
 	  << "Expected version " << minimum << " or higher for module: "
-	  << where << endl;
+	  << module << endl;
       if ( version.empty() ) {
 	LOG << "but no version info was found!." << endl;
       }
@@ -166,11 +199,11 @@ void FrogAPI::test_version( const string& where, double minimum ){
       throw runtime_error( "Frog initialization failed" );
     }
   }
-  else if ( where == "NER" ){
+  else if ( module == "NER" ){
     if ( v < minimum ){
-      LOG << "[[" << where << "]] Wrong FrogData!. "
+      LOG << "[[" << module << "]] Wrong FrogData!. "
 	  << "Expected version " << minimum << " or higher for module: "
-	  << where << endl;
+	  << module << endl;
       if ( version.empty() ) {
 	LOG << "but no version info was found!." << endl;
       }
@@ -181,7 +214,7 @@ void FrogAPI::test_version( const string& where, double minimum ){
     }
   }
   else {
-    throw logic_error( "unknown where:" + where );
+    throw logic_error( "unknown module:" + module );
   }
 }
 
@@ -202,6 +235,18 @@ FrogAPI::FrogAPI( FrogOptions &opt,
   myNERTagger(0),
   tokenizer(0)
 {
+  /// Initialize an FrogAPI class
+  /*!
+    \param opt FrogOptions. Already set or adapted by parsing 'conf'
+    \param conf A TiCC::Configuration.
+    The configuration is set from the command-line or by parsing a config file
+    \param err_log A LogStream for error messages
+    \param dbg_log A LogStream for debugging purposes
+
+    This will throw on problems with 'opt' or 'conf'
+
+    Otherwise a fully instantiated Frog will be available for further use
+  */
   // for some modules init can take a long time
   // so first make sure it will not fail on some trivialities
   //
@@ -523,6 +568,7 @@ FrogAPI::FrogAPI( FrogOptions &opt,
 }
 
 FrogAPI::~FrogAPI() {
+  /// Destructor. Clears all resources
   delete myMbma;
   delete myMblem;
   delete myMwu;
@@ -534,6 +580,11 @@ FrogAPI::~FrogAPI() {
 }
 
 folia::processor *FrogAPI::add_provenance( folia::Document& doc ) const {
+  /// add Frog provenance information to a FoLiA::Document.
+  /*!
+    \param doc The folia::Document.
+    \return an instantiated folia::processor associated with Frog
+   */
   string _label = "frog";
   vector<folia::processor *> procs = doc.get_processors_by_name( _label );
   if ( !procs.empty() ){
@@ -581,6 +632,12 @@ folia::processor *FrogAPI::add_provenance( folia::Document& doc ) const {
 
 folia::FoliaElement* FrogAPI::start_document( const string& id,
 					      folia::Document *& doc ) const {
+  /// Initialize a FoLiA::Document
+  /*!
+    \param id The Document ID to use
+    \param doc The created folia::Document
+    \return a pointer to the top \<text\> node of the Document.
+   */
   doc = new folia::Document( "xml:id='" + id + "'" );
   doc->addStyle( "text/xsl", "folia.xsl" );
   if ( options.debugFlag > 1 ){
@@ -596,28 +653,33 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
 
 void FrogAPI::append_to_sentence( folia::Sentence *sent,
 				  const frog_data& fd ) const {
-  // add tokenization, when applicable
-  vector<folia::Word*> wv = tokenizer->add_words( sent,
-						  fd );
+  /// add the results from frogging to a folia::Sentence
+  /*!
+    \param sent The sentence to add to
+    \param fd The frog_data structure which holds all results
+
+   */
+  vector<folia::Word*> wv = tokenizer->add_words( sent, fd );
   string la;
   if ( sent->has_annotation<folia::LangAnnotation>() ){
     la = sent->annotation<folia::LangAnnotation>()->cls();
   }
   string def_lang = tokenizer->default_language();
+  string detected_lang = fd.get_language();
   if ( options.debugFlag > 1 ){
     DBG << "append_to_sentence()" << endl;
-    DBG << "fd.language = " << fd.language << endl;
+    DBG << "fd.language = " << detected_lang << endl;
     DBG << "default_language = " << def_lang << endl;
     DBG << "sentence language = '" << la << "'" << endl;
   }
   if ( la.empty()
-       && !fd.language.empty()
-       && fd.language != "default"
-       && fd.language != def_lang ){
+       && !detected_lang.empty()
+       && detected_lang != "default"
+       && detected_lang != def_lang ){
     //
     // so the language is non default, and not set
     //
-    Tokenizer::set_language( sent, fd.language );
+    Tokenizer::set_language( sent, detected_lang );
     if ( options.textredundancy == "full" ){
       sent->settext( sent->str(options.inputclass), options.inputclass );
     }
@@ -670,6 +732,13 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
 folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
 					       const frog_data& fd,
 					       unsigned int& p_count ) const {
+  /// append Frog results to a folia element.
+  /*!
+    \param root The FoliaElement to append to
+    \param fd The frog_data structure which holds all results
+    \param p_count the current paragraph count. Can be updated.
+    \return the root element OR a newly created folia::Paragraph under that root
+   */
   if ( !root || !root->doc() ){
     return 0;
   }
@@ -719,12 +788,20 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
 
 void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
 			       const frog_data& fd ) const {
+  /// add all Frogged information to a vector of folia::Words
+  /*!
+    \param wv The vector of folia::Word elements
+    \param fd The frog_data structure which holds all results
+
+    the arity of both parameters should be equal!
+  */
   string def_lang = tokenizer->default_language();
-  if ( fd.language != "default"
-       && fd.language != def_lang ){
+  string detected_lang = fd.get_language();
+  if ( detected_lang != "default"
+       && detected_lang != def_lang ){
     if ( options.debugFlag > 0 ){
       DBG << "append_words() SKIP a sentence (different language: "
-	  << fd.language << "), default= " << def_lang << endl;
+	  << detected_lang << "), default= " << def_lang << endl;
     }
   }
   else {
@@ -760,7 +837,15 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
   }
 }
 
-void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
+void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
+  /// Run a server
+  /*!
+    \param conn A Sockets::ClientSocket object to connect to
+
+    The 'conn' object should be correctly set up using the right parameters.
+    Depending on the Frog settings we can serve text, FoLiA and JSON.
+    At the moment only TCP connections are supported.
+  */
   try {
     while ( conn.isValid() ) {
       ostringstream output_stream;
@@ -787,11 +872,41 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	os.close();
 	folia::Document *xml = run_folia_engine( tmp_file, output_stream );
 	if ( xml && options.doXMLout ){
-	  xml->set_kanon(options.doKanon);
+	  xml->set_canonical(options.doKanon);
 	  output_stream << xml;
 	  delete xml;
 	}
 	LOG << "Done Processing XML... " << endl;
+      }
+      else if ( options.doJSONin ){
+	json the_json;
+	string json_line;
+	// read data from the connection
+	if ( !conn.read( json_line ) ){
+	  throw( runtime_error( "read failed" ) );
+	}
+	try {
+	  the_json = json::parse( json_line );
+	}
+	catch ( const exception& e ){
+	  cerr << "json parsing failed on '" << json_line + "':"
+	       << e.what() << endl;
+	  throw runtime_error( "json failure" );
+	}
+	DBG << "Read JSON: " << the_json << endl;
+	for( const auto& it : the_json ){
+	  string data = it["sentence"];
+	  timers.tokTimer.stop();
+	  vector<Tokenizer::Token> toks = tokenizer->tokenize_line( data );
+	  timers.tokTimer.stop();
+	  while ( toks.size() > 0 ){
+	    frog_data sent = frog_sentence( toks, 1 );
+	    show_results( output_stream, sent );
+	  }
+	  timers.tokTimer.start();
+	  toks = tokenizer->tokenize_line_next();
+	  timers.tokTimer.stop();
+	}
       }
       else {
         string data = "";
@@ -851,7 +966,16 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	}
 	//	DBG << "Done Processing... " << endl;
       }
-      if (!conn.write( (output_stream.str()) ) || !(conn.write("READY\n\n"))  ){
+      if ( options.doJSONout ){
+	if (!conn.write( output_stream.str() ) ){
+	  if (options.debugFlag > 5 ) {
+	    DBG << "socket " << conn.getMessage() << endl;
+	  }
+	  throw( runtime_error( "JSON write to client failed" ) );
+	}
+      }
+      else if ( !conn.write( output_stream.str() )
+		|| !(conn.write("READY\n\n"))  ){
 	if (options.debugFlag > 5 ) {
 	  DBG << "socket " << conn.getMessage() << endl;
 	}
@@ -866,6 +990,13 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 }
 
 void FrogAPI::FrogStdin( bool prompt ) {
+  /// run frog on stdin, output to stdout
+  /*!
+    \param prompt Use a prompt. fixed to the string 'frog>'
+
+    This is the fallback when FrogInteractive is used on NON-tty devices
+    (e.g. a pipe) OR when Frog is build without READLINE support.
+  */
   if ( prompt ){
     cout << "frog>"; cout.flush();
   }
@@ -922,6 +1053,14 @@ void FrogAPI::FrogStdin( bool prompt ) {
 }
 
 void FrogAPI::FrogInteractive(){
+  /// Run an interactive frog on a terminal or a pipe.
+  /*! Normally READLINE support is used to set up an interactive session to
+    communicate with a user on a terminal.
+
+    On non-terminal devices (like a pipe) frog wil just consume input from the
+    input device and output to the output device.
+    This is also the fallback when READLINE support is not available.
+   */
   bool isTTY = isatty(0);
 #ifdef NO_READLINE
   FrogStdin(isTTY);
@@ -993,10 +1132,13 @@ void FrogAPI::FrogInteractive(){
 
 string FrogAPI::Frogtostring( const string& s ){
   /// Parse a string, Frog it and return the result as a string.
-  /// @s: an UTF8 decoded string. May be multilined.
-  /// @return the results of frogging. Depending of the current frog settings
-  /// the input can be interpreted as XML, an the ouput will be XML or
-  /// tab separated
+  /*!
+    \param s: an UTF8 decoded string. May be multilined.
+    \return the results of frogging.
+
+    Depending of the current frog settings the input can be interpreted as XML,
+    an the output will be XML or tab separated
+  */
   if ( s.empty() ){
     return s;
   }
@@ -1009,10 +1151,13 @@ string FrogAPI::Frogtostring( const string& s ){
 
 string FrogAPI::Frogtostringfromfile( const string& infilename ){
   /// Parse a file, Frog it and return the result as a string.
-  /// @name: The filename.
-  /// @return the results of frogging. Depending of the current frog settings
-  /// the inputfile can be interpreted as XML, an the ouput will be XML or
-  /// tab separated
+  /*!
+    \param infilename The filename.
+    \return the results of frogging as an UTF8 string.
+
+    Depending of the current frog settings the inputfile can be interpreted as
+    XML, and the output will be XML or tab separated.
+  */
   options.hide_timers = true;
   bool old_val = options.noStdOut;
   stringstream ss;
@@ -1022,25 +1167,23 @@ string FrogAPI::Frogtostringfromfile( const string& infilename ){
   folia::Document *result = FrogFile( infilename, ss );
   options.noStdOut = old_val;
   if ( result ){
-    result->set_kanon( options.doKanon );
+    result->set_canonical( options.doKanon );
     ss << result;
     delete result;
   }
   return ss.str();
 }
 
-string get_language( frog_data& fd ){
-  fd.language = "default";
-  for ( const auto& r : fd.units ){
-    if ( !r.language.empty() ){
-      fd.language = r.language;
-    }
-    break;
-  }
-  return fd.language;
-}
-
 frog_data extract_fd( vector<Tokenizer::Token>& tokens ){
+  /// extract a frog_data structure from a list of Tokens
+  /*!
+    \param tokens a list of Tokenizer::Token
+    \return the new frog_data structure
+
+    The tokens list may span multiple sentences and paragraphs; this function
+    will return the data for a single sentence and must be called multiple times
+    until the whole list is consumed.
+   */
   frog_data result;
   int quotelevel = 0;
   while ( !tokens.empty() ){
@@ -1063,7 +1206,7 @@ frog_data extract_fd( vector<Tokenizer::Token>& tokens ){
       // we are at ENDOFSENTENCE.
       // when quotelevel == 0, we step out, until the next call
       if ( quotelevel == 0 ){
-	result.language = tok.lang_code;
+	//	result.language = tok.lang_code;
 	break;
       }
     }
@@ -1073,6 +1216,19 @@ frog_data extract_fd( vector<Tokenizer::Token>& tokens ){
 
 frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
 				  const size_t s_count ){
+  /// extract a frog_data structure, representing 1 frogged sentence
+  /*!
+    \param sent a list of Tokenizer::Token
+    \param s_count holds the sentence count
+    \return a frog_data structure representing 1 totally frogged sentence.
+
+    This function is reentrant and should be called multiple times until the
+    whole 'sent' list is consument.
+    s_count is incremented for every returned frog_data element.
+
+    All enabled Frog modules are run on the frog_data structure.
+
+  */
   if ( options.debugFlag > 0 ){
     DBG << "tokens:\n" << sent << endl;
   }
@@ -1080,7 +1236,7 @@ frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
   if ( options.debugFlag > 0 ){
     DBG << "sentence:\n" << sentence << endl;
   }
-  string lan = get_language( sentence );
+  string lan = sentence.get_language();
   string def_lang = tokenizer->default_language();
   if ( options.debugFlag > 0 ){
     DBG << "frog_sentence() on a part. (lang=" << lan << ")" << endl;
@@ -1236,6 +1392,13 @@ frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
 }
 
 string filter_non_NC( const string& filename ){
+  /// Filter out characters that would be invalid as an XML NCname
+  /*!
+    \param filename a string representing a filename
+    \return a string where troublesome characters are skipped or replaced
+
+    see https://www.w3.org/TR/xmlschema-2/#NCName for more information
+  */
   string result;
   bool at_start = true;
   for ( size_t i=0; i < filename.length(); ++i ){
@@ -1270,10 +1433,14 @@ string filter_non_NC( const string& filename ){
 const string Tab = "\t";
 
 void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
-  ///
-  /// output a frog_record @fd in tabbed format to stream @os
-  /// This done in a backward compatible manor to older Frog versions
-  ///
+  /// output a frog_record in tabbed format
+  /*!
+    \param os the output stream
+    \param fd the record to display
+
+    This function is used as part of outputting a complete frog_data structure
+    in show_results
+  */
   os << fd.word << Tab;
   if ( options.doLemma ){
     if ( !fd.lemmas.empty() ){
@@ -1340,30 +1507,76 @@ void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
   }
 }
 
-void FrogAPI::show_results( ostream& os,
-			    const frog_data& fd ) const {
-  ///
-  /// output a frog_data structure @fd in tabbed format to stream @os
-  /// This done in a backward compatible manor to older Frog versions
-  ///
+void FrogAPI::output_JSON( ostream& os,
+			   const frog_data& fd,
+			   int pp_val ) const {
+  /// output a frog_data structure as JSON
+  /*!
+    \param os the output stream
+    \param fd the frog_data to display
+    \param pp_val value to use for formatted output.
+
+    If pp_val is 0, the whole JSON is output as a (very) long string.
+    If pp_val > 0, the JSON is formatted neatly with pp_val as indentation
+  */
+  json out_json = json::array();
   if ( fd.mw_units.empty() ){
     for ( size_t pos=0; pos < fd.units.size(); ++pos ){
-      os << pos+1 << Tab;
-      output_tabbed( os, fd.units[pos] );
-      os << endl;
+      json part = fd.units[pos].to_json();
+      part["index"] = pos+1;
+      out_json.push_back( part );
     }
   }
   else {
     for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
-      os << pos+1 << Tab;
-      output_tabbed( os, fd.mw_units[pos] );
-      os << endl;
+      json part = fd.mw_units[pos].to_json();
+      part["index"] = pos+1;
+      out_json.push_back( part );
     }
   }
-  os << endl;
+  os << std::setw(pp_val) << out_json << endl;
+}
+
+void FrogAPI::show_results( ostream& os,
+			    const frog_data& fd ) const {
+  /// output a frog_data structure to a stream.
+  /*!
+    \param os the outputstream
+    \param fd the structure to display
+
+    Depending on Frog settings, the output can be 'tabbed' or JSON
+  */
+  if ( options.doJSONout ){
+    output_JSON( os, fd, options.JSON_pp );
+  }
+  else {
+    if ( fd.mw_units.empty() ){
+      for ( size_t pos=0; pos < fd.units.size(); ++pos ){
+	os << pos+1 << Tab;
+	output_tabbed( os, fd.units[pos] );
+	os << endl;
+      }
+    }
+    else {
+      for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
+	os << pos+1 << Tab;
+	output_tabbed( os, fd.mw_units[pos] );
+	os << endl;
+      }
+    }
+    os << endl;
+  }
 }
 
 UnicodeString replace_spaces( const UnicodeString& in ) {
+  /// replace spaces by underscores
+  /*!
+    \param in an Unicode string with embedded spaces
+    \return an Unicode string where all spaces have been replaced by an
+    underscore
+
+    'spaces' are detected using the ICU u_ispace() function
+  */
   UnicodeString result;
   StringCharacterIterator sit(in);
   while ( sit.hasNext() ){
@@ -1382,6 +1595,12 @@ UnicodeString replace_spaces( const UnicodeString& in ) {
 void FrogAPI::handle_word_vector( ostream& os,
 				  const vector<folia::Word*>& wv_in,
 				  const size_t s_cnt ){
+  /// run frog on a vector of folia::Word as extracted from a document
+  /*!
+    \param os stream for output
+    \param wv_in the Word list to handle
+    \param s_cnt the sentence count
+  */
   folia::FoliaElement *s = wv_in[0]->parent();
   vector<folia::Word*> wv =  wv_in;
   vector<Tokenizer::Token> toks;
@@ -1433,10 +1652,16 @@ void FrogAPI::handle_word_vector( ostream& os,
 void FrogAPI::handle_one_sentence( ostream& os,
 				   folia::Sentence *s,
 				   const size_t s_cnt ){
+  /// run frog on a folia::Sentence as extracted from a document
+  /*!
+    \param os stream for output
+    \param s the Sentence to handle
+    \param s_cnt the sentence count
+  */
   if  ( options.debugFlag > 1 ){
     DBG << "handle_one_sentence: " << s << endl;
   }
-  string sent_lang =  s->language();
+  string sent_lang = s->language();
   if ( sent_lang.empty() ){
     sent_lang = tokenizer->default_language();
   }
@@ -1447,8 +1672,7 @@ void FrogAPI::handle_one_sentence( ostream& os,
     }
     return;
   }
-  vector<folia::Word*> wv;
-  wv = s->words( options.inputclass );
+  vector<folia::Word*> wv = s->words( options.inputclass );
   if ( wv.empty() ){
     wv = s->words();
   }
@@ -1483,8 +1707,15 @@ void FrogAPI::handle_one_sentence( ostream& os,
 void FrogAPI::handle_one_paragraph( ostream& os,
 				    folia::Paragraph *p,
 				    int& sentence_done ){
-  // a Paragraph may contain both Word and Sentence nodes
-  // if so, the Sentences should be handled separately
+  /// run frog on a folia::Paragraph as extracted from a document
+  /*!
+    \param os stream for output
+    \param p the Paragraph to handle
+    \param sentence_done holds the number of sentences done, may be incremented
+
+    a Paragraph may contain both Word and Sentence nodes
+    if so, the Sentences should be handled separately
+  */
   vector<folia::Word*> wv = p->select<folia::Word>(false);
   vector<folia::Sentence*> sv = p->select<folia::Sentence>(false);
   if ( options.debugFlag > 1 ){
@@ -1542,12 +1773,16 @@ void FrogAPI::handle_one_paragraph( ostream& os,
 void FrogAPI::handle_one_text_parent( ostream& os,
 				      folia::FoliaElement *e,
 				      int& sentence_done ){
-  ///
-  /// input is a FoLiA element @e containing text.
-  /// this can be a Word, Sentence, Paragraph or some other element
-  /// In the latter case, we construct a Sentence from the text, and
-  /// a Paragraph if more then one Sentence is found
-  ///
+  /// genric function to handle text from FoliaElements
+  /*!
+    \param os output stream for the results
+    \param e a FoLiA element containing text.
+    \param sentence_done holds the number of sentences done, may be incremented
+
+    The input 'e' this can be a Word, Sentence, Paragraph or some other element
+    In the latter case, we construct a Sentence from the text, and
+    a Paragraph if more then one Sentence is found
+  */
   if ( e->xmltag() == "w" ){
     // already tokenized into words!
     folia::Word *word = dynamic_cast<folia::Word*>(e);
@@ -1682,6 +1917,17 @@ void FrogAPI::handle_one_text_parent( ostream& os,
 
 folia::Document *FrogAPI::run_folia_engine( const string& infilename,
 					    ostream& output_stream ){
+  /// Run frog on a FoLiA XML file
+  /*!
+    \param infilename the name of the inputfile containing FoLiA
+    \param output_stream the stream to output tabbed/JSON to.
+    \return a Frogged FoLiA Document
+
+    using folia::TextEngine, this function will loop through all relevant
+    parents of <t> nodes in the document specified by infilename.
+    The strings in those nodes will be frogged, and they are enriched with all
+    found information, like POS, lemma etc.
+  */
   if ( options.inputclass == options.outputclass ){
     tokenizer->setFiltering(false);
   }
@@ -1737,6 +1983,15 @@ folia::Document *FrogAPI::run_folia_engine( const string& infilename,
 
 folia::Document *FrogAPI::run_text_engine( const string& infilename,
 					   ostream& os ){
+  /// Run frog on a TEXT file
+  /*!
+    \param infilename the name of the inputfile containing text
+    \param os the stream to output tabbed/JSON to.
+    \return a Frogged FoLiA Document
+
+    this function will loop all text in the inputfile, using the tokenizer to
+    detect Paragraphs and Sentences and creating a FoLiA document on the fly
+  */
   ifstream test_file( infilename );
   int i = 0;
   folia::Document *doc = 0;
@@ -1774,6 +2029,16 @@ folia::Document *FrogAPI::run_text_engine( const string& infilename,
 
 folia::Document *FrogAPI::FrogFile( const string& infilename,
 				    ostream& os ){
+  /// generic function to Frog a file
+  /*!
+    \param infilename the input file-name
+    \param os the outputstream
+    \return a Frogged Document. May be empty if XML output is not required
+
+    This function autodetects FoLiA files vs. text files and will run Frog
+    for the respective types.
+   */
+
   folia::Document *result = 0;
   bool xml_in = options.doXMLin;
   if ( TiCC::match_back( infilename, ".xml.gz" )
@@ -1825,6 +2090,11 @@ folia::Document *FrogAPI::FrogFile( const string& infilename,
 }
 
 void FrogAPI::run_api_tests( const string& testName, ostream& outS ){
+  /// Helper function to run some specific tests for the API
+  /*!
+    \param testName a file to test on
+    \param outS an output stream for the results
+  */
   LOG << "running some extra Frog tests...." << endl;
   if ( testName.find( ".xml" ) != string::npos ){
     options.doXMLin = true;
@@ -1915,11 +2185,17 @@ void FrogAPI::run_api_tests( const string& testName, ostream& outS ){
   }
 }
 
-// the functions below here are ONLY used by TSCAN.
-// the should be moved there probably
-// The problem beeing that tscan has no knowledge about the `Mbma::mbma_tagset`
-// ===========================================================================
 vector<string> get_compound_analysis( folia::Word* word ){
+  /// extract compound information from the deep_morph analysis in word
+  /*!
+    \param word the folia::Word to extract from
+    \return a vector of strings with compound information
+
+    this function is ONLY used by TSCAN atm.
+
+    moving it there is problematic because tscan has no knowledge about the
+    `Mbma::mbma_tagset`
+  */
   vector<string> result;
   vector<folia::MorphologyLayer*> layers
     = word->annotations<folia::MorphologyLayer>( Mbma::mbma_tagset );
@@ -1941,6 +2217,11 @@ vector<string> get_compound_analysis( folia::Word* word ){
 }
 
 string flatten( const string& s ){
+  /// helper function to 'flatten out' bracketed morpheme strings
+  /*!
+    \param s a bracketed string of morphemes
+    \return a string with multiple '[' and ']' reduced to single occurrences
+  */
   string result;
   string::size_type bpos = s.find_first_not_of( "[" );
   if ( bpos != string::npos ){
@@ -1964,12 +2245,24 @@ string flatten( const string& s ){
   return result;
 }
 
-vector<string> get_full_morph_analysis( folia::Word* w,
+vector<string> get_full_morph_analysis( folia::Word *word,
 					const string& cls,
 					bool make_flat ){
+  /// extract a full morpheme analysis from the deep_morph analysis in word
+  /*!
+    \param word the folia::Word to extract from
+    \param cls the textclass to use
+    \param make_flat When 'true' remove extra brackets
+    \return a vector of strings with flattended morpheme information
+
+    this function is ONLY used by TSCAN atm.
+
+    moving it there is problematic because tscan has no knowledge about the
+    `Mbma::mbma_tagset`
+  */
   vector<string> result;
   vector<folia::MorphologyLayer*> layers
-    = w->annotations<folia::MorphologyLayer>( Mbma::mbma_tagset );
+    = word->annotations<folia::MorphologyLayer>( Mbma::mbma_tagset );
   for ( const auto& layer : layers ){
     vector<folia::Morpheme*> m =
       layer->select<folia::Morpheme>( Mbma::mbma_tagset, false );
@@ -1999,6 +2292,17 @@ vector<string> get_full_morph_analysis( folia::Word* w,
   return result;
 }
 
-vector<string> get_full_morph_analysis( folia::Word* w, bool flat ){
-  return get_full_morph_analysis( w, "current", flat );
+vector<string> get_full_morph_analysis( folia::Word *word, bool make_flat ){
+  /// extract a full morpheme analysis from the deep_morph analysis in word
+  /*!
+    \param word the folia::Word to extract from
+    \param make_flat When 'true' remove extra brackets
+    \return a vector of strings with flattended morpheme information
+
+    this function is ONLY used by TSCAN atm.
+
+    moving it there is problematic because tscan has no knowledge about the
+    `Mbma::mbma_tagset`
+  */
+  return get_full_morph_analysis( word, "current", make_flat );
 }

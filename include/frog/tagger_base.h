@@ -62,7 +62,7 @@ class BaseTagger {
   std::string set_eos_mark( const std::string& );
   bool fill_map( const std::string&, std::map<std::string,std::string>& );
   std::vector<Tagger::TagResult> tagLine( const std::string& );
-  std::vector<Tagger::TagResult> tagLine( const std::vector<tag_entry>& );
+  std::vector<Tagger::TagResult> tag_entries( const std::vector<tag_entry>& );
   std::string version() const { return _version; };
  private:
   std::vector<tag_entry> extract_sentence( const frog_data& );

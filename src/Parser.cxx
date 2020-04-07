@@ -58,6 +58,7 @@ using namespace nlohmann;
 #define LOG *TiCC::Log(errLog)
 #define DBG *TiCC::Dbg(dbgLog)
 
+/// structure to store parsing results
 struct parseData {
   void clear() { words.clear(); heads.clear(); mods.clear(); mwus.clear(); }
   vector<string> words;
@@ -67,6 +68,12 @@ struct parseData {
 };
 
 ostream& operator<<( ostream& os, const parseData& pd ){
+  /// output a parseData structure (debugging only)
+  /*!
+    \param os the output stream
+    \param pd the parseData to dump
+    \return the stream
+  */
   os << "pd words " << pd.words << endl;
   os << "pd heads " << pd.heads << endl;
   os << "pd mods " << pd.mods << endl;
@@ -81,6 +88,13 @@ ostream& operator<<( ostream& os, const parseData& pd ){
 }
 
 bool Parser::init( const TiCC::Configuration& configuration ){
+  /// initialize a Parser from the configuration
+  /*!
+    \param configuration the config to use
+    \return true on succes
+    extract all needed information from the configuration and setup the parser
+    by creating 3 Timbl instances
+  */
   filter = 0;
   string pairsFileName;
   string pairsOptions = "-a1 +D -G0 +vdb+di";
@@ -131,8 +145,9 @@ bool Parser::init( const TiCC::Configuration& configuration ){
     MWU_tagset = val;
   }
   string charFile = configuration.lookUp( "char_filter_file", "tagger" );
-  if ( charFile.empty() )
+  if ( charFile.empty() ){
     charFile = configuration.lookUp( "char_filter_file" );
+  }
   if ( !charFile.empty() ){
     charFile = prefix( configuration.configDir(), charFile );
     filter = new TiCC::UniFilter();
@@ -291,12 +306,18 @@ bool Parser::init( const TiCC::Configuration& configuration ){
 }
 
 Parser::~Parser(){
+  /// destructor
   delete rels;
   delete dir;
   delete pairs;
 }
 
 vector<string> Parser::createPairInstances( const parseData& pd ){
+  /// create a list of Instances for the 'pairs' Timbl
+  /*!
+    \param pd the parsedata structure with words, heads and modifiers
+    \return a list of string where every string is a Timbl test instance
+  */
   vector<string> instances;
   const vector<string>& words = pd.words;
   const vector<string>& heads = pd.heads;
@@ -441,6 +462,11 @@ vector<string> Parser::createPairInstances( const parseData& pd ){
 }
 
 vector<string> Parser::createDirInstances( const parseData& pd ){
+  /// create a list of Instances for the 'dir' Timbl
+  /*!
+    \param pd the parsedata structure with words, heads and modifiers
+    \return a list of string where every string is a Timbl test instance
+  */
   vector<string> d_instances;
   const vector<string>& words = pd.words;
   const vector<string>& heads = pd.heads;
@@ -653,6 +679,11 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
 }
 
 vector<string> Parser::createRelInstances( const parseData& pd ){
+  /// create a list of Instances for the 'rel' Timbl
+  /*!
+    \param pd the parsedata structure with words, heads and modifiers
+    \return a list of string where every string is a Timbl test instance
+  */
   vector<string> r_instances;
   const vector<string>& words = pd.words;
   const vector<string>& heads = pd.heads;
@@ -835,6 +866,11 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
 }
 
 void Parser::add_provenance( folia::Document& doc, folia::processor *main ) const {
+  /// add provenance information to the FoLiA document
+  /*!
+    \param doc the foLiA document we are working on
+    \param main the main processor (presumably Frog) we want to add a new one to
+  */
   string _label = "dep-parser";
   if ( !main ){
     throw logic_error( "Parser::add_provenance() without arguments." );
@@ -851,6 +887,15 @@ void Parser::add_provenance( folia::Document& doc, folia::processor *main ) cons
 }
 
 void extract( const string& tv, string& head, string& mods ){
+  /// spit a (CGN-like) tag into a head and a modifier part
+  /*!
+    \param tv a CGN-like tag
+    \param head the extacted head
+    \param mods the modfiers, concatenated using the '|' symbol
+
+    Example: the tag WW(pv,tgw,met-t) will be split into a head 'WW' and a
+    mods string 'pv|tgw|met-t'
+   */
   vector<string> v = TiCC::split_at_first_of( tv, "()" );
   head = v[0];
   mods.clear();
@@ -867,6 +912,11 @@ void extract( const string& tv, string& head, string& mods ){
 }                                                        //     |
                                                          //     |
 parseData Parser::prepareParse( frog_data& fd ){         //     |
+  /// setup the parser for  action
+  /*!
+    \param fd the frog_data structure with the needed information
+    \return a parseData structure for further processing
+  */
   parseData pd;                                          //     |
   for ( size_t i = 0; i < fd.units.size(); ++i ){        //     |
     if ( fd.mwus.find( i ) == fd.mwus.end() ){           //     |
@@ -923,18 +973,31 @@ parseData Parser::prepareParse( frog_data& fd ){         //     |
 }
 
 
-void timbl( Timbl::TimblAPI* tim,
-	    const vector<string>& instances,
-	    vector<timbl_result>& results ){
-  results.clear();
+vector<timbl_result> timbl( Timbl::TimblAPI* tim,
+			    const vector<string>& instances ){
+  /// call a Timbl experiment with a list of instances
+  /*!
+    \param tim The Timbl to use
+    \param instances the instances to feed to the Timbl
+    \return a list of timbl_result structures with the result of processing
+    all instances
+   */
+  vector<timbl_result> result;
   for ( const auto& inst : instances ){
     const Timbl::ValueDistribution *db;
     const Timbl::TargetValue *tv = tim->Classify( inst, db );
-    results.push_back( timbl_result( tv->Name(), db->Confidence(tv), db ) );
+    result.push_back( timbl_result( tv->Name(), db->Confidence(tv), db ) );
   }
+  return result;
 }
 
 vector<pair<string,double>> parse_vd( const string& ds ){
+  /// parse a ValueDistribution string into a vector of class/value pairs
+  /*!
+    \param ds a string representation of a Timbl ValueDistribution
+    \return a vector of string/double pairs. Each pair is one class + it's
+    (relative) count
+  */
   vector<pair<string,double>> result;
   vector<string> parts = TiCC::split_at_first_of( ds, "{,}" );
   for ( const auto& p : parts ){
@@ -945,11 +1008,16 @@ vector<pair<string,double>> parse_vd( const string& ds ){
   return result;
 }
 
-void Parser::timbl_server( const string& base,
-			   const vector<string>& instances,
-			   vector<timbl_result>& results ){
-  results.clear();
-
+vector<timbl_result> Parser::timbl_server( const string& base,
+					   const vector<string>& instances ){
+  /// call a Timbl Server with a list of instances
+  /*!
+    \param base used to select the Timbl to use (should be configured correctly)
+    \param instances the instances to feed to the Timbl Server
+    \return a list of timbl_result structures with the result of processing
+    all instances
+   */
+  vector<timbl_result> result;
   Sockets::ClientSocket client;
   if ( !client.connect( _host, _port ) ){
     LOG << "failed to open connection, " << _host
@@ -1017,20 +1085,26 @@ void Parser::timbl_server( const string& base,
     string cat = response["category"];
     double conf = response.value("confidence",0.0);
     vector<pair<string,double>> vd = parse_vd(response["distribution"]);
-    results.push_back( timbl_result( cat, conf, vd ) );
+    result.push_back( timbl_result( cat, conf, vd ) );
   }
   else {
     for ( const auto& it : response.items() ){
       string cat = it.value()["category"];
       double conf = it.value().value("confidence",0.0);
       vector<pair<string,double>> vd = parse_vd( it.value()["distribution"] );
-      results.push_back( timbl_result( cat, conf, vd ) );
+      result.push_back( timbl_result( cat, conf, vd ) );
     }
   }
+  return result;
 }
 
 void appendParseResult( frog_data& fd,
 			const vector<parsrel>& res ){
+  /// transfer the outcome of the parser back into the fog_data structure
+  /*!
+    \param fd the frog_data we want to add to
+    \param res the parser's results
+  */
   vector<int> nums;
   vector<string> roles;
   for ( const auto& it : res ){
@@ -1049,6 +1123,14 @@ void appendParseResult( frog_data& fd,
 }
 
 void Parser::Parse( frog_data& fd, TimerBlock& timers ){
+  /// Run the Parser on 1 frog_data structure
+  /*!
+    \param fd the frog_data structure with our input
+    \param timers the TimerBlock for measuring what we wasting
+
+    This function will run 3 Timbl's in parallel to get its information
+    which is the handled to the 'real' parsing CSIDP process
+  */
   timers.parseTimer.start();
   if ( !isInit ){
     LOG << "Parser is not initialized! EXIT!" << endl;
@@ -1072,10 +1154,10 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
 	timers.pairsTimer.start();
 	vector<string> instances = createPairInstances( pd );
 	if ( _host.empty() ){
-	  timbl( pairs, instances, p_results );
+	  p_results = timbl( pairs, instances );
 	}
 	else {
-	  timbl_server( _pairs_base, instances, p_results );
+	  p_results = timbl_server( _pairs_base, instances );
 	}
 	timers.pairsTimer.stop();
       }
@@ -1084,10 +1166,10 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
 	timers.dirTimer.start();
 	vector<string> instances = createDirInstances( pd );
 	if ( _host.empty() ){
-	  timbl( dir, instances, d_results );
+	  d_results = timbl( dir, instances );
 	}
 	else {
-	  timbl_server( _dirs_base, instances, d_results );
+	  d_results = timbl_server( _dirs_base, instances );
 	}
 	timers.dirTimer.stop();
       }
@@ -1096,10 +1178,10 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
 	timers.relsTimer.start();
 	vector<string> instances = createRelInstances( pd );
 	if ( _host.empty() ){
-	  timbl( rels, instances, r_results );
+	  r_results = timbl( rels, instances );
 	}
 	else {
-	  timbl_server( _rels_base, instances, r_results );
+	  r_results = timbl_server( _rels_base, instances );
 	}
 	timers.relsTimer.stop();
       }
@@ -1125,6 +1207,14 @@ ParserBase::~ParserBase(){
 
 void ParserBase::add_result( const frog_data& fd,
 			     const vector<folia::Word*>& wv ) const {
+  /// add the parser's conclusiong to the FoLiA we are working on
+  /*!
+    \param fd the frog_data with the parse outcome allready inserted
+    \param wv the original folia::Word elements.
+
+    This will create a DependencyLayer at the Sentence level of the \e wv with
+    Dependency records for every dependency found
+  */
   //  DBG << "Parser::add_result:" << endl << fd << endl;
   folia::Sentence *s = wv[0]->sentence();
   folia::KWargs args;

@@ -35,19 +35,18 @@
 #include <set>
 #include <ostream>
 #include <string>
-#include <string>
 
 #include "ticcutils/Timer.h"
 
-std::string prefix( const std::string&,
-		    const std::string& );
-void getFileNames( const std::string&,
-		   const std::string&,
-		   std::set<std::string>& );
+std::string prefix( const std::string& path,
+		    const std::string& fn );
 
-std::string check_server( const std::string&,
-			  const std::string&,
-			  const std::string& = "" );
+std::set<std::string> getFileNames( const std::string& dirName,
+				    const std::string& ext );
+
+std::string check_server( const std::string& host,
+			  const std::string& port,
+			  const std::string& name= "" );
 
 class TimerBlock{
 public:

@@ -48,7 +48,7 @@ using TiCC::operator<<;
 #define DBG *TiCC::Log(dbgLog)
 
 bool RulePart::isBasic() const {
-  return isBasicClass( ResultClass );
+  return is_CELEX_base( ResultClass );
 }
 
 ostream& operator<<( ostream& os, const RulePart& r ){

@@ -73,6 +73,16 @@ BaseTagger::~BaseTagger(){
 }
 
 bool BaseTagger::fill_map( const string& file, map<string,string>& mp ){
+  /// fill a map op string-string vales from a fie
+  /*!
+    \param file the filenam
+    \param mp the map to fill
+    \return true on succes, false otherwise
+
+    the file should contain lines with TAB separated attribute/value pairs
+
+    lines starting with '#' are seen as comment
+  */
   ifstream is( file );
   if ( !is ){
     return false;
@@ -96,6 +106,12 @@ bool BaseTagger::fill_map( const string& file, map<string,string>& mp ){
 }
 
 bool BaseTagger::init( const TiCC::Configuration& config ){
+  /// initalize a tagger from 'config'
+  /*!
+    \param config the TiCC::Configuration
+    \return true on succes, false otherwise
+
+  */
   if ( tagger != 0 ){
     LOG << _label << "-tagger is already initialized!" << endl;
     return false;
@@ -232,8 +248,13 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
 
 void BaseTagger::add_provenance( folia::Document& doc,
 				 folia::processor *main ) const {
+  /// add provenance information for this tagger. (FoLiA output only)
+  /*!
+    \param doc the FoLiA document to add to
+    \param main the processor to use (presumably the Frog processor)
+  */
   if ( !main ){
-    throw logic_error( _label + "::add_provenance() without parent proc." );
+    throw logic_error( _label + "::add_provenance() without parent processor." );
   }
   folia::KWargs args;
   args["name"] = _label;
@@ -245,6 +266,11 @@ void BaseTagger::add_provenance( folia::Document& doc,
 }
 
 json create_json( const vector<tag_entry>& tv ){
+  /// output a vector of tag_entry structs as JSON
+  /*!
+    \param tv The vector of tag_entry elements, filled by the tagger
+    \return a json structure
+  */
   json result;
   result["command"] = "tag";
   json arr = json::array();
@@ -261,6 +287,14 @@ json create_json( const vector<tag_entry>& tv ){
 }
 
 vector<TagResult> json_to_TR( const json& in ){
+  /// convert a JSON structure to a vector of TagResult elements
+  /*!
+    \param in The input JSON
+    \return a vector of TagResult structures
+
+    Used by the server mode to convert incoming JSON to a structure we
+    can further process
+  */
   vector<TagResult> result;
   for ( auto& i : in ){
     TagResult tr;
@@ -287,6 +321,19 @@ vector<TagResult> json_to_TR( const json& in ){
 }
 
 vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
+  /// Connect to a MBT server, send and receive JSON and translate to a
+  /// TagResult list
+  /*!
+    \param tv the tag_entry we would like to be seviced
+    \return a vector of TagResult elements
+
+    We set up a connection to the configured server, send a query in JSON
+    and on succesful receiving back a JSON result we convert it back into
+    a TagResult vector
+
+    \note So this is a one-shot operation. No connection to the MBT server is
+    kept open.
+  */
   Sockets::ClientSocket client;
   if ( !client.connect( _host, _port ) ){
     LOG << "failed to open connection, " << _label << "::" << _host
@@ -358,6 +405,14 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
 }
 
 vector<TagResult> BaseTagger::tagLine( const string& line ){
+  /// tag a string into a vector of TagResult elements
+  /*!
+    \param line a (UTF8 encoded) string, may be multilined and include Enrichments
+    \return a vector of TagResult
+
+    Depending on the configurarion, the input is send to the local MBT tagger
+    or the associated MBT server.
+  */
   if ( !_host.empty() ){
     vector<tag_entry> to_do;
     vector<string> v = TiCC::split( line );
@@ -373,7 +428,7 @@ vector<TagResult> BaseTagger::tagLine( const string& line ){
       entry.word = word_s;
       to_do.push_back( entry );
     }
-    return tagLine( to_do );
+    return tag_entries( to_do );
   }
   else if ( !tagger ){
     throw runtime_error( _label + "-tagger is not initialized" );
@@ -384,13 +439,17 @@ vector<TagResult> BaseTagger::tagLine( const string& line ){
   return tagger->TagLine( line );
 }
 
-vector<TagResult> BaseTagger::tagLine( const vector<tag_entry>& to_do ){
-  //  if ( debug > 1 ){
-  DBG << "TAGGING TEXT_BLOCK\n" << endl;
-  for ( const auto& it : to_do ){
-    DBG << it.word << "\t" << it.enrichment << "\t" << endl;
+vector<TagResult> BaseTagger::tag_entries( const vector<tag_entry>& to_do ){
+  /// tag a vector of teag_entry into a vector of TagResult elements
+  /*!
+    \param to_do a vector of tag_entry elements representing 1 sentence
+  */
+  if ( debug > 1 ){
+    DBG << "TAGGING TEXT_BLOCK\n" << endl;
+    for ( const auto& it : to_do ){
+      DBG << it.word << "\t" << it.enrichment << "\t" << endl;
+    }
   }
-  //  }
   if ( !_host.empty() ){
     DBG << "calling server" << endl;
     return call_server(to_do);
@@ -416,6 +475,11 @@ vector<TagResult> BaseTagger::tagLine( const vector<tag_entry>& to_do ){
 }
 
 string BaseTagger::set_eos_mark( const std::string& eos ){
+  /// set the EOS marker for the tagger
+  /*!
+    \param eos the eos marker as a string
+    \return the old value
+  */
   if ( !_host.empty() ){
     // just ignore??
     LOG << "cannot change EOS mark for external server!" << endl;
@@ -431,6 +495,13 @@ void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
 				      const string& tagset,
 				      vector<string>& words,
 				      vector<string>& ptags ){
+  /// extract word and POS-tag information from a list of folia::Word
+  /*
+    \param swords the input list of Word elements
+    \param tagset the folia::setname for the POS-tags
+    \param words the extracted words as UTF8 string
+    \param tags the extracted POS-tags as string
+  */
   for ( size_t i=0; i < swords.size(); ++i ){
     folia::Word *sw = swords[i];
     folia::PosAnnotation *postag = 0;
@@ -452,6 +523,11 @@ void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
 }
 
 vector<tag_entry> BaseTagger::extract_sentence( const frog_data& sent ){
+  /// extract a tag_entry list from a frog_data structure
+  /*!
+    \param sent the frog_data structure to convert
+    \return a list of tag_entry elemements
+  */
   vector<tag_entry> result;
   for ( const auto& sword : sent.units ){
     icu::UnicodeString word = TiCC::UnicodeFromUTF8(sword.word);
@@ -468,7 +544,12 @@ vector<tag_entry> BaseTagger::extract_sentence( const frog_data& sent ){
   return result;
 }
 
-ostream& operator<<( ostream&os, const tag_entry& e ){
+ostream& operator<<( ostream& os, const tag_entry& e ){
+  /// output a tag_entry (debugging only)
+  /*!
+    \param os the output stream
+    \param e the element to output
+   */
   os << e.word;
   if ( !e.enrichment.empty() ){
     os << "\t" << e.enrichment;
@@ -478,12 +559,18 @@ ostream& operator<<( ostream&os, const tag_entry& e ){
 }
 
 void BaseTagger::Classify( frog_data& sent ){
+  /// Tag one sentence, give in frog_data format
+  /*!
+    \param sent the frog_data structure to analyze
+
+    When tagging succeeds, 'sent' will be extended with the tag results
+   */
   _words.clear();
   vector<tag_entry> to_do = extract_sentence( sent );
   if ( debug > 1 ){
     DBG << _label << "-tagger in: " << to_do << endl;
   }
-  _tag_result = tagLine( to_do );
+  _tag_result = tag_entries( to_do );
   if ( _tag_result.size() != sent.size() ){
     LOG << _label << "-tagger mismatch between number of words and the tagger result." << endl;
     LOG << "words according to sentence: " << endl;

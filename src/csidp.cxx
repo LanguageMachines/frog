@@ -45,10 +45,19 @@
 using namespace std;
 using TiCC::operator<<;
 
-#define LOG *TiCC::Log(dbglog)
-#define DBG *TiCC::Dbg(dbglog)
+#define LOG *TiCC::Log(dbg_log)
+#define DBG *TiCC::Dbg(dbg_log)
 
 unordered_map<string,double> split_dist( const vector< pair<string,double>>& dist ){
+  /// split a vector of ambi-tags to double pairs into a map of tag[double]
+  /*!
+    \param dist a vector of <string,double> pairs, where each string is a list
+    of '|' separated tags.
+    \return a mapping from tags to doubles
+
+    so for instance when the input is like {<"a|b",0.5>,<"c|d|e",0.6>}
+    the result would be { {"a",0.5},{"b",0.5},{"c",0.6},{"d",0.6},{"e",0.6}}
+   */
   unordered_map<string,double> result;
   for( const auto& it : dist ){
     double d = it.second;
@@ -65,7 +74,16 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
 					 const vector<timbl_result>& p_res,
 					 size_t sent_len,
 					 size_t maxDist,
-					 TiCC::LogStream *dbglog ){
+					 TiCC::LogStream *dbg_log ){
+  /// create a list of Parse Constraint records based on the 3 Timbl outputs
+  /*!
+    \param d_res results of the Timbl dist classifier
+    \param r_res results of the Timbl relations classifier
+    \param p_res results of the Timbl pairs classifier
+    \param sent_len the sentence length
+    \param maxDist the maximum distance we still handle
+    \param dbg_log a LogStream for debugging
+   */
   vector<const Constraint*> constraints;
   vector<timbl_result>::const_iterator pit = p_res.begin();
   //  LOG << "formulate WSCP, step 1" << endl;
@@ -150,24 +168,34 @@ timbl_result::timbl_result( const string& cls,
 
 timbl_result::timbl_result( const string& cls,
 			    double conf,
-			    const vector< pair<string,double> >& vd ):
+			    const vector<std::pair<string,double>>& vd ):
   _cls(cls), _confidence(conf), _dist(vd) {
 }
 
 vector<parsrel> parse( const vector<timbl_result>& p_res,
 		       const vector<timbl_result>& r_res,
 		       const vector<timbl_result>& d_res,
-		       size_t parse_size,
+		       size_t sent_len,
 		       int maxDist,
-		       TiCC::LogStream *dbglog ){
+		       TiCC::LogStream *dbg_log ){
+  /// run de CKY parser using these data
+  /*!
+    \param p_res the Timbl pairs outcome
+    \param r_res the Timbl rels outcome
+    \param d_res the Timbl dir outcome
+    \param sent_len the maximum sentence lenght
+    \param maxDist the maximum distance between dependents we allow
+    \param dbg_log the stream used for debugging
+    \return a vector of parsrel structures
+  */
   vector<const Constraint*> constraints
-    = formulateWCSP( d_res, r_res, p_res, parse_size, maxDist, dbglog );
+    = formulateWCSP( d_res, r_res, p_res, sent_len, maxDist, dbg_log );
   DBG << "constraints: " << endl;
   DBG << constraints << endl;
-  CKYParser parser( parse_size, constraints, dbglog );
+  CKYParser parser( sent_len, constraints, dbg_log );
   parser.parse();
-  vector<parsrel> result( parse_size );
-  parser.rightComplete(0, parse_size, result );
+  vector<parsrel> result( sent_len );
+  parser.rightComplete(0, sent_len, result );
   for ( const auto& constraint : constraints ){
     delete constraint;
   }

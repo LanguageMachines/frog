@@ -44,6 +44,14 @@ using namespace Tagger;
 static string POS_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
 
 bool IOBTagger::init( const TiCC::Configuration& config ){
+  /// initalize a IOB chunker from 'config'
+  /*!
+    \param config the TiCC::Configuration
+    \return true on succes, false otherwise
+
+    first BaseTagger::init() is called to set generic values,
+    then the IOB specific values 'set' is added
+  */
   if ( !BaseTagger::init( config ) ){
     return false;
   }
@@ -56,12 +64,23 @@ bool IOBTagger::init( const TiCC::Configuration& config ){
 
 void IOBTagger::add_declaration( folia::Document& doc,
 				 folia::processor *proc ) const {
+  /// add CHUNKING annotation as an AnnotationType to the document
+  /*!
+    \param doc the Document the add to
+    \param proc the processor to add
+  */
   folia::KWargs args;
   args["processor"] = proc->id();
   doc.declare( folia::AnnotationType::CHUNKING, tagset, args );
 }
 
 void IOBTagger::Classify( frog_data& swords ){
+  /// Tag one sentence, given in frog_data format
+  /*!
+    \param swords the frog_data structure to analyze
+
+    When tagging succeeds, 'swords' will be extended with the tag results
+  */
   vector<string> words;
   vector<string> ptags;
 #pragma omp critical (dataupdate)
@@ -91,7 +110,7 @@ void IOBTagger::Classify( frog_data& swords ){
     }
     to_do.push_back( ta );
   }
-  _tag_result = tagLine( to_do );
+  _tag_result = tag_entries( to_do );
   if ( debug ){
     DBG << "IOB tagger out: " << endl;
     for ( size_t i=0; i < _tag_result.size(); ++i ){
@@ -103,7 +122,12 @@ void IOBTagger::Classify( frog_data& swords ){
   post_process( swords );
 }
 
-void IOBTagger::post_process( frog_data& words ){
+void IOBTagger::post_process( frog_data& sentence ){
+  /// finish the Chunking processs by updating 'sentence'
+  /*!
+    \param sentence a frog_data structure to update with Chunking info
+    from the _tag_result array.
+  */
   if ( debug ){
     DBG << "IOB postprocess...." << endl;
   }
@@ -128,7 +152,7 @@ void IOBTagger::post_process( frog_data& words ){
     else if ( tag[0] == 'B' ){
       last_tag = tag;
     }
-    addTag( words.units[i],
+    addTag( sentence.units[i],
 	    tag,
 	    _tag_result[i].confidence() );
   }
@@ -137,6 +161,12 @@ void IOBTagger::post_process( frog_data& words ){
 void IOBTagger::addTag( frog_record& fd,
 			const string& tag,
 			double confidence ){
+  /// add a tag/confidence pair to a frog_record
+  /*!
+    \param fd The record to add to
+    \param tag the Chunk tag to add
+    \param confidence the confidence value for the tag
+  */
 #pragma omp critical (dataupdate)
   {
     fd.iob_tag = tag;
@@ -146,6 +176,11 @@ void IOBTagger::addTag( frog_record& fd,
 
 void IOBTagger::add_result( const frog_data& fd,
 			    const vector<folia::Word*>& wv ) const {
+  /// add the Chunking tags in 'fd' to the FoLiA list of Word
+  /*!
+    \param fd The tagged results
+    \param wv The folia:Word vector
+  */
   folia::Sentence* s = wv[0]->sentence();
   folia::ChunkingLayer *el = s->annotation<folia::ChunkingLayer>(tagset);
   folia::Chunk *iob = 0;

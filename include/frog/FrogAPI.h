@@ -55,53 +55,115 @@ class CGNTagger;
 class IOBTagger;
 class NERTagger;
 
+  /// this class holds the runtime settings for Frog
 class FrogOptions {
  public:
-  bool doTok;
-  bool doLemma;
-  bool doMorph;
-  bool doDeepMorph;
-  bool doMwu;
-  bool doIOB;
-  bool doNER;
-  bool doParse;
-  bool doTagger;
-  bool doSentencePerLine;
-  bool doQuoteDetection;
-  bool doDirTest;
-  bool doRetry;
-  bool noStdOut;
-  bool doXMLin;
-  bool doXMLout;
-  bool doServer;
-  bool doKanon;
-  bool test_API;
-  bool hide_timers;
-  bool interactive;
-  bool doAlpinoServer;
-  bool doAlpino;
-  int numThreads;
-  int debugFlag;
+  bool doTok;                ///< should we run the tokenizer?
+  bool doLemma;              ///< should we run the lemmatizer?
+  bool doMorph;              ///< should we run the morphological analyzer?
+  bool doDeepMorph;          ///< do we want a deep morphological analysis?
+  bool doMwu;                ///< should we resolve Multi Word Units?
+  bool doIOB;                ///< should we run the IOB Chuker?
+  bool doNER;                ///< should we run the Named Entity recognizer?
+  bool doParse;              ///< should we run the Dependency Parser?
+  bool doTagger;             ///< should we run the Dependency Parser?
+  bool doSentencePerLine;    ///< do we want a sentence per line?
+  /*!< should we see every input-line as a separate
+    sentence?
+  */
+  bool doQuoteDetection;     ///< enable quote detection (NOT USED)
+  /*!< should we enable Quote Detection. This value MUST be false.
+    Quote Detection is NOT supported
+  */
+  bool doRetry;              ///< set retry mode (MISNOMER)
+  /*!< when TRUE, we assume we are retrying one ore more inputfiles, and
+    we skip those input files for which an outputfile already exists.
+  */
+  bool noStdOut;             ///< do we want output to stdout?
+  bool doXMLin;              ///< do we have FoLiA input?
+  bool doXMLout;             ///< do we want FoLiA output?
+  bool doJSONin;             ///< do we have JSON input?
+  /*!< This is only supported for the Server mode of Frog,
+    it implies JSON output too.
+   */
+  bool doJSONout;            ///< do we want JSON output?
+  bool doServer;             ///< do we want to run as a server?
+  /*!< currently only TCP servers are supported
+   */
+  bool doKanon;              ///< do we want FoLiA to be output in a canonical way?
+  /*!< This can be conveniant for testing purposes as it makes sure that nodes
+    from several modules are always in the same order in the XML
+   */
+  bool test_API;             ///< do we want to run some tests?
+  /*!< This will run some generic tests and then stop.
+    No real frogging is done!
+  */
+  bool hide_timers;          ///< should we output timing information?
+  /*!< normaly Frog outputs timing information for the several modules,
+    but it may be usefull to skip that
+  */
+  bool interactive;         ///< are we running from the command line?
+  bool doAlpinoServer;      ///< should we try to connect to an Alpino server?
+  /*!< this assumes that an Alpino Server is set up and running and that it's
+    location is configured correctly.
+   */
+  bool doAlpino;            ///< should we directly run Alpino?
+  /*!< This assumes that Alpinois installed locally and the Alpino command is
+    working.
+   */
+  int numThreads;           ///< limit for the number of threads
+  int debugFlag;            ///< value for the generic debug level
+  /*!< This value is used as the debug level for EVERY module.
+    It is however possible to set specific levels per module too.
+   */
+  int JSON_pp;              ///< for JSON output, use this value to format.
+  /*!< normally JSON will be outputted as one (very long) line.
+    Using a value of JSON_pp >0 it wil be 'pretty-printed' indented with
+    that value.
+   */
+  std::string encoding;     ///< which input-encoding do we expect
+  /*!< using the capabilities of the Ucto tokenizer, Frog can handle a lot
+of input encodings. The default is UTF8. The output will always be in UTF8.
+   */
+  std::string uttmark;     ///< the string which separates Utterances
+  std::string listenport;  ///< determines the port to run the Frog Server on
+  std::string docid;       ///< the FoLiA document ID on output.
+  std::string inputclass;  ///< the textclass to use on FoLiA input
+  std::string outputclass; ///< the textclass to use on FoLiA output
+  std::string default_language; ///< what is our default language
+  std::set<std::string> languages; ///< all languages to take into account
+  /*< This set of languages will be handled over to the ucto tokenizer
+   */
+  std::string textredundancy; ///< determines how much text is added in the FoLiA
+  /*!< possible values are 'full', 'minimal' and 'none'.
 
-  std::string encoding;
-  std::string uttmark;
-  std::string listenport;
-  std::string docid;
-  std::string inputclass;
-  std::string outputclass;
-  std::string default_language;
-  std::set<std::string> languages;
-  std::string textredundancy;
-  bool correct_words;
-  unsigned int maxParserTokens;
-  std::string command;
+    'none': no text (\<t\>) nodes are added to higher structure nodes like
+    \<s\> and \<p\>.
+
+    'minimal': text is added to the structure above \<w\>. Mostly \<s\>
+    nodes
+
+    'full': text is added to all structure nodes. This might result in a
+    lot of (redundant) text.
+
+   */
+  bool correct_words;      ///< should we allow the tokenizer to correct words?
+  /*!< When true, the tokenizer might split words changing the number of words
+    and the text value of the above structure(s). e.g '1984!' to '1984 !'
+   */
+  unsigned int maxParserTokens;  ///< limit the number of words to Parse
+  /*< The Parser may 'explode' on VERY long sentences. So we limit it to a
+maximum of 500 words PER SENTENC. Which is already a lot!
+   */
+  std::string command;    ///< stores the original command that invoked Frog
 
   FrogOptions();
  private:
-  FrogOptions(const FrogOptions & );
+  FrogOptions( const FrogOptions & );
 };
 
-
+/// This is the API class which can be used to set up Frog and run it on files,
+/// strings, TCP sockets or a terminal.
 class FrogAPI {
  public:
   FrogAPI( FrogOptions&,
@@ -112,7 +174,7 @@ class FrogAPI {
   static std::string defaultConfigDir( const std::string& ="" );
   static std::string defaultConfigFile( const std::string& ="" );
   folia::Document *FrogFile( const std::string&, std::ostream& );
-  void FrogServer( Sockets::ServerSocket &conn );
+  void FrogServer( Sockets::ClientSocket &conn );
   void FrogInteractive();
   frog_data frog_sentence( std::vector<Tokenizer::Token>&,
 			   const size_t );
@@ -146,8 +208,13 @@ class FrogAPI {
   void test_version( const std::string&, double );
   // functions
   void FrogStdin( bool prompt );
-  void output_tabbed( std::ostream&, const frog_record& ) const;
-  void show_results( std::ostream&, const frog_data& ) const;
+  void output_tabbed( std::ostream&,
+		      const frog_record& ) const;
+  void output_JSON( std::ostream& os,
+		    const frog_data& fd,
+		    int = 0 ) const;
+  void show_results( std::ostream&,
+		     const frog_data& ) const;
   void handle_one_paragraph( std::ostream&,
 			     folia::Paragraph*,
 			     int& );
@@ -164,30 +231,23 @@ class FrogAPI {
 			   const std::vector<folia::Word*>&,
 			   const size_t );
   // data
-  const TiCC::Configuration& configuration;
-  FrogOptions& options;
-  TiCC::LogStream *theErrLog;
-  TiCC::LogStream *theDbgLog;
-  TimerBlock timers;
-  // pointers to all the modules
-  Mbma *myMbma;
-  Mblem *myMblem;
-  Mwu *myMwu;
-  ParserBase *myParser;
-  CGNTagger *myCGNTagger;
-  IOBTagger *myIOBTagger;
-  NERTagger *myNERTagger;
-  UctoTokenizer *tokenizer;
+  const TiCC::Configuration& configuration; ///< the configuration
+  FrogOptions& options;                     ///< all runtime options
+  TiCC::LogStream *theErrLog;               ///< the stream to send errors to
+  TiCC::LogStream *theDbgLog;               ///< the stream to send debug info
+  TimerBlock timers;                        ///< all runtime timers
+  Mbma *myMbma;             ///< pointer to the MBMA module
+  Mblem *myMblem;           ///< pointer to the MBLEM module
+  Mwu *myMwu;               ///< pointer to the MWU module
+  ParserBase *myParser;     ///< pointer to the CKY parser module
+  CGNTagger *myCGNTagger;   ///< pointer to the CGN tagger
+  IOBTagger *myIOBTagger;   ///< pointer to the IOB chunker
+  NERTagger *myNERTagger;   ///< pointer to the NER
+  UctoTokenizer *tokenizer; ///< pointer to the Ucot tokenizer
 };
 
-// the functions below here are ONLY used by TSCAN.
-// the should be moved there probably
-// =======================================================================
-
-std::vector<std::string> get_full_morph_analysis( folia::Word *, bool = false );
-std::vector<std::string> get_compound_analysis( folia::Word * );
-//std::vector<std::string> get_full_morph_analysis( folia::Word *,
-//						  const std::string&,
-//						  bool = false );
+std::vector<std::string> get_full_morph_analysis( folia::Word *word,
+						  bool make_flat=false );
+std::vector<std::string> get_compound_analysis( folia::Word *word );
 
 #endif

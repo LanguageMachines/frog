@@ -33,29 +33,44 @@
 #include "timbl/TimblAPI.h"
 #include "frog/ckyparser.h"
 
+/// this class stores a triple of Timbl results
+/*!
+  1. the assigned class
+  2. the Confidence value for the class
+  3. the class distribution as a vector of class/double values
+ */
 class timbl_result {
  public:
-  timbl_result( const std::string& cls,
-		double conf,
+  timbl_result( const std::string&,
+		double,
 		const Timbl::ValueDistribution* );
-  timbl_result( const std::string& cls,
-		double conf,
+  timbl_result( const std::string&,
+		double,
 		const std::vector<std::pair<std::string,double>>& );
-  std::string cls() const { return _cls; };
-  double confidence() const { return _confidence; };
-  std::vector< std::pair<std::string,double> > dist() const { return _dist; };
+  std::string cls() const {
+    /// return the cls value
+    return _cls;
+  };
+  double confidence() const {
+    /// return the confidence of  the value
+    return _confidence;
+  };
+  const std::vector< std::pair<std::string,double>>& dist() const {
+    /// return the distribution where the cls value is part of
+    return _dist;
+  };
 private:
   std::string _cls;
   double _confidence;
-  std::vector< std::pair<std::string,double> > _dist;
+  std::vector< std::pair<std::string,double>> _dist;
 };
 
 
-std::vector<parsrel> parse( const std::vector<timbl_result>&,
-			    const std::vector<timbl_result>&,
-			    const std::vector<timbl_result>&,
-			    size_t,
-			    int,
-			    TiCC::LogStream* );
+std::vector<parsrel> parse( const std::vector<timbl_result>& p_res,
+			    const std::vector<timbl_result>& r_res,
+			    const std::vector<timbl_result>& d_res,
+			    size_t sent_len,
+			    int maxDist,
+			    TiCC::LogStream *dbg_log );
 
 #endif
