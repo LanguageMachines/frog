@@ -1,0 +1,125 @@
+\hypertarget{mbma__mod_8cxx}{}\doxysection{src/mbma\+\_\+mod.cxx File Reference}
+\label{mbma__mod_8cxx}\index{src/mbma\_mod.cxx@{src/mbma\_mod.cxx}}
+{\ttfamily \#include \char`\"{}frog/mbma\+\_\+mod.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$cstdlib$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$set$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include $<$fstream$>$}\newline
+{\ttfamily \#include \char`\"{}timbl/\+Timbl\+A\+P\+I.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Configuration.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+String\+Ops.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Pretty\+Print.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Unicode.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Socket\+Basics.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/json.\+hpp\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/\+Frog-\/util.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/\+Frog\+Data.\+h\char`\"{}}\newline
+Include dependency graph for mbma\+\_\+mod.\+cxx\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{mbma__mod_8cxx__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{mbma__mod_8cxx_a159ca84d25a5487d8e81e4438725df19}{L\+OG}}~$\ast$Ti\+C\+C\+::\+Log(err\+Log)
+\item 
+\#define \mbox{\hyperlink{mbma__mod_8cxx_a49606be7356624568932ec81c0d429f4}{D\+BG}}~$\ast$Ti\+C\+C\+::\+Log(dbg\+Log)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+string \mbox{\hyperlink{mbma__mod_8cxx_a8807935fcd4ec846d9153e2e25f23031}{find\+\_\+class}} (unsigned int step, const vector$<$ string $>$ \&classes, unsigned int nranal)
+\item 
+vector$<$ vector$<$ string $>$ $>$ \mbox{\hyperlink{mbma__mod_8cxx_a9faa5a8d313a5ab2deebb57743046df8}{generate\+\_\+all\+\_\+perms}} (const vector$<$ string $>$ \&classes)
+\item 
+bool \mbox{\hyperlink{mbma__mod_8cxx_a28ffd6408915b3e62dd9b8e4e2532019}{mbmacmp}} (\mbox{\hyperlink{classRule}{Rule}} $\ast$m1, \mbox{\hyperlink{classRule}{Rule}} $\ast$m2)
+\item 
+\mbox{\hyperlink{classBracketNest}{Bracket\+Nest}} $\ast$ \mbox{\hyperlink{mbma__mod_8cxx_adbbb79a31240aa8c01bfba282bb75829}{copy\+\_\+nest}} (const \mbox{\hyperlink{classBracketNest}{Bracket\+Nest}} $\ast$brackets)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+const long int \mbox{\hyperlink{mbma__mod_8cxx_a9d0a33980483fdf64ed678df0feef60d}{L\+E\+FT}} = 6
+\item 
+const long int \mbox{\hyperlink{mbma__mod_8cxx_aba01c802d5170337d253ec1744a85111}{R\+I\+G\+HT}} = 6
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{mbma__mod_8cxx_a49606be7356624568932ec81c0d429f4}\label{mbma__mod_8cxx_a49606be7356624568932ec81c0d429f4}} 
+\index{mbma\_mod.cxx@{mbma\_mod.cxx}!DBG@{DBG}}
+\index{DBG@{DBG}!mbma\_mod.cxx@{mbma\_mod.cxx}}
+\doxysubsubsection{\texorpdfstring{DBG}{DBG}}
+{\footnotesize\ttfamily \#define D\+BG~$\ast$Ti\+C\+C\+::\+Log(dbg\+Log)}
+
+\mbox{\Hypertarget{mbma__mod_8cxx_a159ca84d25a5487d8e81e4438725df19}\label{mbma__mod_8cxx_a159ca84d25a5487d8e81e4438725df19}} 
+\index{mbma\_mod.cxx@{mbma\_mod.cxx}!LOG@{LOG}}
+\index{LOG@{LOG}!mbma\_mod.cxx@{mbma\_mod.cxx}}
+\doxysubsubsection{\texorpdfstring{LOG}{LOG}}
+{\footnotesize\ttfamily \#define L\+OG~$\ast$Ti\+C\+C\+::\+Log(err\+Log)}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{mbma__mod_8cxx_adbbb79a31240aa8c01bfba282bb75829}\label{mbma__mod_8cxx_adbbb79a31240aa8c01bfba282bb75829}} 
+\index{mbma\_mod.cxx@{mbma\_mod.cxx}!copy\_nest@{copy\_nest}}
+\index{copy\_nest@{copy\_nest}!mbma\_mod.cxx@{mbma\_mod.cxx}}
+\doxysubsubsection{\texorpdfstring{copy\_nest()}{copy\_nest()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classBracketNest}{Bracket\+Nest}}$\ast$ copy\+\_\+nest (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classBracketNest}{Bracket\+Nest}} $\ast$}]{brackets }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{mbma__mod_8cxx_a8807935fcd4ec846d9153e2e25f23031}\label{mbma__mod_8cxx_a8807935fcd4ec846d9153e2e25f23031}} 
+\index{mbma\_mod.cxx@{mbma\_mod.cxx}!find\_class@{find\_class}}
+\index{find\_class@{find\_class}!mbma\_mod.cxx@{mbma\_mod.cxx}}
+\doxysubsubsection{\texorpdfstring{find\_class()}{find\_class()}}
+{\footnotesize\ttfamily string find\+\_\+class (\begin{DoxyParamCaption}\item[{unsigned int}]{step,  }\item[{const vector$<$ string $>$ \&}]{classes,  }\item[{unsigned int}]{nranal }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{mbma__mod_8cxx_a9faa5a8d313a5ab2deebb57743046df8}\label{mbma__mod_8cxx_a9faa5a8d313a5ab2deebb57743046df8}} 
+\index{mbma\_mod.cxx@{mbma\_mod.cxx}!generate\_all\_perms@{generate\_all\_perms}}
+\index{generate\_all\_perms@{generate\_all\_perms}!mbma\_mod.cxx@{mbma\_mod.cxx}}
+\doxysubsubsection{\texorpdfstring{generate\_all\_perms()}{generate\_all\_perms()}}
+{\footnotesize\ttfamily vector$<$vector$<$string$>$ $>$ generate\+\_\+all\+\_\+perms (\begin{DoxyParamCaption}\item[{const vector$<$ string $>$ \&}]{classes }\end{DoxyParamCaption})}
+
+determine all alternative analyses, remember the largest and store every part in a vector of string vectors
+
+
+\begin{DoxyParams}{Parameters}
+{\em classes} & A vector of possibilities generated by \mbox{\hyperlink{namespaceTimbl}{Timbl}}\\
+\hline
+\end{DoxyParams}
+example\+: \mbox{\hyperlink{namespaceTimbl}{Timbl}} has given 3 results for the word \textquotesingle{}gek\textquotesingle{}\+:
+
+classes=\{\char`\"{}\+A$\vert$\+N$\vert$\+V\char`\"{},\char`\"{}0\char`\"{},\char`\"{}0/\+P$\vert$0/e$\vert$0/te1$\vert$0/te2\+I\char`\"{}\} (from the word \textquotesingle{}gek\textquotesingle{})
+
+This is converted to \{ \{\char`\"{}\+A\char`\"{},\char`\"{}\+N\char`\"{},\char`\"{}\+V\char`\"{},\char`\"{}\+V\char`\"{}\}, \{\char`\"{}0\char`\"{},\char`\"{}0\char`\"{},\char`\"{}0\char`\"{},\char`\"{}0\char`\"{} \}, \{\char`\"{}0/\+P\char`\"{},\char`\"{}0/e\char`\"{},\char`\"{}0/te1\char`\"{},\char`\"{}0/te2\+I\char`\"{}\} \}
+
+As we can see, the \char`\"{}0\char`\"{} from classes is expanded by duplication 4 times. The \char`\"{}\+A$\vert$\+N$\vert$\+V\char`\"{} is expanded by duplicating the last \char`\"{}\+V\char`\"{}.
+
+an then for index 1 to 4 the results are collected\+:
+
+\{ \{\char`\"{}\+A\char`\"{},\char`\"{}0\char`\"{},\char`\"{}0/\+P\char`\"{}\}, \{N\char`\"{},\char`\"{}0\char`\"{}, \char`\"{}0/e\char`\"{}\}, \{\char`\"{}V\char`\"{},\char`\"{}0\char`\"{}, \char`\"{}0/te1\char`\"{}\}, \{\char`\"{}V\char`\"{}, \char`\"{}0\char`\"{},\char`\"{}0/te2I"\} \}\mbox{\Hypertarget{mbma__mod_8cxx_a28ffd6408915b3e62dd9b8e4e2532019}\label{mbma__mod_8cxx_a28ffd6408915b3e62dd9b8e4e2532019}} 
+\index{mbma\_mod.cxx@{mbma\_mod.cxx}!mbmacmp@{mbmacmp}}
+\index{mbmacmp@{mbmacmp}!mbma\_mod.cxx@{mbma\_mod.cxx}}
+\doxysubsubsection{\texorpdfstring{mbmacmp()}{mbmacmp()}}
+{\footnotesize\ttfamily bool mbmacmp (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classRule}{Rule}} $\ast$}]{m1,  }\item[{\mbox{\hyperlink{classRule}{Rule}} $\ast$}]{m2 }\end{DoxyParamCaption})}
+
+sorting function for \mbox{\hyperlink{classRule}{Rule}}\textquotesingle{}s
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{mbma__mod_8cxx_a9d0a33980483fdf64ed678df0feef60d}\label{mbma__mod_8cxx_a9d0a33980483fdf64ed678df0feef60d}} 
+\index{mbma\_mod.cxx@{mbma\_mod.cxx}!LEFT@{LEFT}}
+\index{LEFT@{LEFT}!mbma\_mod.cxx@{mbma\_mod.cxx}}
+\doxysubsubsection{\texorpdfstring{LEFT}{LEFT}}
+{\footnotesize\ttfamily const long int L\+E\+FT = 6}
+
+\mbox{\Hypertarget{mbma__mod_8cxx_aba01c802d5170337d253ec1744a85111}\label{mbma__mod_8cxx_aba01c802d5170337d253ec1744a85111}} 
+\index{mbma\_mod.cxx@{mbma\_mod.cxx}!RIGHT@{RIGHT}}
+\index{RIGHT@{RIGHT}!mbma\_mod.cxx@{mbma\_mod.cxx}}
+\doxysubsubsection{\texorpdfstring{RIGHT}{RIGHT}}
+{\footnotesize\ttfamily const long int R\+I\+G\+HT = 6}
+

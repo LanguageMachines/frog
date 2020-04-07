@@ -1,0 +1,68 @@
+\hypertarget{ner__tagger__mod_8cxx}{}\doxysection{src/ner\+\_\+tagger\+\_\+mod.cxx File Reference}
+\label{ner__tagger__mod_8cxx}\index{src/ner\_tagger\_mod.cxx@{src/ner\_tagger\_mod.cxx}}
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include \char`\"{}frog/ner\+\_\+tagger\+\_\+mod.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}mbt/\+Mbt\+A\+P\+I.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/\+Frog-\/util.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+File\+Utils.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+String\+Ops.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Pretty\+Print.\+h\char`\"{}}\newline
+Include dependency graph for ner\+\_\+tagger\+\_\+mod.\+cxx\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{ner__tagger__mod_8cxx__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{ner__tagger__mod_8cxx_a159ca84d25a5487d8e81e4438725df19}{L\+OG}}~$\ast$Ti\+C\+C\+::\+Log(err\+\_\+log)
+\item 
+\#define \mbox{\hyperlink{ner__tagger__mod_8cxx_a49606be7356624568932ec81c0d429f4}{D\+BG}}~$\ast$Ti\+C\+C\+::\+Log(dbg\+\_\+log)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+string \mbox{\hyperlink{ner__tagger__mod_8cxx_a1ed1db2a899be9dceacba2804d6a5686}{to\+\_\+tag}} (const string \&label, bool inside)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{ner__tagger__mod_8cxx_a49606be7356624568932ec81c0d429f4}\label{ner__tagger__mod_8cxx_a49606be7356624568932ec81c0d429f4}} 
+\index{ner\_tagger\_mod.cxx@{ner\_tagger\_mod.cxx}!DBG@{DBG}}
+\index{DBG@{DBG}!ner\_tagger\_mod.cxx@{ner\_tagger\_mod.cxx}}
+\doxysubsubsection{\texorpdfstring{DBG}{DBG}}
+{\footnotesize\ttfamily \#define D\+BG~$\ast$Ti\+C\+C\+::\+Log(dbg\+\_\+log)}
+
+\mbox{\Hypertarget{ner__tagger__mod_8cxx_a159ca84d25a5487d8e81e4438725df19}\label{ner__tagger__mod_8cxx_a159ca84d25a5487d8e81e4438725df19}} 
+\index{ner\_tagger\_mod.cxx@{ner\_tagger\_mod.cxx}!LOG@{LOG}}
+\index{LOG@{LOG}!ner\_tagger\_mod.cxx@{ner\_tagger\_mod.cxx}}
+\doxysubsubsection{\texorpdfstring{LOG}{LOG}}
+{\footnotesize\ttfamily \#define L\+OG~$\ast$Ti\+C\+C\+::\+Log(err\+\_\+log)}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{ner__tagger__mod_8cxx_a1ed1db2a899be9dceacba2804d6a5686}\label{ner__tagger__mod_8cxx_a1ed1db2a899be9dceacba2804d6a5686}} 
+\index{ner\_tagger\_mod.cxx@{ner\_tagger\_mod.cxx}!to\_tag@{to\_tag}}
+\index{to\_tag@{to\_tag}!ner\_tagger\_mod.cxx@{ner\_tagger\_mod.cxx}}
+\doxysubsubsection{\texorpdfstring{to\_tag()}{to\_tag()}}
+{\footnotesize\ttfamily string to\+\_\+tag (\begin{DoxyParamCaption}\item[{const string \&}]{label,  }\item[{bool}]{inside }\end{DoxyParamCaption})}
+
+convert a label into a result tag
+
+
+\begin{DoxyParams}{Parameters}
+{\em label} & the label as a string \\
+\hline
+{\em inside} & are we \textquotesingle{}inside\textquotesingle{} the tag or at the begin? \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the result tag
+\end{DoxyReturn}
+There are several cases\+:
+
+The label is ambiguous, like \char`\"{}loc+org\char`\"{}. then we return \char`\"{}\+O\char`\"{} The label is usable like \textquotesingle{}org\textquotesingle{}. Then we return \textquotesingle{}I-\/org\textquotesingle{} when \textquotesingle{}inside\textquotesingle{} or \textquotesingle{}B-\/org\textquotesingle{} othwerwise

@@ -1,0 +1,97 @@
+\hypertarget{tagger__base_8cxx}{}\doxysection{src/tagger\+\_\+base.cxx File Reference}
+\label{tagger__base_8cxx}\index{src/tagger\_base.cxx@{src/tagger\_base.cxx}}
+{\ttfamily \#include \char`\"{}frog/tagger\+\_\+base.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Socket\+Basics.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Pretty\+Print.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/json.\+hpp\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/\+Frog-\/util.\+h\char`\"{}}\newline
+Include dependency graph for tagger\+\_\+base.\+cxx\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{tagger__base_8cxx__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{tagger__base_8cxx_a159ca84d25a5487d8e81e4438725df19}{L\+OG}}~$\ast$Ti\+C\+C\+::\+Log(err\+\_\+log)
+\item 
+\#define \mbox{\hyperlink{tagger__base_8cxx_a49606be7356624568932ec81c0d429f4}{D\+BG}}~$\ast$Ti\+C\+C\+::\+Log(dbg\+\_\+log)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+json \mbox{\hyperlink{tagger__base_8cxx_acd40201791880f1cdaf51a0b8f9f28aa}{create\+\_\+json}} (const vector$<$ \mbox{\hyperlink{classtag__entry}{tag\+\_\+entry}} $>$ \&tv)
+\item 
+vector$<$ Tag\+Result $>$ \mbox{\hyperlink{tagger__base_8cxx_aee4d0f485ca1d0c04cc207a23a630c91}{json\+\_\+to\+\_\+\+TR}} (const json \&in)
+\item 
+ostream \& \mbox{\hyperlink{tagger__base_8cxx_a149c3be9f647b37c3980c0b2482aa1e3}{operator$<$$<$}} (ostream \&os, const \mbox{\hyperlink{classtag__entry}{tag\+\_\+entry}} \&e)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{tagger__base_8cxx_a49606be7356624568932ec81c0d429f4}\label{tagger__base_8cxx_a49606be7356624568932ec81c0d429f4}} 
+\index{tagger\_base.cxx@{tagger\_base.cxx}!DBG@{DBG}}
+\index{DBG@{DBG}!tagger\_base.cxx@{tagger\_base.cxx}}
+\doxysubsubsection{\texorpdfstring{DBG}{DBG}}
+{\footnotesize\ttfamily \#define D\+BG~$\ast$Ti\+C\+C\+::\+Log(dbg\+\_\+log)}
+
+\mbox{\Hypertarget{tagger__base_8cxx_a159ca84d25a5487d8e81e4438725df19}\label{tagger__base_8cxx_a159ca84d25a5487d8e81e4438725df19}} 
+\index{tagger\_base.cxx@{tagger\_base.cxx}!LOG@{LOG}}
+\index{LOG@{LOG}!tagger\_base.cxx@{tagger\_base.cxx}}
+\doxysubsubsection{\texorpdfstring{LOG}{LOG}}
+{\footnotesize\ttfamily \#define L\+OG~$\ast$Ti\+C\+C\+::\+Log(err\+\_\+log)}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{tagger__base_8cxx_acd40201791880f1cdaf51a0b8f9f28aa}\label{tagger__base_8cxx_acd40201791880f1cdaf51a0b8f9f28aa}} 
+\index{tagger\_base.cxx@{tagger\_base.cxx}!create\_json@{create\_json}}
+\index{create\_json@{create\_json}!tagger\_base.cxx@{tagger\_base.cxx}}
+\doxysubsubsection{\texorpdfstring{create\_json()}{create\_json()}}
+{\footnotesize\ttfamily json create\+\_\+json (\begin{DoxyParamCaption}\item[{const vector$<$ \mbox{\hyperlink{classtag__entry}{tag\+\_\+entry}} $>$ \&}]{tv }\end{DoxyParamCaption})}
+
+output a vector of \mbox{\hyperlink{classtag__entry}{tag\+\_\+entry}} structs as J\+S\+ON
+
+
+\begin{DoxyParams}{Parameters}
+{\em tv} & The vector of \mbox{\hyperlink{classtag__entry}{tag\+\_\+entry}} elements, filled by the tagger \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a json structure
+\end{DoxyReturn}
+\mbox{\Hypertarget{tagger__base_8cxx_aee4d0f485ca1d0c04cc207a23a630c91}\label{tagger__base_8cxx_aee4d0f485ca1d0c04cc207a23a630c91}} 
+\index{tagger\_base.cxx@{tagger\_base.cxx}!json\_to\_TR@{json\_to\_TR}}
+\index{json\_to\_TR@{json\_to\_TR}!tagger\_base.cxx@{tagger\_base.cxx}}
+\doxysubsubsection{\texorpdfstring{json\_to\_TR()}{json\_to\_TR()}}
+{\footnotesize\ttfamily vector$<$Tag\+Result$>$ json\+\_\+to\+\_\+\+TR (\begin{DoxyParamCaption}\item[{const json \&}]{in }\end{DoxyParamCaption})}
+
+convert a J\+S\+ON structure to a vector of Tag\+Result elements
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & The input J\+S\+ON \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a vector of Tag\+Result structures
+\end{DoxyReturn}
+Used by the server mode to convert incoming J\+S\+ON to a structure we can further process\mbox{\Hypertarget{tagger__base_8cxx_a149c3be9f647b37c3980c0b2482aa1e3}\label{tagger__base_8cxx_a149c3be9f647b37c3980c0b2482aa1e3}} 
+\index{tagger\_base.cxx@{tagger\_base.cxx}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!tagger\_base.cxx@{tagger\_base.cxx}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}}
+{\footnotesize\ttfamily ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{ostream \&}]{os,  }\item[{const \mbox{\hyperlink{classtag__entry}{tag\+\_\+entry}} \&}]{e }\end{DoxyParamCaption})}
+
+output a \mbox{\hyperlink{classtag__entry}{tag\+\_\+entry}} (debugging only)
+
+
+\begin{DoxyParams}{Parameters}
+{\em os} & the output stream \\
+\hline
+{\em e} & the element to output\\
+\hline
+\end{DoxyParams}

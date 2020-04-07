@@ -1,0 +1,88 @@
+\hypertarget{classCKYParser}{}\doxysection{C\+K\+Y\+Parser Class Reference}
+\label{classCKYParser}\index{CKYParser@{CKYParser}}
+
+
+{\ttfamily \#include $<$ckyparser.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classCKYParser_a8f2284d91f7a8fd36f14b1fd4822372a}{C\+K\+Y\+Parser}} (size\+\_\+t, const std\+::vector$<$ const \mbox{\hyperlink{classConstraint}{Constraint}} $\ast$ $>$ \&, Ti\+C\+C\+::\+Log\+Stream $\ast$)
+\item 
+\mbox{\hyperlink{classCKYParser_aa5c1ef93ca7b271e648ea52cb108f522}{$\sim$\+C\+K\+Y\+Parser}} ()
+\item 
+void \mbox{\hyperlink{classCKYParser_a3bbda9bd5597f4c54f6ba91610edd58b}{parse}} ()
+\item 
+void \mbox{\hyperlink{classCKYParser_abf61a709b8b7b7842539f17f5be68d9c}{left\+Incomplete}} (int, int, std\+::vector$<$ \mbox{\hyperlink{structparsrel}{parsrel}} $>$ \&)
+\item 
+void \mbox{\hyperlink{classCKYParser_a4529486931bf2ab3768938763d4b774c}{right\+Incomplete}} (int, int, std\+::vector$<$ \mbox{\hyperlink{structparsrel}{parsrel}} $>$ \&)
+\item 
+void \mbox{\hyperlink{classCKYParser_a70ea3e10d3dc76c957cadb747f972b73}{left\+Complete}} (int, int, std\+::vector$<$ \mbox{\hyperlink{structparsrel}{parsrel}} $>$ \&)
+\item 
+void \mbox{\hyperlink{classCKYParser_a52d8c250d2e27bb367537ec978dfdcd2}{right\+Complete}} (int, int, std\+::vector$<$ \mbox{\hyperlink{structparsrel}{parsrel}} $>$ \&)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classCKYParser_a8f2284d91f7a8fd36f14b1fd4822372a}\label{classCKYParser_a8f2284d91f7a8fd36f14b1fd4822372a}} 
+\index{CKYParser@{CKYParser}!CKYParser@{CKYParser}}
+\index{CKYParser@{CKYParser}!CKYParser@{CKYParser}}
+\doxysubsubsection{\texorpdfstring{CKYParser()}{CKYParser()}}
+{\footnotesize\ttfamily C\+K\+Y\+Parser\+::\+C\+K\+Y\+Parser (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{num,  }\item[{const std\+::vector$<$ const \mbox{\hyperlink{classConstraint}{Constraint}} $\ast$ $>$ \&}]{constraints,  }\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{log }\end{DoxyParamCaption})}
+
+initalialize a C\+K\+Yparser
+
+
+\begin{DoxyParams}{Parameters}
+{\em num} & The number of tokens to parse \\
+\hline
+{\em constraints} & A Constraints vector \\
+\hline
+{\em log} & a Log\+Stream for (debug) messages.\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classCKYParser_aa5c1ef93ca7b271e648ea52cb108f522}\label{classCKYParser_aa5c1ef93ca7b271e648ea52cb108f522}} 
+\index{CKYParser@{CKYParser}!````~CKYParser@{$\sim$CKYParser}}
+\index{````~CKYParser@{$\sim$CKYParser}!CKYParser@{CKYParser}}
+\doxysubsubsection{\texorpdfstring{$\sim$CKYParser()}{~CKYParser()}}
+{\footnotesize\ttfamily C\+K\+Y\+Parser\+::$\sim$\+C\+K\+Y\+Parser (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classCKYParser_a70ea3e10d3dc76c957cadb747f972b73}\label{classCKYParser_a70ea3e10d3dc76c957cadb747f972b73}} 
+\index{CKYParser@{CKYParser}!leftComplete@{leftComplete}}
+\index{leftComplete@{leftComplete}!CKYParser@{CKYParser}}
+\doxysubsubsection{\texorpdfstring{leftComplete()}{leftComplete()}}
+{\footnotesize\ttfamily void C\+K\+Y\+Parser\+::left\+Complete (\begin{DoxyParamCaption}\item[{int}]{s,  }\item[{int}]{t,  }\item[{std\+::vector$<$ \mbox{\hyperlink{structparsrel}{parsrel}} $>$ \&}]{pr }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classCKYParser_abf61a709b8b7b7842539f17f5be68d9c}\label{classCKYParser_abf61a709b8b7b7842539f17f5be68d9c}} 
+\index{CKYParser@{CKYParser}!leftIncomplete@{leftIncomplete}}
+\index{leftIncomplete@{leftIncomplete}!CKYParser@{CKYParser}}
+\doxysubsubsection{\texorpdfstring{leftIncomplete()}{leftIncomplete()}}
+{\footnotesize\ttfamily void C\+K\+Y\+Parser\+::left\+Incomplete (\begin{DoxyParamCaption}\item[{int}]{s,  }\item[{int}]{t,  }\item[{std\+::vector$<$ \mbox{\hyperlink{structparsrel}{parsrel}} $>$ \&}]{pr }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classCKYParser_a3bbda9bd5597f4c54f6ba91610edd58b}\label{classCKYParser_a3bbda9bd5597f4c54f6ba91610edd58b}} 
+\index{CKYParser@{CKYParser}!parse@{parse}}
+\index{parse@{parse}!CKYParser@{CKYParser}}
+\doxysubsubsection{\texorpdfstring{parse()}{parse()}}
+{\footnotesize\ttfamily void C\+K\+Y\+Parser\+::parse (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+run the parser I dare not to comment\mbox{\Hypertarget{classCKYParser_a52d8c250d2e27bb367537ec978dfdcd2}\label{classCKYParser_a52d8c250d2e27bb367537ec978dfdcd2}} 
+\index{CKYParser@{CKYParser}!rightComplete@{rightComplete}}
+\index{rightComplete@{rightComplete}!CKYParser@{CKYParser}}
+\doxysubsubsection{\texorpdfstring{rightComplete()}{rightComplete()}}
+{\footnotesize\ttfamily void C\+K\+Y\+Parser\+::right\+Complete (\begin{DoxyParamCaption}\item[{int}]{s,  }\item[{int}]{t,  }\item[{std\+::vector$<$ \mbox{\hyperlink{structparsrel}{parsrel}} $>$ \&}]{pr }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classCKYParser_a4529486931bf2ab3768938763d4b774c}\label{classCKYParser_a4529486931bf2ab3768938763d4b774c}} 
+\index{CKYParser@{CKYParser}!rightIncomplete@{rightIncomplete}}
+\index{rightIncomplete@{rightIncomplete}!CKYParser@{CKYParser}}
+\doxysubsubsection{\texorpdfstring{rightIncomplete()}{rightIncomplete()}}
+{\footnotesize\ttfamily void C\+K\+Y\+Parser\+::right\+Incomplete (\begin{DoxyParamCaption}\item[{int}]{s,  }\item[{int}]{t,  }\item[{std\+::vector$<$ \mbox{\hyperlink{structparsrel}{parsrel}} $>$ \&}]{pr }\end{DoxyParamCaption})}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{ckyparser_8h}{ckyparser.\+h}}\item 
+src/\mbox{\hyperlink{ckyparser_8cxx}{ckyparser.\+cxx}}\end{DoxyCompactItemize}

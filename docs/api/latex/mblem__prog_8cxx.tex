@@ -1,0 +1,139 @@
+\hypertarget{mblem__prog_8cxx}{}\doxysection{src/mblem\+\_\+prog.cxx File Reference}
+\label{mblem__prog_8cxx}\index{src/mblem\_prog.cxx@{src/mblem\_prog.cxx}}
+{\ttfamily \#include \char`\"{}frog/mblem\+\_\+mod.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$fstream$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include \char`\"{}config.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Log\+Stream.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Configuration.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Command\+Line.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Pretty\+Print.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}libfolia/folia.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/ucto\+\_\+tokenizer\+\_\+mod.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/cgn\+\_\+tagger\+\_\+mod.\+h\char`\"{}}\newline
+Include dependency graph for mblem\+\_\+prog.\+cxx\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{mblem__prog_8cxx__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+Ti\+C\+C\+::\+Log\+Stream \mbox{\hyperlink{mblem__prog_8cxx_a8732abfb0689391d12e2930b6b7b08e6}{my\+\_\+default\+\_\+log}} (cerr, \char`\"{}\char`\"{}, Stamp\+Message)
+\item 
+void \mbox{\hyperlink{mblem__prog_8cxx_a2ef30c42cbc289d899a8be5d2d8f77d0}{usage}} ()
+\item 
+bool \mbox{\hyperlink{mblem__prog_8cxx_a714468cac5f33fb91f50fc52f9128d1f}{parse\+\_\+args}} (Ti\+C\+C\+::\+C\+L\+\_\+\+Options \&Opts)
+\item 
+bool \mbox{\hyperlink{mblem__prog_8cxx_aee8048628ff2b5c026c9e15acdcaacb8}{init}} ()
+\item 
+void \mbox{\hyperlink{mblem__prog_8cxx_a22f88a0ba07af2e4245858aaf776eb95}{Test}} (istream \&in, ostream \&os)
+\item 
+int \mbox{\hyperlink{mblem__prog_8cxx_a0ddf1224851353fc92bfbff6f499fa97}{main}} (int argc, char $\ast$argv\mbox{[}$\,$\mbox{]})
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+Ti\+C\+C\+::\+Log\+Stream $\ast$ \mbox{\hyperlink{mblem__prog_8cxx_add80008acf88093a421aff3c7b3d71b8}{the\+Err\+Log}} = \&\mbox{\hyperlink{ner__prog_8cxx_a8732abfb0689391d12e2930b6b7b08e6}{my\+\_\+default\+\_\+log}}
+\item 
+vector$<$ string $>$ \mbox{\hyperlink{mblem__prog_8cxx_a8a49c56f1092e9ccc4a37225a4050109}{file\+Names}}
+\item 
+bool \mbox{\hyperlink{mblem__prog_8cxx_a12ccf8b60fe710711f9c6cd7d1d69c43}{usewordlist}} = false
+\item 
+bool \mbox{\hyperlink{mblem__prog_8cxx_abedb780423fd8807c627600456cac1bf}{use\+Tagger}} = true
+\item 
+bool \mbox{\hyperlink{mblem__prog_8cxx_a1130398d6fd3c8ba6418f0e445a67568}{use\+Tokenizer}} = true
+\item 
+string \mbox{\hyperlink{mblem__prog_8cxx_a9f90395bb7129abe24be5f35bb5c65c2}{output\+\_\+name}}
+\item 
+Ti\+C\+C\+::\+Configuration \mbox{\hyperlink{mblem__prog_8cxx_ab6cef780d96dfa1d99c73ae23179e04a}{configuration}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{mblem__prog_8cxx_aee8048628ff2b5c026c9e15acdcaacb8}\label{mblem__prog_8cxx_aee8048628ff2b5c026c9e15acdcaacb8}} 
+\index{mblem\_prog.cxx@{mblem\_prog.cxx}!init@{init}}
+\index{init@{init}!mblem\_prog.cxx@{mblem\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{init()}{init()}}
+{\footnotesize\ttfamily bool init (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{mblem__prog_8cxx_a0ddf1224851353fc92bfbff6f499fa97}\label{mblem__prog_8cxx_a0ddf1224851353fc92bfbff6f499fa97}} 
+\index{mblem\_prog.cxx@{mblem\_prog.cxx}!main@{main}}
+\index{main@{main}!mblem\_prog.cxx@{mblem\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily int main (\begin{DoxyParamCaption}\item[{int}]{argc,  }\item[{char $\ast$}]{argv\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{mblem__prog_8cxx_a8732abfb0689391d12e2930b6b7b08e6}\label{mblem__prog_8cxx_a8732abfb0689391d12e2930b6b7b08e6}} 
+\index{mblem\_prog.cxx@{mblem\_prog.cxx}!my\_default\_log@{my\_default\_log}}
+\index{my\_default\_log@{my\_default\_log}!mblem\_prog.cxx@{mblem\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{my\_default\_log()}{my\_default\_log()}}
+{\footnotesize\ttfamily Ti\+C\+C\+::\+Log\+Stream my\+\_\+default\+\_\+log (\begin{DoxyParamCaption}\item[{cerr}]{,  }\item[{\char`\"{}\char`\"{}}]{,  }\item[{Stamp\+Message}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{mblem__prog_8cxx_a714468cac5f33fb91f50fc52f9128d1f}\label{mblem__prog_8cxx_a714468cac5f33fb91f50fc52f9128d1f}} 
+\index{mblem\_prog.cxx@{mblem\_prog.cxx}!parse\_args@{parse\_args}}
+\index{parse\_args@{parse\_args}!mblem\_prog.cxx@{mblem\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{parse\_args()}{parse\_args()}}
+{\footnotesize\ttfamily bool parse\+\_\+args (\begin{DoxyParamCaption}\item[{Ti\+C\+C\+::\+C\+L\+\_\+\+Options \&}]{Opts }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{mblem__prog_8cxx_a22f88a0ba07af2e4245858aaf776eb95}\label{mblem__prog_8cxx_a22f88a0ba07af2e4245858aaf776eb95}} 
+\index{mblem\_prog.cxx@{mblem\_prog.cxx}!Test@{Test}}
+\index{Test@{Test}!mblem\_prog.cxx@{mblem\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{Test()}{Test()}}
+{\footnotesize\ttfamily void Test (\begin{DoxyParamCaption}\item[{istream \&}]{in,  }\item[{ostream \&}]{os }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{mblem__prog_8cxx_a2ef30c42cbc289d899a8be5d2d8f77d0}\label{mblem__prog_8cxx_a2ef30c42cbc289d899a8be5d2d8f77d0}} 
+\index{mblem\_prog.cxx@{mblem\_prog.cxx}!usage@{usage}}
+\index{usage@{usage}!mblem\_prog.cxx@{mblem\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{usage()}{usage()}}
+{\footnotesize\ttfamily void usage (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{mblem__prog_8cxx_ab6cef780d96dfa1d99c73ae23179e04a}\label{mblem__prog_8cxx_ab6cef780d96dfa1d99c73ae23179e04a}} 
+\index{mblem\_prog.cxx@{mblem\_prog.cxx}!configuration@{configuration}}
+\index{configuration@{configuration}!mblem\_prog.cxx@{mblem\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{configuration}{configuration}}
+{\footnotesize\ttfamily Ti\+C\+C\+::\+Configuration configuration}
+
+\mbox{\Hypertarget{mblem__prog_8cxx_a8a49c56f1092e9ccc4a37225a4050109}\label{mblem__prog_8cxx_a8a49c56f1092e9ccc4a37225a4050109}} 
+\index{mblem\_prog.cxx@{mblem\_prog.cxx}!fileNames@{fileNames}}
+\index{fileNames@{fileNames}!mblem\_prog.cxx@{mblem\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{fileNames}{fileNames}}
+{\footnotesize\ttfamily vector$<$string$>$ file\+Names}
+
+\mbox{\Hypertarget{mblem__prog_8cxx_a9f90395bb7129abe24be5f35bb5c65c2}\label{mblem__prog_8cxx_a9f90395bb7129abe24be5f35bb5c65c2}} 
+\index{mblem\_prog.cxx@{mblem\_prog.cxx}!output\_name@{output\_name}}
+\index{output\_name@{output\_name}!mblem\_prog.cxx@{mblem\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{output\_name}{output\_name}}
+{\footnotesize\ttfamily string output\+\_\+name}
+
+\mbox{\Hypertarget{mblem__prog_8cxx_add80008acf88093a421aff3c7b3d71b8}\label{mblem__prog_8cxx_add80008acf88093a421aff3c7b3d71b8}} 
+\index{mblem\_prog.cxx@{mblem\_prog.cxx}!theErrLog@{theErrLog}}
+\index{theErrLog@{theErrLog}!mblem\_prog.cxx@{mblem\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{theErrLog}{theErrLog}}
+{\footnotesize\ttfamily Ti\+C\+C\+::\+Log\+Stream$\ast$ the\+Err\+Log = \&\mbox{\hyperlink{ner__prog_8cxx_a8732abfb0689391d12e2930b6b7b08e6}{my\+\_\+default\+\_\+log}}}
+
+\mbox{\Hypertarget{mblem__prog_8cxx_abedb780423fd8807c627600456cac1bf}\label{mblem__prog_8cxx_abedb780423fd8807c627600456cac1bf}} 
+\index{mblem\_prog.cxx@{mblem\_prog.cxx}!useTagger@{useTagger}}
+\index{useTagger@{useTagger}!mblem\_prog.cxx@{mblem\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{useTagger}{useTagger}}
+{\footnotesize\ttfamily bool use\+Tagger = true}
+
+\mbox{\Hypertarget{mblem__prog_8cxx_a1130398d6fd3c8ba6418f0e445a67568}\label{mblem__prog_8cxx_a1130398d6fd3c8ba6418f0e445a67568}} 
+\index{mblem\_prog.cxx@{mblem\_prog.cxx}!useTokenizer@{useTokenizer}}
+\index{useTokenizer@{useTokenizer}!mblem\_prog.cxx@{mblem\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{useTokenizer}{useTokenizer}}
+{\footnotesize\ttfamily bool use\+Tokenizer = true}
+
+\mbox{\Hypertarget{mblem__prog_8cxx_a12ccf8b60fe710711f9c6cd7d1d69c43}\label{mblem__prog_8cxx_a12ccf8b60fe710711f9c6cd7d1d69c43}} 
+\index{mblem\_prog.cxx@{mblem\_prog.cxx}!usewordlist@{usewordlist}}
+\index{usewordlist@{usewordlist}!mblem\_prog.cxx@{mblem\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{usewordlist}{usewordlist}}
+{\footnotesize\ttfamily bool usewordlist = false}
+

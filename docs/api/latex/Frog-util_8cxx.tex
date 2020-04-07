@@ -1,0 +1,88 @@
+\hypertarget{Frog-util_8cxx}{}\doxysection{src/\+Frog-\/util.cxx File Reference}
+\label{Frog-util_8cxx}\index{src/Frog-\/util.cxx@{src/Frog-\/util.cxx}}
+{\ttfamily \#include \char`\"{}frog/\+Frog-\/util.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$cstring$>$}\newline
+{\ttfamily \#include $<$set$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$ostream$>$}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Socket\+Basics.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}config.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$sys/types.\+h$>$}\newline
+{\ttfamily \#include $<$sys/stat.\+h$>$}\newline
+{\ttfamily \#include $<$dirent.\+h$>$}\newline
+Include dependency graph for Frog-\/util.cxx\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{Frog-util_8cxx__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+string \mbox{\hyperlink{Frog-util_8cxx_abeed760006541fe7e43e069cf2b1e351}{prefix}} (const string \&path, const string \&fn)
+\item 
+set$<$ string $>$ \mbox{\hyperlink{Frog-util_8cxx_a3b15a19ffce93fc44632f43bcadccfa8}{get\+File\+Names}} (const string \&dir\+Name, const string \&ext)
+\item 
+string \mbox{\hyperlink{Frog-util_8cxx_a8cef462666b3f43d511231ca3ba62462}{check\+\_\+server}} (const string \&host, const string \&port, const string \&name)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{Frog-util_8cxx_a8cef462666b3f43d511231ca3ba62462}\label{Frog-util_8cxx_a8cef462666b3f43d511231ca3ba62462}} 
+\index{Frog-\/util.cxx@{Frog-\/util.cxx}!check\_server@{check\_server}}
+\index{check\_server@{check\_server}!Frog-\/util.cxx@{Frog-\/util.cxx}}
+\doxysubsubsection{\texorpdfstring{check\_server()}{check\_server()}}
+{\footnotesize\ttfamily string check\+\_\+server (\begin{DoxyParamCaption}\item[{const string \&}]{host,  }\item[{const string \&}]{port,  }\item[{const string \&}]{name }\end{DoxyParamCaption})}
+
+check if a certain host\+:port is available for us
+
+
+\begin{DoxyParams}{Parameters}
+{\em host} & the host we check \\
+\hline
+{\em port} & the port we want to access \\
+\hline
+{\em name} & extra information (used in diagnostics only) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\char`\"{}\char`\"{} on succes or an error message on failure
+\end{DoxyReturn}
+\mbox{\Hypertarget{Frog-util_8cxx_a3b15a19ffce93fc44632f43bcadccfa8}\label{Frog-util_8cxx_a3b15a19ffce93fc44632f43bcadccfa8}} 
+\index{Frog-\/util.cxx@{Frog-\/util.cxx}!getFileNames@{getFileNames}}
+\index{getFileNames@{getFileNames}!Frog-\/util.cxx@{Frog-\/util.cxx}}
+\doxysubsubsection{\texorpdfstring{getFileNames()}{getFileNames()}}
+{\footnotesize\ttfamily set$<$string$>$ get\+File\+Names (\begin{DoxyParamCaption}\item[{const string \&}]{dir\+Name,  }\item[{const string \&}]{ext }\end{DoxyParamCaption})}
+
+extract a (sorted) list of file-\/names matching an extension pattern
+
+
+\begin{DoxyParams}{Parameters}
+{\em dir\+Name} & the search directory \\
+\hline
+{\em ext} & the file extension we search \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a sorted list og file-\/names
+\end{DoxyReturn}
+\mbox{\Hypertarget{Frog-util_8cxx_abeed760006541fe7e43e069cf2b1e351}\label{Frog-util_8cxx_abeed760006541fe7e43e069cf2b1e351}} 
+\index{Frog-\/util.cxx@{Frog-\/util.cxx}!prefix@{prefix}}
+\index{prefix@{prefix}!Frog-\/util.cxx@{Frog-\/util.cxx}}
+\doxysubsubsection{\texorpdfstring{prefix()}{prefix()}}
+{\footnotesize\ttfamily string prefix (\begin{DoxyParamCaption}\item[{const string \&}]{path,  }\item[{const string \&}]{fn }\end{DoxyParamCaption})}
+
+add a full path to the filename {\itshape fn} 
+
+
+\begin{DoxyParams}{Parameters}
+{\em path} & the path to add \\
+\hline
+{\em fn} & the filename to be prefixed \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a new path If {\itshape fn} already contains (relative) path information, it is left unchanged.
+\end{DoxyReturn}

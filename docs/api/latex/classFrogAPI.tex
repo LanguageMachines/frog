@@ -1,0 +1,135 @@
+\hypertarget{classFrogAPI}{}\doxysection{Frog\+A\+PI Class Reference}
+\label{classFrogAPI}\index{FrogAPI@{FrogAPI}}
+
+
+{\ttfamily \#include $<$Frog\+A\+P\+I.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classFrogAPI_a1cc00c8a3a50fcf9da7d5fe03ff0dfe9}{Frog\+A\+PI}} (\mbox{\hyperlink{classFrogOptions}{Frog\+Options}} \&, const Ti\+C\+C\+::\+Configuration \&, Ti\+C\+C\+::\+Log\+Stream $\ast$, Ti\+C\+C\+::\+Log\+Stream $\ast$)
+\item 
+\mbox{\hyperlink{classFrogAPI_a00c9a2a81eae565793832aeae3edb82c}{$\sim$\+Frog\+A\+PI}} ()
+\item 
+folia\+::\+Document $\ast$ \mbox{\hyperlink{classFrogAPI_a993e32c7a90b760ded6b979ce9741fcf}{Frog\+File}} (const std\+::string \&, std\+::ostream \&)
+\item 
+void \mbox{\hyperlink{classFrogAPI_a25b8424aff421cf1dd8c6f8c64223b24}{Frog\+Server}} (Sockets\+::\+Client\+Socket \&conn)
+\item 
+void \mbox{\hyperlink{classFrogAPI_a03554881da6c555e239aa9c824dffab7}{Frog\+Interactive}} ()
+\item 
+\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \mbox{\hyperlink{classFrogAPI_a4d99c78837eee0bf827bfe4076b86b4a}{frog\+\_\+sentence}} (std\+::vector$<$ Tokenizer\+::\+Token $>$ \&, const size\+\_\+t)
+\item 
+std\+::string \mbox{\hyperlink{classFrogAPI_a44c0039f2609a5bd4e4ec2e42857b312}{Frogtostring}} (const std\+::string \&)
+\item 
+std\+::string \mbox{\hyperlink{classFrogAPI_a9fb82f5c1172794889f524a9a6688551}{Frogtostringfromfile}} (const std\+::string \&)
+\item 
+void \mbox{\hyperlink{classFrogAPI_abb32a32f2c60a8abd979b8b051de5a1a}{run\+\_\+api\+\_\+tests}} (const std\+::string \&, std\+::ostream \&)
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static std\+::string \mbox{\hyperlink{classFrogAPI_a72c5d6e191d557eb7848c3b0002ccec0}{default\+Config\+Dir}} (const std\+::string \&=\char`\"{}\char`\"{})
+\item 
+static std\+::string \mbox{\hyperlink{classFrogAPI_aa2576b235f8e175e9cb9857b762a6cb0}{default\+Config\+File}} (const std\+::string \&=\char`\"{}\char`\"{})
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This is the A\+PI class which can be used to set up Frog and run it on files, strings, T\+CP sockets or a terminal. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classFrogAPI_a1cc00c8a3a50fcf9da7d5fe03ff0dfe9}\label{classFrogAPI_a1cc00c8a3a50fcf9da7d5fe03ff0dfe9}} 
+\index{FrogAPI@{FrogAPI}!FrogAPI@{FrogAPI}}
+\index{FrogAPI@{FrogAPI}!FrogAPI@{FrogAPI}}
+\doxysubsubsection{\texorpdfstring{FrogAPI()}{FrogAPI()}}
+{\footnotesize\ttfamily Frog\+A\+P\+I\+::\+Frog\+A\+PI (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFrogOptions}{Frog\+Options}} \&}]{,  }\item[{const Ti\+C\+C\+::\+Configuration \&}]{,  }\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{,  }\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classFrogAPI_a00c9a2a81eae565793832aeae3edb82c}\label{classFrogAPI_a00c9a2a81eae565793832aeae3edb82c}} 
+\index{FrogAPI@{FrogAPI}!````~FrogAPI@{$\sim$FrogAPI}}
+\index{````~FrogAPI@{$\sim$FrogAPI}!FrogAPI@{FrogAPI}}
+\doxysubsubsection{\texorpdfstring{$\sim$FrogAPI()}{~FrogAPI()}}
+{\footnotesize\ttfamily Frog\+A\+P\+I\+::$\sim$\+Frog\+A\+PI (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classFrogAPI_a72c5d6e191d557eb7848c3b0002ccec0}\label{classFrogAPI_a72c5d6e191d557eb7848c3b0002ccec0}} 
+\index{FrogAPI@{FrogAPI}!defaultConfigDir@{defaultConfigDir}}
+\index{defaultConfigDir@{defaultConfigDir}!FrogAPI@{FrogAPI}}
+\doxysubsubsection{\texorpdfstring{defaultConfigDir()}{defaultConfigDir()}}
+{\footnotesize\ttfamily string Frog\+A\+P\+I\+::default\+Config\+Dir (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{language = {\ttfamily \char`\"{}\char`\"{}} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+return the default location of the configuration files
+
+
+\begin{DoxyParams}{Parameters}
+{\em language} & use this to find the configuration for this language \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a string representing the (language specific) path
+\end{DoxyReturn}
+The location of the configuration files is determined at installation of the package. All languages are supposed to be in sub-\/directories\mbox{\Hypertarget{classFrogAPI_aa2576b235f8e175e9cb9857b762a6cb0}\label{classFrogAPI_aa2576b235f8e175e9cb9857b762a6cb0}} 
+\index{FrogAPI@{FrogAPI}!defaultConfigFile@{defaultConfigFile}}
+\index{defaultConfigFile@{defaultConfigFile}!FrogAPI@{FrogAPI}}
+\doxysubsubsection{\texorpdfstring{defaultConfigFile()}{defaultConfigFile()}}
+{\footnotesize\ttfamily string Frog\+A\+P\+I\+::default\+Config\+File (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{language = {\ttfamily \char`\"{}\char`\"{}} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+return the filename for the default configuration
+
+
+\begin{DoxyParams}{Parameters}
+{\em language} & use this to find the configuration for this language \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a string representing (language specific) default filename
+\end{DoxyReturn}
+The location of the configuration files is determined at installation of the package. All languages are supposed to be in sub-\/directories\mbox{\Hypertarget{classFrogAPI_a4d99c78837eee0bf827bfe4076b86b4a}\label{classFrogAPI_a4d99c78837eee0bf827bfe4076b86b4a}} 
+\index{FrogAPI@{FrogAPI}!frog\_sentence@{frog\_sentence}}
+\index{frog\_sentence@{frog\_sentence}!FrogAPI@{FrogAPI}}
+\doxysubsubsection{\texorpdfstring{frog\_sentence()}{frog\_sentence()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} Frog\+A\+P\+I\+::frog\+\_\+sentence (\begin{DoxyParamCaption}\item[{std\+::vector$<$ Tokenizer\+::\+Token $>$ \&}]{,  }\item[{const}]{size\+\_\+t }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classFrogAPI_a993e32c7a90b760ded6b979ce9741fcf}\label{classFrogAPI_a993e32c7a90b760ded6b979ce9741fcf}} 
+\index{FrogAPI@{FrogAPI}!FrogFile@{FrogFile}}
+\index{FrogFile@{FrogFile}!FrogAPI@{FrogAPI}}
+\doxysubsubsection{\texorpdfstring{FrogFile()}{FrogFile()}}
+{\footnotesize\ttfamily folia\+::\+Document$\ast$ Frog\+A\+P\+I\+::\+Frog\+File (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{,  }\item[{std\+::ostream \&}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classFrogAPI_a03554881da6c555e239aa9c824dffab7}\label{classFrogAPI_a03554881da6c555e239aa9c824dffab7}} 
+\index{FrogAPI@{FrogAPI}!FrogInteractive@{FrogInteractive}}
+\index{FrogInteractive@{FrogInteractive}!FrogAPI@{FrogAPI}}
+\doxysubsubsection{\texorpdfstring{FrogInteractive()}{FrogInteractive()}}
+{\footnotesize\ttfamily void Frog\+A\+P\+I\+::\+Frog\+Interactive (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classFrogAPI_a25b8424aff421cf1dd8c6f8c64223b24}\label{classFrogAPI_a25b8424aff421cf1dd8c6f8c64223b24}} 
+\index{FrogAPI@{FrogAPI}!FrogServer@{FrogServer}}
+\index{FrogServer@{FrogServer}!FrogAPI@{FrogAPI}}
+\doxysubsubsection{\texorpdfstring{FrogServer()}{FrogServer()}}
+{\footnotesize\ttfamily void Frog\+A\+P\+I\+::\+Frog\+Server (\begin{DoxyParamCaption}\item[{Sockets\+::\+Client\+Socket \&}]{conn }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classFrogAPI_a44c0039f2609a5bd4e4ec2e42857b312}\label{classFrogAPI_a44c0039f2609a5bd4e4ec2e42857b312}} 
+\index{FrogAPI@{FrogAPI}!Frogtostring@{Frogtostring}}
+\index{Frogtostring@{Frogtostring}!FrogAPI@{FrogAPI}}
+\doxysubsubsection{\texorpdfstring{Frogtostring()}{Frogtostring()}}
+{\footnotesize\ttfamily std\+::string Frog\+A\+P\+I\+::\+Frogtostring (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classFrogAPI_a9fb82f5c1172794889f524a9a6688551}\label{classFrogAPI_a9fb82f5c1172794889f524a9a6688551}} 
+\index{FrogAPI@{FrogAPI}!Frogtostringfromfile@{Frogtostringfromfile}}
+\index{Frogtostringfromfile@{Frogtostringfromfile}!FrogAPI@{FrogAPI}}
+\doxysubsubsection{\texorpdfstring{Frogtostringfromfile()}{Frogtostringfromfile()}}
+{\footnotesize\ttfamily std\+::string Frog\+A\+P\+I\+::\+Frogtostringfromfile (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classFrogAPI_abb32a32f2c60a8abd979b8b051de5a1a}\label{classFrogAPI_abb32a32f2c60a8abd979b8b051de5a1a}} 
+\index{FrogAPI@{FrogAPI}!run\_api\_tests@{run\_api\_tests}}
+\index{run\_api\_tests@{run\_api\_tests}!FrogAPI@{FrogAPI}}
+\doxysubsubsection{\texorpdfstring{run\_api\_tests()}{run\_api\_tests()}}
+{\footnotesize\ttfamily void Frog\+A\+P\+I\+::run\+\_\+api\+\_\+tests (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{,  }\item[{std\+::ostream \&}]{ }\end{DoxyParamCaption})}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{FrogAPI_8h}{Frog\+A\+P\+I.\+h}}\item 
+src/\mbox{\hyperlink{FrogAPI_8cxx}{Frog\+A\+P\+I.\+cxx}}\end{DoxyCompactItemize}

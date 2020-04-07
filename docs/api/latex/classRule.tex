@@ -1,0 +1,221 @@
+\hypertarget{classRule}{}\doxysection{Rule Class Reference}
+\label{classRule}\index{Rule@{Rule}}
+
+
+{\ttfamily \#include $<$mbma\+\_\+rule.\+h$>$}
+
+
+
+Collaboration diagram for Rule\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classRule__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classRule_a95a9262b22676e671f89bba2d5e541bd}{Rule}} (const std\+::vector$<$ std\+::string $>$ \&, const icu\+::\+Unicode\+String \&, Ti\+C\+C\+::\+Log\+Stream \&, Ti\+C\+C\+::\+Log\+Stream \&, int)
+\item 
+\mbox{\hyperlink{classRule_a92760fc705b3da696f86e42b77943c21}{$\sim$\+Rule}} ()
+\item 
+std\+::vector$<$ std\+::string $>$ \mbox{\hyperlink{classRule_afb165c28054c34d7c067be69e7846843}{extract\+\_\+morphemes}} () const
+\item 
+std\+::string \mbox{\hyperlink{classRule_a8616b1233ee0e2989ba22a5bd94243cd}{morpheme\+\_\+string}} (bool=false) const
+\item 
+std\+::string \mbox{\hyperlink{classRule_a52626116a4960c1a96136073bcaf39bd}{pretty\+\_\+string}} () const
+\item 
+icu\+::\+Unicode\+String \mbox{\hyperlink{classRule_aaa7e10cb3b7e488d267efa1d497de112}{get\+Key}} (bool)
+\item 
+bool \mbox{\hyperlink{classRule_a0835986ba275610f0dc27dd33aee16fc}{perform\+Edits}} ()
+\item 
+void \mbox{\hyperlink{classRule_af0679096dd4bb1c8439256d719e23e64}{get\+Clean\+Inflect}} ()
+\item 
+void \mbox{\hyperlink{classRule_a8dfd6fff225ce2dc2616541547820427}{reduce\+Zero\+Nodes}} ()
+\item 
+void \mbox{\hyperlink{classRule_a5dd339680381e02da3b8676e09719d15}{resolve\+Brackets}} (bool)
+\item 
+void \mbox{\hyperlink{classRule_ad08087fe80eb9d7ff2daa92ac6c9e63d}{resolve\+\_\+inflections}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\+::vector$<$ \mbox{\hyperlink{classRulePart}{Rule\+Part}} $>$ \mbox{\hyperlink{classRule_aa541eef76f82316ac7ecd418ae8466ce}{rules}}
+\item 
+int \mbox{\hyperlink{classRule_a131a66f817fba8807fbed135a7e4bcd6}{debug\+Flag}}
+\item 
+\mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} \mbox{\hyperlink{classRule_a220c6214e63bac70daa9f05bcf417270}{tag}}
+\item 
+icu\+::\+Unicode\+String \mbox{\hyperlink{classRule_a8aba678d8a04e9d4657ebfe53ae98f8a}{sortkey}}
+\item 
+icu\+::\+Unicode\+String \mbox{\hyperlink{classRule_aa1539196754ea61c2c6d9ecb5e784cbe}{orig\+\_\+word}}
+\item 
+std\+::string \mbox{\hyperlink{classRule_a5c11e2b0a85482e9b546c978ad128995}{description}}
+\item 
+std\+::string \mbox{\hyperlink{classRule_a0b2fbbf767b1246afa3218d96a377354}{inflection}}
+\item 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} \mbox{\hyperlink{classRule_a0ecf2ab8af7ad31adb78117ac1719494}{compound}}
+\item 
+\mbox{\hyperlink{classBracketNest}{Bracket\+Nest}} $\ast$ \mbox{\hyperlink{classRule_a1b7c5020d2c82cb06b3ee55e85f46b2e}{brackets}}
+\item 
+Ti\+C\+C\+::\+Log\+Stream \& \mbox{\hyperlink{classRule_a014eedf80cb0e1aa2a46d99e0a860d3c}{my\+Log}}
+\item 
+Ti\+C\+C\+::\+Log\+Stream \& \mbox{\hyperlink{classRule_aa99b793ce7cc60a4db4e51a0b7a1de39}{dbg\+Log}}
+\item 
+double \mbox{\hyperlink{classRule_a6422405ae23ce693c46e154fb1bbd53e}{confidence}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classRule_a95a9262b22676e671f89bba2d5e541bd}\label{classRule_a95a9262b22676e671f89bba2d5e541bd}} 
+\index{Rule@{Rule}!Rule@{Rule}}
+\index{Rule@{Rule}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{Rule()}{Rule()}}
+{\footnotesize\ttfamily Rule\+::\+Rule (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ std\+::string $>$ \&}]{,  }\item[{const icu\+::\+Unicode\+String \&}]{,  }\item[{Ti\+C\+C\+::\+Log\+Stream \&}]{,  }\item[{Ti\+C\+C\+::\+Log\+Stream \&}]{,  }\item[{int}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classRule_a92760fc705b3da696f86e42b77943c21}\label{classRule_a92760fc705b3da696f86e42b77943c21}} 
+\index{Rule@{Rule}!````~Rule@{$\sim$Rule}}
+\index{````~Rule@{$\sim$Rule}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{$\sim$Rule()}{~Rule()}}
+{\footnotesize\ttfamily Rule\+::$\sim$\+Rule (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classRule_afb165c28054c34d7c067be69e7846843}\label{classRule_afb165c28054c34d7c067be69e7846843}} 
+\index{Rule@{Rule}!extract\_morphemes@{extract\_morphemes}}
+\index{extract\_morphemes@{extract\_morphemes}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{extract\_morphemes()}{extract\_morphemes()}}
+{\footnotesize\ttfamily vector$<$ string $>$ Rule\+::extract\+\_\+morphemes (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\mbox{\Hypertarget{classRule_af0679096dd4bb1c8439256d719e23e64}\label{classRule_af0679096dd4bb1c8439256d719e23e64}} 
+\index{Rule@{Rule}!getCleanInflect@{getCleanInflect}}
+\index{getCleanInflect@{getCleanInflect}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{getCleanInflect()}{getCleanInflect()}}
+{\footnotesize\ttfamily void Rule\+::get\+Clean\+Inflect (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classRule_aaa7e10cb3b7e488d267efa1d497de112}\label{classRule_aaa7e10cb3b7e488d267efa1d497de112}} 
+\index{Rule@{Rule}!getKey@{getKey}}
+\index{getKey@{getKey}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{getKey()}{getKey()}}
+{\footnotesize\ttfamily Unicode\+String Rule\+::get\+Key (\begin{DoxyParamCaption}\item[{bool}]{deep }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classRule_a8616b1233ee0e2989ba22a5bd94243cd}\label{classRule_a8616b1233ee0e2989ba22a5bd94243cd}} 
+\index{Rule@{Rule}!morpheme\_string@{morpheme\_string}}
+\index{morpheme\_string@{morpheme\_string}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{morpheme\_string()}{morpheme\_string()}}
+{\footnotesize\ttfamily string Rule\+::morpheme\+\_\+string (\begin{DoxyParamCaption}\item[{bool}]{structured = {\ttfamily false} }\end{DoxyParamCaption}) const}
+
+\mbox{\Hypertarget{classRule_a0835986ba275610f0dc27dd33aee16fc}\label{classRule_a0835986ba275610f0dc27dd33aee16fc}} 
+\index{Rule@{Rule}!performEdits@{performEdits}}
+\index{performEdits@{performEdits}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{performEdits()}{performEdits()}}
+{\footnotesize\ttfamily bool Rule\+::perform\+Edits (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classRule_a52626116a4960c1a96136073bcaf39bd}\label{classRule_a52626116a4960c1a96136073bcaf39bd}} 
+\index{Rule@{Rule}!pretty\_string@{pretty\_string}}
+\index{pretty\_string@{pretty\_string}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{pretty\_string()}{pretty\_string()}}
+{\footnotesize\ttfamily string Rule\+::pretty\+\_\+string (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\mbox{\Hypertarget{classRule_a8dfd6fff225ce2dc2616541547820427}\label{classRule_a8dfd6fff225ce2dc2616541547820427}} 
+\index{Rule@{Rule}!reduceZeroNodes@{reduceZeroNodes}}
+\index{reduceZeroNodes@{reduceZeroNodes}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{reduceZeroNodes()}{reduceZeroNodes()}}
+{\footnotesize\ttfamily void Rule\+::reduce\+Zero\+Nodes (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classRule_ad08087fe80eb9d7ff2daa92ac6c9e63d}\label{classRule_ad08087fe80eb9d7ff2daa92ac6c9e63d}} 
+\index{Rule@{Rule}!resolve\_inflections@{resolve\_inflections}}
+\index{resolve\_inflections@{resolve\_inflections}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{resolve\_inflections()}{resolve\_inflections()}}
+{\footnotesize\ttfamily void Rule\+::resolve\+\_\+inflections (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classRule_a5dd339680381e02da3b8676e09719d15}\label{classRule_a5dd339680381e02da3b8676e09719d15}} 
+\index{Rule@{Rule}!resolveBrackets@{resolveBrackets}}
+\index{resolveBrackets@{resolveBrackets}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{resolveBrackets()}{resolveBrackets()}}
+{\footnotesize\ttfamily void Rule\+::resolve\+Brackets (\begin{DoxyParamCaption}\item[{bool}]{deep }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classRule_a1b7c5020d2c82cb06b3ee55e85f46b2e}\label{classRule_a1b7c5020d2c82cb06b3ee55e85f46b2e}} 
+\index{Rule@{Rule}!brackets@{brackets}}
+\index{brackets@{brackets}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{brackets}{brackets}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classBracketNest}{Bracket\+Nest}}$\ast$ Rule\+::brackets}
+
+\mbox{\Hypertarget{classRule_a0ecf2ab8af7ad31adb78117ac1719494}\label{classRule_a0ecf2ab8af7ad31adb78117ac1719494}} 
+\index{Rule@{Rule}!compound@{compound}}
+\index{compound@{compound}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{compound}{compound}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} Rule\+::compound}
+
+\mbox{\Hypertarget{classRule_a6422405ae23ce693c46e154fb1bbd53e}\label{classRule_a6422405ae23ce693c46e154fb1bbd53e}} 
+\index{Rule@{Rule}!confidence@{confidence}}
+\index{confidence@{confidence}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{confidence}{confidence}}
+{\footnotesize\ttfamily double Rule\+::confidence}
+
+\mbox{\Hypertarget{classRule_aa99b793ce7cc60a4db4e51a0b7a1de39}\label{classRule_aa99b793ce7cc60a4db4e51a0b7a1de39}} 
+\index{Rule@{Rule}!dbgLog@{dbgLog}}
+\index{dbgLog@{dbgLog}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{dbgLog}{dbgLog}}
+{\footnotesize\ttfamily Ti\+C\+C\+::\+Log\+Stream\& Rule\+::dbg\+Log}
+
+\mbox{\Hypertarget{classRule_a131a66f817fba8807fbed135a7e4bcd6}\label{classRule_a131a66f817fba8807fbed135a7e4bcd6}} 
+\index{Rule@{Rule}!debugFlag@{debugFlag}}
+\index{debugFlag@{debugFlag}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{debugFlag}{debugFlag}}
+{\footnotesize\ttfamily int Rule\+::debug\+Flag}
+
+\mbox{\Hypertarget{classRule_a5c11e2b0a85482e9b546c978ad128995}\label{classRule_a5c11e2b0a85482e9b546c978ad128995}} 
+\index{Rule@{Rule}!description@{description}}
+\index{description@{description}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{description}{description}}
+{\footnotesize\ttfamily std\+::string Rule\+::description}
+
+\mbox{\Hypertarget{classRule_a0b2fbbf767b1246afa3218d96a377354}\label{classRule_a0b2fbbf767b1246afa3218d96a377354}} 
+\index{Rule@{Rule}!inflection@{inflection}}
+\index{inflection@{inflection}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{inflection}{inflection}}
+{\footnotesize\ttfamily std\+::string Rule\+::inflection}
+
+\mbox{\Hypertarget{classRule_a014eedf80cb0e1aa2a46d99e0a860d3c}\label{classRule_a014eedf80cb0e1aa2a46d99e0a860d3c}} 
+\index{Rule@{Rule}!myLog@{myLog}}
+\index{myLog@{myLog}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{myLog}{myLog}}
+{\footnotesize\ttfamily Ti\+C\+C\+::\+Log\+Stream\& Rule\+::my\+Log}
+
+\mbox{\Hypertarget{classRule_aa1539196754ea61c2c6d9ecb5e784cbe}\label{classRule_aa1539196754ea61c2c6d9ecb5e784cbe}} 
+\index{Rule@{Rule}!orig\_word@{orig\_word}}
+\index{orig\_word@{orig\_word}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{orig\_word}{orig\_word}}
+{\footnotesize\ttfamily icu\+::\+Unicode\+String Rule\+::orig\+\_\+word}
+
+\mbox{\Hypertarget{classRule_aa541eef76f82316ac7ecd418ae8466ce}\label{classRule_aa541eef76f82316ac7ecd418ae8466ce}} 
+\index{Rule@{Rule}!rules@{rules}}
+\index{rules@{rules}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{rules}{rules}}
+{\footnotesize\ttfamily std\+::vector$<$\mbox{\hyperlink{classRulePart}{Rule\+Part}}$>$ Rule\+::rules}
+
+\mbox{\Hypertarget{classRule_a8aba678d8a04e9d4657ebfe53ae98f8a}\label{classRule_a8aba678d8a04e9d4657ebfe53ae98f8a}} 
+\index{Rule@{Rule}!sortkey@{sortkey}}
+\index{sortkey@{sortkey}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{sortkey}{sortkey}}
+{\footnotesize\ttfamily icu\+::\+Unicode\+String Rule\+::sortkey}
+
+\mbox{\Hypertarget{classRule_a220c6214e63bac70daa9f05bcf417270}\label{classRule_a220c6214e63bac70daa9f05bcf417270}} 
+\index{Rule@{Rule}!tag@{tag}}
+\index{tag@{tag}!Rule@{Rule}}
+\doxysubsubsection{\texorpdfstring{tag}{tag}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} Rule\+::tag}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{mbma__rule_8h}{mbma\+\_\+rule.\+h}}\item 
+src/\mbox{\hyperlink{mbma__rule_8cxx}{mbma\+\_\+rule.\+cxx}}\end{DoxyCompactItemize}

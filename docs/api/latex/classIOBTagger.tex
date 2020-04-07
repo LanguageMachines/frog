@@ -1,0 +1,148 @@
+\hypertarget{classIOBTagger}{}\doxysection{I\+O\+B\+Tagger Class Reference}
+\label{classIOBTagger}\index{IOBTagger@{IOBTagger}}
+
+
+{\ttfamily \#include $<$iob\+\_\+tagger\+\_\+mod.\+h$>$}
+
+
+
+Inheritance diagram for I\+O\+B\+Tagger\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=153pt]{classIOBTagger__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for I\+O\+B\+Tagger\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classIOBTagger__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classIOBTagger_ae316bb3689ad22f27256d8be93dd51d2}{I\+O\+B\+Tagger}} (Ti\+C\+C\+::\+Log\+Stream $\ast$l, Ti\+C\+C\+::\+Log\+Stream $\ast$d=0)
+\item 
+bool \mbox{\hyperlink{classIOBTagger_a91999a401760c93f459f6ea8f61045c4}{init}} (const Ti\+C\+C\+::\+Configuration \&)
+\item 
+void \mbox{\hyperlink{classIOBTagger_a06bb6a0fb2ffe99d6aaf231c636a428f}{add\+\_\+declaration}} (folia\+::\+Document \&, folia\+::processor $\ast$) const
+\item 
+void \mbox{\hyperlink{classIOBTagger_a567f683f1edf304904df446ef24bf3e8}{Classify}} (\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&)
+\item 
+void \mbox{\hyperlink{classIOBTagger_a04024f5cdcf954a32c82cc1fba85798c}{post\+\_\+process}} (\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&)
+\item 
+void \mbox{\hyperlink{classIOBTagger_a7cc8a40263ebb17fef3fa07095fc29f5}{add\+\_\+result}} (const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&fd, const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&wv) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classIOBTagger_ae316bb3689ad22f27256d8be93dd51d2}\label{classIOBTagger_ae316bb3689ad22f27256d8be93dd51d2}} 
+\index{IOBTagger@{IOBTagger}!IOBTagger@{IOBTagger}}
+\index{IOBTagger@{IOBTagger}!IOBTagger@{IOBTagger}}
+\doxysubsubsection{\texorpdfstring{IOBTagger()}{IOBTagger()}}
+{\footnotesize\ttfamily I\+O\+B\+Tagger\+::\+I\+O\+B\+Tagger (\begin{DoxyParamCaption}\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{l,  }\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{d = {\ttfamily 0} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [explicit]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classIOBTagger_a06bb6a0fb2ffe99d6aaf231c636a428f}\label{classIOBTagger_a06bb6a0fb2ffe99d6aaf231c636a428f}} 
+\index{IOBTagger@{IOBTagger}!add\_declaration@{add\_declaration}}
+\index{add\_declaration@{add\_declaration}!IOBTagger@{IOBTagger}}
+\doxysubsubsection{\texorpdfstring{add\_declaration()}{add\_declaration()}}
+{\footnotesize\ttfamily void I\+O\+B\+Tagger\+::add\+\_\+declaration (\begin{DoxyParamCaption}\item[{folia\+::\+Document \&}]{doc,  }\item[{folia\+::processor $\ast$}]{proc }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+add C\+H\+U\+N\+K\+I\+NG annotation as an Annotation\+Type to the document
+
+
+\begin{DoxyParams}{Parameters}
+{\em doc} & the Document the add to \\
+\hline
+{\em proc} & the processor to add\\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classBaseTagger_a4549663d6620c26783f61022c2421c61}{Base\+Tagger}}.
+
+\mbox{\Hypertarget{classIOBTagger_a7cc8a40263ebb17fef3fa07095fc29f5}\label{classIOBTagger_a7cc8a40263ebb17fef3fa07095fc29f5}} 
+\index{IOBTagger@{IOBTagger}!add\_result@{add\_result}}
+\index{add\_result@{add\_result}!IOBTagger@{IOBTagger}}
+\doxysubsubsection{\texorpdfstring{add\_result()}{add\_result()}}
+{\footnotesize\ttfamily void I\+O\+B\+Tagger\+::add\+\_\+result (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd,  }\item[{const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&}]{wv }\end{DoxyParamCaption}) const}
+
+add the Chunking tags in \textquotesingle{}fd\textquotesingle{} to the Fo\+LiA list of Word
+
+
+\begin{DoxyParams}{Parameters}
+{\em fd} & The tagged results \\
+\hline
+{\em wv} & The folia\+:Word vector\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classIOBTagger_a567f683f1edf304904df446ef24bf3e8}\label{classIOBTagger_a567f683f1edf304904df446ef24bf3e8}} 
+\index{IOBTagger@{IOBTagger}!Classify@{Classify}}
+\index{Classify@{Classify}!IOBTagger@{IOBTagger}}
+\doxysubsubsection{\texorpdfstring{Classify()}{Classify()}}
+{\footnotesize\ttfamily void I\+O\+B\+Tagger\+::\+Classify (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{swords }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+Tag one sentence, given in \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} format
+
+
+\begin{DoxyParams}{Parameters}
+{\em swords} & the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure to analyze\\
+\hline
+\end{DoxyParams}
+When tagging succeeds, \textquotesingle{}swords\textquotesingle{} will be extended with the tag results
+
+Reimplemented from \mbox{\hyperlink{classBaseTagger_ac40b077fb93c937e1fc08e40cd43f924}{Base\+Tagger}}.
+
+\mbox{\Hypertarget{classIOBTagger_a91999a401760c93f459f6ea8f61045c4}\label{classIOBTagger_a91999a401760c93f459f6ea8f61045c4}} 
+\index{IOBTagger@{IOBTagger}!init@{init}}
+\index{init@{init}!IOBTagger@{IOBTagger}}
+\doxysubsubsection{\texorpdfstring{init()}{init()}}
+{\footnotesize\ttfamily bool I\+O\+B\+Tagger\+::init (\begin{DoxyParamCaption}\item[{const Ti\+C\+C\+::\+Configuration \&}]{config }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+initalize a I\+OB chunker from \textquotesingle{}config\textquotesingle{}
+
+
+\begin{DoxyParams}{Parameters}
+{\em config} & the Ti\+C\+C\+::\+Configuration \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true on succes, false otherwise
+\end{DoxyReturn}
+first \mbox{\hyperlink{classBaseTagger_adf1ff8bb15ad11151eac9f0d70820853}{Base\+Tagger\+::init()}} is called to set generic values, then the I\+OB specific values \textquotesingle{}set\textquotesingle{} is added
+
+Reimplemented from \mbox{\hyperlink{classBaseTagger_adf1ff8bb15ad11151eac9f0d70820853}{Base\+Tagger}}.
+
+\mbox{\Hypertarget{classIOBTagger_a04024f5cdcf954a32c82cc1fba85798c}\label{classIOBTagger_a04024f5cdcf954a32c82cc1fba85798c}} 
+\index{IOBTagger@{IOBTagger}!post\_process@{post\_process}}
+\index{post\_process@{post\_process}!IOBTagger@{IOBTagger}}
+\doxysubsubsection{\texorpdfstring{post\_process()}{post\_process()}}
+{\footnotesize\ttfamily void I\+O\+B\+Tagger\+::post\+\_\+process (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{sentence }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+finish the Chunking processs by updating \textquotesingle{}sentence\textquotesingle{}
+
+
+\begin{DoxyParams}{Parameters}
+{\em sentence} & a \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure to update with Chunking info from the \+\_\+tag\+\_\+result array.\\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classBaseTagger_a008b76e8797b516fd167e1a24eb71ed4}{Base\+Tagger}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{iob__tagger__mod_8h}{iob\+\_\+tagger\+\_\+mod.\+h}}\item 
+src/\mbox{\hyperlink{iob__tagger__mod_8cxx}{iob\+\_\+tagger\+\_\+mod.\+cxx}}\end{DoxyCompactItemize}

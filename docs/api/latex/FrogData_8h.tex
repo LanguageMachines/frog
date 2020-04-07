@@ -1,0 +1,81 @@
+\hypertarget{FrogData_8h}{}\doxysection{include/frog/\+Frog\+Data.h File Reference}
+\label{FrogData_8h}\index{include/frog/FrogData.h@{include/frog/FrogData.h}}
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include $<$map$>$}\newline
+{\ttfamily \#include $<$set$>$}\newline
+{\ttfamily \#include \char`\"{}ticcutils/json.\+hpp\char`\"{}}\newline
+Include dependency graph for Frog\+Data.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{FrogData_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{FrogData_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classfrog__record}{frog\+\_\+record}}
+\begin{DoxyCompactList}\small\item\em a simple datastructure to hold all frogged information of one word \end{DoxyCompactList}\item 
+class \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}}
+\begin{DoxyCompactList}\small\item\em a datastructure to hold all frogged information of one Sentence \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+ \mbox{\hyperlink{namespaceTokenizer}{Tokenizer}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::ostream \& \mbox{\hyperlink{FrogData_8h_a7e96cb2f1ad261749450cf22fb797e5d}{operator$<$$<$}} (std\+::ostream \&os, const \mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} \&fr)
+\item 
+std\+::ostream \& \mbox{\hyperlink{FrogData_8h_a97f77bc7ee8b3811cd45b9143682f741}{operator$<$$<$}} (std\+::ostream \&os, const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&fd)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{FrogData_8h_a97f77bc7ee8b3811cd45b9143682f741}\label{FrogData_8h_a97f77bc7ee8b3811cd45b9143682f741}} 
+\index{FrogData.h@{FrogData.h}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!FrogData.h@{FrogData.h}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily std\+::ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{std\+::ostream \&}]{os,  }\item[{const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd }\end{DoxyParamCaption})}
+
+output a \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure to a stream
+
+
+\begin{DoxyParams}{Parameters}
+{\em os} & output stream \\
+\hline
+{\em fd} & the record to output \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the stream
+\end{DoxyReturn}
+\mbox{\Hypertarget{FrogData_8h_a7e96cb2f1ad261749450cf22fb797e5d}\label{FrogData_8h_a7e96cb2f1ad261749450cf22fb797e5d}} 
+\index{FrogData.h@{FrogData.h}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!FrogData.h@{FrogData.h}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily std\+::ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{std\+::ostream \&}]{os,  }\item[{const \mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} \&}]{fr }\end{DoxyParamCaption})}
+
+output a \mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} structure to a stream
+
+
+\begin{DoxyParams}{Parameters}
+{\em os} & output stream \\
+\hline
+{\em fr} & the record to output \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the stream
+\end{DoxyReturn}

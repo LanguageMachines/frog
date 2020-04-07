@@ -1,0 +1,154 @@
+\hypertarget{Parser_8cxx}{}\doxysection{src/\+Parser.cxx File Reference}
+\label{Parser_8cxx}\index{src/Parser.cxx@{src/Parser.cxx}}
+{\ttfamily \#include \char`\"{}frog/\+Parser.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$sys/types.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$cstdlib$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$map$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$fstream$>$}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include \char`\"{}config.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Configuration.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Pretty\+Print.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Socket\+Basics.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/json.\+hpp\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}timbl/\+Timbl\+A\+P\+I.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/\+Frog-\/util.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/csidp.\+h\char`\"{}}\newline
+Include dependency graph for Parser.\+cxx\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{Parser_8cxx__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structparseData}{parse\+Data}}
+\begin{DoxyCompactList}\small\item\em structure to store parsing results \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{Parser_8cxx_a159ca84d25a5487d8e81e4438725df19}{L\+OG}}~$\ast$Ti\+C\+C\+::\+Log(err\+Log)
+\item 
+\#define \mbox{\hyperlink{Parser_8cxx_a49606be7356624568932ec81c0d429f4}{D\+BG}}~$\ast$Ti\+C\+C\+::\+Dbg(dbg\+Log)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+ostream \& \mbox{\hyperlink{Parser_8cxx_ac37a6388d9449b5076487c926b71038e}{operator$<$$<$}} (ostream \&os, const \mbox{\hyperlink{structparseData}{parse\+Data}} \&pd)
+\item 
+void \mbox{\hyperlink{Parser_8cxx_a019710f9c273399748e0ef60ced14e95}{extract}} (const string \&tv, string \&head, string \&mods)
+\item 
+vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \mbox{\hyperlink{Parser_8cxx_a3414f89d8ee90032bfd2b9c994bb3158}{timbl}} (Timbl\+::\+Timbl\+A\+PI $\ast$tim, const vector$<$ string $>$ \&instances)
+\item 
+vector$<$ pair$<$ string, double $>$ $>$ \mbox{\hyperlink{Parser_8cxx_a205d2f1d93b36014a4d0fe33913c0bf4}{parse\+\_\+vd}} (const string \&ds)
+\item 
+void \mbox{\hyperlink{Parser_8cxx_aca91539dc97e65702c2f5b48e1f0e5fd}{append\+Parse\+Result}} (\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&fd, const vector$<$ \mbox{\hyperlink{structparsrel}{parsrel}} $>$ \&res)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{Parser_8cxx_a49606be7356624568932ec81c0d429f4}\label{Parser_8cxx_a49606be7356624568932ec81c0d429f4}} 
+\index{Parser.cxx@{Parser.cxx}!DBG@{DBG}}
+\index{DBG@{DBG}!Parser.cxx@{Parser.cxx}}
+\doxysubsubsection{\texorpdfstring{DBG}{DBG}}
+{\footnotesize\ttfamily \#define D\+BG~$\ast$Ti\+C\+C\+::\+Dbg(dbg\+Log)}
+
+\mbox{\Hypertarget{Parser_8cxx_a159ca84d25a5487d8e81e4438725df19}\label{Parser_8cxx_a159ca84d25a5487d8e81e4438725df19}} 
+\index{Parser.cxx@{Parser.cxx}!LOG@{LOG}}
+\index{LOG@{LOG}!Parser.cxx@{Parser.cxx}}
+\doxysubsubsection{\texorpdfstring{LOG}{LOG}}
+{\footnotesize\ttfamily \#define L\+OG~$\ast$Ti\+C\+C\+::\+Log(err\+Log)}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{Parser_8cxx_aca91539dc97e65702c2f5b48e1f0e5fd}\label{Parser_8cxx_aca91539dc97e65702c2f5b48e1f0e5fd}} 
+\index{Parser.cxx@{Parser.cxx}!appendParseResult@{appendParseResult}}
+\index{appendParseResult@{appendParseResult}!Parser.cxx@{Parser.cxx}}
+\doxysubsubsection{\texorpdfstring{appendParseResult()}{appendParseResult()}}
+{\footnotesize\ttfamily void append\+Parse\+Result (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd,  }\item[{const vector$<$ \mbox{\hyperlink{structparsrel}{parsrel}} $>$ \&}]{res }\end{DoxyParamCaption})}
+
+transfer the outcome of the parser back into the fog\+\_\+data structure
+
+
+\begin{DoxyParams}{Parameters}
+{\em fd} & the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} we want to add to \\
+\hline
+{\em res} & the parser\textquotesingle{}s results\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{Parser_8cxx_a019710f9c273399748e0ef60ced14e95}\label{Parser_8cxx_a019710f9c273399748e0ef60ced14e95}} 
+\index{Parser.cxx@{Parser.cxx}!extract@{extract}}
+\index{extract@{extract}!Parser.cxx@{Parser.cxx}}
+\doxysubsubsection{\texorpdfstring{extract()}{extract()}}
+{\footnotesize\ttfamily void extract (\begin{DoxyParamCaption}\item[{const string \&}]{tv,  }\item[{string \&}]{head,  }\item[{string \&}]{mods }\end{DoxyParamCaption})}
+
+spit a (C\+G\+N-\/like) tag into a head and a modifier part
+
+
+\begin{DoxyParams}{Parameters}
+{\em tv} & a C\+G\+N-\/like tag \\
+\hline
+{\em head} & the extacted head \\
+\hline
+{\em mods} & the modfiers, concatenated using the \textquotesingle{}$\vert$\textquotesingle{} symbol\\
+\hline
+\end{DoxyParams}
+Example\+: the tag WW(pv,tgw,met-\/t) will be split into a head \textquotesingle{}WW\textquotesingle{} and a mods string \textquotesingle{}pv$\vert$tgw$\vert$met-\/t\textquotesingle{}\mbox{\Hypertarget{Parser_8cxx_ac37a6388d9449b5076487c926b71038e}\label{Parser_8cxx_ac37a6388d9449b5076487c926b71038e}} 
+\index{Parser.cxx@{Parser.cxx}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!Parser.cxx@{Parser.cxx}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}}
+{\footnotesize\ttfamily ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{ostream \&}]{os,  }\item[{const \mbox{\hyperlink{structparseData}{parse\+Data}} \&}]{pd }\end{DoxyParamCaption})}
+
+output a \mbox{\hyperlink{structparseData}{parse\+Data}} structure (debugging only)
+
+
+\begin{DoxyParams}{Parameters}
+{\em os} & the output stream \\
+\hline
+{\em pd} & the \mbox{\hyperlink{structparseData}{parse\+Data}} to dump \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the stream
+\end{DoxyReturn}
+\mbox{\Hypertarget{Parser_8cxx_a205d2f1d93b36014a4d0fe33913c0bf4}\label{Parser_8cxx_a205d2f1d93b36014a4d0fe33913c0bf4}} 
+\index{Parser.cxx@{Parser.cxx}!parse\_vd@{parse\_vd}}
+\index{parse\_vd@{parse\_vd}!Parser.cxx@{Parser.cxx}}
+\doxysubsubsection{\texorpdfstring{parse\_vd()}{parse\_vd()}}
+{\footnotesize\ttfamily vector$<$pair$<$string,double$>$ $>$ parse\+\_\+vd (\begin{DoxyParamCaption}\item[{const string \&}]{ds }\end{DoxyParamCaption})}
+
+parse a Value\+Distribution string into a vector of class/value pairs
+
+
+\begin{DoxyParams}{Parameters}
+{\em ds} & a string representation of a \mbox{\hyperlink{namespaceTimbl}{Timbl}} Value\+Distribution \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a vector of string/double pairs. Each pair is one class + it\textquotesingle{}s (relative) count
+\end{DoxyReturn}
+\mbox{\Hypertarget{Parser_8cxx_a3414f89d8ee90032bfd2b9c994bb3158}\label{Parser_8cxx_a3414f89d8ee90032bfd2b9c994bb3158}} 
+\index{Parser.cxx@{Parser.cxx}!timbl@{timbl}}
+\index{timbl@{timbl}!Parser.cxx@{Parser.cxx}}
+\doxysubsubsection{\texorpdfstring{timbl()}{timbl()}}
+{\footnotesize\ttfamily vector$<$\mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}}$>$ timbl (\begin{DoxyParamCaption}\item[{Timbl\+::\+Timbl\+A\+PI $\ast$}]{tim,  }\item[{const vector$<$ string $>$ \&}]{instances }\end{DoxyParamCaption})}
+
+call a \mbox{\hyperlink{namespaceTimbl}{Timbl}} experiment with a list of instances
+
+
+\begin{DoxyParams}{Parameters}
+{\em tim} & The \mbox{\hyperlink{namespaceTimbl}{Timbl}} to use \\
+\hline
+{\em instances} & the instances to feed to the \mbox{\hyperlink{namespaceTimbl}{Timbl}} \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a list of \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} structures with the result of processing all instances
+\end{DoxyReturn}

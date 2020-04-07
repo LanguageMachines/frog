@@ -1,0 +1,177 @@
+\hypertarget{classMblem}{}\doxysection{Mblem Class Reference}
+\label{classMblem}\index{Mblem@{Mblem}}
+
+
+{\ttfamily \#include $<$mblem\+\_\+mod.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classMblem_aace19658a16ef48d717e06526146f854}{Mblem}} (Ti\+C\+C\+::\+Log\+Stream $\ast$, Ti\+C\+C\+::\+Log\+Stream $\ast$=0)
+\begin{DoxyCompactList}\small\item\em create a \mbox{\hyperlink{namespaceTimbl}{Timbl}} based lemmatizer \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classMblem_aad555642c7f14433256d51b68f4b85ca}{$\sim$\+Mblem}} ()
+\item 
+bool \mbox{\hyperlink{classMblem_a58172e6096ae07551115c32d19a813d0}{init}} (const Ti\+C\+C\+::\+Configuration \&)
+\item 
+void \mbox{\hyperlink{classMblem_a6f7f2ebdb858650be096adb46a2f45f6}{add\+\_\+provenance}} (folia\+::\+Document \&, folia\+::processor $\ast$) const
+\item 
+void \mbox{\hyperlink{classMblem_adb5dd245abcbd0d74ca469128d15c729}{Classify}} (\mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} \&)
+\item 
+void \mbox{\hyperlink{classMblem_aadd21e5dffd7fc9990d712fc9226f5c3}{Classify}} (const icu\+::\+Unicode\+String \&)
+\item 
+std\+::vector$<$ std\+::pair$<$ std\+::string, std\+::string $>$ $>$ \mbox{\hyperlink{classMblem_a840f943c0d621d6c475b0650f74cc8bc}{get\+Result}} () const
+\item 
+std\+::string \mbox{\hyperlink{classMblem_ac81446799c8d708d155d186d6d33759e}{get\+Tagset}} () const
+\item 
+std\+::string \mbox{\hyperlink{classMblem_ac792ce3057c5250d7c02572196725eee}{version}} () const
+\item 
+void \mbox{\hyperlink{classMblem_aaf838a89eadbcc9a3c60933be3d9752a}{filter\+Tag}} (const std\+::string \&)
+\item 
+void \mbox{\hyperlink{classMblem_af321b52084c5bda9485d45e1ccdfbc98}{make\+Unique}} ()
+\item 
+void \mbox{\hyperlink{classMblem_a2b5364b3b8f1a430a3763bf06cac0d68}{add\+\_\+lemmas}} (const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&, const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&) const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classMblem_aace19658a16ef48d717e06526146f854}\label{classMblem_aace19658a16ef48d717e06526146f854}} 
+\index{Mblem@{Mblem}!Mblem@{Mblem}}
+\index{Mblem@{Mblem}!Mblem@{Mblem}}
+\doxysubsubsection{\texorpdfstring{Mblem()}{Mblem()}}
+{\footnotesize\ttfamily Mblem\+::\+Mblem (\begin{DoxyParamCaption}\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{errlog,  }\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{dbglog = {\ttfamily 0} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+
+
+create a \mbox{\hyperlink{namespaceTimbl}{Timbl}} based lemmatizer 
+
+
+\begin{DoxyParams}{Parameters}
+{\em errlog} & a Log\+Stream for errors \\
+\hline
+{\em dbglog} & a Log\+Stream for debugging \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classMblem_aad555642c7f14433256d51b68f4b85ca}\label{classMblem_aad555642c7f14433256d51b68f4b85ca}} 
+\index{Mblem@{Mblem}!````~Mblem@{$\sim$Mblem}}
+\index{````~Mblem@{$\sim$Mblem}!Mblem@{Mblem}}
+\doxysubsubsection{\texorpdfstring{$\sim$Mblem()}{~Mblem()}}
+{\footnotesize\ttfamily Mblem\+::$\sim$\+Mblem (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classMblem_a2b5364b3b8f1a430a3763bf06cac0d68}\label{classMblem_a2b5364b3b8f1a430a3763bf06cac0d68}} 
+\index{Mblem@{Mblem}!add\_lemmas@{add\_lemmas}}
+\index{add\_lemmas@{add\_lemmas}!Mblem@{Mblem}}
+\doxysubsubsection{\texorpdfstring{add\_lemmas()}{add\_lemmas()}}
+{\footnotesize\ttfamily void Mblem\+::add\+\_\+lemmas (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&}]{wv,  }\item[{const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd }\end{DoxyParamCaption}) const}
+
+add the lemma from \textquotesingle{}fd\textquotesingle{} to the Fo\+LiA list of Word
+
+
+\begin{DoxyParams}{Parameters}
+{\em wv} & The folia\+:Word vector \\
+\hline
+{\em fd} & the folia\+\_\+data with added lemmatizer results\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classMblem_a6f7f2ebdb858650be096adb46a2f45f6}\label{classMblem_a6f7f2ebdb858650be096adb46a2f45f6}} 
+\index{Mblem@{Mblem}!add\_provenance@{add\_provenance}}
+\index{add\_provenance@{add\_provenance}!Mblem@{Mblem}}
+\doxysubsubsection{\texorpdfstring{add\_provenance()}{add\_provenance()}}
+{\footnotesize\ttfamily void Mblem\+::add\+\_\+provenance (\begin{DoxyParamCaption}\item[{folia\+::\+Document \&}]{doc,  }\item[{folia\+::processor $\ast$}]{main }\end{DoxyParamCaption}) const}
+
+add provenance information to the Fo\+LiA document
+
+
+\begin{DoxyParams}{Parameters}
+{\em doc} & the fo\+LiA document we are working on \\
+\hline
+{\em main} & the main processor (presumably Frog) we want to add a new one to\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classMblem_aadd21e5dffd7fc9990d712fc9226f5c3}\label{classMblem_aadd21e5dffd7fc9990d712fc9226f5c3}} 
+\index{Mblem@{Mblem}!Classify@{Classify}}
+\index{Classify@{Classify}!Mblem@{Mblem}}
+\doxysubsubsection{\texorpdfstring{Classify()}{Classify()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void Mblem\+::\+Classify (\begin{DoxyParamCaption}\item[{const icu\+::\+Unicode\+String \&}]{u\+Word }\end{DoxyParamCaption})}
+
+give the lemma for 1 word
+
+
+\begin{DoxyParams}{Parameters}
+{\em u\+Word} & a Unicode string with the word the mblem\+Result struct will be filled with 1 or more (alternative) solutions of a lemma + a P\+O\+S-\/tag\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classMblem_adb5dd245abcbd0d74ca469128d15c729}\label{classMblem_adb5dd245abcbd0d74ca469128d15c729}} 
+\index{Mblem@{Mblem}!Classify@{Classify}}
+\index{Classify@{Classify}!Mblem@{Mblem}}
+\doxysubsubsection{\texorpdfstring{Classify()}{Classify()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void Mblem\+::\+Classify (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} \&}]{fd }\end{DoxyParamCaption})}
+
+add lemma information to the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}}
+
+
+\begin{DoxyParams}{Parameters}
+{\em fd} & The \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}}\\
+\hline
+\end{DoxyParams}
+this handles some special cases like A\+B\+B\+R\+E\+V\+I\+A\+T\+I\+ON, the token-\/strip rules and the one-\/one rules. All \textquotesingle{}normal\textquotesingle{} cases are handled over to the \mbox{\hyperlink{namespaceTimbl}{Timbl}} classifier\mbox{\Hypertarget{classMblem_aaf838a89eadbcc9a3c60933be3d9752a}\label{classMblem_aaf838a89eadbcc9a3c60933be3d9752a}} 
+\index{Mblem@{Mblem}!filterTag@{filterTag}}
+\index{filterTag@{filterTag}!Mblem@{Mblem}}
+\doxysubsubsection{\texorpdfstring{filterTag()}{filterTag()}}
+{\footnotesize\ttfamily void Mblem\+::filter\+Tag (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{postag }\end{DoxyParamCaption})}
+
+filater all non-\/matching tags out of the mblem results
+
+
+\begin{DoxyParams}{Parameters}
+{\em postag} & the tag, given by the C\+G\+N-\/tagger, that should match\\
+\hline
+\end{DoxyParams}
+\mbox{\hyperlink{classMblem}{Mblem}} produces a range of possible solutions with tags. We use the P\+OS tag given by the C\+GN tagger to remove all solutions with a different tag\mbox{\Hypertarget{classMblem_a840f943c0d621d6c475b0650f74cc8bc}\label{classMblem_a840f943c0d621d6c475b0650f74cc8bc}} 
+\index{Mblem@{Mblem}!getResult@{getResult}}
+\index{getResult@{getResult}!Mblem@{Mblem}}
+\doxysubsubsection{\texorpdfstring{getResult()}{getResult()}}
+{\footnotesize\ttfamily vector$<$ pair$<$ string, string $>$ $>$ Mblem\+::get\+Result (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+extract the results into a list of lemma/tag pairs\mbox{\Hypertarget{classMblem_ac81446799c8d708d155d186d6d33759e}\label{classMblem_ac81446799c8d708d155d186d6d33759e}} 
+\index{Mblem@{Mblem}!getTagset@{getTagset}}
+\index{getTagset@{getTagset}!Mblem@{Mblem}}
+\doxysubsubsection{\texorpdfstring{getTagset()}{getTagset()}}
+{\footnotesize\ttfamily std\+::string Mblem\+::get\+Tagset (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classMblem_a58172e6096ae07551115c32d19a813d0}\label{classMblem_a58172e6096ae07551115c32d19a813d0}} 
+\index{Mblem@{Mblem}!init@{init}}
+\index{init@{init}!Mblem@{Mblem}}
+\doxysubsubsection{\texorpdfstring{init()}{init()}}
+{\footnotesize\ttfamily bool Mblem\+::init (\begin{DoxyParamCaption}\item[{const Ti\+C\+C\+::\+Configuration \&}]{config }\end{DoxyParamCaption})}
+
+initialize the lemmatizer using the config
+
+
+\begin{DoxyParams}{Parameters}
+{\em config} & the Configuration to use \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true when no problems are detected
+\end{DoxyReturn}
+\mbox{\Hypertarget{classMblem_af321b52084c5bda9485d45e1ccdfbc98}\label{classMblem_af321b52084c5bda9485d45e1ccdfbc98}} 
+\index{Mblem@{Mblem}!makeUnique@{makeUnique}}
+\index{makeUnique@{makeUnique}!Mblem@{Mblem}}
+\doxysubsubsection{\texorpdfstring{makeUnique()}{makeUnique()}}
+{\footnotesize\ttfamily void Mblem\+::make\+Unique (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+filter out all results that are equal\mbox{\Hypertarget{classMblem_ac792ce3057c5250d7c02572196725eee}\label{classMblem_ac792ce3057c5250d7c02572196725eee}} 
+\index{Mblem@{Mblem}!version@{version}}
+\index{version@{version}!Mblem@{Mblem}}
+\doxysubsubsection{\texorpdfstring{version()}{version()}}
+{\footnotesize\ttfamily std\+::string Mblem\+::version (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{mblem__mod_8h}{mblem\+\_\+mod.\+h}}\item 
+src/\mbox{\hyperlink{mblem__mod_8cxx}{mblem\+\_\+mod.\+cxx}}\end{DoxyCompactItemize}

@@ -1,0 +1,79 @@
+\hypertarget{mbma__rule_8cxx}{}\doxysection{src/mbma\+\_\+rule.cxx File Reference}
+\label{mbma__rule_8cxx}\index{src/mbma\_rule.cxx@{src/mbma\_rule.cxx}}
+{\ttfamily \#include \char`\"{}frog/mbma\+\_\+rule.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+String\+Ops.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Pretty\+Print.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Unicode.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}libfolia/folia.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/mbma\+\_\+brackets.\+h\char`\"{}}\newline
+Include dependency graph for mbma\+\_\+rule.\+cxx\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{mbma__rule_8cxx__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{mbma__rule_8cxx_a159ca84d25a5487d8e81e4438725df19}{L\+OG}}~$\ast$Ti\+C\+C\+::\+Log(my\+Log)
+\item 
+\#define \mbox{\hyperlink{mbma__rule_8cxx_a49606be7356624568932ec81c0d429f4}{D\+BG}}~$\ast$Ti\+C\+C\+::\+Log(dbg\+Log)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+ostream \& \mbox{\hyperlink{mbma__rule_8cxx_a46ea860df2cb2872fab0d6d830242b5f}{operator$<$$<$}} (ostream \&os, const \mbox{\hyperlink{classRulePart}{Rule\+Part}} \&r)
+\item 
+ostream \& \mbox{\hyperlink{mbma__rule_8cxx_a0cdadcac21266739ac928edaca7c35bb}{operator$<$$<$}} (ostream \&os, const \mbox{\hyperlink{classRulePart}{Rule\+Part}} $\ast$r)
+\item 
+ostream \& \mbox{\hyperlink{mbma__rule_8cxx_aee3ebb91086b1c6c58a203fd8d8c4530}{operator$<$$<$}} (ostream \&os, const \mbox{\hyperlink{classRule}{Rule}} \&r)
+\item 
+ostream \& \mbox{\hyperlink{mbma__rule_8cxx_a399863164205f7b263aac41e9d7f6030}{operator$<$$<$}} (ostream \&os, const \mbox{\hyperlink{classRule}{Rule}} $\ast$r)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{mbma__rule_8cxx_a49606be7356624568932ec81c0d429f4}\label{mbma__rule_8cxx_a49606be7356624568932ec81c0d429f4}} 
+\index{mbma\_rule.cxx@{mbma\_rule.cxx}!DBG@{DBG}}
+\index{DBG@{DBG}!mbma\_rule.cxx@{mbma\_rule.cxx}}
+\doxysubsubsection{\texorpdfstring{DBG}{DBG}}
+{\footnotesize\ttfamily \#define D\+BG~$\ast$Ti\+C\+C\+::\+Log(dbg\+Log)}
+
+\mbox{\Hypertarget{mbma__rule_8cxx_a159ca84d25a5487d8e81e4438725df19}\label{mbma__rule_8cxx_a159ca84d25a5487d8e81e4438725df19}} 
+\index{mbma\_rule.cxx@{mbma\_rule.cxx}!LOG@{LOG}}
+\index{LOG@{LOG}!mbma\_rule.cxx@{mbma\_rule.cxx}}
+\doxysubsubsection{\texorpdfstring{LOG}{LOG}}
+{\footnotesize\ttfamily \#define L\+OG~$\ast$Ti\+C\+C\+::\+Log(my\+Log)}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{mbma__rule_8cxx_aee3ebb91086b1c6c58a203fd8d8c4530}\label{mbma__rule_8cxx_aee3ebb91086b1c6c58a203fd8d8c4530}} 
+\index{mbma\_rule.cxx@{mbma\_rule.cxx}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!mbma\_rule.cxx@{mbma\_rule.cxx}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}\hspace{0.1cm}{\footnotesize\ttfamily [1/4]}}
+{\footnotesize\ttfamily ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{ostream \&}]{os,  }\item[{const \mbox{\hyperlink{classRule}{Rule}} \&}]{r }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{mbma__rule_8cxx_a399863164205f7b263aac41e9d7f6030}\label{mbma__rule_8cxx_a399863164205f7b263aac41e9d7f6030}} 
+\index{mbma\_rule.cxx@{mbma\_rule.cxx}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!mbma\_rule.cxx@{mbma\_rule.cxx}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}\hspace{0.1cm}{\footnotesize\ttfamily [2/4]}}
+{\footnotesize\ttfamily ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{ostream \&}]{os,  }\item[{const \mbox{\hyperlink{classRule}{Rule}} $\ast$}]{r }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{mbma__rule_8cxx_a46ea860df2cb2872fab0d6d830242b5f}\label{mbma__rule_8cxx_a46ea860df2cb2872fab0d6d830242b5f}} 
+\index{mbma\_rule.cxx@{mbma\_rule.cxx}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!mbma\_rule.cxx@{mbma\_rule.cxx}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}\hspace{0.1cm}{\footnotesize\ttfamily [3/4]}}
+{\footnotesize\ttfamily ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{ostream \&}]{os,  }\item[{const \mbox{\hyperlink{classRulePart}{Rule\+Part}} \&}]{r }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{mbma__rule_8cxx_a0cdadcac21266739ac928edaca7c35bb}\label{mbma__rule_8cxx_a0cdadcac21266739ac928edaca7c35bb}} 
+\index{mbma\_rule.cxx@{mbma\_rule.cxx}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!mbma\_rule.cxx@{mbma\_rule.cxx}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}\hspace{0.1cm}{\footnotesize\ttfamily [4/4]}}
+{\footnotesize\ttfamily ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{ostream \&}]{os,  }\item[{const \mbox{\hyperlink{classRulePart}{Rule\+Part}} $\ast$}]{r }\end{DoxyParamCaption})}
+

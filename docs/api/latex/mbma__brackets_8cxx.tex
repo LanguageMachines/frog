@@ -1,0 +1,138 @@
+\hypertarget{mbma__brackets_8cxx}{}\doxysection{src/mbma\+\_\+brackets.cxx File Reference}
+\label{mbma__brackets_8cxx}\index{src/mbma\_brackets.cxx@{src/mbma\_brackets.cxx}}
+{\ttfamily \#include \char`\"{}frog/mbma\+\_\+brackets.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$cassert$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include $<$list$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Configuration.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+String\+Ops.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Pretty\+Print.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}libfolia/folia.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/clex.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/mbma\+\_\+rule.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/mbma\+\_\+mod.\+h\char`\"{}}\newline
+Include dependency graph for mbma\+\_\+brackets.\+cxx\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{mbma__brackets_8cxx__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{mbma__brackets_8cxx_a159ca84d25a5487d8e81e4438725df19}{L\+OG}}~$\ast$Ti\+C\+C\+::\+Log(my\+Log)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+string \mbox{\hyperlink{mbma__brackets_8cxx_aa43679f6e9d2d5fc79d261dcdd76cb1c}{to\+String}} (const \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} \&ct)
+\item 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} \mbox{\hyperlink{mbma__brackets_8cxx_a365e991012ceb7276c0fdf0e99e46315}{string\+To\+Compound}} (const string \&s)
+\item 
+ostream \& \mbox{\hyperlink{mbma__brackets_8cxx_a3b5f4b5dbdfc81acad1cede9984a47f7}{operator$<$$<$}} (ostream \&os, const \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} \&ct)
+\item 
+string \mbox{\hyperlink{mbma__brackets_8cxx_a0ede838599ff561b5015d1308259b580}{to\+String}} (const \mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70b}{Status}} \&st)
+\item 
+ostream \& \mbox{\hyperlink{mbma__brackets_8cxx_a239f1a2edb5406c4b5efb1f5b6bbe4c5}{operator$<$$<$}} (ostream \&os, const \mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70b}{Status}} \&st)
+\item 
+ostream \& \mbox{\hyperlink{mbma__brackets_8cxx_ab724d149e3f7f9816d9da850437c0df4}{operator$<$$<$}} (ostream \&os, const \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}} \&c)
+\item 
+ostream \& \mbox{\hyperlink{mbma__brackets_8cxx_aa9618c7f2e0a53c742aa8ce8cd57b054}{operator$<$$<$}} (ostream \&os, const \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}} $\ast$c)
+\item 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} \mbox{\hyperlink{mbma__brackets_8cxx_aca8fc8680af7f106800d068bfa4c0d59}{construct}} (const vector$<$ \mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} $>$ \&tags)
+\item 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} \mbox{\hyperlink{mbma__brackets_8cxx_ade6c35b017cbeaef13d2a8b9d1aa622a}{construct}} (const \mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} tag1, const \mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} tag2)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{mbma__brackets_8cxx_a159ca84d25a5487d8e81e4438725df19}\label{mbma__brackets_8cxx_a159ca84d25a5487d8e81e4438725df19}} 
+\index{mbma\_brackets.cxx@{mbma\_brackets.cxx}!LOG@{LOG}}
+\index{LOG@{LOG}!mbma\_brackets.cxx@{mbma\_brackets.cxx}}
+\doxysubsubsection{\texorpdfstring{LOG}{LOG}}
+{\footnotesize\ttfamily \#define L\+OG~$\ast$Ti\+C\+C\+::\+Log(my\+Log)}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{mbma__brackets_8cxx_ade6c35b017cbeaef13d2a8b9d1aa622a}\label{mbma__brackets_8cxx_ade6c35b017cbeaef13d2a8b9d1aa622a}} 
+\index{mbma\_brackets.cxx@{mbma\_brackets.cxx}!construct@{construct}}
+\index{construct@{construct}!mbma\_brackets.cxx@{mbma\_brackets.cxx}}
+\doxysubsubsection{\texorpdfstring{construct()}{construct()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} construct (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}}}]{tag1,  }\item[{const \mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}}}]{tag2 }\end{DoxyParamCaption})}
+
+construct a \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} given two \mbox{\hyperlink{namespaceCLEX}{C\+L\+EX}} tags
+
+
+\begin{DoxyParams}{Parameters}
+{\em tag1} & a \mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} \\
+\hline
+{\em tag2} & a \mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}}
+\end{DoxyReturn}
+\mbox{\Hypertarget{mbma__brackets_8cxx_aca8fc8680af7f106800d068bfa4c0d59}\label{mbma__brackets_8cxx_aca8fc8680af7f106800d068bfa4c0d59}} 
+\index{mbma\_brackets.cxx@{mbma\_brackets.cxx}!construct@{construct}}
+\index{construct@{construct}!mbma\_brackets.cxx@{mbma\_brackets.cxx}}
+\doxysubsubsection{\texorpdfstring{construct()}{construct()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} construct (\begin{DoxyParamCaption}\item[{const vector$<$ \mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} $>$ \&}]{tags }\end{DoxyParamCaption})}
+
+construct a \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} given a list of \mbox{\hyperlink{namespaceCLEX}{C\+L\+EX}} tags
+
+
+\begin{DoxyParams}{Parameters}
+{\em tags} & a list of C\+L\+E\+X\+::\+Types \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}}
+\end{DoxyReturn}
+\mbox{\Hypertarget{mbma__brackets_8cxx_ab724d149e3f7f9816d9da850437c0df4}\label{mbma__brackets_8cxx_ab724d149e3f7f9816d9da850437c0df4}} 
+\index{mbma\_brackets.cxx@{mbma\_brackets.cxx}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!mbma\_brackets.cxx@{mbma\_brackets.cxx}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}\hspace{0.1cm}{\footnotesize\ttfamily [1/4]}}
+{\footnotesize\ttfamily ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{ostream \&}]{os,  }\item[{const \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}} \&}]{c }\end{DoxyParamCaption})}
+
+output a \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}} to a stream\mbox{\Hypertarget{mbma__brackets_8cxx_aa9618c7f2e0a53c742aa8ce8cd57b054}\label{mbma__brackets_8cxx_aa9618c7f2e0a53c742aa8ce8cd57b054}} 
+\index{mbma\_brackets.cxx@{mbma\_brackets.cxx}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!mbma\_brackets.cxx@{mbma\_brackets.cxx}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}\hspace{0.1cm}{\footnotesize\ttfamily [2/4]}}
+{\footnotesize\ttfamily ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{ostream \&}]{os,  }\item[{const \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}} $\ast$}]{c }\end{DoxyParamCaption})}
+
+output a \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}} to a stream\mbox{\Hypertarget{mbma__brackets_8cxx_a3b5f4b5dbdfc81acad1cede9984a47f7}\label{mbma__brackets_8cxx_a3b5f4b5dbdfc81acad1cede9984a47f7}} 
+\index{mbma\_brackets.cxx@{mbma\_brackets.cxx}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!mbma\_brackets.cxx@{mbma\_brackets.cxx}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}\hspace{0.1cm}{\footnotesize\ttfamily [3/4]}}
+{\footnotesize\ttfamily ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{ostream \&}]{os,  }\item[{const \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} \&}]{ct }\end{DoxyParamCaption})}
+
+output a Compound\+Type to a stream\mbox{\Hypertarget{mbma__brackets_8cxx_a239f1a2edb5406c4b5efb1f5b6bbe4c5}\label{mbma__brackets_8cxx_a239f1a2edb5406c4b5efb1f5b6bbe4c5}} 
+\index{mbma\_brackets.cxx@{mbma\_brackets.cxx}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!mbma\_brackets.cxx@{mbma\_brackets.cxx}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}\hspace{0.1cm}{\footnotesize\ttfamily [4/4]}}
+{\footnotesize\ttfamily ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{ostream \&}]{os,  }\item[{const \mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70b}{Status}} \&}]{st }\end{DoxyParamCaption})}
+
+output a Status to a stream\mbox{\Hypertarget{mbma__brackets_8cxx_a365e991012ceb7276c0fdf0e99e46315}\label{mbma__brackets_8cxx_a365e991012ceb7276c0fdf0e99e46315}} 
+\index{mbma\_brackets.cxx@{mbma\_brackets.cxx}!stringToCompound@{stringToCompound}}
+\index{stringToCompound@{stringToCompound}!mbma\_brackets.cxx@{mbma\_brackets.cxx}}
+\doxysubsubsection{\texorpdfstring{stringToCompound()}{stringToCompound()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} string\+To\+Compound (\begin{DoxyParamCaption}\item[{const string \&}]{s }\end{DoxyParamCaption})}
+
+give the \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} for this string\mbox{\Hypertarget{mbma__brackets_8cxx_aa43679f6e9d2d5fc79d261dcdd76cb1c}\label{mbma__brackets_8cxx_aa43679f6e9d2d5fc79d261dcdd76cb1c}} 
+\index{mbma\_brackets.cxx@{mbma\_brackets.cxx}!toString@{toString}}
+\index{toString@{toString}!mbma\_brackets.cxx@{mbma\_brackets.cxx}}
+\doxysubsubsection{\texorpdfstring{toString()}{toString()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily string to\+String (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} \&}]{ct }\end{DoxyParamCaption})}
+
+return the string representation for the \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}}\mbox{\Hypertarget{mbma__brackets_8cxx_a0ede838599ff561b5015d1308259b580}\label{mbma__brackets_8cxx_a0ede838599ff561b5015d1308259b580}} 
+\index{mbma\_brackets.cxx@{mbma\_brackets.cxx}!toString@{toString}}
+\index{toString@{toString}!mbma\_brackets.cxx@{mbma\_brackets.cxx}}
+\doxysubsubsection{\texorpdfstring{toString()}{toString()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily string to\+String (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70b}{Status}} \&}]{st }\end{DoxyParamCaption})}
+
+return the string representation so a Status value

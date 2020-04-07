@@ -1,0 +1,464 @@
+\hypertarget{classUctoTokenizer}{}\doxysection{Ucto\+Tokenizer Class Reference}
+\label{classUctoTokenizer}\index{UctoTokenizer@{UctoTokenizer}}
+
+
+{\ttfamily \#include $<$ucto\+\_\+tokenizer\+\_\+mod.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classUctoTokenizer_a1577a48a0cd55df737b2b9cf60c7179e}{Ucto\+Tokenizer}} (Ti\+C\+C\+::\+Log\+Stream $\ast$, Ti\+C\+C\+::\+Log\+Stream $\ast$=0)
+\item 
+\mbox{\hyperlink{classUctoTokenizer_adb47141c040ae158bcfa90a8d011dd1f}{$\sim$\+Ucto\+Tokenizer}} ()
+\item 
+bool \mbox{\hyperlink{classUctoTokenizer_a0c27ba6105f6faa864e4b7254cc74689}{init}} (const Ti\+C\+C\+::\+Configuration \&)
+\item 
+void \mbox{\hyperlink{classUctoTokenizer_abd8380c1d877f45130433fdbe93ce78d}{set\+Utt\+Marker}} (const std\+::string \&)
+\item 
+void \mbox{\hyperlink{classUctoTokenizer_a3c510a1a11a3fc12dbd826efe77484ec}{set\+Pass\+Thru}} (bool)
+\item 
+void \mbox{\hyperlink{classUctoTokenizer_ad831991b8294a097300cf5e3ed891056}{set\+\_\+\+T\+C\+\_\+debug}} (bool)
+\item 
+bool \mbox{\hyperlink{classUctoTokenizer_afd39cee0f42519547758491b4a115cc3}{get\+Pass\+Thru}} () const
+\item 
+void \mbox{\hyperlink{classUctoTokenizer_a5a2451d15fa33eb376fd1edbe5549b19}{set\+Sentence\+Per\+Line\+Input}} (bool)
+\item 
+void \mbox{\hyperlink{classUctoTokenizer_a54d2cdc6866bbb839d9dfbc13367b4a4}{set\+Input\+Encoding}} (const std\+::string \&)
+\item 
+void \mbox{\hyperlink{classUctoTokenizer_a28041e9c386773625c57016f9d1fe9bf}{set\+Quote\+Detection}} (bool)
+\item 
+void \mbox{\hyperlink{classUctoTokenizer_a6c2dc39e6f9a5c1bea8104fdc42457ed}{set\+Input\+Xml}} (bool)
+\item 
+void \mbox{\hyperlink{classUctoTokenizer_a90f4c538453eaa9e9131ee7517bf56d5}{set\+Filtering}} (bool)
+\item 
+void \mbox{\hyperlink{classUctoTokenizer_abafc8b71fb7e17a281b061d50d60db5b}{set\+Input\+Class}} (const std\+::string \&)
+\item 
+void \mbox{\hyperlink{classUctoTokenizer_a6a04f28f190f4e8cb6e8c71541f556ed}{set\+Output\+Class}} (const std\+::string \&)
+\item 
+void \mbox{\hyperlink{classUctoTokenizer_a0b807116effc3de611ac251aae20265f}{set\+Doc\+ID}} (const std\+::string \&)
+\item 
+void \mbox{\hyperlink{classUctoTokenizer_a653d53a4d4b74d029964ac7874e046bb}{set\+Text\+Redundancy}} (const std\+::string \&)
+\item 
+void \mbox{\hyperlink{classUctoTokenizer_a606b9b415f330d14aa92f548c79d1d32}{set\+Word\+Correction}} (bool)
+\item 
+std\+::string \mbox{\hyperlink{classUctoTokenizer_a58f6db9d4a0cd72f07fa1f6f9b5b9c4c}{get\+\_\+data\+\_\+version}} () const
+\item 
+std\+::string \mbox{\hyperlink{classUctoTokenizer_a15f5b251f90839d21dadf4825862ae46}{default\+\_\+language}} () const
+\item 
+bool \mbox{\hyperlink{classUctoTokenizer_ac267e2f7dcc55fef67ca45de7712d421}{get\+\_\+setting\+\_\+info}} (const std\+::string \&, std\+::string \&, std\+::string \&) const
+\item 
+std\+::vector$<$ std\+::string $>$ \mbox{\hyperlink{classUctoTokenizer_a1a339eefbeffff1f23a306f253c1d009}{tokenize}} (const std\+::string \&)
+\item 
+std\+::vector$<$ Tokenizer\+::\+Token $>$ \mbox{\hyperlink{classUctoTokenizer_ac4ceaa5751b52e2adf09a1708c7559bf}{tokenize\+\_\+line}} (const std\+::string \&, const std\+::string \&=\char`\"{}\char`\"{})
+\item 
+std\+::vector$<$ Tokenizer\+::\+Token $>$ \mbox{\hyperlink{classUctoTokenizer_ac6fbc7bbc91a8c52b20754e4ae4e852f}{tokenize\+\_\+line\+\_\+next}} ()
+\item 
+std\+::vector$<$ Tokenizer\+::\+Token $>$ \mbox{\hyperlink{classUctoTokenizer_ae299016f83913b683b9b17f43600122d}{tokenize\+\_\+stream}} (std\+::istream \&)
+\item 
+std\+::vector$<$ Tokenizer\+::\+Token $>$ \mbox{\hyperlink{classUctoTokenizer_a8749b3536cd2ad9ff90142dc138981ed}{tokenize\+\_\+stream\+\_\+next}} ()
+\item 
+std\+::string \mbox{\hyperlink{classUctoTokenizer_a0251f8b56846c99609b4ab7e18c3365e}{tokenize\+Stream}} (std\+::istream \&)
+\item 
+std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \mbox{\hyperlink{classUctoTokenizer_ace4b83cb733185a2cd0a2f86892dbbcf}{add\+\_\+words}} (folia\+::\+Sentence $\ast$, const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&) const
+\item 
+void \mbox{\hyperlink{classUctoTokenizer_a207c2dec50fd4427daa81d78c3e7b1fe}{add\+\_\+provenance}} (folia\+::\+Document \&, folia\+::processor $\ast$) const
+\item 
+std\+::vector$<$ Tokenizer\+::\+Token $>$ \mbox{\hyperlink{classUctoTokenizer_a8ca0ee0df24e80e61e705800dea3ecbf}{correct\+\_\+words}} (folia\+::\+Folia\+Element $\ast$, const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classUctoTokenizer_a1577a48a0cd55df737b2b9cf60c7179e}\label{classUctoTokenizer_a1577a48a0cd55df737b2b9cf60c7179e}} 
+\index{UctoTokenizer@{UctoTokenizer}!UctoTokenizer@{UctoTokenizer}}
+\index{UctoTokenizer@{UctoTokenizer}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{UctoTokenizer()}{UctoTokenizer()}}
+{\footnotesize\ttfamily Ucto\+Tokenizer\+::\+Ucto\+Tokenizer (\begin{DoxyParamCaption}\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{err\+\_\+log,  }\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{dbg\+\_\+log = {\ttfamily 0} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+Created a (yet U\+N\+I\+N\+I\+T\+I\+A\+L\+I\+Z\+ED) \mbox{\hyperlink{namespaceTokenizer}{Tokenizer}}
+
+
+\begin{DoxyParams}{Parameters}
+{\em err\+\_\+log} & A Log\+Stream for error messages \\
+\hline
+{\em dbg\+\_\+log} & A Log\+Stream for debugging\\
+\hline
+\end{DoxyParams}
+\mbox{\hyperlink{classUctoTokenizer_a0c27ba6105f6faa864e4b7254cc74689}{Ucto\+Tokenizer\+::init()}} needs to be called to get really going\mbox{\Hypertarget{classUctoTokenizer_adb47141c040ae158bcfa90a8d011dd1f}\label{classUctoTokenizer_adb47141c040ae158bcfa90a8d011dd1f}} 
+\index{UctoTokenizer@{UctoTokenizer}!````~UctoTokenizer@{$\sim$UctoTokenizer}}
+\index{````~UctoTokenizer@{$\sim$UctoTokenizer}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{$\sim$UctoTokenizer()}{~UctoTokenizer()}}
+{\footnotesize\ttfamily Ucto\+Tokenizer\+::$\sim$\+Ucto\+Tokenizer (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Destroy the \mbox{\hyperlink{namespaceTokenizer}{Tokenizer}}
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classUctoTokenizer_a207c2dec50fd4427daa81d78c3e7b1fe}\label{classUctoTokenizer_a207c2dec50fd4427daa81d78c3e7b1fe}} 
+\index{UctoTokenizer@{UctoTokenizer}!add\_provenance@{add\_provenance}}
+\index{add\_provenance@{add\_provenance}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{add\_provenance()}{add\_provenance()}}
+{\footnotesize\ttfamily void Ucto\+Tokenizer\+::add\+\_\+provenance (\begin{DoxyParamCaption}\item[{folia\+::\+Document \&}]{doc,  }\item[{folia\+::processor $\ast$}]{main }\end{DoxyParamCaption}) const}
+
+add provenance information for the tokenizer. (Fo\+LiA output only)
+
+
+\begin{DoxyParams}{Parameters}
+{\em doc} & the Fo\+LiA document to add to \\
+\hline
+{\em main} & the processor to use (presumably the Frog processor)\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classUctoTokenizer_ace4b83cb733185a2cd0a2f86892dbbcf}\label{classUctoTokenizer_ace4b83cb733185a2cd0a2f86892dbbcf}} 
+\index{UctoTokenizer@{UctoTokenizer}!add\_words@{add\_words}}
+\index{add\_words@{add\_words}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{add\_words()}{add\_words()}}
+{\footnotesize\ttfamily vector$<$ folia\+::\+Word $\ast$ $>$ Ucto\+Tokenizer\+::add\+\_\+words (\begin{DoxyParamCaption}\item[{folia\+::\+Sentence $\ast$}]{s,  }\item[{const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd }\end{DoxyParamCaption}) const}
+
+create a list of folia\+::\+Word elements under a folia\+::\+Sentence
+
+
+\begin{DoxyParams}{Parameters}
+{\em s} & The parent to attach too \\
+\hline
+{\em fd} & The \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure with the needed information \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a list of newly created folia\+::\+Word elements
+\end{DoxyReturn}
+this function should be used when creating Fo\+LiA output, and it assumes that the tokenizer allready filled in all required fields in the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure\mbox{\Hypertarget{classUctoTokenizer_a8ca0ee0df24e80e61e705800dea3ecbf}\label{classUctoTokenizer_a8ca0ee0df24e80e61e705800dea3ecbf}} 
+\index{UctoTokenizer@{UctoTokenizer}!correct\_words@{correct\_words}}
+\index{correct\_words@{correct\_words}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{correct\_words()}{correct\_words()}}
+{\footnotesize\ttfamily vector$<$ Tokenizer\+::\+Token $>$ Ucto\+Tokenizer\+::correct\+\_\+words (\begin{DoxyParamCaption}\item[{folia\+::\+Folia\+Element $\ast$}]{elt,  }\item[{const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&}]{wv }\end{DoxyParamCaption})}
+
+correct Word elements in the Fo\+LiA based on results found by the tokenizer
+
+
+\begin{DoxyParams}{Parameters}
+{\em elt} & the Folia\+Element which is the parent for correction \\
+\hline
+{\em wv} & The input Word vector, (of which elt is the parent)\\
+\hline
+\end{DoxyParams}
+the input Word vector might represent a \textquotesingle{}word\textquotesingle{} like \char`\"{}gisteren?\char`\"{}. The tokenizer will split this into \char`\"{}gisteren\char`\"{} and \char`\"{}?\char`\"{} and this function will handle this by creating a correction with 2 words as $<$new$>$\mbox{\Hypertarget{classUctoTokenizer_a15f5b251f90839d21dadf4825862ae46}\label{classUctoTokenizer_a15f5b251f90839d21dadf4825862ae46}} 
+\index{UctoTokenizer@{UctoTokenizer}!default\_language@{default\_language}}
+\index{default\_language@{default\_language}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{default\_language()}{default\_language()}}
+{\footnotesize\ttfamily string Ucto\+Tokenizer\+::default\+\_\+language (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+return the default language of the tokenizer\mbox{\Hypertarget{classUctoTokenizer_a58f6db9d4a0cd72f07fa1f6f9b5b9c4c}\label{classUctoTokenizer_a58f6db9d4a0cd72f07fa1f6f9b5b9c4c}} 
+\index{UctoTokenizer@{UctoTokenizer}!get\_data\_version@{get\_data\_version}}
+\index{get\_data\_version@{get\_data\_version}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{get\_data\_version()}{get\_data\_version()}}
+{\footnotesize\ttfamily string Ucto\+Tokenizer\+::get\+\_\+data\+\_\+version (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+returns the version of the uctodata files we use\mbox{\Hypertarget{classUctoTokenizer_ac267e2f7dcc55fef67ca45de7712d421}\label{classUctoTokenizer_ac267e2f7dcc55fef67ca45de7712d421}} 
+\index{UctoTokenizer@{UctoTokenizer}!get\_setting\_info@{get\_setting\_info}}
+\index{get\_setting\_info@{get\_setting\_info}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{get\_setting\_info()}{get\_setting\_info()}}
+{\footnotesize\ttfamily bool Ucto\+Tokenizer\+::get\+\_\+setting\+\_\+info (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{lang,  }\item[{std\+::string \&}]{name,  }\item[{std\+::string \&}]{version }\end{DoxyParamCaption}) const}
+
+get information about the current settings for a language
+
+
+\begin{DoxyParams}{Parameters}
+{\em lang} & The language to examine \\
+\hline
+{\em name} & The name of the settings file used for {\itshape lang} \\
+\hline
+{\em version} & The version of the settingsfile\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classUctoTokenizer_afd39cee0f42519547758491b4a115cc3}\label{classUctoTokenizer_afd39cee0f42519547758491b4a115cc3}} 
+\index{UctoTokenizer@{UctoTokenizer}!getPassThru@{getPassThru}}
+\index{getPassThru@{getPassThru}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{getPassThru()}{getPassThru()}}
+{\footnotesize\ttfamily bool Ucto\+Tokenizer\+::get\+Pass\+Thru (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+get the value of the Pass\+Thru setting\mbox{\Hypertarget{classUctoTokenizer_a0c27ba6105f6faa864e4b7254cc74689}\label{classUctoTokenizer_a0c27ba6105f6faa864e4b7254cc74689}} 
+\index{UctoTokenizer@{UctoTokenizer}!init@{init}}
+\index{init@{init}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{init()}{init()}}
+{\footnotesize\ttfamily bool Ucto\+Tokenizer\+::init (\begin{DoxyParamCaption}\item[{const Ti\+C\+C\+::\+Configuration \&}]{config }\end{DoxyParamCaption})}
+
+initalize a \mbox{\hyperlink{namespaceTokenizer}{Tokenizer}} using a Configuration structure
+
+
+\begin{DoxyParams}{Parameters}
+{\em config} & the Configuration to use \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true on success, false otherwise
+\end{DoxyReturn}
+this function sets up an Ucto tokenizer with some defaults and the values from config.\mbox{\Hypertarget{classUctoTokenizer_ad831991b8294a097300cf5e3ed891056}\label{classUctoTokenizer_ad831991b8294a097300cf5e3ed891056}} 
+\index{UctoTokenizer@{UctoTokenizer}!set\_TC\_debug@{set\_TC\_debug}}
+\index{set\_TC\_debug@{set\_TC\_debug}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{set\_TC\_debug()}{set\_TC\_debug()}}
+{\footnotesize\ttfamily void Ucto\+Tokenizer\+::set\+\_\+\+T\+C\+\_\+debug (\begin{DoxyParamCaption}\item[{bool}]{b }\end{DoxyParamCaption})}
+
+set the tokenizer T\+C\+\_\+debug property
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & a boolean, true to set to ON or O\+FF respectively\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classUctoTokenizer_a0b807116effc3de611ac251aae20265f}\label{classUctoTokenizer_a0b807116effc3de611ac251aae20265f}} 
+\index{UctoTokenizer@{UctoTokenizer}!setDocID@{setDocID}}
+\index{setDocID@{setDocID}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{setDocID()}{setDocID()}}
+{\footnotesize\ttfamily void Ucto\+Tokenizer\+::set\+Doc\+ID (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{id }\end{DoxyParamCaption})}
+
+set the tokenizer Doc\+ID value (for Fo\+LiA)
+
+
+\begin{DoxyParams}{Parameters}
+{\em id} & a string holding the document id. e.\+g. \char`\"{}document\+\_\+1\char`\"{}\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classUctoTokenizer_a90f4c538453eaa9e9131ee7517bf56d5}\label{classUctoTokenizer_a90f4c538453eaa9e9131ee7517bf56d5}} 
+\index{UctoTokenizer@{UctoTokenizer}!setFiltering@{setFiltering}}
+\index{setFiltering@{setFiltering}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{setFiltering()}{setFiltering()}}
+{\footnotesize\ttfamily void Ucto\+Tokenizer\+::set\+Filtering (\begin{DoxyParamCaption}\item[{bool}]{b }\end{DoxyParamCaption})}
+
+set the tokenizer Filtering property
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & a boolean, true to set to ON or O\+FF respectively\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classUctoTokenizer_abafc8b71fb7e17a281b061d50d60db5b}\label{classUctoTokenizer_abafc8b71fb7e17a281b061d50d60db5b}} 
+\index{UctoTokenizer@{UctoTokenizer}!setInputClass@{setInputClass}}
+\index{setInputClass@{setInputClass}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{setInputClass()}{setInputClass()}}
+{\footnotesize\ttfamily void Ucto\+Tokenizer\+::set\+Input\+Class (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{cls }\end{DoxyParamCaption})}
+
+set the tokenizer Input\+Class value
+
+
+\begin{DoxyParams}{Parameters}
+{\em cls} & a string holding the inputclass. e.\+g. \char`\"{}\+O\+C\+R\char`\"{}\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classUctoTokenizer_a54d2cdc6866bbb839d9dfbc13367b4a4}\label{classUctoTokenizer_a54d2cdc6866bbb839d9dfbc13367b4a4}} 
+\index{UctoTokenizer@{UctoTokenizer}!setInputEncoding@{setInputEncoding}}
+\index{setInputEncoding@{setInputEncoding}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{setInputEncoding()}{setInputEncoding()}}
+{\footnotesize\ttfamily void Ucto\+Tokenizer\+::set\+Input\+Encoding (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{enc }\end{DoxyParamCaption})}
+
+set the tokenizer Input\+Encoding value
+
+
+\begin{DoxyParams}{Parameters}
+{\em enc} & a string holding a possible encoding. e.\+g. \char`\"{}\+W\+I\+N\+D\+O\+W\+S-\/1252\char`\"{}\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classUctoTokenizer_a6c2dc39e6f9a5c1bea8104fdc42457ed}\label{classUctoTokenizer_a6c2dc39e6f9a5c1bea8104fdc42457ed}} 
+\index{UctoTokenizer@{UctoTokenizer}!setInputXml@{setInputXml}}
+\index{setInputXml@{setInputXml}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{setInputXml()}{setInputXml()}}
+{\footnotesize\ttfamily void Ucto\+Tokenizer\+::set\+Input\+Xml (\begin{DoxyParamCaption}\item[{bool}]{b }\end{DoxyParamCaption})}
+
+set the tokenizer Input\+Xml property
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & a boolean, true to set to ON or O\+FF respectively\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classUctoTokenizer_a6a04f28f190f4e8cb6e8c71541f556ed}\label{classUctoTokenizer_a6a04f28f190f4e8cb6e8c71541f556ed}} 
+\index{UctoTokenizer@{UctoTokenizer}!setOutputClass@{setOutputClass}}
+\index{setOutputClass@{setOutputClass}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{setOutputClass()}{setOutputClass()}}
+{\footnotesize\ttfamily void Ucto\+Tokenizer\+::set\+Output\+Class (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{cls }\end{DoxyParamCaption})}
+
+set the tokenizer Output\+Class value
+
+
+\begin{DoxyParams}{Parameters}
+{\em cls} & a string holding the outputclass. e.\+g. \char`\"{}current\char`\"{}\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classUctoTokenizer_a3c510a1a11a3fc12dbd826efe77484ec}\label{classUctoTokenizer_a3c510a1a11a3fc12dbd826efe77484ec}} 
+\index{UctoTokenizer@{UctoTokenizer}!setPassThru@{setPassThru}}
+\index{setPassThru@{setPassThru}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{setPassThru()}{setPassThru()}}
+{\footnotesize\ttfamily void Ucto\+Tokenizer\+::set\+Pass\+Thru (\begin{DoxyParamCaption}\item[{bool}]{b }\end{DoxyParamCaption})}
+
+set the tokenizer Pass\+Thru property
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & a boolean, true to set to ON or O\+FF respectively\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classUctoTokenizer_a28041e9c386773625c57016f9d1fe9bf}\label{classUctoTokenizer_a28041e9c386773625c57016f9d1fe9bf}} 
+\index{UctoTokenizer@{UctoTokenizer}!setQuoteDetection@{setQuoteDetection}}
+\index{setQuoteDetection@{setQuoteDetection}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{setQuoteDetection()}{setQuoteDetection()}}
+{\footnotesize\ttfamily void Ucto\+Tokenizer\+::set\+Quote\+Detection (\begin{DoxyParamCaption}\item[{bool}]{b }\end{DoxyParamCaption})}
+
+set the tokenizer Quote\+Detection property
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & a boolean, true to set to ON or O\+FF respectively\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classUctoTokenizer_a5a2451d15fa33eb376fd1edbe5549b19}\label{classUctoTokenizer_a5a2451d15fa33eb376fd1edbe5549b19}} 
+\index{UctoTokenizer@{UctoTokenizer}!setSentencePerLineInput@{setSentencePerLineInput}}
+\index{setSentencePerLineInput@{setSentencePerLineInput}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{setSentencePerLineInput()}{setSentencePerLineInput()}}
+{\footnotesize\ttfamily void Ucto\+Tokenizer\+::set\+Sentence\+Per\+Line\+Input (\begin{DoxyParamCaption}\item[{bool}]{b }\end{DoxyParamCaption})}
+
+set the tokenizer Sentence\+Per\+Line property
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & a boolean, true to set to ON or O\+FF respectively\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classUctoTokenizer_a653d53a4d4b74d029964ac7874e046bb}\label{classUctoTokenizer_a653d53a4d4b74d029964ac7874e046bb}} 
+\index{UctoTokenizer@{UctoTokenizer}!setTextRedundancy@{setTextRedundancy}}
+\index{setTextRedundancy@{setTextRedundancy}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{setTextRedundancy()}{setTextRedundancy()}}
+{\footnotesize\ttfamily void Ucto\+Tokenizer\+::set\+Text\+Redundancy (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{tr }\end{DoxyParamCaption})}
+
+set the tokenizer Text\+Redundancy value (for Fo\+LiA)
+
+
+\begin{DoxyParams}{Parameters}
+{\em tr} & a string holding the value. Possible values are \char`\"{}none\char`\"{}, \char`\"{}minimal\char`\"{} and \char`\"{}full\char`\"{}\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classUctoTokenizer_abd8380c1d877f45130433fdbe93ce78d}\label{classUctoTokenizer_abd8380c1d877f45130433fdbe93ce78d}} 
+\index{UctoTokenizer@{UctoTokenizer}!setUttMarker@{setUttMarker}}
+\index{setUttMarker@{setUttMarker}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{setUttMarker()}{setUttMarker()}}
+{\footnotesize\ttfamily void Ucto\+Tokenizer\+::set\+Utt\+Marker (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{u }\end{DoxyParamCaption})}
+
+set the utterance marker for the tokenizer
+
+
+\begin{DoxyParams}{Parameters}
+{\em u} & string holding the marker. e.\+g. \char`\"{}$<$utt$>$\char`\"{}\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classUctoTokenizer_a606b9b415f330d14aa92f548c79d1d32}\label{classUctoTokenizer_a606b9b415f330d14aa92f548c79d1d32}} 
+\index{UctoTokenizer@{UctoTokenizer}!setWordCorrection@{setWordCorrection}}
+\index{setWordCorrection@{setWordCorrection}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{setWordCorrection()}{setWordCorrection()}}
+{\footnotesize\ttfamily void Ucto\+Tokenizer\+::set\+Word\+Correction (\begin{DoxyParamCaption}\item[{bool}]{b }\end{DoxyParamCaption})}
+
+set the tokenizer Word\+Correction property
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & a boolean, true to set to ON or O\+FF respectively\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classUctoTokenizer_a1a339eefbeffff1f23a306f253c1d009}\label{classUctoTokenizer_a1a339eefbeffff1f23a306f253c1d009}} 
+\index{UctoTokenizer@{UctoTokenizer}!tokenize@{tokenize}}
+\index{tokenize@{tokenize}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{tokenize()}{tokenize()}}
+{\footnotesize\ttfamily vector$<$ string $>$ Ucto\+Tokenizer\+::tokenize (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{line }\end{DoxyParamCaption})}
+
+Tokenize a buffer of characters into a list of tokenized sentences
+
+
+\begin{DoxyParams}{Parameters}
+{\em line} & of sequence of characters to be tokenized \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a vector of strings each representing a sentence
+\end{DoxyReturn}
+The input line may be long and include newlines etc. Is is assumed to be in the current Input\+Encoding.
+
+The output is sequence of tokenized strings in U\+T\+F8, each representing one sentence.\mbox{\Hypertarget{classUctoTokenizer_ac4ceaa5751b52e2adf09a1708c7559bf}\label{classUctoTokenizer_ac4ceaa5751b52e2adf09a1708c7559bf}} 
+\index{UctoTokenizer@{UctoTokenizer}!tokenize\_line@{tokenize\_line}}
+\index{tokenize\_line@{tokenize\_line}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{tokenize\_line()}{tokenize\_line()}}
+{\footnotesize\ttfamily vector$<$ Tokenizer\+::\+Token $>$ Ucto\+Tokenizer\+::tokenize\+\_\+line (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{buffer,  }\item[{const std\+::string \&}]{lang = {\ttfamily \char`\"{}\char`\"{}} }\end{DoxyParamCaption})}
+
+tokenize a buffer using a specific language
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & a (possible long) sequence of characters \\
+\hline
+{\em lang} & the language to use for tokenizing \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a list of Ucto\+::\+Token elements representing the first sentence
+\end{DoxyReturn}
+The buffer is consumed completely and stored as tokens in the Ucto \mbox{\hyperlink{namespaceTokenizer}{Tokenizer}}
+
+After calling \mbox{\hyperlink{classUctoTokenizer_ac4ceaa5751b52e2adf09a1708c7559bf}{tokenize\+\_\+line()}} you should continue by calling \mbox{\hyperlink{classUctoTokenizer_ac6fbc7bbc91a8c52b20754e4ae4e852f}{tokenize\+\_\+line\+\_\+next()}} repeatedly to extract the next sentences\mbox{\Hypertarget{classUctoTokenizer_ac6fbc7bbc91a8c52b20754e4ae4e852f}\label{classUctoTokenizer_ac6fbc7bbc91a8c52b20754e4ae4e852f}} 
+\index{UctoTokenizer@{UctoTokenizer}!tokenize\_line\_next@{tokenize\_line\_next}}
+\index{tokenize\_line\_next@{tokenize\_line\_next}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{tokenize\_line\_next()}{tokenize\_line\_next()}}
+{\footnotesize\ttfamily vector$<$ Tokenizer\+::\+Token $>$ Ucto\+Tokenizer\+::tokenize\+\_\+line\+\_\+next (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+extract the next sequence of Token elements
+
+\begin{DoxyReturn}{Returns}
+a list of Ucto\+::\+Token elements representing the next sentence
+\end{DoxyReturn}
+assumes the tokenizer is first set up using \mbox{\hyperlink{classUctoTokenizer_ac4ceaa5751b52e2adf09a1708c7559bf}{tokenize\+\_\+line()}}\mbox{\Hypertarget{classUctoTokenizer_ae299016f83913b683b9b17f43600122d}\label{classUctoTokenizer_ae299016f83913b683b9b17f43600122d}} 
+\index{UctoTokenizer@{UctoTokenizer}!tokenize\_stream@{tokenize\_stream}}
+\index{tokenize\_stream@{tokenize\_stream}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{tokenize\_stream()}{tokenize\_stream()}}
+{\footnotesize\ttfamily vector$<$ Tokenizer\+::\+Token $>$ Ucto\+Tokenizer\+::tokenize\+\_\+stream (\begin{DoxyParamCaption}\item[{std\+::istream \&}]{is }\end{DoxyParamCaption})}
+
+restart the tokenizer on stream \textquotesingle{}is\textquotesingle{} and calls tokenizer\+\_\+stream\+\_\+next() for the first results
+
+
+\begin{DoxyParams}{Parameters}
+{\em is} & the stream to connect to \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a list of Ucto\+::\+Token elements which can be examined further
+\end{DoxyReturn}
+After calling \mbox{\hyperlink{classUctoTokenizer_ae299016f83913b683b9b17f43600122d}{tokenize\+\_\+stream()}} you should continue by calling \mbox{\hyperlink{classUctoTokenizer_a8749b3536cd2ad9ff90142dc138981ed}{tokenize\+\_\+stream\+\_\+next()}} until no more tokens ar found.\mbox{\Hypertarget{classUctoTokenizer_a8749b3536cd2ad9ff90142dc138981ed}\label{classUctoTokenizer_a8749b3536cd2ad9ff90142dc138981ed}} 
+\index{UctoTokenizer@{UctoTokenizer}!tokenize\_stream\_next@{tokenize\_stream\_next}}
+\index{tokenize\_stream\_next@{tokenize\_stream\_next}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{tokenize\_stream\_next()}{tokenize\_stream\_next()}}
+{\footnotesize\ttfamily vector$<$ Tokenizer\+::\+Token $>$ Ucto\+Tokenizer\+::tokenize\+\_\+stream\+\_\+next (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Tokenize characters from the current input stream into a list of Ucto\+::\+Token
+
+\begin{DoxyReturn}{Returns}
+a list of Ucto\+::\+Token elements which can be examined further
+\end{DoxyReturn}
+This function will extract characters from stream and tokenize them.
+
+This is non greedy. Might be called multiple times to consume the whole stream. It will return tokens upto an E\+N\+D\+O\+F\+S\+E\+N\+T\+E\+N\+CE token or out of data\mbox{\Hypertarget{classUctoTokenizer_a0251f8b56846c99609b4ab7e18c3365e}\label{classUctoTokenizer_a0251f8b56846c99609b4ab7e18c3365e}} 
+\index{UctoTokenizer@{UctoTokenizer}!tokenizeStream@{tokenizeStream}}
+\index{tokenizeStream@{tokenizeStream}!UctoTokenizer@{UctoTokenizer}}
+\doxysubsubsection{\texorpdfstring{tokenizeStream()}{tokenizeStream()}}
+{\footnotesize\ttfamily string Ucto\+Tokenizer\+::tokenize\+Stream (\begin{DoxyParamCaption}\item[{std\+::istream \&}]{is }\end{DoxyParamCaption})}
+
+Tokenize characters from a stream into one tokenized sentences
+
+
+\begin{DoxyParams}{Parameters}
+{\em is} & the input stream \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a string representing a sentence, or \char`\"{}\char`\"{} when done.
+\end{DoxyReturn}
+This function will extract characters from stream and tokenize them into a sentence. Can be called repeatedly to get more sentences.
+
+The Ucto tokenizer is keeping state of the input, so when calling this function again it is possible that NO actual data is read from the stream while a sentence is still in the tokenizer\textquotesingle{}s buffer
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{ucto__tokenizer__mod_8h}{ucto\+\_\+tokenizer\+\_\+mod.\+h}}\item 
+src/\mbox{\hyperlink{ucto__tokenizer__mod_8cxx}{ucto\+\_\+tokenizer\+\_\+mod.\+cxx}}\end{DoxyCompactItemize}

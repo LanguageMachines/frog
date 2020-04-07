@@ -1,0 +1,235 @@
+\hypertarget{classParserBase}{}\doxysection{Parser\+Base Class Reference}
+\label{classParserBase}\index{ParserBase@{ParserBase}}
+
+
+{\ttfamily \#include $<$Parser.\+h$>$}
+
+
+
+Inheritance diagram for Parser\+Base\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=224pt]{classParserBase__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Parser\+Base\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=195pt]{classParserBase__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classParserBase_a9d3f69037d3ffea73de92a422c14b0f0}{Parser\+Base}} (Ti\+C\+C\+::\+Log\+Stream $\ast$errlog, Ti\+C\+C\+::\+Log\+Stream $\ast$dbglog)
+\item 
+virtual \mbox{\hyperlink{classParserBase_acdda3ff46645e46f0714e7232dd3640a}{$\sim$\+Parser\+Base}} ()
+\item 
+virtual bool \mbox{\hyperlink{classParserBase_a7bf1ebfa663c9ba71d36b9993951f23e}{init}} (const Ti\+C\+C\+::\+Configuration \&)=0
+\item 
+virtual void \mbox{\hyperlink{classParserBase_a276ed872ca9abf82c075f497d5161bbf}{add\+\_\+provenance}} (folia\+::\+Document \&doc, folia\+::processor $\ast$) const =0
+\item 
+virtual void \mbox{\hyperlink{classParserBase_acaf94221556693ae235db90eb72a7759}{Parse}} (\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&, \mbox{\hyperlink{classTimerBlock}{Timer\+Block}} \&)=0
+\item 
+virtual void \mbox{\hyperlink{classParserBase_aa3a4d8a8c228116ef537565756b0906e}{add\+\_\+result}} (const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&, const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&) const
+\item 
+std\+::vector$<$ std\+::string $>$ \mbox{\hyperlink{classParserBase_ad1baf89ead0e8a3e5e41b3dbc0de70ae}{create\+Parser\+Instances}} (const \mbox{\hyperlink{structparseData}{parse\+Data}} \&)
+\item 
+std\+::string \mbox{\hyperlink{classParserBase_a57d53d5508294899bb33f3055bd02829}{get\+Tagset}} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classParserBase_aadc7084602ac6e63b550ce9748c761a4}{Parser\+Base}} (const \mbox{\hyperlink{classParserBase}{Parser\+Base}} \&)
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+bool \mbox{\hyperlink{classParserBase_ae90a0c2186a8169da82e04caac04de61}{is\+Init}}
+\item 
+Ti\+C\+C\+::\+Log\+Stream $\ast$ \mbox{\hyperlink{classParserBase_a3602a58560eb509ff82c011f91ddf007}{err\+Log}}
+\item 
+Ti\+C\+C\+::\+Log\+Stream $\ast$ \mbox{\hyperlink{classParserBase_a3f5e620c5bb0cff7837cb0c9ca0109d7}{dbg\+Log}}
+\item 
+std\+::string \mbox{\hyperlink{classParserBase_a497c7577be78c756be45a34920cb0947}{\+\_\+version}}
+\item 
+std\+::string \mbox{\hyperlink{classParserBase_ade7725de98326052deee54dd344bb684}{dep\+\_\+tagset}}
+\item 
+std\+::string \mbox{\hyperlink{classParserBase_af29bfc2312381d5a92330944948e021f}{P\+O\+S\+\_\+tagset}}
+\item 
+std\+::string \mbox{\hyperlink{classParserBase_a5ee67428313589d96c0f9f0ebfb77270}{M\+W\+U\+\_\+tagset}}
+\item 
+std\+::string \mbox{\hyperlink{classParserBase_abeaeb03ca102fbe8aadbb37e6f3ca5fe}{textclass}}
+\item 
+Ti\+C\+C\+::\+Uni\+Filter $\ast$ \mbox{\hyperlink{classParserBase_a157261c65c5a8cb15a271740dad27b4d}{filter}}
+\item 
+std\+::string \mbox{\hyperlink{classParserBase_a71ac0067b804250f08170277c165a7d8}{\+\_\+host}}
+\item 
+std\+::string \mbox{\hyperlink{classParserBase_a428fb654557462e0e3b7ee30f442ae7c}{\+\_\+port}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classParserBase_a9d3f69037d3ffea73de92a422c14b0f0}\label{classParserBase_a9d3f69037d3ffea73de92a422c14b0f0}} 
+\index{ParserBase@{ParserBase}!ParserBase@{ParserBase}}
+\index{ParserBase@{ParserBase}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{ParserBase()}{ParserBase()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily Parser\+Base\+::\+Parser\+Base (\begin{DoxyParamCaption}\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{errlog,  }\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{dbglog }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [explicit]}}
+
+\mbox{\Hypertarget{classParserBase_acdda3ff46645e46f0714e7232dd3640a}\label{classParserBase_acdda3ff46645e46f0714e7232dd3640a}} 
+\index{ParserBase@{ParserBase}!````~ParserBase@{$\sim$ParserBase}}
+\index{````~ParserBase@{$\sim$ParserBase}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{$\sim$ParserBase()}{~ParserBase()}}
+{\footnotesize\ttfamily Parser\+Base\+::$\sim$\+Parser\+Base (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+\mbox{\Hypertarget{classParserBase_aadc7084602ac6e63b550ce9748c761a4}\label{classParserBase_aadc7084602ac6e63b550ce9748c761a4}} 
+\index{ParserBase@{ParserBase}!ParserBase@{ParserBase}}
+\index{ParserBase@{ParserBase}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{ParserBase()}{ParserBase()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily Parser\+Base\+::\+Parser\+Base (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classParserBase}{Parser\+Base}} \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [protected]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classParserBase_a276ed872ca9abf82c075f497d5161bbf}\label{classParserBase_a276ed872ca9abf82c075f497d5161bbf}} 
+\index{ParserBase@{ParserBase}!add\_provenance@{add\_provenance}}
+\index{add\_provenance@{add\_provenance}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{add\_provenance()}{add\_provenance()}}
+{\footnotesize\ttfamily virtual void Parser\+Base\+::add\+\_\+provenance (\begin{DoxyParamCaption}\item[{folia\+::\+Document \&}]{doc,  }\item[{folia\+::processor $\ast$}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Implemented in \mbox{\hyperlink{classParser_a160a0288adcc432f6727864ed8cf7e4e}{Parser}}, and \mbox{\hyperlink{classAlpinoParser_a82021345a02ae8045180c35214a95778}{Alpino\+Parser}}.
+
+\mbox{\Hypertarget{classParserBase_aa3a4d8a8c228116ef537565756b0906e}\label{classParserBase_aa3a4d8a8c228116ef537565756b0906e}} 
+\index{ParserBase@{ParserBase}!add\_result@{add\_result}}
+\index{add\_result@{add\_result}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{add\_result()}{add\_result()}}
+{\footnotesize\ttfamily void Parser\+Base\+::add\+\_\+result (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd,  }\item[{const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&}]{wv }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+add the parser\textquotesingle{}s conclusiong to the Fo\+LiA we are working on
+
+
+\begin{DoxyParams}{Parameters}
+{\em fd} & the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} with the parse outcome allready inserted \\
+\hline
+{\em wv} & the original folia\+::\+Word elements.\\
+\hline
+\end{DoxyParams}
+This will create a Dependency\+Layer at the Sentence level of the {\itshape wv} with Dependency records for every dependency found
+
+Reimplemented in \mbox{\hyperlink{classAlpinoParser_a1b73895ab3547f3a9f05cbab59d10a92}{Alpino\+Parser}}.
+
+\mbox{\Hypertarget{classParserBase_ad1baf89ead0e8a3e5e41b3dbc0de70ae}\label{classParserBase_ad1baf89ead0e8a3e5e41b3dbc0de70ae}} 
+\index{ParserBase@{ParserBase}!createParserInstances@{createParserInstances}}
+\index{createParserInstances@{createParserInstances}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{createParserInstances()}{createParserInstances()}}
+{\footnotesize\ttfamily std\+::vector$<$std\+::string$>$ Parser\+Base\+::create\+Parser\+Instances (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structparseData}{parse\+Data}} \&}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classParserBase_a57d53d5508294899bb33f3055bd02829}\label{classParserBase_a57d53d5508294899bb33f3055bd02829}} 
+\index{ParserBase@{ParserBase}!getTagset@{getTagset}}
+\index{getTagset@{getTagset}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{getTagset()}{getTagset()}}
+{\footnotesize\ttfamily std\+::string Parser\+Base\+::get\+Tagset (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classParserBase_a7bf1ebfa663c9ba71d36b9993951f23e}\label{classParserBase_a7bf1ebfa663c9ba71d36b9993951f23e}} 
+\index{ParserBase@{ParserBase}!init@{init}}
+\index{init@{init}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{init()}{init()}}
+{\footnotesize\ttfamily virtual bool Parser\+Base\+::init (\begin{DoxyParamCaption}\item[{const Ti\+C\+C\+::\+Configuration \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Implemented in \mbox{\hyperlink{classParser_a3f5ba543039b484a34df64023bcfb84c}{Parser}}, and \mbox{\hyperlink{classAlpinoParser_a129741c0d7450c0fb82fde1aef7fb378}{Alpino\+Parser}}.
+
+\mbox{\Hypertarget{classParserBase_acaf94221556693ae235db90eb72a7759}\label{classParserBase_acaf94221556693ae235db90eb72a7759}} 
+\index{ParserBase@{ParserBase}!Parse@{Parse}}
+\index{Parse@{Parse}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{Parse()}{Parse()}}
+{\footnotesize\ttfamily virtual void Parser\+Base\+::\+Parse (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{,  }\item[{\mbox{\hyperlink{classTimerBlock}{Timer\+Block}} \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Implemented in \mbox{\hyperlink{classParser_a4f4dd369158e210c0a310a9922ba1ef6}{Parser}}, and \mbox{\hyperlink{classAlpinoParser_a9ca0518a748c4796dc06a4d53b0062b4}{Alpino\+Parser}}.
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classParserBase_a71ac0067b804250f08170277c165a7d8}\label{classParserBase_a71ac0067b804250f08170277c165a7d8}} 
+\index{ParserBase@{ParserBase}!\_host@{\_host}}
+\index{\_host@{\_host}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{\_host}{\_host}}
+{\footnotesize\ttfamily std\+::string Parser\+Base\+::\+\_\+host\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classParserBase_a428fb654557462e0e3b7ee30f442ae7c}\label{classParserBase_a428fb654557462e0e3b7ee30f442ae7c}} 
+\index{ParserBase@{ParserBase}!\_port@{\_port}}
+\index{\_port@{\_port}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{\_port}{\_port}}
+{\footnotesize\ttfamily std\+::string Parser\+Base\+::\+\_\+port\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classParserBase_a497c7577be78c756be45a34920cb0947}\label{classParserBase_a497c7577be78c756be45a34920cb0947}} 
+\index{ParserBase@{ParserBase}!\_version@{\_version}}
+\index{\_version@{\_version}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{\_version}{\_version}}
+{\footnotesize\ttfamily std\+::string Parser\+Base\+::\+\_\+version\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classParserBase_a3f5e620c5bb0cff7837cb0c9ca0109d7}\label{classParserBase_a3f5e620c5bb0cff7837cb0c9ca0109d7}} 
+\index{ParserBase@{ParserBase}!dbgLog@{dbgLog}}
+\index{dbgLog@{dbgLog}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{dbgLog}{dbgLog}}
+{\footnotesize\ttfamily Ti\+C\+C\+::\+Log\+Stream$\ast$ Parser\+Base\+::dbg\+Log\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classParserBase_ade7725de98326052deee54dd344bb684}\label{classParserBase_ade7725de98326052deee54dd344bb684}} 
+\index{ParserBase@{ParserBase}!dep\_tagset@{dep\_tagset}}
+\index{dep\_tagset@{dep\_tagset}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{dep\_tagset}{dep\_tagset}}
+{\footnotesize\ttfamily std\+::string Parser\+Base\+::dep\+\_\+tagset\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classParserBase_a3602a58560eb509ff82c011f91ddf007}\label{classParserBase_a3602a58560eb509ff82c011f91ddf007}} 
+\index{ParserBase@{ParserBase}!errLog@{errLog}}
+\index{errLog@{errLog}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{errLog}{errLog}}
+{\footnotesize\ttfamily Ti\+C\+C\+::\+Log\+Stream$\ast$ Parser\+Base\+::err\+Log\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classParserBase_a157261c65c5a8cb15a271740dad27b4d}\label{classParserBase_a157261c65c5a8cb15a271740dad27b4d}} 
+\index{ParserBase@{ParserBase}!filter@{filter}}
+\index{filter@{filter}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{filter}{filter}}
+{\footnotesize\ttfamily Ti\+C\+C\+::\+Uni\+Filter$\ast$ Parser\+Base\+::filter\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classParserBase_ae90a0c2186a8169da82e04caac04de61}\label{classParserBase_ae90a0c2186a8169da82e04caac04de61}} 
+\index{ParserBase@{ParserBase}!isInit@{isInit}}
+\index{isInit@{isInit}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{isInit}{isInit}}
+{\footnotesize\ttfamily bool Parser\+Base\+::is\+Init\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classParserBase_a5ee67428313589d96c0f9f0ebfb77270}\label{classParserBase_a5ee67428313589d96c0f9f0ebfb77270}} 
+\index{ParserBase@{ParserBase}!MWU\_tagset@{MWU\_tagset}}
+\index{MWU\_tagset@{MWU\_tagset}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{MWU\_tagset}{MWU\_tagset}}
+{\footnotesize\ttfamily std\+::string Parser\+Base\+::\+M\+W\+U\+\_\+tagset\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classParserBase_af29bfc2312381d5a92330944948e021f}\label{classParserBase_af29bfc2312381d5a92330944948e021f}} 
+\index{ParserBase@{ParserBase}!POS\_tagset@{POS\_tagset}}
+\index{POS\_tagset@{POS\_tagset}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{POS\_tagset}{POS\_tagset}}
+{\footnotesize\ttfamily std\+::string Parser\+Base\+::\+P\+O\+S\+\_\+tagset\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classParserBase_abeaeb03ca102fbe8aadbb37e6f3ca5fe}\label{classParserBase_abeaeb03ca102fbe8aadbb37e6f3ca5fe}} 
+\index{ParserBase@{ParserBase}!textclass@{textclass}}
+\index{textclass@{textclass}!ParserBase@{ParserBase}}
+\doxysubsubsection{\texorpdfstring{textclass}{textclass}}
+{\footnotesize\ttfamily std\+::string Parser\+Base\+::textclass\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{Parser_8h}{Parser.\+h}}\item 
+src/\mbox{\hyperlink{Parser_8cxx}{Parser.\+cxx}}\end{DoxyCompactItemize}

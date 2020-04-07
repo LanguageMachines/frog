@@ -1,0 +1,160 @@
+\hypertarget{classCGNTagger}{}\doxysection{C\+G\+N\+Tagger Class Reference}
+\label{classCGNTagger}\index{CGNTagger@{CGNTagger}}
+
+
+{\ttfamily \#include $<$cgn\+\_\+tagger\+\_\+mod.\+h$>$}
+
+
+
+Inheritance diagram for C\+G\+N\+Tagger\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=153pt]{classCGNTagger__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for C\+G\+N\+Tagger\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classCGNTagger__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classCGNTagger_ac0239d9a77a9eb0e7eeb503084c967d9}{C\+G\+N\+Tagger}} (Ti\+C\+C\+::\+Log\+Stream $\ast$l, Ti\+C\+C\+::\+Log\+Stream $\ast$d=0)
+\item 
+bool \mbox{\hyperlink{classCGNTagger_ae48fd5dcd3b1487cef35d2fce29ab356}{init}} (const Ti\+C\+C\+::\+Configuration \&)
+\item 
+void \mbox{\hyperlink{classCGNTagger_a7f3699e3ed919d35fa55cae21492a3a5}{add\+\_\+declaration}} (folia\+::\+Document \&, folia\+::processor $\ast$) const
+\item 
+void \mbox{\hyperlink{classCGNTagger_a0404e5acf9b82765a82d41db1748f465}{post\+\_\+process}} (\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&)
+\item 
+void \mbox{\hyperlink{classCGNTagger_ac082ed9c139cd56bbe2600da1d7ba9c6}{add\+\_\+tags}} (const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&, const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&) const
+\item 
+std\+::string \mbox{\hyperlink{classCGNTagger_af08db00984f75770e5a6cffeeaa1939e}{get\+Sub\+Set}} (const std\+::string \&, const std\+::string \&, const std\+::string \&) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classCGNTagger_ac0239d9a77a9eb0e7eeb503084c967d9}\label{classCGNTagger_ac0239d9a77a9eb0e7eeb503084c967d9}} 
+\index{CGNTagger@{CGNTagger}!CGNTagger@{CGNTagger}}
+\index{CGNTagger@{CGNTagger}!CGNTagger@{CGNTagger}}
+\doxysubsubsection{\texorpdfstring{CGNTagger()}{CGNTagger()}}
+{\footnotesize\ttfamily C\+G\+N\+Tagger\+::\+C\+G\+N\+Tagger (\begin{DoxyParamCaption}\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{l,  }\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{d = {\ttfamily 0} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [explicit]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classCGNTagger_a7f3699e3ed919d35fa55cae21492a3a5}\label{classCGNTagger_a7f3699e3ed919d35fa55cae21492a3a5}} 
+\index{CGNTagger@{CGNTagger}!add\_declaration@{add\_declaration}}
+\index{add\_declaration@{add\_declaration}!CGNTagger@{CGNTagger}}
+\doxysubsubsection{\texorpdfstring{add\_declaration()}{add\_declaration()}}
+{\footnotesize\ttfamily void C\+G\+N\+Tagger\+::add\+\_\+declaration (\begin{DoxyParamCaption}\item[{folia\+::\+Document \&}]{doc,  }\item[{folia\+::processor $\ast$}]{proc }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+add P\+OS annotation as an Annotation\+Type to the document
+
+
+\begin{DoxyParams}{Parameters}
+{\em doc} & the Document the add to \\
+\hline
+{\em proc} & the processor to add\\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classBaseTagger_a4549663d6620c26783f61022c2421c61}{Base\+Tagger}}.
+
+\mbox{\Hypertarget{classCGNTagger_ac082ed9c139cd56bbe2600da1d7ba9c6}\label{classCGNTagger_ac082ed9c139cd56bbe2600da1d7ba9c6}} 
+\index{CGNTagger@{CGNTagger}!add\_tags@{add\_tags}}
+\index{add\_tags@{add\_tags}!CGNTagger@{CGNTagger}}
+\doxysubsubsection{\texorpdfstring{add\_tags()}{add\_tags()}}
+{\footnotesize\ttfamily void C\+G\+N\+Tagger\+::add\+\_\+tags (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&}]{wv,  }\item[{const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd }\end{DoxyParamCaption}) const}
+
+add the tagger results to the folia\+:Word list
+
+
+\begin{DoxyParams}{Parameters}
+{\em wv} & The folia\+::\+Word vector to add to \\
+\hline
+{\em fd} & the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure with the tagger results\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classCGNTagger_af08db00984f75770e5a6cffeeaa1939e}\label{classCGNTagger_af08db00984f75770e5a6cffeeaa1939e}} 
+\index{CGNTagger@{CGNTagger}!getSubSet@{getSubSet}}
+\index{getSubSet@{getSubSet}!CGNTagger@{CGNTagger}}
+\doxysubsubsection{\texorpdfstring{getSubSet()}{getSubSet()}}
+{\footnotesize\ttfamily string C\+G\+N\+Tagger\+::get\+Sub\+Set (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{val,  }\item[{const std\+::string \&}]{head,  }\item[{const std\+::string \&}]{fullclass }\end{DoxyParamCaption}) const}
+
+get a specific subset value. (Fo\+LiA output only)
+
+
+\begin{DoxyParams}{Parameters}
+{\em val} & the val to look up \\
+\hline
+{\em head} & the head of the C\+GN P\+O\+S-\/tag \\
+\hline
+{\em fullclass} & the original full C\+GN tag, used for error messages only \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a string with the found value or throws when there is a problem 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+for a well-\/trained C\+GN tagger, all values should belong to a subset A\+ND there may never be a constraints conflict
+\end{DoxyNote}
+A full class may be N(soort,ev,basis,zijd,stan), so the head is N.
+
+For every value in \textquotesingle{}soort,ev,basis,zijd,stan\textquotesingle{} we lookup the subset in the cgn\+\_\+subsets, and when the constraints on the head are satisfied we return the subset.
+
+For instance\+: \textquotesingle{}soort\textquotesingle{} is found in the subsets to belong to the subset \textquotesingle{}ntype\textquotesingle{} and there are no \textquotesingle{}head\textquotesingle{} constrainst on ntype, so the lookup for \textquotesingle{}soort\textquotesingle{} yields \textquotesingle{}ntype\textquotesingle{}
+
+And would the fullclass have been V\+N\+W(betr,pron,stan,vol,persoon,getal) then the subset for \textquotesingle{}getal\textquotesingle{} is \textquotesingle{}getal\textquotesingle{} A\+ND the constraints for \textquotesingle{}getal\textquotesingle{} are \textquotesingle{}V\+NW, N\textquotesingle{}, so these are satisfied and the result is \textquotesingle{}getal\textquotesingle{}\mbox{\Hypertarget{classCGNTagger_ae48fd5dcd3b1487cef35d2fce29ab356}\label{classCGNTagger_ae48fd5dcd3b1487cef35d2fce29ab356}} 
+\index{CGNTagger@{CGNTagger}!init@{init}}
+\index{init@{init}!CGNTagger@{CGNTagger}}
+\doxysubsubsection{\texorpdfstring{init()}{init()}}
+{\footnotesize\ttfamily bool C\+G\+N\+Tagger\+::init (\begin{DoxyParamCaption}\item[{const Ti\+C\+C\+::\+Configuration \&}]{config }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+initalize a C\+GN tagger from \textquotesingle{}config\textquotesingle{}
+
+
+\begin{DoxyParams}{Parameters}
+{\em config} & the Ti\+C\+C\+::\+Configuration \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true on succes, false otherwise
+\end{DoxyReturn}
+first \mbox{\hyperlink{classBaseTagger_adf1ff8bb15ad11151eac9f0d70820853}{Base\+Tagger\+::init()}} is called to set generic values, then the C\+GN specific values for subset and constraints file-\/names are added and those files are read, except when these have the value \textquotesingle{}ignore\textquotesingle{}
+
+Reimplemented from \mbox{\hyperlink{classBaseTagger_adf1ff8bb15ad11151eac9f0d70820853}{Base\+Tagger}}.
+
+\mbox{\Hypertarget{classCGNTagger_a0404e5acf9b82765a82d41db1748f465}\label{classCGNTagger_a0404e5acf9b82765a82d41db1748f465}} 
+\index{CGNTagger@{CGNTagger}!post\_process@{post\_process}}
+\index{post\_process@{post\_process}!CGNTagger@{CGNTagger}}
+\doxysubsubsection{\texorpdfstring{post\_process()}{post\_process()}}
+{\footnotesize\ttfamily void C\+G\+N\+Tagger\+::post\+\_\+process (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{words }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+add the found tagging results to the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure
+
+
+\begin{DoxyParams}{Parameters}
+{\em words} & The \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure to extend\\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classBaseTagger_a008b76e8797b516fd167e1a24eb71ed4}{Base\+Tagger}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{cgn__tagger__mod_8h}{cgn\+\_\+tagger\+\_\+mod.\+h}}\item 
+src/\mbox{\hyperlink{cgn__tagger__mod_8cxx}{cgn\+\_\+tagger\+\_\+mod.\+cxx}}\end{DoxyCompactItemize}

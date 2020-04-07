@@ -1,0 +1,103 @@
+\hypertarget{FrogData_8cxx}{}\doxysection{src/\+Frog\+Data.cxx File Reference}
+\label{FrogData_8cxx}\index{src/FrogData.cxx@{src/FrogData.cxx}}
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$iomanip$>$}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Pretty\+Print.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+String\+Ops.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/\+Frog\+Data.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/mbma\+\_\+brackets.\+h\char`\"{}}\newline
+Include dependency graph for Frog\+Data.\+cxx\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{FrogData_8cxx__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+ostream \& \mbox{\hyperlink{FrogData_8cxx_a1f7608be1f941281168d3855df99b873}{operator$<$$<$}} (ostream \&os, const \mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} \&fr)
+\item 
+\mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} \mbox{\hyperlink{FrogData_8cxx_a87f80bf7fda317a767e0aaf7f50ab7d7}{merge}} (const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&fd, size\+\_\+t start, size\+\_\+t finish)
+\item 
+ostream \& \mbox{\hyperlink{FrogData_8cxx_a59788b0f4593878c1a2db847dc019d16}{operator$<$$<$}} (ostream \&os, const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&fd)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+const string \mbox{\hyperlink{FrogData_8cxx_a674b587b1ddb76b40afd4581eed5af99}{T\+AB}} = \char`\"{}\textbackslash{}t\char`\"{}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{FrogData_8cxx_a87f80bf7fda317a767e0aaf7f50ab7d7}\label{FrogData_8cxx_a87f80bf7fda317a767e0aaf7f50ab7d7}} 
+\index{FrogData.cxx@{FrogData.cxx}!merge@{merge}}
+\index{merge@{merge}!FrogData.cxx@{FrogData.cxx}}
+\doxysubsubsection{\texorpdfstring{merge()}{merge()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} merge (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd,  }\item[{size\+\_\+t}]{start,  }\item[{size\+\_\+t}]{finish }\end{DoxyParamCaption})}
+
+merge a range of records of an \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure into the first one
+
+
+\begin{DoxyParams}{Parameters}
+{\em fd} & the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure \\
+\hline
+{\em start} & index of the first record in the structure to merge \\
+\hline
+{\em finish} & index of the last record in the structure to merge \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the new merged record
+\end{DoxyReturn}
+all information from the records {\itshape start} +1 to {\itshape finish} is merged into the record at position {\itshape start}. Strings are concatenated using an underscore (\textquotesingle{}\+\_\+\textquotesingle{}) which is the way Frog has always displayed M\+WU\textquotesingle{}s
+
+\begin{DoxyNote}{Note}
+merging is only done for the first (default) lemma and morpheme
+\end{DoxyNote}
+\mbox{\Hypertarget{FrogData_8cxx_a59788b0f4593878c1a2db847dc019d16}\label{FrogData_8cxx_a59788b0f4593878c1a2db847dc019d16}} 
+\index{FrogData.cxx@{FrogData.cxx}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!FrogData.cxx@{FrogData.cxx}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{ostream \&}]{os,  }\item[{const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd }\end{DoxyParamCaption})}
+
+output a \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure to a stream
+
+
+\begin{DoxyParams}{Parameters}
+{\em os} & output stream \\
+\hline
+{\em fd} & the record to output \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the stream
+\end{DoxyReturn}
+\mbox{\Hypertarget{FrogData_8cxx_a1f7608be1f941281168d3855df99b873}\label{FrogData_8cxx_a1f7608be1f941281168d3855df99b873}} 
+\index{FrogData.cxx@{FrogData.cxx}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!FrogData.cxx@{FrogData.cxx}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{ostream \&}]{os,  }\item[{const \mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} \&}]{fr }\end{DoxyParamCaption})}
+
+output a \mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} structure to a stream
+
+
+\begin{DoxyParams}{Parameters}
+{\em os} & output stream \\
+\hline
+{\em fr} & the record to output \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the stream
+\end{DoxyReturn}
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{FrogData_8cxx_a674b587b1ddb76b40afd4581eed5af99}\label{FrogData_8cxx_a674b587b1ddb76b40afd4581eed5af99}} 
+\index{FrogData.cxx@{FrogData.cxx}!TAB@{TAB}}
+\index{TAB@{TAB}!FrogData.cxx@{FrogData.cxx}}
+\doxysubsubsection{\texorpdfstring{TAB}{TAB}}
+{\footnotesize\ttfamily const string T\+AB = \char`\"{}\textbackslash{}t\char`\"{}}
+

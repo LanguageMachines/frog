@@ -1,0 +1,76 @@
+\hypertarget{classtimbl__result}{}\doxysection{timbl\+\_\+result Class Reference}
+\label{classtimbl__result}\index{timbl\_result@{timbl\_result}}
+
+
+this class stores a triple of \mbox{\hyperlink{namespaceTimbl}{Timbl}} results  
+
+
+
+
+{\ttfamily \#include $<$csidp.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classtimbl__result_a1365ba926fc50f0cbddd4807a1d47368}{timbl\+\_\+result}} (const std\+::string \&, double, const Timbl\+::\+Value\+Distribution $\ast$)
+\item 
+\mbox{\hyperlink{classtimbl__result_a46d1a5021be855038d6cd760c52a8f0b}{timbl\+\_\+result}} (const std\+::string \&, double, const std\+::vector$<$ std\+::pair$<$ std\+::string, double $>$$>$ \&)
+\item 
+std\+::string \mbox{\hyperlink{classtimbl__result_ac03604b2336f9b23e84443960820482c}{cls}} () const
+\item 
+double \mbox{\hyperlink{classtimbl__result_aff8e7d331c55d529d386aa3f07fb5b6a}{confidence}} () const
+\item 
+const std\+::vector$<$ std\+::pair$<$ std\+::string, double $>$ $>$ \& \mbox{\hyperlink{classtimbl__result_a577eaa3ec1a057a57132914bd83bfdd1}{dist}} () const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+this class stores a triple of \mbox{\hyperlink{namespaceTimbl}{Timbl}} results 
+
+
+\begin{DoxyEnumerate}
+\item the assigned class
+\item the Confidence value for the class
+\item the class distribution as a vector of class/double values 
+\end{DoxyEnumerate}
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classtimbl__result_a1365ba926fc50f0cbddd4807a1d47368}\label{classtimbl__result_a1365ba926fc50f0cbddd4807a1d47368}} 
+\index{timbl\_result@{timbl\_result}!timbl\_result@{timbl\_result}}
+\index{timbl\_result@{timbl\_result}!timbl\_result@{timbl\_result}}
+\doxysubsubsection{\texorpdfstring{timbl\_result()}{timbl\_result()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily timbl\+\_\+result\+::timbl\+\_\+result (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{cls,  }\item[{double}]{conf,  }\item[{const Timbl\+::\+Value\+Distribution $\ast$}]{vd }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classtimbl__result_a46d1a5021be855038d6cd760c52a8f0b}\label{classtimbl__result_a46d1a5021be855038d6cd760c52a8f0b}} 
+\index{timbl\_result@{timbl\_result}!timbl\_result@{timbl\_result}}
+\index{timbl\_result@{timbl\_result}!timbl\_result@{timbl\_result}}
+\doxysubsubsection{\texorpdfstring{timbl\_result()}{timbl\_result()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily timbl\+\_\+result\+::timbl\+\_\+result (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{cls,  }\item[{double}]{conf,  }\item[{const std\+::vector$<$ std\+::pair$<$ std\+::string, double $>$$>$ \&}]{vd }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classtimbl__result_ac03604b2336f9b23e84443960820482c}\label{classtimbl__result_ac03604b2336f9b23e84443960820482c}} 
+\index{timbl\_result@{timbl\_result}!cls@{cls}}
+\index{cls@{cls}!timbl\_result@{timbl\_result}}
+\doxysubsubsection{\texorpdfstring{cls()}{cls()}}
+{\footnotesize\ttfamily std\+::string timbl\+\_\+result\+::cls (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+return the cls value\mbox{\Hypertarget{classtimbl__result_aff8e7d331c55d529d386aa3f07fb5b6a}\label{classtimbl__result_aff8e7d331c55d529d386aa3f07fb5b6a}} 
+\index{timbl\_result@{timbl\_result}!confidence@{confidence}}
+\index{confidence@{confidence}!timbl\_result@{timbl\_result}}
+\doxysubsubsection{\texorpdfstring{confidence()}{confidence()}}
+{\footnotesize\ttfamily double timbl\+\_\+result\+::confidence (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+return the confidence of the value\mbox{\Hypertarget{classtimbl__result_a577eaa3ec1a057a57132914bd83bfdd1}\label{classtimbl__result_a577eaa3ec1a057a57132914bd83bfdd1}} 
+\index{timbl\_result@{timbl\_result}!dist@{dist}}
+\index{dist@{dist}!timbl\_result@{timbl\_result}}
+\doxysubsubsection{\texorpdfstring{dist()}{dist()}}
+{\footnotesize\ttfamily const std\+::vector$<$ std\+::pair$<$std\+::string,double$>$ $>$\& timbl\+\_\+result\+::dist (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+return the distribution where the cls value is part of
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{csidp_8h}{csidp.\+h}}\item 
+src/\mbox{\hyperlink{csidp_8cxx}{csidp.\+cxx}}\end{DoxyCompactItemize}

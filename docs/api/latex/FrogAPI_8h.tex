@@ -1,0 +1,59 @@
+\hypertarget{FrogAPI_8h}{}\doxysection{include/frog/\+Frog\+A\+PI.h File Reference}
+\label{FrogAPI_8h}\index{include/frog/FrogAPI.h@{include/frog/FrogAPI.h}}
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include \char`\"{}timbl/\+Timbl\+A\+P\+I.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Configuration.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Log\+Stream.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Fd\+Stream.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Server\+Base.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}libfolia/folia.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ucto/tokenize.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/\+Frog-\/util.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/\+Frog\+Data.\+h\char`\"{}}\newline
+Include dependency graph for Frog\+A\+P\+I.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{FrogAPI_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=264pt]{FrogAPI_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classFrogOptions}{Frog\+Options}}
+\begin{DoxyCompactList}\small\item\em this class holds the runtime settings for Frog \end{DoxyCompactList}\item 
+class \mbox{\hyperlink{classFrogAPI}{Frog\+A\+PI}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::vector$<$ std\+::string $>$ \mbox{\hyperlink{FrogAPI_8h_a27313f38aaa10981a67d7dd5e3180365}{get\+\_\+full\+\_\+morph\+\_\+analysis}} (folia\+::\+Word $\ast$word, bool make\+\_\+flat=false)
+\item 
+std\+::vector$<$ std\+::string $>$ \mbox{\hyperlink{FrogAPI_8h_ab34c05a8d32cce790df35fedd3382a58}{get\+\_\+compound\+\_\+analysis}} (folia\+::\+Word $\ast$word)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{FrogAPI_8h_ab34c05a8d32cce790df35fedd3382a58}\label{FrogAPI_8h_ab34c05a8d32cce790df35fedd3382a58}} 
+\index{FrogAPI.h@{FrogAPI.h}!get\_compound\_analysis@{get\_compound\_analysis}}
+\index{get\_compound\_analysis@{get\_compound\_analysis}!FrogAPI.h@{FrogAPI.h}}
+\doxysubsubsection{\texorpdfstring{get\_compound\_analysis()}{get\_compound\_analysis()}}
+{\footnotesize\ttfamily std\+::vector$<$std\+::string$>$ get\+\_\+compound\+\_\+analysis (\begin{DoxyParamCaption}\item[{folia\+::\+Word $\ast$}]{word }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{FrogAPI_8h_a27313f38aaa10981a67d7dd5e3180365}\label{FrogAPI_8h_a27313f38aaa10981a67d7dd5e3180365}} 
+\index{FrogAPI.h@{FrogAPI.h}!get\_full\_morph\_analysis@{get\_full\_morph\_analysis}}
+\index{get\_full\_morph\_analysis@{get\_full\_morph\_analysis}!FrogAPI.h@{FrogAPI.h}}
+\doxysubsubsection{\texorpdfstring{get\_full\_morph\_analysis()}{get\_full\_morph\_analysis()}}
+{\footnotesize\ttfamily std\+::vector$<$std\+::string$>$ get\+\_\+full\+\_\+morph\+\_\+analysis (\begin{DoxyParamCaption}\item[{folia\+::\+Word $\ast$}]{word,  }\item[{bool}]{make\+\_\+flat = {\ttfamily false} }\end{DoxyParamCaption})}
+

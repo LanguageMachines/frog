@@ -1,0 +1,59 @@
+\hypertarget{Parser_8h}{}\doxysection{include/frog/\+Parser.h File Reference}
+\label{Parser_8h}\index{include/frog/Parser.h@{include/frog/Parser.h}}
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include $<$set$>$}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Log\+Stream.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Configuration.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Unicode.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}libfolia/folia.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ucto/tokenize.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}timbl/\+Timbl\+A\+P\+I.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/\+Frog\+Data.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/ckyparser.\+h\char`\"{}}\newline
+Include dependency graph for Parser.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{Parser_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{Parser_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classParserBase}{Parser\+Base}}
+\item 
+class \mbox{\hyperlink{classParser}{Parser}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{Parser_8h_adabe86559432ad22fbbedbe2e21ce8a4}{append\+Parse\+Result}} (\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&fd, const std\+::vector$<$ \mbox{\hyperlink{structparsrel}{parsrel}} $>$ \&res)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{Parser_8h_adabe86559432ad22fbbedbe2e21ce8a4}\label{Parser_8h_adabe86559432ad22fbbedbe2e21ce8a4}} 
+\index{Parser.h@{Parser.h}!appendParseResult@{appendParseResult}}
+\index{appendParseResult@{appendParseResult}!Parser.h@{Parser.h}}
+\doxysubsubsection{\texorpdfstring{appendParseResult()}{appendParseResult()}}
+{\footnotesize\ttfamily void append\+Parse\+Result (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd,  }\item[{const std\+::vector$<$ \mbox{\hyperlink{structparsrel}{parsrel}} $>$ \&}]{res }\end{DoxyParamCaption})}
+
+transfer the outcome of the parser back into the fog\+\_\+data structure
+
+
+\begin{DoxyParams}{Parameters}
+{\em fd} & the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} we want to add to \\
+\hline
+{\em res} & the parser\textquotesingle{}s results\\
+\hline
+\end{DoxyParams}

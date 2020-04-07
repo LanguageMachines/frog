@@ -1,0 +1,167 @@
+\hypertarget{classMwu}{}\doxysection{Mwu Class Reference}
+\label{classMwu}\index{Mwu@{Mwu}}
+
+
+{\ttfamily \#include $<$mwu\+\_\+chunker\+\_\+mod.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classMwu_a1acca06525ee26476dcd313743221ba0}{Mwu}} (Ti\+C\+C\+::\+Log\+Stream $\ast$, Ti\+C\+C\+::\+Log\+Stream $\ast$)
+\item 
+\mbox{\hyperlink{classMwu_a1d6f836043a1faad8b6d9b035d4c92ff}{$\sim$\+Mwu}} ()
+\item 
+void \mbox{\hyperlink{classMwu_a510114f4861c64207eb1acbe53af4cd0}{reset}} ()
+\item 
+bool \mbox{\hyperlink{classMwu_ab3973f0549bb784011d09edaa3b603f8}{init}} (const Ti\+C\+C\+::\+Configuration \&)
+\item 
+void \mbox{\hyperlink{classMwu_a7fa25ae1a73f83cbf42b15bb77a7160c}{add\+\_\+provenance}} (folia\+::\+Document \&, folia\+::processor $\ast$) const
+\item 
+void \mbox{\hyperlink{classMwu_acbdac70792689092313c91a20f2e2cb2}{Classify}} (\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&)
+\item 
+void \mbox{\hyperlink{classMwu_a4848425af22eeda7a50046e9ead544ab}{add}} (\mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} \&)
+\item 
+void \mbox{\hyperlink{classMwu_a3d0d039c1611c23dfaf5ea229909db34}{add\+\_\+result}} (const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&, const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&) const
+\item 
+std\+::string \mbox{\hyperlink{classMwu_a32910a3f5c99410367daceb35881e109}{get\+Tagset}} () const
+\begin{DoxyCompactList}\small\item\em return the value for {\itshape mwu\+\_\+tagset}. (set via Configuration) \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classMwu_afcaad4761152ea74b1c2a7df0a744ad0}{version}} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+std\+::ostream \& \mbox{\hyperlink{classMwu_aceb0e89b14dd295dd1adf207406a4a18}{operator$<$$<$}} (std\+::ostream \&, const \mbox{\hyperlink{classMwu}{Mwu}} \&)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classMwu_a1acca06525ee26476dcd313743221ba0}\label{classMwu_a1acca06525ee26476dcd313743221ba0}} 
+\index{Mwu@{Mwu}!Mwu@{Mwu}}
+\index{Mwu@{Mwu}!Mwu@{Mwu}}
+\doxysubsubsection{\texorpdfstring{Mwu()}{Mwu()}}
+{\footnotesize\ttfamily Mwu\+::\+Mwu (\begin{DoxyParamCaption}\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{err\+\_\+log,  }\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{dbg\+\_\+log }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+create a \mbox{\hyperlink{classMwu}{Mwu}} record (U\+N\+I\+N\+I\+T\+I\+A\+L\+I\+Z\+ED yet)
+
+
+\begin{DoxyParams}{Parameters}
+{\em err\+\_\+log} & The Log\+Stream for errors \\
+\hline
+{\em dbg\+\_\+log} & The Log\+Stream for debugging\\
+\hline
+\end{DoxyParams}
+a call to \mbox{\hyperlink{classMwu_ab3973f0549bb784011d09edaa3b603f8}{Mwu\+::init()}} is needed to be able to use the \mbox{\hyperlink{classMwu}{Mwu}} classifier\mbox{\Hypertarget{classMwu_a1d6f836043a1faad8b6d9b035d4c92ff}\label{classMwu_a1d6f836043a1faad8b6d9b035d4c92ff}} 
+\index{Mwu@{Mwu}!````~Mwu@{$\sim$Mwu}}
+\index{````~Mwu@{$\sim$Mwu}!Mwu@{Mwu}}
+\doxysubsubsection{\texorpdfstring{$\sim$Mwu()}{~Mwu()}}
+{\footnotesize\ttfamily Mwu\+::$\sim$\+Mwu (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+erase an \mbox{\hyperlink{classMwu}{Mwu}} record
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classMwu_a4848425af22eeda7a50046e9ead544ab}\label{classMwu_a4848425af22eeda7a50046e9ead544ab}} 
+\index{Mwu@{Mwu}!add@{add}}
+\index{add@{add}!Mwu@{Mwu}}
+\doxysubsubsection{\texorpdfstring{add()}{add()}}
+{\footnotesize\ttfamily void Mwu\+::add (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} \&}]{fd }\end{DoxyParamCaption})}
+
+add a \mbox{\hyperlink{classmwuAna}{mwu\+Ana}} record to this \mbox{\hyperlink{classMwu}{Mwu}}
+
+
+\begin{DoxyParams}{Parameters}
+{\em fd} & The \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure with the information to use\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classMwu_a7fa25ae1a73f83cbf42b15bb77a7160c}\label{classMwu_a7fa25ae1a73f83cbf42b15bb77a7160c}} 
+\index{Mwu@{Mwu}!add\_provenance@{add\_provenance}}
+\index{add\_provenance@{add\_provenance}!Mwu@{Mwu}}
+\doxysubsubsection{\texorpdfstring{add\_provenance()}{add\_provenance()}}
+{\footnotesize\ttfamily void Mwu\+::add\+\_\+provenance (\begin{DoxyParamCaption}\item[{folia\+::\+Document \&}]{doc,  }\item[{folia\+::processor $\ast$}]{main }\end{DoxyParamCaption}) const}
+
+add provenance information for the tokenizer. (Fo\+LiA output only)
+
+
+\begin{DoxyParams}{Parameters}
+{\em doc} & the Fo\+LiA document to add to \\
+\hline
+{\em main} & the processor to use (presumably the Frog processor)\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classMwu_a3d0d039c1611c23dfaf5ea229909db34}\label{classMwu_a3d0d039c1611c23dfaf5ea229909db34}} 
+\index{Mwu@{Mwu}!add\_result@{add\_result}}
+\index{add\_result@{add\_result}!Mwu@{Mwu}}
+\doxysubsubsection{\texorpdfstring{add\_result()}{add\_result()}}
+{\footnotesize\ttfamily void Mwu\+::add\+\_\+result (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd,  }\item[{const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&}]{wv }\end{DoxyParamCaption}) const}
+
+add the mwu\textquotesingle{}s in {\itshape fd} as Entities to the parent of the {\itshape wv} list of Word
+
+
+\begin{DoxyParams}{Parameters}
+{\em fd} & The tagged results \\
+\hline
+{\em wv} & The folia\+:Word vector\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classMwu_acbdac70792689092313c91a20f2e2cb2}\label{classMwu_acbdac70792689092313c91a20f2e2cb2}} 
+\index{Mwu@{Mwu}!Classify@{Classify}}
+\index{Classify@{Classify}!Mwu@{Mwu}}
+\doxysubsubsection{\texorpdfstring{Classify()}{Classify()}}
+{\footnotesize\ttfamily void Mwu\+::\+Classify (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{sent }\end{DoxyParamCaption})}
+
+run the \mbox{\hyperlink{classMwu}{Mwu}} classifier on e sentence in \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} format
+
+
+\begin{DoxyParams}{Parameters}
+{\em sent} & a \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure with unresolved M\+WU\textquotesingle{}s\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classMwu_a32910a3f5c99410367daceb35881e109}\label{classMwu_a32910a3f5c99410367daceb35881e109}} 
+\index{Mwu@{Mwu}!getTagset@{getTagset}}
+\index{getTagset@{getTagset}!Mwu@{Mwu}}
+\doxysubsubsection{\texorpdfstring{getTagset()}{getTagset()}}
+{\footnotesize\ttfamily std\+::string Mwu\+::get\+Tagset (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+return the value for {\itshape mwu\+\_\+tagset}. (set via Configuration) 
+
+\mbox{\Hypertarget{classMwu_ab3973f0549bb784011d09edaa3b603f8}\label{classMwu_ab3973f0549bb784011d09edaa3b603f8}} 
+\index{Mwu@{Mwu}!init@{init}}
+\index{init@{init}!Mwu@{Mwu}}
+\doxysubsubsection{\texorpdfstring{init()}{init()}}
+{\footnotesize\ttfamily bool Mwu\+::init (\begin{DoxyParamCaption}\item[{const Ti\+C\+C\+::\+Configuration \&}]{config }\end{DoxyParamCaption})}
+
+initialize the \mbox{\hyperlink{classMwu}{Mwu}} using a Configuration structure
+
+
+\begin{DoxyParams}{Parameters}
+{\em config} & the configuration to use\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classMwu_a510114f4861c64207eb1acbe53af4cd0}\label{classMwu_a510114f4861c64207eb1acbe53af4cd0}} 
+\index{Mwu@{Mwu}!reset@{reset}}
+\index{reset@{reset}!Mwu@{Mwu}}
+\doxysubsubsection{\texorpdfstring{reset()}{reset()}}
+{\footnotesize\ttfamily void Mwu\+::reset (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+clear an \mbox{\hyperlink{classMwu}{Mwu}} record\mbox{\Hypertarget{classMwu_afcaad4761152ea74b1c2a7df0a744ad0}\label{classMwu_afcaad4761152ea74b1c2a7df0a744ad0}} 
+\index{Mwu@{Mwu}!version@{version}}
+\index{version@{version}!Mwu@{Mwu}}
+\doxysubsubsection{\texorpdfstring{version()}{version()}}
+{\footnotesize\ttfamily std\+::string Mwu\+::version (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Friends And Related Function Documentation}
+\mbox{\Hypertarget{classMwu_aceb0e89b14dd295dd1adf207406a4a18}\label{classMwu_aceb0e89b14dd295dd1adf207406a4a18}} 
+\index{Mwu@{Mwu}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!Mwu@{Mwu}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$}{operator<<}}
+{\footnotesize\ttfamily std\+::ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{std\+::ostream \&}]{os,  }\item[{const \mbox{\hyperlink{classMwu}{Mwu}} \&}]{mwu }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [friend]}}
+
+output an \mbox{\hyperlink{classMwu}{Mwu}} (debugging only)
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{mwu__chunker__mod_8h}{mwu\+\_\+chunker\+\_\+mod.\+h}}\item 
+src/\mbox{\hyperlink{mwu__chunker__mod_8cxx}{mwu\+\_\+chunker\+\_\+mod.\+cxx}}\end{DoxyCompactItemize}

@@ -1,0 +1,106 @@
+\hypertarget{ner__prog_8cxx}{}\doxysection{src/ner\+\_\+prog.cxx File Reference}
+\label{ner__prog_8cxx}\index{src/ner\_prog.cxx@{src/ner\_prog.cxx}}
+{\ttfamily \#include \char`\"{}frog/ner\+\_\+tagger\+\_\+mod.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include \char`\"{}config.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Log\+Stream.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Configuration.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Command\+Line.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Pretty\+Print.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}libfolia/folia.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}mbt/\+Mbt\+A\+P\+I.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/ucto\+\_\+tokenizer\+\_\+mod.\+h\char`\"{}}\newline
+Include dependency graph for ner\+\_\+prog.\+cxx\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{ner__prog_8cxx__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+Ti\+C\+C\+::\+Log\+Stream \mbox{\hyperlink{ner__prog_8cxx_a8732abfb0689391d12e2930b6b7b08e6}{my\+\_\+default\+\_\+log}} (cerr, \char`\"{}\char`\"{}, Stamp\+Message)
+\item 
+void \mbox{\hyperlink{ner__prog_8cxx_a2ef30c42cbc289d899a8be5d2d8f77d0}{usage}} ()
+\item 
+bool \mbox{\hyperlink{ner__prog_8cxx_a714468cac5f33fb91f50fc52f9128d1f}{parse\+\_\+args}} (Ti\+C\+C\+::\+C\+L\+\_\+\+Options \&Opts)
+\item 
+bool \mbox{\hyperlink{ner__prog_8cxx_aee8048628ff2b5c026c9e15acdcaacb8}{init}} ()
+\item 
+void \mbox{\hyperlink{ner__prog_8cxx_a2163d6e1fed2e20c4e5b73bdc68a1e31}{Test}} (istream \&in)
+\item 
+int \mbox{\hyperlink{ner__prog_8cxx_a0ddf1224851353fc92bfbff6f499fa97}{main}} (int argc, char $\ast$argv\mbox{[}$\,$\mbox{]})
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+Ti\+C\+C\+::\+Log\+Stream $\ast$ \mbox{\hyperlink{ner__prog_8cxx_add80008acf88093a421aff3c7b3d71b8}{the\+Err\+Log}} = \&\mbox{\hyperlink{ner__prog_8cxx_a8732abfb0689391d12e2930b6b7b08e6}{my\+\_\+default\+\_\+log}}
+\item 
+vector$<$ string $>$ \mbox{\hyperlink{ner__prog_8cxx_a8a49c56f1092e9ccc4a37225a4050109}{file\+Names}}
+\item 
+Ti\+C\+C\+::\+Configuration \mbox{\hyperlink{ner__prog_8cxx_ab6cef780d96dfa1d99c73ae23179e04a}{configuration}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{ner__prog_8cxx_aee8048628ff2b5c026c9e15acdcaacb8}\label{ner__prog_8cxx_aee8048628ff2b5c026c9e15acdcaacb8}} 
+\index{ner\_prog.cxx@{ner\_prog.cxx}!init@{init}}
+\index{init@{init}!ner\_prog.cxx@{ner\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{init()}{init()}}
+{\footnotesize\ttfamily bool init (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ner__prog_8cxx_a0ddf1224851353fc92bfbff6f499fa97}\label{ner__prog_8cxx_a0ddf1224851353fc92bfbff6f499fa97}} 
+\index{ner\_prog.cxx@{ner\_prog.cxx}!main@{main}}
+\index{main@{main}!ner\_prog.cxx@{ner\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily int main (\begin{DoxyParamCaption}\item[{int}]{argc,  }\item[{char $\ast$}]{argv\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ner__prog_8cxx_a8732abfb0689391d12e2930b6b7b08e6}\label{ner__prog_8cxx_a8732abfb0689391d12e2930b6b7b08e6}} 
+\index{ner\_prog.cxx@{ner\_prog.cxx}!my\_default\_log@{my\_default\_log}}
+\index{my\_default\_log@{my\_default\_log}!ner\_prog.cxx@{ner\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{my\_default\_log()}{my\_default\_log()}}
+{\footnotesize\ttfamily Ti\+C\+C\+::\+Log\+Stream my\+\_\+default\+\_\+log (\begin{DoxyParamCaption}\item[{cerr}]{,  }\item[{\char`\"{}\char`\"{}}]{,  }\item[{Stamp\+Message}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ner__prog_8cxx_a714468cac5f33fb91f50fc52f9128d1f}\label{ner__prog_8cxx_a714468cac5f33fb91f50fc52f9128d1f}} 
+\index{ner\_prog.cxx@{ner\_prog.cxx}!parse\_args@{parse\_args}}
+\index{parse\_args@{parse\_args}!ner\_prog.cxx@{ner\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{parse\_args()}{parse\_args()}}
+{\footnotesize\ttfamily bool parse\+\_\+args (\begin{DoxyParamCaption}\item[{Ti\+C\+C\+::\+C\+L\+\_\+\+Options \&}]{Opts }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ner__prog_8cxx_a2163d6e1fed2e20c4e5b73bdc68a1e31}\label{ner__prog_8cxx_a2163d6e1fed2e20c4e5b73bdc68a1e31}} 
+\index{ner\_prog.cxx@{ner\_prog.cxx}!Test@{Test}}
+\index{Test@{Test}!ner\_prog.cxx@{ner\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{Test()}{Test()}}
+{\footnotesize\ttfamily void Test (\begin{DoxyParamCaption}\item[{istream \&}]{in }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ner__prog_8cxx_a2ef30c42cbc289d899a8be5d2d8f77d0}\label{ner__prog_8cxx_a2ef30c42cbc289d899a8be5d2d8f77d0}} 
+\index{ner\_prog.cxx@{ner\_prog.cxx}!usage@{usage}}
+\index{usage@{usage}!ner\_prog.cxx@{ner\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{usage()}{usage()}}
+{\footnotesize\ttfamily void usage (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{ner__prog_8cxx_ab6cef780d96dfa1d99c73ae23179e04a}\label{ner__prog_8cxx_ab6cef780d96dfa1d99c73ae23179e04a}} 
+\index{ner\_prog.cxx@{ner\_prog.cxx}!configuration@{configuration}}
+\index{configuration@{configuration}!ner\_prog.cxx@{ner\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{configuration}{configuration}}
+{\footnotesize\ttfamily Ti\+C\+C\+::\+Configuration configuration}
+
+\mbox{\Hypertarget{ner__prog_8cxx_a8a49c56f1092e9ccc4a37225a4050109}\label{ner__prog_8cxx_a8a49c56f1092e9ccc4a37225a4050109}} 
+\index{ner\_prog.cxx@{ner\_prog.cxx}!fileNames@{fileNames}}
+\index{fileNames@{fileNames}!ner\_prog.cxx@{ner\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{fileNames}{fileNames}}
+{\footnotesize\ttfamily vector$<$string$>$ file\+Names}
+
+\mbox{\Hypertarget{ner__prog_8cxx_add80008acf88093a421aff3c7b3d71b8}\label{ner__prog_8cxx_add80008acf88093a421aff3c7b3d71b8}} 
+\index{ner\_prog.cxx@{ner\_prog.cxx}!theErrLog@{theErrLog}}
+\index{theErrLog@{theErrLog}!ner\_prog.cxx@{ner\_prog.cxx}}
+\doxysubsubsection{\texorpdfstring{theErrLog}{theErrLog}}
+{\footnotesize\ttfamily Ti\+C\+C\+::\+Log\+Stream$\ast$ the\+Err\+Log = \&\mbox{\hyperlink{ner__prog_8cxx_a8732abfb0689391d12e2930b6b7b08e6}{my\+\_\+default\+\_\+log}}}
+

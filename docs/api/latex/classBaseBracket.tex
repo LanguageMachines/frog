@@ -1,0 +1,374 @@
+\hypertarget{classBaseBracket}{}\doxysection{Base\+Bracket Class Reference}
+\label{classBaseBracket}\index{BaseBracket@{BaseBracket}}
+
+
+{\ttfamily \#include $<$mbma\+\_\+brackets.\+h$>$}
+
+
+
+Inheritance diagram for Base\+Bracket\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=248pt]{classBaseBracket__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Base\+Bracket\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=190pt]{classBaseBracket__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classBaseBracket_ac5a0065087bd0c3da901a4427efd0bed}{Base\+Bracket}} (\mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} t, const std\+::vector$<$ \mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} $>$ \&R, int flag, Ti\+C\+C\+::\+Log\+Stream \&l)
+\item 
+\mbox{\hyperlink{classBaseBracket_a70ab28470b2a31735944569e60808c2b}{Base\+Bracket}} (\mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} t, int flag, Ti\+C\+C\+::\+Log\+Stream \&l)
+\item 
+virtual \mbox{\hyperlink{classBaseBracket_a8f43b6a249666a75905a2930c485ebc3}{$\sim$\+Base\+Bracket}} ()
+\item 
+virtual \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}} $\ast$ \mbox{\hyperlink{classBaseBracket_a587216a5f413c922d854a899260944b7}{clone}} () const =0
+\item 
+\mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70b}{Status}} \mbox{\hyperlink{classBaseBracket_a5b9ab31de09281d0711a64f988ee300e}{status}} () const
+\item 
+void \mbox{\hyperlink{classBaseBracket_a8e20490c78fad92008683d8ff5be3d32}{set\+\_\+status}} (const \mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70b}{Status}} s)
+\item 
+virtual icu\+::\+Unicode\+String \mbox{\hyperlink{classBaseBracket_ae09db32ada4490e047871f50b6bf7b8f}{morpheme}} () const
+\item 
+virtual std\+::string \mbox{\hyperlink{classBaseBracket_a8de3052582742956f51ac62514a6684c}{inflection}} () const
+\item 
+virtual std\+::string \mbox{\hyperlink{classBaseBracket_aad09fa10a3c103abd313201cea2de920}{original}} () const
+\item 
+virtual int \mbox{\hyperlink{classBaseBracket_a6ca68c63a4c3d023c534f70c4c28be4d}{infixpos}} () const
+\item 
+virtual bool \mbox{\hyperlink{classBaseBracket_a03b0e75c74650677146e980686aaa22e}{isglue}} () const
+\item 
+virtual icu\+::\+Unicode\+String \mbox{\hyperlink{classBaseBracket_adf4a170a9ddedd6abba402a854469057}{put}} (bool=true) const
+\item 
+virtual icu\+::\+Unicode\+String \mbox{\hyperlink{classBaseBracket_a13ef714938d063a18f1c97aab148d4f2}{pretty\+\_\+put}} () const
+\item 
+virtual \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}} $\ast$ \mbox{\hyperlink{classBaseBracket_a8a1bedc7cf377ea9ea5f80324da20b41}{append}} (\mbox{\hyperlink{classBaseBracket}{Base\+Bracket}} $\ast$)
+\item 
+virtual bool \mbox{\hyperlink{classBaseBracket_af3540660d5b43ea82dc51cab2a4e0886}{is\+Nested}} ()
+\item 
+virtual void \mbox{\hyperlink{classBaseBracket_ab046171130f028e9be66a2e36c29e4f5}{resolve\+Glue}} ()
+\item 
+virtual void \mbox{\hyperlink{classBaseBracket_a6e0abcf1ac90b1a7dfbfb0d034e77707}{resolve\+Lead}} ()
+\item 
+virtual void \mbox{\hyperlink{classBaseBracket_a5b55a4b1a722a1248e18efd05b192d94}{resolve\+Tail}} ()
+\item 
+virtual void \mbox{\hyperlink{classBaseBracket_a32be0458fb0de650d1fb44ed1603b8d7}{resolve\+Middle}} ()
+\item 
+virtual void \mbox{\hyperlink{classBaseBracket_a2f36f3d60483256fd0781251419ef0fa}{clear\+Empty\+Nodes}} ()
+\item 
+virtual folia\+::\+Morpheme $\ast$ \mbox{\hyperlink{classBaseBracket_a7fe29ffc78ef68812d8ba117bb9f0bdb}{create\+Morpheme}} (folia\+::\+Document $\ast$) const =0
+\item 
+virtual folia\+::\+Morpheme $\ast$ \mbox{\hyperlink{classBaseBracket_a8e8d2da64d8ea40c98dd404798242286}{create\+Morpheme}} (folia\+::\+Document $\ast$, std\+::string \&, int \&) const =0
+\item 
+virtual \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} \mbox{\hyperlink{classBaseBracket_a93f63f704d7f0f3fe7b35600c65f5ab0}{compound}} () const
+\item 
+virtual \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} \mbox{\hyperlink{classBaseBracket_aa3c968a4499a0c52afd9648a83bf48c2}{get\+Compound\+Type}} ()
+\item 
+\mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} \mbox{\hyperlink{classBaseBracket_aee94972c28f488629c12acd455e89c98}{tag}} () const
+\item 
+void \mbox{\hyperlink{classBaseBracket_addcc1041b792b3b63cf7d52436378923}{set\+Tag}} (\mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} t)
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\+::vector$<$ \mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} $>$ \mbox{\hyperlink{classBaseBracket_a1505bcb000100c841020e60ee8808ca8}{Right\+Hand}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} \mbox{\hyperlink{classBaseBracket_a78a1bd0151714ed714a54db202ab0058}{cls}}
+\item 
+\mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70b}{Status}} \mbox{\hyperlink{classBaseBracket_a60cff746281dfde378ca6eb4db62d618}{\+\_\+status}}
+\item 
+int \mbox{\hyperlink{classBaseBracket_a1aba440220280a6d1d65b5a13541a3a7}{debug\+Flag}}
+\item 
+Ti\+C\+C\+::\+Log\+Stream \& \mbox{\hyperlink{classBaseBracket_a3ff13fec2b88a7504eaebb3deff88c34}{my\+Log}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classBaseBracket_ac5a0065087bd0c3da901a4427efd0bed}\label{classBaseBracket_ac5a0065087bd0c3da901a4427efd0bed}} 
+\index{BaseBracket@{BaseBracket}!BaseBracket@{BaseBracket}}
+\index{BaseBracket@{BaseBracket}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{BaseBracket()}{BaseBracket()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily Base\+Bracket\+::\+Base\+Bracket (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}}}]{t,  }\item[{const std\+::vector$<$ \mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} $>$ \&}]{R,  }\item[{int}]{flag,  }\item[{Ti\+C\+C\+::\+Log\+Stream \&}]{l }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classBaseBracket_a70ab28470b2a31735944569e60808c2b}\label{classBaseBracket_a70ab28470b2a31735944569e60808c2b}} 
+\index{BaseBracket@{BaseBracket}!BaseBracket@{BaseBracket}}
+\index{BaseBracket@{BaseBracket}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{BaseBracket()}{BaseBracket()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily Base\+Bracket\+::\+Base\+Bracket (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}}}]{t,  }\item[{int}]{flag,  }\item[{Ti\+C\+C\+::\+Log\+Stream \&}]{l }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classBaseBracket_a8f43b6a249666a75905a2930c485ebc3}\label{classBaseBracket_a8f43b6a249666a75905a2930c485ebc3}} 
+\index{BaseBracket@{BaseBracket}!````~BaseBracket@{$\sim$BaseBracket}}
+\index{````~BaseBracket@{$\sim$BaseBracket}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{$\sim$BaseBracket()}{~BaseBracket()}}
+{\footnotesize\ttfamily virtual Base\+Bracket\+::$\sim$\+Base\+Bracket (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classBaseBracket_a8a1bedc7cf377ea9ea5f80324da20b41}\label{classBaseBracket_a8a1bedc7cf377ea9ea5f80324da20b41}} 
+\index{BaseBracket@{BaseBracket}!append@{append}}
+\index{append@{append}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{append()}{append()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}}$\ast$ Base\+Bracket\+::append (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classBaseBracket}{Base\+Bracket}} $\ast$}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classBracketNest_a749be4739cad72166f9a1970a5d034db}{Bracket\+Nest}}.
+
+\mbox{\Hypertarget{classBaseBracket_a2f36f3d60483256fd0781251419ef0fa}\label{classBaseBracket_a2f36f3d60483256fd0781251419ef0fa}} 
+\index{BaseBracket@{BaseBracket}!clearEmptyNodes@{clearEmptyNodes}}
+\index{clearEmptyNodes@{clearEmptyNodes}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{clearEmptyNodes()}{clearEmptyNodes()}}
+{\footnotesize\ttfamily virtual void Base\+Bracket\+::clear\+Empty\+Nodes (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classBracketNest_a921c6ff102bfac7e886d1ceb2325bb93}{Bracket\+Nest}}.
+
+\mbox{\Hypertarget{classBaseBracket_a587216a5f413c922d854a899260944b7}\label{classBaseBracket_a587216a5f413c922d854a899260944b7}} 
+\index{BaseBracket@{BaseBracket}!clone@{clone}}
+\index{clone@{clone}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{clone()}{clone()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}}$\ast$ Base\+Bracket\+::clone (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Implemented in \mbox{\hyperlink{classBracketNest_aeb80dbe90c5d99bfc7e344f94bedb811}{Bracket\+Nest}}, and \mbox{\hyperlink{classBracketLeaf_a7f36e9543df0f36d9e27bb6e41906d0c}{Bracket\+Leaf}}.
+
+\mbox{\Hypertarget{classBaseBracket_a93f63f704d7f0f3fe7b35600c65f5ab0}\label{classBaseBracket_a93f63f704d7f0f3fe7b35600c65f5ab0}} 
+\index{BaseBracket@{BaseBracket}!compound@{compound}}
+\index{compound@{compound}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{compound()}{compound()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} Base\+Bracket\+::compound (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classBracketNest_a3ef87545ec5ef0d67804e4c5a01b5f7b}{Bracket\+Nest}}.
+
+\mbox{\Hypertarget{classBaseBracket_a7fe29ffc78ef68812d8ba117bb9f0bdb}\label{classBaseBracket_a7fe29ffc78ef68812d8ba117bb9f0bdb}} 
+\index{BaseBracket@{BaseBracket}!createMorpheme@{createMorpheme}}
+\index{createMorpheme@{createMorpheme}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{createMorpheme()}{createMorpheme()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily virtual folia\+::\+Morpheme$\ast$ Base\+Bracket\+::create\+Morpheme (\begin{DoxyParamCaption}\item[{folia\+::\+Document $\ast$}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Implemented in \mbox{\hyperlink{classBracketNest_ad8de28e782e7de928f538afe3c2efad5}{Bracket\+Nest}}, and \mbox{\hyperlink{classBracketLeaf_a9e95f0bc4869bfe5847d0a468ff3b85a}{Bracket\+Leaf}}.
+
+\mbox{\Hypertarget{classBaseBracket_a8e8d2da64d8ea40c98dd404798242286}\label{classBaseBracket_a8e8d2da64d8ea40c98dd404798242286}} 
+\index{BaseBracket@{BaseBracket}!createMorpheme@{createMorpheme}}
+\index{createMorpheme@{createMorpheme}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{createMorpheme()}{createMorpheme()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily virtual folia\+::\+Morpheme$\ast$ Base\+Bracket\+::create\+Morpheme (\begin{DoxyParamCaption}\item[{folia\+::\+Document $\ast$}]{,  }\item[{std\+::string \&}]{,  }\item[{int \&}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Implemented in \mbox{\hyperlink{classBracketNest_af1c127e6b77202ee5014063bad4ab8b9}{Bracket\+Nest}}, and \mbox{\hyperlink{classBracketLeaf_af17383ac0f21496c488cb64f899f97b8}{Bracket\+Leaf}}.
+
+\mbox{\Hypertarget{classBaseBracket_aa3c968a4499a0c52afd9648a83bf48c2}\label{classBaseBracket_aa3c968a4499a0c52afd9648a83bf48c2}} 
+\index{BaseBracket@{BaseBracket}!getCompoundType@{getCompoundType}}
+\index{getCompoundType@{getCompoundType}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{getCompoundType()}{getCompoundType()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} Base\+Bracket\+::get\+Compound\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classBracketNest_a9584af4252b907f06c63fc547dda6ba6}{Bracket\+Nest}}.
+
+\mbox{\Hypertarget{classBaseBracket_a6ca68c63a4c3d023c534f70c4c28be4d}\label{classBaseBracket_a6ca68c63a4c3d023c534f70c4c28be4d}} 
+\index{BaseBracket@{BaseBracket}!infixpos@{infixpos}}
+\index{infixpos@{infixpos}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{infixpos()}{infixpos()}}
+{\footnotesize\ttfamily virtual int Base\+Bracket\+::infixpos (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classBracketLeaf_acf1451b9ef276540ab2d94a23f4aeffe}{Bracket\+Leaf}}.
+
+\mbox{\Hypertarget{classBaseBracket_a8de3052582742956f51ac62514a6684c}\label{classBaseBracket_a8de3052582742956f51ac62514a6684c}} 
+\index{BaseBracket@{BaseBracket}!inflection@{inflection}}
+\index{inflection@{inflection}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{inflection()}{inflection()}}
+{\footnotesize\ttfamily virtual std\+::string Base\+Bracket\+::inflection (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classBracketLeaf_a718f042bbc295dfe8e48e897e8e70d4b}{Bracket\+Leaf}}.
+
+\mbox{\Hypertarget{classBaseBracket_a03b0e75c74650677146e980686aaa22e}\label{classBaseBracket_a03b0e75c74650677146e980686aaa22e}} 
+\index{BaseBracket@{BaseBracket}!isglue@{isglue}}
+\index{isglue@{isglue}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{isglue()}{isglue()}}
+{\footnotesize\ttfamily virtual bool Base\+Bracket\+::isglue (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classBracketLeaf_a2a4ff6d613552cd5bc0d3daf157d4543}{Bracket\+Leaf}}.
+
+\mbox{\Hypertarget{classBaseBracket_af3540660d5b43ea82dc51cab2a4e0886}\label{classBaseBracket_af3540660d5b43ea82dc51cab2a4e0886}} 
+\index{BaseBracket@{BaseBracket}!isNested@{isNested}}
+\index{isNested@{isNested}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{isNested()}{isNested()}}
+{\footnotesize\ttfamily virtual bool Base\+Bracket\+::is\+Nested (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classBracketNest_aff753299f48b14e1ffbaa3fe3883e7d6}{Bracket\+Nest}}.
+
+\mbox{\Hypertarget{classBaseBracket_ae09db32ada4490e047871f50b6bf7b8f}\label{classBaseBracket_ae09db32ada4490e047871f50b6bf7b8f}} 
+\index{BaseBracket@{BaseBracket}!morpheme@{morpheme}}
+\index{morpheme@{morpheme}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{morpheme()}{morpheme()}}
+{\footnotesize\ttfamily virtual icu\+::\+Unicode\+String Base\+Bracket\+::morpheme (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classBracketLeaf_a5152685c9035541d52b6301a1629b5e4}{Bracket\+Leaf}}.
+
+\mbox{\Hypertarget{classBaseBracket_aad09fa10a3c103abd313201cea2de920}\label{classBaseBracket_aad09fa10a3c103abd313201cea2de920}} 
+\index{BaseBracket@{BaseBracket}!original@{original}}
+\index{original@{original}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{original()}{original()}}
+{\footnotesize\ttfamily virtual std\+::string Base\+Bracket\+::original (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classBracketLeaf_ab78981e78996707b55b701682301e78e}{Bracket\+Leaf}}.
+
+\mbox{\Hypertarget{classBaseBracket_a13ef714938d063a18f1c97aab148d4f2}\label{classBaseBracket_a13ef714938d063a18f1c97aab148d4f2}} 
+\index{BaseBracket@{BaseBracket}!pretty\_put@{pretty\_put}}
+\index{pretty\_put@{pretty\_put}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{pretty\_put()}{pretty\_put()}}
+{\footnotesize\ttfamily icu\+::\+Unicode\+String Base\+Bracket\+::pretty\+\_\+put (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+create a descriptive Unicode string representation for this object
+
+Reimplemented in \mbox{\hyperlink{classBracketNest_ab3de527365a35b0de9bafea772638ac9}{Bracket\+Nest}}, and \mbox{\hyperlink{classBracketLeaf_a0095124ddc138878146795de7b6d41b5}{Bracket\+Leaf}}.
+
+\mbox{\Hypertarget{classBaseBracket_adf4a170a9ddedd6abba402a854469057}\label{classBaseBracket_adf4a170a9ddedd6abba402a854469057}} 
+\index{BaseBracket@{BaseBracket}!put@{put}}
+\index{put@{put}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{put()}{put()}}
+{\footnotesize\ttfamily icu\+::\+Unicode\+String Base\+Bracket\+::put (\begin{DoxyParamCaption}\item[{bool}]{full = {\ttfamily true} }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+create a Unicode string representation for this object
+
+Reimplemented in \mbox{\hyperlink{classBracketNest_a5600158ff49e144b2c19be158d8fc83e}{Bracket\+Nest}}, and \mbox{\hyperlink{classBracketLeaf_ad543b8f461108c443e23ab3242db5211}{Bracket\+Leaf}}.
+
+\mbox{\Hypertarget{classBaseBracket_ab046171130f028e9be66a2e36c29e4f5}\label{classBaseBracket_ab046171130f028e9be66a2e36c29e4f5}} 
+\index{BaseBracket@{BaseBracket}!resolveGlue@{resolveGlue}}
+\index{resolveGlue@{resolveGlue}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{resolveGlue()}{resolveGlue()}}
+{\footnotesize\ttfamily virtual void Base\+Bracket\+::resolve\+Glue (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classBracketNest_a040cbd6299ca6c174aaeef684a009ca0}{Bracket\+Nest}}.
+
+\mbox{\Hypertarget{classBaseBracket_a6e0abcf1ac90b1a7dfbfb0d034e77707}\label{classBaseBracket_a6e0abcf1ac90b1a7dfbfb0d034e77707}} 
+\index{BaseBracket@{BaseBracket}!resolveLead@{resolveLead}}
+\index{resolveLead@{resolveLead}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{resolveLead()}{resolveLead()}}
+{\footnotesize\ttfamily virtual void Base\+Bracket\+::resolve\+Lead (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classBracketNest_a8c686b44c8403aaa119e4a76276a47cd}{Bracket\+Nest}}.
+
+\mbox{\Hypertarget{classBaseBracket_a32be0458fb0de650d1fb44ed1603b8d7}\label{classBaseBracket_a32be0458fb0de650d1fb44ed1603b8d7}} 
+\index{BaseBracket@{BaseBracket}!resolveMiddle@{resolveMiddle}}
+\index{resolveMiddle@{resolveMiddle}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{resolveMiddle()}{resolveMiddle()}}
+{\footnotesize\ttfamily virtual void Base\+Bracket\+::resolve\+Middle (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classBracketNest_a46592e7d835b3d0413a0b4a9d55974b1}{Bracket\+Nest}}.
+
+\mbox{\Hypertarget{classBaseBracket_a5b55a4b1a722a1248e18efd05b192d94}\label{classBaseBracket_a5b55a4b1a722a1248e18efd05b192d94}} 
+\index{BaseBracket@{BaseBracket}!resolveTail@{resolveTail}}
+\index{resolveTail@{resolveTail}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{resolveTail()}{resolveTail()}}
+{\footnotesize\ttfamily virtual void Base\+Bracket\+::resolve\+Tail (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classBracketNest_aa3518a7d52a19e9d347e18493a1ed091}{Bracket\+Nest}}.
+
+\mbox{\Hypertarget{classBaseBracket_a8e20490c78fad92008683d8ff5be3d32}\label{classBaseBracket_a8e20490c78fad92008683d8ff5be3d32}} 
+\index{BaseBracket@{BaseBracket}!set\_status@{set\_status}}
+\index{set\_status@{set\_status}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{set\_status()}{set\_status()}}
+{\footnotesize\ttfamily void Base\+Bracket\+::set\+\_\+status (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70b}{Status}}}]{s }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classBaseBracket_addcc1041b792b3b63cf7d52436378923}\label{classBaseBracket_addcc1041b792b3b63cf7d52436378923}} 
+\index{BaseBracket@{BaseBracket}!setTag@{setTag}}
+\index{setTag@{setTag}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{setTag()}{setTag()}}
+{\footnotesize\ttfamily void Base\+Bracket\+::set\+Tag (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}}}]{t }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classBaseBracket_a5b9ab31de09281d0711a64f988ee300e}\label{classBaseBracket_a5b9ab31de09281d0711a64f988ee300e}} 
+\index{BaseBracket@{BaseBracket}!status@{status}}
+\index{status@{status}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{status()}{status()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70b}{Status}} Base\+Bracket\+::status (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classBaseBracket_aee94972c28f488629c12acd455e89c98}\label{classBaseBracket_aee94972c28f488629c12acd455e89c98}} 
+\index{BaseBracket@{BaseBracket}!tag@{tag}}
+\index{tag@{tag}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{tag()}{tag()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} Base\+Bracket\+::tag (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classBaseBracket_a60cff746281dfde378ca6eb4db62d618}\label{classBaseBracket_a60cff746281dfde378ca6eb4db62d618}} 
+\index{BaseBracket@{BaseBracket}!\_status@{\_status}}
+\index{\_status@{\_status}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{\_status}{\_status}}
+{\footnotesize\ttfamily \mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70b}{Status}} Base\+Bracket\+::\+\_\+status\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classBaseBracket_a78a1bd0151714ed714a54db202ab0058}\label{classBaseBracket_a78a1bd0151714ed714a54db202ab0058}} 
+\index{BaseBracket@{BaseBracket}!cls@{cls}}
+\index{cls@{cls}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{cls}{cls}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} Base\+Bracket\+::cls\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classBaseBracket_a1aba440220280a6d1d65b5a13541a3a7}\label{classBaseBracket_a1aba440220280a6d1d65b5a13541a3a7}} 
+\index{BaseBracket@{BaseBracket}!debugFlag@{debugFlag}}
+\index{debugFlag@{debugFlag}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{debugFlag}{debugFlag}}
+{\footnotesize\ttfamily int Base\+Bracket\+::debug\+Flag\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classBaseBracket_a3ff13fec2b88a7504eaebb3deff88c34}\label{classBaseBracket_a3ff13fec2b88a7504eaebb3deff88c34}} 
+\index{BaseBracket@{BaseBracket}!myLog@{myLog}}
+\index{myLog@{myLog}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{myLog}{myLog}}
+{\footnotesize\ttfamily Ti\+C\+C\+::\+Log\+Stream\& Base\+Bracket\+::my\+Log\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classBaseBracket_a1505bcb000100c841020e60ee8808ca8}\label{classBaseBracket_a1505bcb000100c841020e60ee8808ca8}} 
+\index{BaseBracket@{BaseBracket}!RightHand@{RightHand}}
+\index{RightHand@{RightHand}!BaseBracket@{BaseBracket}}
+\doxysubsubsection{\texorpdfstring{RightHand}{RightHand}}
+{\footnotesize\ttfamily std\+::vector$<$\mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}}$>$ Base\+Bracket\+::\+Right\+Hand}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{mbma__brackets_8h}{mbma\+\_\+brackets.\+h}}\item 
+src/\mbox{\hyperlink{mbma__brackets_8cxx}{mbma\+\_\+brackets.\+cxx}}\end{DoxyCompactItemize}

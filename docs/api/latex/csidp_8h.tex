@@ -1,0 +1,59 @@
+\hypertarget{csidp_8h}{}\doxysection{include/frog/csidp.h File Reference}
+\label{csidp_8h}\index{include/frog/csidp.h@{include/frog/csidp.h}}
+{\ttfamily \#include \char`\"{}timbl/\+Timbl\+A\+P\+I.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/ckyparser.\+h\char`\"{}}\newline
+Include dependency graph for csidp.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{csidp_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=264pt]{csidp_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}}
+\begin{DoxyCompactList}\small\item\em this class stores a triple of \mbox{\hyperlink{namespaceTimbl}{Timbl}} results \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::vector$<$ \mbox{\hyperlink{structparsrel}{parsrel}} $>$ \mbox{\hyperlink{csidp_8h_ae66d77ee519ae669d9dcf797a643a9c4}{parse}} (const std\+::vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \&p\+\_\+res, const std\+::vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \&r\+\_\+res, const std\+::vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \&d\+\_\+res, size\+\_\+t sent\+\_\+len, int max\+Dist, Ti\+C\+C\+::\+Log\+Stream $\ast$dbg\+\_\+log)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{csidp_8h_ae66d77ee519ae669d9dcf797a643a9c4}\label{csidp_8h_ae66d77ee519ae669d9dcf797a643a9c4}} 
+\index{csidp.h@{csidp.h}!parse@{parse}}
+\index{parse@{parse}!csidp.h@{csidp.h}}
+\doxysubsubsection{\texorpdfstring{parse()}{parse()}}
+{\footnotesize\ttfamily std\+::vector$<$\mbox{\hyperlink{structparsrel}{parsrel}}$>$ parse (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \&}]{p\+\_\+res,  }\item[{const std\+::vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \&}]{r\+\_\+res,  }\item[{const std\+::vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \&}]{d\+\_\+res,  }\item[{size\+\_\+t}]{sent\+\_\+len,  }\item[{int}]{max\+Dist,  }\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{dbg\+\_\+log }\end{DoxyParamCaption})}
+
+run de C\+KY parser using these data
+
+
+\begin{DoxyParams}{Parameters}
+{\em p\+\_\+res} & the \mbox{\hyperlink{namespaceTimbl}{Timbl}} pairs outcome \\
+\hline
+{\em r\+\_\+res} & the \mbox{\hyperlink{namespaceTimbl}{Timbl}} rels outcome \\
+\hline
+{\em d\+\_\+res} & the \mbox{\hyperlink{namespaceTimbl}{Timbl}} dir outcome \\
+\hline
+{\em sent\+\_\+len} & the maximum sentence lenght \\
+\hline
+{\em max\+Dist} & the maximum distance between dependents we allow \\
+\hline
+{\em dbg\+\_\+log} & the stream used for debugging \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a vector of parsrel structures
+\end{DoxyReturn}

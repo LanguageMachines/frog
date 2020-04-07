@@ -1,0 +1,148 @@
+\hypertarget{classmwuAna}{}\doxysection{mwu\+Ana Class Reference}
+\label{classmwuAna}\index{mwuAna@{mwuAna}}
+
+
+{\ttfamily \#include $<$mwu\+\_\+chunker\+\_\+mod.\+h$>$}
+
+
+
+Collaboration diagram for mwu\+Ana\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=184pt]{classmwuAna__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classmwuAna_a1f4484a6a835c79dbe3bfffc224591e6}{mwu\+Ana}} (const std\+::string \&, bool, size\+\_\+t)
+\item 
+virtual \mbox{\hyperlink{classmwuAna_ac1cf5381d3b28857b00c9a380261f9df}{$\sim$mwu\+Ana}} ()
+\item 
+void \mbox{\hyperlink{classmwuAna_a0f81db9dfda6ee255887fec9d3e84cb0}{merge}} (const \mbox{\hyperlink{classmwuAna}{mwu\+Ana}} $\ast$)
+\item 
+std\+::string \mbox{\hyperlink{classmwuAna_ab0cb28c7abbfa6b9c9bcffb7c5187730}{get\+Word}} () const
+\item 
+bool \mbox{\hyperlink{classmwuAna_a3f30f65fcd6bb6e012c4e691bf5e9373}{is\+Spec}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+size\+\_\+t \mbox{\hyperlink{classmwuAna_a3acf73e0f173d11307ac2fcbbd9d3b4a}{mwu\+\_\+start}}
+\item 
+size\+\_\+t \mbox{\hyperlink{classmwuAna_a7849788d160f4fc1a5694a155f11800c}{mwu\+\_\+end}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classmwuAna_a81c4b581ae64848f198916d4a10eb13f}{mwu\+Ana}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string \mbox{\hyperlink{classmwuAna_a0381d2afdb2281d76953e133b5a9e27b}{word}}
+\item 
+bool \mbox{\hyperlink{classmwuAna_ad15b3b871a0e413384a3453ed09889b4}{spec}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+std\+::ostream \& \mbox{\hyperlink{classmwuAna_a8bf9232eb3d304f76962e440dd5b328e}{operator$<$$<$}} (std\+::ostream \&, const \mbox{\hyperlink{classmwuAna}{mwu\+Ana}} \&)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classmwuAna_a1f4484a6a835c79dbe3bfffc224591e6}\label{classmwuAna_a1f4484a6a835c79dbe3bfffc224591e6}} 
+\index{mwuAna@{mwuAna}!mwuAna@{mwuAna}}
+\index{mwuAna@{mwuAna}!mwuAna@{mwuAna}}
+\doxysubsubsection{\texorpdfstring{mwuAna()}{mwuAna()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily mwu\+Ana\+::mwu\+Ana (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{wrd,  }\item[{bool}]{glue\+\_\+tag,  }\item[{size\+\_\+t}]{index }\end{DoxyParamCaption})}
+
+create a mwu Analysis record
+
+
+\begin{DoxyParams}{Parameters}
+{\em wrd} & The text of the word \\
+\hline
+{\em glue\+\_\+tag} & was a {\itshape \textquotesingle{}glue\textquotesingle{}} tag detected? \\
+\hline
+{\em index} & The (initial) position in the sentence\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classmwuAna_ac1cf5381d3b28857b00c9a380261f9df}\label{classmwuAna_ac1cf5381d3b28857b00c9a380261f9df}} 
+\index{mwuAna@{mwuAna}!````~mwuAna@{$\sim$mwuAna}}
+\index{````~mwuAna@{$\sim$mwuAna}!mwuAna@{mwuAna}}
+\doxysubsubsection{\texorpdfstring{$\sim$mwuAna()}{~mwuAna()}}
+{\footnotesize\ttfamily virtual mwu\+Ana\+::$\sim$mwu\+Ana (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+\mbox{\Hypertarget{classmwuAna_a81c4b581ae64848f198916d4a10eb13f}\label{classmwuAna_a81c4b581ae64848f198916d4a10eb13f}} 
+\index{mwuAna@{mwuAna}!mwuAna@{mwuAna}}
+\index{mwuAna@{mwuAna}!mwuAna@{mwuAna}}
+\doxysubsubsection{\texorpdfstring{mwuAna()}{mwuAna()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily mwu\+Ana\+::mwu\+Ana (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [protected]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classmwuAna_ab0cb28c7abbfa6b9c9bcffb7c5187730}\label{classmwuAna_ab0cb28c7abbfa6b9c9bcffb7c5187730}} 
+\index{mwuAna@{mwuAna}!getWord@{getWord}}
+\index{getWord@{getWord}!mwuAna@{mwuAna}}
+\doxysubsubsection{\texorpdfstring{getWord()}{getWord()}}
+{\footnotesize\ttfamily std\+::string mwu\+Ana\+::get\+Word (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classmwuAna_a3f30f65fcd6bb6e012c4e691bf5e9373}\label{classmwuAna_a3f30f65fcd6bb6e012c4e691bf5e9373}} 
+\index{mwuAna@{mwuAna}!isSpec@{isSpec}}
+\index{isSpec@{isSpec}!mwuAna@{mwuAna}}
+\doxysubsubsection{\texorpdfstring{isSpec()}{isSpec()}}
+{\footnotesize\ttfamily bool mwu\+Ana\+::is\+Spec (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classmwuAna_a0f81db9dfda6ee255887fec9d3e84cb0}\label{classmwuAna_a0f81db9dfda6ee255887fec9d3e84cb0}} 
+\index{mwuAna@{mwuAna}!merge@{merge}}
+\index{merge@{merge}!mwuAna@{mwuAna}}
+\doxysubsubsection{\texorpdfstring{merge()}{merge()}}
+{\footnotesize\ttfamily void mwu\+Ana\+::merge (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classmwuAna}{mwu\+Ana}} $\ast$}]{add }\end{DoxyParamCaption})}
+
+merge two \mbox{\hyperlink{classmwuAna}{mwu\+Ana}} records
+
+\doxysubsection{Friends And Related Function Documentation}
+\mbox{\Hypertarget{classmwuAna_a8bf9232eb3d304f76962e440dd5b328e}\label{classmwuAna_a8bf9232eb3d304f76962e440dd5b328e}} 
+\index{mwuAna@{mwuAna}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!mwuAna@{mwuAna}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$}{operator<<}}
+{\footnotesize\ttfamily std\+::ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{std\+::ostream \&}]{,  }\item[{const \mbox{\hyperlink{classmwuAna}{mwu\+Ana}} \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [friend]}}
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classmwuAna_a7849788d160f4fc1a5694a155f11800c}\label{classmwuAna_a7849788d160f4fc1a5694a155f11800c}} 
+\index{mwuAna@{mwuAna}!mwu\_end@{mwu\_end}}
+\index{mwu\_end@{mwu\_end}!mwuAna@{mwuAna}}
+\doxysubsubsection{\texorpdfstring{mwu\_end}{mwu\_end}}
+{\footnotesize\ttfamily size\+\_\+t mwu\+Ana\+::mwu\+\_\+end}
+
+\mbox{\Hypertarget{classmwuAna_a3acf73e0f173d11307ac2fcbbd9d3b4a}\label{classmwuAna_a3acf73e0f173d11307ac2fcbbd9d3b4a}} 
+\index{mwuAna@{mwuAna}!mwu\_start@{mwu\_start}}
+\index{mwu\_start@{mwu\_start}!mwuAna@{mwuAna}}
+\doxysubsubsection{\texorpdfstring{mwu\_start}{mwu\_start}}
+{\footnotesize\ttfamily size\+\_\+t mwu\+Ana\+::mwu\+\_\+start}
+
+\mbox{\Hypertarget{classmwuAna_ad15b3b871a0e413384a3453ed09889b4}\label{classmwuAna_ad15b3b871a0e413384a3453ed09889b4}} 
+\index{mwuAna@{mwuAna}!spec@{spec}}
+\index{spec@{spec}!mwuAna@{mwuAna}}
+\doxysubsubsection{\texorpdfstring{spec}{spec}}
+{\footnotesize\ttfamily bool mwu\+Ana\+::spec\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classmwuAna_a0381d2afdb2281d76953e133b5a9e27b}\label{classmwuAna_a0381d2afdb2281d76953e133b5a9e27b}} 
+\index{mwuAna@{mwuAna}!word@{word}}
+\index{word@{word}!mwuAna@{mwuAna}}
+\doxysubsubsection{\texorpdfstring{word}{word}}
+{\footnotesize\ttfamily std\+::string mwu\+Ana\+::word\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{mwu__chunker__mod_8h}{mwu\+\_\+chunker\+\_\+mod.\+h}}\item 
+src/\mbox{\hyperlink{mwu__chunker__mod_8cxx}{mwu\+\_\+chunker\+\_\+mod.\+cxx}}\end{DoxyCompactItemize}

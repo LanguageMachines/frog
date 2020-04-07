@@ -1,0 +1,334 @@
+\hypertarget{classfrog__record}{}\doxysection{frog\+\_\+record Class Reference}
+\label{classfrog__record}\index{frog\_record@{frog\_record}}
+
+
+a simple datastructure to hold all frogged information of one word  
+
+
+
+
+{\ttfamily \#include $<$Frog\+Data.\+h$>$}
+
+
+
+Collaboration diagram for frog\+\_\+record\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classfrog__record__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classfrog__record_a4198b3fd6aef2dedcd75d2c64581f593}{frog\+\_\+record}} ()
+\begin{DoxyCompactList}\small\item\em default constructor \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classfrog__record_ae144971235fe8fcfe39a82a1732f0276}{$\sim$frog\+\_\+record}} ()
+\begin{DoxyCompactList}\small\item\em default destructor \end{DoxyCompactList}\item 
+nlohmann\+::json \mbox{\hyperlink{classfrog__record_a05154026f23bfa4d04a0ffa9314e88d9}{to\+\_\+json}} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string \mbox{\hyperlink{classfrog__record_abcb96a5848e34532de2151395a2ff457}{word}}
+\begin{DoxyCompactList}\small\item\em the word in U\+T\+F8 \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classfrog__record_a2c2879b74432d817ff9114e3f897c635}{clean\+\_\+word}}
+\begin{DoxyCompactList}\small\item\em lowercased word (M\+B\+MA only) \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classfrog__record_a165004411cde69b1790a6e1e4d3c137e}{token\+\_\+class}}
+\begin{DoxyCompactList}\small\item\em the assigned token class of the word \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classfrog__record_a34c6bce19ba5548fa1a18bdb90a7f334}{language}}
+\begin{DoxyCompactList}\small\item\em the deteected language of the word \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classfrog__record_a6f1d5ce3eb9bac47191b27f062ed1a4a}{no\+\_\+space}}
+\begin{DoxyCompactList}\small\item\em was there a space after the word? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classfrog__record_aebf807c0660fc6ec7c9d288f4de47319}{new\+\_\+paragraph}}
+\begin{DoxyCompactList}\small\item\em did the tokenizer detect a paragraph here? \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classfrog__record_a99b9394f7bda337a6f6e461eb00e14a5}{tag}}
+\begin{DoxyCompactList}\small\item\em the assigned P\+OS tag \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{classfrog__record_a4665776bc59d0f8a405a9c904c65d7ab}{tag\+\_\+confidence}}
+\begin{DoxyCompactList}\small\item\em the confidence of the P\+OS tag \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classfrog__record_a38abf798ff74aec99bd54dcbdf5e996f}{iob\+\_\+tag}}
+\begin{DoxyCompactList}\small\item\em the assigned I\+OB tag \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{classfrog__record_aabaac7b705037eb9b719a4cbe475e82b}{iob\+\_\+confidence}}
+\begin{DoxyCompactList}\small\item\em the confidence of the I\+OB tag \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classfrog__record_aa303aab12ac19de76a97f581e6e079f7}{ner\+\_\+tag}}
+\begin{DoxyCompactList}\small\item\em the assigned N\+ER tag \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{classfrog__record_a4df48f1b0fce1464097e07bbde21a37f}{ner\+\_\+confidence}}
+\begin{DoxyCompactList}\small\item\em the confidence of the N\+ER tag \end{DoxyCompactList}\item 
+std\+::vector$<$ std\+::string $>$ \mbox{\hyperlink{classfrog__record_aef2103f5d7b39595a4ef0d83e885cd88}{lemmas}}
+\begin{DoxyCompactList}\small\item\em a list of possible lemma\textquotesingle{}s \end{DoxyCompactList}\item 
+std\+::vector$<$ std\+::vector$<$ std\+::string $>$ $>$ \mbox{\hyperlink{classfrog__record_adcd5f4a7d55c47ff6c458f1f0fa82b41}{morphs}}
+\begin{DoxyCompactList}\small\item\em the morph analysis \end{DoxyCompactList}\item 
+std\+::vector$<$ const \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}} $\ast$ $>$ \mbox{\hyperlink{classfrog__record_a9ba3a6039531ab8274625ea5dec959f0}{deep\+\_\+morphs}}
+\begin{DoxyCompactList}\small\item\em pointers to the deep morphemes \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classfrog__record_adbe15917300cd06f93713e64737fa52c}{compound\+\_\+string}}
+\begin{DoxyCompactList}\small\item\em string representation of first compound \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classfrog__record_ad3e2639d544bc44de48bd2087b002094}{morph\+\_\+string}}
+\begin{DoxyCompactList}\small\item\em string representation of first morph \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classfrog__record_a6b7fd7036f40043b001ef1e5400bd14d}{deep\+\_\+morph\+\_\+string}}
+\begin{DoxyCompactList}\small\item\em string representation of first deep\+\_\+morph \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{classfrog__record_a5d994c3193c61a70f416b968535a75aa}{parse\+\_\+index}}
+\begin{DoxyCompactList}\small\item\em label of the dependency \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classfrog__record_af9639337745bec82b063ed87256efa5c}{parse\+\_\+role}}
+\begin{DoxyCompactList}\small\item\em role of the dependency \end{DoxyCompactList}\item 
+std\+::set$<$ size\+\_\+t $>$ \mbox{\hyperlink{classfrog__record_a31e1cbe9b6ec63cf28af2b99b0525b5a}{parts}}
+\begin{DoxyCompactList}\small\item\em set of indeces a M\+WU is made of (M\+WU only) \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+a simple datastructure to hold all frogged information of one word 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classfrog__record_a4198b3fd6aef2dedcd75d2c64581f593}\label{classfrog__record_a4198b3fd6aef2dedcd75d2c64581f593}} 
+\index{frog\_record@{frog\_record}!frog\_record@{frog\_record}}
+\index{frog\_record@{frog\_record}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{frog\_record()}{frog\_record()}}
+{\footnotesize\ttfamily frog\+\_\+record\+::frog\+\_\+record (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+default constructor 
+
+\mbox{\Hypertarget{classfrog__record_ae144971235fe8fcfe39a82a1732f0276}\label{classfrog__record_ae144971235fe8fcfe39a82a1732f0276}} 
+\index{frog\_record@{frog\_record}!````~frog\_record@{$\sim$frog\_record}}
+\index{````~frog\_record@{$\sim$frog\_record}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{$\sim$frog\_record()}{~frog\_record()}}
+{\footnotesize\ttfamily frog\+\_\+record\+::$\sim$frog\+\_\+record (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+default destructor 
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classfrog__record_a05154026f23bfa4d04a0ffa9314e88d9}\label{classfrog__record_a05154026f23bfa4d04a0ffa9314e88d9}} 
+\index{frog\_record@{frog\_record}!to\_json@{to\_json}}
+\index{to\_json@{to\_json}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{to\_json()}{to\_json()}}
+{\footnotesize\ttfamily json frog\+\_\+record\+::to\+\_\+json (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+format a \mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} fd into a json structure
+
+\begin{DoxyReturn}{Returns}
+an J\+S\+ON structure
+\end{DoxyReturn}
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classfrog__record_a2c2879b74432d817ff9114e3f897c635}\label{classfrog__record_a2c2879b74432d817ff9114e3f897c635}} 
+\index{frog\_record@{frog\_record}!clean\_word@{clean\_word}}
+\index{clean\_word@{clean\_word}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{clean\_word}{clean\_word}}
+{\footnotesize\ttfamily std\+::string frog\+\_\+record\+::clean\+\_\+word}
+
+
+
+lowercased word (M\+B\+MA only) 
+
+\mbox{\Hypertarget{classfrog__record_adbe15917300cd06f93713e64737fa52c}\label{classfrog__record_adbe15917300cd06f93713e64737fa52c}} 
+\index{frog\_record@{frog\_record}!compound\_string@{compound\_string}}
+\index{compound\_string@{compound\_string}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{compound\_string}{compound\_string}}
+{\footnotesize\ttfamily std\+::string frog\+\_\+record\+::compound\+\_\+string}
+
+
+
+string representation of first compound 
+
+\mbox{\Hypertarget{classfrog__record_a6b7fd7036f40043b001ef1e5400bd14d}\label{classfrog__record_a6b7fd7036f40043b001ef1e5400bd14d}} 
+\index{frog\_record@{frog\_record}!deep\_morph\_string@{deep\_morph\_string}}
+\index{deep\_morph\_string@{deep\_morph\_string}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{deep\_morph\_string}{deep\_morph\_string}}
+{\footnotesize\ttfamily std\+::string frog\+\_\+record\+::deep\+\_\+morph\+\_\+string}
+
+
+
+string representation of first deep\+\_\+morph 
+
+\mbox{\Hypertarget{classfrog__record_a9ba3a6039531ab8274625ea5dec959f0}\label{classfrog__record_a9ba3a6039531ab8274625ea5dec959f0}} 
+\index{frog\_record@{frog\_record}!deep\_morphs@{deep\_morphs}}
+\index{deep\_morphs@{deep\_morphs}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{deep\_morphs}{deep\_morphs}}
+{\footnotesize\ttfamily std\+::vector$<$const \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}}$\ast$$>$ frog\+\_\+record\+::deep\+\_\+morphs}
+
+
+
+pointers to the deep morphemes 
+
+\mbox{\Hypertarget{classfrog__record_aabaac7b705037eb9b719a4cbe475e82b}\label{classfrog__record_aabaac7b705037eb9b719a4cbe475e82b}} 
+\index{frog\_record@{frog\_record}!iob\_confidence@{iob\_confidence}}
+\index{iob\_confidence@{iob\_confidence}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{iob\_confidence}{iob\_confidence}}
+{\footnotesize\ttfamily double frog\+\_\+record\+::iob\+\_\+confidence}
+
+
+
+the confidence of the I\+OB tag 
+
+\mbox{\Hypertarget{classfrog__record_a38abf798ff74aec99bd54dcbdf5e996f}\label{classfrog__record_a38abf798ff74aec99bd54dcbdf5e996f}} 
+\index{frog\_record@{frog\_record}!iob\_tag@{iob\_tag}}
+\index{iob\_tag@{iob\_tag}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{iob\_tag}{iob\_tag}}
+{\footnotesize\ttfamily std\+::string frog\+\_\+record\+::iob\+\_\+tag}
+
+
+
+the assigned I\+OB tag 
+
+\mbox{\Hypertarget{classfrog__record_a34c6bce19ba5548fa1a18bdb90a7f334}\label{classfrog__record_a34c6bce19ba5548fa1a18bdb90a7f334}} 
+\index{frog\_record@{frog\_record}!language@{language}}
+\index{language@{language}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{language}{language}}
+{\footnotesize\ttfamily std\+::string frog\+\_\+record\+::language}
+
+
+
+the deteected language of the word 
+
+\mbox{\Hypertarget{classfrog__record_aef2103f5d7b39595a4ef0d83e885cd88}\label{classfrog__record_aef2103f5d7b39595a4ef0d83e885cd88}} 
+\index{frog\_record@{frog\_record}!lemmas@{lemmas}}
+\index{lemmas@{lemmas}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{lemmas}{lemmas}}
+{\footnotesize\ttfamily std\+::vector$<$std\+::string$>$ frog\+\_\+record\+::lemmas}
+
+
+
+a list of possible lemma\textquotesingle{}s 
+
+\mbox{\Hypertarget{classfrog__record_ad3e2639d544bc44de48bd2087b002094}\label{classfrog__record_ad3e2639d544bc44de48bd2087b002094}} 
+\index{frog\_record@{frog\_record}!morph\_string@{morph\_string}}
+\index{morph\_string@{morph\_string}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{morph\_string}{morph\_string}}
+{\footnotesize\ttfamily std\+::string frog\+\_\+record\+::morph\+\_\+string}
+
+
+
+string representation of first morph 
+
+\mbox{\Hypertarget{classfrog__record_adcd5f4a7d55c47ff6c458f1f0fa82b41}\label{classfrog__record_adcd5f4a7d55c47ff6c458f1f0fa82b41}} 
+\index{frog\_record@{frog\_record}!morphs@{morphs}}
+\index{morphs@{morphs}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{morphs}{morphs}}
+{\footnotesize\ttfamily std\+::vector$<$std\+::vector$<$std\+::string$>$ $>$ frog\+\_\+record\+::morphs}
+
+
+
+the morph analysis 
+
+\mbox{\Hypertarget{classfrog__record_a4df48f1b0fce1464097e07bbde21a37f}\label{classfrog__record_a4df48f1b0fce1464097e07bbde21a37f}} 
+\index{frog\_record@{frog\_record}!ner\_confidence@{ner\_confidence}}
+\index{ner\_confidence@{ner\_confidence}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{ner\_confidence}{ner\_confidence}}
+{\footnotesize\ttfamily double frog\+\_\+record\+::ner\+\_\+confidence}
+
+
+
+the confidence of the N\+ER tag 
+
+\mbox{\Hypertarget{classfrog__record_aa303aab12ac19de76a97f581e6e079f7}\label{classfrog__record_aa303aab12ac19de76a97f581e6e079f7}} 
+\index{frog\_record@{frog\_record}!ner\_tag@{ner\_tag}}
+\index{ner\_tag@{ner\_tag}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{ner\_tag}{ner\_tag}}
+{\footnotesize\ttfamily std\+::string frog\+\_\+record\+::ner\+\_\+tag}
+
+
+
+the assigned N\+ER tag 
+
+\mbox{\Hypertarget{classfrog__record_aebf807c0660fc6ec7c9d288f4de47319}\label{classfrog__record_aebf807c0660fc6ec7c9d288f4de47319}} 
+\index{frog\_record@{frog\_record}!new\_paragraph@{new\_paragraph}}
+\index{new\_paragraph@{new\_paragraph}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{new\_paragraph}{new\_paragraph}}
+{\footnotesize\ttfamily bool frog\+\_\+record\+::new\+\_\+paragraph}
+
+
+
+did the tokenizer detect a paragraph here? 
+
+\mbox{\Hypertarget{classfrog__record_a6f1d5ce3eb9bac47191b27f062ed1a4a}\label{classfrog__record_a6f1d5ce3eb9bac47191b27f062ed1a4a}} 
+\index{frog\_record@{frog\_record}!no\_space@{no\_space}}
+\index{no\_space@{no\_space}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{no\_space}{no\_space}}
+{\footnotesize\ttfamily bool frog\+\_\+record\+::no\+\_\+space}
+
+
+
+was there a space after the word? 
+
+\mbox{\Hypertarget{classfrog__record_a5d994c3193c61a70f416b968535a75aa}\label{classfrog__record_a5d994c3193c61a70f416b968535a75aa}} 
+\index{frog\_record@{frog\_record}!parse\_index@{parse\_index}}
+\index{parse\_index@{parse\_index}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{parse\_index}{parse\_index}}
+{\footnotesize\ttfamily int frog\+\_\+record\+::parse\+\_\+index}
+
+
+
+label of the dependency 
+
+\mbox{\Hypertarget{classfrog__record_af9639337745bec82b063ed87256efa5c}\label{classfrog__record_af9639337745bec82b063ed87256efa5c}} 
+\index{frog\_record@{frog\_record}!parse\_role@{parse\_role}}
+\index{parse\_role@{parse\_role}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{parse\_role}{parse\_role}}
+{\footnotesize\ttfamily std\+::string frog\+\_\+record\+::parse\+\_\+role}
+
+
+
+role of the dependency 
+
+\mbox{\Hypertarget{classfrog__record_a31e1cbe9b6ec63cf28af2b99b0525b5a}\label{classfrog__record_a31e1cbe9b6ec63cf28af2b99b0525b5a}} 
+\index{frog\_record@{frog\_record}!parts@{parts}}
+\index{parts@{parts}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{parts}{parts}}
+{\footnotesize\ttfamily std\+::set$<$size\+\_\+t$>$ frog\+\_\+record\+::parts}
+
+
+
+set of indeces a M\+WU is made of (M\+WU only) 
+
+\mbox{\Hypertarget{classfrog__record_a99b9394f7bda337a6f6e461eb00e14a5}\label{classfrog__record_a99b9394f7bda337a6f6e461eb00e14a5}} 
+\index{frog\_record@{frog\_record}!tag@{tag}}
+\index{tag@{tag}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{tag}{tag}}
+{\footnotesize\ttfamily std\+::string frog\+\_\+record\+::tag}
+
+
+
+the assigned P\+OS tag 
+
+\mbox{\Hypertarget{classfrog__record_a4665776bc59d0f8a405a9c904c65d7ab}\label{classfrog__record_a4665776bc59d0f8a405a9c904c65d7ab}} 
+\index{frog\_record@{frog\_record}!tag\_confidence@{tag\_confidence}}
+\index{tag\_confidence@{tag\_confidence}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{tag\_confidence}{tag\_confidence}}
+{\footnotesize\ttfamily double frog\+\_\+record\+::tag\+\_\+confidence}
+
+
+
+the confidence of the P\+OS tag 
+
+\mbox{\Hypertarget{classfrog__record_a165004411cde69b1790a6e1e4d3c137e}\label{classfrog__record_a165004411cde69b1790a6e1e4d3c137e}} 
+\index{frog\_record@{frog\_record}!token\_class@{token\_class}}
+\index{token\_class@{token\_class}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{token\_class}{token\_class}}
+{\footnotesize\ttfamily std\+::string frog\+\_\+record\+::token\+\_\+class}
+
+
+
+the assigned token class of the word 
+
+\mbox{\Hypertarget{classfrog__record_abcb96a5848e34532de2151395a2ff457}\label{classfrog__record_abcb96a5848e34532de2151395a2ff457}} 
+\index{frog\_record@{frog\_record}!word@{word}}
+\index{word@{word}!frog\_record@{frog\_record}}
+\doxysubsubsection{\texorpdfstring{word}{word}}
+{\footnotesize\ttfamily std\+::string frog\+\_\+record\+::word}
+
+
+
+the word in U\+T\+F8 
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{FrogData_8h}{Frog\+Data.\+h}}\item 
+src/\mbox{\hyperlink{FrogData_8cxx}{Frog\+Data.\+cxx}}\end{DoxyCompactItemize}

@@ -1,0 +1,196 @@
+\hypertarget{Frog_8cxx}{}\doxysection{src/\+Frog.cxx File Reference}
+\label{Frog_8cxx}\index{src/Frog.cxx@{src/Frog.cxx}}
+{\ttfamily \#include $<$cstdlib$>$}\newline
+{\ttfamily \#include $<$cstdio$>$}\newline
+{\ttfamily \#include $<$sys/wait.\+h$>$}\newline
+{\ttfamily \#include $<$signal.\+h$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$cstring$>$}\newline
+{\ttfamily \#include $<$random$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$sstream$>$}\newline
+{\ttfamily \#include $<$fstream$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include \char`\"{}config.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}timbl/\+Timbl\+A\+P\+I.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Fd\+Stream.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Server\+Base.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/\+Frog-\/util.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/\+Frog\+A\+P\+I.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/ucto\+\_\+tokenizer\+\_\+mod.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/tagger\+\_\+base.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+String\+Ops.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Command\+Line.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+File\+Utils.\+h\char`\"{}}\newline
+Include dependency graph for Frog.\+cxx\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{Frog_8cxx__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{Frog_8cxx_a159ca84d25a5487d8e81e4438725df19}{L\+OG}}~$\ast$Ti\+C\+C\+::\+Log(\mbox{\hyperlink{ner__prog_8cxx_add80008acf88093a421aff3c7b3d71b8}{the\+Err\+Log}})
+\item 
+\#define \mbox{\hyperlink{Frog_8cxx_a49606be7356624568932ec81c0d429f4}{D\+BG}}~$\ast$Ti\+C\+C\+::\+Log(the\+Dbg\+Log)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{Frog_8cxx_a2ef30c42cbc289d899a8be5d2d8f77d0}{usage}} ()
+\item 
+bool \mbox{\hyperlink{Frog_8cxx_acf3fbd622932d0ddb04038afc974e592}{parse\+\_\+args}} (Ti\+C\+C\+::\+C\+L\+\_\+\+Options \&Opts, \mbox{\hyperlink{classFrogOptions}{Frog\+Options}} \&options, Ti\+C\+C\+::\+Log\+Stream $\ast$\mbox{\hyperlink{ner__prog_8cxx_add80008acf88093a421aff3c7b3d71b8}{the\+Err\+Log}})
+\item 
+void \mbox{\hyperlink{Frog_8cxx_ac4638eee98ce17a18e103abe4b16ceca}{Kill\+Server\+Fun}} (int Signal)
+\item 
+unsigned long long \mbox{\hyperlink{Frog_8cxx_a1cf4746447da43103ccc04c0c8a595eb}{random64}} ()
+\item 
+string \mbox{\hyperlink{Frog_8cxx_a9f4319e0dc82f25e4fd4903b2d97a130}{randnum}} (int len)
+\item 
+int \mbox{\hyperlink{Frog_8cxx_a0ddf1224851353fc92bfbff6f499fa97}{main}} (int argc, char $\ast$argv\mbox{[}$\,$\mbox{]})
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+string \mbox{\hyperlink{Frog_8cxx_a45efe3e7cc87a9445fe3be719d2bffde}{test\+Dir\+Name}}
+\item 
+string \mbox{\hyperlink{Frog_8cxx_aaae3bfdd654e72f5b6cca95ce6467170}{output\+File\+Name}}
+\item 
+bool \mbox{\hyperlink{Frog_8cxx_af4d91410fe83ef3fcb3c508fd5764f1f}{want\+O\+UT}}
+\item 
+string \mbox{\hyperlink{Frog_8cxx_ad399ecbb71c6f80c96a99fc15b8e0335}{X\+M\+Lout\+File\+Name}}
+\item 
+string \mbox{\hyperlink{Frog_8cxx_af2d14ea7429197eeda7dd3fb1965d2db}{output\+Dir\+Name}}
+\item 
+string \mbox{\hyperlink{Frog_8cxx_a775d0dfde8e68de88f2fd6a741d5b8d3}{xml\+Dir\+Name}}
+\item 
+set$<$ string $>$ \mbox{\hyperlink{Frog_8cxx_af77663e995907f67cda8be3944f5e3b3}{file\+Names}}
+\item 
+Ti\+C\+C\+::\+Configuration \mbox{\hyperlink{Frog_8cxx_ab6cef780d96dfa1d99c73ae23179e04a}{configuration}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{Frog_8cxx_a49606be7356624568932ec81c0d429f4}\label{Frog_8cxx_a49606be7356624568932ec81c0d429f4}} 
+\index{Frog.cxx@{Frog.cxx}!DBG@{DBG}}
+\index{DBG@{DBG}!Frog.cxx@{Frog.cxx}}
+\doxysubsubsection{\texorpdfstring{DBG}{DBG}}
+{\footnotesize\ttfamily \#define D\+BG~$\ast$Ti\+C\+C\+::\+Log(the\+Dbg\+Log)}
+
+\mbox{\Hypertarget{Frog_8cxx_a159ca84d25a5487d8e81e4438725df19}\label{Frog_8cxx_a159ca84d25a5487d8e81e4438725df19}} 
+\index{Frog.cxx@{Frog.cxx}!LOG@{LOG}}
+\index{LOG@{LOG}!Frog.cxx@{Frog.cxx}}
+\doxysubsubsection{\texorpdfstring{LOG}{LOG}}
+{\footnotesize\ttfamily \#define L\+OG~$\ast$Ti\+C\+C\+::\+Log(\mbox{\hyperlink{ner__prog_8cxx_add80008acf88093a421aff3c7b3d71b8}{the\+Err\+Log}})}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{Frog_8cxx_ac4638eee98ce17a18e103abe4b16ceca}\label{Frog_8cxx_ac4638eee98ce17a18e103abe4b16ceca}} 
+\index{Frog.cxx@{Frog.cxx}!KillServerFun@{KillServerFun}}
+\index{KillServerFun@{KillServerFun}!Frog.cxx@{Frog.cxx}}
+\doxysubsubsection{\texorpdfstring{KillServerFun()}{KillServerFun()}}
+{\footnotesize\ttfamily void Kill\+Server\+Fun (\begin{DoxyParamCaption}\item[{int}]{Signal }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{Frog_8cxx_a0ddf1224851353fc92bfbff6f499fa97}\label{Frog_8cxx_a0ddf1224851353fc92bfbff6f499fa97}} 
+\index{Frog.cxx@{Frog.cxx}!main@{main}}
+\index{main@{main}!Frog.cxx@{Frog.cxx}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily int main (\begin{DoxyParamCaption}\item[{int}]{argc,  }\item[{char $\ast$}]{argv\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+Frog\textquotesingle{}s main program.\mbox{\Hypertarget{Frog_8cxx_acf3fbd622932d0ddb04038afc974e592}\label{Frog_8cxx_acf3fbd622932d0ddb04038afc974e592}} 
+\index{Frog.cxx@{Frog.cxx}!parse\_args@{parse\_args}}
+\index{parse\_args@{parse\_args}!Frog.cxx@{Frog.cxx}}
+\doxysubsubsection{\texorpdfstring{parse\_args()}{parse\_args()}}
+{\footnotesize\ttfamily bool parse\+\_\+args (\begin{DoxyParamCaption}\item[{Ti\+C\+C\+::\+C\+L\+\_\+\+Options \&}]{Opts,  }\item[{\mbox{\hyperlink{classFrogOptions}{Frog\+Options}} \&}]{options,  }\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{the\+Err\+Log }\end{DoxyParamCaption})}
+
+process the command line and fill \mbox{\hyperlink{classFrogOptions}{Frog\+Options}} to initialize the A\+PI also fill some globals we use for our own main.
+
+
+\begin{DoxyParams}{Parameters}
+{\em Opts} & The command line options we have received \\
+\hline
+{\em options} & The \mbox{\hyperlink{classFrogOptions}{Frog\+Options}} structure we will fill \\
+\hline
+{\em the\+Err\+Log} & the stream to send error messages to return true on succes\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{Frog_8cxx_a9f4319e0dc82f25e4fd4903b2d97a130}\label{Frog_8cxx_a9f4319e0dc82f25e4fd4903b2d97a130}} 
+\index{Frog.cxx@{Frog.cxx}!randnum@{randnum}}
+\index{randnum@{randnum}!Frog.cxx@{Frog.cxx}}
+\doxysubsubsection{\texorpdfstring{randnum()}{randnum()}}
+{\footnotesize\ttfamily string randnum (\begin{DoxyParamCaption}\item[{int}]{len }\end{DoxyParamCaption})}
+
+generate a rather random string of length {\itshape len} 
+
+
+\begin{DoxyParams}{Parameters}
+{\em len} & The length of the output string\\
+\hline
+\end{DoxyParams}
+We generate a 64 bit random number an convert is to a string. Then this string is truncated at {\itshape len} characters. (which means that the result migth be N\+OT unique!)\mbox{\Hypertarget{Frog_8cxx_a1cf4746447da43103ccc04c0c8a595eb}\label{Frog_8cxx_a1cf4746447da43103ccc04c0c8a595eb}} 
+\index{Frog.cxx@{Frog.cxx}!random64@{random64}}
+\index{random64@{random64}!Frog.cxx@{Frog.cxx}}
+\doxysubsubsection{\texorpdfstring{random64()}{random64()}}
+{\footnotesize\ttfamily unsigned long long random64 (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+generate a 64 bit random number\mbox{\Hypertarget{Frog_8cxx_a2ef30c42cbc289d899a8be5d2d8f77d0}\label{Frog_8cxx_a2ef30c42cbc289d899a8be5d2d8f77d0}} 
+\index{Frog.cxx@{Frog.cxx}!usage@{usage}}
+\index{usage@{usage}!Frog.cxx@{Frog.cxx}}
+\doxysubsubsection{\texorpdfstring{usage()}{usage()}}
+{\footnotesize\ttfamily void usage (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{Frog_8cxx_ab6cef780d96dfa1d99c73ae23179e04a}\label{Frog_8cxx_ab6cef780d96dfa1d99c73ae23179e04a}} 
+\index{Frog.cxx@{Frog.cxx}!configuration@{configuration}}
+\index{configuration@{configuration}!Frog.cxx@{Frog.cxx}}
+\doxysubsubsection{\texorpdfstring{configuration}{configuration}}
+{\footnotesize\ttfamily Ti\+C\+C\+::\+Configuration configuration}
+
+\mbox{\Hypertarget{Frog_8cxx_af77663e995907f67cda8be3944f5e3b3}\label{Frog_8cxx_af77663e995907f67cda8be3944f5e3b3}} 
+\index{Frog.cxx@{Frog.cxx}!fileNames@{fileNames}}
+\index{fileNames@{fileNames}!Frog.cxx@{Frog.cxx}}
+\doxysubsubsection{\texorpdfstring{fileNames}{fileNames}}
+{\footnotesize\ttfamily set$<$string$>$ file\+Names}
+
+\mbox{\Hypertarget{Frog_8cxx_af2d14ea7429197eeda7dd3fb1965d2db}\label{Frog_8cxx_af2d14ea7429197eeda7dd3fb1965d2db}} 
+\index{Frog.cxx@{Frog.cxx}!outputDirName@{outputDirName}}
+\index{outputDirName@{outputDirName}!Frog.cxx@{Frog.cxx}}
+\doxysubsubsection{\texorpdfstring{outputDirName}{outputDirName}}
+{\footnotesize\ttfamily string output\+Dir\+Name}
+
+\mbox{\Hypertarget{Frog_8cxx_aaae3bfdd654e72f5b6cca95ce6467170}\label{Frog_8cxx_aaae3bfdd654e72f5b6cca95ce6467170}} 
+\index{Frog.cxx@{Frog.cxx}!outputFileName@{outputFileName}}
+\index{outputFileName@{outputFileName}!Frog.cxx@{Frog.cxx}}
+\doxysubsubsection{\texorpdfstring{outputFileName}{outputFileName}}
+{\footnotesize\ttfamily string output\+File\+Name}
+
+\mbox{\Hypertarget{Frog_8cxx_a45efe3e7cc87a9445fe3be719d2bffde}\label{Frog_8cxx_a45efe3e7cc87a9445fe3be719d2bffde}} 
+\index{Frog.cxx@{Frog.cxx}!testDirName@{testDirName}}
+\index{testDirName@{testDirName}!Frog.cxx@{Frog.cxx}}
+\doxysubsubsection{\texorpdfstring{testDirName}{testDirName}}
+{\footnotesize\ttfamily string test\+Dir\+Name}
+
+\mbox{\Hypertarget{Frog_8cxx_af4d91410fe83ef3fcb3c508fd5764f1f}\label{Frog_8cxx_af4d91410fe83ef3fcb3c508fd5764f1f}} 
+\index{Frog.cxx@{Frog.cxx}!wantOUT@{wantOUT}}
+\index{wantOUT@{wantOUT}!Frog.cxx@{Frog.cxx}}
+\doxysubsubsection{\texorpdfstring{wantOUT}{wantOUT}}
+{\footnotesize\ttfamily bool want\+O\+UT}
+
+\mbox{\Hypertarget{Frog_8cxx_a775d0dfde8e68de88f2fd6a741d5b8d3}\label{Frog_8cxx_a775d0dfde8e68de88f2fd6a741d5b8d3}} 
+\index{Frog.cxx@{Frog.cxx}!xmlDirName@{xmlDirName}}
+\index{xmlDirName@{xmlDirName}!Frog.cxx@{Frog.cxx}}
+\doxysubsubsection{\texorpdfstring{xmlDirName}{xmlDirName}}
+{\footnotesize\ttfamily string xml\+Dir\+Name}
+
+\mbox{\Hypertarget{Frog_8cxx_ad399ecbb71c6f80c96a99fc15b8e0335}\label{Frog_8cxx_ad399ecbb71c6f80c96a99fc15b8e0335}} 
+\index{Frog.cxx@{Frog.cxx}!XMLoutFileName@{XMLoutFileName}}
+\index{XMLoutFileName@{XMLoutFileName}!Frog.cxx@{Frog.cxx}}
+\doxysubsubsection{\texorpdfstring{XMLoutFileName}{XMLoutFileName}}
+{\footnotesize\ttfamily string X\+M\+Lout\+File\+Name}
+

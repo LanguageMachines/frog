@@ -1,0 +1,6 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classBaseTagger.html" title=" " alt="" coords="5,56,103,83"/>
+<area shape="rect" id="node2" href="$classCGNTagger.html" title=" " alt="" coords="151,5,245,32"/>
+<area shape="rect" id="node3" href="$classIOBTagger.html" title=" " alt="" coords="154,56,242,83"/>
+<area shape="rect" id="node4" href="$classNERTagger.html" title=" " alt="" coords="152,107,244,133"/>
+</map>

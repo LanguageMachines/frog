@@ -1,0 +1,158 @@
+\hypertarget{classfrog__data}{}\doxysection{frog\+\_\+data Class Reference}
+\label{classfrog__data}\index{frog\_data@{frog\_data}}
+
+
+a datastructure to hold all frogged information of one Sentence  
+
+
+
+
+{\ttfamily \#include $<$Frog\+Data.\+h$>$}
+
+
+
+Collaboration diagram for frog\+\_\+data\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classfrog__data__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+size\+\_\+t \mbox{\hyperlink{classfrog__data_a32ad06e77934d5186ef4ac5e44ecd97b}{size}} () const
+\item 
+bool \mbox{\hyperlink{classfrog__data_a1db0522f4c5a07da74bf4ba3e2561464}{empty}} () const
+\item 
+void \mbox{\hyperlink{classfrog__data_a773f31be94d0ae4615b986c5fc7b29f4}{resolve\+\_\+mwus}} ()
+\item 
+void \mbox{\hyperlink{classfrog__data_a3d1cd0be124c20fab5ab7ee9d3f20756}{append}} (const \mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} \&)
+\item 
+std\+::string \mbox{\hyperlink{classfrog__data_a29648d6f48e68d2b0787286274347573}{get\+\_\+language}} () const
+\item 
+std\+::string \mbox{\hyperlink{classfrog__data_af2ec5ca9899360ac1f8bc6ba6d318f5d}{sentence}} (bool=false) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\+::vector$<$ \mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} $>$ \mbox{\hyperlink{classfrog__data_a23c097c3b32c06382cfa6a69af069342}{units}}
+\begin{DoxyCompactList}\small\item\em the records that make up the sentence \end{DoxyCompactList}\item 
+std\+::vector$<$ \mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} $>$ \mbox{\hyperlink{classfrog__data_a408425475ae77f857f1f438ea63996b6}{mw\+\_\+units}}
+\begin{DoxyCompactList}\small\item\em the M\+WU records that make up the sentence \end{DoxyCompactList}\item 
+std\+::map$<$ size\+\_\+t, size\+\_\+t $>$ \mbox{\hyperlink{classfrog__data_a5dea0488dad0b434a2d2c008e0b3f78f}{mwus}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \mbox{\hyperlink{classfrog__data_a6451b7ada860af431c40797fcd66209c}{extract\+\_\+fd}} (std\+::vector$<$ Tokenizer\+::\+Token $>$ \&)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+a datastructure to hold all frogged information of one Sentence 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classfrog__data_a3d1cd0be124c20fab5ab7ee9d3f20756}\label{classfrog__data_a3d1cd0be124c20fab5ab7ee9d3f20756}} 
+\index{frog\_data@{frog\_data}!append@{append}}
+\index{append@{append}!frog\_data@{frog\_data}}
+\doxysubsubsection{\texorpdfstring{append()}{append()}}
+{\footnotesize\ttfamily void frog\+\_\+data\+::append (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} \&}]{fr }\end{DoxyParamCaption})}
+
+add a \mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} to the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure
+
+
+\begin{DoxyParams}{Parameters}
+{\em fr} & the record to add.\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classfrog__data_a1db0522f4c5a07da74bf4ba3e2561464}\label{classfrog__data_a1db0522f4c5a07da74bf4ba3e2561464}} 
+\index{frog\_data@{frog\_data}!empty@{empty}}
+\index{empty@{empty}!frog\_data@{frog\_data}}
+\doxysubsubsection{\texorpdfstring{empty()}{empty()}}
+{\footnotesize\ttfamily bool frog\+\_\+data\+::empty (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classfrog__data_a29648d6f48e68d2b0787286274347573}\label{classfrog__data_a29648d6f48e68d2b0787286274347573}} 
+\index{frog\_data@{frog\_data}!get\_language@{get\_language}}
+\index{get\_language@{get\_language}!frog\_data@{frog\_data}}
+\doxysubsubsection{\texorpdfstring{get\_language()}{get\_language()}}
+{\footnotesize\ttfamily string frog\+\_\+data\+::get\+\_\+language (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+return the language of the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure
+
+\begin{DoxyReturn}{Returns}
+a string loop through all records and return the first non-\/default language value returns \char`\"{}default\char`\"{} when nothing was found
+\end{DoxyReturn}
+\mbox{\Hypertarget{classfrog__data_a773f31be94d0ae4615b986c5fc7b29f4}\label{classfrog__data_a773f31be94d0ae4615b986c5fc7b29f4}} 
+\index{frog\_data@{frog\_data}!resolve\_mwus@{resolve\_mwus}}
+\index{resolve\_mwus@{resolve\_mwus}!frog\_data@{frog\_data}}
+\doxysubsubsection{\texorpdfstring{resolve\_mwus()}{resolve\_mwus()}}
+{\footnotesize\ttfamily void frog\+\_\+data\+::resolve\+\_\+mwus (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+resolve M\+WU\textquotesingle{}s by merging them into the first record of the M\+WU\mbox{\Hypertarget{classfrog__data_af2ec5ca9899360ac1f8bc6ba6d318f5d}\label{classfrog__data_af2ec5ca9899360ac1f8bc6ba6d318f5d}} 
+\index{frog\_data@{frog\_data}!sentence@{sentence}}
+\index{sentence@{sentence}!frog\_data@{frog\_data}}
+\doxysubsubsection{\texorpdfstring{sentence()}{sentence()}}
+{\footnotesize\ttfamily string frog\+\_\+data\+::sentence (\begin{DoxyParamCaption}\item[{bool}]{tokenized = {\ttfamily false} }\end{DoxyParamCaption}) const}
+
+extract the sentence from a \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure by concatenating the words in the units. Normally separated by spaces.
+
+
+\begin{DoxyParams}{Parameters}
+{\em tokenized} & When true, the \textquotesingle{}no\+\_\+space\textquotesingle{} value is taken into account. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a U\+T\+F8 string of the orginal words, separated by 1 space except when the no\+\_\+space value is set A\+ND {\itshape tokenized} is true
+\end{DoxyReturn}
+\mbox{\Hypertarget{classfrog__data_a32ad06e77934d5186ef4ac5e44ecd97b}\label{classfrog__data_a32ad06e77934d5186ef4ac5e44ecd97b}} 
+\index{frog\_data@{frog\_data}!size@{size}}
+\index{size@{size}!frog\_data@{frog\_data}}
+\doxysubsubsection{\texorpdfstring{size()}{size()}}
+{\footnotesize\ttfamily size\+\_\+t frog\+\_\+data\+::size (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Friends And Related Function Documentation}
+\mbox{\Hypertarget{classfrog__data_a6451b7ada860af431c40797fcd66209c}\label{classfrog__data_a6451b7ada860af431c40797fcd66209c}} 
+\index{frog\_data@{frog\_data}!extract\_fd@{extract\_fd}}
+\index{extract\_fd@{extract\_fd}!frog\_data@{frog\_data}}
+\doxysubsubsection{\texorpdfstring{extract\_fd}{extract\_fd}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} extract\+\_\+fd (\begin{DoxyParamCaption}\item[{std\+::vector$<$ Tokenizer\+::\+Token $>$ \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [friend]}}
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classfrog__data_a408425475ae77f857f1f438ea63996b6}\label{classfrog__data_a408425475ae77f857f1f438ea63996b6}} 
+\index{frog\_data@{frog\_data}!mw\_units@{mw\_units}}
+\index{mw\_units@{mw\_units}!frog\_data@{frog\_data}}
+\doxysubsubsection{\texorpdfstring{mw\_units}{mw\_units}}
+{\footnotesize\ttfamily std\+::vector$<$\mbox{\hyperlink{classfrog__record}{frog\+\_\+record}}$>$ frog\+\_\+data\+::mw\+\_\+units}
+
+
+
+the M\+WU records that make up the sentence 
+
+\mbox{\Hypertarget{classfrog__data_a5dea0488dad0b434a2d2c008e0b3f78f}\label{classfrog__data_a5dea0488dad0b434a2d2c008e0b3f78f}} 
+\index{frog\_data@{frog\_data}!mwus@{mwus}}
+\index{mwus@{mwus}!frog\_data@{frog\_data}}
+\doxysubsubsection{\texorpdfstring{mwus}{mwus}}
+{\footnotesize\ttfamily std\+::map$<$size\+\_\+t,size\+\_\+t$>$ frog\+\_\+data\+::mwus}
+
+\mbox{\Hypertarget{classfrog__data_a23c097c3b32c06382cfa6a69af069342}\label{classfrog__data_a23c097c3b32c06382cfa6a69af069342}} 
+\index{frog\_data@{frog\_data}!units@{units}}
+\index{units@{units}!frog\_data@{frog\_data}}
+\doxysubsubsection{\texorpdfstring{units}{units}}
+{\footnotesize\ttfamily std\+::vector$<$\mbox{\hyperlink{classfrog__record}{frog\+\_\+record}}$>$ frog\+\_\+data\+::units}
+
+
+
+the records that make up the sentence 
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{FrogData_8h}{Frog\+Data.\+h}}\item 
+src/\mbox{\hyperlink{FrogData_8cxx}{Frog\+Data.\+cxx}}\end{DoxyCompactItemize}

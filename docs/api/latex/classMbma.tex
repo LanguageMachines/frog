@@ -1,0 +1,290 @@
+\hypertarget{classMbma}{}\doxysection{Mbma Class Reference}
+\label{classMbma}\index{Mbma@{Mbma}}
+
+
+{\ttfamily \#include $<$mbma\+\_\+mod.\+h$>$}
+
+
+
+Collaboration diagram for Mbma\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=324pt]{classMbma__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classMbma_a725b2d01a6dc3b0306de3506a5f30df1}{Mbma}} (Ti\+C\+C\+::\+Log\+Stream $\ast$, Ti\+C\+C\+::\+Log\+Stream $\ast$=0)
+\item 
+\mbox{\hyperlink{classMbma_a1da6b645c45997949847023b8c84d45e}{$\sim$\+Mbma}} ()
+\item 
+bool \mbox{\hyperlink{classMbma_a95878702d7f17e92c191aa885fb3413a}{init}} (const Ti\+C\+C\+::\+Configuration \&)
+\item 
+void \mbox{\hyperlink{classMbma_a92794290c5bae2b9b4c4436c6c19211a}{add\+\_\+provenance}} (folia\+::\+Document \&, folia\+::processor $\ast$) const
+\item 
+void \mbox{\hyperlink{classMbma_afa3d4000fa79f3fa7fc238c2466aec87}{Classify}} (\mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} \&)
+\item 
+void \mbox{\hyperlink{classMbma_a1bf80716395d6e6fdaac8c151bb82536}{Classify}} (const icu\+::\+Unicode\+String \&)
+\item 
+void \mbox{\hyperlink{classMbma_ac93bdf472fcce1b39901432d33898e75}{filter\+Head\+Tag}} (const std\+::string \&)
+\item 
+void \mbox{\hyperlink{classMbma_aadb3f17de3d8f5287d6a2abbdd3349e3}{filter\+Sub\+Tags}} (const std\+::vector$<$ std\+::string $>$ \&)
+\item 
+void \mbox{\hyperlink{classMbma_abe33b56584c1c568c0c5fb7a7c01bb7e}{assign\+\_\+compounds}} ()
+\item 
+std\+::vector$<$ std\+::string $>$ \mbox{\hyperlink{classMbma_a8721e0c6490a20f854da46f3b6a0d0f8}{get\+Result}} () const
+\item 
+std\+::vector$<$ std\+::pair$<$ std\+::string, std\+::string $>$ $>$ \mbox{\hyperlink{classMbma_a340e98d0af97ec014fc9c6d4a0f95b73}{get\+Results}} () const
+\item 
+std\+::vector$<$ std\+::pair$<$ std\+::string, std\+::string $>$ $>$ \mbox{\hyperlink{classMbma_a7a1933e94ecaf98928ac31dfc44f4de9}{get\+Pretty\+Results}} () const
+\item 
+void \mbox{\hyperlink{classMbma_a8d8902719346f20c1936336d614f5df4}{set\+Deep\+Morph}} (bool b)
+\item 
+void \mbox{\hyperlink{classMbma_a044fe7bda69538c0af1836a26df4cdcc}{clear\+Analysis}} ()
+\item 
+\mbox{\hyperlink{classRule}{Rule}} $\ast$ \mbox{\hyperlink{classMbma_aaff50f95cd6f048e94e6bcb5ad9c239d}{match\+Rule}} (const std\+::vector$<$ std\+::string $>$ \&, const icu\+::\+Unicode\+String \&)
+\item 
+std\+::vector$<$ \mbox{\hyperlink{classRule}{Rule}} $\ast$ $>$ \mbox{\hyperlink{classMbma_aa889523b924a537882ad315be41b703a}{execute}} (const icu\+::\+Unicode\+String \&, const std\+::vector$<$ std\+::string $>$ \&)
+\item 
+std\+::string \mbox{\hyperlink{classMbma_ab3ae26e77eb107ac94c061c235da2dfb}{version}} () const
+\item 
+void \mbox{\hyperlink{classMbma_a549bda9757682478279d1b7d715d08cd}{add\+\_\+morphemes}} (const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&, const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&fd) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static std\+::map$<$ std\+::string, std\+::string $>$ \mbox{\hyperlink{classMbma_ac73469c570c6ccb94a96487e605b2908}{T\+A\+Gconv}}
+\item 
+static std\+::string \mbox{\hyperlink{classMbma_a82847c14c407d316ec70936ac4541cd5}{mbma\+\_\+tagset}} = \char`\"{}http\+://ilk.\+uvt.\+nl/folia/sets/frog-\/mbma-\/nl\char`\"{}
+\item 
+static std\+::string \mbox{\hyperlink{classMbma_a975b2ef8de43e5ea9daf57f37a8148cb}{pos\+\_\+tagset}} = \char`\"{}http\+://ilk.\+uvt.\+nl/folia/sets/frog-\/mbpos-\/cgn\char`\"{}
+\item 
+static std\+::string \mbox{\hyperlink{classMbma_a68424a4cc9b056441dadc659ce099457}{clex\+\_\+tagset}} = \char`\"{}http\+://ilk.\+uvt.\+nl/folia/sets/frog-\/mbpos-\/clex\char`\"{}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classMbma_a725b2d01a6dc3b0306de3506a5f30df1}\label{classMbma_a725b2d01a6dc3b0306de3506a5f30df1}} 
+\index{Mbma@{Mbma}!Mbma@{Mbma}}
+\index{Mbma@{Mbma}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{Mbma()}{Mbma()}}
+{\footnotesize\ttfamily Mbma\+::\+Mbma (\begin{DoxyParamCaption}\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{errlog,  }\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{dbglog = {\ttfamily 0} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+create an \mbox{\hyperlink{classMbma}{Mbma}} classifier object
+
+
+\begin{DoxyParams}{Parameters}
+{\em errlog} & the Log\+Stream to use for Error messages \\
+\hline
+{\em dbglog} & the Log\+Stream to use for Debug messages\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classMbma_a1da6b645c45997949847023b8c84d45e}\label{classMbma_a1da6b645c45997949847023b8c84d45e}} 
+\index{Mbma@{Mbma}!````~Mbma@{$\sim$Mbma}}
+\index{````~Mbma@{$\sim$Mbma}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{$\sim$Mbma()}{~Mbma()}}
+{\footnotesize\ttfamily Mbma\+::$\sim$\+Mbma (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+the mbma destructor
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classMbma_a549bda9757682478279d1b7d715d08cd}\label{classMbma_a549bda9757682478279d1b7d715d08cd}} 
+\index{Mbma@{Mbma}!add\_morphemes@{add\_morphemes}}
+\index{add\_morphemes@{add\_morphemes}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{add\_morphemes()}{add\_morphemes()}}
+{\footnotesize\ttfamily void Mbma\+::add\+\_\+morphemes (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&}]{wv,  }\item[{const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd }\end{DoxyParamCaption}) const}
+
+\mbox{\Hypertarget{classMbma_a92794290c5bae2b9b4c4436c6c19211a}\label{classMbma_a92794290c5bae2b9b4c4436c6c19211a}} 
+\index{Mbma@{Mbma}!add\_provenance@{add\_provenance}}
+\index{add\_provenance@{add\_provenance}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{add\_provenance()}{add\_provenance()}}
+{\footnotesize\ttfamily void Mbma\+::add\+\_\+provenance (\begin{DoxyParamCaption}\item[{folia\+::\+Document \&}]{doc,  }\item[{folia\+::processor $\ast$}]{main }\end{DoxyParamCaption}) const}
+
+add provenance information to the Fo\+LiA document
+
+
+\begin{DoxyParams}{Parameters}
+{\em doc} & the fo\+LiA document we are working on \\
+\hline
+{\em main} & the main processor (presumably Frog) we want to add a new one to\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classMbma_abe33b56584c1c568c0c5fb7a7c01bb7e}\label{classMbma_abe33b56584c1c568c0c5fb7a7c01bb7e}} 
+\index{Mbma@{Mbma}!assign\_compounds@{assign\_compounds}}
+\index{assign\_compounds@{assign\_compounds}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{assign\_compounds()}{assign\_compounds()}}
+{\footnotesize\ttfamily void Mbma\+::assign\+\_\+compounds (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+add compound information to the result\mbox{\Hypertarget{classMbma_a1bf80716395d6e6fdaac8c151bb82536}\label{classMbma_a1bf80716395d6e6fdaac8c151bb82536}} 
+\index{Mbma@{Mbma}!Classify@{Classify}}
+\index{Classify@{Classify}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{Classify()}{Classify()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void Mbma\+::\+Classify (\begin{DoxyParamCaption}\item[{const icu\+::\+Unicode\+String \&}]{word }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classMbma_afa3d4000fa79f3fa7fc238c2466aec87}\label{classMbma_afa3d4000fa79f3fa7fc238c2466aec87}} 
+\index{Mbma@{Mbma}!Classify@{Classify}}
+\index{Classify@{Classify}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{Classify()}{Classify()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void Mbma\+::\+Classify (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__record}{frog\+\_\+record}} \&}]{fd }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classMbma_a044fe7bda69538c0af1836a26df4cdcc}\label{classMbma_a044fe7bda69538c0af1836a26df4cdcc}} 
+\index{Mbma@{Mbma}!clearAnalysis@{clearAnalysis}}
+\index{clearAnalysis@{clearAnalysis}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{clearAnalysis()}{clearAnalysis()}}
+{\footnotesize\ttfamily void Mbma\+::clear\+Analysis (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classMbma_aa889523b924a537882ad315be41b703a}\label{classMbma_aa889523b924a537882ad315be41b703a}} 
+\index{Mbma@{Mbma}!execute@{execute}}
+\index{execute@{execute}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{execute()}{execute()}}
+{\footnotesize\ttfamily vector$<$ \mbox{\hyperlink{classRule}{Rule}} $\ast$ $>$ Mbma\+::execute (\begin{DoxyParamCaption}\item[{const icu\+::\+Unicode\+String \&}]{word,  }\item[{const std\+::vector$<$ std\+::string $>$ \&}]{classes }\end{DoxyParamCaption})}
+
+attempt to find matching Rules
+
+
+\begin{DoxyParams}{Parameters}
+{\em word} & a word to check \\
+\hline
+{\em classes} & the \mbox{\hyperlink{namespaceTimbl}{Timbl}} classifications \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 or more matching Rules
+\end{DoxyReturn}
+\mbox{\Hypertarget{classMbma_ac93bdf472fcce1b39901432d33898e75}\label{classMbma_ac93bdf472fcce1b39901432d33898e75}} 
+\index{Mbma@{Mbma}!filterHeadTag@{filterHeadTag}}
+\index{filterHeadTag@{filterHeadTag}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{filterHeadTag()}{filterHeadTag()}}
+{\footnotesize\ttfamily void Mbma\+::filter\+Head\+Tag (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{head }\end{DoxyParamCaption})}
+
+reduce the Mbms analysis by removing all solutions where the head is not matched
+
+
+\begin{DoxyParams}{Parameters}
+{\em head} & the head-\/tag that is required matching does not mean equality. We are a forgivingful in the sense that \begin{DoxyVerb}N matches PN
+A matches B and vv
+A matches V
+\end{DoxyVerb}
+\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classMbma_aadb3f17de3d8f5287d6a2abbdd3349e3}\label{classMbma_aadb3f17de3d8f5287d6a2abbdd3349e3}} 
+\index{Mbma@{Mbma}!filterSubTags@{filterSubTags}}
+\index{filterSubTags@{filterSubTags}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{filterSubTags()}{filterSubTags()}}
+{\footnotesize\ttfamily void Mbma\+::filter\+Sub\+Tags (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ std\+::string $>$ \&}]{feats }\end{DoxyParamCaption})}
+
+reduce the analyses set based on sub-\/features
+
+
+\begin{DoxyParams}{Parameters}
+{\em feats} & a list of subfeatures when a candidate \mbox{\hyperlink{classRule}{Rule}} has inflexion it should match a feature.\\
+\hline
+\end{DoxyParams}
+Other criteria\+: only take the highest confidence, and remove Rules that yield the same analysis.
+
+Example\+: \begin{DoxyVerb}The word 'appel' is according to Mbma an N with inflection e ('enkelvoud')
+The tagger will assign an N too, with features [soort,ev,basis,zijd,stan]
+one of the features, 'ev' will match the 'e' inflection after translation
+so this is a good reading
+\end{DoxyVerb}
+\mbox{\Hypertarget{classMbma_a7a1933e94ecaf98928ac31dfc44f4de9}\label{classMbma_a7a1933e94ecaf98928ac31dfc44f4de9}} 
+\index{Mbma@{Mbma}!getPrettyResults@{getPrettyResults}}
+\index{getPrettyResults@{getPrettyResults}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{getPrettyResults()}{getPrettyResults()}}
+{\footnotesize\ttfamily vector$<$ pair$<$ string, string $>$ $>$ Mbma\+::get\+Pretty\+Results (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\mbox{\Hypertarget{classMbma_a8721e0c6490a20f854da46f3b6a0d0f8}\label{classMbma_a8721e0c6490a20f854da46f3b6a0d0f8}} 
+\index{Mbma@{Mbma}!getResult@{getResult}}
+\index{getResult@{getResult}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{getResult()}{getResult()}}
+{\footnotesize\ttfamily vector$<$ string $>$ Mbma\+::get\+Result (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\mbox{\Hypertarget{classMbma_a340e98d0af97ec014fc9c6d4a0f95b73}\label{classMbma_a340e98d0af97ec014fc9c6d4a0f95b73}} 
+\index{Mbma@{Mbma}!getResults@{getResults}}
+\index{getResults@{getResults}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{getResults()}{getResults()}}
+{\footnotesize\ttfamily vector$<$ pair$<$ string, string $>$ $>$ Mbma\+::get\+Results (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\mbox{\Hypertarget{classMbma_a95878702d7f17e92c191aa885fb3413a}\label{classMbma_a95878702d7f17e92c191aa885fb3413a}} 
+\index{Mbma@{Mbma}!init@{init}}
+\index{init@{init}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{init()}{init()}}
+{\footnotesize\ttfamily bool Mbma\+::init (\begin{DoxyParamCaption}\item[{const Ti\+C\+C\+::\+Configuration \&}]{config }\end{DoxyParamCaption})}
+
+initialize the \mbox{\hyperlink{classMbma}{Mbma}} analyzer using the config
+
+
+\begin{DoxyParams}{Parameters}
+{\em config} & the Configuration to use \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true when no problems are detected
+\end{DoxyReturn}
+\mbox{\Hypertarget{classMbma_aaff50f95cd6f048e94e6bcb5ad9c239d}\label{classMbma_aaff50f95cd6f048e94e6bcb5ad9c239d}} 
+\index{Mbma@{Mbma}!matchRule@{matchRule}}
+\index{matchRule@{matchRule}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{matchRule()}{matchRule()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classRule}{Rule}} $\ast$ Mbma\+::match\+Rule (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ std\+::string $>$ \&}]{ana,  }\item[{const icu\+::\+Unicode\+String \&}]{word }\end{DoxyParamCaption})}
+
+attempt to match an Analysis on a word
+
+
+\begin{DoxyParams}{Parameters}
+{\em ana} & one analysis result, expanded from the \mbox{\hyperlink{namespaceTimbl}{Timbl}} classifier \\
+\hline
+{\em word} & a Unicode Word to check \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a matched \mbox{\hyperlink{classRule}{Rule}} or 0
+\end{DoxyReturn}
+\mbox{\Hypertarget{classMbma_a8d8902719346f20c1936336d614f5df4}\label{classMbma_a8d8902719346f20c1936336d614f5df4}} 
+\index{Mbma@{Mbma}!setDeepMorph@{setDeepMorph}}
+\index{setDeepMorph@{setDeepMorph}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{setDeepMorph()}{setDeepMorph()}}
+{\footnotesize\ttfamily void Mbma\+::set\+Deep\+Morph (\begin{DoxyParamCaption}\item[{bool}]{b }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classMbma_ab3ae26e77eb107ac94c061c235da2dfb}\label{classMbma_ab3ae26e77eb107ac94c061c235da2dfb}} 
+\index{Mbma@{Mbma}!version@{version}}
+\index{version@{version}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{version()}{version()}}
+{\footnotesize\ttfamily std\+::string Mbma\+::version (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classMbma_a68424a4cc9b056441dadc659ce099457}\label{classMbma_a68424a4cc9b056441dadc659ce099457}} 
+\index{Mbma@{Mbma}!clex\_tagset@{clex\_tagset}}
+\index{clex\_tagset@{clex\_tagset}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{clex\_tagset}{clex\_tagset}}
+{\footnotesize\ttfamily string Mbma\+::clex\+\_\+tagset = \char`\"{}http\+://ilk.\+uvt.\+nl/folia/sets/frog-\/mbpos-\/clex\char`\"{}\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classMbma_a82847c14c407d316ec70936ac4541cd5}\label{classMbma_a82847c14c407d316ec70936ac4541cd5}} 
+\index{Mbma@{Mbma}!mbma\_tagset@{mbma\_tagset}}
+\index{mbma\_tagset@{mbma\_tagset}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{mbma\_tagset}{mbma\_tagset}}
+{\footnotesize\ttfamily string Mbma\+::mbma\+\_\+tagset = \char`\"{}http\+://ilk.\+uvt.\+nl/folia/sets/frog-\/mbma-\/nl\char`\"{}\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classMbma_a975b2ef8de43e5ea9daf57f37a8148cb}\label{classMbma_a975b2ef8de43e5ea9daf57f37a8148cb}} 
+\index{Mbma@{Mbma}!pos\_tagset@{pos\_tagset}}
+\index{pos\_tagset@{pos\_tagset}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{pos\_tagset}{pos\_tagset}}
+{\footnotesize\ttfamily string Mbma\+::pos\+\_\+tagset = \char`\"{}http\+://ilk.\+uvt.\+nl/folia/sets/frog-\/mbpos-\/cgn\char`\"{}\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classMbma_ac73469c570c6ccb94a96487e605b2908}\label{classMbma_ac73469c570c6ccb94a96487e605b2908}} 
+\index{Mbma@{Mbma}!TAGconv@{TAGconv}}
+\index{TAGconv@{TAGconv}!Mbma@{Mbma}}
+\doxysubsubsection{\texorpdfstring{TAGconv}{TAGconv}}
+{\footnotesize\ttfamily map$<$ string, string $>$ Mbma\+::\+T\+A\+Gconv\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{mbma__mod_8h}{mbma\+\_\+mod.\+h}}\item 
+src/\mbox{\hyperlink{mbma__mod_8cxx}{mbma\+\_\+mod.\+cxx}}\end{DoxyCompactItemize}

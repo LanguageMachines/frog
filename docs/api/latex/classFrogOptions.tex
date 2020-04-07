@@ -1,0 +1,524 @@
+\hypertarget{classFrogOptions}{}\doxysection{Frog\+Options Class Reference}
+\label{classFrogOptions}\index{FrogOptions@{FrogOptions}}
+
+
+this class holds the runtime settings for Frog  
+
+
+
+
+{\ttfamily \#include $<$Frog\+A\+P\+I.\+h$>$}
+
+
+
+Collaboration diagram for Frog\+Options\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=343pt]{classFrogOptions__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classFrogOptions_a766e37cb1fae670b252668ba54dbc15e}{Frog\+Options}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+bool \mbox{\hyperlink{classFrogOptions_aa2279c655d2eec480ab0bb50abea5152}{do\+Tok}}
+\begin{DoxyCompactList}\small\item\em should we run the tokenizer? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_a8e5b638ca0c15913b1b8c2577fb5f383}{do\+Lemma}}
+\begin{DoxyCompactList}\small\item\em should we run the lemmatizer? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_acd3af6d5c56f12760031f1fb4d595db6}{do\+Morph}}
+\begin{DoxyCompactList}\small\item\em should we run the morphological analyzer? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_ade4408cec48b7666de71c6a11b2a87a2}{do\+Deep\+Morph}}
+\begin{DoxyCompactList}\small\item\em do we want a deep morphological analysis? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_ac1977f09c42435855e6741f15ea2074d}{do\+Mwu}}
+\begin{DoxyCompactList}\small\item\em should we resolve Multi Word Units? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_afb80e3b7b3c75486b3bea576a8fc20f1}{do\+I\+OB}}
+\begin{DoxyCompactList}\small\item\em should we run the I\+OB Chuker? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_ad13f19eae8b5736dfe15e4de03b8916f}{do\+N\+ER}}
+\begin{DoxyCompactList}\small\item\em should we run the Named Entity recognizer? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_a5374fa7becc4c9ced486ef6018b7a483}{do\+Parse}}
+\begin{DoxyCompactList}\small\item\em should we run the Dependency \mbox{\hyperlink{classParser}{Parser}}? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_aa6d519f5529998ae680e6fa318be7701}{do\+Tagger}}
+\begin{DoxyCompactList}\small\item\em should we run the Dependency \mbox{\hyperlink{classParser}{Parser}}? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_aabcdab71703163ca77c08913cb0455ac}{do\+Sentence\+Per\+Line}}
+\begin{DoxyCompactList}\small\item\em do we want a sentence per line? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_acd25fed030b34ceedcfd530498d93a16}{do\+Quote\+Detection}}
+\begin{DoxyCompactList}\small\item\em enable quote detection (N\+OT U\+S\+ED) \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_a1824607c3fed9bd0701d76d6d593d33e}{do\+Retry}}
+\begin{DoxyCompactList}\small\item\em set retry mode (M\+I\+S\+N\+O\+M\+ER) \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_a5897c1f7d4f4baf2b5a75896eabfb7f3}{no\+Std\+Out}}
+\begin{DoxyCompactList}\small\item\em do we want output to stdout? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_a0fbfb2e858792729257fc4436c469df8}{do\+X\+M\+Lin}}
+\begin{DoxyCompactList}\small\item\em do we have Fo\+LiA input? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_a41e0ae9d2ee1f15b4a859ae3837ef81f}{do\+X\+M\+Lout}}
+\begin{DoxyCompactList}\small\item\em do we want Fo\+LiA output? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_a4d78009c616ff5c449ba5743633cbf84}{do\+J\+S\+O\+Nin}}
+\begin{DoxyCompactList}\small\item\em do we have J\+S\+ON input? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_a2d66c62d2b1bea8ead92aac67400cab1}{do\+J\+S\+O\+Nout}}
+\begin{DoxyCompactList}\small\item\em do we want J\+S\+ON output? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_ac218777306a3f28dd6d0eb25204e57ba}{do\+Server}}
+\begin{DoxyCompactList}\small\item\em do we want to run as a server? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_a101863fc84180eb3275d3e8a2aa19df6}{do\+Kanon}}
+\begin{DoxyCompactList}\small\item\em do we want Fo\+LiA to be output in a canonical way? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_a8ab02a18f5ae56f0829a4a27bb5bcb65}{test\+\_\+\+A\+PI}}
+\begin{DoxyCompactList}\small\item\em do we want to run some tests? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_ac95487bfcc8070e134d1f7e8f879c6e5}{hide\+\_\+timers}}
+\begin{DoxyCompactList}\small\item\em should we output timing information? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_a823e32272e6c4fd68a2378639506f357}{interactive}}
+\begin{DoxyCompactList}\small\item\em are we running from the command line? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_a99e7fd391b7d618da597333443d8ef56}{do\+Alpino\+Server}}
+\begin{DoxyCompactList}\small\item\em should we try to connect to an Alpino server? \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_a9a2422db6b75147214c2827fb9b8d0e3}{do\+Alpino}}
+\begin{DoxyCompactList}\small\item\em should we directly run Alpino? \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{classFrogOptions_af59da319356d439798acb38147abcea5}{num\+Threads}}
+\begin{DoxyCompactList}\small\item\em limit for the number of threads \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{classFrogOptions_ac8f12c427b362177129cd7e904e1395b}{debug\+Flag}}
+\begin{DoxyCompactList}\small\item\em value for the generic debug level \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{classFrogOptions_a3a4ae257315783817f8e229451ab2e5c}{J\+S\+O\+N\+\_\+pp}}
+\begin{DoxyCompactList}\small\item\em for J\+S\+ON output, use this value to format. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classFrogOptions_aa1320aec65794c216b0d428ce1cf30fb}{encoding}}
+\begin{DoxyCompactList}\small\item\em which input-\/encoding do we expect \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classFrogOptions_a9f9aec6fc7ff471b84ccc925dd34837c}{uttmark}}
+\begin{DoxyCompactList}\small\item\em the string which separates Utterances \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classFrogOptions_afb7d7e036e65e02ac98656dc043d2d2e}{listenport}}
+\begin{DoxyCompactList}\small\item\em determines the port to run the Frog Server on \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classFrogOptions_a13d056bf65b761cd1aeeafbfbfc4387b}{docid}}
+\begin{DoxyCompactList}\small\item\em the Fo\+LiA document ID on output. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classFrogOptions_adea6148513dbbfd6e8bbb9f67bca8302}{inputclass}}
+\begin{DoxyCompactList}\small\item\em the textclass to use on Fo\+LiA input \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classFrogOptions_a8b95c142ca325a6b0d3f53cb851160d4}{outputclass}}
+\begin{DoxyCompactList}\small\item\em the textclass to use on Fo\+LiA output \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classFrogOptions_a62edb3f47fc5b40ae1fdb5b33121d8f8}{default\+\_\+language}}
+\begin{DoxyCompactList}\small\item\em what is our default language \end{DoxyCompactList}\item 
+std\+::set$<$ std\+::string $>$ \mbox{\hyperlink{classFrogOptions_a680a6c8510940ce908aa8de2f3377518}{languages}}
+\begin{DoxyCompactList}\small\item\em all languages to take into account \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classFrogOptions_a43558476420702dd17d3e5405ced5356}{textredundancy}}
+\begin{DoxyCompactList}\small\item\em determines how much text is added in the Fo\+LiA \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFrogOptions_a29ce45713ad3f13f73325b6f9add240c}{correct\+\_\+words}}
+\begin{DoxyCompactList}\small\item\em should we allow the tokenizer to correct words? \end{DoxyCompactList}\item 
+unsigned int \mbox{\hyperlink{classFrogOptions_a5e62c2607b2fa3310b5427179f1237b5}{max\+Parser\+Tokens}}
+\begin{DoxyCompactList}\small\item\em limit the number of words to Parse \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classFrogOptions_a742c74e32bc5d7547298e8989a061aaa}{command}}
+\begin{DoxyCompactList}\small\item\em stores the original command that invoked Frog \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+this class holds the runtime settings for Frog 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classFrogOptions_a766e37cb1fae670b252668ba54dbc15e}\label{classFrogOptions_a766e37cb1fae670b252668ba54dbc15e}} 
+\index{FrogOptions@{FrogOptions}!FrogOptions@{FrogOptions}}
+\index{FrogOptions@{FrogOptions}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{FrogOptions()}{FrogOptions()}}
+{\footnotesize\ttfamily Frog\+Options\+::\+Frog\+Options (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classFrogOptions_a742c74e32bc5d7547298e8989a061aaa}\label{classFrogOptions_a742c74e32bc5d7547298e8989a061aaa}} 
+\index{FrogOptions@{FrogOptions}!command@{command}}
+\index{command@{command}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{command}{command}}
+{\footnotesize\ttfamily std\+::string Frog\+Options\+::command}
+
+
+
+stores the original command that invoked Frog 
+
+\mbox{\Hypertarget{classFrogOptions_a29ce45713ad3f13f73325b6f9add240c}\label{classFrogOptions_a29ce45713ad3f13f73325b6f9add240c}} 
+\index{FrogOptions@{FrogOptions}!correct\_words@{correct\_words}}
+\index{correct\_words@{correct\_words}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{correct\_words}{correct\_words}}
+{\footnotesize\ttfamily bool Frog\+Options\+::correct\+\_\+words}
+
+
+
+should we allow the tokenizer to correct words? 
+
+When true, the tokenizer might split words changing the number of words and the text value of the above structure(s). e.\+g \textquotesingle{}1984!\textquotesingle{} to \textquotesingle{}1984 !\textquotesingle{} \mbox{\Hypertarget{classFrogOptions_ac8f12c427b362177129cd7e904e1395b}\label{classFrogOptions_ac8f12c427b362177129cd7e904e1395b}} 
+\index{FrogOptions@{FrogOptions}!debugFlag@{debugFlag}}
+\index{debugFlag@{debugFlag}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{debugFlag}{debugFlag}}
+{\footnotesize\ttfamily int Frog\+Options\+::debug\+Flag}
+
+
+
+value for the generic debug level 
+
+This value is used as the debug level for E\+V\+E\+RY module. It is however possible to set specific levels per module too. \mbox{\Hypertarget{classFrogOptions_a62edb3f47fc5b40ae1fdb5b33121d8f8}\label{classFrogOptions_a62edb3f47fc5b40ae1fdb5b33121d8f8}} 
+\index{FrogOptions@{FrogOptions}!default\_language@{default\_language}}
+\index{default\_language@{default\_language}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{default\_language}{default\_language}}
+{\footnotesize\ttfamily std\+::string Frog\+Options\+::default\+\_\+language}
+
+
+
+what is our default language 
+
+\mbox{\Hypertarget{classFrogOptions_a9a2422db6b75147214c2827fb9b8d0e3}\label{classFrogOptions_a9a2422db6b75147214c2827fb9b8d0e3}} 
+\index{FrogOptions@{FrogOptions}!doAlpino@{doAlpino}}
+\index{doAlpino@{doAlpino}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doAlpino}{doAlpino}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+Alpino}
+
+
+
+should we directly run Alpino? 
+
+This assumes that Alpinois installed locally and the Alpino command is working. \mbox{\Hypertarget{classFrogOptions_a99e7fd391b7d618da597333443d8ef56}\label{classFrogOptions_a99e7fd391b7d618da597333443d8ef56}} 
+\index{FrogOptions@{FrogOptions}!doAlpinoServer@{doAlpinoServer}}
+\index{doAlpinoServer@{doAlpinoServer}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doAlpinoServer}{doAlpinoServer}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+Alpino\+Server}
+
+
+
+should we try to connect to an Alpino server? 
+
+this assumes that an Alpino Server is set up and running and that it\textquotesingle{}s location is configured correctly. \mbox{\Hypertarget{classFrogOptions_a13d056bf65b761cd1aeeafbfbfc4387b}\label{classFrogOptions_a13d056bf65b761cd1aeeafbfbfc4387b}} 
+\index{FrogOptions@{FrogOptions}!docid@{docid}}
+\index{docid@{docid}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{docid}{docid}}
+{\footnotesize\ttfamily std\+::string Frog\+Options\+::docid}
+
+
+
+the Fo\+LiA document ID on output. 
+
+\mbox{\Hypertarget{classFrogOptions_ade4408cec48b7666de71c6a11b2a87a2}\label{classFrogOptions_ade4408cec48b7666de71c6a11b2a87a2}} 
+\index{FrogOptions@{FrogOptions}!doDeepMorph@{doDeepMorph}}
+\index{doDeepMorph@{doDeepMorph}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doDeepMorph}{doDeepMorph}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+Deep\+Morph}
+
+
+
+do we want a deep morphological analysis? 
+
+\mbox{\Hypertarget{classFrogOptions_afb80e3b7b3c75486b3bea576a8fc20f1}\label{classFrogOptions_afb80e3b7b3c75486b3bea576a8fc20f1}} 
+\index{FrogOptions@{FrogOptions}!doIOB@{doIOB}}
+\index{doIOB@{doIOB}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doIOB}{doIOB}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+I\+OB}
+
+
+
+should we run the I\+OB Chuker? 
+
+\mbox{\Hypertarget{classFrogOptions_a4d78009c616ff5c449ba5743633cbf84}\label{classFrogOptions_a4d78009c616ff5c449ba5743633cbf84}} 
+\index{FrogOptions@{FrogOptions}!doJSONin@{doJSONin}}
+\index{doJSONin@{doJSONin}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doJSONin}{doJSONin}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+J\+S\+O\+Nin}
+
+
+
+do we have J\+S\+ON input? 
+
+This is only supported for the Server mode of Frog, it implies J\+S\+ON output too. \mbox{\Hypertarget{classFrogOptions_a2d66c62d2b1bea8ead92aac67400cab1}\label{classFrogOptions_a2d66c62d2b1bea8ead92aac67400cab1}} 
+\index{FrogOptions@{FrogOptions}!doJSONout@{doJSONout}}
+\index{doJSONout@{doJSONout}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doJSONout}{doJSONout}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+J\+S\+O\+Nout}
+
+
+
+do we want J\+S\+ON output? 
+
+\mbox{\Hypertarget{classFrogOptions_a101863fc84180eb3275d3e8a2aa19df6}\label{classFrogOptions_a101863fc84180eb3275d3e8a2aa19df6}} 
+\index{FrogOptions@{FrogOptions}!doKanon@{doKanon}}
+\index{doKanon@{doKanon}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doKanon}{doKanon}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+Kanon}
+
+
+
+do we want Fo\+LiA to be output in a canonical way? 
+
+This can be conveniant for testing purposes as it makes sure that nodes from several modules are always in the same order in the X\+ML \mbox{\Hypertarget{classFrogOptions_a8e5b638ca0c15913b1b8c2577fb5f383}\label{classFrogOptions_a8e5b638ca0c15913b1b8c2577fb5f383}} 
+\index{FrogOptions@{FrogOptions}!doLemma@{doLemma}}
+\index{doLemma@{doLemma}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doLemma}{doLemma}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+Lemma}
+
+
+
+should we run the lemmatizer? 
+
+\mbox{\Hypertarget{classFrogOptions_acd3af6d5c56f12760031f1fb4d595db6}\label{classFrogOptions_acd3af6d5c56f12760031f1fb4d595db6}} 
+\index{FrogOptions@{FrogOptions}!doMorph@{doMorph}}
+\index{doMorph@{doMorph}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doMorph}{doMorph}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+Morph}
+
+
+
+should we run the morphological analyzer? 
+
+\mbox{\Hypertarget{classFrogOptions_ac1977f09c42435855e6741f15ea2074d}\label{classFrogOptions_ac1977f09c42435855e6741f15ea2074d}} 
+\index{FrogOptions@{FrogOptions}!doMwu@{doMwu}}
+\index{doMwu@{doMwu}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doMwu}{doMwu}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+Mwu}
+
+
+
+should we resolve Multi Word Units? 
+
+\mbox{\Hypertarget{classFrogOptions_ad13f19eae8b5736dfe15e4de03b8916f}\label{classFrogOptions_ad13f19eae8b5736dfe15e4de03b8916f}} 
+\index{FrogOptions@{FrogOptions}!doNER@{doNER}}
+\index{doNER@{doNER}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doNER}{doNER}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+N\+ER}
+
+
+
+should we run the Named Entity recognizer? 
+
+\mbox{\Hypertarget{classFrogOptions_a5374fa7becc4c9ced486ef6018b7a483}\label{classFrogOptions_a5374fa7becc4c9ced486ef6018b7a483}} 
+\index{FrogOptions@{FrogOptions}!doParse@{doParse}}
+\index{doParse@{doParse}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doParse}{doParse}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+Parse}
+
+
+
+should we run the Dependency \mbox{\hyperlink{classParser}{Parser}}? 
+
+\mbox{\Hypertarget{classFrogOptions_acd25fed030b34ceedcfd530498d93a16}\label{classFrogOptions_acd25fed030b34ceedcfd530498d93a16}} 
+\index{FrogOptions@{FrogOptions}!doQuoteDetection@{doQuoteDetection}}
+\index{doQuoteDetection@{doQuoteDetection}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doQuoteDetection}{doQuoteDetection}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+Quote\+Detection}
+
+
+
+enable quote detection (N\+OT U\+S\+ED) 
+
+should we enable Quote Detection. This value M\+U\+ST be false. Quote Detection is N\+OT supported \mbox{\Hypertarget{classFrogOptions_a1824607c3fed9bd0701d76d6d593d33e}\label{classFrogOptions_a1824607c3fed9bd0701d76d6d593d33e}} 
+\index{FrogOptions@{FrogOptions}!doRetry@{doRetry}}
+\index{doRetry@{doRetry}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doRetry}{doRetry}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+Retry}
+
+
+
+set retry mode (M\+I\+S\+N\+O\+M\+ER) 
+
+when T\+R\+UE, we assume we are retrying one ore more inputfiles, and we skip those input files for which an outputfile already exists. \mbox{\Hypertarget{classFrogOptions_aabcdab71703163ca77c08913cb0455ac}\label{classFrogOptions_aabcdab71703163ca77c08913cb0455ac}} 
+\index{FrogOptions@{FrogOptions}!doSentencePerLine@{doSentencePerLine}}
+\index{doSentencePerLine@{doSentencePerLine}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doSentencePerLine}{doSentencePerLine}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+Sentence\+Per\+Line}
+
+
+
+do we want a sentence per line? 
+
+should we see every input-\/line as a separate sentence? \mbox{\Hypertarget{classFrogOptions_ac218777306a3f28dd6d0eb25204e57ba}\label{classFrogOptions_ac218777306a3f28dd6d0eb25204e57ba}} 
+\index{FrogOptions@{FrogOptions}!doServer@{doServer}}
+\index{doServer@{doServer}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doServer}{doServer}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+Server}
+
+
+
+do we want to run as a server? 
+
+currently only T\+CP servers are supported \mbox{\Hypertarget{classFrogOptions_aa6d519f5529998ae680e6fa318be7701}\label{classFrogOptions_aa6d519f5529998ae680e6fa318be7701}} 
+\index{FrogOptions@{FrogOptions}!doTagger@{doTagger}}
+\index{doTagger@{doTagger}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doTagger}{doTagger}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+Tagger}
+
+
+
+should we run the Dependency \mbox{\hyperlink{classParser}{Parser}}? 
+
+\mbox{\Hypertarget{classFrogOptions_aa2279c655d2eec480ab0bb50abea5152}\label{classFrogOptions_aa2279c655d2eec480ab0bb50abea5152}} 
+\index{FrogOptions@{FrogOptions}!doTok@{doTok}}
+\index{doTok@{doTok}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doTok}{doTok}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+Tok}
+
+
+
+should we run the tokenizer? 
+
+\mbox{\Hypertarget{classFrogOptions_a0fbfb2e858792729257fc4436c469df8}\label{classFrogOptions_a0fbfb2e858792729257fc4436c469df8}} 
+\index{FrogOptions@{FrogOptions}!doXMLin@{doXMLin}}
+\index{doXMLin@{doXMLin}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doXMLin}{doXMLin}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+X\+M\+Lin}
+
+
+
+do we have Fo\+LiA input? 
+
+\mbox{\Hypertarget{classFrogOptions_a41e0ae9d2ee1f15b4a859ae3837ef81f}\label{classFrogOptions_a41e0ae9d2ee1f15b4a859ae3837ef81f}} 
+\index{FrogOptions@{FrogOptions}!doXMLout@{doXMLout}}
+\index{doXMLout@{doXMLout}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{doXMLout}{doXMLout}}
+{\footnotesize\ttfamily bool Frog\+Options\+::do\+X\+M\+Lout}
+
+
+
+do we want Fo\+LiA output? 
+
+\mbox{\Hypertarget{classFrogOptions_aa1320aec65794c216b0d428ce1cf30fb}\label{classFrogOptions_aa1320aec65794c216b0d428ce1cf30fb}} 
+\index{FrogOptions@{FrogOptions}!encoding@{encoding}}
+\index{encoding@{encoding}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{encoding}{encoding}}
+{\footnotesize\ttfamily std\+::string Frog\+Options\+::encoding}
+
+
+
+which input-\/encoding do we expect 
+
+using the capabilities of the Ucto tokenizer, Frog can handle a lot of input encodings. The default is U\+T\+F8. The output will always be in U\+T\+F8. \mbox{\Hypertarget{classFrogOptions_ac95487bfcc8070e134d1f7e8f879c6e5}\label{classFrogOptions_ac95487bfcc8070e134d1f7e8f879c6e5}} 
+\index{FrogOptions@{FrogOptions}!hide\_timers@{hide\_timers}}
+\index{hide\_timers@{hide\_timers}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{hide\_timers}{hide\_timers}}
+{\footnotesize\ttfamily bool Frog\+Options\+::hide\+\_\+timers}
+
+
+
+should we output timing information? 
+
+normaly Frog outputs timing information for the several modules, but it may be usefull to skip that \mbox{\Hypertarget{classFrogOptions_adea6148513dbbfd6e8bbb9f67bca8302}\label{classFrogOptions_adea6148513dbbfd6e8bbb9f67bca8302}} 
+\index{FrogOptions@{FrogOptions}!inputclass@{inputclass}}
+\index{inputclass@{inputclass}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{inputclass}{inputclass}}
+{\footnotesize\ttfamily std\+::string Frog\+Options\+::inputclass}
+
+
+
+the textclass to use on Fo\+LiA input 
+
+\mbox{\Hypertarget{classFrogOptions_a823e32272e6c4fd68a2378639506f357}\label{classFrogOptions_a823e32272e6c4fd68a2378639506f357}} 
+\index{FrogOptions@{FrogOptions}!interactive@{interactive}}
+\index{interactive@{interactive}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{interactive}{interactive}}
+{\footnotesize\ttfamily bool Frog\+Options\+::interactive}
+
+
+
+are we running from the command line? 
+
+\mbox{\Hypertarget{classFrogOptions_a3a4ae257315783817f8e229451ab2e5c}\label{classFrogOptions_a3a4ae257315783817f8e229451ab2e5c}} 
+\index{FrogOptions@{FrogOptions}!JSON\_pp@{JSON\_pp}}
+\index{JSON\_pp@{JSON\_pp}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{JSON\_pp}{JSON\_pp}}
+{\footnotesize\ttfamily int Frog\+Options\+::\+J\+S\+O\+N\+\_\+pp}
+
+
+
+for J\+S\+ON output, use this value to format. 
+
+normally J\+S\+ON will be outputted as one (very long) line. Using a value of J\+S\+O\+N\+\_\+pp $>$0 it wil be \textquotesingle{}pretty-\/printed\textquotesingle{} indented with that value. \mbox{\Hypertarget{classFrogOptions_a680a6c8510940ce908aa8de2f3377518}\label{classFrogOptions_a680a6c8510940ce908aa8de2f3377518}} 
+\index{FrogOptions@{FrogOptions}!languages@{languages}}
+\index{languages@{languages}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{languages}{languages}}
+{\footnotesize\ttfamily std\+::set$<$std\+::string$>$ Frog\+Options\+::languages}
+
+
+
+all languages to take into account 
+
+\mbox{\Hypertarget{classFrogOptions_afb7d7e036e65e02ac98656dc043d2d2e}\label{classFrogOptions_afb7d7e036e65e02ac98656dc043d2d2e}} 
+\index{FrogOptions@{FrogOptions}!listenport@{listenport}}
+\index{listenport@{listenport}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{listenport}{listenport}}
+{\footnotesize\ttfamily std\+::string Frog\+Options\+::listenport}
+
+
+
+determines the port to run the Frog Server on 
+
+\mbox{\Hypertarget{classFrogOptions_a5e62c2607b2fa3310b5427179f1237b5}\label{classFrogOptions_a5e62c2607b2fa3310b5427179f1237b5}} 
+\index{FrogOptions@{FrogOptions}!maxParserTokens@{maxParserTokens}}
+\index{maxParserTokens@{maxParserTokens}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{maxParserTokens}{maxParserTokens}}
+{\footnotesize\ttfamily unsigned int Frog\+Options\+::max\+Parser\+Tokens}
+
+
+
+limit the number of words to Parse 
+
+\mbox{\Hypertarget{classFrogOptions_a5897c1f7d4f4baf2b5a75896eabfb7f3}\label{classFrogOptions_a5897c1f7d4f4baf2b5a75896eabfb7f3}} 
+\index{FrogOptions@{FrogOptions}!noStdOut@{noStdOut}}
+\index{noStdOut@{noStdOut}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{noStdOut}{noStdOut}}
+{\footnotesize\ttfamily bool Frog\+Options\+::no\+Std\+Out}
+
+
+
+do we want output to stdout? 
+
+\mbox{\Hypertarget{classFrogOptions_af59da319356d439798acb38147abcea5}\label{classFrogOptions_af59da319356d439798acb38147abcea5}} 
+\index{FrogOptions@{FrogOptions}!numThreads@{numThreads}}
+\index{numThreads@{numThreads}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{numThreads}{numThreads}}
+{\footnotesize\ttfamily int Frog\+Options\+::num\+Threads}
+
+
+
+limit for the number of threads 
+
+\mbox{\Hypertarget{classFrogOptions_a8b95c142ca325a6b0d3f53cb851160d4}\label{classFrogOptions_a8b95c142ca325a6b0d3f53cb851160d4}} 
+\index{FrogOptions@{FrogOptions}!outputclass@{outputclass}}
+\index{outputclass@{outputclass}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{outputclass}{outputclass}}
+{\footnotesize\ttfamily std\+::string Frog\+Options\+::outputclass}
+
+
+
+the textclass to use on Fo\+LiA output 
+
+\mbox{\Hypertarget{classFrogOptions_a8ab02a18f5ae56f0829a4a27bb5bcb65}\label{classFrogOptions_a8ab02a18f5ae56f0829a4a27bb5bcb65}} 
+\index{FrogOptions@{FrogOptions}!test\_API@{test\_API}}
+\index{test\_API@{test\_API}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{test\_API}{test\_API}}
+{\footnotesize\ttfamily bool Frog\+Options\+::test\+\_\+\+A\+PI}
+
+
+
+do we want to run some tests? 
+
+This will run some generic tests and then stop. No real frogging is done! \mbox{\Hypertarget{classFrogOptions_a43558476420702dd17d3e5405ced5356}\label{classFrogOptions_a43558476420702dd17d3e5405ced5356}} 
+\index{FrogOptions@{FrogOptions}!textredundancy@{textredundancy}}
+\index{textredundancy@{textredundancy}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{textredundancy}{textredundancy}}
+{\footnotesize\ttfamily std\+::string Frog\+Options\+::textredundancy}
+
+
+
+determines how much text is added in the Fo\+LiA 
+
+possible values are \textquotesingle{}full\textquotesingle{}, \textquotesingle{}minimal\textquotesingle{} and \textquotesingle{}none\textquotesingle{}.
+
+\textquotesingle{}none\textquotesingle{}\+: no text ($<$t$>$) nodes are added to higher structure nodes like $<$s$>$ and $<$p$>$.
+
+\textquotesingle{}minimal\textquotesingle{}\+: text is added to the structure above $<$w$>$. Mostly $<$s$>$ nodes
+
+\textquotesingle{}full\textquotesingle{}\+: text is added to all structure nodes. This might result in a lot of (redundant) text. \mbox{\Hypertarget{classFrogOptions_a9f9aec6fc7ff471b84ccc925dd34837c}\label{classFrogOptions_a9f9aec6fc7ff471b84ccc925dd34837c}} 
+\index{FrogOptions@{FrogOptions}!uttmark@{uttmark}}
+\index{uttmark@{uttmark}!FrogOptions@{FrogOptions}}
+\doxysubsubsection{\texorpdfstring{uttmark}{uttmark}}
+{\footnotesize\ttfamily std\+::string Frog\+Options\+::uttmark}
+
+
+
+the string which separates Utterances 
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{FrogAPI_8h}{Frog\+A\+P\+I.\+h}}\item 
+src/\mbox{\hyperlink{FrogAPI_8cxx}{Frog\+A\+P\+I.\+cxx}}\end{DoxyCompactItemize}

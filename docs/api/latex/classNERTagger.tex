@@ -1,0 +1,228 @@
+\hypertarget{classNERTagger}{}\doxysection{N\+E\+R\+Tagger Class Reference}
+\label{classNERTagger}\index{NERTagger@{NERTagger}}
+
+
+{\ttfamily \#include $<$ner\+\_\+tagger\+\_\+mod.\+h$>$}
+
+
+
+Inheritance diagram for N\+E\+R\+Tagger\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=153pt]{classNERTagger__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for N\+E\+R\+Tagger\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classNERTagger__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classNERTagger_a7cdac60975ac21d842d17f83b9b9bef2}{N\+E\+R\+Tagger}} (Ti\+C\+C\+::\+Log\+Stream $\ast$, Ti\+C\+C\+::\+Log\+Stream $\ast$=0)
+\item 
+bool \mbox{\hyperlink{classNERTagger_a37b8907d495924f1db87ec5cf4b39fb0}{init}} (const Ti\+C\+C\+::\+Configuration \&)
+\item 
+void \mbox{\hyperlink{classNERTagger_ac8a94db725ec47c717d77d0044174554}{Classify}} (\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&)
+\item 
+void \mbox{\hyperlink{classNERTagger_a4bb12c07a98090f3dcf1e8037a33d7dd}{post\+\_\+process}} (\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&)
+\item 
+void \mbox{\hyperlink{classNERTagger_a86be2e162786f5b4e88fb780d4151c38}{post\+\_\+process}} (\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&, const std\+::vector$<$ \mbox{\hyperlink{ner__tagger__mod_8h_a7f021fdda312a9d446977cdda44bceb4}{tc\+\_\+pair}} $>$ \&)
+\item 
+void \mbox{\hyperlink{classNERTagger_ab29a2175b6cf0adcd16d0ce2fbc282eb}{add\+\_\+declaration}} (folia\+::\+Document \&, folia\+::processor $\ast$) const
+\item 
+void \mbox{\hyperlink{classNERTagger_acf551867b90fde9e1969f51b182a0de6}{add\+\_\+result}} (const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&fd, const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&wv) const
+\item 
+bool \mbox{\hyperlink{classNERTagger_aaa3415fd3dd87322c7ed28275de948f0}{read\+\_\+gazets}} (const std\+::string \&f, const std\+::string \&p)
+\item 
+bool \mbox{\hyperlink{classNERTagger_ae340a6d5c96f6e576684446e32dcda2c}{read\+\_\+overrides}} (const std\+::string \&f, const std\+::string \&p)
+\item 
+std\+::vector$<$ std\+::string $>$ \mbox{\hyperlink{classNERTagger_a701a9f0db6ec63a8c1368c2bc9776cfb}{create\+\_\+ner\+\_\+list}} (const std\+::vector$<$ std\+::string $>$ \&s)
+\item 
+std\+::vector$<$ std\+::string $>$ \mbox{\hyperlink{classNERTagger_ad1064ba71eb2ce59c848fe32795ff18f}{create\+\_\+override\+\_\+list}} (const std\+::vector$<$ std\+::string $>$ \&s)
+\item 
+bool \mbox{\hyperlink{classNERTagger_a3569204ac015fe9215b71acf36a214a6}{Generate}} (const std\+::string \&)
+\item 
+void \mbox{\hyperlink{classNERTagger_a18fc3f3f7b17c6ca1642e2acdf6cb71d}{merge\+\_\+override}} (std\+::vector$<$ \mbox{\hyperlink{ner__tagger__mod_8h_a7f021fdda312a9d446977cdda44bceb4}{tc\+\_\+pair}} $>$ \&, const std\+::vector$<$ \mbox{\hyperlink{ner__tagger__mod_8h_a7f021fdda312a9d446977cdda44bceb4}{tc\+\_\+pair}} $>$ \&, bool, const std\+::vector$<$ std\+::string $>$ \&) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classNERTagger_a7cdac60975ac21d842d17f83b9b9bef2}\label{classNERTagger_a7cdac60975ac21d842d17f83b9b9bef2}} 
+\index{NERTagger@{NERTagger}!NERTagger@{NERTagger}}
+\index{NERTagger@{NERTagger}!NERTagger@{NERTagger}}
+\doxysubsubsection{\texorpdfstring{NERTagger()}{NERTagger()}}
+{\footnotesize\ttfamily N\+E\+R\+Tagger\+::\+N\+E\+R\+Tagger (\begin{DoxyParamCaption}\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{l,  }\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{d = {\ttfamily 0} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+initialize a \mbox{\hyperlink{classNERTagger}{N\+E\+R\+Tagger}} instance
+
+
+\begin{DoxyParams}{Parameters}
+{\em l} & a Log\+Stream for errors \\
+\hline
+{\em d} & a Log\+Stream for debugging\\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classNERTagger_ab29a2175b6cf0adcd16d0ce2fbc282eb}\label{classNERTagger_ab29a2175b6cf0adcd16d0ce2fbc282eb}} 
+\index{NERTagger@{NERTagger}!add\_declaration@{add\_declaration}}
+\index{add\_declaration@{add\_declaration}!NERTagger@{NERTagger}}
+\doxysubsubsection{\texorpdfstring{add\_declaration()}{add\_declaration()}}
+{\footnotesize\ttfamily void N\+E\+R\+Tagger\+::add\+\_\+declaration (\begin{DoxyParamCaption}\item[{folia\+::\+Document \&}]{doc,  }\item[{folia\+::processor $\ast$}]{proc }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+add E\+N\+T\+I\+TY annotation as an Annotation\+Type to the document
+
+
+\begin{DoxyParams}{Parameters}
+{\em doc} & the Document the add to \\
+\hline
+{\em proc} & the processor to add\\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classBaseTagger_a4549663d6620c26783f61022c2421c61}{Base\+Tagger}}.
+
+\mbox{\Hypertarget{classNERTagger_acf551867b90fde9e1969f51b182a0de6}\label{classNERTagger_acf551867b90fde9e1969f51b182a0de6}} 
+\index{NERTagger@{NERTagger}!add\_result@{add\_result}}
+\index{add\_result@{add\_result}!NERTagger@{NERTagger}}
+\doxysubsubsection{\texorpdfstring{add\_result()}{add\_result()}}
+{\footnotesize\ttfamily void N\+E\+R\+Tagger\+::add\+\_\+result (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd,  }\item[{const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&}]{wv }\end{DoxyParamCaption}) const}
+
+add the N\+ER tags in \textquotesingle{}fd\textquotesingle{} to the Fo\+LiA list of Word
+
+
+\begin{DoxyParams}{Parameters}
+{\em fd} & The tagged results \\
+\hline
+{\em wv} & The folia\+:Word vector\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classNERTagger_ac8a94db725ec47c717d77d0044174554}\label{classNERTagger_ac8a94db725ec47c717d77d0044174554}} 
+\index{NERTagger@{NERTagger}!Classify@{Classify}}
+\index{Classify@{Classify}!NERTagger@{NERTagger}}
+\doxysubsubsection{\texorpdfstring{Classify()}{Classify()}}
+{\footnotesize\ttfamily void N\+E\+R\+Tagger\+::\+Classify (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{swords }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+Tag one sentence, given in \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} format
+
+
+\begin{DoxyParams}{Parameters}
+{\em swords} & the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure to analyze\\
+\hline
+\end{DoxyParams}
+When tagging succeeds, \textquotesingle{}swords\textquotesingle{} will be extended with the tag results
+
+Reimplemented from \mbox{\hyperlink{classBaseTagger_ac40b077fb93c937e1fc08e40cd43f924}{Base\+Tagger}}.
+
+\mbox{\Hypertarget{classNERTagger_a701a9f0db6ec63a8c1368c2bc9776cfb}\label{classNERTagger_a701a9f0db6ec63a8c1368c2bc9776cfb}} 
+\index{NERTagger@{NERTagger}!create\_ner\_list@{create\_ner\_list}}
+\index{create\_ner\_list@{create\_ner\_list}!NERTagger@{NERTagger}}
+\doxysubsubsection{\texorpdfstring{create\_ner\_list()}{create\_ner\_list()}}
+{\footnotesize\ttfamily std\+::vector$<$std\+::string$>$ N\+E\+R\+Tagger\+::create\+\_\+ner\+\_\+list (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ std\+::string $>$ \&}]{s }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classNERTagger_ad1064ba71eb2ce59c848fe32795ff18f}\label{classNERTagger_ad1064ba71eb2ce59c848fe32795ff18f}} 
+\index{NERTagger@{NERTagger}!create\_override\_list@{create\_override\_list}}
+\index{create\_override\_list@{create\_override\_list}!NERTagger@{NERTagger}}
+\doxysubsubsection{\texorpdfstring{create\_override\_list()}{create\_override\_list()}}
+{\footnotesize\ttfamily std\+::vector$<$std\+::string$>$ N\+E\+R\+Tagger\+::create\+\_\+override\+\_\+list (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ std\+::string $>$ \&}]{s }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classNERTagger_a3569204ac015fe9215b71acf36a214a6}\label{classNERTagger_a3569204ac015fe9215b71acf36a214a6}} 
+\index{NERTagger@{NERTagger}!Generate@{Generate}}
+\index{Generate@{Generate}!NERTagger@{NERTagger}}
+\doxysubsubsection{\texorpdfstring{Generate()}{Generate()}}
+{\footnotesize\ttfamily bool N\+E\+R\+Tagger\+::\+Generate (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{opt\+\_\+line }\end{DoxyParamCaption})}
+
+generate a new tagger using opt\+\_\+line\mbox{\Hypertarget{classNERTagger_a37b8907d495924f1db87ec5cf4b39fb0}\label{classNERTagger_a37b8907d495924f1db87ec5cf4b39fb0}} 
+\index{NERTagger@{NERTagger}!init@{init}}
+\index{init@{init}!NERTagger@{NERTagger}}
+\doxysubsubsection{\texorpdfstring{init()}{init()}}
+{\footnotesize\ttfamily bool N\+E\+R\+Tagger\+::init (\begin{DoxyParamCaption}\item[{const Ti\+C\+C\+::\+Configuration \&}]{config }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+initalize a N\+ER tagger from \textquotesingle{}config\textquotesingle{}
+
+
+\begin{DoxyParams}{Parameters}
+{\em config} & the Ti\+C\+C\+::\+Configuration \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true on succes, false otherwise
+\end{DoxyReturn}
+first \mbox{\hyperlink{classBaseTagger_adf1ff8bb15ad11151eac9f0d70820853}{Base\+Tagger\+::init()}} is called to set generic values, then the N\+ER specific values for the gazeteer file-\/names etc. are added and the files are read.
+
+Reimplemented from \mbox{\hyperlink{classBaseTagger_adf1ff8bb15ad11151eac9f0d70820853}{Base\+Tagger}}.
+
+\mbox{\Hypertarget{classNERTagger_a18fc3f3f7b17c6ca1642e2acdf6cb71d}\label{classNERTagger_a18fc3f3f7b17c6ca1642e2acdf6cb71d}} 
+\index{NERTagger@{NERTagger}!merge\_override@{merge\_override}}
+\index{merge\_override@{merge\_override}!NERTagger@{NERTagger}}
+\doxysubsubsection{\texorpdfstring{merge\_override()}{merge\_override()}}
+{\footnotesize\ttfamily void N\+E\+R\+Tagger\+::merge\+\_\+override (\begin{DoxyParamCaption}\item[{std\+::vector$<$ \mbox{\hyperlink{ner__tagger__mod_8h_a7f021fdda312a9d446977cdda44bceb4}{tc\+\_\+pair}} $>$ \&}]{tags,  }\item[{const std\+::vector$<$ \mbox{\hyperlink{ner__tagger__mod_8h_a7f021fdda312a9d446977cdda44bceb4}{tc\+\_\+pair}} $>$ \&}]{overrides,  }\item[{bool}]{unconditional,  }\item[{const std\+::vector$<$ std\+::string $>$ \&}]{P\+O\+S\+\_\+tags }\end{DoxyParamCaption}) const}
+
+merge overrides into the tc\+\_\+pair vector
+
+
+\begin{DoxyParams}{Parameters}
+{\em tags} & the list of tc\+\_\+pair to merge into \\
+\hline
+{\em overrides} & the override information (from gazeteers and such) \\
+\hline
+{\em unconditional} & when true, prefer the information from overrides, otherwise only override when there was no tag assigned yet \\
+\hline
+{\em P\+O\+S\+\_\+tags} & a list of P\+O\+S-\/tags. When this list is non-\/empty, only override when it contains a N or a S\+P\+EC tag.\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classNERTagger_a4bb12c07a98090f3dcf1e8037a33d7dd}\label{classNERTagger_a4bb12c07a98090f3dcf1e8037a33d7dd}} 
+\index{NERTagger@{NERTagger}!post\_process@{post\_process}}
+\index{post\_process@{post\_process}!NERTagger@{NERTagger}}
+\doxysubsubsection{\texorpdfstring{post\_process()}{post\_process()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void N\+E\+R\+Tagger\+::post\+\_\+process (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+This implements \mbox{\hyperlink{classBaseTagger_a008b76e8797b516fd167e1a24eb71ed4}{Base\+Tagger\+::post\+\_\+process}} by D\+I\+S\+A\+L\+L\+O\+W\+I\+NG it.
+
+Implements \mbox{\hyperlink{classBaseTagger_a008b76e8797b516fd167e1a24eb71ed4}{Base\+Tagger}}.
+
+\mbox{\Hypertarget{classNERTagger_a86be2e162786f5b4e88fb780d4151c38}\label{classNERTagger_a86be2e162786f5b4e88fb780d4151c38}} 
+\index{NERTagger@{NERTagger}!post\_process@{post\_process}}
+\index{post\_process@{post\_process}!NERTagger@{NERTagger}}
+\doxysubsubsection{\texorpdfstring{post\_process()}{post\_process()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void N\+E\+R\+Tagger\+::post\+\_\+process (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{sentence,  }\item[{const std\+::vector$<$ \mbox{\hyperlink{ner__tagger__mod_8h_a7f021fdda312a9d446977cdda44bceb4}{tc\+\_\+pair}} $>$ \&}]{ners }\end{DoxyParamCaption})}
+
+finish the N\+ER processs by updating \textquotesingle{}sentence\textquotesingle{}
+
+
+\begin{DoxyParams}{Parameters}
+{\em sentence} & a \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure to update with N\+ER info \\
+\hline
+{\em ners} & a sequence of NE tags (maybe \textquotesingle{}O\textquotesingle{}) with their confidence\\
+\hline
+\end{DoxyParams}
+This is a specialized version local to \mbox{\hyperlink{classNERTagger}{N\+E\+R\+Tagger}}. Don\textquotesingle{}t use the norma; \mbox{\hyperlink{classNERTagger_a4bb12c07a98090f3dcf1e8037a33d7dd}{post\+\_\+process()}}\mbox{\Hypertarget{classNERTagger_aaa3415fd3dd87322c7ed28275de948f0}\label{classNERTagger_aaa3415fd3dd87322c7ed28275de948f0}} 
+\index{NERTagger@{NERTagger}!read\_gazets@{read\_gazets}}
+\index{read\_gazets@{read\_gazets}!NERTagger@{NERTagger}}
+\doxysubsubsection{\texorpdfstring{read\_gazets()}{read\_gazets()}}
+{\footnotesize\ttfamily bool N\+E\+R\+Tagger\+::read\+\_\+gazets (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{f,  }\item[{const std\+::string \&}]{p }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classNERTagger_ae340a6d5c96f6e576684446e32dcda2c}\label{classNERTagger_ae340a6d5c96f6e576684446e32dcda2c}} 
+\index{NERTagger@{NERTagger}!read\_overrides@{read\_overrides}}
+\index{read\_overrides@{read\_overrides}!NERTagger@{NERTagger}}
+\doxysubsubsection{\texorpdfstring{read\_overrides()}{read\_overrides()}}
+{\footnotesize\ttfamily bool N\+E\+R\+Tagger\+::read\+\_\+overrides (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{f,  }\item[{const std\+::string \&}]{p }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{ner__tagger__mod_8h}{ner\+\_\+tagger\+\_\+mod.\+h}}\item 
+src/\mbox{\hyperlink{ner__tagger__mod_8cxx}{ner\+\_\+tagger\+\_\+mod.\+cxx}}\end{DoxyCompactItemize}

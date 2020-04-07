@@ -1,0 +1,283 @@
+\hypertarget{AlpinoParser_8cxx}{}\doxysection{src/\+Alpino\+Parser.cxx File Reference}
+\label{AlpinoParser_8cxx}\index{src/AlpinoParser.cxx@{src/AlpinoParser.cxx}}
+{\ttfamily \#include \char`\"{}frog/\+Alpino\+Parser.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$ticcutils/\+X\+M\+Ltools.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+String\+Ops.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Pretty\+Print.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Socket\+Basics.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+File\+Utils.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/\+Frog-\/util.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/\+Frog\+Data.\+h\char`\"{}}\newline
+Include dependency graph for Alpino\+Parser.\+cxx\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{AlpinoParser_8cxx__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{AlpinoParser_8cxx_a159ca84d25a5487d8e81e4438725df19}{L\+OG}}~$\ast$Ti\+C\+C\+::\+Log(err\+Log)
+\item 
+\#define \mbox{\hyperlink{AlpinoParser_8cxx_a49606be7356624568932ec81c0d429f4}{D\+BG}}~$\ast$Ti\+C\+C\+::\+Dbg(dbg\+Log)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+ostream \& \mbox{\hyperlink{AlpinoParser_8cxx_a4326f526dad25579b51a986e089282f8}{operator$<$$<$}} (ostream \&os, const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$node)
+\item 
+void \mbox{\hyperlink{AlpinoParser_8cxx_a55afcf9530f7cb5532da2598e2f70f31}{print\+\_\+nodes}} (int indent, const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$store)
+\item 
+const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$ \mbox{\hyperlink{AlpinoParser_8cxx_a181689b44933572446a4dd96c7cef502}{extract\+\_\+hd}} (const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$node)
+\item 
+\mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$ \mbox{\hyperlink{AlpinoParser_8cxx_ae8e230637e944b2c596ab25074411df9}{parse\+\_\+node}} (xml\+Node $\ast$node)
+\item 
+\mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$ \mbox{\hyperlink{AlpinoParser_8cxx_a853ee318f6ac58af8bb2aa9677c6b4e4}{parse\+\_\+nodes}} (xml\+Node $\ast$node)
+\item 
+\mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$ \mbox{\hyperlink{AlpinoParser_8cxx_ac2626e90d8182dc6254edd5bbcc170af}{resolve\+\_\+mwus}} (\mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$in, int \&compensate, int \&restart, \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&fd)
+\item 
+\mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$ \mbox{\hyperlink{AlpinoParser_8cxx_af9d5a5b880243e47375d4085634c7441}{enumerate\+\_\+top}} (\mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$in)
+\item 
+\mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$ \mbox{\hyperlink{AlpinoParser_8cxx_a6e912481cfa94c61e255a247ab5b1ff8}{resolve\+\_\+mwus}} (\mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$in, \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&fd)
+\item 
+void \mbox{\hyperlink{AlpinoParser_8cxx_ad24e7abd72474f70fc84e4e8acef6441}{extract\+\_\+dependencies}} (list$<$ pair$<$ const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$, const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$ $>$$>$ \&result, const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$store, const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$top\+\_\+root)
+\item 
+vector$<$ \mbox{\hyperlink{structparsrel}{parsrel}} $>$ \mbox{\hyperlink{AlpinoParser_8cxx_a7da5d029c601981989d51f548de7a8cf}{extract}} (list$<$ pair$<$ const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$, const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$ $>$$>$ \&l)
+\item 
+vector$<$ \mbox{\hyperlink{structparsrel}{parsrel}} $>$ \mbox{\hyperlink{AlpinoParser_8cxx_aabab2ba3a8a71655bb2f427badff4aed}{extract\+\_\+dp}} (xml\+Doc $\ast$alp\+\_\+doc, \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&fd)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+const string \mbox{\hyperlink{AlpinoParser_8cxx_ae964d38bd256950c68ed94f076bc8ce5}{alpino\+\_\+tagset}} = \char`\"{}http\+://ilk.\+uvt.\+nl/folia/sets/alpino-\/\mbox{\hyperlink{csidp_8h_ae66d77ee519ae669d9dcf797a643a9c4}{parse}}-\/nl\char`\"{}
+\item 
+const string \mbox{\hyperlink{AlpinoParser_8cxx_ab1e76c3288e3bff3baa43102d0da6afa}{alpino\+\_\+mwu\+\_\+tagset}} = \char`\"{}http\+://ilk.\+uvt.\+nl/folia/sets/alpino-\/mwu-\/nl\char`\"{}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{AlpinoParser_8cxx_a49606be7356624568932ec81c0d429f4}\label{AlpinoParser_8cxx_a49606be7356624568932ec81c0d429f4}} 
+\index{AlpinoParser.cxx@{AlpinoParser.cxx}!DBG@{DBG}}
+\index{DBG@{DBG}!AlpinoParser.cxx@{AlpinoParser.cxx}}
+\doxysubsubsection{\texorpdfstring{DBG}{DBG}}
+{\footnotesize\ttfamily \#define D\+BG~$\ast$Ti\+C\+C\+::\+Dbg(dbg\+Log)}
+
+\mbox{\Hypertarget{AlpinoParser_8cxx_a159ca84d25a5487d8e81e4438725df19}\label{AlpinoParser_8cxx_a159ca84d25a5487d8e81e4438725df19}} 
+\index{AlpinoParser.cxx@{AlpinoParser.cxx}!LOG@{LOG}}
+\index{LOG@{LOG}!AlpinoParser.cxx@{AlpinoParser.cxx}}
+\doxysubsubsection{\texorpdfstring{LOG}{LOG}}
+{\footnotesize\ttfamily \#define L\+OG~$\ast$Ti\+C\+C\+::\+Log(err\+Log)}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{AlpinoParser_8cxx_af9d5a5b880243e47375d4085634c7441}\label{AlpinoParser_8cxx_af9d5a5b880243e47375d4085634c7441}} 
+\index{AlpinoParser.cxx@{AlpinoParser.cxx}!enumerate\_top@{enumerate\_top}}
+\index{enumerate\_top@{enumerate\_top}!AlpinoParser.cxx@{AlpinoParser.cxx}}
+\doxysubsubsection{\texorpdfstring{enumerate\_top()}{enumerate\_top()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}}$\ast$ enumerate\+\_\+top (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$}]{in }\end{DoxyParamCaption})}
+
+Enumerate the T\+OP nodes in the \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}}
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & the tree to enumerate \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a pointer to the found top node
+\end{DoxyReturn}
+This also changes the linking order of the children under {\itshape in}.
+
+These are N\+OT always sorted from low to high. We make it so and return a pointer to the new top\mbox{\Hypertarget{AlpinoParser_8cxx_a7da5d029c601981989d51f548de7a8cf}\label{AlpinoParser_8cxx_a7da5d029c601981989d51f548de7a8cf}} 
+\index{AlpinoParser.cxx@{AlpinoParser.cxx}!extract@{extract}}
+\index{extract@{extract}!AlpinoParser.cxx@{AlpinoParser.cxx}}
+\doxysubsubsection{\texorpdfstring{extract()}{extract()}}
+{\footnotesize\ttfamily vector$<$\mbox{\hyperlink{structparsrel}{parsrel}}$>$ extract (\begin{DoxyParamCaption}\item[{list$<$ pair$<$ const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$, const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$ $>$$>$ \&}]{l }\end{DoxyParamCaption})}
+
+convert a list of head-\/dependent pairs into a list of parsrel records
+
+
+\begin{DoxyParams}{Parameters}
+{\em l} & a list of head-\/dependent pairs \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a list of parsrel records. This to be able to use the same code as for the build-\/in non-\/alpino parser.
+\end{DoxyReturn}
+This function does a lot of trickery to handle special nodes.\mbox{\Hypertarget{AlpinoParser_8cxx_ad24e7abd72474f70fc84e4e8acef6441}\label{AlpinoParser_8cxx_ad24e7abd72474f70fc84e4e8acef6441}} 
+\index{AlpinoParser.cxx@{AlpinoParser.cxx}!extract\_dependencies@{extract\_dependencies}}
+\index{extract\_dependencies@{extract\_dependencies}!AlpinoParser.cxx@{AlpinoParser.cxx}}
+\doxysubsubsection{\texorpdfstring{extract\_dependencies()}{extract\_dependencies()}}
+{\footnotesize\ttfamily void extract\+\_\+dependencies (\begin{DoxyParamCaption}\item[{list$<$ pair$<$ const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$, const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$ $>$$>$ \&}]{result,  }\item[{const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$}]{store,  }\item[{const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$}]{top\+\_\+root }\end{DoxyParamCaption})}
+
+recursively extract all head-\/dependent pairs from store
+
+
+\begin{DoxyParams}{Parameters}
+{\em result} & an aggregated list of all dependency pairs found \\
+\hline
+{\em store} & The tree to search through \\
+\hline
+{\em top\+\_\+root} & The R\+O\+OT node of this sequence. For the topmost store it is 0\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{AlpinoParser_8cxx_aabab2ba3a8a71655bb2f427badff4aed}\label{AlpinoParser_8cxx_aabab2ba3a8a71655bb2f427badff4aed}} 
+\index{AlpinoParser.cxx@{AlpinoParser.cxx}!extract\_dp@{extract\_dp}}
+\index{extract\_dp@{extract\_dp}!AlpinoParser.cxx@{AlpinoParser.cxx}}
+\doxysubsubsection{\texorpdfstring{extract\_dp()}{extract\_dp()}}
+{\footnotesize\ttfamily vector$<$\mbox{\hyperlink{structparsrel}{parsrel}}$>$ extract\+\_\+dp (\begin{DoxyParamCaption}\item[{xml\+Doc $\ast$}]{alp\+\_\+doc,  }\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd }\end{DoxyParamCaption})}
+
+extract a list of parsrel records from an Alpino X\+ML file and resolve M\+WU\textquotesingle{}s
+
+
+\begin{DoxyParams}{Parameters}
+{\em alp\+\_\+doc} & an Alpino X\+ML document \\
+\hline
+{\em fd} & a \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure to receive the M\+WU information \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a list of parsrel records
+\end{DoxyReturn}
+\mbox{\Hypertarget{AlpinoParser_8cxx_a181689b44933572446a4dd96c7cef502}\label{AlpinoParser_8cxx_a181689b44933572446a4dd96c7cef502}} 
+\index{AlpinoParser.cxx@{AlpinoParser.cxx}!extract\_hd@{extract\_hd}}
+\index{extract\_hd@{extract\_hd}!AlpinoParser.cxx@{AlpinoParser.cxx}}
+\doxysubsubsection{\texorpdfstring{extract\_hd()}{extract\_hd()}}
+{\footnotesize\ttfamily const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}}$\ast$ extract\+\_\+hd (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$}]{node }\end{DoxyParamCaption})}
+
+search a \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} for a head node
+
+
+\begin{DoxyParams}{Parameters}
+{\em node} & the top node to start searching \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} structure holding a head
+\end{DoxyReturn}
+a head is defined as a node with a {\itshape rel} value of \textquotesingle{}hd\textquotesingle{}, \textquotesingle{}crd\textquotesingle{} ot \textquotesingle{}cmp\textquotesingle{}\mbox{\Hypertarget{AlpinoParser_8cxx_a4326f526dad25579b51a986e089282f8}\label{AlpinoParser_8cxx_a4326f526dad25579b51a986e089282f8}} 
+\index{AlpinoParser.cxx@{AlpinoParser.cxx}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!AlpinoParser.cxx@{AlpinoParser.cxx}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}}
+{\footnotesize\ttfamily ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{ostream \&}]{os,  }\item[{const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$}]{node }\end{DoxyParamCaption})}
+
+print out one \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} structure node
+
+
+\begin{DoxyParams}{Parameters}
+{\em os} & the output stream \\
+\hline
+{\em node} & the node to print\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{AlpinoParser_8cxx_ae8e230637e944b2c596ab25074411df9}\label{AlpinoParser_8cxx_ae8e230637e944b2c596ab25074411df9}} 
+\index{AlpinoParser.cxx@{AlpinoParser.cxx}!parse\_node@{parse\_node}}
+\index{parse\_node@{parse\_node}!AlpinoParser.cxx@{AlpinoParser.cxx}}
+\doxysubsubsection{\texorpdfstring{parse\_node()}{parse\_node()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}}$\ast$ parse\+\_\+node (\begin{DoxyParamCaption}\item[{xml\+Node $\ast$}]{node }\end{DoxyParamCaption})}
+
+convert a singel node in an Alpino X\+ML tree into a much simpler \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} node
+
+
+\begin{DoxyParams}{Parameters}
+{\em node} & The Alpino X\+ML node to parse \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} structure with the essential information from Alpino
+\end{DoxyReturn}
+\mbox{\Hypertarget{AlpinoParser_8cxx_a853ee318f6ac58af8bb2aa9677c6b4e4}\label{AlpinoParser_8cxx_a853ee318f6ac58af8bb2aa9677c6b4e4}} 
+\index{AlpinoParser.cxx@{AlpinoParser.cxx}!parse\_nodes@{parse\_nodes}}
+\index{parse\_nodes@{parse\_nodes}!AlpinoParser.cxx@{AlpinoParser.cxx}}
+\doxysubsubsection{\texorpdfstring{parse\_nodes()}{parse\_nodes()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}}$\ast$ parse\+\_\+nodes (\begin{DoxyParamCaption}\item[{xml\+Node $\ast$}]{node }\end{DoxyParamCaption})}
+
+recurively convert an Alpino X\+ML tree into a much simpler \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} tree
+
+
+\begin{DoxyParams}{Parameters}
+{\em node} & The Alpino X\+ML tree to parse \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} node tree
+\end{DoxyReturn}
+an Alpino X\+ML tree is quite complex. We try to simplify it and extract only what is needed.\mbox{\Hypertarget{AlpinoParser_8cxx_a55afcf9530f7cb5532da2598e2f70f31}\label{AlpinoParser_8cxx_a55afcf9530f7cb5532da2598e2f70f31}} 
+\index{AlpinoParser.cxx@{AlpinoParser.cxx}!print\_nodes@{print\_nodes}}
+\index{print\_nodes@{print\_nodes}!AlpinoParser.cxx@{AlpinoParser.cxx}}
+\doxysubsubsection{\texorpdfstring{print\_nodes()}{print\_nodes()}}
+{\footnotesize\ttfamily void print\+\_\+nodes (\begin{DoxyParamCaption}\item[{int}]{indent,  }\item[{const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$}]{store }\end{DoxyParamCaption})}
+
+recursively pretty print out a \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} tree to stderr
+
+
+\begin{DoxyParams}{Parameters}
+{\em indent} & indentation level \\
+\hline
+{\em store} & the top node to print\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{AlpinoParser_8cxx_a6e912481cfa94c61e255a247ab5b1ff8}\label{AlpinoParser_8cxx_a6e912481cfa94c61e255a247ab5b1ff8}} 
+\index{AlpinoParser.cxx@{AlpinoParser.cxx}!resolve\_mwus@{resolve\_mwus}}
+\index{resolve\_mwus@{resolve\_mwus}!AlpinoParser.cxx@{AlpinoParser.cxx}}
+\doxysubsubsection{\texorpdfstring{resolve\_mwus()}{resolve\_mwus()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}}$\ast$ resolve\+\_\+mwus (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$}]{in,  }\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd }\end{DoxyParamCaption})}
+
+search for M\+WU\textquotesingle{}s in the \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} and register them in the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}}
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & The \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} to analyze \\
+\hline
+{\em fd} & the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} to fill \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+pointer to the (modified) input.
+\end{DoxyReturn}
+\mbox{\Hypertarget{AlpinoParser_8cxx_ac2626e90d8182dc6254edd5bbcc170af}\label{AlpinoParser_8cxx_ac2626e90d8182dc6254edd5bbcc170af}} 
+\index{AlpinoParser.cxx@{AlpinoParser.cxx}!resolve\_mwus@{resolve\_mwus}}
+\index{resolve\_mwus@{resolve\_mwus}!AlpinoParser.cxx@{AlpinoParser.cxx}}
+\doxysubsubsection{\texorpdfstring{resolve\_mwus()}{resolve\_mwus()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}}$\ast$ resolve\+\_\+mwus (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$}]{in,  }\item[{int \&}]{compensate,  }\item[{int \&}]{restart,  }\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd }\end{DoxyParamCaption})}
+
+extract M\+WU information into \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em in} & the \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} to search through \\
+\hline
+{\em compensate} & complicated \\
+\hline
+{\em restart} & complicated \\
+\hline
+{\em fd} & the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure to register the M\+WU in. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the modified \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}}
+\end{DoxyReturn}
+this function searches the \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} for M\+W\+US (rel=\textquotesingle{}mwp\textquotesingle{}). It will merge the found M\+WU words in a modified \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} A\+ND register the start and finish indexes of the mwu in {\itshape fd} 
+
+The indices of the M\+WU\textquotesingle{}s in \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} are not always consecutively, so we have to check that using {\itshape restart}.
+
+Also, after modifying the tree, the indices are wrong by the size of the M\+WU. so we need to compensate for that too.
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{AlpinoParser_8cxx_ab1e76c3288e3bff3baa43102d0da6afa}\label{AlpinoParser_8cxx_ab1e76c3288e3bff3baa43102d0da6afa}} 
+\index{AlpinoParser.cxx@{AlpinoParser.cxx}!alpino\_mwu\_tagset@{alpino\_mwu\_tagset}}
+\index{alpino\_mwu\_tagset@{alpino\_mwu\_tagset}!AlpinoParser.cxx@{AlpinoParser.cxx}}
+\doxysubsubsection{\texorpdfstring{alpino\_mwu\_tagset}{alpino\_mwu\_tagset}}
+{\footnotesize\ttfamily const string alpino\+\_\+mwu\+\_\+tagset = \char`\"{}http\+://ilk.\+uvt.\+nl/folia/sets/alpino-\/mwu-\/nl\char`\"{}}
+
+\mbox{\Hypertarget{AlpinoParser_8cxx_ae964d38bd256950c68ed94f076bc8ce5}\label{AlpinoParser_8cxx_ae964d38bd256950c68ed94f076bc8ce5}} 
+\index{AlpinoParser.cxx@{AlpinoParser.cxx}!alpino\_tagset@{alpino\_tagset}}
+\index{alpino\_tagset@{alpino\_tagset}!AlpinoParser.cxx@{AlpinoParser.cxx}}
+\doxysubsubsection{\texorpdfstring{alpino\_tagset}{alpino\_tagset}}
+{\footnotesize\ttfamily const string alpino\+\_\+tagset = \char`\"{}http\+://ilk.\+uvt.\+nl/folia/sets/alpino-\/\mbox{\hyperlink{csidp_8h_ae66d77ee519ae669d9dcf797a643a9c4}{parse}}-\/nl\char`\"{}}
+

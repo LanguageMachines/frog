@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['n_295',['N',['../namespaceCLEX.html#ab6ea89a830f35fd6b424bebb35d1c3d5a8a64ea74128a4945bb261183797cc7f5',1,'CLEX']]],
+  ['na_296',['NA',['../namespaceCompound.html#a28150158e9410153c560fdfa42f48e2ca8eca1b2ee452c84ae94abdc96d727e0e',1,'Compound']]],
+  ['nb_297',['NB',['../namespaceCompound.html#a28150158e9410153c560fdfa42f48e2ca21a53ec31c4fa3e69ef57ad6112320a6',1,'Compound']]],
+  ['ner_5fconfidence_298',['ner_confidence',['../classfrog__record.html#a4df48f1b0fce1464097e07bbde21a37f',1,'frog_record']]],
+  ['ner_5fprog_2ecxx_299',['ner_prog.cxx',['../ner__prog_8cxx.html',1,'']]],
+  ['ner_5ftag_300',['ner_tag',['../classfrog__record.html#aa303aab12ac19de76a97f581e6e079f7',1,'frog_record']]],
+  ['ner_5ftagger_5fmod_2ecxx_301',['ner_tagger_mod.cxx',['../ner__tagger__mod_8cxx.html',1,'']]],
+  ['ner_5ftagger_5fmod_2eh_302',['ner_tagger_mod.h',['../ner__tagger__mod_8h.html',1,'']]],
+  ['nertagger_303',['NERTagger',['../classNERTagger.html',1,'NERTagger'],['../classNERTagger.html#a7cdac60975ac21d842d17f83b9b9bef2',1,'NERTagger::NERTagger()']]],
+  ['nertimer_304',['nerTimer',['../classTimerBlock.html#a5a3c6abad4b1b4dc54c0f8d022532e03',1,'TimerBlock']]],
+  ['neutral_305',['NEUTRAL',['../namespaceCLEX.html#ab6ea89a830f35fd6b424bebb35d1c3d5a0e926b0aabb123236449dd9e6817b707',1,'CLEX']]],
+  ['new_5fparagraph_306',['new_paragraph',['../classfrog__record.html#aebf807c0660fc6ec7c9d288f4de47319',1,'frog_record']]],
+  ['next_307',['next',['../structdp__tree.html#a822f23f8e5c660aae6ba6e9c8ad14e7d',1,'dp_tree']]],
+  ['nn_308',['NN',['../namespaceCompound.html#a28150158e9410153c560fdfa42f48e2ca30c9dd6cce1278dbaeabb9db6030855c',1,'Compound']]],
+  ['nnn_309',['NNN',['../namespaceCompound.html#a28150158e9410153c560fdfa42f48e2caa82665cca9be331e6511cd2ac6c62250',1,'Compound']]],
+  ['no_5freadline_310',['NO_READLINE',['../FrogAPI_8cxx.html#aa1556b651c5bee5979536713c8b55c83',1,'FrogAPI.cxx']]],
+  ['no_5fspace_311',['no_space',['../classfrog__record.html#a6f1d5ce3eb9bac47191b27f062ed1a4a',1,'frog_record']]],
+  ['none_312',['NONE',['../namespaceCompound.html#a28150158e9410153c560fdfa42f48e2cad62d4f617d93bd85f54279ae25661491',1,'Compound']]],
+  ['nostdout_313',['noStdOut',['../classFrogOptions.html#a5897c1f7d4f4baf2b5a75896eabfb7f3',1,'FrogOptions']]],
+  ['np_314',['NP',['../namespaceCompound.html#a28150158e9410153c560fdfa42f48e2cace70e2925d38e3c2f069cff767e9f067',1,'Compound']]],
+  ['numthreads_315',['numThreads',['../classFrogOptions.html#af59da319356d439798acb38147abcea5',1,'FrogOptions']]],
+  ['nv_316',['NV',['../namespaceCompound.html#a28150158e9410153c560fdfa42f48e2ca3e90685832e942f2bb5c841fadc109c6',1,'Compound']]],
+  ['nvn_317',['NVN',['../namespaceCompound.html#a28150158e9410153c560fdfa42f48e2ca029a3e4e28944dc38e15a3d9597bab50',1,'Compound']]]
+];

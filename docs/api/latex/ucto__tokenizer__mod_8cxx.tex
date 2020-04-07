@@ -1,0 +1,83 @@
+\hypertarget{ucto__tokenizer__mod_8cxx}{}\doxysection{src/ucto\+\_\+tokenizer\+\_\+mod.cxx File Reference}
+\label{ucto__tokenizer__mod_8cxx}\index{src/ucto\_tokenizer\_mod.cxx@{src/ucto\_tokenizer\_mod.cxx}}
+{\ttfamily \#include \char`\"{}frog/ucto\+\_\+tokenizer\+\_\+mod.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include \char`\"{}timbl/\+Timbl\+A\+P\+I.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/\+Frog-\/util.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/\+Frog\+Data.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Configuration.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+File\+Utils.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Unicode.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Pretty\+Print.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}config.\+h\char`\"{}}\newline
+Include dependency graph for ucto\+\_\+tokenizer\+\_\+mod.\+cxx\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{ucto__tokenizer__mod_8cxx__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{ucto__tokenizer__mod_8cxx_a159ca84d25a5487d8e81e4438725df19}{L\+OG}}~$\ast$Ti\+C\+C\+::\+Log(err\+Log)
+\item 
+\#define \mbox{\hyperlink{ucto__tokenizer__mod_8cxx_a49606be7356624568932ec81c0d429f4}{D\+BG}}~$\ast$Ti\+C\+C\+::\+Log(dbg\+Log)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+string \mbox{\hyperlink{ucto__tokenizer__mod_8cxx_ab86008f2fc8a56cdb82ad3799f3f4f6f}{resolve\+\_\+configdir}} (const string \&rules\+\_\+name, const string \&dir)
+\item 
+string \mbox{\hyperlink{ucto__tokenizer__mod_8cxx_af0e19c5c8e61b2a8c8ef39591a5073bd}{get\+\_\+parent\+\_\+id}} (folia\+::\+Folia\+Element $\ast$el)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{ucto__tokenizer__mod_8cxx_a49606be7356624568932ec81c0d429f4}\label{ucto__tokenizer__mod_8cxx_a49606be7356624568932ec81c0d429f4}} 
+\index{ucto\_tokenizer\_mod.cxx@{ucto\_tokenizer\_mod.cxx}!DBG@{DBG}}
+\index{DBG@{DBG}!ucto\_tokenizer\_mod.cxx@{ucto\_tokenizer\_mod.cxx}}
+\doxysubsubsection{\texorpdfstring{DBG}{DBG}}
+{\footnotesize\ttfamily \#define D\+BG~$\ast$Ti\+C\+C\+::\+Log(dbg\+Log)}
+
+\mbox{\Hypertarget{ucto__tokenizer__mod_8cxx_a159ca84d25a5487d8e81e4438725df19}\label{ucto__tokenizer__mod_8cxx_a159ca84d25a5487d8e81e4438725df19}} 
+\index{ucto\_tokenizer\_mod.cxx@{ucto\_tokenizer\_mod.cxx}!LOG@{LOG}}
+\index{LOG@{LOG}!ucto\_tokenizer\_mod.cxx@{ucto\_tokenizer\_mod.cxx}}
+\doxysubsubsection{\texorpdfstring{LOG}{LOG}}
+{\footnotesize\ttfamily \#define L\+OG~$\ast$Ti\+C\+C\+::\+Log(err\+Log)}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{ucto__tokenizer__mod_8cxx_af0e19c5c8e61b2a8c8ef39591a5073bd}\label{ucto__tokenizer__mod_8cxx_af0e19c5c8e61b2a8c8ef39591a5073bd}} 
+\index{ucto\_tokenizer\_mod.cxx@{ucto\_tokenizer\_mod.cxx}!get\_parent\_id@{get\_parent\_id}}
+\index{get\_parent\_id@{get\_parent\_id}!ucto\_tokenizer\_mod.cxx@{ucto\_tokenizer\_mod.cxx}}
+\doxysubsubsection{\texorpdfstring{get\_parent\_id()}{get\_parent\_id()}}
+{\footnotesize\ttfamily string get\+\_\+parent\+\_\+id (\begin{DoxyParamCaption}\item[{folia\+::\+Folia\+Element $\ast$}]{el }\end{DoxyParamCaption})}
+
+return the id of the Folia\+Element or its parent
+
+
+\begin{DoxyParams}{Parameters}
+{\em el} & The Folia\+Element to examine \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the id found or \char`\"{}\char`\"{} if nothing is found
+\end{DoxyReturn}
+recurses upwards through the parents when the element doesn\textquotesingle{}t have an id\mbox{\Hypertarget{ucto__tokenizer__mod_8cxx_ab86008f2fc8a56cdb82ad3799f3f4f6f}\label{ucto__tokenizer__mod_8cxx_ab86008f2fc8a56cdb82ad3799f3f4f6f}} 
+\index{ucto\_tokenizer\_mod.cxx@{ucto\_tokenizer\_mod.cxx}!resolve\_configdir@{resolve\_configdir}}
+\index{resolve\_configdir@{resolve\_configdir}!ucto\_tokenizer\_mod.cxx@{ucto\_tokenizer\_mod.cxx}}
+\doxysubsubsection{\texorpdfstring{resolve\_configdir()}{resolve\_configdir()}}
+{\footnotesize\ttfamily string resolve\+\_\+configdir (\begin{DoxyParamCaption}\item[{const string \&}]{rules\+\_\+name,  }\item[{const string \&}]{dir }\end{DoxyParamCaption})}
+
+lame attempt to resolve the location of a rules file give a possible dir
+
+
+\begin{DoxyParams}{Parameters}
+{\em rules\+\_\+name} & The filename to search \\
+\hline
+{\em dir} & possible location of the file\\
+\hline
+\end{DoxyParams}

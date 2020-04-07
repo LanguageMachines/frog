@@ -1,0 +1,24 @@
+var searchData=
+[
+  ['call_5fserver_606',['call_server',['../classBaseTagger.html#a39effc4a726b59ada6e7d91e6eee5020',1,'BaseTagger']]],
+  ['cgntagger_607',['CGNTagger',['../classCGNTagger.html#ac0239d9a77a9eb0e7eeb503084c967d9',1,'CGNTagger']]],
+  ['check_5fserver_608',['check_server',['../Frog-util_8cxx.html#a8cef462666b3f43d511231ca3ba62462',1,'check_server(const string &amp;host, const string &amp;port, const string &amp;name):&#160;Frog-util.cxx'],['../Frog-util_8h.html#a58436ca6bc5112a765bb744e07d0202c',1,'check_server(const std::string &amp;host, const std::string &amp;port, const std::string &amp;name=&quot;&quot;):&#160;Frog-util.cxx']]],
+  ['ckyparser_609',['CKYParser',['../classCKYParser.html#a8f2284d91f7a8fd36f14b1fd4822372a',1,'CKYParser']]],
+  ['classify_610',['Classify',['../classIOBTagger.html#a567f683f1edf304904df446ef24bf3e8',1,'IOBTagger::Classify()'],['../classMblem.html#adb5dd245abcbd0d74ca469128d15c729',1,'Mblem::Classify(frog_record &amp;)'],['../classMblem.html#aadd21e5dffd7fc9990d712fc9226f5c3',1,'Mblem::Classify(const icu::UnicodeString &amp;)'],['../classMbma.html#afa3d4000fa79f3fa7fc238c2466aec87',1,'Mbma::Classify(frog_record &amp;)'],['../classMbma.html#a1bf80716395d6e6fdaac8c151bb82536',1,'Mbma::Classify(const icu::UnicodeString &amp;)'],['../classMwu.html#acbdac70792689092313c91a20f2e2cb2',1,'Mwu::Classify()'],['../classNERTagger.html#ac8a94db725ec47c717d77d0044174554',1,'NERTagger::Classify()'],['../classBaseTagger.html#ac40b077fb93c937e1fc08e40cd43f924',1,'BaseTagger::Classify()']]],
+  ['clear_611',['clear',['../structparseData.html#a90851a9d92d507b5b62eb67ab1fa6fa7',1,'parseData']]],
+  ['clearanalysis_612',['clearAnalysis',['../classMbma.html#a044fe7bda69538c0af1836a26df4cdcc',1,'Mbma']]],
+  ['clearemptynodes_613',['clearEmptyNodes',['../classBaseBracket.html#a2f36f3d60483256fd0781251419ef0fa',1,'BaseBracket::clearEmptyNodes()'],['../classBracketNest.html#a921c6ff102bfac7e886d1ceb2325bb93',1,'BracketNest::clearEmptyNodes()']]],
+  ['clone_614',['clone',['../classBaseBracket.html#a587216a5f413c922d854a899260944b7',1,'BaseBracket::clone()'],['../classBracketLeaf.html#a7f36e9543df0f36d9e27bb6e41906d0c',1,'BracketLeaf::clone()'],['../classBracketNest.html#aeb80dbe90c5d99bfc7e344f94bedb811',1,'BracketNest::clone()']]],
+  ['cls_615',['cls',['../classtimbl__result.html#ac03604b2336f9b23e84443960820482c',1,'timbl_result']]],
+  ['compound_616',['compound',['../classBaseBracket.html#a93f63f704d7f0f3fe7b35600c65f5ab0',1,'BaseBracket::compound()'],['../classBracketNest.html#a3ef87545ec5ef0d67804e4c5a01b5f7b',1,'BracketNest::compound()']]],
+  ['confidence_617',['confidence',['../classtimbl__result.html#aff8e7d331c55d529d386aa3f07fb5b6a',1,'timbl_result']]],
+  ['constraint_618',['Constraint',['../classConstraint.html#a468545515c8bda1799a5835c27f449e7',1,'Constraint']]],
+  ['construct_619',['construct',['../mbma__brackets_8cxx.html#aca8fc8680af7f106800d068bfa4c0d59',1,'construct(const vector&lt; CLEX::Type &gt; &amp;tags):&#160;mbma_brackets.cxx'],['../mbma__brackets_8cxx.html#ade6c35b017cbeaef13d2a8b9d1aa622a',1,'construct(const CLEX::Type tag1, const CLEX::Type tag2):&#160;mbma_brackets.cxx']]],
+  ['copy_5fnest_620',['copy_nest',['../mbma__mod_8cxx.html#adbbb79a31240aa8c01bfba282bb75829',1,'mbma_mod.cxx']]],
+  ['correct_5fwords_621',['correct_words',['../classUctoTokenizer.html#a8ca0ee0df24e80e61e705800dea3ecbf',1,'UctoTokenizer']]],
+  ['create_5fjson_622',['create_json',['../tagger__base_8cxx.html#acd40201791880f1cdaf51a0b8f9f28aa',1,'tagger_base.cxx']]],
+  ['create_5fner_5flist_623',['create_ner_list',['../classNERTagger.html#a701a9f0db6ec63a8c1368c2bc9776cfb',1,'NERTagger']]],
+  ['create_5foverride_5flist_624',['create_override_list',['../classNERTagger.html#ad1064ba71eb2ce59c848fe32795ff18f',1,'NERTagger']]],
+  ['createmorpheme_625',['createMorpheme',['../classBaseBracket.html#a7fe29ffc78ef68812d8ba117bb9f0bdb',1,'BaseBracket::createMorpheme(folia::Document *) const =0'],['../classBaseBracket.html#a8e8d2da64d8ea40c98dd404798242286',1,'BaseBracket::createMorpheme(folia::Document *, std::string &amp;, int &amp;) const =0'],['../classBracketLeaf.html#a9e95f0bc4869bfe5847d0a468ff3b85a',1,'BracketLeaf::createMorpheme(folia::Document *) const'],['../classBracketLeaf.html#af17383ac0f21496c488cb64f899f97b8',1,'BracketLeaf::createMorpheme(folia::Document *, std::string &amp;, int &amp;) const'],['../classBracketNest.html#ad8de28e782e7de928f538afe3c2efad5',1,'BracketNest::createMorpheme(folia::Document *) const'],['../classBracketNest.html#af1c127e6b77202ee5014063bad4ab8b9',1,'BracketNest::createMorpheme(folia::Document *, std::string &amp;, int &amp;) const']]],
+  ['createparserinstances_626',['createParserInstances',['../classParserBase.html#ad1baf89ead0e8a3e5e41b3dbc0de70ae',1,'ParserBase']]]
+];

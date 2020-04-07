@@ -1,0 +1,95 @@
+\hypertarget{Frog-util_8h}{}\doxysection{include/frog/\+Frog-\/util.h File Reference}
+\label{Frog-util_8h}\index{include/frog/Frog-\/util.h@{include/frog/Frog-\/util.h}}
+{\ttfamily \#include $<$set$>$}\newline
+{\ttfamily \#include $<$ostream$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Timer.\+h\char`\"{}}\newline
+Include dependency graph for Frog-\/util.h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{Frog-util_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{Frog-util_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classTimerBlock}{Timer\+Block}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string \mbox{\hyperlink{Frog-util_8h_afebe43ad1085454a96e404cc43053b1f}{prefix}} (const std\+::string \&path, const std\+::string \&fn)
+\item 
+std\+::set$<$ std\+::string $>$ \mbox{\hyperlink{Frog-util_8h_a0536ac60a15db03b99b44d4fd8241530}{get\+File\+Names}} (const std\+::string \&dir\+Name, const std\+::string \&ext)
+\item 
+std\+::string \mbox{\hyperlink{Frog-util_8h_a58436ca6bc5112a765bb744e07d0202c}{check\+\_\+server}} (const std\+::string \&host, const std\+::string \&port, const std\+::string \&name=\char`\"{}\char`\"{})
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{Frog-util_8h_a58436ca6bc5112a765bb744e07d0202c}\label{Frog-util_8h_a58436ca6bc5112a765bb744e07d0202c}} 
+\index{Frog-\/util.h@{Frog-\/util.h}!check\_server@{check\_server}}
+\index{check\_server@{check\_server}!Frog-\/util.h@{Frog-\/util.h}}
+\doxysubsubsection{\texorpdfstring{check\_server()}{check\_server()}}
+{\footnotesize\ttfamily std\+::string check\+\_\+server (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{host,  }\item[{const std\+::string \&}]{port,  }\item[{const std\+::string \&}]{name = {\ttfamily \char`\"{}\char`\"{}} }\end{DoxyParamCaption})}
+
+check if a certain host\+:port is available for us
+
+
+\begin{DoxyParams}{Parameters}
+{\em host} & the host we check \\
+\hline
+{\em port} & the port we want to access \\
+\hline
+{\em name} & extra information (used in diagnostics only) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\char`\"{}\char`\"{} on succes or an error message on failure
+\end{DoxyReturn}
+\mbox{\Hypertarget{Frog-util_8h_a0536ac60a15db03b99b44d4fd8241530}\label{Frog-util_8h_a0536ac60a15db03b99b44d4fd8241530}} 
+\index{Frog-\/util.h@{Frog-\/util.h}!getFileNames@{getFileNames}}
+\index{getFileNames@{getFileNames}!Frog-\/util.h@{Frog-\/util.h}}
+\doxysubsubsection{\texorpdfstring{getFileNames()}{getFileNames()}}
+{\footnotesize\ttfamily std\+::set$<$std\+::string$>$ get\+File\+Names (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{dir\+Name,  }\item[{const std\+::string \&}]{ext }\end{DoxyParamCaption})}
+
+extract a (sorted) list of file-\/names matching an extension pattern
+
+
+\begin{DoxyParams}{Parameters}
+{\em dir\+Name} & the search directory \\
+\hline
+{\em ext} & the file extension we search \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a sorted list og file-\/names
+\end{DoxyReturn}
+\mbox{\Hypertarget{Frog-util_8h_afebe43ad1085454a96e404cc43053b1f}\label{Frog-util_8h_afebe43ad1085454a96e404cc43053b1f}} 
+\index{Frog-\/util.h@{Frog-\/util.h}!prefix@{prefix}}
+\index{prefix@{prefix}!Frog-\/util.h@{Frog-\/util.h}}
+\doxysubsubsection{\texorpdfstring{prefix()}{prefix()}}
+{\footnotesize\ttfamily std\+::string prefix (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{path,  }\item[{const std\+::string \&}]{fn }\end{DoxyParamCaption})}
+
+add a full path to the filename {\itshape fn} 
+
+
+\begin{DoxyParams}{Parameters}
+{\em path} & the path to add \\
+\hline
+{\em fn} & the filename to be prefixed \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a new path If {\itshape fn} already contains (relative) path information, it is left unchanged.
+\end{DoxyReturn}

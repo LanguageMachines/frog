@@ -1,0 +1,220 @@
+\hypertarget{classBracketLeaf}{}\doxysection{Bracket\+Leaf Class Reference}
+\label{classBracketLeaf}\index{BracketLeaf@{BracketLeaf}}
+
+
+{\ttfamily \#include $<$mbma\+\_\+brackets.\+h$>$}
+
+
+
+Inheritance diagram for Bracket\+Leaf\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=157pt]{classBracketLeaf__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Bracket\+Leaf\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=190pt]{classBracketLeaf__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classBracketLeaf_aad69531a8a0aaccd7da1f872c698b7b6}{Bracket\+Leaf}} (const \mbox{\hyperlink{classRulePart}{Rule\+Part}} \&, int, Ti\+C\+C\+::\+Log\+Stream \&)
+\item 
+\mbox{\hyperlink{classBracketLeaf_aff3164d2f5b64088ca67b28df2b41800}{Bracket\+Leaf}} (\mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}}, const icu\+::\+Unicode\+String \&, int, Ti\+C\+C\+::\+Log\+Stream \&)
+\item 
+\mbox{\hyperlink{classBracketLeaf}{Bracket\+Leaf}} $\ast$ \mbox{\hyperlink{classBracketLeaf_a7f36e9543df0f36d9e27bb6e41906d0c}{clone}} () const
+\item 
+icu\+::\+Unicode\+String \mbox{\hyperlink{classBracketLeaf_ad543b8f461108c443e23ab3242db5211}{put}} (bool=true) const
+\item 
+icu\+::\+Unicode\+String \mbox{\hyperlink{classBracketLeaf_a0095124ddc138878146795de7b6d41b5}{pretty\+\_\+put}} () const
+\item 
+icu\+::\+Unicode\+String \mbox{\hyperlink{classBracketLeaf_a5152685c9035541d52b6301a1629b5e4}{morpheme}} () const
+\item 
+std\+::string \mbox{\hyperlink{classBracketLeaf_a718f042bbc295dfe8e48e897e8e70d4b}{inflection}} () const
+\item 
+std\+::string \mbox{\hyperlink{classBracketLeaf_ab78981e78996707b55b701682301e78e}{original}} () const
+\item 
+int \mbox{\hyperlink{classBracketLeaf_acf1451b9ef276540ab2d94a23f4aeffe}{infixpos}} () const
+\item 
+bool \mbox{\hyperlink{classBracketLeaf_a2a4ff6d613552cd5bc0d3daf157d4543}{isglue}} () const
+\item 
+folia\+::\+Morpheme $\ast$ \mbox{\hyperlink{classBracketLeaf_a9e95f0bc4869bfe5847d0a468ff3b85a}{create\+Morpheme}} (folia\+::\+Document $\ast$) const
+\item 
+folia\+::\+Morpheme $\ast$ \mbox{\hyperlink{classBracketLeaf_af17383ac0f21496c488cb64f899f97b8}{create\+Morpheme}} (folia\+::\+Document $\ast$, std\+::string \&, int \&) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classBracketLeaf_aad69531a8a0aaccd7da1f872c698b7b6}\label{classBracketLeaf_aad69531a8a0aaccd7da1f872c698b7b6}} 
+\index{BracketLeaf@{BracketLeaf}!BracketLeaf@{BracketLeaf}}
+\index{BracketLeaf@{BracketLeaf}!BracketLeaf@{BracketLeaf}}
+\doxysubsubsection{\texorpdfstring{BracketLeaf()}{BracketLeaf()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily Bracket\+Leaf\+::\+Bracket\+Leaf (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classRulePart}{Rule\+Part}} \&}]{p,  }\item[{int}]{debug\+\_\+flag,  }\item[{Ti\+C\+C\+::\+Log\+Stream \&}]{l }\end{DoxyParamCaption})}
+
+create a \mbox{\hyperlink{classBracketLeaf}{Bracket\+Leaf}} object from a \mbox{\hyperlink{classRulePart}{Rule\+Part}}
+
+
+\begin{DoxyParams}{Parameters}
+{\em p} & A Rulepart to create from \\
+\hline
+{\em debug\+\_\+flag} & the debug value \\
+\hline
+{\em l} & a Log\+Stream for messages\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classBracketLeaf_aff3164d2f5b64088ca67b28df2b41800}\label{classBracketLeaf_aff3164d2f5b64088ca67b28df2b41800}} 
+\index{BracketLeaf@{BracketLeaf}!BracketLeaf@{BracketLeaf}}
+\index{BracketLeaf@{BracketLeaf}!BracketLeaf@{BracketLeaf}}
+\doxysubsubsection{\texorpdfstring{BracketLeaf()}{BracketLeaf()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily Bracket\+Leaf\+::\+Bracket\+Leaf (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}}}]{t,  }\item[{const icu\+::\+Unicode\+String \&}]{morpheme,  }\item[{int}]{debug\+\_\+flag,  }\item[{Ti\+C\+C\+::\+Log\+Stream \&}]{l }\end{DoxyParamCaption})}
+
+create a \mbox{\hyperlink{classBracketLeaf}{Bracket\+Leaf}} object from a \mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} and a morpheme
+
+
+\begin{DoxyParams}{Parameters}
+{\em t} & A \mbox{\hyperlink{namespaceCLEX_ab6ea89a830f35fd6b424bebb35d1c3d5}{C\+L\+E\+X\+::\+Type}} \\
+\hline
+{\em morpheme} & the (Unicode) morpheme \\
+\hline
+{\em debug\+\_\+flag} & the debug value \\
+\hline
+{\em l} & a Log\+Stream for messages\\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classBracketLeaf_a7f36e9543df0f36d9e27bb6e41906d0c}\label{classBracketLeaf_a7f36e9543df0f36d9e27bb6e41906d0c}} 
+\index{BracketLeaf@{BracketLeaf}!clone@{clone}}
+\index{clone@{clone}!BracketLeaf@{BracketLeaf}}
+\doxysubsubsection{\texorpdfstring{clone()}{clone()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classBracketLeaf}{Bracket\+Leaf}} $\ast$ Bracket\+Leaf\+::clone (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+make a copy of the \mbox{\hyperlink{classBracketLeaf}{Bracket\+Leaf}}
+
+Implements \mbox{\hyperlink{classBaseBracket_a587216a5f413c922d854a899260944b7}{Base\+Bracket}}.
+
+\mbox{\Hypertarget{classBracketLeaf_a9e95f0bc4869bfe5847d0a468ff3b85a}\label{classBracketLeaf_a9e95f0bc4869bfe5847d0a468ff3b85a}} 
+\index{BracketLeaf@{BracketLeaf}!createMorpheme@{createMorpheme}}
+\index{createMorpheme@{createMorpheme}!BracketLeaf@{BracketLeaf}}
+\doxysubsubsection{\texorpdfstring{createMorpheme()}{createMorpheme()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily folia\+::\+Morpheme $\ast$ Bracket\+Leaf\+::create\+Morpheme (\begin{DoxyParamCaption}\item[{folia\+::\+Document $\ast$}]{doc }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+use the data in the Leaf to create a folia\+::\+Morpheme node
+
+
+\begin{DoxyParams}{Parameters}
+{\em doc} & The Fo\+LiA Document context\\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classBaseBracket_a7fe29ffc78ef68812d8ba117bb9f0bdb}{Base\+Bracket}}.
+
+\mbox{\Hypertarget{classBracketLeaf_af17383ac0f21496c488cb64f899f97b8}\label{classBracketLeaf_af17383ac0f21496c488cb64f899f97b8}} 
+\index{BracketLeaf@{BracketLeaf}!createMorpheme@{createMorpheme}}
+\index{createMorpheme@{createMorpheme}!BracketLeaf@{BracketLeaf}}
+\doxysubsubsection{\texorpdfstring{createMorpheme()}{createMorpheme()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily folia\+::\+Morpheme $\ast$ Bracket\+Leaf\+::create\+Morpheme (\begin{DoxyParamCaption}\item[{folia\+::\+Document $\ast$}]{doc,  }\item[{std\+::string \&}]{desc,  }\item[{int \&}]{cnt }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+use the data in the Leaf to create a folia\+::\+Morpheme node
+
+
+\begin{DoxyParams}{Parameters}
+{\em doc} & The Fo\+LiA Document context \\
+\hline
+{\em desc} & a decriptien note to add \\
+\hline
+{\em cnt} & a counter for the number of handled morphemes\\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classBaseBracket_a8e8d2da64d8ea40c98dd404798242286}{Base\+Bracket}}.
+
+\mbox{\Hypertarget{classBracketLeaf_acf1451b9ef276540ab2d94a23f4aeffe}\label{classBracketLeaf_acf1451b9ef276540ab2d94a23f4aeffe}} 
+\index{BracketLeaf@{BracketLeaf}!infixpos@{infixpos}}
+\index{infixpos@{infixpos}!BracketLeaf@{BracketLeaf}}
+\doxysubsubsection{\texorpdfstring{infixpos()}{infixpos()}}
+{\footnotesize\ttfamily int Bracket\+Leaf\+::infixpos (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+return the position of an infix
+
+Reimplemented from \mbox{\hyperlink{classBaseBracket_a6ca68c63a4c3d023c534f70c4c28be4d}{Base\+Bracket}}.
+
+\mbox{\Hypertarget{classBracketLeaf_a718f042bbc295dfe8e48e897e8e70d4b}\label{classBracketLeaf_a718f042bbc295dfe8e48e897e8e70d4b}} 
+\index{BracketLeaf@{BracketLeaf}!inflection@{inflection}}
+\index{inflection@{inflection}!BracketLeaf@{BracketLeaf}}
+\doxysubsubsection{\texorpdfstring{inflection()}{inflection()}}
+{\footnotesize\ttfamily std\+::string Bracket\+Leaf\+::inflection (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+return the value of the inflexion (if any)
+
+Reimplemented from \mbox{\hyperlink{classBaseBracket_a8de3052582742956f51ac62514a6684c}{Base\+Bracket}}.
+
+\mbox{\Hypertarget{classBracketLeaf_a2a4ff6d613552cd5bc0d3daf157d4543}\label{classBracketLeaf_a2a4ff6d613552cd5bc0d3daf157d4543}} 
+\index{BracketLeaf@{BracketLeaf}!isglue@{isglue}}
+\index{isglue@{isglue}!BracketLeaf@{BracketLeaf}}
+\doxysubsubsection{\texorpdfstring{isglue()}{isglue()}}
+{\footnotesize\ttfamily bool Bracket\+Leaf\+::isglue (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+return tre if this is a glue tag
+
+Reimplemented from \mbox{\hyperlink{classBaseBracket_a03b0e75c74650677146e980686aaa22e}{Base\+Bracket}}.
+
+\mbox{\Hypertarget{classBracketLeaf_a5152685c9035541d52b6301a1629b5e4}\label{classBracketLeaf_a5152685c9035541d52b6301a1629b5e4}} 
+\index{BracketLeaf@{BracketLeaf}!morpheme@{morpheme}}
+\index{morpheme@{morpheme}!BracketLeaf@{BracketLeaf}}
+\doxysubsubsection{\texorpdfstring{morpheme()}{morpheme()}}
+{\footnotesize\ttfamily icu\+::\+Unicode\+String Bracket\+Leaf\+::morpheme (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+return the value of the morpheme
+
+Reimplemented from \mbox{\hyperlink{classBaseBracket_ae09db32ada4490e047871f50b6bf7b8f}{Base\+Bracket}}.
+
+\mbox{\Hypertarget{classBracketLeaf_ab78981e78996707b55b701682301e78e}\label{classBracketLeaf_ab78981e78996707b55b701682301e78e}} 
+\index{BracketLeaf@{BracketLeaf}!original@{original}}
+\index{original@{original}!BracketLeaf@{BracketLeaf}}
+\doxysubsubsection{\texorpdfstring{original()}{original()}}
+{\footnotesize\ttfamily std\+::string Bracket\+Leaf\+::original (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+return the original value befor processing
+
+Reimplemented from \mbox{\hyperlink{classBaseBracket_aad09fa10a3c103abd313201cea2de920}{Base\+Bracket}}.
+
+\mbox{\Hypertarget{classBracketLeaf_a0095124ddc138878146795de7b6d41b5}\label{classBracketLeaf_a0095124ddc138878146795de7b6d41b5}} 
+\index{BracketLeaf@{BracketLeaf}!pretty\_put@{pretty\_put}}
+\index{pretty\_put@{pretty\_put}!BracketLeaf@{BracketLeaf}}
+\doxysubsubsection{\texorpdfstring{pretty\_put()}{pretty\_put()}}
+{\footnotesize\ttfamily icu\+::\+Unicode\+String Bracket\+Leaf\+::pretty\+\_\+put (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+create a descriptive Unicode string representation for this object
+
+Reimplemented from \mbox{\hyperlink{classBaseBracket_a13ef714938d063a18f1c97aab148d4f2}{Base\+Bracket}}.
+
+\mbox{\Hypertarget{classBracketLeaf_ad543b8f461108c443e23ab3242db5211}\label{classBracketLeaf_ad543b8f461108c443e23ab3242db5211}} 
+\index{BracketLeaf@{BracketLeaf}!put@{put}}
+\index{put@{put}!BracketLeaf@{BracketLeaf}}
+\doxysubsubsection{\texorpdfstring{put()}{put()}}
+{\footnotesize\ttfamily icu\+::\+Unicode\+String Bracket\+Leaf\+::put (\begin{DoxyParamCaption}\item[{bool}]{full = {\ttfamily true} }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+create a Unicode string representation for this object
+
+Reimplemented from \mbox{\hyperlink{classBaseBracket_adf4a170a9ddedd6abba402a854469057}{Base\+Bracket}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{mbma__brackets_8h}{mbma\+\_\+brackets.\+h}}\item 
+src/\mbox{\hyperlink{mbma__brackets_8cxx}{mbma\+\_\+brackets.\+cxx}}\end{DoxyCompactItemize}

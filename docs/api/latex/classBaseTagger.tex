@@ -1,0 +1,396 @@
+\hypertarget{classBaseTagger}{}\doxysection{Base\+Tagger Class Reference}
+\label{classBaseTagger}\index{BaseTagger@{BaseTagger}}
+
+
+{\ttfamily \#include $<$tagger\+\_\+base.\+h$>$}
+
+
+
+Inheritance diagram for Base\+Tagger\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=323pt]{classBaseTagger__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Base\+Tagger\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classBaseTagger__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classBaseTagger_ac891e05042c9173eaf99370508e1c35b}{Base\+Tagger}} (Ti\+C\+C\+::\+Log\+Stream $\ast$, Ti\+C\+C\+::\+Log\+Stream $\ast$, const std\+::string \&)
+\item 
+virtual \mbox{\hyperlink{classBaseTagger_a672c5e26627e55ff1bd46eb7a689b153}{$\sim$\+Base\+Tagger}} ()
+\item 
+virtual bool \mbox{\hyperlink{classBaseTagger_adf1ff8bb15ad11151eac9f0d70820853}{init}} (const Ti\+C\+C\+::\+Configuration \&)
+\item 
+virtual void \mbox{\hyperlink{classBaseTagger_a008b76e8797b516fd167e1a24eb71ed4}{post\+\_\+process}} (\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&)=0
+\item 
+virtual void \mbox{\hyperlink{classBaseTagger_ac40b077fb93c937e1fc08e40cd43f924}{Classify}} (\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&)
+\item 
+virtual void \mbox{\hyperlink{classBaseTagger_a4549663d6620c26783f61022c2421c61}{add\+\_\+declaration}} (folia\+::\+Document \&, folia\+::processor $\ast$) const =0
+\item 
+void \mbox{\hyperlink{classBaseTagger_a9295903c10ba71a099ebfadc5bf5d97c}{add\+\_\+provenance}} (folia\+::\+Document \&, folia\+::processor $\ast$) const
+\item 
+std\+::string \mbox{\hyperlink{classBaseTagger_a402034dd2b6dd6b68342eb6d7e63d6ef}{get\+Tagset}} () const
+\item 
+std\+::string \mbox{\hyperlink{classBaseTagger_a98b4e586583bc901fce1458bf1ee35fe}{set\+\_\+eos\+\_\+mark}} (const std\+::string \&)
+\item 
+bool \mbox{\hyperlink{classBaseTagger_a8580ee3c4c2641fe006ab12be2a09383}{fill\+\_\+map}} (const std\+::string \&, std\+::map$<$ std\+::string, std\+::string $>$ \&)
+\item 
+std\+::vector$<$ Tagger\+::\+Tag\+Result $>$ \mbox{\hyperlink{classBaseTagger_a86ede3b7195e322439f0fa4d74d05c20}{tag\+Line}} (const std\+::string \&)
+\item 
+std\+::vector$<$ Tagger\+::\+Tag\+Result $>$ \mbox{\hyperlink{classBaseTagger_a26afbe685c03e0f63e31b4238f852245}{tag\+\_\+entries}} (const std\+::vector$<$ \mbox{\hyperlink{classtag__entry}{tag\+\_\+entry}} $>$ \&)
+\item 
+std\+::string \mbox{\hyperlink{classBaseTagger_a4045ee27258b486a583fe7aee4de4c31}{version}} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classBaseTagger_a7bcc74a87f4f206f4db97ea8c1658361}{extract\+\_\+words\+\_\+tags}} (const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&, const std\+::string \&, std\+::vector$<$ std\+::string $>$ \&, std\+::vector$<$ std\+::string $>$ \&)
+\item 
+std\+::vector$<$ Tagger\+::\+Tag\+Result $>$ \mbox{\hyperlink{classBaseTagger_a39effc4a726b59ada6e7d91e6eee5020}{call\+\_\+server}} (const std\+::vector$<$ \mbox{\hyperlink{classtag__entry}{tag\+\_\+entry}} $>$ \&) const
+\item 
+\mbox{\hyperlink{classBaseTagger_afe3ab3cea71901617b0dca1d3b5d88a5}{Base\+Tagger}} (const \mbox{\hyperlink{classBaseTagger}{Base\+Tagger}} \&)
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{classBaseTagger_a6157c6e0b2a9d03a338fa2292020b82c}{debug}}
+\item 
+std\+::string \mbox{\hyperlink{classBaseTagger_a5bfc6d9ba06ee666cd9a241a906db1e5}{\+\_\+label}}
+\item 
+std\+::string \mbox{\hyperlink{classBaseTagger_a5d13dabf4ba288556997e162cb5a8bf7}{tagset}}
+\item 
+std\+::string \mbox{\hyperlink{classBaseTagger_af0cd11d55abf2280099da59064b87760}{\+\_\+version}}
+\item 
+std\+::string \mbox{\hyperlink{classBaseTagger_acc3018360fae4f1578075b9b2e9c27ed}{textclass}}
+\item 
+Ti\+C\+C\+::\+Log\+Stream $\ast$ \mbox{\hyperlink{classBaseTagger_a4e57a417e71d7077b6d503a33854e17a}{err\+\_\+log}}
+\item 
+Ti\+C\+C\+::\+Log\+Stream $\ast$ \mbox{\hyperlink{classBaseTagger_ac387d7230a52e44386af463e54b44274}{dbg\+\_\+log}}
+\item 
+std\+::string \mbox{\hyperlink{classBaseTagger_a075fd6eb1b92031c1fa0dc7c75e37f1f}{base}}
+\item 
+std\+::string \mbox{\hyperlink{classBaseTagger_ae721b840bb054f19548f7a135ac02932}{\+\_\+host}}
+\item 
+std\+::string \mbox{\hyperlink{classBaseTagger_af762904d3cbd9bd61c6ea8624d4d7564}{\+\_\+port}}
+\item 
+Mbt\+A\+PI $\ast$ \mbox{\hyperlink{classBaseTagger_ac9c9613625fff4a695c189cb35938481}{tagger}}
+\item 
+Ti\+C\+C\+::\+Uni\+Filter $\ast$ \mbox{\hyperlink{classBaseTagger_ac86fbac1ed87b10f467e8a4d8df0a3f6}{filter}}
+\item 
+std\+::vector$<$ std\+::string $>$ \mbox{\hyperlink{classBaseTagger_a4240e2c7428220d4f2f52927830b34ac}{\+\_\+words}}
+\item 
+std\+::vector$<$ Tagger\+::\+Tag\+Result $>$ \mbox{\hyperlink{classBaseTagger_a823313229f398c80f7f70fdde6e70bb8}{\+\_\+tag\+\_\+result}}
+\item 
+std\+::map$<$ std\+::string, std\+::string $>$ \mbox{\hyperlink{classBaseTagger_ac21eca309d31f7a9124dce27d7910964}{token\+\_\+tag\+\_\+map}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classBaseTagger_ac891e05042c9173eaf99370508e1c35b}\label{classBaseTagger_ac891e05042c9173eaf99370508e1c35b}} 
+\index{BaseTagger@{BaseTagger}!BaseTagger@{BaseTagger}}
+\index{BaseTagger@{BaseTagger}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{BaseTagger()}{BaseTagger()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily Base\+Tagger\+::\+Base\+Tagger (\begin{DoxyParamCaption}\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{errlog,  }\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{dbglog,  }\item[{const std\+::string \&}]{label }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+\mbox{\Hypertarget{classBaseTagger_a672c5e26627e55ff1bd46eb7a689b153}\label{classBaseTagger_a672c5e26627e55ff1bd46eb7a689b153}} 
+\index{BaseTagger@{BaseTagger}!````~BaseTagger@{$\sim$BaseTagger}}
+\index{````~BaseTagger@{$\sim$BaseTagger}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{$\sim$BaseTagger()}{~BaseTagger()}}
+{\footnotesize\ttfamily Base\+Tagger\+::$\sim$\+Base\+Tagger (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+\mbox{\Hypertarget{classBaseTagger_afe3ab3cea71901617b0dca1d3b5d88a5}\label{classBaseTagger_afe3ab3cea71901617b0dca1d3b5d88a5}} 
+\index{BaseTagger@{BaseTagger}!BaseTagger@{BaseTagger}}
+\index{BaseTagger@{BaseTagger}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{BaseTagger()}{BaseTagger()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily Base\+Tagger\+::\+Base\+Tagger (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classBaseTagger}{Base\+Tagger}} \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [protected]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classBaseTagger_a4549663d6620c26783f61022c2421c61}\label{classBaseTagger_a4549663d6620c26783f61022c2421c61}} 
+\index{BaseTagger@{BaseTagger}!add\_declaration@{add\_declaration}}
+\index{add\_declaration@{add\_declaration}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{add\_declaration()}{add\_declaration()}}
+{\footnotesize\ttfamily virtual void Base\+Tagger\+::add\+\_\+declaration (\begin{DoxyParamCaption}\item[{folia\+::\+Document \&}]{,  }\item[{folia\+::processor $\ast$}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Implemented in \mbox{\hyperlink{classNERTagger_ab29a2175b6cf0adcd16d0ce2fbc282eb}{N\+E\+R\+Tagger}}, \mbox{\hyperlink{classCGNTagger_a7f3699e3ed919d35fa55cae21492a3a5}{C\+G\+N\+Tagger}}, and \mbox{\hyperlink{classIOBTagger_a06bb6a0fb2ffe99d6aaf231c636a428f}{I\+O\+B\+Tagger}}.
+
+\mbox{\Hypertarget{classBaseTagger_a9295903c10ba71a099ebfadc5bf5d97c}\label{classBaseTagger_a9295903c10ba71a099ebfadc5bf5d97c}} 
+\index{BaseTagger@{BaseTagger}!add\_provenance@{add\_provenance}}
+\index{add\_provenance@{add\_provenance}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{add\_provenance()}{add\_provenance()}}
+{\footnotesize\ttfamily void Base\+Tagger\+::add\+\_\+provenance (\begin{DoxyParamCaption}\item[{folia\+::\+Document \&}]{doc,  }\item[{folia\+::processor $\ast$}]{main }\end{DoxyParamCaption}) const}
+
+add provenance information for this tagger. (Fo\+LiA output only)
+
+
+\begin{DoxyParams}{Parameters}
+{\em doc} & the Fo\+LiA document to add to \\
+\hline
+{\em main} & the processor to use (presumably the Frog processor)\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classBaseTagger_a39effc4a726b59ada6e7d91e6eee5020}\label{classBaseTagger_a39effc4a726b59ada6e7d91e6eee5020}} 
+\index{BaseTagger@{BaseTagger}!call\_server@{call\_server}}
+\index{call\_server@{call\_server}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{call\_server()}{call\_server()}}
+{\footnotesize\ttfamily vector$<$ Tag\+Result $>$ Base\+Tagger\+::call\+\_\+server (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ \mbox{\hyperlink{classtag__entry}{tag\+\_\+entry}} $>$ \&}]{tv }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [protected]}}
+
+Connect to a M\+BT server, send and receive J\+S\+ON and translate to a Tag\+Result list
+
+
+\begin{DoxyParams}{Parameters}
+{\em tv} & the \mbox{\hyperlink{classtag__entry}{tag\+\_\+entry}} we would like to be seviced \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a vector of Tag\+Result elements
+\end{DoxyReturn}
+We set up a connection to the configured server, send a query in J\+S\+ON and on succesful receiving back a J\+S\+ON result we convert it back into a Tag\+Result vector
+
+\begin{DoxyNote}{Note}
+So this is a one-\/shot operation. No connection to the M\+BT server is kept open.
+\end{DoxyNote}
+\mbox{\Hypertarget{classBaseTagger_ac40b077fb93c937e1fc08e40cd43f924}\label{classBaseTagger_ac40b077fb93c937e1fc08e40cd43f924}} 
+\index{BaseTagger@{BaseTagger}!Classify@{Classify}}
+\index{Classify@{Classify}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{Classify()}{Classify()}}
+{\footnotesize\ttfamily void Base\+Tagger\+::\+Classify (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{sent }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+Tag one sentence, give in \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} format
+
+
+\begin{DoxyParams}{Parameters}
+{\em sent} & the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure to analyze\\
+\hline
+\end{DoxyParams}
+When tagging succeeds, \textquotesingle{}sent\textquotesingle{} will be extended with the tag results
+
+Reimplemented in \mbox{\hyperlink{classNERTagger_ac8a94db725ec47c717d77d0044174554}{N\+E\+R\+Tagger}}, and \mbox{\hyperlink{classIOBTagger_a567f683f1edf304904df446ef24bf3e8}{I\+O\+B\+Tagger}}.
+
+\mbox{\Hypertarget{classBaseTagger_a7bcc74a87f4f206f4db97ea8c1658361}\label{classBaseTagger_a7bcc74a87f4f206f4db97ea8c1658361}} 
+\index{BaseTagger@{BaseTagger}!extract\_words\_tags@{extract\_words\_tags}}
+\index{extract\_words\_tags@{extract\_words\_tags}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{extract\_words\_tags()}{extract\_words\_tags()}}
+{\footnotesize\ttfamily void Base\+Tagger\+::extract\+\_\+words\+\_\+tags (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&}]{swords,  }\item[{const std\+::string \&}]{tagset,  }\item[{std\+::vector$<$ std\+::string $>$ \&}]{words,  }\item[{std\+::vector$<$ std\+::string $>$ \&}]{ptags }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+extract word and P\+O\+S-\/tag information from a list of folia\+::\+Word\mbox{\Hypertarget{classBaseTagger_a8580ee3c4c2641fe006ab12be2a09383}\label{classBaseTagger_a8580ee3c4c2641fe006ab12be2a09383}} 
+\index{BaseTagger@{BaseTagger}!fill\_map@{fill\_map}}
+\index{fill\_map@{fill\_map}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{fill\_map()}{fill\_map()}}
+{\footnotesize\ttfamily bool Base\+Tagger\+::fill\+\_\+map (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{file,  }\item[{std\+::map$<$ std\+::string, std\+::string $>$ \&}]{mp }\end{DoxyParamCaption})}
+
+fill a map op string-\/string vales from a fie
+
+
+\begin{DoxyParams}{Parameters}
+{\em file} & the filenam \\
+\hline
+{\em mp} & the map to fill \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true on succes, false otherwise
+\end{DoxyReturn}
+the file should contain lines with T\+AB separated attribute/value pairs
+
+lines starting with \textquotesingle{}\#\textquotesingle{} are seen as comment\mbox{\Hypertarget{classBaseTagger_a402034dd2b6dd6b68342eb6d7e63d6ef}\label{classBaseTagger_a402034dd2b6dd6b68342eb6d7e63d6ef}} 
+\index{BaseTagger@{BaseTagger}!getTagset@{getTagset}}
+\index{getTagset@{getTagset}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{getTagset()}{getTagset()}}
+{\footnotesize\ttfamily std\+::string Base\+Tagger\+::get\+Tagset (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classBaseTagger_adf1ff8bb15ad11151eac9f0d70820853}\label{classBaseTagger_adf1ff8bb15ad11151eac9f0d70820853}} 
+\index{BaseTagger@{BaseTagger}!init@{init}}
+\index{init@{init}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{init()}{init()}}
+{\footnotesize\ttfamily bool Base\+Tagger\+::init (\begin{DoxyParamCaption}\item[{const Ti\+C\+C\+::\+Configuration \&}]{config }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+initalize a tagger from \textquotesingle{}config\textquotesingle{}
+
+
+\begin{DoxyParams}{Parameters}
+{\em config} & the Ti\+C\+C\+::\+Configuration \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true on succes, false otherwise
+\end{DoxyReturn}
+
+
+Reimplemented in \mbox{\hyperlink{classNERTagger_a37b8907d495924f1db87ec5cf4b39fb0}{N\+E\+R\+Tagger}}, \mbox{\hyperlink{classCGNTagger_ae48fd5dcd3b1487cef35d2fce29ab356}{C\+G\+N\+Tagger}}, and \mbox{\hyperlink{classIOBTagger_a91999a401760c93f459f6ea8f61045c4}{I\+O\+B\+Tagger}}.
+
+\mbox{\Hypertarget{classBaseTagger_a008b76e8797b516fd167e1a24eb71ed4}\label{classBaseTagger_a008b76e8797b516fd167e1a24eb71ed4}} 
+\index{BaseTagger@{BaseTagger}!post\_process@{post\_process}}
+\index{post\_process@{post\_process}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{post\_process()}{post\_process()}}
+{\footnotesize\ttfamily virtual void Base\+Tagger\+::post\+\_\+process (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Implemented in \mbox{\hyperlink{classNERTagger_a4bb12c07a98090f3dcf1e8037a33d7dd}{N\+E\+R\+Tagger}}, \mbox{\hyperlink{classCGNTagger_a0404e5acf9b82765a82d41db1748f465}{C\+G\+N\+Tagger}}, and \mbox{\hyperlink{classIOBTagger_a04024f5cdcf954a32c82cc1fba85798c}{I\+O\+B\+Tagger}}.
+
+\mbox{\Hypertarget{classBaseTagger_a98b4e586583bc901fce1458bf1ee35fe}\label{classBaseTagger_a98b4e586583bc901fce1458bf1ee35fe}} 
+\index{BaseTagger@{BaseTagger}!set\_eos\_mark@{set\_eos\_mark}}
+\index{set\_eos\_mark@{set\_eos\_mark}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{set\_eos\_mark()}{set\_eos\_mark()}}
+{\footnotesize\ttfamily string Base\+Tagger\+::set\+\_\+eos\+\_\+mark (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{eos }\end{DoxyParamCaption})}
+
+set the E\+OS marker for the tagger
+
+
+\begin{DoxyParams}{Parameters}
+{\em eos} & the eos marker as a string \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the old value
+\end{DoxyReturn}
+\mbox{\Hypertarget{classBaseTagger_a26afbe685c03e0f63e31b4238f852245}\label{classBaseTagger_a26afbe685c03e0f63e31b4238f852245}} 
+\index{BaseTagger@{BaseTagger}!tag\_entries@{tag\_entries}}
+\index{tag\_entries@{tag\_entries}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{tag\_entries()}{tag\_entries()}}
+{\footnotesize\ttfamily vector$<$ Tag\+Result $>$ Base\+Tagger\+::tag\+\_\+entries (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ \mbox{\hyperlink{classtag__entry}{tag\+\_\+entry}} $>$ \&}]{to\+\_\+do }\end{DoxyParamCaption})}
+
+tag a vector of teag\+\_\+entry into a vector of Tag\+Result elements
+
+
+\begin{DoxyParams}{Parameters}
+{\em to\+\_\+do} & a vector of \mbox{\hyperlink{classtag__entry}{tag\+\_\+entry}} elements representing 1 sentence\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classBaseTagger_a86ede3b7195e322439f0fa4d74d05c20}\label{classBaseTagger_a86ede3b7195e322439f0fa4d74d05c20}} 
+\index{BaseTagger@{BaseTagger}!tagLine@{tagLine}}
+\index{tagLine@{tagLine}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{tagLine()}{tagLine()}}
+{\footnotesize\ttfamily vector$<$ Tag\+Result $>$ Base\+Tagger\+::tag\+Line (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{line }\end{DoxyParamCaption})}
+
+tag a string into a vector of Tag\+Result elements
+
+
+\begin{DoxyParams}{Parameters}
+{\em line} & a (U\+T\+F8 encoded) string, may be multilined and include Enrichments \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a vector of Tag\+Result
+\end{DoxyReturn}
+Depending on the configurarion, the input is send to the local M\+BT tagger or the associated M\+BT server.\mbox{\Hypertarget{classBaseTagger_a4045ee27258b486a583fe7aee4de4c31}\label{classBaseTagger_a4045ee27258b486a583fe7aee4de4c31}} 
+\index{BaseTagger@{BaseTagger}!version@{version}}
+\index{version@{version}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{version()}{version()}}
+{\footnotesize\ttfamily std\+::string Base\+Tagger\+::version (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classBaseTagger_ae721b840bb054f19548f7a135ac02932}\label{classBaseTagger_ae721b840bb054f19548f7a135ac02932}} 
+\index{BaseTagger@{BaseTagger}!\_host@{\_host}}
+\index{\_host@{\_host}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{\_host}{\_host}}
+{\footnotesize\ttfamily std\+::string Base\+Tagger\+::\+\_\+host\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classBaseTagger_a5bfc6d9ba06ee666cd9a241a906db1e5}\label{classBaseTagger_a5bfc6d9ba06ee666cd9a241a906db1e5}} 
+\index{BaseTagger@{BaseTagger}!\_label@{\_label}}
+\index{\_label@{\_label}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{\_label}{\_label}}
+{\footnotesize\ttfamily std\+::string Base\+Tagger\+::\+\_\+label\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classBaseTagger_af762904d3cbd9bd61c6ea8624d4d7564}\label{classBaseTagger_af762904d3cbd9bd61c6ea8624d4d7564}} 
+\index{BaseTagger@{BaseTagger}!\_port@{\_port}}
+\index{\_port@{\_port}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{\_port}{\_port}}
+{\footnotesize\ttfamily std\+::string Base\+Tagger\+::\+\_\+port\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classBaseTagger_a823313229f398c80f7f70fdde6e70bb8}\label{classBaseTagger_a823313229f398c80f7f70fdde6e70bb8}} 
+\index{BaseTagger@{BaseTagger}!\_tag\_result@{\_tag\_result}}
+\index{\_tag\_result@{\_tag\_result}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{\_tag\_result}{\_tag\_result}}
+{\footnotesize\ttfamily std\+::vector$<$Tagger\+::\+Tag\+Result$>$ Base\+Tagger\+::\+\_\+tag\+\_\+result\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classBaseTagger_af0cd11d55abf2280099da59064b87760}\label{classBaseTagger_af0cd11d55abf2280099da59064b87760}} 
+\index{BaseTagger@{BaseTagger}!\_version@{\_version}}
+\index{\_version@{\_version}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{\_version}{\_version}}
+{\footnotesize\ttfamily std\+::string Base\+Tagger\+::\+\_\+version\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classBaseTagger_a4240e2c7428220d4f2f52927830b34ac}\label{classBaseTagger_a4240e2c7428220d4f2f52927830b34ac}} 
+\index{BaseTagger@{BaseTagger}!\_words@{\_words}}
+\index{\_words@{\_words}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{\_words}{\_words}}
+{\footnotesize\ttfamily std\+::vector$<$std\+::string$>$ Base\+Tagger\+::\+\_\+words\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classBaseTagger_a075fd6eb1b92031c1fa0dc7c75e37f1f}\label{classBaseTagger_a075fd6eb1b92031c1fa0dc7c75e37f1f}} 
+\index{BaseTagger@{BaseTagger}!base@{base}}
+\index{base@{base}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{base}{base}}
+{\footnotesize\ttfamily std\+::string Base\+Tagger\+::base\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classBaseTagger_ac387d7230a52e44386af463e54b44274}\label{classBaseTagger_ac387d7230a52e44386af463e54b44274}} 
+\index{BaseTagger@{BaseTagger}!dbg\_log@{dbg\_log}}
+\index{dbg\_log@{dbg\_log}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{dbg\_log}{dbg\_log}}
+{\footnotesize\ttfamily Ti\+C\+C\+::\+Log\+Stream$\ast$ Base\+Tagger\+::dbg\+\_\+log\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classBaseTagger_a6157c6e0b2a9d03a338fa2292020b82c}\label{classBaseTagger_a6157c6e0b2a9d03a338fa2292020b82c}} 
+\index{BaseTagger@{BaseTagger}!debug@{debug}}
+\index{debug@{debug}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{debug}{debug}}
+{\footnotesize\ttfamily int Base\+Tagger\+::debug\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classBaseTagger_a4e57a417e71d7077b6d503a33854e17a}\label{classBaseTagger_a4e57a417e71d7077b6d503a33854e17a}} 
+\index{BaseTagger@{BaseTagger}!err\_log@{err\_log}}
+\index{err\_log@{err\_log}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{err\_log}{err\_log}}
+{\footnotesize\ttfamily Ti\+C\+C\+::\+Log\+Stream$\ast$ Base\+Tagger\+::err\+\_\+log\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classBaseTagger_ac86fbac1ed87b10f467e8a4d8df0a3f6}\label{classBaseTagger_ac86fbac1ed87b10f467e8a4d8df0a3f6}} 
+\index{BaseTagger@{BaseTagger}!filter@{filter}}
+\index{filter@{filter}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{filter}{filter}}
+{\footnotesize\ttfamily Ti\+C\+C\+::\+Uni\+Filter$\ast$ Base\+Tagger\+::filter\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classBaseTagger_ac9c9613625fff4a695c189cb35938481}\label{classBaseTagger_ac9c9613625fff4a695c189cb35938481}} 
+\index{BaseTagger@{BaseTagger}!tagger@{tagger}}
+\index{tagger@{tagger}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{tagger}{tagger}}
+{\footnotesize\ttfamily Mbt\+A\+PI$\ast$ Base\+Tagger\+::tagger\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classBaseTagger_a5d13dabf4ba288556997e162cb5a8bf7}\label{classBaseTagger_a5d13dabf4ba288556997e162cb5a8bf7}} 
+\index{BaseTagger@{BaseTagger}!tagset@{tagset}}
+\index{tagset@{tagset}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{tagset}{tagset}}
+{\footnotesize\ttfamily std\+::string Base\+Tagger\+::tagset\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classBaseTagger_acc3018360fae4f1578075b9b2e9c27ed}\label{classBaseTagger_acc3018360fae4f1578075b9b2e9c27ed}} 
+\index{BaseTagger@{BaseTagger}!textclass@{textclass}}
+\index{textclass@{textclass}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{textclass}{textclass}}
+{\footnotesize\ttfamily std\+::string Base\+Tagger\+::textclass\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classBaseTagger_ac21eca309d31f7a9124dce27d7910964}\label{classBaseTagger_ac21eca309d31f7a9124dce27d7910964}} 
+\index{BaseTagger@{BaseTagger}!token\_tag\_map@{token\_tag\_map}}
+\index{token\_tag\_map@{token\_tag\_map}!BaseTagger@{BaseTagger}}
+\doxysubsubsection{\texorpdfstring{token\_tag\_map}{token\_tag\_map}}
+{\footnotesize\ttfamily std\+::map$<$std\+::string,std\+::string$>$ Base\+Tagger\+::token\+\_\+tag\+\_\+map\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{tagger__base_8h}{tagger\+\_\+base.\+h}}\item 
+src/\mbox{\hyperlink{tagger__base_8cxx}{tagger\+\_\+base.\+cxx}}\end{DoxyCompactItemize}

@@ -1,0 +1,175 @@
+\hypertarget{classConstraint}{}\doxysection{Constraint Class Reference}
+\label{classConstraint}\index{Constraint@{Constraint}}
+
+
+{\ttfamily \#include $<$ckyparser.\+h$>$}
+
+
+
+Inheritance diagram for Constraint\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classConstraint__inherit__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{classConstraint_a751b84be7b48208454578b5f07bc0552}{Constraint\+Type}} \{ \mbox{\hyperlink{classConstraint_a751b84be7b48208454578b5f07bc0552a79ab419184307dd8fdac550281925a9d}{Incoming}}, 
+\mbox{\hyperlink{classConstraint_a751b84be7b48208454578b5f07bc0552a9fbc419ac004c4010c0635a379fcaae4}{Dependency}}, 
+\mbox{\hyperlink{classConstraint_a751b84be7b48208454578b5f07bc0552a022eaf9aa09f393b1c159e5a714ccad4}{Direction}}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classConstraint_a468545515c8bda1799a5835c27f449e7}{Constraint}} (double w, int i)
+\item 
+virtual \mbox{\hyperlink{classConstraint_a0ea4ebf0c039e8c4dac2616a8ec3acd7}{$\sim$\+Constraint}} ()
+\item 
+virtual void \mbox{\hyperlink{classConstraint_ae520e99fd1607b572a65c9f889a9900a}{put}} (std\+::ostream \&os) const
+\item 
+virtual \mbox{\hyperlink{classConstraint_a751b84be7b48208454578b5f07bc0552}{Constraint\+Type}} \mbox{\hyperlink{classConstraint_afbefc43b7679f66b28ced4950b831d16}{type}} () const =0
+\item 
+virtual \mbox{\hyperlink{ckyparser_8h_a8027caea534b2e5a10d31b73dbfd8143}{dir\+Type}} \mbox{\hyperlink{classConstraint_a1ce821cf60a8d23ff55202564e8fd7f0}{direct}} () const
+\item 
+virtual std\+::string \mbox{\hyperlink{classConstraint_a6cf3cc2e410f403e729503c7015844f9}{rel}} () const
+\item 
+virtual int \mbox{\hyperlink{classConstraint_abea692087cb255844b1052ab58961734}{h\+Index}} () const
+\item 
+int \mbox{\hyperlink{classConstraint_acbe1a0be7db0da38fa397dd4e3d7b79b}{t\+Index}} () const
+\item 
+double \mbox{\hyperlink{classConstraint_a53e6e848e895962b23af810bfcc2d595}{wght}} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+double \mbox{\hyperlink{classConstraint_ad932bc2c6626eff93e74e5fcb100c14e}{weight}}
+\item 
+int \mbox{\hyperlink{classConstraint_ac0b14a52209d4302d42a99d60d8fe752}{token\+Index}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Enumeration Documentation}
+\mbox{\Hypertarget{classConstraint_a751b84be7b48208454578b5f07bc0552}\label{classConstraint_a751b84be7b48208454578b5f07bc0552}} 
+\index{Constraint@{Constraint}!ConstraintType@{ConstraintType}}
+\index{ConstraintType@{ConstraintType}!Constraint@{Constraint}}
+\doxysubsubsection{\texorpdfstring{ConstraintType}{ConstraintType}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{classConstraint_a751b84be7b48208454578b5f07bc0552}{Constraint\+::\+Constraint\+Type}}}
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Incoming@{Incoming}!Constraint@{Constraint}}\index{Constraint@{Constraint}!Incoming@{Incoming}}}\mbox{\Hypertarget{classConstraint_a751b84be7b48208454578b5f07bc0552a79ab419184307dd8fdac550281925a9d}\label{classConstraint_a751b84be7b48208454578b5f07bc0552a79ab419184307dd8fdac550281925a9d}} 
+Incoming&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Dependency@{Dependency}!Constraint@{Constraint}}\index{Constraint@{Constraint}!Dependency@{Dependency}}}\mbox{\Hypertarget{classConstraint_a751b84be7b48208454578b5f07bc0552a9fbc419ac004c4010c0635a379fcaae4}\label{classConstraint_a751b84be7b48208454578b5f07bc0552a9fbc419ac004c4010c0635a379fcaae4}} 
+Dependency&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Direction@{Direction}!Constraint@{Constraint}}\index{Constraint@{Constraint}!Direction@{Direction}}}\mbox{\Hypertarget{classConstraint_a751b84be7b48208454578b5f07bc0552a022eaf9aa09f393b1c159e5a714ccad4}\label{classConstraint_a751b84be7b48208454578b5f07bc0552a022eaf9aa09f393b1c159e5a714ccad4}} 
+Direction&\\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classConstraint_a468545515c8bda1799a5835c27f449e7}\label{classConstraint_a468545515c8bda1799a5835c27f449e7}} 
+\index{Constraint@{Constraint}!Constraint@{Constraint}}
+\index{Constraint@{Constraint}!Constraint@{Constraint}}
+\doxysubsubsection{\texorpdfstring{Constraint()}{Constraint()}}
+{\footnotesize\ttfamily Constraint\+::\+Constraint (\begin{DoxyParamCaption}\item[{double}]{w,  }\item[{int}]{i }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classConstraint_a0ea4ebf0c039e8c4dac2616a8ec3acd7}\label{classConstraint_a0ea4ebf0c039e8c4dac2616a8ec3acd7}} 
+\index{Constraint@{Constraint}!````~Constraint@{$\sim$Constraint}}
+\index{````~Constraint@{$\sim$Constraint}!Constraint@{Constraint}}
+\doxysubsubsection{\texorpdfstring{$\sim$Constraint()}{~Constraint()}}
+{\footnotesize\ttfamily virtual Constraint\+::$\sim$\+Constraint (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classConstraint_a1ce821cf60a8d23ff55202564e8fd7f0}\label{classConstraint_a1ce821cf60a8d23ff55202564e8fd7f0}} 
+\index{Constraint@{Constraint}!direct@{direct}}
+\index{direct@{direct}!Constraint@{Constraint}}
+\doxysubsubsection{\texorpdfstring{direct()}{direct()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{ckyparser_8h_a8027caea534b2e5a10d31b73dbfd8143}{dir\+Type}} Constraint\+::direct (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classDependencyDirection_abb1d07a211ec54d0496ffd38cc00645a}{Dependency\+Direction}}.
+
+\mbox{\Hypertarget{classConstraint_abea692087cb255844b1052ab58961734}\label{classConstraint_abea692087cb255844b1052ab58961734}} 
+\index{Constraint@{Constraint}!hIndex@{hIndex}}
+\index{hIndex@{hIndex}!Constraint@{Constraint}}
+\doxysubsubsection{\texorpdfstring{hIndex()}{hIndex()}}
+{\footnotesize\ttfamily virtual int Constraint\+::h\+Index (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classHasDependency_a51aa858d08967b3277c31fff68935c03}{Has\+Dependency}}.
+
+\mbox{\Hypertarget{classConstraint_ae520e99fd1607b572a65c9f889a9900a}\label{classConstraint_ae520e99fd1607b572a65c9f889a9900a}} 
+\index{Constraint@{Constraint}!put@{put}}
+\index{put@{put}!Constraint@{Constraint}}
+\doxysubsubsection{\texorpdfstring{put()}{put()}}
+{\footnotesize\ttfamily virtual void Constraint\+::put (\begin{DoxyParamCaption}\item[{std\+::ostream \&}]{os }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classDependencyDirection_a1b7c0d1aa24fa37470927a120ad0b395}{Dependency\+Direction}}, \mbox{\hyperlink{classHasDependency_a8a6b2e38f127cb8cf4e10b4930cc8bad}{Has\+Dependency}}, and \mbox{\hyperlink{classHasIncomingRel_af27da58ad30310250320b596d0db88ef}{Has\+Incoming\+Rel}}.
+
+\mbox{\Hypertarget{classConstraint_a6cf3cc2e410f403e729503c7015844f9}\label{classConstraint_a6cf3cc2e410f403e729503c7015844f9}} 
+\index{Constraint@{Constraint}!rel@{rel}}
+\index{rel@{rel}!Constraint@{Constraint}}
+\doxysubsubsection{\texorpdfstring{rel()}{rel()}}
+{\footnotesize\ttfamily virtual std\+::string Constraint\+::rel (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classHasDependency_a9024b1c7fc9614c259681b33eaf47311}{Has\+Dependency}}, and \mbox{\hyperlink{classHasIncomingRel_a35ce6ab26c8ec4442ec26f214ca808d6}{Has\+Incoming\+Rel}}.
+
+\mbox{\Hypertarget{classConstraint_acbe1a0be7db0da38fa397dd4e3d7b79b}\label{classConstraint_acbe1a0be7db0da38fa397dd4e3d7b79b}} 
+\index{Constraint@{Constraint}!tIndex@{tIndex}}
+\index{tIndex@{tIndex}!Constraint@{Constraint}}
+\doxysubsubsection{\texorpdfstring{tIndex()}{tIndex()}}
+{\footnotesize\ttfamily int Constraint\+::t\+Index (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classConstraint_afbefc43b7679f66b28ced4950b831d16}\label{classConstraint_afbefc43b7679f66b28ced4950b831d16}} 
+\index{Constraint@{Constraint}!type@{type}}
+\index{type@{type}!Constraint@{Constraint}}
+\doxysubsubsection{\texorpdfstring{type()}{type()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{classConstraint_a751b84be7b48208454578b5f07bc0552}{Constraint\+Type}} Constraint\+::type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Implemented in \mbox{\hyperlink{classDependencyDirection_aef7c3ab466522543fea1359642a49d26}{Dependency\+Direction}}, \mbox{\hyperlink{classHasDependency_a19b60638e757d4c62fa5a6d9eb780851}{Has\+Dependency}}, and \mbox{\hyperlink{classHasIncomingRel_ab4040dddc9eeb002d1a3dbac33dac222}{Has\+Incoming\+Rel}}.
+
+\mbox{\Hypertarget{classConstraint_a53e6e848e895962b23af810bfcc2d595}\label{classConstraint_a53e6e848e895962b23af810bfcc2d595}} 
+\index{Constraint@{Constraint}!wght@{wght}}
+\index{wght@{wght}!Constraint@{Constraint}}
+\doxysubsubsection{\texorpdfstring{wght()}{wght()}}
+{\footnotesize\ttfamily double Constraint\+::wght (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classConstraint_ac0b14a52209d4302d42a99d60d8fe752}\label{classConstraint_ac0b14a52209d4302d42a99d60d8fe752}} 
+\index{Constraint@{Constraint}!tokenIndex@{tokenIndex}}
+\index{tokenIndex@{tokenIndex}!Constraint@{Constraint}}
+\doxysubsubsection{\texorpdfstring{tokenIndex}{tokenIndex}}
+{\footnotesize\ttfamily int Constraint\+::token\+Index\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classConstraint_ad932bc2c6626eff93e74e5fcb100c14e}\label{classConstraint_ad932bc2c6626eff93e74e5fcb100c14e}} 
+\index{Constraint@{Constraint}!weight@{weight}}
+\index{weight@{weight}!Constraint@{Constraint}}
+\doxysubsubsection{\texorpdfstring{weight}{weight}}
+{\footnotesize\ttfamily double Constraint\+::weight\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{ckyparser_8h}{ckyparser.\+h}}\end{DoxyCompactItemize}

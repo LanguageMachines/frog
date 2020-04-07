@@ -1,0 +1,102 @@
+\hypertarget{FrogAPI_8cxx}{}\doxysection{src/\+Frog\+A\+PI.cxx File Reference}
+\label{FrogAPI_8cxx}\index{src/FrogAPI.cxx@{src/FrogAPI.cxx}}
+{\ttfamily \#include \char`\"{}frog/\+Frog\+A\+P\+I.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$cstdlib$>$}\newline
+{\ttfamily \#include $<$cstdio$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$signal.\+h$>$}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$cstring$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$iomanip$>$}\newline
+{\ttfamily \#include $<$sstream$>$}\newline
+{\ttfamily \#include $<$fstream$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include \char`\"{}unicode/schriter.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}config.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Pretty\+Print.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+File\+Utils.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/\+Frog-\/util.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/ucto\+\_\+tokenizer\+\_\+mod.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/mblem\+\_\+mod.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/mbma\+\_\+mod.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/mwu\+\_\+chunker\+\_\+mod.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/cgn\+\_\+tagger\+\_\+mod.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/iob\+\_\+tagger\+\_\+mod.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/ner\+\_\+tagger\+\_\+mod.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/\+Parser.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/\+Alpino\+Parser.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/json.\+hpp\char`\"{}}\newline
+Include dependency graph for Frog\+A\+P\+I.\+cxx\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{FrogAPI_8cxx__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{FrogAPI_8cxx_aa1556b651c5bee5979536713c8b55c83}{N\+O\+\_\+\+R\+E\+A\+D\+L\+I\+NE}}
+\item 
+\#define \mbox{\hyperlink{FrogAPI_8cxx_a159ca84d25a5487d8e81e4438725df19}{L\+OG}}~$\ast$Ti\+C\+C\+::\+Log(\mbox{\hyperlink{ner__prog_8cxx_add80008acf88093a421aff3c7b3d71b8}{the\+Err\+Log}})
+\item 
+\#define \mbox{\hyperlink{FrogAPI_8cxx_a49606be7356624568932ec81c0d429f4}{D\+BG}}~$\ast$Ti\+C\+C\+::\+Log(the\+Dbg\+Log)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+const string \mbox{\hyperlink{FrogAPI_8cxx_acb1155f35ca04eb73ea02b255ebf3a18}{I\+S\+O\+\_\+\+S\+ET}} = \char`\"{}http\+://raw.\+github.\+com/proycon/folia/master/setdefinitions/iso639\+\_\+3.\+foliaset\char`\"{}
+\begin{DoxyCompactList}\small\item\em the Fo\+LiA setname for languages \end{DoxyCompactList}\item 
+string \mbox{\hyperlink{FrogAPI_8cxx_a087946c21d06c64cd0485e49bf4f490e}{config\+Dir}} = string(S\+Y\+S\+C\+O\+N\+F\+\_\+\+P\+A\+TH) + \char`\"{}/\char`\"{} + P\+A\+C\+K\+A\+GE + \char`\"{}/\char`\"{}
+\item 
+string \mbox{\hyperlink{FrogAPI_8cxx_a6d62f1d63abac6c1d6ea24d18d1325ac}{config\+File\+Name}} = \mbox{\hyperlink{FrogAPI_8cxx_a087946c21d06c64cd0485e49bf4f490e}{config\+Dir}} + \char`\"{}frog.\+cfg\char`\"{}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{FrogAPI_8cxx_a49606be7356624568932ec81c0d429f4}\label{FrogAPI_8cxx_a49606be7356624568932ec81c0d429f4}} 
+\index{FrogAPI.cxx@{FrogAPI.cxx}!DBG@{DBG}}
+\index{DBG@{DBG}!FrogAPI.cxx@{FrogAPI.cxx}}
+\doxysubsubsection{\texorpdfstring{DBG}{DBG}}
+{\footnotesize\ttfamily \#define D\+BG~$\ast$Ti\+C\+C\+::\+Log(the\+Dbg\+Log)}
+
+\mbox{\Hypertarget{FrogAPI_8cxx_a159ca84d25a5487d8e81e4438725df19}\label{FrogAPI_8cxx_a159ca84d25a5487d8e81e4438725df19}} 
+\index{FrogAPI.cxx@{FrogAPI.cxx}!LOG@{LOG}}
+\index{LOG@{LOG}!FrogAPI.cxx@{FrogAPI.cxx}}
+\doxysubsubsection{\texorpdfstring{LOG}{LOG}}
+{\footnotesize\ttfamily \#define L\+OG~$\ast$Ti\+C\+C\+::\+Log(\mbox{\hyperlink{ner__prog_8cxx_add80008acf88093a421aff3c7b3d71b8}{the\+Err\+Log}})}
+
+\mbox{\Hypertarget{FrogAPI_8cxx_aa1556b651c5bee5979536713c8b55c83}\label{FrogAPI_8cxx_aa1556b651c5bee5979536713c8b55c83}} 
+\index{FrogAPI.cxx@{FrogAPI.cxx}!NO\_READLINE@{NO\_READLINE}}
+\index{NO\_READLINE@{NO\_READLINE}!FrogAPI.cxx@{FrogAPI.cxx}}
+\doxysubsubsection{\texorpdfstring{NO\_READLINE}{NO\_READLINE}}
+{\footnotesize\ttfamily \#define N\+O\+\_\+\+R\+E\+A\+D\+L\+I\+NE}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{FrogAPI_8cxx_a087946c21d06c64cd0485e49bf4f490e}\label{FrogAPI_8cxx_a087946c21d06c64cd0485e49bf4f490e}} 
+\index{FrogAPI.cxx@{FrogAPI.cxx}!configDir@{configDir}}
+\index{configDir@{configDir}!FrogAPI.cxx@{FrogAPI.cxx}}
+\doxysubsubsection{\texorpdfstring{configDir}{configDir}}
+{\footnotesize\ttfamily string config\+Dir = string(S\+Y\+S\+C\+O\+N\+F\+\_\+\+P\+A\+TH) + \char`\"{}/\char`\"{} + P\+A\+C\+K\+A\+GE + \char`\"{}/\char`\"{}}
+
+\mbox{\Hypertarget{FrogAPI_8cxx_a6d62f1d63abac6c1d6ea24d18d1325ac}\label{FrogAPI_8cxx_a6d62f1d63abac6c1d6ea24d18d1325ac}} 
+\index{FrogAPI.cxx@{FrogAPI.cxx}!configFileName@{configFileName}}
+\index{configFileName@{configFileName}!FrogAPI.cxx@{FrogAPI.cxx}}
+\doxysubsubsection{\texorpdfstring{configFileName}{configFileName}}
+{\footnotesize\ttfamily string config\+File\+Name = \mbox{\hyperlink{FrogAPI_8cxx_a087946c21d06c64cd0485e49bf4f490e}{config\+Dir}} + \char`\"{}frog.\+cfg\char`\"{}}
+
+\mbox{\Hypertarget{FrogAPI_8cxx_acb1155f35ca04eb73ea02b255ebf3a18}\label{FrogAPI_8cxx_acb1155f35ca04eb73ea02b255ebf3a18}} 
+\index{FrogAPI.cxx@{FrogAPI.cxx}!ISO\_SET@{ISO\_SET}}
+\index{ISO\_SET@{ISO\_SET}!FrogAPI.cxx@{FrogAPI.cxx}}
+\doxysubsubsection{\texorpdfstring{ISO\_SET}{ISO\_SET}}
+{\footnotesize\ttfamily const string I\+S\+O\+\_\+\+S\+ET = \char`\"{}http\+://raw.\+github.\+com/proycon/folia/master/setdefinitions/iso639\+\_\+3.\+foliaset\char`\"{}}
+
+
+
+the Fo\+LiA setname for languages 
+

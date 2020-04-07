@@ -1,0 +1,61 @@
+\hypertarget{AlpinoParser_8h}{}\doxysection{include/frog/\+Alpino\+Parser.h File Reference}
+\label{AlpinoParser_8h}\index{include/frog/AlpinoParser.h@{include/frog/AlpinoParser.h}}
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include $<$set$>$}\newline
+{\ttfamily \#include $<$libxml/tree.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}frog/\+Parser.\+h\char`\"{}}\newline
+Include dependency graph for Alpino\+Parser.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{AlpinoParser_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=306pt]{AlpinoParser_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}}
+\item 
+class \mbox{\hyperlink{classAlpinoParser}{Alpino\+Parser}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::ostream \& \mbox{\hyperlink{AlpinoParser_8h_aa9c95809f48f8a0d001fda45d4f16306}{operator$<$$<$}} (std\+::ostream \&os, const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$node)
+\item 
+std\+::vector$<$ \mbox{\hyperlink{structparsrel}{parsrel}} $>$ \mbox{\hyperlink{AlpinoParser_8h_aa66956ec6df77ec5e68c63b7ff102f4b}{alpino\+\_\+server\+\_\+parse}} (\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&fd)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{AlpinoParser_8h_aa66956ec6df77ec5e68c63b7ff102f4b}\label{AlpinoParser_8h_aa66956ec6df77ec5e68c63b7ff102f4b}} 
+\index{AlpinoParser.h@{AlpinoParser.h}!alpino\_server\_parse@{alpino\_server\_parse}}
+\index{alpino\_server\_parse@{alpino\_server\_parse}!AlpinoParser.h@{AlpinoParser.h}}
+\doxysubsubsection{\texorpdfstring{alpino\_server\_parse()}{alpino\_server\_parse()}}
+{\footnotesize\ttfamily std\+::vector$<$\mbox{\hyperlink{structparsrel}{parsrel}}$>$ alpino\+\_\+server\+\_\+parse (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{AlpinoParser_8h_aa9c95809f48f8a0d001fda45d4f16306}\label{AlpinoParser_8h_aa9c95809f48f8a0d001fda45d4f16306}} 
+\index{AlpinoParser.h@{AlpinoParser.h}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!AlpinoParser.h@{AlpinoParser.h}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}}
+{\footnotesize\ttfamily std\+::ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{std\+::ostream \&}]{os,  }\item[{const \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} $\ast$}]{node }\end{DoxyParamCaption})}
+
+print out one \mbox{\hyperlink{structdp__tree}{dp\+\_\+tree}} structure node
+
+
+\begin{DoxyParams}{Parameters}
+{\em os} & the output stream \\
+\hline
+{\em node} & the node to print\\
+\hline
+\end{DoxyParams}

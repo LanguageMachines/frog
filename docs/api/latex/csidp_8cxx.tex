@@ -1,0 +1,119 @@
+\hypertarget{csidp_8cxx}{}\doxysection{src/csidp.cxx File Reference}
+\label{csidp_8cxx}\index{src/csidp.cxx@{src/csidp.cxx}}
+{\ttfamily \#include \char`\"{}frog/csidp.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$fstream$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include $<$unordered\+\_\+map$>$}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+String\+Ops.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Pretty\+Print.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Log\+Stream.\+h\char`\"{}}\newline
+Include dependency graph for csidp.\+cxx\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{csidp_8cxx__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{csidp_8cxx_a159ca84d25a5487d8e81e4438725df19}{L\+OG}}~$\ast$Ti\+C\+C\+::\+Log(dbg\+\_\+log)
+\item 
+\#define \mbox{\hyperlink{csidp_8cxx_a49606be7356624568932ec81c0d429f4}{D\+BG}}~$\ast$Ti\+C\+C\+::\+Dbg(dbg\+\_\+log)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+unordered\+\_\+map$<$ string, double $>$ \mbox{\hyperlink{csidp_8cxx_ab2132d1b9eeef8922af8dbf310ad130b}{split\+\_\+dist}} (const vector$<$ pair$<$ string, double $>$$>$ \&dist)
+\item 
+vector$<$ const \mbox{\hyperlink{classConstraint}{Constraint}} $\ast$ $>$ \mbox{\hyperlink{csidp_8cxx_a445dd90698cb1b07d57493486a6f8b23}{formulate\+W\+C\+SP}} (const vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \&d\+\_\+res, const vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \&r\+\_\+res, const vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \&p\+\_\+res, size\+\_\+t sent\+\_\+len, size\+\_\+t max\+Dist, Ti\+C\+C\+::\+Log\+Stream $\ast$dbg\+\_\+log)
+\item 
+vector$<$ \mbox{\hyperlink{structparsrel}{parsrel}} $>$ \mbox{\hyperlink{csidp_8cxx_a424869be2eb3dbe0a1c4906b31c3120f}{parse}} (const vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \&p\+\_\+res, const vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \&r\+\_\+res, const vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \&d\+\_\+res, size\+\_\+t sent\+\_\+len, int max\+Dist, Ti\+C\+C\+::\+Log\+Stream $\ast$dbg\+\_\+log)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{csidp_8cxx_a49606be7356624568932ec81c0d429f4}\label{csidp_8cxx_a49606be7356624568932ec81c0d429f4}} 
+\index{csidp.cxx@{csidp.cxx}!DBG@{DBG}}
+\index{DBG@{DBG}!csidp.cxx@{csidp.cxx}}
+\doxysubsubsection{\texorpdfstring{DBG}{DBG}}
+{\footnotesize\ttfamily \#define D\+BG~$\ast$Ti\+C\+C\+::\+Dbg(dbg\+\_\+log)}
+
+\mbox{\Hypertarget{csidp_8cxx_a159ca84d25a5487d8e81e4438725df19}\label{csidp_8cxx_a159ca84d25a5487d8e81e4438725df19}} 
+\index{csidp.cxx@{csidp.cxx}!LOG@{LOG}}
+\index{LOG@{LOG}!csidp.cxx@{csidp.cxx}}
+\doxysubsubsection{\texorpdfstring{LOG}{LOG}}
+{\footnotesize\ttfamily \#define L\+OG~$\ast$Ti\+C\+C\+::\+Log(dbg\+\_\+log)}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{csidp_8cxx_a445dd90698cb1b07d57493486a6f8b23}\label{csidp_8cxx_a445dd90698cb1b07d57493486a6f8b23}} 
+\index{csidp.cxx@{csidp.cxx}!formulateWCSP@{formulateWCSP}}
+\index{formulateWCSP@{formulateWCSP}!csidp.cxx@{csidp.cxx}}
+\doxysubsubsection{\texorpdfstring{formulateWCSP()}{formulateWCSP()}}
+{\footnotesize\ttfamily vector$<$const \mbox{\hyperlink{classConstraint}{Constraint}}$\ast$$>$ formulate\+W\+C\+SP (\begin{DoxyParamCaption}\item[{const vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \&}]{d\+\_\+res,  }\item[{const vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \&}]{r\+\_\+res,  }\item[{const vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \&}]{p\+\_\+res,  }\item[{size\+\_\+t}]{sent\+\_\+len,  }\item[{size\+\_\+t}]{max\+Dist,  }\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{dbg\+\_\+log }\end{DoxyParamCaption})}
+
+create a list of Parse \mbox{\hyperlink{classConstraint}{Constraint}} records based on the 3 \mbox{\hyperlink{namespaceTimbl}{Timbl}} outputs
+
+
+\begin{DoxyParams}{Parameters}
+{\em d\+\_\+res} & results of the \mbox{\hyperlink{namespaceTimbl}{Timbl}} dist classifier \\
+\hline
+{\em r\+\_\+res} & results of the \mbox{\hyperlink{namespaceTimbl}{Timbl}} relations classifier \\
+\hline
+{\em p\+\_\+res} & results of the \mbox{\hyperlink{namespaceTimbl}{Timbl}} pairs classifier \\
+\hline
+{\em sent\+\_\+len} & the sentence length \\
+\hline
+{\em max\+Dist} & the maximum distance we still handle \\
+\hline
+{\em dbg\+\_\+log} & a Log\+Stream for debugging\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{csidp_8cxx_a424869be2eb3dbe0a1c4906b31c3120f}\label{csidp_8cxx_a424869be2eb3dbe0a1c4906b31c3120f}} 
+\index{csidp.cxx@{csidp.cxx}!parse@{parse}}
+\index{parse@{parse}!csidp.cxx@{csidp.cxx}}
+\doxysubsubsection{\texorpdfstring{parse()}{parse()}}
+{\footnotesize\ttfamily vector$<$\mbox{\hyperlink{structparsrel}{parsrel}}$>$ parse (\begin{DoxyParamCaption}\item[{const vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \&}]{p\+\_\+res,  }\item[{const vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \&}]{r\+\_\+res,  }\item[{const vector$<$ \mbox{\hyperlink{classtimbl__result}{timbl\+\_\+result}} $>$ \&}]{d\+\_\+res,  }\item[{size\+\_\+t}]{sent\+\_\+len,  }\item[{int}]{max\+Dist,  }\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{dbg\+\_\+log }\end{DoxyParamCaption})}
+
+run de C\+KY parser using these data
+
+
+\begin{DoxyParams}{Parameters}
+{\em p\+\_\+res} & the \mbox{\hyperlink{namespaceTimbl}{Timbl}} pairs outcome \\
+\hline
+{\em r\+\_\+res} & the \mbox{\hyperlink{namespaceTimbl}{Timbl}} rels outcome \\
+\hline
+{\em d\+\_\+res} & the \mbox{\hyperlink{namespaceTimbl}{Timbl}} dir outcome \\
+\hline
+{\em sent\+\_\+len} & the maximum sentence lenght \\
+\hline
+{\em max\+Dist} & the maximum distance between dependents we allow \\
+\hline
+{\em dbg\+\_\+log} & the stream used for debugging \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a vector of parsrel structures
+\end{DoxyReturn}
+\mbox{\Hypertarget{csidp_8cxx_ab2132d1b9eeef8922af8dbf310ad130b}\label{csidp_8cxx_ab2132d1b9eeef8922af8dbf310ad130b}} 
+\index{csidp.cxx@{csidp.cxx}!split\_dist@{split\_dist}}
+\index{split\_dist@{split\_dist}!csidp.cxx@{csidp.cxx}}
+\doxysubsubsection{\texorpdfstring{split\_dist()}{split\_dist()}}
+{\footnotesize\ttfamily unordered\+\_\+map$<$string,double$>$ split\+\_\+dist (\begin{DoxyParamCaption}\item[{const vector$<$ pair$<$ string, double $>$$>$ \&}]{dist }\end{DoxyParamCaption})}
+
+split a vector of ambi-\/tags to double pairs into a map of tag\mbox{[}double\mbox{]}
+
+
+\begin{DoxyParams}{Parameters}
+{\em dist} & a vector of $<$string,double$>$ pairs, where each string is a list of \textquotesingle{}$\vert$\textquotesingle{} separated tags. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a mapping from tags to doubles
+\end{DoxyReturn}
+so for instance when the input is like \{$<$\char`\"{}a$\vert$b\char`\"{},0.\+5$>$,$<$\char`\"{}c$\vert$d$\vert$e\char`\"{},0.\+6$>$\} the result would be \{ \{\char`\"{}a\char`\"{},0.\+5\},\{\char`\"{}b\char`\"{},0.\+5\},\{\char`\"{}c\char`\"{},0.\+6\},\{\char`\"{}d\char`\"{},0.\+6\},\{\char`\"{}e\char`\"{},0.\+6\}\}

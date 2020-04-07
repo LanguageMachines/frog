@@ -1,0 +1,140 @@
+\hypertarget{classParser}{}\doxysection{Parser Class Reference}
+\label{classParser}\index{Parser@{Parser}}
+
+
+{\ttfamily \#include $<$Parser.\+h$>$}
+
+
+
+Inheritance diagram for Parser\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=151pt]{classParser__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Parser\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=195pt]{classParser__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classParser_ad064da97ab4f7694e9223e291adb100d}{Parser}} (Ti\+C\+C\+::\+Log\+Stream $\ast$errlog, Ti\+C\+C\+::\+Log\+Stream $\ast$dbglog)
+\item 
+\mbox{\hyperlink{classParser_a3e658b5917a93a3ef648050d060e3a93}{$\sim$\+Parser}} ()
+\item 
+bool \mbox{\hyperlink{classParser_a3f5ba543039b484a34df64023bcfb84c}{init}} (const Ti\+C\+C\+::\+Configuration \&)
+\item 
+void \mbox{\hyperlink{classParser_a160a0288adcc432f6727864ed8cf7e4e}{add\+\_\+provenance}} (folia\+::\+Document \&doc, folia\+::processor $\ast$) const
+\item 
+\mbox{\hyperlink{structparseData}{parse\+Data}} \mbox{\hyperlink{classParser_a6ef349265b04bc25a89bfd55bcc4edf2}{prepare\+Parse}} (\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&)
+\item 
+void \mbox{\hyperlink{classParser_a4f4dd369158e210c0a310a9922ba1ef6}{Parse}} (\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&, \mbox{\hyperlink{classTimerBlock}{Timer\+Block}} \&)
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classParser_ad064da97ab4f7694e9223e291adb100d}\label{classParser_ad064da97ab4f7694e9223e291adb100d}} 
+\index{Parser@{Parser}!Parser@{Parser}}
+\index{Parser@{Parser}!Parser@{Parser}}
+\doxysubsubsection{\texorpdfstring{Parser()}{Parser()}}
+{\footnotesize\ttfamily Parser\+::\+Parser (\begin{DoxyParamCaption}\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{errlog,  }\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{dbglog }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [explicit]}}
+
+\mbox{\Hypertarget{classParser_a3e658b5917a93a3ef648050d060e3a93}\label{classParser_a3e658b5917a93a3ef648050d060e3a93}} 
+\index{Parser@{Parser}!````~Parser@{$\sim$Parser}}
+\index{````~Parser@{$\sim$Parser}!Parser@{Parser}}
+\doxysubsubsection{\texorpdfstring{$\sim$Parser()}{~Parser()}}
+{\footnotesize\ttfamily Parser\+::$\sim$\+Parser (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+destructor
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classParser_a160a0288adcc432f6727864ed8cf7e4e}\label{classParser_a160a0288adcc432f6727864ed8cf7e4e}} 
+\index{Parser@{Parser}!add\_provenance@{add\_provenance}}
+\index{add\_provenance@{add\_provenance}!Parser@{Parser}}
+\doxysubsubsection{\texorpdfstring{add\_provenance()}{add\_provenance()}}
+{\footnotesize\ttfamily void Parser\+::add\+\_\+provenance (\begin{DoxyParamCaption}\item[{folia\+::\+Document \&}]{doc,  }\item[{folia\+::processor $\ast$}]{main }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+add provenance information to the Fo\+LiA document
+
+
+\begin{DoxyParams}{Parameters}
+{\em doc} & the fo\+LiA document we are working on \\
+\hline
+{\em main} & the main processor (presumably Frog) we want to add a new one to\\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classParserBase_a276ed872ca9abf82c075f497d5161bbf}{Parser\+Base}}.
+
+\mbox{\Hypertarget{classParser_a3f5ba543039b484a34df64023bcfb84c}\label{classParser_a3f5ba543039b484a34df64023bcfb84c}} 
+\index{Parser@{Parser}!init@{init}}
+\index{init@{init}!Parser@{Parser}}
+\doxysubsubsection{\texorpdfstring{init()}{init()}}
+{\footnotesize\ttfamily bool Parser\+::init (\begin{DoxyParamCaption}\item[{const Ti\+C\+C\+::\+Configuration \&}]{configuration }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+initialize a \mbox{\hyperlink{classParser}{Parser}} from the configuration
+
+
+\begin{DoxyParams}{Parameters}
+{\em configuration} & the config to use \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true on succes extract all needed information from the configuration and setup the parser by creating 3 \mbox{\hyperlink{namespaceTimbl}{Timbl}} instances
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classParserBase_a7bf1ebfa663c9ba71d36b9993951f23e}{Parser\+Base}}.
+
+\mbox{\Hypertarget{classParser_a4f4dd369158e210c0a310a9922ba1ef6}\label{classParser_a4f4dd369158e210c0a310a9922ba1ef6}} 
+\index{Parser@{Parser}!Parse@{Parse}}
+\index{Parse@{Parse}!Parser@{Parser}}
+\doxysubsubsection{\texorpdfstring{Parse()}{Parse()}}
+{\footnotesize\ttfamily void Parser\+::\+Parse (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd,  }\item[{\mbox{\hyperlink{classTimerBlock}{Timer\+Block}} \&}]{timers }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+Run the \mbox{\hyperlink{classParser}{Parser}} on 1 \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure
+
+
+\begin{DoxyParams}{Parameters}
+{\em fd} & the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure with our input \\
+\hline
+{\em timers} & the \mbox{\hyperlink{classTimerBlock}{Timer\+Block}} for measuring what we wasting\\
+\hline
+\end{DoxyParams}
+This function will run 3 \mbox{\hyperlink{namespaceTimbl}{Timbl}}\textquotesingle{}s in parallel to get its information which is the handled to the \textquotesingle{}real\textquotesingle{} parsing C\+S\+I\+DP process
+
+Implements \mbox{\hyperlink{classParserBase_acaf94221556693ae235db90eb72a7759}{Parser\+Base}}.
+
+\mbox{\Hypertarget{classParser_a6ef349265b04bc25a89bfd55bcc4edf2}\label{classParser_a6ef349265b04bc25a89bfd55bcc4edf2}} 
+\index{Parser@{Parser}!prepareParse@{prepareParse}}
+\index{prepareParse@{prepareParse}!Parser@{Parser}}
+\doxysubsubsection{\texorpdfstring{prepareParse()}{prepareParse()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structparseData}{parse\+Data}} Parser\+::prepare\+Parse (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd }\end{DoxyParamCaption})}
+
+setup the parser for action
+
+
+\begin{DoxyParams}{Parameters}
+{\em fd} & the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure with the needed information \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a \mbox{\hyperlink{structparseData}{parse\+Data}} structure for further processing
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{Parser_8h}{Parser.\+h}}\item 
+src/\mbox{\hyperlink{Parser_8cxx}{Parser.\+cxx}}\end{DoxyCompactItemize}

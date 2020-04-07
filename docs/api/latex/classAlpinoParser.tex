@@ -1,0 +1,151 @@
+\hypertarget{classAlpinoParser}{}\doxysection{Alpino\+Parser Class Reference}
+\label{classAlpinoParser}\index{AlpinoParser@{AlpinoParser}}
+
+
+{\ttfamily \#include $<$Alpino\+Parser.\+h$>$}
+
+
+
+Inheritance diagram for Alpino\+Parser\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=158pt]{classAlpinoParser__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Alpino\+Parser\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=195pt]{classAlpinoParser__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classAlpinoParser_a4f7f5d11bd67f4c94e28ef7787f574e0}{Alpino\+Parser}} (Ti\+C\+C\+::\+Log\+Stream $\ast$errlog, Ti\+C\+C\+::\+Log\+Stream $\ast$dbglog)
+\item 
+bool \mbox{\hyperlink{classAlpinoParser_a129741c0d7450c0fb82fde1aef7fb378}{init}} (const Ti\+C\+C\+::\+Configuration \&)
+\item 
+void \mbox{\hyperlink{classAlpinoParser_a82021345a02ae8045180c35214a95778}{add\+\_\+provenance}} (folia\+::\+Document \&doc, folia\+::processor $\ast$) const
+\item 
+void \mbox{\hyperlink{classAlpinoParser_a9ca0518a748c4796dc06a4d53b0062b4}{Parse}} (\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&, \mbox{\hyperlink{classTimerBlock}{Timer\+Block}} \&)
+\item 
+void \mbox{\hyperlink{classAlpinoParser_a1b73895ab3547f3a9f05cbab59d10a92}{add\+\_\+result}} (const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&, const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&) const
+\item 
+void \mbox{\hyperlink{classAlpinoParser_a8298ec1321395fea3e32557f8c446244}{add\+\_\+mwus}} (const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&, const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classAlpinoParser_a4f7f5d11bd67f4c94e28ef7787f574e0}\label{classAlpinoParser_a4f7f5d11bd67f4c94e28ef7787f574e0}} 
+\index{AlpinoParser@{AlpinoParser}!AlpinoParser@{AlpinoParser}}
+\index{AlpinoParser@{AlpinoParser}!AlpinoParser@{AlpinoParser}}
+\doxysubsubsection{\texorpdfstring{AlpinoParser()}{AlpinoParser()}}
+{\footnotesize\ttfamily Alpino\+Parser\+::\+Alpino\+Parser (\begin{DoxyParamCaption}\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{errlog,  }\item[{Ti\+C\+C\+::\+Log\+Stream $\ast$}]{dbglog }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [explicit]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classAlpinoParser_a8298ec1321395fea3e32557f8c446244}\label{classAlpinoParser_a8298ec1321395fea3e32557f8c446244}} 
+\index{AlpinoParser@{AlpinoParser}!add\_mwus@{add\_mwus}}
+\index{add\_mwus@{add\_mwus}!AlpinoParser@{AlpinoParser}}
+\doxysubsubsection{\texorpdfstring{add\_mwus()}{add\_mwus()}}
+{\footnotesize\ttfamily void Alpino\+Parser\+::add\+\_\+mwus (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd,  }\item[{const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&}]{wv }\end{DoxyParamCaption}) const}
+
+add the M\+WU\textquotesingle{}s stored in a \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} record as folia Entities
+
+
+\begin{DoxyParams}{Parameters}
+{\em fd} & the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure to use \\
+\hline
+{\em wv} & the list of folia\+::\+Word nodes that was parsed into the {\itshape fd} \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure\\
+\hline
+\end{DoxyParams}
+So we create an entities layer on the Sentence above the Word vector and add all words as M\+WU entities in that layer\mbox{\Hypertarget{classAlpinoParser_a82021345a02ae8045180c35214a95778}\label{classAlpinoParser_a82021345a02ae8045180c35214a95778}} 
+\index{AlpinoParser@{AlpinoParser}!add\_provenance@{add\_provenance}}
+\index{add\_provenance@{add\_provenance}!AlpinoParser@{AlpinoParser}}
+\doxysubsubsection{\texorpdfstring{add\_provenance()}{add\_provenance()}}
+{\footnotesize\ttfamily void Alpino\+Parser\+::add\+\_\+provenance (\begin{DoxyParamCaption}\item[{folia\+::\+Document \&}]{doc,  }\item[{folia\+::processor $\ast$}]{main }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+add provenance data for the \mbox{\hyperlink{classAlpinoParser}{Alpino\+Parser}} to the Frog provenance
+
+
+\begin{DoxyParams}{Parameters}
+{\em doc} & the current folia\+::\+Document \\
+\hline
+{\em main} & a pointer to the provenance processor of Frog\\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classParserBase_a276ed872ca9abf82c075f497d5161bbf}{Parser\+Base}}.
+
+\mbox{\Hypertarget{classAlpinoParser_a1b73895ab3547f3a9f05cbab59d10a92}\label{classAlpinoParser_a1b73895ab3547f3a9f05cbab59d10a92}} 
+\index{AlpinoParser@{AlpinoParser}!add\_result@{add\_result}}
+\index{add\_result@{add\_result}!AlpinoParser@{AlpinoParser}}
+\doxysubsubsection{\texorpdfstring{add\_result()}{add\_result()}}
+{\footnotesize\ttfamily void Alpino\+Parser\+::add\+\_\+result (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd,  }\item[{const std\+::vector$<$ folia\+::\+Word $\ast$ $>$ \&}]{wv }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+add the parser information in {\itshape fd} as Dependencies and Entities to the Fo\+LiA
+
+
+\begin{DoxyParams}{Parameters}
+{\em fd} & the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure with all information \\
+\hline
+{\em wv} & the list of folia\+::\+Word nodes that was parsed into the {\itshape fd} \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure\\
+\hline
+\end{DoxyParams}
+
+
+Reimplemented from \mbox{\hyperlink{classParserBase_aa3a4d8a8c228116ef537565756b0906e}{Parser\+Base}}.
+
+\mbox{\Hypertarget{classAlpinoParser_a129741c0d7450c0fb82fde1aef7fb378}\label{classAlpinoParser_a129741c0d7450c0fb82fde1aef7fb378}} 
+\index{AlpinoParser@{AlpinoParser}!init@{init}}
+\index{init@{init}!AlpinoParser@{AlpinoParser}}
+\doxysubsubsection{\texorpdfstring{init()}{init()}}
+{\footnotesize\ttfamily bool Alpino\+Parser\+::init (\begin{DoxyParamCaption}\item[{const Ti\+C\+C\+::\+Configuration \&}]{configuration }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+initaliaze an \mbox{\hyperlink{classAlpinoParser}{Alpino\+Parser}} class from a configuration
+
+
+\begin{DoxyParams}{Parameters}
+{\em configuration} & the configuration to use\\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classParserBase_a7bf1ebfa663c9ba71d36b9993951f23e}{Parser\+Base}}.
+
+\mbox{\Hypertarget{classAlpinoParser_a9ca0518a748c4796dc06a4d53b0062b4}\label{classAlpinoParser_a9ca0518a748c4796dc06a4d53b0062b4}} 
+\index{AlpinoParser@{AlpinoParser}!Parse@{Parse}}
+\index{Parse@{Parse}!AlpinoParser@{AlpinoParser}}
+\doxysubsubsection{\texorpdfstring{Parse()}{Parse()}}
+{\footnotesize\ttfamily void Alpino\+Parser\+::\+Parse (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} \&}]{fd,  }\item[{\mbox{\hyperlink{classTimerBlock}{Timer\+Block}} \&}]{timers }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+parse a \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure using Alpino
+
+
+\begin{DoxyParams}{Parameters}
+{\em fd} & the \mbox{\hyperlink{classfrog__data}{frog\+\_\+data}} structure \\
+\hline
+{\em timers} & used for storing timing information\\
+\hline
+\end{DoxyParams}
+this function will use an Alpino Server or a locally installed Alpino executable, depending on the current options and settings.
+
+The results are stored in the {\itshape fd} parameter
+
+Implements \mbox{\hyperlink{classParserBase_acaf94221556693ae235db90eb72a7759}{Parser\+Base}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/frog/\mbox{\hyperlink{AlpinoParser_8h}{Alpino\+Parser.\+h}}\item 
+src/\mbox{\hyperlink{AlpinoParser_8cxx}{Alpino\+Parser.\+cxx}}\end{DoxyCompactItemize}

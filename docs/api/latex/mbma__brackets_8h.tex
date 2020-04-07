@@ -1,0 +1,185 @@
+\hypertarget{mbma__brackets_8h}{}\doxysection{include/frog/mbma\+\_\+brackets.h File Reference}
+\label{mbma__brackets_8h}\index{include/frog/mbma\_brackets.h@{include/frog/mbma\_brackets.h}}
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include $<$list$>$}\newline
+{\ttfamily \#include \char`\"{}unicode/unistr.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ticcutils/\+Log\+Stream.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}frog/clex.\+h\char`\"{}}\newline
+Include dependency graph for mbma\+\_\+brackets.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{mbma__brackets_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{mbma__brackets_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}}
+\item 
+class \mbox{\hyperlink{classBracketLeaf}{Bracket\+Leaf}}
+\item 
+class \mbox{\hyperlink{classBracketNest}{Bracket\+Nest}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+ \mbox{\hyperlink{namespaceCompound}{Compound}}
+\item 
+ \mbox{\hyperlink{namespacefolia}{folia}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70b}{Status}} \{ \newline
+\mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70ba748005382152808a72b1a9177d9dc806}{I\+N\+FO}}, 
+\mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70ba9d5f1bb92a042f18899b99e4212bf848}{P\+A\+R\+T\+I\+C\+LE}}, 
+\mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70ba64aff51f4fe4e4f8d260971d2956eb5f}{P\+A\+R\+T\+I\+C\+I\+P\+LE}}, 
+\mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70ba7b750f0381c3208950135c110ccdf0e0}{S\+T\+EM}}, 
+\newline
+\mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70ba5374e1234e4d55af346d6ae6263ad573}{C\+O\+M\+P\+L\+EX}}, 
+\mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70ba85104bdfc210e74a6db65628895e6ff6}{I\+N\+F\+L\+E\+C\+T\+I\+ON}}, 
+\mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70bae882c913bbcef122c897360b753e9c51}{D\+E\+R\+I\+V\+A\+T\+I\+O\+N\+AL}}, 
+\mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70baecedb56d1405a60c6069f4a0139bdec5}{F\+A\+I\+L\+ED}}
+ \}
+\begin{DoxyCompactList}\small\item\em The state of the M\+B\+MA structure. \end{DoxyCompactList}\item 
+enum \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} \+: int \{ \newline
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2cad62d4f617d93bd85f54279ae25661491}{Compound\+::\+N\+O\+NE}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2ca30c9dd6cce1278dbaeabb9db6030855c}{Compound\+::\+NN}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2ca8eca1b2ee452c84ae94abdc96d727e0e}{Compound\+::\+NA}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2ca21a53ec31c4fa3e69ef57ad6112320a6}{Compound\+::\+NB}}, 
+\newline
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2cace70e2925d38e3c2f069cff767e9f067}{Compound\+::\+NP}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2ca3e90685832e942f2bb5c841fadc109c6}{Compound\+::\+NV}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2ca1d5b1c354f0eb07bf24cecf78e169b6f}{Compound\+::\+AN}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2cab877120970fe441ee02a4824df383c49}{Compound\+::\+AA}}, 
+\newline
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2ca51b73180ed9114342c9627219b1842a2}{Compound\+::\+AB}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2cabf8528f34ff6b6ced9a8f04f842de51e}{Compound\+::\+AP}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2ca215fd2c6c3ae8c58f584dc680987008e}{Compound\+::\+AV}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2cad03dfb28c236242af5ada031ced27c52}{Compound\+::\+BN}}, 
+\newline
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2ca8df43d714f19117f75508424a0113572}{Compound\+::\+BA}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2ca9e2ddbde9a889b121096d3d9641144fd}{Compound\+::\+BB}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2ca202977988f953aed108872d0db7ceb3d}{Compound\+::\+BP}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2caf26d596debf5011803f0c106eefdfc8a}{Compound\+::\+BV}}, 
+\newline
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2ca017b71d7a2eb1fc37ca0cbb1da1c02ef}{Compound\+::\+PN}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2ca9adb8a8fc739f0ac445f92448ea19543}{Compound\+::\+PA}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2cac9c158e72c9c2e9792bf60837b2ac527}{Compound\+::\+PB}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2caf37279af29c76a15ccb5a09e7c0fcf6c}{Compound\+::\+PP}}, 
+\newline
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2ca8ed7fd52ff3851cf7054f2ca5711d7e7}{Compound\+::\+PV}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2ca693f4ad0d5f48e447f53c9e6a837096b}{Compound\+::\+VN}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2ca43e38455be1943d9a7d271fb1ad3a53a}{Compound\+::\+VA}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2ca3636962a00745125d3720926e1641da9}{Compound\+::\+VB}}, 
+\newline
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2cae52f81fba2512809e9b8106056b60568}{Compound\+::\+VP}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2ca63ffe9f2b3b918a956ca36f8ffd6d98b}{Compound\+::\+VV}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2caa82665cca9be331e6511cd2ac6c62250}{Compound\+::\+N\+NN}}, 
+\mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2ca029a3e4e28944dc38e15a3d9597bab50}{Compound\+::\+N\+VN}}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string \mbox{\hyperlink{mbma__brackets_8h_adfa7a4b5fc351fb58447c5e347635148}{to\+String}} (const \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} \&)
+\item 
+std\+::ostream \& \mbox{\hyperlink{mbma__brackets_8h_ac92fe978db394fa40444cbafa50b7471}{operator$<$$<$}} (std\+::ostream \&, const \mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70b}{Status}} \&)
+\item 
+std\+::ostream \& \mbox{\hyperlink{mbma__brackets_8h_a280f9d06ed4562bdb77a4f64e30d42e8}{operator$<$$<$}} (std\+::ostream \&, const \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} \&)
+\item 
+std\+::ostream \& \mbox{\hyperlink{mbma__brackets_8h_adcb3ec3028aa399f2ffd73ddadbba1ba}{operator$<$$<$}} (std\+::ostream \&, const \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}} \&)
+\item 
+std\+::ostream \& \mbox{\hyperlink{mbma__brackets_8h_a3fd4d4f26bbce420a7597769563e74aa}{operator$<$$<$}} (std\+::ostream \&, const \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}} $\ast$)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70b}\label{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70b}} 
+\index{mbma\_brackets.h@{mbma\_brackets.h}!Status@{Status}}
+\index{Status@{Status}!mbma\_brackets.h@{mbma\_brackets.h}}
+\doxysubsubsection{\texorpdfstring{Status}{Status}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70b}{Status}}}
+
+
+
+The state of the M\+B\+MA structure. 
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{INFO@{INFO}!mbma\_brackets.h@{mbma\_brackets.h}}\index{mbma\_brackets.h@{mbma\_brackets.h}!INFO@{INFO}}}\mbox{\Hypertarget{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70ba748005382152808a72b1a9177d9dc806}\label{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70ba748005382152808a72b1a9177d9dc806}} 
+I\+N\+FO&The structure contains additional Information. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{PARTICLE@{PARTICLE}!mbma\_brackets.h@{mbma\_brackets.h}}\index{mbma\_brackets.h@{mbma\_brackets.h}!PARTICLE@{PARTICLE}}}\mbox{\Hypertarget{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70ba9d5f1bb92a042f18899b99e4212bf848}\label{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70ba9d5f1bb92a042f18899b99e4212bf848}} 
+P\+A\+R\+T\+I\+C\+LE&The structure describes a Particle. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{PARTICIPLE@{PARTICIPLE}!mbma\_brackets.h@{mbma\_brackets.h}}\index{mbma\_brackets.h@{mbma\_brackets.h}!PARTICIPLE@{PARTICIPLE}}}\mbox{\Hypertarget{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70ba64aff51f4fe4e4f8d260971d2956eb5f}\label{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70ba64aff51f4fe4e4f8d260971d2956eb5f}} 
+P\+A\+R\+T\+I\+C\+I\+P\+LE&The structure describes a Participle. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STEM@{STEM}!mbma\_brackets.h@{mbma\_brackets.h}}\index{mbma\_brackets.h@{mbma\_brackets.h}!STEM@{STEM}}}\mbox{\Hypertarget{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70ba7b750f0381c3208950135c110ccdf0e0}\label{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70ba7b750f0381c3208950135c110ccdf0e0}} 
+S\+T\+EM&The structure describes the Stem. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{COMPLEX@{COMPLEX}!mbma\_brackets.h@{mbma\_brackets.h}}\index{mbma\_brackets.h@{mbma\_brackets.h}!COMPLEX@{COMPLEX}}}\mbox{\Hypertarget{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70ba5374e1234e4d55af346d6ae6263ad573}\label{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70ba5374e1234e4d55af346d6ae6263ad573}} 
+C\+O\+M\+P\+L\+EX&The structure describes a Complex \mbox{\hyperlink{classRule}{Rule}}. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{INFLECTION@{INFLECTION}!mbma\_brackets.h@{mbma\_brackets.h}}\index{mbma\_brackets.h@{mbma\_brackets.h}!INFLECTION@{INFLECTION}}}\mbox{\Hypertarget{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70ba85104bdfc210e74a6db65628895e6ff6}\label{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70ba85104bdfc210e74a6db65628895e6ff6}} 
+I\+N\+F\+L\+E\+C\+T\+I\+ON&The structure describes an Inflection \mbox{\hyperlink{classRule}{Rule}}. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{DERIVATIONAL@{DERIVATIONAL}!mbma\_brackets.h@{mbma\_brackets.h}}\index{mbma\_brackets.h@{mbma\_brackets.h}!DERIVATIONAL@{DERIVATIONAL}}}\mbox{\Hypertarget{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70bae882c913bbcef122c897360b753e9c51}\label{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70bae882c913bbcef122c897360b753e9c51}} 
+D\+E\+R\+I\+V\+A\+T\+I\+O\+N\+AL&The structure describes a Drivational rule. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{FAILED@{FAILED}!mbma\_brackets.h@{mbma\_brackets.h}}\index{mbma\_brackets.h@{mbma\_brackets.h}!FAILED@{FAILED}}}\mbox{\Hypertarget{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70baecedb56d1405a60c6069f4a0139bdec5}\label{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70baecedb56d1405a60c6069f4a0139bdec5}} 
+F\+A\+I\+L\+ED&The structure describes a Failed state. \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{mbma__brackets_8h_adcb3ec3028aa399f2ffd73ddadbba1ba}\label{mbma__brackets_8h_adcb3ec3028aa399f2ffd73ddadbba1ba}} 
+\index{mbma\_brackets.h@{mbma\_brackets.h}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!mbma\_brackets.h@{mbma\_brackets.h}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}\hspace{0.1cm}{\footnotesize\ttfamily [1/4]}}
+{\footnotesize\ttfamily std\+::ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{std\+::ostream \&}]{,  }\item[{const \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}} \&}]{ }\end{DoxyParamCaption})}
+
+output a \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}} to a stream\mbox{\Hypertarget{mbma__brackets_8h_a3fd4d4f26bbce420a7597769563e74aa}\label{mbma__brackets_8h_a3fd4d4f26bbce420a7597769563e74aa}} 
+\index{mbma\_brackets.h@{mbma\_brackets.h}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!mbma\_brackets.h@{mbma\_brackets.h}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}\hspace{0.1cm}{\footnotesize\ttfamily [2/4]}}
+{\footnotesize\ttfamily std\+::ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{std\+::ostream \&}]{,  }\item[{const \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}} $\ast$}]{ }\end{DoxyParamCaption})}
+
+output a \mbox{\hyperlink{classBaseBracket}{Base\+Bracket}} to a stream\mbox{\Hypertarget{mbma__brackets_8h_a280f9d06ed4562bdb77a4f64e30d42e8}\label{mbma__brackets_8h_a280f9d06ed4562bdb77a4f64e30d42e8}} 
+\index{mbma\_brackets.h@{mbma\_brackets.h}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!mbma\_brackets.h@{mbma\_brackets.h}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}\hspace{0.1cm}{\footnotesize\ttfamily [3/4]}}
+{\footnotesize\ttfamily std\+::ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{std\+::ostream \&}]{,  }\item[{const \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} \&}]{ }\end{DoxyParamCaption})}
+
+output a Compound\+Type to a stream\mbox{\Hypertarget{mbma__brackets_8h_ac92fe978db394fa40444cbafa50b7471}\label{mbma__brackets_8h_ac92fe978db394fa40444cbafa50b7471}} 
+\index{mbma\_brackets.h@{mbma\_brackets.h}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!mbma\_brackets.h@{mbma\_brackets.h}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$()}{operator<<()}\hspace{0.1cm}{\footnotesize\ttfamily [4/4]}}
+{\footnotesize\ttfamily std\+::ostream\& operator$<$$<$ (\begin{DoxyParamCaption}\item[{std\+::ostream \&}]{,  }\item[{const \mbox{\hyperlink{mbma__brackets_8h_a67a0db04d321a74b7e7fcfd3f1a3f70b}{Status}} \&}]{ }\end{DoxyParamCaption})}
+
+output a Status to a stream\mbox{\Hypertarget{mbma__brackets_8h_adfa7a4b5fc351fb58447c5e347635148}\label{mbma__brackets_8h_adfa7a4b5fc351fb58447c5e347635148}} 
+\index{mbma\_brackets.h@{mbma\_brackets.h}!toString@{toString}}
+\index{toString@{toString}!mbma\_brackets.h@{mbma\_brackets.h}}
+\doxysubsubsection{\texorpdfstring{toString()}{toString()}}
+{\footnotesize\ttfamily std\+::string to\+String (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}} \&}]{ }\end{DoxyParamCaption})}
+
+return the string representation for the \mbox{\hyperlink{namespaceCompound_a28150158e9410153c560fdfa42f48e2c}{Compound\+::\+Type}}
