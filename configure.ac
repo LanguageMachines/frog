@@ -149,10 +149,15 @@ PKG_CHECK_MODULES([frogdata], [frogdata >= 0.15] )
 AC_CHECK_PROGS([DOXYGEN], [doxygen])
 if test -z "$DOXYGEN"; then
    AC_MSG_WARN([Doxygen not found - continue without Doxygen support])
-fi
-AC_CHECK_PROGS([DOT], [dot])
-if test -z "$DOT"; then
-   AC_MSG_ERROR([Doxygen needs dot, please install dot first])
+else
+   AC_CHECK_PROGS([DOT], [dot])
+   if test -z "$DOT"; then
+      AC_MSG_ERROR([Doxygen needs dot, please install dot first])
+   fi
+   AC_CHECK_PROGS([PDFLATEX], [pdflatex])
+   if test -z "$PDFLATEX"; then
+     AC_MSG_ERROR([Doxygen needs pdflatex program, it is part of TeX http://www.tug.org/texlive/acquire-netinstall.html])
+   fi
 fi
 AM_CONDITIONAL([HAVE_DOXYGEN], [test -n "$DOXYGEN"])
 
