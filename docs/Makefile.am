@@ -6,13 +6,10 @@ EXTRA_DIST = frog.1 mbma.1 mblem.1 ner.1
 if HAVE_DOXYGEN
 directory = $(top_srcdir)/docs/html
 
-#man_MANS = $(directory)
-
 $(directory): doxyfile.stamp
 
 doxyfile.stamp: Doxygen.cfg
 	$(DOXYGEN) $^
-#	cd latex && $(MAKE)
 	echo Timestamp > $@
 
 CLEANFILES = doxyfile.stamp
@@ -20,5 +17,4 @@ CLEANFILES = doxyfile.stamp
 all-local: doxyfile.stamp
 clean-local:
 	-rm -rf $(top_srcdir)/docs/html
-#	-rm -rf $(top_srcdir)/docs/latex
 endif
