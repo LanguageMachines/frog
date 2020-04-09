@@ -48,6 +48,8 @@ struct parseData;
 class TimerBlock;
 class timbl_result;
 
+/// \brief a virtual base class to add parser functionality. Needs specializions
+/// for e.g running a CKY parser or Alpino
 class ParserBase {
  public:
   explicit ParserBase( TiCC::LogStream* errlog, TiCC::LogStream* dbglog ):
@@ -81,6 +83,7 @@ class ParserBase {
   ParserBase( const ParserBase& ){}; // inhibit copies
 };
 
+/// \brief a specialization of ParserBase to run a CKY parser
 class Parser: public ParserBase {
  public:
   explicit Parser( TiCC::LogStream* errlog, TiCC::LogStream* dbglog ):

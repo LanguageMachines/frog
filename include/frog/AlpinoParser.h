@@ -59,6 +59,7 @@ std::ostream& operator<<( std::ostream& os, const dp_tree *node );
 
 std::vector<parsrel> alpino_server_parse( frog_data& fd );
 
+/// \brief a specialization of ParserBase to run a true AlpinoParser
 class AlpinoParser: public ParserBase {
  public:
   explicit AlpinoParser( TiCC::LogStream* errlog, TiCC::LogStream* dbglog ):

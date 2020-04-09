@@ -40,6 +40,7 @@
 #include "libfolia/folia.h"
 #include "frog/FrogData.h"
 
+/// \brief a helper class for Mwu. Stores needed information.
 class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );
  public:
@@ -65,6 +66,7 @@ class mwuAna {
 
 #define mymap2 std::multimap<std::string, std::vector<std::string> >
 
+/// \brief provide all functionality to detect MWU's
 class Mwu {
   friend std::ostream& operator<< (std::ostream&, const Mwu& );
  public:

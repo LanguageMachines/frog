@@ -41,12 +41,14 @@
 #include "ucto/tokenize.h"
 #include "frog/FrogData.h"
 
+/// \brief helper class to store a word + enrichment
 class tag_entry {
 public:
   std::string word;
   std::string enrichment;
 };
 
+/// \brief a base Class for interfacing to MBT taggers
 class BaseTagger {
  public:
   explicit BaseTagger( TiCC::LogStream *,

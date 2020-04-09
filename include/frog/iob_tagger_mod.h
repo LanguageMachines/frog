@@ -34,6 +34,7 @@
 
 #include "frog/tagger_base.h"
 
+/// \brief a specialization of Basetagger to tag IOB tags
 class IOBTagger: public BaseTagger {
  public:
   explicit IOBTagger( TiCC::LogStream *l, TiCC::LogStream *d =0 ):

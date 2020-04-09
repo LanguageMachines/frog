@@ -55,7 +55,7 @@ class CGNTagger;
 class IOBTagger;
 class NERTagger;
 
-  /// this class holds the runtime settings for Frog
+/// \brief this class holds the runtime settings for Frog
 class FrogOptions {
  public:
   bool doTok;                ///< should we run the tokenizer?
@@ -162,8 +162,8 @@ maximum of 500 words PER SENTENC. Which is already a lot!
   FrogOptions( const FrogOptions & );
 };
 
-/// This is the API class which can be used to set up Frog and run it on files,
-/// strings, TCP sockets or a terminal.
+/// \brief This is the API class which can be used to set up Frog and run it
+/// on files, strings, TCP sockets or a terminal.
 class FrogAPI {
  public:
   FrogAPI( FrogOptions&,

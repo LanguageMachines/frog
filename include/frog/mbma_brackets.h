@@ -71,6 +71,7 @@ namespace folia {
 
 class RulePart;
 
+/// \brief a base class for storing bracketted MBMA rules
 class BaseBracket {
  public:
  BaseBracket( CLEX::Type t, const std::vector<CLEX::Type>& R, int flag,
@@ -120,6 +121,8 @@ class BaseBracket {
   TiCC::LogStream& myLog;
 };
 
+/// \brief a specialization of BaseBracket to store endnodes (morphemes and
+/// inflection information
 class BracketLeaf: public BaseBracket {
 public:
   BracketLeaf( const RulePart&, int, TiCC::LogStream& );
@@ -158,6 +161,9 @@ private:
   std::string inflect;
 };
 
+/// \brief a specialization of BaseBracket to store intermediate nodes
+///
+/// provides functions to test and resolve rules
 class BracketNest: public BaseBracket {
  public:
   BracketNest( CLEX::Type, Compound::Type, int, TiCC::LogStream& );
