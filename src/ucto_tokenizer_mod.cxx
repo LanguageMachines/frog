@@ -152,19 +152,11 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
 	return false;
       }
       if ( !tokenizer->init( language_list ) ){
-        //fall back to rulesFile
-        rulesName = config.lookUp( "rulesFile", "tokenizer" );
-        if ( rulesName.empty() ) {
-            LOG << "no 'rulesFile' found in configuration and language list initialisation failed" << endl;
-            return false;
-        }
-      } else {
-        rulesName = ""; //so we don't trigger the next init block
-        tokenizer->setLanguage( language_list[0] );
+	return false;
       }
+      tokenizer->setLanguage( language_list[0] );
     }
-
-    if (!rulesName.empty() ){
+    else {
       rulesName = resolve_configdir( rulesName, config.configDir() );
       if ( !tokenizer->init( rulesName ) ){
 	return false;
