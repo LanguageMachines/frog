@@ -213,6 +213,10 @@ bool parse_args( TiCC::CL_Options& Opts,
   if ( !Opts.extract( 'c',  configFileName ) ){
     Opts.extract( "config",  configFileName );
   }
+  if ( !TiCC::isFile( configFileName ) ){
+    // maybe it is in the default dir?
+    configFileName = FrogAPI::defaultConfigDir() + configFileName;
+  }
   if ( configuration.fill( configFileName ) ){
     LOG << "config read from: " << configFileName << endl;
     string vers = configuration.lookUp( "version" );
