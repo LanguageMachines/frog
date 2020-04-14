@@ -257,6 +257,7 @@ bool parse_args( TiCC::CL_Options& Opts,
   else {
     configuration.setatt( "debug", "0" );
   }
+  bool old_mwu = Opts.extract("OLDMWU");
   if ( Opts.extract( "debug", opt_val ) ) {
     vector<string> vec = TiCC::split_at( opt_val, "," );
     for ( const auto& val : vec ){
@@ -350,6 +351,10 @@ bool parse_args( TiCC::CL_Options& Opts,
 	LOG << "option skip=p conflicts with --alpino"
 	    << endl;
 	return false;
+      }
+      else if ( options.doMwu && !old_mwu ){
+	LOG << " MWU disabled, because the Parser is deselected" << endl;
+	options.doMwu = false;
       }
       options.doParse = false;
     }
@@ -691,7 +696,7 @@ int main(int argc, char *argv[]) {
 			  "help,language:,retry,nostdout,ner-override:,"
 			  "debug:,keep-parser-files,version,threads:,alpino::,"
 			  "override:,KANON,TESTAPI,debugfile:,JSONin,JSONout::,"
-			  "allow-word-corrections");
+			  "allow-word-corrections,OLDMWU");
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
       // we already did show what we wanted.
