@@ -1133,7 +1133,7 @@ void FrogAPI::FrogInteractive(){
 string FrogAPI::Frogtostring( const string& s ){
   /// Parse a string, Frog it and return the result as a string.
   /*!
-    \param s: an UTF8 decoded string. May be multilined.
+    \param s: an UTF8 encoded string. May be multilined. May be FoLiA too.
     \return the results of frogging.
 
     Depending of the current frog settings the input can be interpreted as XML,
@@ -1153,7 +1153,7 @@ string FrogAPI::Frogtostringfromfile( const string& infilename ){
   /// Parse a file, Frog it and return the result as a string.
   /*!
     \param infilename The filename.
-    \return the results of frogging as an UTF8 string.
+    \return the results of frogging endoded in an UTF8 string.
 
     Depending of the current frog settings the inputfile can be interpreted as
     XML, and the output will be XML or tab separated.
@@ -1220,13 +1220,16 @@ frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
   /*!
     \param sent a list of Tokenizer::Token
     \param s_count holds the sentence count
-    \return a frog_data structure representing 1 totally frogged sentence.
+    \return a frog_data structure representing 1 totally frogged sentence. Will
+    be empty if we are done.
 
     This function is reentrant and should be called multiple times until the
-    whole 'sent' list is consument.
-    s_count is incremented for every returned frog_data element.
+    whole 'sent' list is consumed and an empty frog_data is returned.
 
-    All enabled Frog modules are run on the frog_data structure.
+    All enabled Frog modules are run on the \e sent and for every completed
+    sentence a frog_data structure is returned.
+
+    \e s_count is incremented for every returned frog_data element.
 
   */
   if ( options.debugFlag > 0 ){
@@ -2032,8 +2035,8 @@ folia::Document *FrogAPI::FrogFile( const string& infilename,
   /// generic function to Frog a file
   /*!
     \param infilename the input file-name
-    \param os the outputstream
-    \return a Frogged Document. May be empty if XML output is not required
+    \param os the outputstream for \e tabbed or \e JSON output
+    \return a FoLiA Document. May be empty if XML output is not required.
 
     This function autodetects FoLiA files vs. text files and will run Frog
     for the respective types.
