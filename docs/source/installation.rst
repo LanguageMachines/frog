@@ -20,11 +20,11 @@ Windows. LaMachine makes the installation of Frog straightforward;
 detailed instructions for the installation of LaMachine can be found
 here: http://proycon.github.io/LaMachine/.
 
-Manual compilation & installation
+Manual compilation and installation
 ---------------------------------
 
 The source code of Frog for manual installation can be obtained from
-Github. Because of file sizes and to cleanly separate code from data,
+GitHub. Because of file sizes and to cleanly separate code from data,
 the data and configuration files for the modules of Frog have been
 packaged separately.
 
@@ -42,7 +42,7 @@ the order specified here:
 
 -  ``ticcutils``\  [2]_ - A shared utility library
 
--  ``libfolia``\  [3]_- A library for the FoLiA format
+-  ``libfolia``\  [3]_ - A library for the FoLiA format
 
 -  ``ucto``\  [4]_ - A rule-based tokenizer
 
@@ -52,7 +52,7 @@ the order specified here:
 
 -  ``frogdata``\  [7]_ - Datafiles needed to run Frog
 
-You will also need the following 3rd party dependencies:
+You will also need the following third party dependencies:
 
 -  **icu** - A C++ library for Unicode and Globalization support. On
    Debian/Ubuntu systems, install the package ``libicu-dev``.
@@ -63,13 +63,14 @@ You will also need the following 3rd party dependencies:
 -  **textcat** - A library for language detection. On Debian/Ubuntu systems install the
    package ``libexttextcat-dev``.
 
--  A sane build environment with a C++ compiler (e.g. gcc or clang),
+-  A sane build environment with a C++ compiler (e.g. GCC or Clang),
    autotools, autoconf-archive, libtool, pkg-config
 
 The actual compilation proceeds by entering the Frog directory and
 issuing the following commands:
 
 ::
+   
     $ bash bootstrap.sh
     $ ./configure
     $ make
@@ -92,15 +93,16 @@ syntactic information to words.
 
 We give a brief explanation on running Frog to get you started quickly, followed by a more elaborate description of
 using Frog and how to manipulate the settings for each of the separate
-modules in Chapter :[modulesDescription].
+modules in Chapter: :doc:`Frog Modules<moduleDetails>`.
 
 Frog is developed as a command line tool. We assume the reader already
 has at least basic command line skills.
 
 Typing ``frog -h`` on the command line results in a brief overview of all
 available command line options. Frog is typically run on an input
-document, which is specified using the -t option for plain text
-documents, or -x for documents in the FoLiA XML format. It is, however,
+document, which is specified using the -t option for plain
+text, --JSONin for
+documents in JSON format, or -x for documents in the FoLiA XML format. It is, however,
 also possible to run it interactively or as a server. We show an example
 of the output of Frog when processing the contents of a plain-text file
 ``test.txt``, containing just the sentence *In ’41 werd aan de stamkaart
@@ -108,9 +110,9 @@ een z.g. inlegvel toegevoegd.*
 
 We run Frog as follows: $ frog -t test.txt
 
-Frog will present the output as shown in example [ex-frog-out] below:
+Frog will present the output as shown in the example below:
 
-[ex-frog-out]
+
 
 +----+------------+-----------+--------------------+------------------------------+----------+---+------+---+------+
 | 1  |      2     |   3       |   4                |     5                        |     6    | 7 |   8  | 9 |   10 |
@@ -178,7 +180,7 @@ contain every detail available to Frog.
 
 For full output, you will want to instruct Frog to output to a FoLiA XML
 file. This is done using the -X option, followed by the name of the
-output file. https://github.com/proycon/pynlpl, supports both Python 2 and Pytho
+output file. 
 
 To run Frog in this way we execute: $ frog -t test.txt -X test.xml The
 result is a file in FoLiA XML format [FOLIA]_ that
@@ -186,12 +188,10 @@ contains all information in a more structured and verbose fashion. More
 information about this file format, including a full specification,
 programming libraries, and other tools, can be found on
 https://proycon.github.io/folia. We show an example of the XML structure
-for the token *aangesneden* in example [ex-xml-tok] and explain the
-details of this structure in section [sec-usage]. Each of these layers
+for the token *aangesneden* in the XML example below and explain the
+details of this structure in Section :doc:`Usage<usage>`. Each of these layers
 of linguistic output will be discussed in more detail in the next
 chapters.
-
-[ex-xml-tok]
 
 ::
 
@@ -223,19 +223,20 @@ Input and Output options
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 By default the output of Frog is written to screen (i.e. standard
-output). There are two options for outputting to file (which can also be https://github.com/proycon/pynlpl, supports both Python 2 and Pytho
-called simultaneously):
+output). There are two options for writing the output to file:
 
 -  ``-o <filename>`` – Writes columned (TAB delimited) data to file.
 
 -  ``-X <filename>`` – Writes FoLiA XML to file.
-
-We already saw the input option -t <filename> for plain-text files. It
-is also possible to read FoLiA XML documents instead, using the -x
-<filename> option.
+   
+We already saw the input option `` -t <filename>`` for plain-text files. It
+is also possible to read FoLiA XML documents instead, using the `` -x
+<filename>`` option. Frog also allows for inputfiles and outputfiles in
+JSON format, when using the options ``--JSONin`` or
+``--JSONout`` respectively. 
 
 Besides input of a single plain text file, Frog also accepts a directory
-of plain text files as input –testdir=<directory> , which can also be
+of plain text files (or JSON format) as input –testdir=<directory> , which can also be
 written to an output directory with parameter –outputdir=<dir>. The
 FoLiA equivalent for –outputdir is –xmldir. To read multiple FoLiA
 documents, instead of plain-text documents, from a directory, use -x
@@ -309,7 +310,8 @@ our LaMachine distribution.
       #TODO: Further processing per word
 
 Do note that Python users may prefer using the ``python-frog`` binding
-instead, which will be described in Section :[pythonfrog]:. This binds
+instead, which will be described in the Chapter :doc:`Python Frog
+<pythonfrog>`. This binds
 with Frog natively without using a client/server model and therefore has
 better performance.
 
