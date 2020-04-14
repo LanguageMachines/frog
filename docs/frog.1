@@ -30,7 +30,7 @@ to select the 'config-file' for an installed language 'lang'
 set debug level per module, indicated by a single letter:
 Tagger (T), Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a),
 Chunker (c), Multi\(hyWord Units (m), Named Entity Recognition (n),
-or Parser (p). Diffrent modules must be separated by kommas.
+or Parser (p). Different modules must be separated by commas.
 
 (e.g. \-\-debug=l5,n3 sets the level for the Lemmatizer to 5 and for the NER
 to 3 )
@@ -80,7 +80,7 @@ further they will be handled as that language.
 
 .BR \-n
 .RS
-assume inputfile to hold one sentence per line. (newline separators)
+assume inputfile to have one sentence per line. (newline separators)
 
 Very useful when running interactive, otherwise an empty line is needed to
 signal end of input.
@@ -150,7 +150,7 @@ Run Frog as a server on 'port'
 process 'file'.
 
 \-t can be omitted. Frog will run on any <file> found on the command-line.
-Wildcards are allowed too. When NO files are specied, Frog will in
+Wildcards are allowed too. When NO files are specied, Frog will start in
 interactive mode.
 .RE
 
@@ -164,7 +164,7 @@ is provided, all '.xml' files in 'dir' will be processed as FoLia XML.
 
 .BR \-X " <xmlfile>"
 .RS
-When 'xmlfile' is specifies, creae a FoLiA XML output file with that name.
+When 'xmlfile' is specified, create a FoLiA XML output file with that name.
 
 When 'xmlfile' is empty, generate XML output for every inputfile.
 .RE
@@ -234,7 +234,7 @@ inputfile(s) with '.xml' appended. (Except when it already ends with '.xml')
 When
 .BR \-X
 for FoLia is given, use 'id' to give the doc an ID. The default is an xml:id
-based on the filename
+based on the filename.
 .RE
 
 .BR \-\-allow\-word\-corrections
@@ -285,7 +285,7 @@ only introduce text on <w>, AND remove all text from higher levels
 
 .BR \-\-override "=<section>.<parameter>=<value>"
 .RS
-Overide a parameter from the configuration file with a different value.
+Override a parameter from the configuration file with a different value.
 
 This option may be repeated several times.
 .RE
