@@ -1,4 +1,4 @@
-.TH frog 1 "2020 mar 23"
+.TH frog 1 "2020 apr 14"
 
 .SH NAME
 frog \- Dutch Natural Language Toolkit
@@ -18,7 +18,11 @@ add Named Entities and will assign a dependency graph to each sentence.
 
 .BR \-c " <file>  or " \-\-config =<file>
 .RS
-set the configuration using 'file'
+set the configuration using 'file'.
+
+you can use
+.B -c lang/config-file
+to select the 'config-file' for an installed language 'lang'
 .RE
 
 .BR \-\-debug =<modele><level>,...
@@ -59,14 +63,19 @@ give some help
 
 .BR \-\-language= <comma\ separated\ list\ of\ languages>
 .RS
-Set the languages to work on. This parameter is also passed to the tokenizer.
+Set the languages to work on. This parameter is passed to the tokenizer.
 The strings are assumed to be ISO 639\-2 codes.
 
 The first language in the list will be the default, unspecified languages are
-asumed to be that default.
+asumed to be of that default.
 
 e.g. \-\-language=nld,eng,por
 means: detect Dutch, English and Portuguese, with Dutch being the default.
+
+.B IMPORTANT
+Frog can at the moment handle only one language at a time, as determined by the
+config file. So other languages mentioned here will be tokenized correctly, but
+further they will be handled as that language.
 .RE
 
 .BR \-n
