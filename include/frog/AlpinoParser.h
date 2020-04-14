@@ -40,6 +40,7 @@
 
 class frog_data;
 
+/// \brief a class to store all the information from an Alpino XML tree we need.
 struct dp_tree {
   int id;
   int begin;
