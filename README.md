@@ -2,8 +2,8 @@
 
 # Frog - A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
 
-    Copyright 2006-2019
-    Bertjan Busser, Antal van den Bosch,  Ko van der Sloot, Maarten van Gompel
+    Copyright 2006-2020
+    Ko van der Sloot, Maarten van Gompel, Antal van den Bosch, Bertjan Busser
 
     Centre for Language and Speech Technology, Radboud University Nijmegen
     Induction of Linguistic Knowledge Research Group, Tilburg University
