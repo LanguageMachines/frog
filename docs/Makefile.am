@@ -1,5 +1,5 @@
 man1_MANS = frog.1 mbma.1 mblem.1 ner.1
-EXTRA_DIST = frog.1 mbma.1 mblem.1 ner.1
+EXTRA_DIST = frog.1 mbma.1 mblem.1 ner.1 Doxygen.cfg
 
 # https://stackoverflow.com/questions/10682603/generating-and-installing-doxygen-documentation-with-autotools
 
