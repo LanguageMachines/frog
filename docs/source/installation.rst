@@ -159,7 +159,7 @@ contain every detail available to Frog.
     square brackets
 
 5. PoS tag
-    The Part-of-Speech tag according to the CGN tagset [POS2004]_.
+    The Part-of-Speech tag according to the CGN tagset [VanEynde2004]_.
 
 6. Confidence
     in the PoS tag, a number between 0 and 1, representing the
@@ -178,6 +178,7 @@ contain every detail available to Frog.
 10. Dependency relation type
     of the word with head word
 
+    
 For full output, you will want to instruct Frog to output to a FoLiA XML
 file. This is done using the -X option, followed by the name of the
 output file. 
@@ -189,9 +190,11 @@ information about this file format, including a full specification,
 programming libraries, and other tools, can be found on
 https://proycon.github.io/folia. We show an example of the XML structure
 for the token *aangesneden* in the XML example below and explain the
-details of this structure in Section :doc:`Usage<usage>`. Each of these layers
-of linguistic output will be discussed in more detail in the next
-chapters.
+details of this structure in the  :doc: `Folia
+Documentation<https://folia.readthedocs.io/en/latest/introduction.html#annotation-types>`. Each
+of the layers
+of linguistic output will be discussed in more detail in the
+Chapter :doc: `Frog Modules<moduleDetails>`.
 
 ::
 
@@ -229,11 +232,134 @@ output). There are two options for writing the output to file:
 
 -  ``-X <filename>`` – Writes FoLiA XML to file.
    
-We already saw the input option `` -t <filename>`` for plain-text files. It
-is also possible to read FoLiA XML documents instead, using the `` -x
-<filename>`` option. Frog also allows for inputfiles and outputfiles in
+We already saw the input option ``-t <filename>``  for plain-text files. It
+is also possible to read FoLiA XML documents instead, using the  `` -x
+<filename>``  option. Frog also allows for inputfiles and outputfiles in
 JSON format, when using the options ``--JSONin`` or
-``--JSONout`` respectively. 
+``--JSONout`` respectively. We show an example of JSON input and output
+below. Each linguistic layer in the output is presented as a key-value pair for each
+detected token in the text input.
+
+
+::
+   
+JSON input:
+[{"sentence":"Dit nog zo'n boeiende test."}]
+
+
+JSON output:
+[
+ {
+   "chunking": {
+     "confidence": 1.0,
+     "tag": "B-NP"
+   },
+   "index": 1,
+   "lemma": "dit",
+   "morph": "[dit]",
+   "parse": {
+     "parse_index": 2,
+     "parse_role": "su"
+   },
+   "pos": {
+     "confidence": 0.7770847770847771,
+     "tag": "VNW(aanw,pron,stan,vol,3o,ev)"
+   },
+   "ucto": {
+     "new_paragraph": true,
+     "token": "WORD"
+   },
+   "word": "Dit"
+ },
+ {
+   "chunking": {
+     "confidence": 1.0,
+     "tag": "B-VP"
+   },
+   "index": 2,
+   "lemma": "zijn",
+   "morph": "[zijn]
+   "parse": {
+     "parse_index": 0,
+     "parse_role": "ROOT"
+   },
+   "pos": {
+     "confidence": 0.9998905788379473,
+     "tag": "WW(pv,tgw,ev)"
+   },
+   "ucto": {
+     "token": "WORD"
+   },
+   "word": "is"
+ },
+ {
+   "chunking": {
+     "confidence": 1.0,
+     "tag": "B-NP"
+   },
+   "index": 3,
+   "lemma": "een",
+   "morph": "[een]",
+   "parse": {
+     "parse_index": 4,
+     "parse_role": "det"
+   },
+   "pos": {
+     "confidence": 0.9991126885536823,
+     "tag": "LID(onbep,stan,agr)"
+   },
+   "ucto": {
+     "token": "WORD"
+   },
+   "word": "een"
+ },
+ {
+   "chunking": {
+     "confidence": 1.0,
+     "tag": "I-NP"
+   },
+   "index": 4,
+   "lemma": "test",
+   "morph": "[test]",
+   "parse": {
+     "parse_index": 2,
+     "parse_role": "predc"
+   },
+   "pos": {
+     "confidence": 0.9030552291421856,
+     "tag": "N(soort,ev,basis,zijd,stan)"
+   },
+   "ucto": {
+     "space": false,
+     "token": "WORD"
+   },
+   "word": "test"
+ },
+ },
+ {
+   "chunking": {
+     "confidence": 1.0,
+     "tag": "O"
+   },
+   "index": 5,
+   "lemma": ".",
+   "morph": "[.]",
+   "parse": {
+     "parse_index": 4,
+     "parse_role": "punct"
+   },
+   "pos": {
+     "confidence": 1.0,
+     "tag": "LET()"
+   },
+   "ucto": {
+     "token": "PUNCTUATION"
+   },
+   "word": "."
+ }
+]
+
+
 
 Besides input of a single plain text file, Frog also accepts a directory
 of plain text files (or JSON format) as input –testdir=<directory> , which can also be
@@ -359,6 +485,3 @@ better performance.
 
 
 
-
-
-.. [POS2004] Van Eynde, Frank. 2004. Part of speech tagging en lemmatisering van het corpus gesproken nederlands. Technical report, Centrum voor Computerlinguıstiek, KU Leuven, Belgium.

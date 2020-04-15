@@ -36,7 +36,7 @@ confidentiality threshold [VandenBosch+06]_.
    multi-modal dialogues [brone2015insight]_;
 
 -  The SUBTLEX-NL word frequency database was based on an automatically
-   analysed 44-million word corpus of Dutch subtitles of movies and
+   analyseds 44-million word corpus of Dutch subtitles of movies and
    television shows [subtlex]_.
 
 Feature generation for text filtering and Natural Language Processing
