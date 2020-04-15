@@ -902,10 +902,10 @@ void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
 	  while ( toks.size() > 0 ){
 	    frog_data sent = frog_sentence( toks, 1 );
 	    show_results( output_stream, sent );
+	    timers.tokTimer.start();
+	    toks = tokenizer->tokenize_line_next();
+	    timers.tokTimer.stop();
 	  }
-	  timers.tokTimer.start();
-	  toks = tokenizer->tokenize_line_next();
-	  timers.tokTimer.stop();
 	}
       }
       else {
@@ -1537,6 +1537,7 @@ void FrogAPI::output_JSON( ostream& os,
       out_json.push_back( part );
     }
   }
+  DBG << "spitting out JSON:" << out_json << endl;
   os << std::setw(pp_val) << out_json << endl;
 }
 
