@@ -35,7 +35,9 @@
 #include <set>
 #include <string>
 #include <ostream>
+#include <fstream>
 #include "ticcutils/SocketBasics.h"
+#include "ticcutils/FileUtils.h"
 #include "config.h"
 
 #include <sys/types.h>
@@ -120,4 +122,14 @@ string check_server( const string& host,
     outline += "\nmessage: (" + client.getMessage() + ")" ;
   }
   return outline;
+}
+
+tmp_stream::tmp_stream( const string& prefix ){
+  temp_name = TiCC::tempname(prefix);
+  _os = new ofstream( temp_name );
+}
+
+tmp_stream::~tmp_stream(){
+  delete _os;
+  remove( temp_name.c_str() );
 }

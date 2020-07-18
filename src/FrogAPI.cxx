@@ -866,11 +866,10 @@ void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
         if ( options.debugFlag > 5 ){
 	  DBG << "received data [" << result << "]" << endl;
 	}
-	string tmp_file = TiCC::tempname("frog");
-	ofstream os( tmp_file );
-	os << result << endl;
-	os.close();
-	folia::Document *xml = run_folia_engine( tmp_file, output_stream );
+	tmp_stream ts( "frog" );
+	ts.os() << result << endl;
+	ts.os().close();
+	folia::Document *xml = run_folia_engine( ts.tmp_name(), output_stream );
 	if ( xml && options.doXMLout ){
 	  xml->set_canonical(options.doKanon);
 	  output_stream << xml;
@@ -1142,11 +1141,10 @@ string FrogAPI::Frogtostring( const string& s ){
   if ( s.empty() ){
     return s;
   }
-  string tmp_file = TiCC::tempname("frog");
-  ofstream os( tmp_file );
-  os << s << endl;
-  os.close();
-  return Frogtostringfromfile( tmp_file );
+  tmp_stream ts( "frog" );
+  ts.os() << s << endl;
+  ts.os().close();
+  return Frogtostringfromfile( ts.tmp_name() );
 }
 
 string FrogAPI::Frogtostringfromfile( const string& infilename ){

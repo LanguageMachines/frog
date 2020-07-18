@@ -83,5 +83,15 @@ public:
   }
 };
 
+class tmp_stream {
+public:
+  tmp_stream( const std::string& );
+  ~tmp_stream();
+  std::ofstream& os() { return *_os; };
+  const std::string tmp_name() { return temp_name; };
+private:
+  std::string temp_name;
+  std::ofstream *_os;
+};
 
 #endif
