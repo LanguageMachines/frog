@@ -868,7 +868,7 @@ void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
 	}
 	tmp_stream ts( "frog" );
 	ts.os() << result << endl;
-	ts.os().close();
+	ts.close();
 	folia::Document *xml = run_folia_engine( ts.tmp_name(), output_stream );
 	if ( xml && options.doXMLout ){
 	  xml->set_canonical(options.doKanon);
@@ -1143,7 +1143,7 @@ string FrogAPI::Frogtostring( const string& s ){
   }
   tmp_stream ts( "frog" );
   ts.os() << s << endl;
-  ts.os().close();
+  ts.close();
   return Frogtostringfromfile( ts.tmp_name() );
 }
 

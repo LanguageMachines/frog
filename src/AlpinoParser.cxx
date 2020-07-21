@@ -806,14 +806,18 @@ vector<parsrel> AlpinoParser::alpino_parse( frog_data& fd ){
   cerr << "calling Alpino input:" << fd.sentence() << endl;
 #endif
   vector<parsrel> result;
-  string input_file = TiCC::tempname("alpino-parse.txt.");
-  string tmp_dir = TiCC::dirname(input_file)+"/";
+#ifdef DEBUG_ALPINO
+  tmp_stream temp_stream( "alpino-parse.txt.", true );
+#else
+  tmp_stream temp_stream( "alpino-parse.txt." );
+#endif
+  string input_file = temp_stream.tmp_name();
+  string tmp_dir = TiCC::dirname(input_file) +"/";
   string tmp_str = input_file.substr( input_file.size()-6 );
+  //    Alpino will use the tmp_str part for its output filename.
   string txt = tmp_str + "|" + fd.sentence();
-  //    Alpino will use tmp_str for the output filename.
-  ofstream os( input_file );
-  os << txt;
-  os.close();
+  temp_stream.os() << txt;
+  temp_stream.close();
   string parseCmd = "Alpino -veryfast -flag treebank " + tmp_dir +
     " end_hook=xml -parse <  " + input_file + " -notk > /dev/null 2>&1";
 #ifdef DEBUG_ALPINO
@@ -824,9 +828,6 @@ vector<parsrel> AlpinoParser::alpino_parse( frog_data& fd ){
     cerr << "Alpino failed: RES = " << res << " : " << strerror(res) << endl;
     return result;
   }
-#ifndef DEBUG_ALPINO
-  TiCC::erase( input_file );
-#endif
   string xml_file = tmp_dir + tmp_str + ".xml";
   xmlDoc *xmldoc = xmlReadFile( xml_file.c_str(), 0, XML_PARSE_NOBLANKS );
   result = extract_dp(xmldoc,fd);
