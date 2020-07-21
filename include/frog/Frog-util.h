@@ -34,6 +34,7 @@
 
 #include <set>
 #include <ostream>
+#include <fstream>
 #include <string>
 
 #include "ticcutils/Timer.h"
@@ -85,13 +86,15 @@ public:
 
 class tmp_stream {
 public:
-  tmp_stream( const std::string& );
+  tmp_stream( const std::string&, bool = false );
   ~tmp_stream();
+  void close() { _os->close(); };
   std::ofstream& os() { return *_os; };
-  const std::string tmp_name() { return temp_name; };
+  const std::string tmp_name() { return _temp_name; };
 private:
-  std::string temp_name;
+  std::string _temp_name;
   std::ofstream *_os;
+  bool _keep;
 };
 
 #endif

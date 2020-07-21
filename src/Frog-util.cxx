@@ -124,12 +124,15 @@ string check_server( const string& host,
   return outline;
 }
 
-tmp_stream::tmp_stream( const string& prefix ){
-  temp_name = TiCC::tempname(prefix);
-  _os = new ofstream( temp_name );
+tmp_stream::tmp_stream( const string& prefix, bool keep ){
+  _temp_name = TiCC::tempname(prefix);
+  _os = new ofstream( _temp_name );
+  _keep = keep;
 }
 
 tmp_stream::~tmp_stream(){
   delete _os;
-  remove( temp_name.c_str() );
+  if ( !_keep ){
+    remove( _temp_name.c_str() );
+  }
 }
