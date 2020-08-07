@@ -38,9 +38,20 @@
 #include "ticcutils/LogStream.h"
 #include "frog/clex.h"
 
-enum Status { INFO, PARTICLE, PARTICIPLE, STEM, COMPLEX, INFLECTION,
-	      DERIVATIONAL, FAILED };
+/// The state of the MBMA structure
+enum Status {
+  INFO,          ///< The structure contains additional Information
+  PARTICLE,      ///< The structure describes a Particle
+  PARTICIPLE,    ///< The structure describes a Participle
+  STEM,          ///< The structure describes the Stem
+  COMPLEX,       ///< The structure describes a Complex Rule
+  INFLECTION,    ///< The structure describes an Inflection Rule
+  DERIVATIONAL,  ///< The structure describes a Drivational rule
+  FAILED         ///< The structure describes a Failed state
+};
 
+/// a range off all 'possible' compound types. Not all of these ae actively
+/// assigned
 namespace Compound {
   enum Type : int {
     // NB and PB compounds don't exist
@@ -60,6 +71,7 @@ namespace folia {
 
 class RulePart;
 
+/// \brief a base class for storing bracketted MBMA rules
 class BaseBracket {
  public:
  BaseBracket( CLEX::Type t, const std::vector<CLEX::Type>& R, int flag,
@@ -109,6 +121,8 @@ class BaseBracket {
   TiCC::LogStream& myLog;
 };
 
+/// \brief a specialization of BaseBracket to store endnodes (morphemes and
+/// inflection information
 class BracketLeaf: public BaseBracket {
 public:
   BracketLeaf( const RulePart&, int, TiCC::LogStream& );
@@ -116,11 +130,26 @@ public:
   BracketLeaf *clone() const;
   icu::UnicodeString put( bool = true ) const;
   icu::UnicodeString pretty_put() const;
-  icu::UnicodeString morpheme() const { return morph; };
-  std::string inflection() const { return inflect; };
-  std::string original() const { return orig; };
-  int infixpos() const { return ifpos; };
-  bool isglue() const { return glue; };
+  icu::UnicodeString morpheme() const {
+    /// return the value of the morpheme
+    return morph;
+  };
+  std::string inflection() const {
+    /// return the value of the inflexion (if any)
+    return inflect;
+  };
+  std::string original() const {
+    /// return the original value befor processing
+    return orig;
+  };
+  int infixpos() const {
+    /// return the position of an infix
+    return ifpos;
+  };
+  bool isglue() const {
+    /// return tre if this is a glue tag
+    return glue;
+  };
   folia::Morpheme *createMorpheme( folia::Document * ) const;
   folia::Morpheme *createMorpheme( folia::Document *,
 				   std::string&, int& ) const;
@@ -132,6 +161,9 @@ private:
   std::string inflect;
 };
 
+/// \brief a specialization of BaseBracket to store intermediate nodes
+///
+/// provides functions to test and resolve rules
 class BracketNest: public BaseBracket {
  public:
   BracketNest( CLEX::Type, Compound::Type, int, TiCC::LogStream& );

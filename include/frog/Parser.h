@@ -48,6 +48,8 @@ struct parseData;
 class TimerBlock;
 class timbl_result;
 
+/// \brief a virtual base class to add parser functionality. Needs specializions
+/// for e.g running a CKY parser or Alpino
 class ParserBase {
  public:
   explicit ParserBase( TiCC::LogStream* errlog, TiCC::LogStream* dbglog ):
@@ -81,6 +83,7 @@ class ParserBase {
   ParserBase( const ParserBase& ){}; // inhibit copies
 };
 
+/// \brief a specialization of ParserBase to run a CKY parser
 class Parser: public ParserBase {
  public:
   explicit Parser( TiCC::LogStream* errlog, TiCC::LogStream* dbglog ):
@@ -98,9 +101,8 @@ class Parser: public ParserBase {
   std::vector<std::string> createPairInstances( const parseData& );
   std::vector<std::string> createDirInstances( const parseData& );
   std::vector<std::string> createRelInstances( const parseData& );
-  void timbl_server( const std::string&,
-		     const std::vector<std::string>&,
-		     std::vector<timbl_result>& );
+  std::vector<timbl_result> timbl_server( const std::string&,
+					  const std::vector<std::string>& );
   std::string maxDepSpanS;
   size_t maxDepSpan;
   Timbl::TimblAPI *pairs;
@@ -111,5 +113,6 @@ class Parser: public ParserBase {
   std::string _rels_base;
 };
 
-void appendParseResult( frog_data&, const std::vector<parsrel>& );
+void appendParseResult( frog_data& fd,
+			const std::vector<parsrel>& res );
 #endif

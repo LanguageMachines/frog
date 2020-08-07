@@ -39,6 +39,7 @@
 #include "timbl/TimblAPI.h"
 #include "frog/FrogData.h"
 
+/// \brief Helper class for Mblem. A datastructure to hold lemma/tag information
 class mblemData {
  public:
  mblemData( const std::string& l, const std::string& t ):
@@ -51,6 +52,7 @@ class mblemData {
   std::string tag;
 };
 
+/// \brief provide all functionality to run a Timbl for lemmatization
 class Mblem {
  public:
   explicit Mblem( TiCC::LogStream *, TiCC::LogStream * =0 );

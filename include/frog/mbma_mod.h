@@ -50,6 +50,7 @@ namespace Timbl{
   class TimblAPI;
 }
 
+/// \brief provide all functionality to run a Timbl for Morphological Analyzis
 class Mbma {
  public:
   explicit Mbma( TiCC::LogStream *, TiCC::LogStream * =0 );

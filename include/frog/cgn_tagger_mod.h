@@ -35,6 +35,7 @@
 #include "frog/FrogData.h"
 #include "frog/tagger_base.h"
 
+/// \brief a specialization of Basetagger to tag CGN tags
 class CGNTagger: public BaseTagger {
  public:
   explicit CGNTagger( TiCC::LogStream *l, TiCC::LogStream *d = 0 ):

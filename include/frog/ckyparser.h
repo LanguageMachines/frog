@@ -38,6 +38,7 @@
 
 enum dirType { ROOT, LEFT, RIGHT, ERROR };
 
+/// \brief base class to hold parse constraints
 class Constraint {
  public:
   enum ConstraintType { Incoming, Dependency, Direction };
@@ -61,6 +62,7 @@ class Constraint {
 std::ostream& operator<<( std::ostream& os, const Constraint& c );
 std::ostream& operator<<( std::ostream& os, const Constraint* c );
 
+/// \brief specialization of Constraint to hold a relation
 class HasIncomingRel: public Constraint {
  public:
  HasIncomingRel( int i, const std::string& r, double w ):
@@ -73,6 +75,7 @@ class HasIncomingRel: public Constraint {
   std::string relType;
 };
 
+/// \brief specialization of Constraint to hold a dependency
 class HasDependency: public Constraint {
  public:
  HasDependency( int i, int h, const std::string& r, double w ):
@@ -87,6 +90,7 @@ class HasDependency: public Constraint {
   int headType;
 };
 
+/// \brief specialization of Constraint to hold the direction of a Dependency
 class DependencyDirection: public Constraint {
  public:
  DependencyDirection( int i, const std::string& d, double w ):
@@ -110,6 +114,7 @@ class DependencyDirection: public Constraint {
   dirType direction;
 };
 
+/// \brief structure to hold best fit so far
 class SubTree {
  public:
  SubTree( double score, int r, const std::string& label ):
@@ -128,11 +133,13 @@ class SubTree {
   std::string _edgeLabel;
 };
 
+/// \brief helper structure to hold a head and a relation
 struct parsrel {
   std::string deprel;
   int head;
 };
 
+/// \brief the class to hold left and right results
 class chart_rec {
  public:
   SubTree l_True;
@@ -141,6 +148,7 @@ class chart_rec {
   SubTree r_False;
 };
 
+/// \brief The class that can run the parser
 class CKYParser {
 public:
   CKYParser( size_t, const std::vector<const Constraint*>&, TiCC::LogStream* );

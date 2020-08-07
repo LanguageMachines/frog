@@ -1,15 +1,14 @@
 .. _frogData:
 
 
-
-  Frog in practice
+Frog in practice
 ----------------
 
 Frog has been used in research projects mostly because of its capacity
-to process Dutch texts efficiently and analyze the texts sufficiently
+to process Dutch texts efficiently and analyse the texts sufficiently
 accurately. The purposes range from corpus construction to linguistic
 research and natural language processing and text analytics
-applications. We provide a overview of work reporting to use Frog, in
+applications. We provide an overview of work reporting to use Frog, in
 topical clusters.
 
 Corpus construction
@@ -37,7 +36,7 @@ confidentiality threshold [VandenBosch+06]_.
    multi-modal dialogues [brone2015insight]_;
 
 -  The SUBTLEX-NL word frequency database was based on an automatically
-   analyzed 44-million word corpus of Dutch subtitles of movies and
+   analyseds 44-million word corpus of Dutch subtitles of movies and
    television shows [subtlex]_.
 
 Feature generation for text filtering and Natural Language Processing

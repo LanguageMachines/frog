@@ -99,11 +99,11 @@ void usage( ) {
        << "\t -e <encoding>          specify encoding of the input (default UTF-8)\n"
        << "\t -t <testfile>          Run frog on this file\n"
        << "\t -x <testfile>          Run frog on this FoLiA XML file. Or the files from 'testdir'\n"
-       << "\t --textclass=<cls>      use the specified class to search for text in the the FoLiA docs. (default 'current').\n"
+       << "\t --textclass=<cls>      use the specified class to search for text in the the FoLiA docs. (default 'current'). \n"
        << "\t                        the same value is used for output too.\n"
+       << "\t                        Deprecated! use --inputclass and --outputclass.\n"
        << "\t --inputclass=<cls>     use the specified class to search for text in the the FoLiA docs. (default 'current') \n"
        << "\t --outputclass=<cls>    use the specified class to output text in the the FoLia docs. (default 'inputclass') \n"
-       << "\t --allow-word-corrections         allow the tokenizer to correct <w> nodes. (FoLiA only)\n"
        << "\t --testdir=<directory>  All files in this dir will be tested\n"
        << "\t --uttmarker=<mark>     utterances are separated by 'mark' symbols (default none)\n"
        << "\t -n                     Assume input file to hold one sentence per line\n"
@@ -111,6 +111,7 @@ void usage( ) {
        << "\t                        already done files are skipped. (detected on the basis of already existing output files)\n"
        << "\t --max-parser-tokens=<n> inhibit parsing when a sentence contains over 'n' tokens. (default: 500, needs already 16Gb of memory!)\n"
     //       << "\t -Q                     Enable quote detection in tokenizer.\n"
+       << "\t --JSONin               The input is JSON. Implies JSONout too! (server mode only)\n"
        << "\t -T or --textredundancy=[full|minimal|none]\n"
        << "\t                        Set the text redundancy level in the tokenizer for text nodes in FoLiA output: \n"
        << "\t                        'full' - add text to all levels: <p> <s> <w> etc.\n"
@@ -124,21 +125,25 @@ void usage( ) {
        << "\t                        (as specified in the frog configuration file \n"
        << "\t ============= CONFIGURATION OPTIONS =====================================\n"
        << "\t -c <filename> OR --config=<filename>\n"
-       << "\t                        Set configuration file (default " << FrogAPI::defaultConfigFile() << ")\n"
-       << "\t --override <section>.<parameter>=<value>\n"
-       << "\t                       Override a configuration option, can be used multiple times\n"
+       << "\t                        use this configuration file (default " << FrogAPI::defaultConfigFile("nld") << ")\n"
+       << "\t                        you can use -c lang/config-file to select the config-file for an installed language 'lang'\n"
        << "\t --language <language-list>\n"
-       << "\t                        Set the languages. e.g. --language=nld,eng,por\n"
+       << "\t                        Set the languages to be used in the tokenizer.\n"
+       << "\t                        e.g. --language=nld,eng,por\n"
        << "\t                        The first language in the list will be the default. (default dutch).\n"
+       << "\t                        IMPORTANT: frog can handle only one language at a time, determined by the config.\n"
+       << "\t                        So other languages mentioned here will be tokenized correctly, but further handled as the configured language.\n"
+       << "\t --override <section>.<parameter>=<value>\n"
+       << "\t                        Override a configuration option, can be used multiple times\n"
        << "\t ============= OUTPUT OPTIONS ============================================\n"
-       << "\t -o <outputfile>	     Output columned output to file, instead of default stdout\n"
-       << "\t --nostdout             suppress columned output to stdout\n"
+       << "\t -o <outputfile>        Output Tab separated or JSON output to file, instead of default stdout\n"
+       << "\t --nostdout             suppress Tabbed/JSON output to stdout\n"
        << "\t -X <xmlfile>           Output also to an XML file in FoLiA format\n"
        << "\t --id=<docid>           Document ID, used in FoLiA output. (Default 'untitled')\n"
+       << "\t --allow-word-corrections         allow the tokenizer to correct <w> nodes. (FoLiA only)\n"
        << "\t --outputdir=<dir>      Output to dir, instead of default stdout\n"
        << "\t --xmldir=<dir>         Use 'dir' to output FoliA XML to.\n"
        << "\t --deep-morph           add deep morphological information to the output\n"
-       << "\t --JSONin               The input is JSON. Implies JSONout too! (server mode only)\n"
        << "\t --JSONout=n            Output JSON instead of Tabbed.\n"
        << "\t                        When n != 0, use it for pretty-printing the output. (default n=0) \n"
        << "\t ============= OTHER OPTIONS ============================================\n"
@@ -158,8 +163,14 @@ void usage( ) {
 bool parse_args( TiCC::CL_Options& Opts,
 		 FrogOptions& options,
 		 TiCC::LogStream* theErrLog ){
-  // process the command line and fill FrogOptions to initialize the API
-  // also fill some globals we use for our own main.
+  /// process the command line and fill FrogOptions to initialize the API
+  /// also fill some globals we use for our own main.
+  /*!
+    \param Opts The command line options we have received
+    \param options The FrogOptions structure we will fill
+    \param theErrLog the stream to send error messages to
+    return true on succes
+  */
   options.command = Opts.toString();
   // is a language-list specified? Default is dutch
   string language;
@@ -206,6 +217,10 @@ bool parse_args( TiCC::CL_Options& Opts,
   if ( !Opts.extract( 'c',  configFileName ) ){
     Opts.extract( "config",  configFileName );
   }
+  if ( !TiCC::isFile( configFileName ) ){
+    // maybe it is in the default dir?
+    configFileName = FrogAPI::defaultConfigDir() + configFileName;
+  }
   if ( configuration.fill( configFileName ) ){
     LOG << "config read from: " << configFileName << endl;
     string vers = configuration.lookUp( "version" );
@@ -242,6 +257,7 @@ bool parse_args( TiCC::CL_Options& Opts,
   else {
     configuration.setatt( "debug", "0" );
   }
+  bool old_mwu = Opts.extract("OLDMWU");
   if ( Opts.extract( "debug", opt_val ) ) {
     vector<string> vec = TiCC::split_at( opt_val, "," );
     for ( const auto& val : vec ){
@@ -335,6 +351,10 @@ bool parse_args( TiCC::CL_Options& Opts,
 	LOG << "option skip=p conflicts with --alpino"
 	    << endl;
 	return false;
+      }
+      else if ( options.doMwu && !old_mwu ){
+	LOG << " MWU disabled, because the Parser is deselected" << endl;
+	options.doMwu = false;
       }
       options.doParse = false;
     }
@@ -546,10 +566,10 @@ bool parse_args( TiCC::CL_Options& Opts,
   Opts.extract ("uttmarker", options.uttmark );
   if ( !testDirName.empty() ){
     if ( options.doXMLin ){
-      getFileNames( testDirName, ".xml", fileNames );
+      fileNames = getFileNames( testDirName, ".xml" );
     }
     else {
-      getFileNames( testDirName, "", fileNames );
+      fileNames = getFileNames( testDirName, "" );
     }
     if ( fileNames.empty() ){
       LOG << "error: couldn't find any files in directory: "
@@ -645,6 +665,7 @@ string randnum( int len ){
 }
 
 int main(int argc, char *argv[]) {
+  /// Frog's main program.
   cerr << "frog " << VERSION << " (c) CLST, ILK 1998 - 2020" << endl
        << "CLST  - Centre for Language and Speech Technology,"
        << "Radboud University" << endl
@@ -653,7 +674,7 @@ int main(int argc, char *argv[]) {
   cerr << "based on [" << Tokenizer::VersionName() << ", "
        << folia::VersionName() << ", "
        << Timbl::VersionName() << ", "
-       << TimblServer::VersionName() << ", "
+       << TiCCServer::VersionName() << ", "
        << Tagger::VersionName() << "]" << endl;
   TiCC::LogStream *theErrLog
     = new TiCC::LogStream( cerr, "frog-", StampMessage );
@@ -664,9 +685,7 @@ int main(int argc, char *argv[]) {
   string db_filename;
   string remove_command = "find frog.*.debug -mtime +1 -exec rm {} \\;";
   cerr << "removing old debug files using: '" << remove_command << "'" << endl;
-  int ret = system( remove_command.c_str() );
-  if ( ret != 0 ){
-    cerr << "result of removing: " << ret << endl;
+  if ( system( remove_command.c_str() ) ){
   }
   try {
     TiCC::CL_Options Opts("c:e:o:t:T:x::X::nQhVd:S:",
@@ -677,7 +696,7 @@ int main(int argc, char *argv[]) {
 			  "help,language:,retry,nostdout,ner-override:,"
 			  "debug:,keep-parser-files,version,threads:,alpino::,"
 			  "override:,KANON,TESTAPI,debugfile:,JSONin,JSONout::,"
-			  "allow-word-corrections");
+			  "allow-word-corrections,OLDMWU");
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
       // we already did show what we wanted.
@@ -856,7 +875,7 @@ int main(int argc, char *argv[]) {
 	  throw( runtime_error( "listen(5) failed" ) );
 	}
 	while ( StillRunning ) {
-	  Sockets::ServerSocket conn;
+	  Sockets::ClientSocket conn;
 	  if ( server.accept( conn ) ){
 	    LOG << "New connection..." << endl;
 	    int pid = fork();

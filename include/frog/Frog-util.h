@@ -34,21 +34,22 @@
 
 #include <set>
 #include <ostream>
-#include <string>
+#include <fstream>
 #include <string>
 
 #include "ticcutils/Timer.h"
 
-std::string prefix( const std::string&,
-		    const std::string& );
-void getFileNames( const std::string&,
-		   const std::string&,
-		   std::set<std::string>& );
+std::string prefix( const std::string& path,
+		    const std::string& fn );
 
-std::string check_server( const std::string&,
-			  const std::string&,
-			  const std::string& = "" );
+std::set<std::string> getFileNames( const std::string& dirName,
+				    const std::string& ext );
 
+std::string check_server( const std::string& host,
+			  const std::string& port,
+			  const std::string& name= "" );
+
+/// \brief a collection of Ticc:Timers that registrate timings per module
 class TimerBlock{
 public:
   TiCC::Timer parseTimer;
@@ -83,5 +84,17 @@ public:
   }
 };
 
+class tmp_stream {
+public:
+  tmp_stream( const std::string&, bool = false );
+  ~tmp_stream();
+  void close() { _os->close(); };
+  std::ofstream& os() { return *_os; };
+  const std::string tmp_name() { return _temp_name; };
+private:
+  std::string _temp_name;
+  std::ofstream *_os;
+  bool _keep;
+};
 
 #endif

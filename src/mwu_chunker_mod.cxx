@@ -216,10 +216,11 @@ using TiCC::operator<<;
 
 ostream &operator<<( ostream& os, const Mwu& mwu ){
   /// output an Mwu (debugging only)
-  for ( size_t i = 0; i < mwu.mWords.size(); ++i )
+  for ( size_t i = 0; i < mwu.mWords.size(); ++i ){
     os << i+1 << "\t" << mwu.mWords[i]->getWord()
        <<  "(" << mwu.mWords[i]->mwu_start << "," << mwu.mWords[i]->mwu_end
        << ")" << endl;
+  }
   return os;
 }
 

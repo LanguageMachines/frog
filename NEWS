@@ -1,3 +1,24 @@
+0.20.1 - 2020-04-15
+[Ko vd Sloot]
+Bug fix release.
+- added missing Doxygen.cfg to the tarball
+
+0.20 - 2020-04-15
+[Ko vd Sloot]
+* added Doxygen to the build
+* added a lot of comment in Doxygen format
+* adapted to the newest ticcutils version
+* adapted to latest libfolia
+* adapted to latest ucto
+* lots of code refactorings
+* implemented --JSONin option (server only)
+* implemented --JSONout option
+* added a --allow-word-correction option which allows ucto to correct FoLiA
+  Word nodes
+
+[Iris Hendrix]
+Documentation updates
+
 0.19.1 - 2019-11-15
 [Ko vd Sloot]
 * fixed an overseen incompatability problem with the new libfolia.

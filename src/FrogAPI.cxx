@@ -38,6 +38,7 @@
 #include <string>
 #include <cstring>
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <fstream>
 #include <vector>
@@ -836,10 +837,10 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
   }
 }
 
-void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
+void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
   /// Run a server
   /*!
-    \param conn A Sockets::ServerSocket object to connect to
+    \param conn A Sockets::ClientSocket object to connect to
 
     The 'conn' object should be correctly set up using the right parameters.
     Depending on the Frog settings we can serve text, FoLiA and JSON.
@@ -865,11 +866,10 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
         if ( options.debugFlag > 5 ){
 	  DBG << "received data [" << result << "]" << endl;
 	}
-	string tmp_file = TiCC::tempname("frog");
-	ofstream os( tmp_file );
-	os << result << endl;
-	os.close();
-	folia::Document *xml = run_folia_engine( tmp_file, output_stream );
+	tmp_stream ts( "frog" );
+	ts.os() << result << endl;
+	ts.close();
+	folia::Document *xml = run_folia_engine( ts.tmp_name(), output_stream );
 	if ( xml && options.doXMLout ){
 	  xml->set_canonical(options.doKanon);
 	  output_stream << xml;
@@ -901,10 +901,10 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	  while ( toks.size() > 0 ){
 	    frog_data sent = frog_sentence( toks, 1 );
 	    show_results( output_stream, sent );
+	    timers.tokTimer.start();
+	    toks = tokenizer->tokenize_line_next();
+	    timers.tokTimer.stop();
 	  }
-	  timers.tokTimer.start();
-	  toks = tokenizer->tokenize_line_next();
-	  timers.tokTimer.stop();
 	}
       }
       else {
@@ -973,14 +973,12 @@ void FrogAPI::FrogServer( Sockets::ServerSocket &conn ){
 	  throw( runtime_error( "JSON write to client failed" ) );
 	}
       }
-      else {
-	if (!conn.write( output_stream.str() )
-	    || !(conn.write("READY\n\n"))  ){
-	  if (options.debugFlag > 5 ) {
-	    DBG << "socket " << conn.getMessage() << endl;
-	  }
-	  throw( runtime_error( "write to client failed" ) );
+      else if ( !conn.write( output_stream.str() )
+		|| !(conn.write("READY\n\n"))  ){
+	if (options.debugFlag > 5 ) {
+	  DBG << "socket " << conn.getMessage() << endl;
 	}
+	throw( runtime_error( "write to client failed" ) );
       }
     }
   }
@@ -1134,7 +1132,7 @@ void FrogAPI::FrogInteractive(){
 string FrogAPI::Frogtostring( const string& s ){
   /// Parse a string, Frog it and return the result as a string.
   /*!
-    \param s: an UTF8 decoded string. May be multilined.
+    \param s: an UTF8 encoded string. May be multilined. May be FoLiA too.
     \return the results of frogging.
 
     Depending of the current frog settings the input can be interpreted as XML,
@@ -1143,18 +1141,17 @@ string FrogAPI::Frogtostring( const string& s ){
   if ( s.empty() ){
     return s;
   }
-  string tmp_file = TiCC::tempname("frog");
-  ofstream os( tmp_file );
-  os << s << endl;
-  os.close();
-  return Frogtostringfromfile( tmp_file );
+  tmp_stream ts( "frog" );
+  ts.os() << s << endl;
+  ts.close();
+  return Frogtostringfromfile( ts.tmp_name() );
 }
 
 string FrogAPI::Frogtostringfromfile( const string& infilename ){
   /// Parse a file, Frog it and return the result as a string.
   /*!
     \param infilename The filename.
-    \return the results of frogging as an UTF8 string.
+    \return the results of frogging endoded in an UTF8 string.
 
     Depending of the current frog settings the inputfile can be interpreted as
     XML, and the output will be XML or tab separated.
@@ -1221,13 +1218,16 @@ frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
   /*!
     \param sent a list of Tokenizer::Token
     \param s_count holds the sentence count
-    \return a frog_data structure representing 1 totally frogged sentence.
+    \return a frog_data structure representing 1 totally frogged sentence. Will
+    be empty if we are done.
 
     This function is reentrant and should be called multiple times until the
-    whole 'sent' list is consument.
-    s_count is incremented for every returned frog_data element.
+    whole 'sent' list is consumed and an empty frog_data is returned.
 
-    All enabled Frog modules are run on the frog_data structure.
+    All enabled Frog modules are run on the \e sent and for every completed
+    sentence a frog_data structure is returned.
+
+    \e s_count is incremented for every returned frog_data element.
 
   */
   if ( options.debugFlag > 0 ){
@@ -1535,6 +1535,7 @@ void FrogAPI::output_JSON( ostream& os,
       out_json.push_back( part );
     }
   }
+  DBG << "spitting out JSON:" << out_json << endl;
   os << std::setw(pp_val) << out_json << endl;
 }
 
@@ -2033,8 +2034,8 @@ folia::Document *FrogAPI::FrogFile( const string& infilename,
   /// generic function to Frog a file
   /*!
     \param infilename the input file-name
-    \param os the outputstream
-    \return a Frogged Document. May be empty if XML output is not required
+    \param os the outputstream for \e tabbed or \e JSON output
+    \return a FoLiA Document. May be empty if XML output is not required.
 
     This function autodetects FoLiA files vs. text files and will run Frog
     for the respective types.

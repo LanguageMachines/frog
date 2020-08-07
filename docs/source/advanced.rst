@@ -120,7 +120,7 @@ config file.
 Lemmatizer
 ~~~~~~~~~~
 
-The lemmatizer is trained on the e-Lex lexicon :raw-latex:`\cite{e-lex}`
+The lemmatizer is trained on the e-Lex lexicon [ELEX]_
 with 595,664 unique word form - PoS-tag - lemma combinations. The e-Lex
 lexicon has been manually cleaned to correct several errors. A timbl
 classifier [Timbl]_ is trained to learn the conversion of word forms to their
@@ -149,7 +149,7 @@ lemmatizer does not take into account the sentence context of the words
 and in those rare cases where a word form has different lemmas
 associated with the same PoS-tags, a random choice is made.
 
-[ex-lem]
+
 
 Morphological Analyzer
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -158,7 +158,6 @@ The Morphological analyser MBMA [MBMA]_ aims to
 decompose tokens into their morphemes reflecting possible spelling
 changes. Here we show two example words:
 
-[ex-longword]
 
 ::
 
@@ -167,8 +166,7 @@ changes. Here we show two example words:
 
 Internally, MBMA not only tries to split tokens into morphemes but also
 aims to classify each splitting point and its relation to the adjacent
-morpheme. MBMA is trained on the CELEX database
-:raw-latex:`\cite{Baayen+93}`. Each word is represented by a set of
+morpheme. MBMA is trained on the [CELEX]_ database. Each word is represented by a set of
 instances that each represent one character of the word in context of 6
 characters to the left and right. As example we show the 10 instances
 that were created for the word form *gesneden* in [ex-mbma]. The general
@@ -181,7 +179,7 @@ root form *snijd* to the actual used form *sned* (0+Rij\ :math:`>`\ e:
 replace current character ’ij’ with ’e’ ). Instance 7 also has label
 ’pv’ and denotes the end boundary of the root morpheme.
 
-Timbl IGtree :raw-latex:`\cite{timbl}` trained on 3179,331 instances
+Timbl IGtree [TIMBL]_ trained on 3179,331 instances
 extracted from that were based on the CELEX lexicon of 293,570 word
 forms. The morphological character type classes result in a total 2708
 class labels where the most frequent class ’0’ occurs in 69% of the
@@ -222,7 +220,7 @@ changes*.
 +-----+------+------+------+------+------+------+---------+------+------+------+------+------+------+-----------------------+
 
 Note that the older version of the morphological analyzer reported in
-:raw-latex:`\cite{Tadpole}` was trained on a slightly different version
+[Tadpole2007]_  was trained on a slightly different version
 of the data with a context of only 5 instead of 6 characters left and
 right. In that older study the performance of the morphological analyzer
 was evaluated on a 10% held out set and an accuracy of 79% on *unseen*
@@ -304,16 +302,26 @@ Phrase Chunker
 The phrase chunker module is based on the chunker developed in the 90’s [Daelemans1999]_ and uses MBT [MBT]_ as
 classifier. The chunker adopted the BIO tags to represent chunking as a
 tagging task where B-tags signal the start of the chunk, I-tags inside
-the chunk and O-tags outside the chunk. In the context of the TTNW
-[TTNWW]_, the chunker was updated and trained on a newer and larger corpus of one million words, the Lassy Small
-[lassysmall]_. This corpus a annotated with syntactic trees that were fist converted to a flat structure with a
+the chunk and O-tags outside the chunk. In the context of the TTNWW
+[TTNWW]_, the chunker was updated and trained on a newer and larger
+corpus of one million words, the Lassy Small corpus
+[lassysmall]_. This corpus a annotated with syntactic trees that were first converted to a flat structure with a
 script.
 
 Parser
 ~~~~~~
 
-The Constraint-satisfaction inference-based dependency parser (CSI-DP)
-[Canisius2009]_ is trained on the manually verified
+The default parser in Frog is the  Constraint-satisfaction inference-based dependency parser (CSI-DP)
+[Canisius2009]_ . However, it is also possible to switch to the Alpino
+parser instead. The Alpino parser is more accurate in predicting
+syntactic labels but has a much higher memory usage and is slower.
+Alpino is not integrated in Frog, you need to install the parser
+locally on your machine and can integrate the parser output in Frog
+using the option --alpino. If you want to use an Alpino version on a
+remoter server, you can specify this --alpino=server. We refer to the
+[Alpino]_ documentation for details of the Alpino parser.
+
+CSI-DP  is trained on the manually verified
 *Lassy small* corpus [lassysmall]_ and several million
 tokens of automatically parsed text by the Alpino parser
 [ALPINO]_ from Wikipedia pages, newspaper
@@ -327,7 +335,7 @@ the final parse tree where each token has only one relation with another
 token using a constraint solver based on the Eisner parsing algorithm
 [Eisner2000]_. The soft constraints determine the
 search space for the constraint solver to find the optimal solution.
-
+s
 CSI-DP applies three types of constraints: dependency constraints,
 modifier constraints and direction constraints. For each constraint
 type, a separate timbl classifier is trained. Each pair of tokens in the
@@ -335,7 +343,7 @@ training set occurs with a certain set of possible dependency relations
 and this information is learned by the dependency constraint classifier.
 An instance is created for each token pair and its relation where one is
 the modifier and and one is head. Note that a pair always creates two
-instances where these roles are switched. The timbl classifier trained
+instances where these roles are switched. The TiMBL classifier trained
 on this instance base will then for each token pair predict zero, one or
 multiple relations and these relations form the soft constraints that
 are the input for the general solver who selects the overall best parse
@@ -353,12 +361,12 @@ present dependency relations in the training set
 instances that express an actual syntactic relation between a word pair
 and negative cases. Therefore, the negative instances in the training
 set were reduced by randomly sampling a set of negative cases that is
-twice as big the number of positive cases (based on experiments in
+twice as big as the number of positive cases (based on experiments in
 [Canisius2009]_).
 
 The second group of constraints are the modifier constraints that
-express for each single token the possible syntactic relations that it
-has in the training set. The feature set for these instances consist of
+express the possible syntactic relations  for each single token that it
+has in the training set. The feature set for these instances consists of
 the local context in 1 or 2 ?? words and PoS tags of the token.
 
 The third group of direction constraints specify for each token in the
@@ -395,7 +403,6 @@ References
 
 .. [CELEX] Baayen, R. H., R. Piepenbrock, and H. van Rijn. 1993. The CELEX lexical data base on CD-ROM. Linguistic Data Consortium, Philadelphia, PA.
 
-
 .. [ELEX] TST-centrale. 2007. E-lex voor taal- en spraaktechnologie, version 1.1. Technical report, Nederlandse TaalUnie.
 
 .. [Alpino] Bouma, G., G. Van Noord R., and Malouf. 2001. Alpino: Wide-coverage computational analysis of dutch. Language and Computers, 37(1):45–59.
@@ -412,7 +419,6 @@ References
 
 .. [NERmanual] Desmet, Bart and Veronique Hoste. 2009. Named Entity Annotatierichtlijnen voor het Nederlands. Technical Report LT3 09.01.,  LT3, University Ghent, Belgium.
 
-
 .. [Eisner2000]   Eisner, Jason, 2000. Bilexical grammars and their cubic-time parsing algorithms, pages 29–61. Springer.  Haque, R., S. Kumar Naskar, A. Van den Bosch, and A. Way. 2011. Integrating source-language context into phrase-based statistical machine translation. Machine Translation, 25(3):239–285, September.
 
 .. [CGN] Schuurman, Ineke, Machteld Schouppe, Heleen Hoekstra, and Ton van der Wouden. 2003. CGN, an annotated corpus of spoken Dutch. In Anne Abeillé, Silvia Hansen-Schirra, and Hans Uszkoreit, editors, Proceedings of 4th International Workshop on Linguistically Interpreted Corpora (LINC-03), pages 101–108, Budapest, Hungary.
@@ -422,6 +428,9 @@ References
 .. [Lassysmall] van Noord, Gertjan, Ineke Schuurman, and Gosse Bouma. 2011. Lassy syntactische annotatie. Technical report.
 
 .. [LASSY] Van Noord, Gertjan, Gosse Bouma, Frank Van Eynde, Daniel De Kok, Jelmer Van der Linde, Ineke Schuurman, Erik Tjong Kim Sang, and Vincent Vandeghinste. 2013a. Large scale syntactic annotation of written dutch: Lassy. In Essential Speech and Language Technology for Dutch. Springer, pages 147–164.
+
 .. [Folia] van Gompel, M. and M. Reynaert. 2013. Folia: A practical xml format for linguistic annotation - a descriptive and comparative study. Computational Linguistics in the Netherlands Journal, 3.
 
+.. [VanEynde2004] Van Eynde, Frank. 2004. Part of speech tagging en lemmatisering van het corpus gesproken nederlands. Technical report, Centrum voor Computerlinguıstiek, KU Leuven, Belgium.
+	  
 .. [UCTO] Maarten van Gompel, Ko van der Sloot, Iris Hendrickx and Antal van den Bosch. Ucto: Unicode Tokeniser. Reference Guide, Language and Speech Technology Technical Report Series 18-01, Radboud University, Nijmegen, October, 2018, Available from https://ucto.readthedocs.io/

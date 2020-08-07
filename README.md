@@ -1,9 +1,9 @@
-[![Build Status](https://travis-ci.org/LanguageMachines/frog.svg?branch=master)](https://travis-ci.org/LanguageMachines/frog) [![Documentation Status](https://readthedocs.org/projects/frognlp/badge/?version=latest)](https://frognlp.readthedocs.io/?badge=latest) [![Language Machines Badge](http://applejack.science.ru.nl/lamabadge.php/frog)](http://applejack.science.ru.nl/languagemachines/) [![DOI](https://zenodo.org/badge/20526435.svg)](https://zenodo.org/badge/latestdoi/20526435) [![GitHub release](https://img.shields.io/github/release/LanguageMachines/frog.js.svg)](https://GitHub.com/LanguageMachines/frog/releases/) [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![Build Status](https://travis-ci.org/LanguageMachines/frog.svg?branch=master)](https://travis-ci.org/LanguageMachines/frog) [![Documentation Status](https://readthedocs.org/projects/frognlp/badge/?version=latest)](https://frognlp.readthedocs.io/?badge=latest) [![Language Machines Badge](http://applejack.science.ru.nl/lamabadge.php/frog)](http://applejack.science.ru.nl/languagemachines/) [![DOI](https://zenodo.org/badge/20526435.svg)](https://zenodo.org/badge/latestdoi/20526435) [![GitHub release](https://img.shields.io/github/release/LanguageMachines/frog.svg)](https://GitHub.com/LanguageMachines/frog/releases/) [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 
 # Frog - A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
 
-    Copyright 2006-2019
-    Bertjan Busser, Antal van den Bosch,  Ko van der Sloot, Maarten van Gompel
+    Copyright 2006-2020
+    Ko van der Sloot, Maarten van Gompel, Antal van den Bosch, Bertjan Busser
 
     Centre for Language and Speech Technology, Radboud University Nijmegen
     Induction of Linguistic Knowledge Research Group, Tilburg University

@@ -3,7 +3,7 @@
 
 AC_PREREQ(2.59)
 #also adapt version number in codemeta.json
-AC_INIT([frog], [0.20], [lamasoftware@science.ru.nl]) #adapt version number in codemeta.json as well
+AC_INIT([frog], [0.22], [lamasoftware@science.ru.nl]) #adapt version number in codemeta.json as well
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_MACRO_DIR([m4])
@@ -116,7 +116,7 @@ LIBS="$ICU_LIBS $LIBS"
 
 AX_LIB_READLINE
 
-PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.23] )
+PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.24] )
 
 CXXFLAGS="$CXXFLAGS $ticcutils_CFLAGS"
 LIBS="$ticcutils_LIBS $LIBS"
@@ -146,6 +146,16 @@ AC_DEFINE_UNQUOTED( [UCTO_INT_VERSION],
 
 PKG_CHECK_MODULES([frogdata], [frogdata >= 0.15] )
 
+AC_CHECK_PROGS([DOXYGEN], [doxygen])
+if test -z "$DOXYGEN"; then
+   AC_MSG_WARN([Doxygen not found - continue without Doxygen support])
+else
+   AC_CHECK_PROGS([DOT], [dot])
+   if test -z "$DOT"; then
+      AC_MSG_ERROR([Doxygen needs dot, please install dot first])
+   fi
+fi
+AM_CONDITIONAL([HAVE_DOXYGEN], [test -n "$DOXYGEN"])
 
 AC_OUTPUT([
   Makefile

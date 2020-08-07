@@ -41,6 +41,7 @@
 
 typedef std::pair<std::string,double> tc_pair;
 
+/// \brief a specialization of Basetagger to tag Named Entities
 class NERTagger: public BaseTagger {
  public:
   explicit NERTagger( TiCC::LogStream *, TiCC::LogStream * =0 );

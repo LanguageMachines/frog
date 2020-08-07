@@ -187,7 +187,7 @@ string CGNTagger::getSubSet( const string& val,
     \note for a well-trained CGN tagger, all values should belong to a subset
     AND there may never be a constraints conflict
 
-    A fullclass may be N(soort,ev,basis,zijd,stan), so the head is N.
+    A full class may be N(soort,ev,basis,zijd,stan), so the head is N.
 
     For every value in 'soort,ev,basis,zijd,stan' we lookup the
     subset in the cgn_subsets, and when the constraints on the head

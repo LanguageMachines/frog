@@ -43,6 +43,7 @@ namespace Compound {
   enum Type : int;
 }
 
+/// \brief a class to hold 1 MBMA rule
 class RulePart {
 public:
   RulePart( const std::string&, const UChar, bool );
@@ -66,6 +67,7 @@ std::ostream& operator<<( std::ostream& os, const RulePart * );
 
 class BracketNest;
 
+/// \brief a class to hold a MBMA rule
 class Rule {
 public:
   Rule( const std::vector<std::string>&,

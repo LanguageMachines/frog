@@ -33,6 +33,7 @@
 #include "frog/FrogData.h"
 #include "ticcutils/Configuration.h"
 
+/// \brief an Interface to the Ucto tokenizer
 class UctoTokenizer {
  public:
   explicit UctoTokenizer( TiCC::LogStream *, TiCC::LogStream * =0 );

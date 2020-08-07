@@ -35,7 +35,9 @@
 #include <set>
 #include <string>
 #include <ostream>
+#include <fstream>
 #include "ticcutils/SocketBasics.h"
+#include "ticcutils/FileUtils.h"
 #include "config.h"
 
 #include <sys/types.h>
@@ -47,6 +49,13 @@
 using namespace std;
 
 string prefix( const string& path, const string& fn ){
+  /// add a full path to the filename \e fn
+  /*!
+    \param path the path to add
+    \param fn the filename to be prefixed
+    \return a new path
+    If \e fn already contains (relative) path information, it is left unchanged.
+   */
   if ( fn.find( "/" ) == string::npos && !path.empty() ){
     // only append prefix when it isn't empty AND
     // NO path is specified in the filename
@@ -56,12 +65,18 @@ string prefix( const string& path, const string& fn ){
 }
 
 #ifdef HAVE_DIRENT_H
-void getFileNames( const string& dirName,
-		   const string& ext,
-		   set<string>& fileNames ){
+set<string> getFileNames( const string& dirName,
+			   const string& ext ){
+  /// extract a (sorted) list of file-names matching an extension pattern
+  /*!
+    \param dirName the search directory
+    \param ext the file extension we search
+    \return a sorted list og file-names
+  */
+  set<string> result;
   DIR *dir = opendir( dirName.c_str() );
   if ( !dir ){
-    return;
+    return result;
   }
   else {
     struct stat sb;
@@ -73,20 +88,30 @@ void getFileNames( const string& dirName,
 	     filename.rfind( ext ) != string::npos ) {
 	  string fullName = dirName + "/" + filename;
 	  if ( stat( fullName.c_str(), &sb ) >= 0 ){
-            if ( (sb.st_mode & S_IFMT) == S_IFREG )
-	      fileNames.insert( entry->d_name );
+            if ( (sb.st_mode & S_IFMT) == S_IFREG ){
+	      result.insert( entry->d_name );
+	    }
 	  }
 	}
       }
       entry = readdir( dir );
     }
     closedir( dir );
+    return result;
   }
 }
+#endif
 
 string check_server( const string& host,
 		     const string& port,
 		     const string& name ){
+  /// check if a certain host:port is available for us
+  /*!
+    \param host the host we check
+    \param port the port we want to access
+    \param name extra information (used in diagnostics only)
+    \return "" on succes or an error message on failure
+  */
   string outline;
   Sockets::ClientSocket client;
   if ( !client.connect( host, port ) ){
@@ -99,4 +124,15 @@ string check_server( const string& host,
   return outline;
 }
 
-#endif
+tmp_stream::tmp_stream( const string& prefix, bool keep ){
+  _temp_name = TiCC::tempname(prefix);
+  _os = new ofstream( _temp_name );
+  _keep = keep;
+}
+
+tmp_stream::~tmp_stream(){
+  delete _os;
+  if ( !_keep ){
+    remove( _temp_name.c_str() );
+  }
+}

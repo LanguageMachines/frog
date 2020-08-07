@@ -51,7 +51,13 @@ NERTagger::NERTagger( TiCC::LogStream *l, TiCC::LogStream *d ):
   BaseTagger( l, d, "NER" ),
   gazets_only(false),
   max_ner_size(20)
-{ gazet_ners.resize( max_ner_size + 1 );
+{
+  /// initialize a NERTagger instance
+  /*!
+    \param l a LogStream for errors
+    \param d a LogStream for debugging
+  */
+  gazet_ners.resize( max_ner_size + 1 );
   override_ners.resize( max_ner_size + 1 );
 }
 
@@ -99,6 +105,13 @@ bool NERTagger::fill_ners( const string& cat,
 			   const string& name,
 			   const string& config_dir,
 			   vector<unordered_map<string,set<string>>>& ners ){
+  /// fill known Named Entities from one gazeteer file
+  /*!
+    \param cat The NE categorie (like 'loc' or 'org')
+    \param name the filename to read
+    \param config_dir the directory to search for files
+    \param ners the structure to store the NE's in
+  */
   string file_name = name;
   if ( !TiCC::isFile( file_name ) ){
     file_name = config_dir + "/" + name;
@@ -153,6 +166,19 @@ bool NERTagger::fill_ners( const string& cat,
 bool NERTagger::read_gazets( const string& name,
 			     const string& config_dir,
 			     vector<unordered_map<string,set<string>>>& ners ){
+  /// fill known Named Entities from a list of gazeteer files
+  /*!
+    \param name the filename to read the gazeteer info from
+    \param config_dir the directory to search for files
+    \param ners the structure to store the NE's in
+
+    NE's are stored in a vector of maps, ranked on their length. So NE's of
+    length 1 ("London") are stored at position 1 and so on. ("dag van de arbeid"
+    at position 4).
+
+    the NE is stored in a map using as the mono-spaced string as key and adding
+    the cetagory in a set. (as categories can be ambiguous)
+  */
   string file_name = name;
   string lookup_dir = config_dir;
   if ( name[0] != '/' ) {
@@ -204,7 +230,8 @@ bool NERTagger::read_gazets( const string& name,
 }
 
 static vector<string> serialize( const vector<set<string>>& stags ){
-  // for every non empty set {el1,el2,..}, we compose a string like: el1+el2+...
+  /// for every non empty set {el1,el2,..} in stags we compose a string like:
+  /// el1+el2+...
   vector<string> ambitags( stags.size(), "O" );
   size_t pos = 0;
   for ( const auto& it : stags ){
@@ -222,6 +249,11 @@ static vector<string> serialize( const vector<set<string>>& stags ){
 
 vector<string> NERTagger::create_ner_list( const vector<string>& words,
 					   std::vector<std::unordered_map<std::string,std::set<std::string>>>& ners ){
+  /// create a list of ambitags given a range of words
+  /*!
+    \param words a sentence as a list of words
+    \param ners the NE structure to examine
+   */
   vector<set<string>> stags( words.size() );
   if ( debug > 1 ){
     DBG << "search for known NER's" << endl;

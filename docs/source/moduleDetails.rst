@@ -9,11 +9,13 @@ Character encoding
 Frog assumes the input text to be plain text in the UTF-8 character
 encoding. However, Frog offers the option to specify another character
 encoding as input with the option t -e. This options is passed on to the
-*Ucto* Tokenizer. It has some limitations, (see [tokenizer]) and will be
+*Ucto* Tokenizer. It has some limitations, (see :ref:`Tokeniser`) and will be
 ignored when the Tokenizer is disabled. The character encodings are
 derived from the ubiquitous unix tool *iconv*  [12]_. The output of Frog
 will always be in UTF-8 character encoding. Likewise, FoLiA XML defaults
 to UTF-8 as well.
+
+.. _Tokenizer
 
 Tokenizer
 ~~~~~~~~~~
@@ -109,7 +111,7 @@ Part-of-Speech Tagger
 ~~~~~~~~~~~~~~~~~~~~~
 
 The Part-of-Speech tagger uses the tag set of *Corpus Gesproken
-Nederlands (CNG)* [POS2004]_. It has 12 main PoS
+Nederlands (CNG)* [VanEynde2004]_. It has 12 main PoS
 tags (shown in table [tab-pos-tags]) and detailed features for type,
 gender, number, case, position, degree, and tense.
 
