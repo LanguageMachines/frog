@@ -866,7 +866,7 @@ void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
         if ( options.debugFlag > 5 ){
 	  DBG << "received data [" << result << "]" << endl;
 	}
-	tmp_stream ts( "frog" );
+	TiCC::tmp_stream ts( "frog" );
 	ts.os() << result << endl;
 	ts.close();
 	folia::Document *xml = run_folia_engine( ts.tmp_name(), output_stream );
@@ -1141,7 +1141,7 @@ string FrogAPI::Frogtostring( const string& s ){
   if ( s.empty() ){
     return s;
   }
-  tmp_stream ts( "frog" );
+  TiCC::tmp_stream ts( "frog" );
   ts.os() << s << endl;
   ts.close();
   return Frogtostringfromfile( ts.tmp_name() );

@@ -807,9 +807,9 @@ vector<parsrel> AlpinoParser::alpino_parse( frog_data& fd ){
 #endif
   vector<parsrel> result;
 #ifdef DEBUG_ALPINO
-  tmp_stream temp_stream( "alpino-parse.txt.", true );
+  TiCC::tmp_stream temp_stream( "alpino-parse.txt.", true );
 #else
-  tmp_stream temp_stream( "alpino-parse.txt." );
+  TiCC::tmp_stream temp_stream( "alpino-parse.txt." );
 #endif
   string input_file = temp_stream.tmp_name();
   string tmp_dir = TiCC::dirname(input_file) +"/";
