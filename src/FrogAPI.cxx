@@ -766,9 +766,7 @@ FrogAPI::FrogAPI( TiCC::CL_Options& Opts,
 {
   /// Initialize an FrogAPI class
   /*!
-    \param opt FrogOptions. Already set or adapted by parsing 'conf'
-    \param conf A TiCC::Configuration.
-    The configuration is set from the command-line or by parsing a config file
+    \param Opts CommandLine Options as found by parsing the command line
     \param err_log A LogStream for error messages
     \param dbg_log A LogStream for debugging purposes
 

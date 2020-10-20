@@ -58,6 +58,7 @@ class NERTagger;
 /// \brief this class holds the runtime settings for Frog
 class FrogOptions {
  public:
+  FrogOptions();             ///< the constructor
   bool doTok;                ///< should we run the tokenizer?
   bool doLemma;              ///< should we run the lemmatizer?
   bool doMorph;              ///< should we run the morphological analyzer?
@@ -156,15 +157,14 @@ of input encodings. The default is UTF8. The output will always be in UTF8.
   /*< The Parser may 'explode' on VERY long sentences. So we limit it to a
 maximum of 500 words PER SENTENC. Which is already a lot!
    */
-  std::set<std::string> fileNames;
-  std::string testDirName;
-  std::string xmlDirName;
-  std::string outputDirName;
-  std::string outputFileName;
-  std::string XMLoutFileName;
-  std::string command;    ///< stores the original command that invoked Frog
+  std::set<std::string> fileNames; ///< the filenames as parsed from the commandline
+  std::string testDirName;    ///< the name of the directory with testfiles
+  std::string xmlDirName;     ///< the name of the directory to store FoLia results in
+  std::string outputDirName;  ///< the name of the output directory for tabbed or JSON
+  std::string outputFileName; ///< the name of a single tabbed/JSON outputfile
+  std::string XMLoutFileName; ///< the name fo a single FoLiA outputfile
+  std::string command;        ///< the original command that invoked Frog
 
-  FrogOptions();
  private:
   FrogOptions( const FrogOptions & );
 };
