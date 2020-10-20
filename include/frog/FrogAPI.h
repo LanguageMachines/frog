@@ -184,14 +184,14 @@ class FrogAPI {
 		   FrogOptions&,
 		   TiCC::Configuration&,
 		   TiCC::LogStream* );
-  folia::Document *FrogFile( const std::string&, std::ostream& );
+  folia::Document *FrogFile( const std::string& );
   void FrogServer( Sockets::ClientSocket &conn );
   void FrogInteractive();
   frog_data frog_sentence( std::vector<Tokenizer::Token>&,
 			   const size_t );
   std::string Frogtostring( const std::string& );
   std::string Frogtostringfromfile( const std::string& );
-  void run_api_tests( const std::string&, std::ostream& );
+  void run_api_tests( const std::string& );
 
  private:
   folia::Document *run_folia_engine( const std::string&,
@@ -247,6 +247,9 @@ class FrogAPI {
   TiCC::LogStream *theErrLog;               ///< the stream to send errors to
   TiCC::LogStream *theDbgLog;               ///< the stream to send debug info
   TimerBlock timers;                        ///< all runtime timers
+ public:
+  std::ostream *outS;
+ private:
   Mbma *myMbma;             ///< pointer to the MBMA module
   Mblem *myMblem;           ///< pointer to the MBLEM module
   Mwu *myMwu;               ///< pointer to the MWU module

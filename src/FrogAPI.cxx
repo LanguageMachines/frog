@@ -736,6 +736,18 @@ bool FrogAPI::parse_args( TiCC::CL_Options& Opts,
     LOG << "Disabled the parser." << endl;
     options.doParse = false;
   }
+  if ( !options.outputFileName.empty() ){
+    if ( options.doRetry && TiCC::isFile( options.outputFileName ) ){
+      LOG << "retry, skip: " << options.outputFileName << " already exists" << endl;
+      return EXIT_SUCCESS;
+    }
+    if ( !TiCC::createPath( options.outputFileName ) ) {
+      LOG << "problem: unable to create outputfile: "
+	  << options.outputFileName << endl;
+      return EXIT_FAILURE;
+    }
+    outS = new ofstream( options.outputFileName );
+  }
   return true;
 }
 
@@ -746,6 +758,7 @@ FrogAPI::FrogAPI( TiCC::CL_Options& Opts,
   options(opt),
   theErrLog(err_log),
   theDbgLog(dbg_log),
+  outS(0),
   myMbma(0),
   myMblem(0),
   myMwu(0),
@@ -1636,12 +1649,12 @@ string FrogAPI::Frogtostringfromfile( const string& infilename ){
   */
   options.hide_timers = true;
   bool old_val = options.noStdOut;
-  stringstream ss;
   if ( options.doXMLout ){
     options.noStdOut = true;
   }
-  folia::Document *result = FrogFile( infilename, ss );
+  folia::Document *result = FrogFile( infilename );
   options.noStdOut = old_val;
+  stringstream ss;
   if ( result ){
     result->set_canonical( options.doKanon );
     ss << result;
@@ -2507,8 +2520,7 @@ folia::Document *FrogAPI::run_text_engine( const string& infilename,
   return doc;
 }
 
-folia::Document *FrogAPI::FrogFile( const string& infilename,
-				    ostream& os ){
+folia::Document *FrogAPI::FrogFile( const string& infilename ){
   /// generic function to Frog a file
   /*!
     \param infilename the input file-name
@@ -2529,10 +2541,10 @@ folia::Document *FrogAPI::FrogFile( const string& infilename,
   }
   timers.reset();
   if ( xml_in ){
-    result = run_folia_engine( infilename, os );
+    result = run_folia_engine( infilename, *outS );
   }
   else {
-    result = run_text_engine( infilename, os );
+    result = run_text_engine( infilename, *outS );
   }
   if ( !options.hide_timers ){
     LOG << "tokenisation took:  " << timers.tokTimer << endl;
@@ -2569,11 +2581,10 @@ folia::Document *FrogAPI::FrogFile( const string& infilename,
   return result;
 }
 
-void FrogAPI::run_api_tests( const string& testName, ostream& outS ){
+void FrogAPI::run_api_tests( const string& testName ){
   /// Helper function to run some specific tests for the API
   /*!
     \param testName a file to test on
-    \param outS an output stream for the results
   */
   LOG << "running some extra Frog tests...." << endl;
   if ( testName.find( ".xml" ) != string::npos ){
@@ -2592,12 +2603,12 @@ void FrogAPI::run_api_tests( const string& testName, ostream& outS ){
     while ( getline( is, line ) ){
       ss << line << endl;
     }
+    *outS << "STRING 1 " << endl;
     string s1 = Frogtostring( ss.str() );
-    outS << "STRING 1 " << endl;
-    outS << s1 << endl;
+    *outS << s1 << endl;
+    *outS << "STRING 2 " << endl;
     string s2 = Frogtostringfromfile( testName );
-    outS << "STRING 2 " << endl;
-    outS << s2 << endl;
+    *outS << s2 << endl;
     if ( s1 != s2 ){
       LOG << "FAILED test :" << testName << endl;
     }
@@ -2620,12 +2631,12 @@ void FrogAPI::run_api_tests( const string& testName, ostream& outS ){
     while ( getline( is, line ) ){
       ss << line << endl;
     }
+    *outS << "STRING 1 " << endl;
     string s1 = Frogtostring( ss.str() );
-    outS << "STRING 1 " << endl;
-    outS << s1 << endl;
+    *outS << s1 << endl;
+    *outS << "STRING 2 " << endl;
     string s2 = Frogtostringfromfile( testName );
-    outS << "STRING 2 " << endl;
-    outS << s2 << endl;
+    *outS << s2 << endl;
     if ( s1 != s2 ){
       LOG << "FAILED test :" << testName << endl;
     }
@@ -2650,11 +2661,11 @@ void FrogAPI::run_api_tests( const string& testName, ostream& outS ){
     }
     options.docid = "test";
     string s1 = Frogtostring( ss.str() );
-    outS << "STRING 1 " << endl;
-    outS << s1 << endl;
+    *outS << "STRING 1 " << endl;
+    *outS << s1 << endl;
     string s2 = Frogtostringfromfile( testName );
-    outS << "STRING 2 " << endl;
-    outS << s2 << endl;
+    *outS << "STRING 2 " << endl;
+    *outS << s2 << endl;
     if ( s1 != s2 ){
       LOG << "FAILED test :" << testName << endl;
     }

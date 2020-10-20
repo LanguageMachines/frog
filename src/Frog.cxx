@@ -239,19 +239,6 @@ int main(int argc, char *argv[]) {
       string outPath = options.outputDirName;
       string xmlPath = options.xmlDirName;
 
-      ostream *outS = 0;
-      if ( !options.outputFileName.empty() ){
-	if ( options.doRetry && TiCC::isFile( options.outputFileName ) ){
-	  LOG << "retry, skip: " << options.outputFileName << " already exists" << endl;
-	  return EXIT_SUCCESS;
-	}
-	if ( !TiCC::createPath( options.outputFileName ) ) {
-	  LOG << "problem: unable to create outputfile: "
-	      << options.outputFileName << endl;
-	  return EXIT_FAILURE;
-	}
-        outS = new ofstream( options.outputFileName );
-      }
       if ( options.fileNames.size() > 1 ){
 	LOG << "start processing " << options.fileNames.size() << " files..." << endl;
       }
@@ -263,7 +250,7 @@ int main(int argc, char *argv[]) {
 	  continue;
 	}
 	string outName;
-	if ( outS == 0 ){
+	if ( frog.outS == 0 ){
 	  if ( options.wantOUT ){
 	    if ( options.doXMLin ){
 	      if ( !outPath.empty() ){
@@ -283,10 +270,10 @@ int main(int argc, char *argv[]) {
 			      << endl;
 	      continue;
 	    }
-	    outS = new ofstream( outName );
+	    frog.outS = new ofstream( outName );
 	  }
 	  else {
-	    outS = &cout;
+	    frog.outS = &cout;
 	  }
 	}
 	string xmlOutName = options.XMLoutFileName;
@@ -320,12 +307,12 @@ int main(int argc, char *argv[]) {
 	}
 	LOG << TiCC::Timer::now() << " Frogging " << testName << endl;
 	if ( options.test_API ){
-	  frog.run_api_tests( testName, *outS );
+	  frog.run_api_tests( testName );
 	}
 	else {
 	  folia::Document *result = 0;
 	  try {
-	    result = frog.FrogFile( testName, *outS );
+	    result = frog.FrogFile( testName );
 	  }
 	  catch ( exception& e ){
 	    LOG << "problem frogging: " << name << endl
@@ -344,16 +331,16 @@ int main(int argc, char *argv[]) {
 	  }
 	  if ( !outName.empty() ){
 	    LOG << "results stored in " << outName << endl;
-	    if ( outS != &cout ){
-	      delete outS;
-	      outS = 0;
+	    if ( frog.outS != &cout ){
+	      delete frog.outS;
+	      frog.outS = 0;
 	    }
 	  }
 	  if ( !options.outputFileName.empty() ){
 	    LOG << "results stored in " << options.outputFileName << endl;
-	    if ( outS != &cout ){
-	      delete outS;
-	      outS = 0;
+	    if ( frog.outS != &cout ){
+	      delete frog.outS;
+	      frog.outS = 0;
 	    }
 	  }
 	}
