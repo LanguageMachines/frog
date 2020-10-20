@@ -82,6 +82,7 @@ class FrogOptions {
   bool noStdOut;             ///< do we want output to stdout?
   bool doXMLin;              ///< do we have FoLiA input?
   bool doXMLout;             ///< do we want FoLiA output?
+  bool wantOUT;              ///< do we want ANY output?
   bool doJSONin;             ///< do we have JSON input?
   /*!< This is only supported for the Server mode of Frog,
     it implies JSON output too.
@@ -155,6 +156,12 @@ of input encodings. The default is UTF8. The output will always be in UTF8.
   /*< The Parser may 'explode' on VERY long sentences. So we limit it to a
 maximum of 500 words PER SENTENC. Which is already a lot!
    */
+  std::set<std::string> fileNames;
+  std::string testDirName;
+  std::string xmlDirName;
+  std::string outputDirName;
+  std::string outputFileName;
+  std::string XMLoutFileName;
   std::string command;    ///< stores the original command that invoked Frog
 
   FrogOptions();
@@ -166,13 +173,17 @@ maximum of 500 words PER SENTENC. Which is already a lot!
 /// on files, strings, TCP sockets or a terminal.
 class FrogAPI {
  public:
-  FrogAPI( FrogOptions&,
-	   const TiCC::Configuration&,
+  FrogAPI( TiCC::CL_Options&,
+	   FrogOptions&,
 	   TiCC::LogStream *,
 	   TiCC::LogStream * );
   ~FrogAPI();
   static std::string defaultConfigDir( const std::string& ="" );
   static std::string defaultConfigFile( const std::string& ="" );
+  bool parse_args( TiCC::CL_Options&,
+		   FrogOptions&,
+		   TiCC::Configuration&,
+		   TiCC::LogStream* );
   folia::Document *FrogFile( const std::string&, std::ostream& );
   void FrogServer( Sockets::ClientSocket &conn );
   void FrogInteractive();
@@ -205,7 +216,7 @@ class FrogAPI {
 			 const frog_data&,
 			 const std::vector<folia::Word*>& ) const;
   folia::processor *add_provenance( folia::Document& ) const;
-  void test_version( const std::string&, double );
+  void test_version( const TiCC::Configuration&, const std::string&, double );
   // functions
   void FrogStdin( bool prompt );
   void output_tabbed( std::ostream&,
@@ -231,7 +242,7 @@ class FrogAPI {
 			   const std::vector<folia::Word*>&,
 			   const size_t );
   // data
-  const TiCC::Configuration& configuration; ///< the configuration
+  //  TiCC::Configuration& configuration; ///< the configuration
   FrogOptions& options;                     ///< all runtime options
   TiCC::LogStream *theErrLog;               ///< the stream to send errors to
   TiCC::LogStream *theDbgLog;               ///< the stream to send debug info

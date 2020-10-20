@@ -170,7 +170,9 @@ FrogOptions::FrogOptions() {
   JSON_pp = 0;
 }
 
-void FrogAPI::test_version( const string& module, double minimum ){
+void FrogAPI::test_version( const TiCC::Configuration& configuration,
+			    const string& module,
+			    double minimum ){
   /// check if a module in the Frog Configuration is at least at the
   /// requested version level
   /*!
@@ -218,11 +220,529 @@ void FrogAPI::test_version( const string& module, double minimum ){
   }
 }
 
-FrogAPI::FrogAPI( FrogOptions &opt,
-		  const TiCC::Configuration &conf,
+bool FrogAPI::parse_args( TiCC::CL_Options& Opts,
+			  FrogOptions& options,
+			  TiCC::Configuration& configuration,
+			  TiCC::LogStream* theErrLog ){
+  /// process the command line and fill FrogOptions to initialize the API
+  /// also fill some globals we use for our own main.
+  /*!
+    \param Opts The command line options we have received
+    \param options The FrogOptions structure we will fill
+    \param theErrLog the stream to send error messages to
+    return true on succes
+  */
+  options.command = Opts.toString();
+  // is a language-list specified? Default is dutch
+  string language;
+  string languages;
+  Opts.extract ("language", languages );
+  string configFileName;
+  if ( languages.empty() ){
+    // ok no languages parameter.
+    // use a (default) configfile. Dutch
+    configFileName = FrogAPI::defaultConfigFile("nld");
+    language = "nld";
+    options.languages.insert( "nld" );
+  }
+  else {
+    vector<string> lang_v = TiCC::split_at( languages, "," );
+    if ( lang_v.empty() ){
+      cerr<< "invalid value in --language=" << languages
+	  << " option. " << endl;
+      return false;
+    }
+    language = lang_v[0]; // the first mentioned is the default.
+    for ( const auto& l : lang_v ){
+      options.languages.insert( l );
+    }
+    if ( lang_v.size() > 1 ){
+      cerr << "WARNING: you used the --language=" << languages << " option"
+	   << " with more then one language " << endl
+	   << "\t specified. These values will be handled to the tokenizer,"
+	   << " but Frog"<< endl
+	   << "\t will only handle the first language: " << language
+	   << " for further processing!" << endl;
+    }
+    configFileName = FrogAPI::defaultConfigFile(language);
+    if ( !TiCC::isFile( configFileName ) ){
+      cerr << "configuration file: " << configFileName << " not found" << endl;
+      cerr << "Did you correctly install the frogdata package for language="
+	   << language << "?" << endl;
+      configFileName = FrogAPI::defaultConfigFile();
+      cerr << "using fallback configuration file: " << configFileName << endl;
+    }
+  }
+  options.default_language = language;
+  // override default config settings when a configfile is specified
+  if ( !Opts.extract( 'c',  configFileName ) ){
+    Opts.extract( "config",  configFileName );
+  }
+  if ( !TiCC::isFile( configFileName ) ){
+    // maybe it is in the default dir?
+    configFileName = FrogAPI::defaultConfigDir() + configFileName;
+  }
+  if ( configuration.fill( configFileName ) ){
+    LOG << "config read from: " << configFileName << endl;
+    string vers = configuration.lookUp( "version" );
+    if ( !vers.empty() ){
+      LOG << "configuration version = " << vers << endl;
+    }
+    string langs = configuration.getatt( "languages", "tokenizer" );
+    if ( !langs.empty() ){
+      vector<string> lang_v = TiCC::split_at( langs, "," );
+      options.default_language = lang_v[0];
+      for ( const auto& l : lang_v ){
+	options.languages.insert( l );
+      }
+    }
+  }
+  else {
+    cerr << "failed to read configuration from '" << configFileName << "' !!" << endl;
+    cerr << "Did you correctly install the frogdata package for language="
+	 << language << "?" << endl;
+    return false;
+  }
+  if ( !languages.empty() ){
+    configuration.setatt( "languages", languages, "tokenizer" );
+  }
+  string opt_val;
+  // debug opts
+  if ( Opts.extract ('d', opt_val) ) {
+    if ( !TiCC::stringTo<int>( opt_val, options.debugFlag ) ){
+      LOG << "-d value should be an integer" << endl;
+      return false;
+    }
+    configuration.setatt( "debug", opt_val );
+  }
+  else {
+    configuration.setatt( "debug", "0" );
+  }
+  bool old_mwu = Opts.extract("OLDMWU");
+  if ( Opts.extract( "debug", opt_val ) ) {
+    vector<string> vec = TiCC::split_at( opt_val, "," );
+    for ( const auto& val : vec ){
+      char mod = val[0];
+      string value = val.substr(1);
+      int dbval = 0;
+      if ( !TiCC::stringTo<int>( value, dbval ) ){
+	cerr << "expected integer value for --debug=" << mod << value << endl;
+	return false;
+      }
+      switch ( mod ){
+      case 'T':
+	configuration.setatt( "debug", value, "tagger" );
+	break;
+      case 't':
+	configuration.setatt( "debug", value, "tokenizer" );
+	break;
+      case 'l':
+	configuration.setatt( "debug", value, "mblem" );
+	break;
+      case 'a':
+	configuration.setatt( "debug", value, "mbma" );
+	break;
+      case 'm':
+	configuration.setatt( "debug", value, "mwu" );
+	break;
+      case 'c':
+	configuration.setatt( "debug", value, "IOB" );
+	break;
+      case 'n':
+	configuration.setatt( "debug", value, "NER" );
+	break;
+      case 'p':
+	configuration.setatt( "debug", value, "parser" );
+	break;
+      default:
+	cerr << "unknown module code:'" << mod << "'" << endl;
+	return false;
+      }
+    }
+  }
+  string redundancy;
+  Opts.extract( 'T', redundancy );
+  Opts.extract( "textredundancy", redundancy );
+  if ( !redundancy.empty() ){
+    if ( redundancy != "full"
+	 && redundancy != "minimal"
+	 && redundancy != "none" ){
+      LOG << "unknown textredundancy level: " << redundancy << endl;
+      return false;
+    }
+    options.textredundancy = redundancy;
+  }
+  options.doSentencePerLine = Opts.extract( 'n' );
+  options.correct_words = Opts.extract( "allow-word-corrections" );
+  options.doQuoteDetection = Opts.extract( 'Q' );
+  if (  options.doQuoteDetection ){
+    LOG << "Quote detection is NOT supported!" << endl;
+    return false;
+  }
+  if ( Opts.extract( "skip", opt_val )) {
+    string skip = opt_val;
+    if ( skip.find_first_of("tT") != string::npos ){
+      options.doTok = false;
+    }
+    if ( skip.find_first_of("lL") != string::npos ){
+      options.doLemma = false;
+    }
+    if ( skip.find_first_of("aA") != string::npos ){
+      options.doMorph = false;
+    }
+    if ( skip.find_first_of("mM") != string::npos ){
+      if ( options.doAlpino ){
+	LOG << "option skip=m conflicts with --alpino"
+	    << endl;
+	return false;
+      }
+      options.doMwu = false;
+    }
+    if ( skip.find_first_of("cC") != string::npos ){
+      options.doIOB = false;
+    }
+    if ( skip.find_first_of("nN") != string::npos ){
+      options.doNER = false;
+    }
+    if ( skip.find_first_of("gG") != string::npos ){
+      options.doTagger = false;
+    }
+    if ( skip.find_first_of("pP") != string::npos ){
+      if ( options.doAlpino ){
+	LOG << "option skip=p conflicts with --alpino"
+	    << endl;
+	return false;
+      }
+      else if ( options.doMwu && !old_mwu ){
+	LOG << " MWU disabled, because the Parser is deselected" << endl;
+	options.doMwu = false;
+      }
+      options.doParse = false;
+    }
+    else if ( !options.doMwu && options.doParse ){
+      LOG << " Parser disabled, because MWU is deselected" << endl;
+      options.doParse = false;
+    }
+    Opts.remove("skip");
+  };
+
+  if ( Opts.extract( "deep-morph" ) ) {
+    options.doDeepMorph = true;
+    options.doMorph = true;
+  }
+  options.doRetry = Opts.extract( "retry" );
+  options.noStdOut = Opts.extract( "nostdout" );
+  Opts.extract( 'e', options.encoding );
+
+  if ( Opts.extract( "max-parser-tokens", opt_val ) ){
+    if ( !TiCC::stringTo<unsigned int>( opt_val, options.maxParserTokens ) ){
+      LOG << "max-parser-tokens value should be an integer" << endl;
+      return false;
+    }
+  }
+
+  if ( Opts.extract( "ner-override", opt_val ) ){
+    configuration.setatt( "ner_override", opt_val, "NER" );
+  }
+  options.doServer = Opts.extract('S', options.listenport );
+  options.doJSONin = Opts.extract( "JSONin" );
+  if ( options.doJSONin && !options.doServer ){
+    LOG << "option JSONin is only allowed for server mode. (-S option)" << endl;
+    return false;
+  }
+  options.doAlpino = Opts.extract("alpino", opt_val);
+  if ( options.doAlpino ){
+    if ( !opt_val.empty() ){
+      if ( opt_val == "server" ){
+	options.doAlpinoServer = true;
+	configuration.setatt( "alpinoserver", "true", "parser" );
+      }
+      else {
+	LOG << "unsupported value for --alpino: " << opt_val << endl;
+	return false;
+      }
+    }
+  }
+  if ( options.doAlpino ){
+    options.doParse = false;
+    options.doMwu = false;
+  }
+#ifdef HAVE_OPENMP
+  if ( options.doServer ) {
+    // run in one thread in server mode, forking is too expensive for lots of small snippets
+    options.numThreads =  1;
+    Opts.extract( "threads", opt_val ); //discard threads option
+  }
+  else if ( Opts.extract( "threads", opt_val ) ){
+    int num;
+    if ( !TiCC::stringTo<int>( opt_val, num ) || num < 1 ){
+      LOG << "threads value should be a positive integer" << endl;
+      return false;
+    }
+    options.numThreads = num;
+  }
+#else
+  if ( Opts.extract( "threads", opt_val ) ){
+    LOG << "WARNING!\n---> There is NO OpenMP support enabled\n"
+		    << "---> --threads=" << opt_val << " is ignored.\n"
+		    << "---> Will continue on just 1 thread." << endl;
+  }
+#endif
+
+  if ( Opts.extract( "keep-parser-files" ) ){
+    LOG << "keep-parser-files option not longer supported. (ignored)" << endl;
+  }
+  if ( Opts.extract( "tmpdir" ) ){
+    LOG << "tmpdir option not longer supported. (ignored)" << endl;
+  }
+  string TestFileName;
+  if ( Opts.extract( "testdir", TestFileName ) ) {
+    options.testDirName = TestFileName;
+    if ( options.testDirName.back() != '/' ){
+      options.testDirName += "/";
+    }
+    if ( !TiCC::isDir( options.testDirName ) ){
+      LOG << "input dir " << options.testDirName << " not readable" << endl;
+      return false;
+    }
+  }
+  else if ( Opts.extract( 't', TestFileName ) ) {
+    if ( !TiCC::isFile( TestFileName ) ){
+      LOG << "input stream " << TestFileName << " is not readable" << endl;
+      return false;
+    }
+  };
+  options.wantOUT = false;
+  if ( Opts.extract( "outputdir", options.outputDirName )) {
+    if ( options.outputDirName.back() != '/' ){
+      options.outputDirName += "/";
+    }
+    if ( !TiCC::createPath( options.outputDirName ) ){
+      LOG << "output dir " << options.outputDirName << " not readable" << endl;
+      return false;
+    }
+    options.wantOUT = true;
+  }
+  else if ( Opts.extract( 'o', options.outputFileName ) ){
+    options.wantOUT = true;
+  };
+  string json_pps;
+  options.doJSONout = Opts.extract( "JSONout", json_pps );
+  if ( options.doJSONout ){
+    if ( json_pps.empty() ){
+      options.JSON_pp = 0;
+    }
+    else {
+      int tmp;
+      if ( !TiCC::stringTo<int>( json_pps, tmp )
+	   || tmp < 0 ){
+	LOG << "--JSONout value should be an integer >=0 " << endl;
+	return false;
+      }
+      else {
+	options.JSON_pp = tmp;
+      }
+    }
+  }
+  else {
+    if ( options.doJSONin ){
+      options.doJSONout = true;
+    }
+  }
+  options.doXMLout = false;
+  Opts.extract( "id", options.docid );
+  if ( !options.docid.empty() ){
+    if ( !folia::isNCName(options.docid) ){
+      LOG << "Invalid value for 'id': " << options.docid << " (not a valid NCName)" << endl;
+      return false;
+    }
+  }
+  if ( Opts.extract( "xmldir", options.xmlDirName ) ){
+    if ( options.xmlDirName.back() != '/' ){
+      options.xmlDirName += "/";
+    }
+    if ( !TiCC::createPath( options.xmlDirName ) ){
+      LOG << "XML output dir " << options.xmlDirName << " not readable" << endl;
+      return false;
+    }
+    options.doXMLout = true;
+  }
+  else if ( Opts.extract('X',options. XMLoutFileName ) ){
+    options.doXMLout = true;
+  }
+
+  options.doKanon = Opts.extract("KANON");
+  options.test_API = Opts.extract("TESTAPI");
+
+  options.doXMLin = false;
+  if ( Opts.extract ('x', opt_val ) ){
+    options.doXMLin = true;
+    if ( !opt_val.empty() ){
+      if ( !options.xmlDirName.empty() || !options.testDirName.empty() ){
+	LOG << "-x may not provide a value when --testdir or --xmldir is provided" << endl;
+	return false;
+      }
+      TestFileName = opt_val;
+      if ( !TiCC::isFile( TestFileName ) ){
+	LOG << "input stream " << opt_val << " is not readable" << endl;
+	return false;
+      }
+    }
+  }
+  string textclass;
+  string inputclass;
+  string outputclass;
+  Opts.extract( "textclass", textclass );
+  Opts.extract( "inputclass", inputclass );
+  Opts.extract( "outputclass", outputclass );
+  if ( !textclass.empty() ){
+    if ( !inputclass.empty() || !outputclass.empty() ){
+      LOG << "when --textclass is specified, --inputclass or --outputclass may NOT be present." << endl;
+      return false;
+    }
+    options.inputclass = textclass;
+    options.outputclass = textclass;
+    configuration.setatt( "inputclass", textclass );
+    configuration.setatt( "outputclass", textclass );
+  }
+  else {
+    if ( !inputclass.empty() ){
+      options.inputclass = inputclass;
+      configuration.setatt( "inputclass", inputclass );
+      if ( outputclass.empty() ){
+	options.outputclass = inputclass;
+	configuration.setatt( "outputclass", inputclass );
+      }
+    }
+    if ( !outputclass.empty() ){
+      options.outputclass = outputclass;
+      configuration.setatt( "outputclass", outputclass );
+    }
+  }
+  if ( !options.XMLoutFileName.empty() && !options.testDirName.empty() ){
+    LOG << "useless -X value" << endl;
+    return false;
+  }
+
+  Opts.extract ("uttmarker", options.uttmark );
+  if ( !options.testDirName.empty() ){
+    if ( options.doXMLin ){
+      options.fileNames = getFileNames( options.testDirName, ".xml" );
+    }
+    else {
+      options.fileNames = getFileNames( options.testDirName, "" );
+    }
+    if ( options.fileNames.empty() ){
+      LOG << "error: couldn't find any files in directory: "
+		      << options.testDirName << endl;
+      return false;
+    }
+  }
+  if ( options.fileNames.empty() ){
+    if ( !TestFileName.empty() ){
+      if ( !TiCC::isFile( TestFileName ) ){
+	LOG << "Input file not found: " << TestFileName << endl;
+	return false;
+      }
+      options.fileNames.insert( TestFileName );
+    }
+    else {
+      vector<string> mass = Opts.getMassOpts();
+      for ( const auto& name : mass ){
+	if ( !TiCC::isFile( name ) ){
+	  LOG << "Input file not found: " << name << endl;
+	  return false;
+	}
+	options.fileNames.insert( name );
+      }
+    }
+  }
+  if ( options.fileNames.size() > 1 ){
+    if ( !options.XMLoutFileName.empty() ){
+      LOG << "'-X " << options.XMLoutFileName
+	  << "' is invalid for multiple inputfiles." << endl;
+      return false;
+    }
+  }
+  string overridestatement;
+  while ( Opts.extract("override", overridestatement )) {
+    vector<string> values;
+    const int num = TiCC::split_at( overridestatement,values,  "=" );
+    if ( num == 2 ) {
+        vector<string> module_param;
+        const int num2 = TiCC::split_at(values[0], module_param, "." );
+        if (num2 == 2) {
+            LOG << "Overriding configuration parameter " << module_param[0] << "." << module_param[1] << " with " << values[1] << endl;
+            configuration.setatt( module_param[1] , values[1], module_param[0] );
+        } else if (num2 == 1) {
+            LOG << "Overriding configuration parameter " << module_param[0] << " with " << values[1] << endl;
+            configuration.setatt( module_param[0] , values[1]);
+        } else {
+            LOG << "Invalid syntax for --override option" << endl;
+        }
+    } else {
+        LOG << "Invalid syntax for --override option" << endl;
+    }
+  }
+  if ( !Opts.empty() ){
+    LOG << "unhandled commandline options: " << Opts.toString() << endl;
+
+    return false;
+  }
+  if ( options.doTagger && !configuration.hasSection("tagger") ){
+    LOG << "Missing [[tagger]] section in config file." << endl;
+    LOG << "cannot run without a tagger!" << endl;
+    return false;
+  }
+  if ( options.doTok && !configuration.hasSection("tokenizer") ){
+    LOG << "Missing [[tokenizer]] section in config file." << endl;
+    LOG << "Disabled the tokenizer." << endl;
+    options.doTok = false;
+  }
+  if ( options.doMorph && !configuration.hasSection("mbma") ){
+    LOG << "Missing [[mbma]] section in config file." << endl;
+    LOG << "Disabled the Morhological analyzer." << endl;
+    options.doMorph = false;
+  }
+  if ( options.doIOB ){
+    if ( !configuration.hasSection("IOB") ){
+      LOG << "Missing [[IOB]] section in config file." << endl;
+      LOG << "Disabled the IOB Chunker." << endl;
+      options.doIOB = false;
+    }
+    else {
+      test_version( configuration, "IOB", 2.0 );
+    }
+  }
+  if ( options.doNER ) {
+    if ( !configuration.hasSection("NER") ){
+      LOG << "Missing [[NER]] section in config file." << endl;
+      LOG << "Disabled the NER." << endl;
+      options.doNER = false;
+    }
+    else {
+      test_version( configuration, "NER", 2.0 );
+    }
+  }
+  if ( options.doMwu && !configuration.hasSection("mwu") ){
+    LOG << "Missing [[mwu]] section in config file." << endl;
+    LOG << "Disabled the Multi Word Unit." << endl;
+    LOG << "Also disabled the parser." << endl;
+    options.doMwu = false;
+    options.doParse = false;
+  }
+  if ( options.doParse && !configuration.hasSection("parser") ){
+    LOG << "Missing [[parser]] section in config file." << endl;
+    LOG << "Disabled the parser." << endl;
+    options.doParse = false;
+  }
+  return true;
+}
+
+FrogAPI::FrogAPI( TiCC::CL_Options& Opts,
+		  FrogOptions &opt,
 		  TiCC::LogStream *err_log,
 		  TiCC::LogStream *dbg_log ):
-  configuration(conf),
   options(opt),
   theErrLog(err_log),
   theDbgLog(dbg_log),
@@ -250,52 +770,10 @@ FrogAPI::FrogAPI( FrogOptions &opt,
   // for some modules init can take a long time
   // so first make sure it will not fail on some trivialities
   //
-  if ( options.doTagger && !configuration.hasSection("tagger") ){
-    LOG << "Missing [[tagger]] section in config file." << endl;
-    LOG << "cannot run without a tagger!" << endl;
-    throw runtime_error( "Frog initialization failed" );
-  }
-  if ( options.doTok && !configuration.hasSection("tokenizer") ){
-    LOG << "Missing [[tokenizer]] section in config file." << endl;
-    LOG << "Disabled the tokenizer." << endl;
-    options.doTok = false;
-  }
-  if ( options.doMorph && !configuration.hasSection("mbma") ){
-    LOG << "Missing [[mbma]] section in config file." << endl;
-    LOG << "Disabled the Morhological analyzer." << endl;
-    options.doMorph = false;
-  }
-  if ( options.doIOB ){
-    if ( !configuration.hasSection("IOB") ){
-      LOG << "Missing [[IOB]] section in config file." << endl;
-      LOG << "Disabled the IOB Chunker." << endl;
-      options.doIOB = false;
-    }
-    else {
-      test_version( "IOB", 2.0 );
-    }
-  }
-  if ( options.doNER ) {
-    if ( !configuration.hasSection("NER") ){
-      LOG << "Missing [[NER]] section in config file." << endl;
-      LOG << "Disabled the NER." << endl;
-      options.doNER = false;
-    }
-    else {
-      test_version( "NER", 2.0 );
-    }
-  }
-  if ( options.doMwu && !configuration.hasSection("mwu") ){
-    LOG << "Missing [[mwu]] section in config file." << endl;
-    LOG << "Disabled the Multi Word Unit." << endl;
-    LOG << "Also disabled the parser." << endl;
-    options.doMwu = false;
-    options.doParse = false;
-  }
-  if ( options.doParse && !configuration.hasSection("parser") ){
-    LOG << "Missing [[parser]] section in config file." << endl;
-    LOG << "Disabled the parser." << endl;
-    options.doParse = false;
+  TiCC::Configuration configuration;
+  bool parsed = parse_args( Opts, options, configuration, theErrLog );
+  if (!parsed) {
+    throw runtime_error( "init failed" );
   }
 
   if ( options.doServer ){
