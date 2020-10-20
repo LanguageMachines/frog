@@ -150,15 +150,6 @@ void usage( ) {
        << "\t                         (but always 1 for server mode)\n";
 }
 
-static bool StillRunning = true;
-
-void KillServerFun( int Signal ){
-  if ( Signal == SIGTERM ){
-    cerr << TiCC::Timer::now() << " KillServerFun caught a signal SIGTERM" << endl;
-    sleep(5); // give children some spare time...
-    StillRunning = false;
-  }
-}
 
 unsigned long long random64(){
   /// generate a 64 bit random number
@@ -202,10 +193,6 @@ int main(int argc, char *argv[]) {
   std::ios_base::sync_with_stdio(false);
   FrogOptions options;
   string db_filename;
-  string remove_command = "find frog.*.debug -mtime +1 -exec rm {} \\;";
-  cerr << "removing old debug files using: '" << remove_command << "'" << endl;
-  if ( system( remove_command.c_str() ) ){
-  }
   try {
     TiCC::CL_Options Opts("c:e:o:t:T:x::X::nQhVd:S:",
 			  "config:,testdir:,"
@@ -228,183 +215,33 @@ int main(int argc, char *argv[]) {
       delete theErrLog;
       return EXIT_SUCCESS;
     };
+    string remove_command = "find frog.*.debug -mtime +1 -exec rm {} \\;";
+    cerr << "removing old debug files using: '" << remove_command
+	 << "'" << endl;
+    if ( system( remove_command.c_str() ) ){
+      // nothing
+    }
     Opts.extract( "debugfile", db_filename );
     if ( db_filename.empty() ){
       db_filename = "frog." + randnum(8) + ".debug";
     }
     the_dbg_stream = new ofstream( db_filename );
     theDbgLog = new TiCC::LogStream( *the_dbg_stream, "frog-", StampMessage );
-    FrogAPI frog( Opts, options, theErrLog, theDbgLog );
-    if ( !options.fileNames.empty() ) {
-      string outPath = options.outputDirName;
-      string xmlPath = options.xmlDirName;
-
-      if ( options.fileNames.size() > 1 ){
-	LOG << "start processing " << options.fileNames.size() << " files..." << endl;
-      }
-      for ( auto const& name : options.fileNames ){
-	string testName = options.testDirName + name;
-	if ( !TiCC::isFile( testName ) ){
-	  LOG << "skip " << testName << " (file not found )"
-	      << endl;
-	  continue;
-	}
-	string outName;
-	if ( frog.outS == 0 ){
-	  if ( options.wantOUT ){
-	    if ( options.doXMLin ){
-	      if ( !outPath.empty() ){
-		outName = outPath + name + ".out";
-	      }
-	    }
-	    else {
-	      outName = outPath + name + ".out";
-	    }
-	    if ( options.doRetry && TiCC::isFile( outName ) ){
-	      LOG << "retry, skip: " << outName << " already exists" << endl;
-	      continue;
-	    }
-	    if ( !TiCC::createPath( outName ) ) {
-	      LOG << "problem frogging: " << name << endl
-			      << "unable to create outputfile: " << outName
-			      << endl;
-	      continue;
-	    }
-	    frog.outS = new ofstream( outName );
-	  }
-	  else {
-	    frog.outS = &cout;
-	  }
-	}
-	string xmlOutName = options.XMLoutFileName;
-	if ( xmlOutName.empty() ){
-	  if ( !options.xmlDirName.empty() ){
-	    if ( name.rfind(".xml") == string::npos ){
-	      xmlOutName = xmlPath + name + ".xml";
-	    }
-	    else {
-	      xmlOutName = xmlPath + name;
-	    }
-	  }
-	  else if ( options.doXMLout ){
-	    xmlOutName = name + ".xml"; // do not clobber the inputdir!
-	  }
-	}
-	if ( !xmlOutName.empty() ){
-	  if ( options.doRetry && TiCC::isFile( xmlOutName ) ){
-	    LOG << "retry, skip: " << xmlOutName << " already exists" << endl;
-	    continue;
-	  }
-	  if ( !TiCC::createPath( xmlOutName ) ){
-	    LOG << "problem frogging: " << name << endl
-		<< "unable to create outputfile: " << xmlOutName
-		<< endl;
-	    continue;
-	  }
-	  else {
-	    remove( xmlOutName.c_str() );
-	  }
-	}
-	LOG << TiCC::Timer::now() << " Frogging " << testName << endl;
-	if ( options.test_API ){
-	  frog.run_api_tests( testName );
-	}
-	else {
-	  folia::Document *result = 0;
-	  try {
-	    result = frog.FrogFile( testName );
-	  }
-	  catch ( exception& e ){
-	    LOG << "problem frogging: " << name << endl
-		<< e.what() << endl;
-	    continue;
-	  }
-	  if ( !xmlOutName.empty() ){
-	    if ( !result ){
-	      LOG << "FAILED to create FoLiA??" << endl;
-	    }
-	    else {
-	      result->save( xmlOutName );
-	      LOG << "FoLiA stored in " << xmlOutName << endl;
-	      delete result;
-	    }
-	  }
-	  if ( !outName.empty() ){
-	    LOG << "results stored in " << outName << endl;
-	    if ( frog.outS != &cout ){
-	      delete frog.outS;
-	      frog.outS = 0;
-	    }
-	  }
-	  if ( !options.outputFileName.empty() ){
-	    LOG << "results stored in " << options.outputFileName << endl;
-	    if ( frog.outS != &cout ){
-	      delete frog.outS;
-	      frog.outS = 0;
-	    }
-	  }
-	}
-      }
-      LOG << TiCC::Timer::now() << " Frog finished" << endl;
+    FrogAPI frog( Opts, theErrLog, theDbgLog );
+    if ( !frog.options.fileNames.empty() ) {
+      frog.run_on_files();
     }
-    else if ( options.doServer ) {
-      //first set up some things to deal with zombies
-      struct sigaction action;
-      action.sa_handler = SIG_IGN;
-      sigemptyset(&action.sa_mask);
-#ifdef SA_NOCLDWAIT
-      action.sa_flags = SA_NOCLDWAIT;
-#endif
-      sigaction(SIGCHLD, &action, NULL);
-      struct sigaction act;
-      sigaction( SIGTERM, NULL, &act ); // get current action
-      act.sa_handler = KillServerFun;
-      act.sa_flags &= ~SA_RESTART;      // do not continue after SIGTERM
-      sigaction( SIGTERM, &act, NULL );
-
-      srand((unsigned)time(0));
-
-      LOG << "Listening on port " << options.listenport << "\n";
-
-      try {
-	// Create the socket
-	Sockets::ServerSocket server;
-	if ( !server.connect( options.listenport ) ){
-	  throw( runtime_error( "starting server on port " + options.listenport + " failed" ) );
-	}
-	if ( !server.listen( 5 ) ) {
-	  // maximum of 5 pending requests
-	  throw( runtime_error( "listen(5) failed" ) );
-	}
-	while ( StillRunning ) {
-	  Sockets::ClientSocket conn;
-	  if ( server.accept( conn ) ){
-	    LOG << "New connection..." << endl;
-	    int pid = fork();
-	    if (pid < 0) {
-	      string err = strerror(errno);
-	      LOG << "ERROR on fork: " << err << endl;
-	      throw runtime_error( "FORK failed: " + err );
-	    }
-	    else if (pid == 0)  {
-	      frog.FrogServer( conn );
-	      return EXIT_SUCCESS;
-	    }
-	  }
-	  else {
-	    throw( runtime_error( "Accept failed" ) );
-	  }
-	}
-	LOG << TiCC::Timer::now() << " server terminated by SIGTERM" << endl;
+    else if ( frog.options.doServer ) {
+      if ( frog.run_a_server() ){
+	return EXIT_SUCCESS;
       }
-      catch ( exception& e ) {
-	LOG << "Server error:" << e.what() << " Exiting." << endl;
-	throw;
+      else {
+	return EXIT_FAILURE;
       }
     }
     else {
       // interactive mode
-      frog.FrogInteractive();
+      frog.run_interactive();
     }
   }
   catch ( const TiCC::OptionError& e ){

@@ -174,26 +174,27 @@ maximum of 500 words PER SENTENC. Which is already a lot!
 class FrogAPI {
  public:
   FrogAPI( TiCC::CL_Options&,
-	   FrogOptions&,
 	   TiCC::LogStream *,
 	   TiCC::LogStream * );
   ~FrogAPI();
-  static std::string defaultConfigDir( const std::string& ="" );
-  static std::string defaultConfigFile( const std::string& ="" );
-  bool parse_args( TiCC::CL_Options&,
-		   FrogOptions&,
-		   TiCC::Configuration&,
-		   TiCC::LogStream* );
-  folia::Document *FrogFile( const std::string& );
-  void FrogServer( Sockets::ClientSocket &conn );
-  void FrogInteractive();
-  frog_data frog_sentence( std::vector<Tokenizer::Token>&,
-			   const size_t );
+  void run_on_files();
+  bool run_a_server();
+  void run_interactive();
+  void run_api_tests( const std::string& );
   std::string Frogtostring( const std::string& );
   std::string Frogtostringfromfile( const std::string& );
-  void run_api_tests( const std::string& );
+  static std::string defaultConfigFile( const std::string& ="" );
 
  private:
+  static std::string defaultConfigDir( const std::string& ="" );
+  bool collect_options( TiCC::CL_Options&,
+			TiCC::Configuration&,
+			TiCC::LogStream* );
+  folia::Document *FrogFile( const std::string& );
+  void FrogServer( Sockets::ClientSocket &conn );
+
+  frog_data frog_sentence( std::vector<Tokenizer::Token>&,
+			   const size_t );
   folia::Document *run_folia_engine( const std::string&,
 				     std::ostream& );
   folia::Document *run_text_engine( const std::string&,
@@ -242,14 +243,13 @@ class FrogAPI {
 			   const std::vector<folia::Word*>&,
 			   const size_t );
   // data
-  //  TiCC::Configuration& configuration; ///< the configuration
-  FrogOptions& options;                     ///< all runtime options
+ public:
+  FrogOptions options;                     ///< all runtime options
+  std::ostream *outS;
+ private:
   TiCC::LogStream *theErrLog;               ///< the stream to send errors to
   TiCC::LogStream *theDbgLog;               ///< the stream to send debug info
   TimerBlock timers;                        ///< all runtime timers
- public:
-  std::ostream *outS;
- private:
   Mbma *myMbma;             ///< pointer to the MBMA module
   Mblem *myMblem;           ///< pointer to the MBLEM module
   Mwu *myMwu;               ///< pointer to the MWU module
