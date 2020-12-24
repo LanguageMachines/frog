@@ -1,3 +1,11 @@
+0.22 - 2020-11-17
+[Ko vd Sloot]
+* start using the tmp_stream() class form ticcutils 0.25
+
+0.21 - 2020-07-22
+[Ko van der Sloot]
+* Fixes a problem with temporary files not being cleaned up properly #92
+
 0.20.1 - 2020-04-15
 [Ko vd Sloot]
 Bug fix release.
