@@ -861,8 +861,7 @@ FrogAPI::FrogAPI( TiCC::CL_Options& Opts,
 		      << " threads instead" << endl;
     }
     else if ( options.debugFlag ){
-      DBG << "running on " << curt
-		      << " threads" << endl;
+      DBG << "running on " << curt << " threads" << endl;
     }
 
 #endif
