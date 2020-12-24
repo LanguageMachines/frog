@@ -35,6 +35,7 @@ matrix:
         - OPENMPFLAG=--disable-openmp
 
     - os: osx
+      osx_image: xcode11
       compiler: clang++
       cache:
         directories:
@@ -54,10 +55,10 @@ before_install:
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew update;
-#      brew install pkg-config;
+      brew install pkg-config;
       brew install autoconf-archive;
-#      brew install telnet;
-#      brew install libxml2;
+      brew install telnet;
+      brew install libxml2;
       brew install bzip2;
       brew install zlib;
       brew install libtar;
