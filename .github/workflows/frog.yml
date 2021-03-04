@@ -1,0 +1,154 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - '.github/**'
+
+  pull_request:
+    branches: [master]
+
+jobs:
+  notification:
+    runs-on: ubuntu-latest
+    name: Notify start to #gitlama
+    steps:
+      - name: IRC notification
+        uses: Gottox/irc-message-action@v1
+        with:
+          server: irc.uvt.nl
+          channel: '#gitlama'
+          nickname: GitHub
+          message: |-
+            ${{ github.actor }} started a build of ${{ github.event.repository.name }}
+
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        compiler: [g++, clang++]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Build Environment
+        run: |
+             if [ "$RUNNER_OS" == "Linux" ]; then
+                sudo apt-get install pkg-config autoconf-archive
+             else
+                brew upgrade;
+                brew install pkg-config;
+                brew install autoconf-archive;
+                brew install autoconf;
+                brew install automake;
+             fi
+      - name: Install Dependencies
+        run: |
+             if [ "$RUNNER_OS" == "Linux" ]; then
+                sudo apt-get install libicu-dev libxml2-dev libbz2-dev;
+                sudo apt-get install zlib1g-dev libtar-dev libexttextcat-dev;
+             else
+                brew install libxml2;
+                brew install bzip2;
+                brew install zlib;
+                brew install libtar
+                brew install libtextcat
+             fi
+      - name: install TiccUtils
+        env:
+          CXX: ${{ matrix.compiler }}
+        run: |
+          git clone https://github.com/LanguageMachines/ticcutils;
+          cd ticcutils;
+          bash bootstrap.sh;
+          ./configure;
+          make;
+          sudo make install;
+          cd ..;
+
+      - name: install libfolia
+        env:
+          CXX: ${{ matrix.compiler }}
+        run: |
+          git clone https://github.com/LanguageMachines/libfolia;
+          cd libfolia;
+          bash bootstrap.sh;
+          ./configure;
+          make;
+          sudo make install;
+          cd ..;
+
+      - name: install uctodata
+        env:
+          CXX: ${{ matrix.compiler }}
+        run: |
+          git clone https://github.com/LanguageMachines/uctodata;
+          cd uctodata;
+          bash bootstrap.sh;
+          ./configure;
+          make;
+          sudo make install;
+          cd ..;
+
+      - name: install ucto
+        env:
+          CXX: ${{ matrix.compiler }}
+        run: |
+          git clone https://github.com/LanguageMachines/ucto;
+          cd ucto;
+          bash bootstrap.sh;
+          ./configure;
+          make;
+          sudo make install;
+          cd ..;
+
+      - name: install frogdata
+        env:
+          CXX: ${{ matrix.compiler }}
+        run: |
+          git clone https://github.com/LanguageMachines/frogdata;
+          cd frogdata;
+          bash bootstrap.sh;
+          ./configure;
+          make;
+          sudo make install;
+          cd ..;
+
+      - name: bootstrap
+        run: sh bootstrap.sh
+      - name: configure
+        env:
+          CXX:  ${{ matrix.compiler }}
+        run: ./configure
+      - name: make
+        run: make
+      - name: install
+        run: sudo make install
+      - name: check
+        env:
+          CXX:  ${{ matrix.compiler }}
+        run: LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib make check
+        continue-on-error: true
+
+      - name: Notify IRC of failure
+        if: ${{ failure() }}
+        uses: Gottox/irc-message-action@v1
+        with:
+          server: irc.uvt.nl
+          channel: '#gitlama'
+          nickname: GitHub
+          message: |-
+            ${{ github.event.repository.name }} with ${{ matrix.compiler }} build by ${{ github.actor }} on ${{ matrix.os }}: FAILED
+
+      - name: Notify IRC of succes
+        if: ${{ success() }}
+        uses: Gottox/irc-message-action@v1
+        with:
+          server: irc.uvt.nl
+          channel: '#gitlama'
+          nickname: GitHub
+          message: |-
+            ${{ github.event.repository.name }} with ${{ matrix.compiler }} build by ${{ github.actor }} on ${{ matrix.os }}: SUCCESS
