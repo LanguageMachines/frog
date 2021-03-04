@@ -1,6 +1,9 @@
 name: C/C++ CI
 
 on:
+  schedule:
+    - cron: "* 23 * * 6"
+
   push:
     branches: [master]
     paths:
@@ -14,7 +17,7 @@ on:
 jobs:
   notification:
     runs-on: ubuntu-latest
-    name: Notify start to #gitlama
+    name: Notify start to ##gitlama
     steps:
       - name: IRC notification
         uses: Gottox/irc-message-action@v1
