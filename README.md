@@ -1,4 +1,8 @@
-[![Build Status](https://travis-ci.org/LanguageMachines/frog.svg?branch=master)](https://travis-ci.org/LanguageMachines/frog) [![Documentation Status](https://readthedocs.org/projects/frognlp/badge/?version=latest)](https://frognlp.readthedocs.io/?badge=latest) [![Language Machines Badge](http://applejack.science.ru.nl/lamabadge.php/frog)](http://applejack.science.ru.nl/languagemachines/) [![DOI](https://zenodo.org/badge/20526435.svg)](https://zenodo.org/badge/latestdoi/20526435) [![GitHub release](https://img.shields.io/github/release/LanguageMachines/frog.svg)](https://GitHub.com/LanguageMachines/frog/releases/) [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![GitHub build](https://github.com/LanguageMachines/ucto/actions/workflows/ucto.yml/badge.svg?branch=master)](https://github.com/LanguageMachines/ucto/actions/)
+[![Documentation Status](https://readthedocs.org/projects/frognlp/badge/?version=latest)](https://frognlp.readthedocs.io/?badge=latest)
+[![Language Machines Badge](http://applejack.science.ru.nl/lamabadge.php/frog)](http://applejack.science.ru.nl/languagemachines/)
+[![DOI](https://zenodo.org/badge/20526435.svg)](https://zenodo.org/badge/latestdoi/20526435) [![GitHub release](https://img.shields.io/github/release/LanguageMachines/frog.svg)](https://GitHub.com/LanguageMachines/frog/releases/)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 
 # Frog - A Tagger-Lemmatizer-Morphological-Analyzer-Dependency-Parser for Dutch
 
