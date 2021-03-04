@@ -105,6 +105,30 @@ jobs:
           sudo make install;
           cd ..;
 
+      - name: install timbl
+        env:
+          CXX: ${{ matrix.compiler }}
+        run: |
+          git clone https://github.com/LanguageMachines/timbl;
+          cd timbl;
+          bash bootstrap.sh;
+          ./configure;
+          make;
+          sudo make install;
+          cd ..;
+
+      - name: install mbt
+        env:
+          CXX: ${{ matrix.compiler }}
+        run: |
+          git clone https://github.com/LanguageMachines/mbt;
+          cd mbt;
+          bash bootstrap.sh;
+          ./configure;
+          make;
+          sudo make install;
+          cd ..;
+
       - name: install frogdata
         env:
           CXX: ${{ matrix.compiler }}
