@@ -2,7 +2,7 @@ name: C/C++ CI
 
 on:
   schedule:
-    - cron: "* 23 * * 6"
+    - cron: "0 23 * * 6"
 
   push:
     branches: [master]
