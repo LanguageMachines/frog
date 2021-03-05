@@ -1,6 +1,6 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  Copyright (c) 2006 - 2020
+  Copyright (c) 2006 - 2021
   CLST  - Radboud University
   ILK   - Tilburg University
 
