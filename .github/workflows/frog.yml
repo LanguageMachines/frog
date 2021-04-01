@@ -26,7 +26,7 @@ jobs:
           channel: '#gitlama'
           nickname: GitHub
           message: |-
-            ${{ github.actor }} started a build of ${{ github.event.repository.name }}
+            ${{ github.actor }} started a build of Frog
 
   build:
     runs-on: ${{ matrix.os }}
@@ -53,12 +53,14 @@ jobs:
              if [ "$RUNNER_OS" == "Linux" ]; then
                 sudo apt-get install libicu-dev libxml2-dev libbz2-dev;
                 sudo apt-get install zlib1g-dev libtar-dev libexttextcat-dev;
+		sudo apy-get install cppcheck
              else
                 brew install libxml2;
                 brew install bzip2;
                 brew install zlib;
                 brew install libtar
                 brew install libtextcat
+                brew install cppcheck
              fi
       - name: install TiccUtils
         env:
@@ -150,6 +152,8 @@ jobs:
         env:
           CXX:  ${{ matrix.compiler }}
         run: ./configure
+      - name: Static Code-check
+        run: cppcheck --enable=all --quiet --error-exitcode=0 .
       - name: make
         run: make
       - name: install
@@ -168,7 +172,7 @@ jobs:
           channel: '#gitlama'
           nickname: GitHub
           message: |-
-            ${{ github.event.repository.name }} with ${{ matrix.compiler }} build by ${{ github.actor }} on ${{ matrix.os }}: FAILED
+            Building Frog with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: FAILED
 
       - name: Notify IRC of succes
         if: ${{ success() }}
@@ -178,4 +182,4 @@ jobs:
           channel: '#gitlama'
           nickname: GitHub
           message: |-
-            ${{ github.event.repository.name }} with ${{ matrix.compiler }} build by ${{ github.actor }} on ${{ matrix.os }}: SUCCESS
+            Building Frog with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: SUCCESS
