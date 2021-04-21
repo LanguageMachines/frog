@@ -176,7 +176,11 @@ class FrogAPI {
   FrogAPI( TiCC::CL_Options&,
 	   TiCC::LogStream *,
 	   TiCC::LogStream * );
+  FrogAPI( const TiCC::Configuration&,
+	   TiCC::LogStream *,
+	   TiCC::LogStream * );
   ~FrogAPI();
+  void run_api( const TiCC::Configuration& );
   void run_on_files();
   bool run_a_server();
   void run_interactive();

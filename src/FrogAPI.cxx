@@ -770,7 +770,7 @@ FrogAPI::FrogAPI( TiCC::CL_Options& Opts,
     \param err_log A LogStream for error messages
     \param dbg_log A LogStream for debugging purposes
 
-    This will throw on problems with 'opt' or 'conf'
+    This will throw on problems with 'Opts'
 
     Otherwise a fully instantiated Frog will be available for further use
   */
@@ -782,7 +782,28 @@ FrogAPI::FrogAPI( TiCC::CL_Options& Opts,
   if (!parsed) {
     throw runtime_error( "init failed" );
   }
+  run_api( configuration );
+}
 
+FrogAPI::FrogAPI( const TiCC::Configuration& configuration,
+		  TiCC::LogStream *err_log,
+		  TiCC::LogStream *dbg_log ):
+  outS(0),
+  theErrLog(err_log),
+  theDbgLog(dbg_log),
+  myMbma(0),
+  myMblem(0),
+  myMwu(0),
+  myParser(0),
+  myCGNTagger(0),
+  myIOBTagger(0),
+  myNERTagger(0),
+  tokenizer(0)
+{
+  run_api( configuration );
+}
+
+void FrogAPI::run_api( const TiCC::Configuration& configuration ){
   if ( options.doServer ){
     // we use fork(). omp (GCC version) doesn't do well when omp is used
     // before the fork!
@@ -1050,6 +1071,7 @@ FrogAPI::FrogAPI( TiCC::CL_Options& Opts,
   }
   LOG << TiCC::Timer::now() <<  " Initialization done." << endl;
 }
+
 
 FrogAPI::~FrogAPI() {
   /// Destructor. Clears all resources
