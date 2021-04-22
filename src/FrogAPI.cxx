@@ -1826,6 +1826,7 @@ string FrogAPI::Frogtostringfromfile( const string& infilename ){
   stringstream ss;
   options.hide_timers = true;
   bool old_val = options.noStdOut;
+  ostream* old_out = outS;
   if ( options.doXMLout ){
     options.noStdOut = true;
   } else {
@@ -1834,12 +1835,12 @@ string FrogAPI::Frogtostringfromfile( const string& infilename ){
   }
   folia::Document *result = FrogFile( infilename );
   options.noStdOut = old_val;
+  outS = old_out;
   if ( result ){
     result->set_canonical( options.doKanon );
     ss << result;
     delete result;
   }
-  outS = NULL;
   return ss.str();
 }
 
