@@ -1823,19 +1823,23 @@ string FrogAPI::Frogtostringfromfile( const string& infilename ){
     Depending of the current frog settings the inputfile can be interpreted as
     XML, and the output will be XML or tab separated.
   */
+  stringstream ss;
   options.hide_timers = true;
   bool old_val = options.noStdOut;
   if ( options.doXMLout ){
     options.noStdOut = true;
+  } else {
+    options.noStdOut = false;
+    outS = &ss;
   }
   folia::Document *result = FrogFile( infilename );
   options.noStdOut = old_val;
-  stringstream ss;
   if ( result ){
     result->set_canonical( options.doKanon );
     ss << result;
     delete result;
   }
+  outS = NULL;
   return ss.str();
 }
 
