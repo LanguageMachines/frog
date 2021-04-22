@@ -565,7 +565,7 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
     }
     options.doXMLout = true;
   }
-  else if ( Opts.extract('X',options. XMLoutFileName ) ){
+  else if ( Opts.extract('X',options.XMLoutFileName ) ){
     options.doXMLout = true;
   }
 
@@ -782,24 +782,6 @@ FrogAPI::FrogAPI( TiCC::CL_Options& Opts,
   if (!parsed) {
     throw runtime_error( "init failed" );
   }
-  run_api( configuration );
-}
-
-FrogAPI::FrogAPI( const TiCC::Configuration& configuration,
-		  TiCC::LogStream *err_log,
-		  TiCC::LogStream *dbg_log ):
-  outS(0),
-  theErrLog(err_log),
-  theDbgLog(dbg_log),
-  myMbma(0),
-  myMblem(0),
-  myMwu(0),
-  myParser(0),
-  myCGNTagger(0),
-  myIOBTagger(0),
-  myNERTagger(0),
-  tokenizer(0)
-{
   run_api( configuration );
 }
 
