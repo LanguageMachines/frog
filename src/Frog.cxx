@@ -186,8 +186,7 @@ int main(int argc, char *argv[]) {
        << Timbl::VersionName() << ", "
        << TiCCServer::VersionName() << ", "
        << Tagger::VersionName() << "]" << endl;
-  TiCC::LogStream *theErrLog
-    = new TiCC::LogStream( cerr, "frog-", StampMessage );
+  TiCC::LogStream *theErrLog = 0;
   ostream *the_dbg_stream = 0;
   TiCC::LogStream *theDbgLog = 0;
   std::ios_base::sync_with_stdio(false);
@@ -206,13 +205,11 @@ int main(int argc, char *argv[]) {
     Opts.init(argc, argv);
     if ( Opts.is_present('V' ) || Opts.is_present("version" ) ){
       // we already did show what we wanted.
-      delete theErrLog;
       return EXIT_SUCCESS;
     }
     if ( Opts.is_present( 'h' )
 	 || Opts.is_present( "help" ) ) {
       usage();
-      delete theErrLog;
       return EXIT_SUCCESS;
     };
     string remove_command = "find frog.*.debug -mtime +1 -exec rm {} \\;";
@@ -221,6 +218,7 @@ int main(int argc, char *argv[]) {
     if ( system( remove_command.c_str() ) ){
       // nothing
     }
+    theErrLog = new TiCC::LogStream( cerr, "frog-", StampMessage );
     Opts.extract( "debugfile", db_filename );
     if ( db_filename.empty() ){
       db_filename = "frog." + randnum(8) + ".debug";
