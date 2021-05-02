@@ -12,7 +12,7 @@ on:
       - '.github/**'
 
   pull_request:
-    branches: [master] 
+    branches: [master]
 
 jobs:
   notification:
@@ -150,8 +150,12 @@ jobs:
         run: sh bootstrap.sh
       - name: configure
         env:
-          CXX:  ${{ matrix.compiler }}
+          CXX: ${{ matrix.compiler }}
         run: ./configure
+      - id: compiler
+        run: |
+          id=$(echo ${{matrix.compiler}} | cut -d\+ -f1)
+          echo "::set-output name=id::$id"
       - name: Static Code-check
         run: cppcheck --enable=all --quiet --error-exitcode=0 .
       - name: make
@@ -160,7 +164,7 @@ jobs:
         run: sudo make install
       - name: check
         env:
-          CXX:  ${{ matrix.compiler }}
+          CXX: ${{ matrix.compiler }}
         run: LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib make check
         continue-on-error: true
 
@@ -170,7 +174,7 @@ jobs:
         with:
           server: irc.uvt.nl
           channel: '#gitlama'
-          nickname: GitHub
+          nickname: GH-${{ runner.os }}-${{ steps.compiler.outputs.id }}
           message: |-
             Building Frog with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: FAILED
 
@@ -180,6 +184,6 @@ jobs:
         with:
           server: irc.uvt.nl
           channel: '#gitlama'
-          nickname: GitHub
+          nickname: GH-${{ runner.os }}-${{ steps.compiler.outputs.id }}
           message: |-
             Building Frog with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: SUCCESS
