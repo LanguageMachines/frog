@@ -2639,11 +2639,6 @@ folia::Document *FrogAPI::run_folia_engine( const string& infilename,
       if ( options.debugFlag > 0 ){
 	DBG << "done with sentence " << sentence_done << endl;
       }
-      if ( engine.next() ){
-	if ( options.debugFlag > 1 ){
-	  DBG << "looping for more ..." << endl;
-	}
-      }
     }
     if ( sentence_done == 0 ){
       LOG << "Strange: didn't process any sentence...." << endl;
