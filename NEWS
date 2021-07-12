@@ -1,3 +1,10 @@
+0.23 - 2021
+[Ko vd Sloot]
+* requires libfolia 2.9
+* replaced TravisCI by GitHub actions
+* fixed https://github.com/proycon/python-frog/issues/20
+* some refactoring to avoid unneeded creation of files
+
 0.22 - 2020-11-17
 [Ko vd Sloot]
 * start using the tmp_stream() class form ticcutils 0.25
