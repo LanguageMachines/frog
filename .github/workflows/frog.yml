@@ -185,6 +185,10 @@ jobs:
           message: |-
             Building Frog with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: FAILED
 
+      - name: show log on failure
+        if: ${{ failure() }}
+        run: !-
+          cat testserver.diff
       - name: Notify IRC of succes
         if: ${{ success() }}
         uses: Gottox/irc-message-action@v1
