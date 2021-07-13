@@ -43,23 +43,24 @@ jobs:
                 sudo apt-get install pkg-config autoconf-archive
              else
                 brew upgrade;
-                brew install pkg-config;
-                brew install autoconf-archive;
-                brew install autoconf;
-                brew install automake;
+                brew install pkg-config
+                brew install autoconf-archive
+                brew install autoconf
+                brew install automake
              fi
       - name: Install Dependencies
         run: |
              if [ "$RUNNER_OS" == "Linux" ]; then
-                sudo apt-get install libicu-dev libxml2-dev libbz2-dev;
-                sudo apt-get install zlib1g-dev libtar-dev libexttextcat-dev;
-                sudo apt-get install cppcheck
+                sudo apt-get install libicu-dev libxml2-dev libbz2-dev
+                sudo apt-get install zlib1g-dev libtar-dev libexttextcat-dev
+                sudo apt-get install expect cppcheck
              else
-                brew install libxml2;
-                brew install bzip2;
-                brew install zlib;
+                brew install libxml2
+                brew install bzip2
+                brew install zlib
                 brew install libtar
                 brew install libtextcat
+                brew install telnet
                 brew install cppcheck
              fi
       - name: install TiccUtils
@@ -180,7 +181,8 @@ jobs:
         if: ${{ steps.frogtests.output.status }} > 0
         run: |
           cat frogtests/testserver.log
-          cat frogtests/testserver-n.log
+          cat frogtests/testserver.err
+          cat frogtests/testserver5.out
 
       - name: Notify IRC of failure
         if: ${{ steps.frogtests.output.status }} > 0
