@@ -17,7 +17,7 @@ on:
 jobs:
   notification:
     runs-on: ubuntu-latest
-    name: Notify start to ##gitlama
+    name: Notify start to IRC/gitlama
     steps:
       - name: IRC notification
         uses: Gottox/irc-message-action@v1
@@ -166,6 +166,14 @@ jobs:
         env:
           CXX: ${{ matrix.compiler }}
         run: LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib make check
+        continue-on-error: true
+
+      - name: frogtests
+        run: |
+          git clone --depth=1 --single-branch https://github.com/LanguageMachines/frogtests.git;
+          cd frogtests;
+          LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib ./testall.sh;
+          cd ..;
         continue-on-error: true
 
       - name: Notify IRC of failure
