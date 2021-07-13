@@ -187,7 +187,7 @@ jobs:
 
       - name: show log on failure
         if: ${{ failure() }}
-        run: !-
+        run: |-
           cat testserver.diff
       - name: Notify IRC of succes
         if: ${{ success() }}
