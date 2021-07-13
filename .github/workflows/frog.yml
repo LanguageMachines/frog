@@ -180,9 +180,8 @@ jobs:
       - name: show log on failure
         if: ${{ steps.frogtests.output.status }} > 0
         run: |
-          cat frogtests/testserver.log
-          cat frogtests/testserver.err
-          cat frogtests/testserver5.out
+          cat frogtests/testxmlin.err
+          cat frogtests/testxmlin.out
 
       - name: Notify IRC of failure
         if: ${{ steps.frogtests.output.status }} > 0
@@ -195,7 +194,7 @@ jobs:
             Building Frog with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: FAILED
 
       - name: Notify IRC of succes
-        if: ${{ steps.frogtests.output.status }} = 0
+        if: ${{ steps.frogtests.output.status }} == 0
         uses: Gottox/irc-message-action@v1
         with:
           server: irc.uvt.nl
