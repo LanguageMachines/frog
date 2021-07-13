@@ -173,6 +173,7 @@ jobs:
           git clone --depth=1 --single-branch https://github.com/LanguageMachines/frogtests.git;
           cd frogtests;
           frog_bin=/usr/local/bin LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib ./testall.sh;
+          echo "::set-output name=status::$?"
         continue-on-error: true
 
       - name: Notify IRC of failure
@@ -186,9 +187,10 @@ jobs:
             Building Frog with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: FAILED
 
       - name: show log on failure
-        if: ${{ failure() }}
+        if: ${{ steps.frogtests.output.status }} > 0
         run: |-
           cat testserver.diff
+
       - name: Notify IRC of succes
         if: ${{ success() }}
         uses: Gottox/irc-message-action@v1
