@@ -176,6 +176,11 @@ jobs:
           echo "::set-output name=status::$?"
         continue-on-error: true
 
+      - name: show log on failure
+        if: ${{ steps.frogtests.output.status }} > 0
+        run: |
+          cat frogtests/testserver.diff
+
       - name: Notify IRC of failure
         if: ${{ failure() }}
         uses: Gottox/irc-message-action@v1
@@ -185,11 +190,6 @@ jobs:
           nickname: GH-${{ runner.os }}-${{ steps.compiler.outputs.id }}
           message: |-
             Building Frog with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: FAILED
-
-      - name: show log on failure
-        if: ${{ steps.frogtests.output.status }} > 0
-        run: |-
-          cat testserver.diff
 
       - name: Notify IRC of succes
         if: ${{ success() }}
