@@ -177,21 +177,20 @@ jobs:
           TEST_STAT=$(cat status.tmp)
           echo "test_status=$TEST_STAT"
           echo "test_status=$TEST_STAT" >> $GITHUB_ENV
-          echo "do we get here:$TEST_STAT:"
-          echo "env_status=${{ env.test_status }}"
         continue-on-error: true
+
       - name: Show Status
         run: |
           echo "env.status=${{ env.test_status }}"
 
       - name: show log on failure
-        if: env.test_status != '0'
+        if: ${{ env.test_status != '0' }}
         run: |
           cat frogtests/testxmlin.diff
 
       - name: Notify IRC of failure
 
-        if: env.test_status != '0'
+        if: ${{ env.test_status != '0' }}
         uses: Gottox/irc-message-action@v1
         with:
           server: irc.uvt.nl
@@ -201,7 +200,7 @@ jobs:
             Building Frog with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: FAILED
 
       - name: Notify IRC of succes
-        if: env.test_status != '0'
+        if: ${{ env.test_status == '0' }}
         uses: Gottox/irc-message-action@v1
         with:
           server: irc.uvt.nl
