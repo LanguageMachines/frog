@@ -159,6 +159,7 @@ jobs:
           CXX: ${{ matrix.compiler }}
         run: ./configure
       - name: compiler-id
+        id: compiler
         run: |
           id=$(echo ${{matrix.compiler}} | cut -d\+ -f1)
           echo "::set-output name=id::$id"
