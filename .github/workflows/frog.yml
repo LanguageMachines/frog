@@ -41,8 +41,8 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
+      - uses: actions/checkout@v2
       - name: Install Build Environment
-        uses: actions/checkout@v2
         run: |
              if [ "$RUNNER_OS" == "Linux" ]; then
                 sudo apt-get install pkg-config autoconf-archive
@@ -54,7 +54,6 @@ jobs:
                 brew install automake
              fi
       - name: Install Dependencies
-        uses: actions/checkout@v2
         run: |
              if [ "$RUNNER_OS" == "Linux" ]; then
                 sudo apt-get install libicu-dev libxml2-dev libbz2-dev
