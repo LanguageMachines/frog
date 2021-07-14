@@ -96,7 +96,6 @@ using TiCC::operator<<;
 const string ISO_SET = "http://raw.github.com/proycon/folia/master/setdefinitions/iso639_3.foliaset";
 
 string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
-string configFileName = configDir + "frog.cfg";
 
 string FrogAPI::defaultConfigDir( const string& language ){
   /// return the default location of the configuration files
@@ -450,6 +449,8 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
   }
   options.doAlpino = Opts.extract("alpino", opt_val);
   if ( options.doAlpino ){
+    options.doParse = false;
+    options.doMwu = false;
     if ( !opt_val.empty() ){
       if ( opt_val == "server" ){
 	options.doAlpinoServer = true;
@@ -460,10 +461,6 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
 	return false;
       }
     }
-  }
-  if ( options.doAlpino ){
-    options.doParse = false;
-    options.doMwu = false;
   }
 #ifdef HAVE_OPENMP
   if ( options.doServer ) {
