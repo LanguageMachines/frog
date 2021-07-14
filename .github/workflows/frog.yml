@@ -172,7 +172,6 @@ jobs:
       - name: frogtests
         run: |
           git clone --depth=1 --single-branch https://github.com/LanguageMachines/frogtests.git;
-          echo "where does this message go?"
           cd frogtests;
           frog_bin=/usr/local/bin LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib ./testaction.sh;
           echo "::set-output name=status::$TEST_STAT";
@@ -181,6 +180,11 @@ jobs:
 
       - name: show log on failure
         if: steps.frogtests.outputs.status == 0
+        run: |
+          cat frogtests/testxmlin.diff
+
+      - name: show log on succes too
+        if: steps.frogtests.outputs.status != 0
         run: |
           cat frogtests/testxmlin.diff
 
