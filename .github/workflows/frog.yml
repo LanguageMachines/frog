@@ -175,7 +175,8 @@ jobs:
           echo "where does this message go?"
           cd frogtests;
           frog_bin=/usr/local/bin LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib ./testaction.sh;
-          echo "::set-output name=status::$TEST_STAT"
+          echo "::set-output name=status::$TEST_STAT";
+          echo "do we get here:$TEST_STAT:"
         continue-on-error: true
 
       - name: show log on failure
