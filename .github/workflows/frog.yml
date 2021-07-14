@@ -173,13 +173,11 @@ jobs:
         run: |
           git clone --depth=1 --single-branch https://github.com/LanguageMachines/frogtests.git;
           cd frogtests;
-          frog_bin=/usr/local/bin LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib ./testall.sh;
-          echo "::set-output name=status::$?"
-          echo Status=${{ steps.frogtests.outputs.status }}
+          frog_bin=/usr/local/bin LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib ./testaction.sh;
         continue-on-error: true
 
       - name: show log on failure
-        if: steps.frogtests.outputs.status != 0
+        if: steps.frogtests.outputs.status == 0
         run: |
           cat frogtests/testxmlin.diff
 
