@@ -36,8 +36,13 @@ jobs:
         compiler: [g++, clang++]
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.0
+        with:
+          access_token: ${{ github.token }}
+
       - name: Install Build Environment
+        uses: actions/checkout@v2
         run: |
              if [ "$RUNNER_OS" == "Linux" ]; then
                 sudo apt-get install pkg-config autoconf-archive
@@ -49,6 +54,7 @@ jobs:
                 brew install automake
              fi
       - name: Install Dependencies
+        uses: actions/checkout@v2
         run: |
              if [ "$RUNNER_OS" == "Linux" ]; then
                 sudo apt-get install libicu-dev libxml2-dev libbz2-dev
@@ -175,13 +181,8 @@ jobs:
           cd frogtests;
           frog_bin=/usr/local/bin LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib ./testaction.sh;
           TEST_STAT=$(cat status.tmp)
-          echo "test_status=$TEST_STAT"
           echo "test_status=$TEST_STAT" >> $GITHUB_ENV
         continue-on-error: true
-
-      - name: Show Status
-        run: |
-          echo "env.status=${{ env.test_status }}"
 
       - name: show log on failure
         if: ${{ env.test_status != '0' }}
@@ -199,7 +200,7 @@ jobs:
           message: |-
             Building Frog with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: FAILED
 
-      - name: Notify IRC of succes
+      - name: Notify IRC of success
         if: ${{ env.test_status == '0' }}
         uses: Gottox/irc-message-action@v1
         with:
