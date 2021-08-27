@@ -137,7 +137,7 @@ PKG_CHECK_MODULES([ucto], [ucto >= 0.15] )
 CXXFLAGS="$CXXFLAGS $ucto_CFLAGS"
 LIBS="$ucto_LIBS $LIBS"
 
-UCTO_VERSION=`pkg-config --modversion ucto`
+UCTO_VERSION=`$PKG_CONFIG --modversion ucto`
 UCTO_INT="${UCTO_VERSION//.}" # no dots
 UCTO_INT=$((10#$UCTO_INT))    # no leading 0 (that's octal)
 AC_DEFINE_UNQUOTED( [UCTO_INT_VERSION],
