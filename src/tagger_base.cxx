@@ -423,7 +423,7 @@ vector<TagResult> BaseTagger::tagLine( const UnicodeString& line ){
     \param line a (UTF8 encoded) string, may be multilined and include Enrichments
     \return a vector of TagResult
 
-    Depending on the configurarion, the input is send to the local MBT tagger
+    Depending on the configuration, the input is send to the local MBT tagger
     or the associated MBT server.
   */
   if ( !_host.empty() ){

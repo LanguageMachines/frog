@@ -412,7 +412,7 @@ void NERTagger::Classify( frog_data& swords ){
       ner_tags.push_back( make_pair( assigned, tag.confidence() ) );
     }
     if ( !override_tags.empty() ){
-      vector<string> empty;
+      vector<UnicodeString> empty;
       merge_override( ner_tags, override_tags, true, empty );
     }
   }
@@ -542,7 +542,7 @@ UnicodeString to_tag( const UnicodeString& label, bool inside ){
 void NERTagger::merge_override( vector<tc_pair>& tags,
 				const vector<tc_pair>& overrides,
 				bool unconditional,
-				const vector<string>& POS_tags ) const {
+				const vector<UnicodeString>& POS_tags ) const {
   /// merge overrides into the tc_pair vector
   /*!
     \param tags the list of tc_pair to merge into
@@ -556,8 +556,8 @@ void NERTagger::merge_override( vector<tc_pair>& tags,
   for ( size_t i=0; i < tags.size(); ++i ){
     if ( overrides[i].first != "O"
 	 && ( POS_tags.empty()
-	      || POS_tags[i].find("SPEC(") != string::npos
-	      || POS_tags[i].find("N(") != string::npos ) ){
+	      || POS_tags[i].indexOf("SPEC(") != -1
+	      || POS_tags[i].indexOf("N(") != -1 ) ){
       // if ( i == 0 ){
       //  	 cerr << "override = " << override << endl;
       //  	 cerr << "ner tags = " << tags << endl;

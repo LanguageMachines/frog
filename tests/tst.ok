@@ -1,12 +1,12 @@
-1	Dit	dit	[dit]	VNW(aanw,pron,stan,vol,3o,ev)	0.777085	O	B-NP		
-2	is	zijn	[zijn]	WW(pv,tgw,ev)	0.999891	O	B-VP		
-3	een	een	[een]	LID(onbep,stan,agr)	0.999113	O	B-NP		
-4	test	test	[test]	N(soort,ev,basis,zijd,stan)	0.991304	O	I-NP		
-5	van	van	[van]	VZ(init)	0.959310	O	B-PP		
-6	Frog	Frog	[Frog]	SPEC(deeleigen)	1.000000	B-PER	B-NP		
-7	op	op	[op]	VZ(init)	0.997760	O	B-PP		
-8	de	de	[de]	LID(bep,stan,rest)	0.999964	O	B-NP		
-9	datum	datum	[datum]	N(soort,ev,basis,zijd,stan)	0.997691	O	I-NP		
-10	09-01-2012	09-01-2012	[09-01-2012]	TW(hoofd,vrij)	0.533224	O	B-NP		
-11	!	!	[!]	LET()	1.000000	O	O		
+1	Dit	dit	[dit]	VNW(aanw,pron,stan,vol,3o,ev)	0.777085	O	B-NP				
+2	is	zijn	[zijn]	WW(pv,tgw,ev)	0.999891	O	B-VP				
+3	een	een	[een]	LID(onbep,stan,agr)	0.999113	O	B-NP				
+4	test	test	[test]	N(soort,ev,basis,zijd,stan)	0.991304	O	I-NP				
+5	van	van	[van]	VZ(init)	0.959312	O	B-PP				
+6	Frog	Frog	[Frog]	SPEC(deeleigen)	1.000000	B-PER	B-NP				
+7	op	op	[op]	VZ(init)	0.997760	O	B-PP				
+8	de	de	[de]	LID(bep,stan,rest)	0.999964	O	B-NP				
+9	datum	datum	[datum]	N(soort,ev,basis,zijd,stan)	0.997691	O	I-NP				
+10	09-01-2012	09-01-2012	[09-01-2012]	TW(hoofd,vrij)	0.532451	O	B-NP				
+11	!	!	[!]	LET()	1.000000	O	O				
 

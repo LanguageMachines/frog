@@ -69,7 +69,7 @@ class NERTagger: public BaseTagger {
   void merge_override( std::vector<tc_pair>&,
 		       const std::vector<tc_pair>&,
 		       bool,
-		       const std::vector<std::string>& ) const;
+		       const std::vector<icu::UnicodeString>& ) const;
 
  private:
   bool read_gazets( const std::string&,
