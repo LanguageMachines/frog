@@ -192,12 +192,11 @@ void Test( istream& in, ostream& os ){
 	for ( const auto& tr : tagrv ){
 	  UnicodeString uWord = tr.word();
 	  myMblem.Classify( uWord );
-	  myMblem.filterTag( TiCC::UnicodeToUTF8(tr.assigned_tag()) );
-	  vector<pair<string,string> > res = myMblem.getResult();
+	  myMblem.filterTag( tr.assigned_tag() );
+	  vector<pair<UnicodeString,UnicodeString> > res = myMblem.getResult();
 	  UnicodeString line = tr.word() + " {" + tr.assigned_tag() + "}\t";
 	  for ( const auto& p : res ){
-	    line += TiCC::UnicodeFromUTF8(p.first) + "["
-	      + TiCC::UnicodeFromUTF8(p.second) + "]/";
+	    line += p.first + "[" + p.second + "]/";
 	  }
 	  line.remove(line.length()-1);
 	  line += "\n";
@@ -220,11 +219,11 @@ void Test( istream& in, ostream& os ){
 	  else {
 	    UnicodeString uWord = TiCC::UnicodeFromUTF8(parts[0]);
 	    myMblem.Classify( uWord );
-	    vector<pair<string,string> > res = myMblem.getResult();
-	    string line =  parts[0] + ",";
-	    set<string> out_set;
+	    vector<pair<UnicodeString,UnicodeString> > res = myMblem.getResult();
+	    UnicodeString line =  TiCC::UnicodeFromUTF8(parts[0]) + ",";
+	    set<UnicodeString> out_set;
 	    for ( const auto& p : res ){
-	      if ( p.first != parts[0] || out_set.empty() ){
+	      if ( p.first != TiCC::UnicodeFromUTF8(parts[0]) || out_set.empty() ){
 		out_set.insert( p.first );
 	      }
 	    }
@@ -235,16 +234,16 @@ void Test( istream& in, ostream& os ){
 	  }
 	}
 	else {
-	  vector<string> parts = TiCC::split( s );
+	  vector<UnicodeString> parts = TiCC::split( TiCC::UnicodeFromUTF8(s) );
 	  for ( const auto& w : parts ){
-	    UnicodeString uWord = TiCC::UnicodeFromUTF8(w);
+	    UnicodeString uWord = w;
 	    myMblem.Classify( uWord );
-	    vector<pair<string,string> > res = myMblem.getResult();
-	    string line = w + "\t";
+	    vector<pair<UnicodeString,UnicodeString> > res = myMblem.getResult();
+	    UnicodeString line = w + "\t";
 	    for ( const auto& p : res ){
 	      line += p.first + "[" + p.second + "]/";
 	    }
-	    line.erase(line.length()-1);
+	    line.remove(line.length()-1);
 	    line += "\n";
 	    os << line;
 	  }

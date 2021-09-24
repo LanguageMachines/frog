@@ -86,10 +86,10 @@ void IOBTagger::Classify( frog_data& swords ){
 #pragma omp critical (dataupdate)
   {
     for ( const auto& w : swords.units ){
-      UnicodeString word = TiCC::UnicodeFromUTF8( w.word);
+      UnicodeString word = w.word;
       word = filter_spaces( word );
       words.push_back( word );
-      ptags.push_back( TiCC::UnicodeFromUTF8(w.tag) );
+      ptags.push_back( w.tag );
     }
   }
 

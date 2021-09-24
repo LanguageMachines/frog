@@ -405,18 +405,6 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
   return json_to_TR( my_json );
 }
 
-UnicodeString filter_spaces( const UnicodeString& in ){
-  // the word may contain spaces, remove them all!
-  UnicodeString result;
-  for ( int i=0; i < in.length(); ++i ){
-    if ( u_isspace( in[i] ) ){
-      continue;
-    }
-    result += in[i];
-  }
-  return result;
-}
-
 vector<TagResult> BaseTagger::tagLine( const UnicodeString& line ){
   /// tag a string into a vector of TagResult elements
   /*!
@@ -539,7 +527,7 @@ vector<tag_entry> BaseTagger::extract_sentence( const frog_data& sent ){
   */
   vector<tag_entry> result;
   for ( const auto& sword : sent.units ){
-    icu::UnicodeString word = TiCC::UnicodeFromUTF8(sword.word);
+    icu::UnicodeString word = sword.word;
     if ( filter ){
       word = filter->filter( word );
     }

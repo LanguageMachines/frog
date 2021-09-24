@@ -95,7 +95,7 @@ class Mwu {
   std::string _version;
   std::string textclass;
   std::string mwu_tagset;
-  std::string glue_tag;
+  icu::UnicodeString glue_tag;
   TiCC::UniFilter *filter;
 };
 

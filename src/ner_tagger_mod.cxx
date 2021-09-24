@@ -314,10 +314,10 @@ void NERTagger::Classify( frog_data& swords ){
 #pragma omp critical (dataupdate)
   {
     for ( const auto& w : swords.units ){
-      UnicodeString word = TiCC::UnicodeFromUTF8(w.word);
+      UnicodeString word = w.word;
       word = filter_spaces( word );
       words.push_back( word );
-      pos_tags.push_back( TiCC::UnicodeFromUTF8(w.tag) );
+      pos_tags.push_back( w.tag );
     }
   }
   vector<tc_pair> ner_tags;
@@ -556,8 +556,8 @@ void NERTagger::merge_override( vector<tc_pair>& tags,
   for ( size_t i=0; i < tags.size(); ++i ){
     if ( overrides[i].first != "O"
 	 && ( POS_tags.empty()
-	      || POS_tags[i].indexOf("SPEC(") != -1
-	      || POS_tags[i].indexOf("N(") != -1 ) ){
+	      || POS_tags[i].indexOf("SPEC(") == 0
+	      || POS_tags[i].indexOf("N(") == 0 ) ){
       // if ( i == 0 ){
       //  	 cerr << "override = " << override << endl;
       //  	 cerr << "ner tags = " << tags << endl;

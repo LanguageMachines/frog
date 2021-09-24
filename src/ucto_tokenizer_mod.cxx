@@ -632,7 +632,7 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
 	cerr << "Word(" << args << ") creation failed: " << e.what() << endl;
 	exit(EXIT_FAILURE);
       }
-      w->settext( word.word, textclass );
+      w->setutext( word.word, textclass );
       if (  debug > 5 ){
 	DBG << "add_result, create a word, done:" << w << endl;
       }

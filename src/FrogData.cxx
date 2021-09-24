@@ -33,6 +33,7 @@
 #include <iomanip>
 #include "ticcutils/PrettyPrint.h"
 #include "ticcutils/StringOps.h"
+#include "ticcutils/Unicode.h"
 #include "frog/FrogData.h"
 #include "frog/mbma_brackets.h"
 
@@ -66,7 +67,7 @@ json frog_record::to_json() const {
     \return an JSON structure
   */
   json result;
-  result["word"] = word;
+  result["word"] = TiCC::UnicodeToUTF8(word);
   if ( !token_class.empty() ){
     json tok;
     tok["token"] = token_class;
@@ -90,9 +91,9 @@ json frog_record::to_json() const {
   else if ( !morph_string.empty() ){
     result["morph"] = morph_string;
   }
-  if ( !tag.empty() ){
+  if ( !tag.isEmpty() ){
     json tg;
-    tg["tag"] = tag;
+    tg["tag"] = TiCC::UnicodeToUTF8(tag);
     tg["confidence"] = tag_confidence;
     result["pos"] = tg;
   }
@@ -237,14 +238,14 @@ string frog_data::sentence( bool tokenized ) const {
     \return a UTF8 string of the orginal words, separated by 1 space
     except when the no_space value is set AND \e tokenized is true
    */
-  string result;
+  UnicodeString result;
   for ( const auto& it : units ){
     result += it.word;
     if ( !tokenized || !it.no_space ){
       result += " ";
     }
   }
-  return result;
+  return TiCC::UnicodeToUTF8(result);
 }
 
 void frog_data::resolve_mwus(){

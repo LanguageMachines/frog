@@ -109,7 +109,7 @@ void Mwu::add( frog_record& fd ){
   /*!
     \param fd The frog_data structure with the information to use
    */
-  icu::UnicodeString tmp = TiCC::UnicodeFromUTF8(fd.word);
+  icu::UnicodeString tmp = fd.word;
   if ( filter ){
     tmp = filter->filter( tmp );
   }
@@ -198,7 +198,7 @@ bool Mwu::init( const TiCC::Configuration& config ) {
     glue_tag = "SPEC(deeleigen)";
   }
   else {
-    glue_tag = val;
+    glue_tag = TiCC::UnicodeFromUTF8(val);
   }
 
   string cls = config.lookUp( "outputclass" );

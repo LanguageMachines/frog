@@ -59,8 +59,8 @@ class Mbma {
   void add_provenance( folia::Document&, folia::processor * ) const;
   void Classify( frog_record& );
   void Classify( const icu::UnicodeString& );
-  void filterHeadTag( const std::string& );
-  void filterSubTags( const std::vector<std::string>& );
+  void filterHeadTag( const icu::UnicodeString& );
+  void filterSubTags( const std::vector<icu::UnicodeString>& );
   void assign_compounds();
   std::vector<std::string> getResult() const;
   std::vector<std::pair<std::string,std::string>> getResults( ) const;
@@ -82,7 +82,9 @@ class Mbma {
   bool readsettings( const std::string&, const std::string& );
   void fillMaps();
   void init_cgn( const std::string&, const std::string& );
-  void getResult( frog_record&, const icu::UnicodeString&, const std::string& ) const;
+  void getResult( frog_record&,
+		  const icu::UnicodeString&,
+		  const icu::UnicodeString& ) const;
   std::vector<std::string> make_instances( const icu::UnicodeString& word );
   void call_server( const std::vector<std::string>&,
 		    std::vector<std::string>& );

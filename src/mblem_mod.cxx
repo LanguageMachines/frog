@@ -290,7 +290,7 @@ string Mblem::make_instance( const icu::UnicodeString& in ) {
   return result;
 }
 
-void Mblem::filterTag( const string& postag ){
+void Mblem::filterTag( const UnicodeString& postag ){
   /// filater all non-matching tags out of the mblem results
   /*!
     \param postag the tag, given by the CGN-tagger, that should match
@@ -300,7 +300,7 @@ void Mblem::filterTag( const string& postag ){
   */
   auto it = mblemResult.begin();
   while( it != mblemResult.end() ){
-    string tag = it->getTag();
+    UnicodeString tag = it->getTag();
     if ( postag == tag ){
       if ( debug > 1 ){
 	DBG << "compare cgn-tag " << postag << " with mblem-tag " << tag
@@ -328,7 +328,7 @@ void Mblem::makeUnique( ){
   */
   auto it = mblemResult.begin();
   while( it != mblemResult.end() ){
-    string lemma = it->getLemma();
+    UnicodeString lemma = it->getLemma();
     auto it2 = it+1;
     while( it2 != mblemResult.end() ){
       if (debug > 1){
@@ -390,9 +390,9 @@ void Mblem::Classify( frog_record& fd ){
     All 'normal' cases are handled over to the Timbl classifier
   */
   icu::UnicodeString uword;
-  string pos;
+  icu::UnicodeString pos;
   string token_class;
-  uword = TiCC::UnicodeFromUTF8(fd.word);
+  uword = fd.word;
   pos = fd.tag;
   token_class = fd.token_class;
   if (debug > 1 ){
@@ -411,7 +411,7 @@ void Mblem::Classify( frog_record& fd ){
     }
     return;
   }
-  auto const& it1 = token_strip_map.find( pos );
+  auto const& it1 = token_strip_map.find( TiCC::UnicodeToUTF8(pos) );
   if ( it1 != token_strip_map.end() ){
     // some tag/tokenizer_class combinations are special
     // we have to strip a few letters to get a lemma
@@ -429,7 +429,7 @@ void Mblem::Classify( frog_record& fd ){
       return;
     }
   }
-  if ( one_one_tags.find(pos) != one_one_tags.end() ){
+  if ( one_one_tags.find( TiCC::UnicodeToUTF8(pos)) != one_one_tags.end() ){
     // some tags are just taken as such
     string word = TiCC::UnicodeToUTF8(uword);
 #pragma omp critical (dataupdate)
@@ -456,8 +456,8 @@ void Mblem::Classify( frog_record& fd ){
 #pragma omp critical (dataupdate)
     {
       for ( auto const& it : mblemResult ){
-	string result = it.getLemma();
-	fd.lemmas.push_back( result );
+	UnicodeString result = it.getLemma();
+	fd.lemmas.push_back( TiCC::UnicodeToUTF8(result) );
       }
     }
   }
@@ -681,7 +681,7 @@ void Mblem::Classify( const icu::UnicodeString& uWord ){
     if ( debug > 1 ){
       DBG << "appending lemma " << lemma << " and tag " << restag << endl;
     }
-    mblemResult.push_back( mblemData( TiCC::UnicodeToUTF8(lemma), restag ) );
+    mblemResult.push_back( mblemData( lemma, TiCC::UnicodeFromUTF8(restag) ) );
   } // while
   if ( debug > 1) {
     DBG << "stored lemma and tag options: " << mblemResult.size()
@@ -693,9 +693,9 @@ void Mblem::Classify( const icu::UnicodeString& uWord ){
   }
 }
 
-vector<pair<string,string> > Mblem::getResult() const {
+vector<pair<UnicodeString,UnicodeString> > Mblem::getResult() const {
   /// extract the results into a list of lemma/tag pairs
-  vector<pair<string,string> > result;
+  vector<pair<UnicodeString,UnicodeString> > result;
   for ( const auto& mbr : mblemResult ){
     result.push_back( make_pair( mbr.getLemma(),
 				 mbr.getTag() ) );

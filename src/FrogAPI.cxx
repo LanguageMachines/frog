@@ -1857,7 +1857,7 @@ frog_data extract_fd( vector<Tokenizer::Token>& tokens ){
     const auto tok = tokens.front();
     tokens.erase(tokens.begin());
     frog_record tmp;
-    tmp.word = TiCC::UnicodeToUTF8(tok.us);
+    tmp.word = tok.us;
     tmp.token_class = TiCC::UnicodeToUTF8(tok.type);
     tmp.no_space = (tok.role & Tokenizer::TokenRole::NOSPACE);
     tmp.language = tok.lang_code;
@@ -2141,7 +2141,7 @@ void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
     }
   }
   if ( options.doTagger ){
-    if ( fd.tag.empty() ){
+    if ( fd.tag.isEmpty() ){
       os << Tab << Tab << fixed << showpoint << std::setprecision(6) << 1.0;
     }
     else {

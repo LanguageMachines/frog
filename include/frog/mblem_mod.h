@@ -42,14 +42,14 @@
 /// \brief Helper class for Mblem. A datastructure to hold lemma/tag information
 class mblemData {
  public:
- mblemData( const std::string& l, const std::string& t ):
+ mblemData( const icu::UnicodeString& l, const icu::UnicodeString& t ):
   lemma( l ),
     tag( t ) { };
-  std::string getLemma() const { return lemma; };
-  std::string getTag() const { return tag; };
+  icu::UnicodeString getLemma() const { return lemma; };
+  icu::UnicodeString getTag() const { return tag; };
  private:
-  std::string lemma;
-  std::string tag;
+  icu::UnicodeString lemma;
+  icu::UnicodeString tag;
 };
 
 /// \brief provide all functionality to run a Timbl for lemmatization
@@ -61,10 +61,10 @@ class Mblem {
   void add_provenance( folia::Document&, folia::processor * ) const;
   void Classify( frog_record& );
   void Classify( const icu::UnicodeString& );
-  std::vector<std::pair<std::string,std::string> > getResult() const;
+  std::vector<std::pair<icu::UnicodeString,icu::UnicodeString> > getResult() const;
   std::string getTagset() const { return tagset; };
   std::string version() const { return _version; };
-  void filterTag( const std::string&  );
+  void filterTag( const icu::UnicodeString&  );
   void makeUnique();
   void add_lemmas( const std::vector<folia::Word*>&,
 		   const frog_data& ) const;

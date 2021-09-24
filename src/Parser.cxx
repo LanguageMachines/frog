@@ -61,9 +61,9 @@ using namespace nlohmann;
 /// structure to store parsing results
 struct parseData {
   void clear() { words.clear(); heads.clear(); mods.clear(); mwus.clear(); }
-  vector<string> words;
-  vector<string> heads;
-  vector<string> mods;
+  vector<UnicodeString> words;
+  vector<UnicodeString> heads;
+  vector<UnicodeString> mods;
   vector<vector<folia::Word*> > mwus;
 };
 
@@ -85,6 +85,18 @@ ostream& operator<<( ostream& os, const parseData& pd ){
     os << endl;
   }
   return os;
+}
+
+UnicodeString filter_spaces( const UnicodeString& in ){
+  // the word may contain spaces, remove them all!
+  UnicodeString result;
+  for ( int i=0; i < in.length(); ++i ){
+    if ( u_isspace( in[i] ) ){
+      continue;
+    }
+    result += in[i];
+  }
+  return result;
 }
 
 bool Parser::init( const TiCC::Configuration& configuration ){
@@ -319,21 +331,21 @@ vector<string> Parser::createPairInstances( const parseData& pd ){
     \return a list of string where every string is a Timbl test instance
   */
   vector<string> instances;
-  const vector<string>& words = pd.words;
-  const vector<string>& heads = pd.heads;
-  const vector<string>& mods = pd.mods;
+  const vector<UnicodeString>& words = pd.words;
+  const vector<UnicodeString>& heads = pd.heads;
+  const vector<UnicodeString>& mods = pd.mods;
   if ( words.size() == 1 ){
-    string inst =
+    UnicodeString inst =
       "__ " + words[0] + " __ ROOT ROOT ROOT __ " + heads[0]
       + " __ ROOT ROOT ROOT "+ words[0] +"^ROOT ROOT ROOT ROOT^"
       + heads[0] + " _";
-    instances.push_back( inst );
+    instances.push_back( TiCC::UnicodeToUTF8(inst) );
   }
   else {
     for ( size_t i=0 ; i < words.size(); ++i ){
-      string word_1, word0, word1;
-      string tag_1, tag0, tag1;
-      string mods0;
+      UnicodeString word_1, word0, word1;
+      UnicodeString tag_1, tag0, tag1;
+      UnicodeString mods0;
       if ( i == 0 ){
 	word_1 = "__";
 	tag_1 = "__";
@@ -353,17 +365,17 @@ vector<string> Parser::createPairInstances( const parseData& pd ){
 	word1 = words[i+1];
 	tag1 = heads[i+1];
       }
-      string inst = word_1 + " " + word0 + " " + word1
+      UnicodeString inst = word_1 + " " + word0 + " " + word1
 	+ " ROOT ROOT ROOT " + tag_1 + " "
 	+ tag0 + " " + tag1 + " ROOT ROOT ROOT " + tag0
 	+ "^ROOT ROOT ROOT ROOT^" + mods0 + " _";
-      instances.push_back( inst );
+      instances.push_back( TiCC::UnicodeToUTF8(inst) );
     }
     //
     for ( size_t wPos=0; wPos < words.size(); ++wPos ){
-      string w_word_1, w_word0, w_word1;
-      string w_tag_1, w_tag0, w_tag1;
-      string w_mods0;
+      UnicodeString w_word_1, w_word0, w_word1;
+      UnicodeString w_tag_1, w_tag0, w_tag1;
+      UnicodeString w_mods0;
       if ( wPos == 0 ){
 	w_word_1 = "__";
 	w_tag_1 = "__";
@@ -393,7 +405,7 @@ vector<string> Parser::createPairInstances( const parseData& pd ){
 	if ( pos + maxDepSpan < wPos ){
 	  continue;
 	}
-	string inst = w_word_1 + " " + w_word0 + " " + w_word1;
+	UnicodeString inst = w_word_1 + " " + w_word0 + " " + w_word1;
 
 	if ( pos == 0 ){
 	  inst += " __";
@@ -442,10 +454,10 @@ vector<string> Parser::createPairInstances( const parseData& pd ){
 	}
 
 	if ( wPos > pos ){
-	  inst += " LEFT " + TiCC::toString( wPos - pos );
+	  inst += " LEFT " + TiCC::UnicodeFromUTF8(TiCC::toString( wPos - pos ));
 	}
 	else {
-	  inst += " RIGHT "+ TiCC::toString( pos - wPos );
+	  inst += " RIGHT "+ TiCC::UnicodeFromUTF8(TiCC::toString( pos - wPos ));
 	}
 	if ( pos >= words.size() ){
 	  inst += " __";
@@ -454,7 +466,7 @@ vector<string> Parser::createPairInstances( const parseData& pd ){
 	  inst += " " + mods[pos];
 	}
 	inst += "^" + w_mods0 + " __";
-	instances.push_back( inst );
+	instances.push_back( TiCC::UnicodeToUTF8(inst) );
       }
     }
   }
@@ -468,28 +480,28 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
     \return a list of string where every string is a Timbl test instance
   */
   vector<string> d_instances;
-  const vector<string>& words = pd.words;
-  const vector<string>& heads = pd.heads;
-  const vector<string>& mods = pd.mods;
+  const vector<UnicodeString>& words = pd.words;
+  const vector<UnicodeString>& heads = pd.heads;
+  const vector<UnicodeString>& mods = pd.mods;
 
   if ( words.size() == 1 ){
-    string word0 = words[0];
-    string tag0 = heads[0];
-    string mod0 = mods[0];
-    string inst = "__ __ " + word0 + " __ __ __ __ " + tag0
+    UnicodeString word0 = words[0];
+    UnicodeString tag0 = heads[0];
+    UnicodeString mod0 = mods[0];
+    UnicodeString inst = "__ __ " + word0 + " __ __ __ __ " + tag0
       + " __ __ __ __ " + word0 + "^" + tag0
       + " __ __ __^" + tag0 + " " + tag0 +"^__ __ " + mod0
       + " __ ROOT";
-    d_instances.push_back( inst );
+    d_instances.push_back( TiCC::UnicodeToUTF8(inst) );
   }
   else if ( words.size() == 2 ){
-    string word0 = words[0];
-    string tag0 = heads[0];
-    string mod0 = mods[0];
-    string word1 = words[1];
-    string tag1 = heads[1];
-    string mod1 = mods[1];
-    string inst = string("__ __")
+    UnicodeString word0 = words[0];
+    UnicodeString tag0 = heads[0];
+    UnicodeString mod0 = mods[0];
+    UnicodeString word1 = words[1];
+    UnicodeString tag1 = heads[1];
+    UnicodeString mod1 = mods[1];
+    UnicodeString inst = UnicodeString("__ __")
       + " " + word0
       + " " + word1
       + " __ __ __"
@@ -504,8 +516,8 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
       + " " + mod0
       + " " + mod1
       + " ROOT";
-    d_instances.push_back( inst );
-    inst = string("__")
+    d_instances.push_back( TiCC::UnicodeToUTF8(inst) );
+    inst = UnicodeString("__")
       + " " + word0
       + " " + word1
       + " __ __ __"
@@ -521,19 +533,19 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
       + " " + mod1
       + " __"
       + " ROOT";
-    d_instances.push_back( inst );
+    d_instances.push_back( TiCC::UnicodeToUTF8(inst) );
   }
   else if ( words.size() == 3 ) {
-    string word0 = words[0];
-    string tag0 = heads[0];
-    string mod0 = mods[0];
-    string word1 = words[1];
-    string tag1 = heads[1];
-    string mod1 = mods[1];
-    string word2 = words[2];
-    string tag2 = heads[2];
-    string mod2 = mods[2];
-    string inst = string("__ __")
+    UnicodeString word0 = words[0];
+    UnicodeString tag0 = heads[0];
+    UnicodeString mod0 = mods[0];
+    UnicodeString word1 = words[1];
+    UnicodeString tag1 = heads[1];
+    UnicodeString mod1 = mods[1];
+    UnicodeString word2 = words[2];
+    UnicodeString tag2 = heads[2];
+    UnicodeString mod2 = mods[2];
+    UnicodeString inst = UnicodeString("__ __")
       + " " + word0
       + " " + word1
       + " " + word2
@@ -551,8 +563,8 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
       + " " + mod0
       + " " + mod1
       + " ROOT";
-    d_instances.push_back( inst );
-    inst = string("__")
+    d_instances.push_back( TiCC::UnicodeToUTF8(inst) );
+    inst = UnicodeString("__")
       + " " + word0
       + " " + word1
       + " " + word2
@@ -571,7 +583,7 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
       + " " + mod1
       + " " + mod2
       + " ROOT";
-    d_instances.push_back( inst );
+    d_instances.push_back( TiCC::UnicodeToUTF8(inst) );
     inst = word0
       + " " + word1
       + " " + word2
@@ -590,13 +602,13 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
       + " " + mod2
       + " __"
       + " ROOT";
-    d_instances.push_back( inst );
+    d_instances.push_back( TiCC::UnicodeToUTF8(inst) );
   }
   else {
     for ( size_t i=0 ; i < words.size(); ++i ){
-      string word_1, word_2;
-      string tag_1, tag_2;
-      string mod_1;
+      UnicodeString word_1, word_2;
+      UnicodeString tag_1, tag_2;
+      UnicodeString mod_1;
       if ( i == 0 ){
 	word_2 = "__";
 	tag_2 = "__";
@@ -621,12 +633,12 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
 	tag_1 = heads[i-1];
 	mod_1 = mods[i-1];
       }
-      string word0 = words[i];
-      string word1, word2;
-      string tag0 = heads[i];
-      string tag1, tag2;
-      string mod0 = mods[i];
-      string mod1;
+      UnicodeString word0 = words[i];
+      UnicodeString word1, word2;
+      UnicodeString tag0 = heads[i];
+      UnicodeString tag1, tag2;
+      UnicodeString mod0 = mods[i];
+      UnicodeString mod1;
       if ( i < words.size() - 2 ){
 	word1 = words[i+1];
 	tag1 = heads[i+1];
@@ -651,7 +663,7 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
 	tag2 = "__";
 	//	mod2 = "__";
       }
-      string inst = word_2
+      UnicodeString inst = word_2
 	+ " " + word_1
 	+ " " + word0
 	+ " " + word1
@@ -672,7 +684,7 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
 	+ " " + mod0
 	+ " " + mod1
 	+ " ROOT";
-      d_instances.push_back( inst );
+      d_instances.push_back( TiCC::UnicodeToUTF8(inst) );
     }
   }
   return d_instances;
@@ -685,29 +697,29 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
     \return a list of string where every string is a Timbl test instance
   */
   vector<string> r_instances;
-  const vector<string>& words = pd.words;
-  const vector<string>& heads = pd.heads;
-  const vector<string>& mods = pd.mods;
+  const vector<UnicodeString>& words = pd.words;
+  const vector<UnicodeString>& heads = pd.heads;
+  const vector<UnicodeString>& mods = pd.mods;
 
   if ( words.size() == 1 ){
-    string word0 = words[0];
-    string tag0 = heads[0];
-    string mod0 = mods[0];
-    string inst = "__ __ " + word0 + " __ __ " + mod0
+    UnicodeString word0 = words[0];
+    UnicodeString tag0 = heads[0];
+    UnicodeString mod0 = mods[0];
+    UnicodeString inst = "__ __ " + word0 + " __ __ " + mod0
       + " __ __ "  + tag0 + " __ __ __^" + tag0
       + " " + tag0 + "^__ __^__^" + tag0
       + " " + tag0 + "^__^__ __";
-    r_instances.push_back( inst );
+    r_instances.push_back( TiCC::UnicodeToUTF8(inst) );
   }
   else if ( words.size() == 2 ){
-    string word0 = words[0];
-    string tag0 = heads[0];
-    string mod0 = mods[0];
-    string word1 = words[1];
-    string tag1 = heads[1];
-    string mod1 = mods[1];
+    UnicodeString word0 = words[0];
+    UnicodeString tag0 = heads[0];
+    UnicodeString mod0 = mods[0];
+    UnicodeString word1 = words[1];
+    UnicodeString tag1 = heads[1];
+    UnicodeString mod1 = mods[1];
     //
-    string inst = string("__ __")
+    UnicodeString inst = UnicodeString("__ __")
       + " " + word0
       + " " + word1
       + " __"
@@ -721,8 +733,8 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
       + " __^__^" + tag0
       + " " + tag0 + "^" + tag1 + "^__"
       + " __";
-    r_instances.push_back( inst );
-    inst = string("__")
+    r_instances.push_back( TiCC::UnicodeToUTF8(inst) );
+    inst = UnicodeString("__")
       + " " + word0
       + " " + word1
       + " __ __"
@@ -736,20 +748,20 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
       + " __^" + tag0 + "^" + tag1
       + " " + tag1 + "^__^__"
       + " __";
-    r_instances.push_back( inst );
+    r_instances.push_back( TiCC::UnicodeToUTF8(inst) );
   }
   else if ( words.size() == 3 ) {
-    string word0 = words[0];
-    string tag0 = heads[0];
-    string mod0 = mods[0];
-    string word1 = words[1];
-    string tag1 = heads[1];
-    string mod1 = mods[1];
-    string word2 = words[2];
-    string tag2 = heads[2];
-    string mod2 = mods[2];
+    UnicodeString word0 = words[0];
+    UnicodeString tag0 = heads[0];
+    UnicodeString mod0 = mods[0];
+    UnicodeString word1 = words[1];
+    UnicodeString tag1 = heads[1];
+    UnicodeString mod1 = mods[1];
+    UnicodeString word2 = words[2];
+    UnicodeString tag2 = heads[2];
+    UnicodeString mod2 = mods[2];
     //
-    string inst = string("__ __")
+    UnicodeString inst = UnicodeString("__ __")
       + " " + word0
       + " " + word1
       + " " + word2
@@ -763,8 +775,8 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
       + " __^__^" + tag0
       + " " + tag0 + "^" + tag1 + "^" + tag2
       + " __";
-    r_instances.push_back( inst );
-    inst = string("__")
+    r_instances.push_back( TiCC::UnicodeToUTF8(inst) );
+    inst = UnicodeString("__")
       + " " + word0
       + " " + word1
       + " " + word2
@@ -780,7 +792,7 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
       + " __^" + tag0 + "^" + tag1
       + " " + tag1 + "^" + tag2 + "^__"
       + " __";
-    r_instances.push_back( inst );
+    r_instances.push_back( TiCC::UnicodeToUTF8(inst) );
     inst = word0
       + " " + word1
       + " " + word2
@@ -795,12 +807,12 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
       + " " + tag0 + "^" + tag1 + "^" + tag2
       + " " + tag2 + "^__^__"
       + " __";
-    r_instances.push_back( inst );
+    r_instances.push_back( TiCC::UnicodeToUTF8(inst) );
   }
   else {
     for ( size_t i=0 ; i < words.size(); ++i ){
-      string word_1, word_2;
-      string tag_1, tag_2;
+      UnicodeString word_1, word_2;
+      UnicodeString tag_1, tag_2;
       if ( i == 0 ){
 	word_2 = "__";
 	tag_2 = "__";
@@ -819,11 +831,11 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
 	word_1 = words[i-1];
 	tag_1 = heads[i-1];
       }
-      string word0 = words[i];
-      string word1, word2;
-      string tag0 = heads[i];
-      string tag1, tag2;
-      string mod0 = mods[i];
+      UnicodeString word0 = words[i];
+      UnicodeString word1, word2;
+      UnicodeString tag0 = heads[i];
+      UnicodeString tag1, tag2;
+      UnicodeString mod0 = mods[i];
       if ( i < words.size() - 2 ){
 	word1 = words[i+1];
 	tag1 = heads[i+1];
@@ -843,7 +855,7 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
 	tag2 = "__";
       }
       //
-      string inst = word_2
+      UnicodeString inst = word_2
 	+ " " + word_1
 	+ " " + word0
 	+ " " + word1
@@ -859,7 +871,7 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
 	+ " " + tag_2 + "^" + tag_1 + "^" + tag0
 	+ " " + tag0 + "^" + tag1 + "^" + tag2
 	+ " __";
-      r_instances.push_back( inst );
+      r_instances.push_back( TiCC::UnicodeToUTF8(inst) );
     }
   }
   return r_instances;
@@ -886,7 +898,9 @@ void Parser::add_provenance( folia::Document& doc, folia::processor *main ) cons
   doc.declare( folia::AnnotationType::DEPENDENCY, dep_tagset, args );
 }
 
-void extract( const string& tv, string& head, string& mods ){
+void extract( const UnicodeString& tv,
+	      UnicodeString& head,
+	      UnicodeString& mods ){
   /// spit a (CGN-like) tag into a head and a modifier part
   /*!
     \param tv a CGN-like tag
@@ -896,11 +910,11 @@ void extract( const string& tv, string& head, string& mods ){
     Example: the tag WW(pv,tgw,met-t) will be split into a head 'WW' and a
     mods string 'pv|tgw|met-t'
    */
-  vector<string> v = TiCC::split_at_first_of( tv, "()" );
+  vector<UnicodeString> v = TiCC::split_at_first_of( tv, "()" );
   head = v[0];
-  mods.clear();
+  mods.remove();
   if ( v.size() > 1 ){
-    vector<string> mv = TiCC::split_at( v[1], "," );
+    vector<UnicodeString> mv = TiCC::split_at( v[1], "," );
     mods = mv[0];
     for ( size_t i=1; i < mv.size(); ++i ){
       mods += "|" + mv[i];
@@ -920,15 +934,13 @@ parseData Parser::prepareParse( frog_data& fd ){         //     |
   parseData pd;                                          //     |
   for ( size_t i = 0; i < fd.units.size(); ++i ){        //     |
     if ( fd.mwus.find( i ) == fd.mwus.end() ){           //     |
-      string head;                                       //     |
-      string mods;                                       //     |
+      UnicodeString head;                                       //     |
+      UnicodeString mods;                                       //     |
       extract( fd.units[i].tag, head, mods );            //     |
-      string word_s = fd.units[i].word;                  //     |
-      // the word may contain spaces, remove them all!          |
-      word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
+      UnicodeString word_s = filter_spaces(fd.units[i].word);   //     |
       pd.words.push_back( word_s );                      //     |
       pd.heads.push_back( head );                        //     |
-      if ( mods.empty() ){                               //    \/
+      if ( mods.isEmpty() ){                               //    \/
 	// HACK: make this bug-to-bug compatible with older versions.
 	// But in fact this should also be done for the mwu's loop below!
 	// now sometimes empty mods get appended there.
@@ -938,27 +950,25 @@ parseData Parser::prepareParse( frog_data& fd ){         //     |
       pd.mods.push_back( mods );
     }
     else {
-      string multi_word;
-      string multi_head;
-      string multi_mods;
+      UnicodeString multi_word;
+      UnicodeString multi_head;
+      UnicodeString multi_mods;
       for ( size_t k = i; k <= fd.mwus[i]; ++k ){
-	icu::UnicodeString tmp = TiCC::UnicodeFromUTF8( fd.units[k].word );
+	icu::UnicodeString tmp = fd.units[k].word;
 	if ( filter ){
 	  tmp = filter->filter( tmp );
 	}
-	string ms = TiCC::UnicodeToUTF8( tmp );
-	// the word may contain spaces, remove them all!
-	ms.erase(remove_if(ms.begin(), ms.end(), ::isspace), ms.end());
-	string head;
-	string mods;
+	tmp = filter_spaces( tmp );
+	UnicodeString head;
+	UnicodeString mods;
 	extract( fd.units[k].tag, head, mods );
 	if ( k == i ){
-	  multi_word = ms;
+	  multi_word = tmp;
 	  multi_head = head;
 	  multi_mods = mods;
 	}
 	else {
-	  multi_word += "_" + ms;
+	  multi_word += "_" + tmp;
 	  multi_head += "_" + head;
 	  multi_mods += "_" + mods;
 	}

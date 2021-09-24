@@ -521,7 +521,7 @@ bool mbmacmp( Rule *m1, Rule *m2 ){
   return m1->getKey(false).length() > m2->getKey(false).length();
 }
 
-void Mbma::filterHeadTag( const string& head ){
+void Mbma::filterHeadTag( const UnicodeString& head ){
   /// reduce the Mbms analysis by removing all solutions where the head is not
   /// matched
   /*!
@@ -542,10 +542,11 @@ void Mbma::filterHeadTag( const string& head ){
       DBG << ++i << " - " << it << endl;
     }
   }
-  map<string,string>::const_iterator tagIt = TAGconv.find( head );
+  map<string,string>::const_iterator tagIt = TAGconv.find( TiCC::UnicodeToUTF8(head) );
   if ( tagIt == TAGconv.end() ) {
     // this should never happen
-    throw folia::ValueError( "1 unknown head feature '" + head + "'" );
+    throw folia::ValueError( "1 unknown head feature '"
+			     + TiCC::UnicodeToUTF8(head) + "'" );
   }
   string celex_tag = tagIt->second;
   if (debugFlag > 1){
@@ -605,7 +606,7 @@ void Mbma::filterHeadTag( const string& head ){
   }
 }
 
-void Mbma::filterSubTags( const vector<string>& feats ){
+void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
   /// reduce the analyses set based on sub-features
   /*!
     \param feats a list of subfeatures
@@ -647,7 +648,7 @@ void Mbma::filterSubTags( const vector<string>& feats ){
       DBG << "matching " << inflection << " with " << feats << endl;
     }
     for ( const auto& feat : feats ){
-      map<string,string>::const_iterator conv_tag_p = TAGconv.find( feat );
+      map<string,string>::const_iterator conv_tag_p = TAGconv.find( TiCC::UnicodeToUTF8(feat) );
       if (conv_tag_p != TAGconv.end()) {
 	string c = conv_tag_p->second;
 	if (debugFlag > 1){
@@ -884,8 +885,8 @@ void Mbma::store_brackets( frog_record& fd,
 }
 
 void Mbma::getResult( frog_record& fd,
-		      const icu::UnicodeString& uword,
-		      const string& head ) const {
+		      const UnicodeString& uword,
+		      const UnicodeString& uhead ) const {
   if ( analysis.size() == 0 ){
     // fallback option: use the word and pretend it's a morpheme ;-)
     if ( debugFlag > 1){
@@ -893,6 +894,7 @@ void Mbma::getResult( frog_record& fd,
 		    << uword << endl;
     }
     string word = TiCC::UnicodeToUTF8(uword);
+    string head = TiCC::UnicodeToUTF8(uhead);
     if ( doDeepMorph ){
       store_brackets( fd, word, head, true );
     }
@@ -930,51 +932,47 @@ void Mbma::getResult( frog_record& fd,
 }
 
 void Mbma::Classify( frog_record& fd ){
-  string word_s;
-  string tag;
+  UnicodeString word = fd.word;
+  UnicodeString tag = fd.tag;
   string token_class;
-  word_s = fd.word;
-  tag = fd.tag;
   token_class = fd.token_class;
-  icu::UnicodeString uWord = TiCC::UnicodeFromUTF8( word_s );
-  vector<string> v = TiCC::split_at_first_of( tag, "()" );
-  string head = v[0];
+  vector<UnicodeString> v = TiCC::split_at_first_of( tag, "()" );
+  UnicodeString head = v[0];
   if (debugFlag >1 ){
-    DBG << "Classify " << uWord << "(" << head << ") ["
+    DBG << "Classify " << word << "(" << head << ") ["
 	<< token_class << "]" << endl;
   }
   // HACK! for now remove any whitespace!
-  vector<string> parts = TiCC::split( word_s );
-  word_s.clear();
+  vector<UnicodeString> parts = TiCC::split( word );
+  word.remove();
   for ( const auto& p : parts ){
-    word_s += p;
+    word += p;
   }
-  uWord = TiCC::UnicodeFromUTF8( word_s );
   if ( filter ){
-    uWord = filter->filter( uWord );
+    word = filter->filter( word );
   }
   if ( head == "LET" || head == "SPEC" || token_class == "ABBREVIATION" ){
     // take over the letter/word 'as-is'.
     //  also ABBREVIATION's aren't handled bij mbma-rules
-    string word = TiCC::UnicodeToUTF8( uWord );
     fd.clean_word = word;
     if ( doDeepMorph ){
-      store_brackets( fd, word, head );
+      store_brackets( fd, TiCC::UnicodeToUTF8(word),
+		      TiCC::UnicodeToUTF8(head) );
     }
     else {
       vector<string> tmp;
-      tmp.push_back( word );
+      tmp.push_back( TiCC::UnicodeToUTF8(word) );
       store_morphemes( fd, tmp );
     }
   }
   else {
-    icu::UnicodeString lWord = uWord;
+    UnicodeString lWord = word;
     if ( head != "SPEC" ){
       lWord.toLower();
     }
-    fd.clean_word = TiCC::UnicodeToUTF8( lWord );
+    fd.clean_word = lWord;
     Classify( lWord );
-    vector<string> featVals;
+    vector<UnicodeString> featVals;
     if( v.size() > 1 ){
       featVals = TiCC::split_at( v[1], "," );
     }
@@ -1166,7 +1164,9 @@ void Mbma::add_morphemes( const vector<folia::Word*>& wv,
     }
     else {
       for ( const auto& mor : fd.units[i].deep_morphs ) {
-	addBracketMorph( wv[i], fd.units[i].clean_word, mor );
+	addBracketMorph( wv[i],
+			 TiCC::UnicodeToUTF8(fd.units[i].clean_word),
+			 mor );
       }
     }
   }

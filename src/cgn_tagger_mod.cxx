@@ -32,6 +32,7 @@
 #include "frog/cgn_tagger_mod.h"
 #include "frog/FrogData.h"
 #include "frog/Frog-util.h"
+#include "ticcutils/Unicode.h"
 #include "ticcutils/PrettyPrint.h"
 
 using namespace std;
@@ -258,7 +259,7 @@ void CGNTagger::addTag( frog_record& fd,
   */
 #pragma omp critical (dataupdate)
   {
-    fd.tag = TiCC::UnicodeToUTF8(inputTag);
+    fd.tag = inputTag;
     if ( inputTag.indexOf( "SPEC(" ) == 0 ){
       fd.tag_confidence = 1.0;
     }
@@ -278,7 +279,7 @@ void CGNTagger::addTag( frog_record& fd,
     }
 #pragma omp critical (dataupdate)
     {
-      fd.tag = tt->second;
+      fd.tag = TiCC::UnicodeFromUTF8(tt->second);
       fd.tag_confidence = 1.0;
     }
   }
@@ -297,7 +298,7 @@ void CGNTagger::add_tags( const vector<folia::Word*>& wv,
   for ( const auto& word : fd.units ){
     folia::KWargs args;
     args["set"]   = getTagset();
-    args["class"] = word.tag;
+    args["class"] = TiCC::UnicodeToUTF8(word.tag);
     if ( textclass != "current" ){
       args["textclass"] = textclass;
     }
@@ -307,9 +308,9 @@ void CGNTagger::add_tags( const vector<folia::Word*>& wv,
     {
       postag = wv[pos]->addPosAnnotation( args );
     }
-    vector<string> hv = TiCC::split_at_first_of( word.tag, "()" );
-    string head = hv[0];
-    args["class"] = head;
+    vector<UnicodeString> hv = TiCC::split_at_first_of( word.tag, "()" );
+    UnicodeString head = hv[0];
+    args["class"] = TiCC::UnicodeToUTF8(head);
 #pragma omp critical (foliaupdate)
     {
       folia::Feature *feat = new folia::HeadFeature( args );
@@ -318,15 +319,17 @@ void CGNTagger::add_tags( const vector<folia::Word*>& wv,
 	postag->confidence(1.0);
       }
     }
-    vector<string> feats;
+    vector<UnicodeString> feats;
     if ( hv.size() > 1 ){
       feats = TiCC::split_at( hv[1], "," );
     }
     for ( const auto& f : feats ){
       folia::KWargs args;
       args["set"] =  getTagset();
-      args["subset"] = getSubSet( f, head, word.tag );
-      args["class"]  = f;
+      args["subset"] = getSubSet( TiCC::UnicodeToUTF8(f),
+				  TiCC::UnicodeToUTF8(head),
+				  TiCC::UnicodeToUTF8(word.tag) );
+      args["class"]  = TiCC::UnicodeToUTF8(f);
 #pragma omp critical (foliaupdate)
       {
 	folia::Feature *feat = new folia::Feature( args, wv[pos]->doc() );

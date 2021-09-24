@@ -36,6 +36,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include "ticcutils/Unicode.h"
 #include "ticcutils/json.hpp"
 
 class BaseBracket;
@@ -49,13 +50,13 @@ class frog_record {
   frog_record();
   ~frog_record();
   nlohmann::json to_json() const;
-  std::string word;          ///< the word in UTF8
-  std::string clean_word;    ///< lowercased word (MBMA only)
+  icu::UnicodeString word;          ///< the word in Unicode
+  icu::UnicodeString clean_word;    ///< lowercased word (MBMA only) in Unicode
   std::string token_class;   ///< the assigned token class of the word
-  std::string language;      ///< the deteected language of the word
+  std::string language;      ///< the detetected language of the word
   bool no_space;             ///< was there a space after the word?
   bool new_paragraph;        ///< did the tokenizer detect a paragraph here?
-  std::string tag;           ///< the assigned POS tag
+  icu::UnicodeString tag;           ///< the assigned POS tag in Unicode
   double tag_confidence;     ///< the confidence of the POS tag
   std::string iob_tag;       ///< the assigned IOB tag
   double iob_confidence;     ///< the confidence of the IOB tag

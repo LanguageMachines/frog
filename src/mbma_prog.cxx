@@ -186,12 +186,12 @@ void Test( istream& in ){
 	vector<TagResult> tagv = tagger.tagLine( TiCC::UnicodeFromUTF8(s) );
 	for ( const auto& tr : tagv ){
 	  UnicodeString uWord = tr.word();
-	  string tag = TiCC::UnicodeToUTF8( tr.assigned_tag() );
-	  vector<string> v = TiCC::split_at_first_of( tag, "(,)" );
+	  UnicodeString tag = tr.assigned_tag();
+	  vector<UnicodeString> v = TiCC::split_at_first_of( tag, "(,)" );
 	  if ( v.empty() ){
 	    throw runtime_error( "error: tag not in right format " );
 	  }
-	  string head = v[0];
+	  UnicodeString head = v[0];
 	  if ( head != "SPEC" ){
 	    uWord.toLower();
 	  }
