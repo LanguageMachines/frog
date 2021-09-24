@@ -188,17 +188,18 @@ void Test( istream& in, ostream& os ){
     }
     for ( auto const& s : sentences ){
       if ( useTagger ){
-	vector<TagResult> tagrv = tagger.tagLine( s );
+	vector<TagResult> tagrv = tagger.tagLine( TiCC::UnicodeFromUTF8(s) );
 	for ( const auto& tr : tagrv ){
-	  UnicodeString uWord = TiCC::UnicodeFromUTF8(tr.word());
+	  UnicodeString uWord = tr.word();
 	  myMblem.Classify( uWord );
-	  myMblem.filterTag( tr.assigned_tag() );
+	  myMblem.filterTag( TiCC::UnicodeToUTF8(tr.assigned_tag()) );
 	  vector<pair<string,string> > res = myMblem.getResult();
-	  string line = tr.word() + " {" + tr.assigned_tag() + "}\t";
+	  UnicodeString line = tr.word() + " {" + tr.assigned_tag() + "}\t";
 	  for ( const auto& p : res ){
-	    line += p.first + "[" + p.second + "]/";
+	    line += TiCC::UnicodeFromUTF8(p.first) + "["
+	      + TiCC::UnicodeFromUTF8(p.second) + "]/";
 	  }
-	  line.erase(line.length()-1);
+	  line.remove(line.length()-1);
 	  line += "\n";
 	  os << line;
 	}

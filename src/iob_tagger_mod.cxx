@@ -81,21 +81,20 @@ void IOBTagger::Classify( frog_data& swords ){
 
     When tagging succeeds, 'swords' will be extended with the tag results
   */
-  vector<string> words;
-  vector<string> ptags;
+  vector<UnicodeString> words;
+  vector<UnicodeString> ptags;
 #pragma omp critical (dataupdate)
   {
     for ( const auto& w : swords.units ){
-      string word_s = w.word;
-      // the word may contain spaces, remove them all!
-      word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
-      words.push_back( word_s );
-      ptags.push_back( w.tag );
+      UnicodeString word = TiCC::UnicodeFromUTF8( w.word);
+      word = filter_spaces( word );
+      words.push_back( word );
+      ptags.push_back( TiCC::UnicodeFromUTF8(w.tag) );
     }
   }
 
   vector<tag_entry> to_do;
-  string prev = "_";
+  UnicodeString prev = "_";
   for ( size_t i=0; i < swords.size(); ++i ){
     tag_entry ta;
     ta.word = words[i];
@@ -133,24 +132,25 @@ void IOBTagger::post_process( frog_data& sentence ){
   }
   string last_tag;
   for ( size_t i=0; i < _tag_result.size(); ++i ){
-    string tag = _tag_result[i].assigned_tag();
+    UnicodeString tag = _tag_result[i].assigned_tag();
     if ( tag[0] == 'I' ){
       // make sure that we start a new 'sequence' with a B
       if ( last_tag.empty() ){
-	tag[0] = 'B';
+	tag.replace(0,1,'B');
       }
       else {
-	if ( last_tag.substr(2) != tag.substr( 2 ) ){
-	  tag[0] = 'B';
+	string hack = TiCC::UnicodeToUTF8( tag );
+	if ( last_tag.substr(2) != hack.substr( 2 ) ){
+	  tag.replace(0,1,'B');
 	}
       }
-      last_tag = tag;
+      last_tag = TiCC::UnicodeToUTF8(tag);
     }
     else if ( tag[0] == 'O' ){
       last_tag.clear();
     }
     else if ( tag[0] == 'B' ){
-      last_tag = tag;
+      last_tag = TiCC::UnicodeToUTF8(tag);
     }
     addTag( sentence.units[i],
 	    tag,
@@ -159,7 +159,7 @@ void IOBTagger::post_process( frog_data& sentence ){
 }
 
 void IOBTagger::addTag( frog_record& fd,
-			const string& tag,
+			const UnicodeString& tag,
 			double confidence ){
   /// add a tag/confidence pair to a frog_record
   /*!
@@ -169,7 +169,7 @@ void IOBTagger::addTag( frog_record& fd,
   */
 #pragma omp critical (dataupdate)
   {
-    fd.iob_tag = tag;
+    fd.iob_tag = TiCC::UnicodeToUTF8(tag);
     fd.iob_confidence = confidence;
   }
 }

@@ -44,8 +44,8 @@
 /// \brief helper class to store a word + enrichment
 class tag_entry {
 public:
-  std::string word;
-  std::string enrichment;
+  icu::UnicodeString word;
+  icu::UnicodeString enrichment;
 };
 
 /// \brief a base Class for interfacing to MBT taggers
@@ -63,7 +63,7 @@ class BaseTagger {
   std::string getTagset() const { return tagset; };
   std::string set_eos_mark( const std::string& );
   bool fill_map( const std::string&, std::map<std::string,std::string>& );
-  std::vector<Tagger::TagResult> tagLine( const std::string& );
+  std::vector<Tagger::TagResult> tagLine( const icu::UnicodeString& );
   std::vector<Tagger::TagResult> tag_entries( const std::vector<tag_entry>& );
   std::string version() const { return _version; };
  private:
@@ -71,8 +71,8 @@ class BaseTagger {
  protected:
   void extract_words_tags(  const std::vector<folia::Word *>&,
 			    const std::string&,
-			    std::vector<std::string>&,
-			    std::vector<std::string>& );
+			    std::vector<icu::UnicodeString>&,
+			    std::vector<icu::UnicodeString>& );
   std::vector<Tagger::TagResult> call_server( const std::vector<tag_entry>& ) const;
   int debug;
   std::string _label;
@@ -91,5 +91,7 @@ class BaseTagger {
   std::map<std::string,std::string> token_tag_map;
   BaseTagger( const BaseTagger& ){} // inhibit copies
 };
+
+icu::UnicodeString filter_spaces( const icu::UnicodeString& );
 
 #endif // TAGGER_BASE_H

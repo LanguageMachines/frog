@@ -47,7 +47,7 @@ class IOBTagger: public BaseTagger {
 		   const std::vector<folia::Word*>& wv ) const;
  private:
   void addTag( frog_record&,
-	       const std::string&,
+	       const icu::UnicodeString&,
 	       double );
 };
 

@@ -34,6 +34,7 @@
 #include <algorithm>
 #include "ticcutils/SocketBasics.h"
 #include "ticcutils/PrettyPrint.h"
+#include "ticcutils/Unicode.h"
 #include "ticcutils/json.hpp"
 #include "frog/Frog-util.h"
 
@@ -276,9 +277,9 @@ json create_json( const vector<tag_entry>& tv ){
   json arr = json::array();
   for ( const auto& it : tv ){
     json one_entry;
-    one_entry["word"] = it.word;
-    if ( !it.enrichment.empty() ){
-      one_entry["enrichment"] = it.enrichment;
+    one_entry["word"] = TiCC::UnicodeToUTF8(it.word);
+    if ( !it.enrichment.isEmpty() ){
+      one_entry["enrichment"] = TiCC::UnicodeToUTF8(it.enrichment);
     }
     arr.push_back( one_entry );
   }
@@ -298,22 +299,22 @@ vector<TagResult> json_to_TR( const json& in ){
   vector<TagResult> result;
   for ( auto& i : in ){
     TagResult tr;
-    tr.set_word( i["word"] );
+    tr.set_word( TiCC::UnicodeFromUTF8(i["word"]) );
     if ( i.find("known") != i.end() ){
       tr.set_known( i["known"] == "true" );
     }
-    tr.set_tag( i["tag"] );
+    tr.set_tag( TiCC::UnicodeFromUTF8(i["tag"]) );
     if ( i.find("confidence") != i.end() ){
-      tr.set_confidence( i["confidence"] );;
+      tr.set_confidence( i["confidence"] );
     }
     if ( i.find("distance") != i.end() ){
       tr.set_distance( i["distance"] );
     }
     if ( i.find("distribution") != i.end() ){
-      tr.set_distribution( i["distribution"] );
+      tr.set_distribution(  TiCC::UnicodeFromUTF8(i["distribution"]) );
     }
     if ( i.find("enrichment") != i.end() ){
-      tr.set_enrichment( i["enrichment"] );
+      tr.set_enrichment( TiCC::UnicodeFromUTF8(i["enrichment"]) );
     }
     result.push_back( tr );
   }
@@ -404,7 +405,19 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
   return json_to_TR( my_json );
 }
 
-vector<TagResult> BaseTagger::tagLine( const string& line ){
+UnicodeString filter_spaces( const UnicodeString& in ){
+  // the word may contain spaces, remove them all!
+  UnicodeString result;
+  for ( int i=0; i < in.length(); ++i ){
+    if ( u_isspace( in[i] ) ){
+      continue;
+    }
+    result += in[i];
+  }
+  return result;
+}
+
+vector<TagResult> BaseTagger::tagLine( const UnicodeString& line ){
   /// tag a string into a vector of TagResult elements
   /*!
     \param line a (UTF8 encoded) string, may be multilined and include Enrichments
@@ -415,17 +428,15 @@ vector<TagResult> BaseTagger::tagLine( const string& line ){
   */
   if ( !_host.empty() ){
     vector<tag_entry> to_do;
-    vector<string> v = TiCC::split( line );
+    vector<UnicodeString> v = TiCC::split( line );
     for ( const auto& w : v ){
-      icu::UnicodeString word = TiCC::UnicodeFromUTF8(w);
+      UnicodeString word = w;
       if ( filter ){
 	word = filter->filter( word );
       }
-      string word_s = TiCC::UnicodeToUTF8( word );
-      // the word may contain spaces, remove them all!
-      word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
+      word = filter_spaces( word );
       tag_entry entry;
-      entry.word = word_s;
+      entry.word = word;
       to_do.push_back( entry );
     }
     return tag_entries( to_do );
@@ -458,10 +469,10 @@ vector<TagResult> BaseTagger::tag_entries( const vector<tag_entry>& to_do ){
     if ( !tagger ){
       throw runtime_error( _label + "-tagger is not initialized" );
     }
-    string block;
+    UnicodeString block;
     for ( const auto& e: to_do ){
       block += e.word;
-      if ( !e.enrichment.empty() ){
+      if ( !e.enrichment.isEmpty() ){
 	block += "\t" + e.enrichment;
 	block += "\t??\n";
       }
@@ -493,8 +504,8 @@ string BaseTagger::set_eos_mark( const std::string& eos ){
 
 void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
 				      const string& tagset,
-				      vector<string>& words,
-				      vector<string>& ptags ){
+				      vector<UnicodeString>& words,
+				      vector<UnicodeString>& ptags ){
   /// extract word and POS-tag information from a list of folia::Word
   /*
     \param swords the input list of Word elements
@@ -514,11 +525,9 @@ void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
     if ( filter ){
       word = filter->filter( word );
     }
-    // the word may contain spaces, remove them all!
-    string word_s = TiCC::UnicodeToUTF8( word );
-    word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
-    words.push_back( word_s );
-    ptags.push_back( postag->cls() );
+    word = filter_spaces( word );
+    words.push_back( word );
+    ptags.push_back( TiCC::UnicodeFromUTF8(postag->cls()) );
   }
 }
 
@@ -534,11 +543,9 @@ vector<tag_entry> BaseTagger::extract_sentence( const frog_data& sent ){
     if ( filter ){
       word = filter->filter( word );
     }
-    string word_s = TiCC::UnicodeToUTF8( word );
-    // the word may contain spaces, remove them all!
-    word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
+    word = filter_spaces( word );
     tag_entry entry;
-    entry.word = word_s;
+    entry.word = word;
     result.push_back( entry );
   }
   return result;
@@ -551,7 +558,7 @@ ostream& operator<<( ostream& os, const tag_entry& e ){
     \param e the element to output
    */
   os << e.word;
-  if ( !e.enrichment.empty() ){
+  if ( !e.enrichment.isEmpty() ){
     os << "\t" << e.enrichment;
   }
   os << endl;

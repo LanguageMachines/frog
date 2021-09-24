@@ -241,7 +241,7 @@ void CGNTagger::post_process( frog_data& words ){
 }
 
 void CGNTagger::addTag( frog_record& fd,
-			const string& inputTag,
+			const UnicodeString& inputTag,
 			double confidence ){
   /// add a tag/confidence pair to a frog_record
   /*!
@@ -258,8 +258,8 @@ void CGNTagger::addTag( frog_record& fd,
   */
 #pragma omp critical (dataupdate)
   {
-    fd.tag = inputTag;
-    if ( inputTag.find( "SPEC(" ) == 0 ){
+    fd.tag = TiCC::UnicodeToUTF8(inputTag);
+    if ( inputTag.indexOf( "SPEC(" ) == -1 ){
       fd.tag_confidence = 1;
     }
     else {

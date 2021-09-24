@@ -139,7 +139,7 @@ void Test( istream& in ){
       break;
     }
     cout << "processing: " << sentence << endl;
-    vector<TagResult> tagv = tagger.tagLine(sentence);
+    vector<TagResult> tagv = tagger.tagLine(TiCC::UnicodeFromUTF8(sentence));
     for ( const auto& tr : tagv ){
       cout << tr.word() << "\t" << tr.assigned_tag() << endl;
     }

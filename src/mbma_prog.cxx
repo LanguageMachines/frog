@@ -183,10 +183,11 @@ void Test( istream& in ){
     }
     for ( auto const& s : sentences ){
       if ( useTagger ){
-	vector<TagResult> tagv = tagger.tagLine( s );
+	vector<TagResult> tagv = tagger.tagLine( TiCC::UnicodeFromUTF8(s) );
 	for ( const auto& tr : tagv ){
-	  UnicodeString uWord = TiCC::UnicodeFromUTF8( tr.word() );
-	  vector<string> v = TiCC::split_at_first_of( tr.assigned_tag(), "(,)" );
+	  UnicodeString uWord = tr.word();
+	  string tag = TiCC::UnicodeToUTF8( tr.assigned_tag() );
+	  vector<string> v = TiCC::split_at_first_of( tag, "(,)" );
 	  if ( v.empty() ){
 	    throw runtime_error( "error: tag not in right format " );
 	  }

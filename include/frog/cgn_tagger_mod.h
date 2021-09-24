@@ -49,7 +49,7 @@ class CGNTagger: public BaseTagger {
 			 const std::string&,
 			 const std::string& ) const;
  private:
-  void addTag( frog_record&, const std::string&, double );
+  void addTag( frog_record&, const icu::UnicodeString&, double );
   void fillSubSetTable();
   bool fillSubSetTable( const std::string&, const std::string& );
   std::multimap<std::string,std::string> cgnSubSets;

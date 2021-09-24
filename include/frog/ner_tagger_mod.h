@@ -39,7 +39,7 @@
 #include "libfolia/folia.h"
 #include "frog/tagger_base.h"
 
-typedef std::pair<std::string,double> tc_pair;
+typedef std::pair<icu::UnicodeString,double> tc_pair;
 
 /// \brief a specialization of Basetagger to tag Named Entities
 class NERTagger: public BaseTagger {
@@ -59,10 +59,10 @@ class NERTagger: public BaseTagger {
   bool read_overrides( const std::string& f, const std::string& p ){
     return read_gazets( f, p, override_ners );
   }
-  std::vector<std::string> create_ner_list( const std::vector<std::string>& s ){
+  std::vector<icu::UnicodeString> create_ner_list( const std::vector<icu::UnicodeString>& s ){
     return create_ner_list( s, gazet_ners );
   }
-  std::vector<std::string> create_override_list( const std::vector<std::string>& s ){
+  std::vector<icu::UnicodeString> create_override_list( const std::vector<icu::UnicodeString>& s ){
     return create_ner_list( s, override_ners );
   }
   bool Generate( const std::string& );
@@ -79,7 +79,7 @@ class NERTagger: public BaseTagger {
 		  const std::string&,
 		  const std::string&,
 		  std::vector<std::unordered_map<std::string,std::set<std::string>>>& );
-  std::vector<std::string> create_ner_list( const std::vector<std::string>&,
+  std::vector<icu::UnicodeString> create_ner_list( const std::vector<icu::UnicodeString>&,
 					    std::vector<std::unordered_map<std::string,std::set<std::string>>>& );
   std::vector<std::unordered_map<std::string,std::set<std::string>>> gazet_ners;
   std::vector<std::unordered_map<std::string,std::set<std::string>>> override_ners;

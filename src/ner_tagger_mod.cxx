@@ -229,16 +229,16 @@ bool NERTagger::read_gazets( const string& name,
   }
 }
 
-static vector<string> serialize( const vector<set<string>>& stags ){
+static vector<UnicodeString> serialize( const vector<set<string>>& stags ){
   /// for every non empty set {el1,el2,..} in stags we compose a string like:
   /// el1+el2+...
-  vector<string> ambitags( stags.size(), "O" );
+  vector<UnicodeString> ambitags( stags.size(), "O" );
   size_t pos = 0;
   for ( const auto& it : stags ){
     if ( !it.empty() ){
-      string res;
+      UnicodeString res;
       for ( const auto& s : it ){
-	res += s + "+";
+	res += TiCC::UnicodeFromUTF8(s) + "+";
       }
       ambitags[pos] = res;
     }
@@ -247,8 +247,8 @@ static vector<string> serialize( const vector<set<string>>& stags ){
   return ambitags;
 }
 
-vector<string> NERTagger::create_ner_list( const vector<string>& words,
-					   std::vector<std::unordered_map<std::string,std::set<std::string>>>& ners ){
+vector<UnicodeString> NERTagger::create_ner_list( const vector<UnicodeString>& words,
+						  std::vector<std::unordered_map<std::string,std::set<std::string>>>& ners ){
   /// create a list of ambitags given a range of words
   /*!
     \param words a sentence as a list of words
@@ -268,7 +268,7 @@ vector<string> NERTagger::create_ner_list( const vector<string>& words,
       if ( mp.empty() ){
 	continue;
       }
-      seq += words[j+i];
+      seq += TiCC::UnicodeToUTF8(words[j+i]);
       if ( debug > 1 ){
 	DBG << "sequence = '" << seq << "'" << endl;
       }
@@ -309,26 +309,25 @@ void NERTagger::Classify( frog_data& swords ){
   if ( debug ){
     DBG << "classify from DATA" << endl;
   }
-  vector<string> words;
-  vector<string> pos_tags;
+  vector<UnicodeString> words;
+  vector<UnicodeString> pos_tags;
 #pragma omp critical (dataupdate)
   {
     for ( const auto& w : swords.units ){
-      string word_s = w.word;
-      // the word may contain spaces, remove them all!
-      word_s.erase(remove_if(word_s.begin(), word_s.end(), ::isspace), word_s.end());
-      words.push_back( word_s );
-      pos_tags.push_back( w.tag );
+      UnicodeString word = TiCC::UnicodeFromUTF8(w.word);
+      word = filter_spaces( word );
+      words.push_back( word );
+      pos_tags.push_back( TiCC::UnicodeFromUTF8(w.tag) );
     }
   }
   vector<tc_pair> ner_tags;
   if ( gazets_only ){
-    vector<string> gazet_tags = create_ner_list( words, gazet_ners );
-    string last = "O";
+    vector<UnicodeString> gazet_tags = create_ner_list( words, gazet_ners );
+    UnicodeString last = "O";
     cerr << "bekijk gazet tags: " << gazet_tags << endl;
     for ( const auto& it : gazet_tags ){
-      vector<string> parts = TiCC::split_at( it, "+" );
-      string tag = parts[0];
+      vector<UnicodeString> parts = TiCC::split_at( it, "+" );
+      UnicodeString tag = parts[0];
       cerr << "AHA: last = " << last << " Nieuw=" << tag << endl;
       if ( tag == "O" ){
 	last = tag;
@@ -347,15 +346,14 @@ void NERTagger::Classify( frog_data& swords ){
     }
   }
   else {
-    vector<string> gazet_tags = create_ner_list( words, gazet_ners );
-    vector<string> override_v = create_ner_list( words, override_ners );
+    vector<UnicodeString> gazet_tags = create_ner_list( words, gazet_ners );
+    vector<UnicodeString> override_v = create_ner_list( words, override_ners );
     vector<tc_pair> override_tags;
     for ( const auto& it : override_v ){
       override_tags.push_back( make_pair( it, 1.0 ) );
     }
-    string text_block;
-    string prev = "_";
-    string prevN = "_";
+    UnicodeString prev = "_";
+    UnicodeString prevN = "_";
     vector<tag_entry> to_do;
     for ( size_t i=0; i < swords.size(); ++i ){
       tag_entry entry;
@@ -390,16 +388,16 @@ void NERTagger::Classify( frog_data& swords ){
     //
     // we have to correct for tags that start with 'I-'
     // (the MBT tagger may deliver those)
-    string last;
+    UnicodeString last;
     for ( const auto& tag : _tag_result ){
-      string assigned = tag.assigned_tag();
+      UnicodeString assigned = tag.assigned_tag();
       if ( assigned == "O" ){
 	last = "";
       }
       else {
-	vector<string> parts = TiCC::split_at( assigned, "-" );
-	vector<string> vals = TiCC::split_at( parts[1], "+" );
-	string val = vals[0];
+	vector<UnicodeString> parts = TiCC::split_at( assigned, "-" );
+	vector<UnicodeString> vals = TiCC::split_at( parts[1], "+" );
+	UnicodeString val = vals[0];
 	if ( val == last ){
 	  assigned = "I-" + val;
 	}
@@ -435,7 +433,7 @@ void NERTagger::post_process( frog_data& sentence,
     return;
   }
   vector<tc_pair> entity;
-  string curNER; // only used in debug messages
+  UnicodeString curNER; // only used in debug messages
   for ( size_t i=0; i < ners.size(); ++i ){
     if (debug > 1){
       DBG << "NER = " << ners[i].first << endl;
@@ -457,7 +455,7 @@ void NERTagger::post_process( frog_data& sentence,
 	if ( debug > 1 ){
 	  DBG << "B spit out " << curNER << endl;
 	  DBG << "spit out " << entity << endl;
-	  curNER = ners[i].first.substr(2);
+	  curNER = UnicodeString( ners[i].first, 2 );
 	}
 	addEntity( sentence, i, entity );
 	entity.clear();
@@ -498,7 +496,7 @@ void NERTagger::addEntity( frog_data& sent,
   for ( size_t i = 0; i < entity.size(); ++i ){
 #pragma omp critical (foliaupdate)
     {
-      sent.units[pos-entity.size()+i].ner_tag = entity[i].first;
+      sent.units[pos-entity.size()+i].ner_tag = TiCC::UnicodeToUTF8(entity[i].first);
       sent.units[pos-entity.size()+i].ner_confidence = c;
     }
   }
@@ -510,7 +508,7 @@ void NERTagger::post_process( frog_data& ){
   throw logic_error( "NER tagger call undefined postprocess() member" );
 }
 
-string to_tag( const string& label, bool inside ){
+UnicodeString to_tag( const UnicodeString& label, bool inside ){
   /// convert a label into a result tag
   /*!
     \param label the label as a string
@@ -523,13 +521,13 @@ string to_tag( const string& label, bool inside ){
     * The label is usable like 'org'. Then we return 'I-org' when 'inside' or
     'B-org' othwerwise
   */
-  vector<string> parts = TiCC::split_at( label, "+" );
+  vector<UnicodeString> parts = TiCC::split_at( label, "+" );
   if ( parts.size() > 1 ){
     // undecided
     return "O";
   }
   else {
-    string result;
+    UnicodeString result;
     if ( inside ){
       result += "I-";
     }
@@ -554,7 +552,7 @@ void NERTagger::merge_override( vector<tc_pair>& tags,
     \param POS_tags a list of POS-tags. When this list is non-empty, only
     override when it contains a N or a SPEC tag.
    */
-  string label;
+  UnicodeString label;
   for ( size_t i=0; i < tags.size(); ++i ){
     if ( overrides[i].first != "O"
 	 && ( POS_tags.empty()
@@ -572,7 +570,7 @@ void NERTagger::merge_override( vector<tc_pair>& tags,
       }
       bool inside = (label == overrides[i].first );
       //      cerr << "step i=" << i << " override=" << overrides[i] << endl;
-      string replace = to_tag(overrides[i].first, inside );
+      UnicodeString replace = to_tag(overrides[i].first, inside );
       //      cerr << "replace=" << replace << endl;
       if ( replace != "O" ){
 	// there is something to override.
@@ -583,7 +581,7 @@ void NERTagger::merge_override( vector<tc_pair>& tags,
 	  // whipe previous I tags, and one B
 	  if ( i == 0 ){
 	    // strange exception, in fact starting with an I tag is impossible
-	    tags[i].first[0] = 'B'; // fix it on the fly
+	    tags[i].first.replace(0,1,'B'); // fix it on the fly
 	    continue; // next i
 	  }
 	  for ( size_t j = i-1; j > 0; --j ){
