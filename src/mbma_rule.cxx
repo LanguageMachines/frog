@@ -97,25 +97,20 @@ ostream& operator<<( ostream& os, const RulePart *r ){
   return os << *r;
 }
 
-void RulePart::get_edits( const string& edit ){
+void RulePart::get_edits( const UnicodeString& edit ){
   if (edit[0]=='D') { // delete operation
-    string s = edit.substr(1);
-    ins = TiCC::UnicodeFromUTF8( s );
+    ins = UnicodeString( edit, 1 );
   }
   else if ( edit[0]=='I') {  // insert operation
-    string s = edit.substr(1);
-    del = TiCC::UnicodeFromUTF8( s );
+    del = UnicodeString( edit, 1 );
   }
   else if ( edit[0]=='H') {  // hidden morpheme
-    string s = edit.substr(1);
-    hide = TiCC::UnicodeFromUTF8( s );
+    hide = UnicodeString( edit, 1 );
   }
   else if ( edit[0]=='R') { // replace operation
-    string::size_type pos = edit.find( ">" );
-    string s = edit.substr( 1, pos-1 );
-    ins = TiCC::UnicodeFromUTF8( s );
-    s = edit.substr( pos+1 );
-    del = TiCC::UnicodeFromUTF8( s );
+    int pos = edit.indexOf( ">" );
+    ins = UnicodeString( edit, 1, pos-1 );
+    del = UnicodeString( edit, pos+1 );
   }
 }
 
@@ -127,7 +122,7 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
   is_participle(false)
 {
   //  cerr << "extract RulePart:" << rs << endl;
-  string edit;
+  UnicodeString edit;
   string s = rs;
   string::size_type ppos = rs.find("+");
   if ( ppos != string::npos ){
@@ -137,10 +132,10 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
       // inflection too
       inflect = rs.substr( spos+1 );
       //    cerr << "inflect = " << inflect << endl;
-      edit = rs.substr( ppos+1, spos-ppos-1 );
+      edit = TiCC::UnicodeFromUTF8(rs.substr( ppos+1, spos-ppos-1 ));
     }
     else {
-      edit = rs.substr( ppos+1 );
+      edit = TiCC::UnicodeFromUTF8(rs.substr( ppos+1 ));
     }
     //    cerr << "EDIT = " << edit << endl;
     get_edits( edit );
@@ -299,26 +294,25 @@ void Rule::reduceZeroNodes(){
   rules.swap( out );
 }
 
-vector<string> Rule::extract_morphemes( ) const {
-  vector<string> morphemes;
+vector<UnicodeString> Rule::extract_morphemes( ) const {
+  vector<UnicodeString> morphemes;
   morphemes.reserve( rules.size() );
   for ( const auto& it : rules ){
     UnicodeString morpheme = it.morpheme;
     if ( !morpheme.isEmpty() ){
-      morphemes.push_back( TiCC::UnicodeToUTF8(morpheme) );
+      morphemes.push_back( morpheme );
     }
   }
   return morphemes;
 }
 
-string Rule::morpheme_string( bool structured ) const {
-  string result;
+UnicodeString Rule::morpheme_string( bool structured ) const {
+  UnicodeString result;
   if ( structured ){
-    UnicodeString us = brackets->put(true);
-    result = TiCC::UnicodeToUTF8( us );
+    result = brackets->put(true);
   }
   else {
-    vector<string> vec = extract_morphemes();
+    vector<UnicodeString> vec = extract_morphemes();
     for ( const auto& m : vec ){
       result += "[" + m + "]";
     }
@@ -508,11 +502,11 @@ UnicodeString Rule::getKey( bool deep ){
     return sortkey;
   }
   else {
-    vector<string> morphs = extract_morphemes();
+    vector<UnicodeString> morphs = extract_morphemes();
     UnicodeString tmp;
     // create an unique string
     for ( auto const& mor : morphs ){
-      tmp += TiCC::UnicodeFromUTF8(mor) + "++";
+      tmp += mor + "++";
     }
     return tmp;
   }

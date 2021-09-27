@@ -48,7 +48,7 @@ class RulePart {
 public:
   RulePart( const std::string&, const UChar, bool );
   bool isBasic() const;
-  void get_edits( const std::string& );
+  void get_edits( const icu::UnicodeString& );
   CLEX::Type ResultClass;
   std::vector<CLEX::Type> RightHand;
   icu::UnicodeString ins;
@@ -76,8 +76,8 @@ public:
 	TiCC::LogStream&,
 	int );
   ~Rule();
-  std::vector<std::string> extract_morphemes() const;
-  std::string morpheme_string( bool = false ) const;
+  std::vector<icu::UnicodeString> extract_morphemes() const;
+  icu::UnicodeString morpheme_string( bool = false ) const;
   std::string pretty_string() const;
   icu::UnicodeString getKey( bool );
   bool performEdits();

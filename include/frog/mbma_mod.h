@@ -35,6 +35,7 @@
 #include <map>
 #include <vector>
 #include <list>
+#include "unicode/unistr.h"
 #include <unicode/translit.h>
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Unicode.h"
@@ -73,7 +74,7 @@ class Mbma {
   std::string version() const { return _version; };
   void add_morphemes( const std::vector<folia::Word*>&,
 		      const frog_data& fd ) const;
-  static std::map<std::string,std::string> TAGconv;
+  static std::map<icu::UnicodeString,std::string> TAGconv;
   static std::string mbma_tagset;
   static std::string pos_tagset;
   static std::string clex_tagset;
@@ -90,16 +91,17 @@ class Mbma {
 		    std::vector<std::string>& );
   CLEX::Type getFinalTag( const std::list<BaseBracket*>& );
   int debugFlag;
-  void store_morphemes( frog_record&, const std::vector<std::string>& ) const;
+  void store_morphemes( frog_record&,
+			const std::vector<icu::UnicodeString>& ) const;
   void store_brackets( frog_record&,
-		       const std::string&,
-		       const std::string&,
+		       const icu::UnicodeString&,
+		       const icu::UnicodeString&,
 		       bool=false ) const;
   void addBracketMorph( folia::Word *,
 			const std::string&,
 			const BaseBracket * ) const;
   void store_brackets( frog_record&,
-		       const std::string&,
+		       const icu::UnicodeString&,
 		       const BracketNest * ) const;
   std::string MTreeFilename;
   Timbl::TimblAPI *MTree;

@@ -80,7 +80,7 @@ Mbma::Mbma( TiCC::LogStream *errlog, TiCC::LogStream *dbglog ):
 }
 
 // define the statics
-map<string,string> Mbma::TAGconv;
+map<UnicodeString,string> Mbma::TAGconv;
 string Mbma::mbma_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbma-nl";
 string Mbma::pos_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
 string Mbma::clex_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-clex";
@@ -134,7 +134,7 @@ void Mbma::init_cgn( const string& main, const string& sub ) {
 	LOG << "splitting '" << line << "' failed" << endl;
 	throw ( runtime_error("panic") );
       }
-      TAGconv.insert( make_pair( tmp[0], tmp[1] ) );
+      TAGconv.insert( make_pair( TiCC::UnicodeFromUTF8(tmp[0]), tmp[1] ) );
     }
   }
   else {
@@ -147,7 +147,7 @@ void Mbma::init_cgn( const string& main, const string& sub ) {
       vector<string> tmp;
       size_t num = TiCC::split_at(line, tmp, " ");
       if ( num == 2 ){
-	TAGconv.insert( make_pair( tmp[0], tmp[1] ) );
+	TAGconv.insert( make_pair( TiCC::UnicodeFromUTF8(tmp[0]), tmp[1] ) );
       }
     }
   }
@@ -542,7 +542,7 @@ void Mbma::filterHeadTag( const UnicodeString& head ){
       DBG << ++i << " - " << it << endl;
     }
   }
-  map<string,string>::const_iterator tagIt = TAGconv.find( TiCC::UnicodeToUTF8(head) );
+  auto const tagIt = TAGconv.find( head );
   if ( tagIt == TAGconv.end() ) {
     // this should never happen
     throw folia::ValueError( "1 unknown head feature '"
@@ -648,7 +648,7 @@ void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
       DBG << "matching " << inflection << " with " << feats << endl;
     }
     for ( const auto& feat : feats ){
-      map<string,string>::const_iterator conv_tag_p = TAGconv.find( TiCC::UnicodeToUTF8(feat) );
+      auto const conv_tag_p = TAGconv.find( feat );
       if (conv_tag_p != TAGconv.end()) {
 	string c = conv_tag_p->second;
 	if (debugFlag > 1){
@@ -792,11 +792,11 @@ void Mbma::add_provenance( folia::Document& doc,
 }
 
 void Mbma::store_morphemes( frog_record& fd,
-			    const vector<string>& morphemes ) const {
+			    const vector<UnicodeString>& morphemes ) const {
   /// store the calculated morphemes in the FrogData
   vector<string> adapted;
   for ( const auto& m : morphemes ){
-    adapted.push_back( "[" + m + "]" );
+    adapted.push_back( "[" + TiCC::UnicodeToUTF8(m) + "]" );
   }
 #pragma omp critical (dataupdate)
   {
@@ -810,12 +810,14 @@ void Mbma::store_morphemes( frog_record& fd,
 }
 
 void Mbma::store_brackets( frog_record& fd,
-			   const string& wrd,
-			   const string& head,
+			   const UnicodeString& wrd,
+			   const UnicodeString& head,
 			   bool unanalysed ) const {
   if (debugFlag > 1){
     DBG << "store_brackets(" << wrd << "," << head << ")" << endl;
   }
+  string utf8_wrd = TiCC::UnicodeToUTF8( wrd );
+  string utf8_head = TiCC::UnicodeToUTF8( head );
   if ( unanalysed  ) {
     // unanalysed, so trust the TAGGER
     if (debugFlag > 1){
@@ -824,7 +826,7 @@ void Mbma::store_brackets( frog_record& fd,
     const auto tagIt = TAGconv.find( head );
     if ( tagIt == TAGconv.end() ) {
       // this should never happen
-      throw logic_error( "2 unknown head feature '" + head + "'" );
+      throw logic_error( "2 unknown head feature '" + utf8_head + "'" );
     }
     string clex_tag = tagIt->second;
     string head_tag = CLEX::get_tDescr(CLEX::toCLEX(clex_tag));
@@ -832,33 +834,33 @@ void Mbma::store_brackets( frog_record& fd,
       DBG << "replaced X by: " << head << endl;
     }
     BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(clex_tag),
-					 TiCC::UnicodeFromUTF8(wrd),
+					 wrd,
 					 debugFlag,
 					 *dbgLog );
     if ( fd.deep_morph_string.empty() ){
-      fd.deep_morph_string = "[" + wrd + "]" + head_tag;
+      fd.deep_morph_string = "[" + utf8_wrd + "]" + head_tag;
     }
     fd.deep_morphs.push_back( leaf );
   }
   else if ( head == "LET" || head == "SPEC" ){
-    BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(head),
-					 TiCC::UnicodeFromUTF8(wrd),
+    BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(utf8_head),
+					 wrd,
 					 debugFlag,
 					 *dbgLog );
     leaf->set_status( STEM );
     if ( fd.deep_morph_string.empty() ){
-      fd.deep_morph_string = "[" + wrd + "]";
+      fd.deep_morph_string = "[" + utf8_wrd + "]";
     }
     fd.deep_morphs.push_back( leaf );
   }
   else {
-    BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(head),
-					 TiCC::UnicodeFromUTF8(wrd),
+    BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(utf8_head),
+					 wrd,
 					 debugFlag,
 					 *dbgLog );
     leaf->set_status( STEM );
     if ( fd.deep_morph_string.empty() ){
-      fd.deep_morph_string = "[" + wrd + "]" + head;
+      fd.deep_morph_string = "[" + utf8_wrd + "]" + utf8_head;
     }
     fd.deep_morphs.push_back( leaf );
   }
@@ -870,7 +872,7 @@ BracketNest *copy_nest( const BracketNest *brackets ){
 }
 
 void Mbma::store_brackets( frog_record& fd,
-			   const string& orig_word,
+			   const UnicodeString& orig_word,
 			   const BracketNest *brackets ) const {
   if (debugFlag > 1){
     DBG << "store_brackets(" << fd.word << "," << orig_word
@@ -893,14 +895,13 @@ void Mbma::getResult( frog_record& fd,
       DBG << "no matches found, use the word instead: "
 		    << uword << endl;
     }
-    string word = TiCC::UnicodeToUTF8(uword);
     string head = TiCC::UnicodeToUTF8(uhead);
     if ( doDeepMorph ){
-      store_brackets( fd, word, head, true );
+      store_brackets( fd, uword, uhead, true );
     }
     else {
-      vector<string> tmp;
-      tmp.push_back( word );
+      vector<UnicodeString> tmp;
+      tmp.push_back( uword );
       store_morphemes( fd, tmp );
     }
   }
@@ -922,7 +923,7 @@ void Mbma::getResult( frog_record& fd,
     }
     for ( auto const& sit : analysis ){
       if ( doDeepMorph ){
-	store_brackets( fd, TiCC::UnicodeToUTF8(uword), sit->brackets );
+	store_brackets( fd, uword, sit->brackets );
       }
       else {
 	store_morphemes( fd, sit->extract_morphemes() );
@@ -956,12 +957,11 @@ void Mbma::Classify( frog_record& fd ){
     //  also ABBREVIATION's aren't handled bij mbma-rules
     fd.clean_word = word;
     if ( doDeepMorph ){
-      store_brackets( fd, TiCC::UnicodeToUTF8(word),
-		      TiCC::UnicodeToUTF8(head) );
+      store_brackets( fd, word, head );
     }
     else {
-      vector<string> tmp;
-      tmp.push_back( TiCC::UnicodeToUTF8(word) );
+      vector<UnicodeString> tmp;
+      tmp.push_back( word );
       store_morphemes( fd, tmp );
     }
   }
@@ -1098,8 +1098,8 @@ void Mbma::Classify( const icu::UnicodeString& word ){
 vector<string> Mbma::getResult() const {
   vector<string> result;
   for ( const auto& it : analysis ){
-    string tmp = it->morpheme_string( doDeepMorph );
-    result.push_back( tmp );
+    UnicodeString tmp = it->morpheme_string( doDeepMorph );
+    result.push_back( TiCC::UnicodeToUTF8(tmp) );
   }
   if ( debugFlag > 1 ){
     DBG << "result of morph analyses: " << result << endl;
@@ -1110,9 +1110,9 @@ vector<string> Mbma::getResult() const {
 vector<pair<string,string>> Mbma::getResults( ) const {
   vector<pair<string,string>> result;
   for ( const auto& it : analysis ){
-    string tmp = it->morpheme_string( true );
+    UnicodeString tmp = it->morpheme_string( true );
     string cmp = toString( it->compound );
-    result.push_back( make_pair(tmp,cmp) );
+    result.push_back( make_pair(TiCC::UnicodeToUTF8(tmp),cmp) );
   }
   if ( debugFlag > 1 ){
     DBG << "result of morph analyses: ";
