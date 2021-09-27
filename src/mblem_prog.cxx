@@ -187,65 +187,62 @@ void Test( istream& in, ostream& os ){
       sentences.push_back( line );
     }
     for ( auto const& s : sentences ){
+      UnicodeString us = TiCC::UnicodeFromUTF8(s);
       if ( useTagger ){
-	vector<TagResult> tagrv = tagger.tagLine( TiCC::UnicodeFromUTF8(s) );
+	vector<TagResult> tagrv = tagger.tagLine( us );
 	for ( const auto& tr : tagrv ){
-	  UnicodeString uWord = tr.word();
-	  myMblem.Classify( uWord );
+	  myMblem.Classify( tr.word() );
 	  myMblem.filterTag( tr.assigned_tag() );
 	  vector<pair<UnicodeString,UnicodeString> > res = myMblem.getResult();
-	  UnicodeString line = tr.word() + " {" + tr.assigned_tag() + "}\t";
+	  UnicodeString out_line = tr.word() + " {" + tr.assigned_tag() + "}\t";
 	  for ( const auto& p : res ){
-	    line += p.first + "[" + p.second + "]/";
+	    out_line += p.first + "[" + p.second + "]/";
 	  }
-	  line.remove(line.length()-1);
-	  line += "\n";
-	  os << line;
+	  out_line.remove(out_line.length()-1);
+	  out_line += "\n";
+	  os << out_line;
 	}
       }
       else {
-	string line = s;
 	if ( usewordlist ){
-	  if ( line[0] == '"' ){
-	    line.erase(line.begin());
+	  if ( us[0] == '"' ){
+	    us.remove(0,1);
 	  }
-	  if ( line.back() == '"' ){
-	    line.pop_back();
+	  if ( us.endsWith( "\"" ) ){
+	    us.remove( us.length()-1 );
 	  }
-	  vector<string> parts = TiCC::split( line );
+	  vector<UnicodeString> parts = TiCC::split( us );
 	  if ( parts.size() > 1 ){
 	    cerr << "skipping multiword " << s << endl;
 	  }
 	  else {
-	    UnicodeString uWord = TiCC::UnicodeFromUTF8(parts[0]);
-	    myMblem.Classify( uWord );
+	    myMblem.Classify( parts[0] );
 	    vector<pair<UnicodeString,UnicodeString> > res = myMblem.getResult();
-	    UnicodeString line =  TiCC::UnicodeFromUTF8(parts[0]) + ",";
+	    UnicodeString out_line = parts[0] + ",";
 	    set<UnicodeString> out_set;
 	    for ( const auto& p : res ){
-	      if ( p.first != TiCC::UnicodeFromUTF8(parts[0]) || out_set.empty() ){
+	      if ( p.first != parts[0] || out_set.empty() ){
 		out_set.insert( p.first );
 	      }
 	    }
-	    for ( const auto& s : out_set ){
-	      line += s + ",";
+	    for ( const auto& st : out_set ){
+	      out_line += st + ",";
 	    }
-	    os << line;
+	    os << out_line;
 	  }
 	}
 	else {
-	  vector<UnicodeString> parts = TiCC::split( TiCC::UnicodeFromUTF8(s) );
-	  for ( const auto& w : parts ){
-	    UnicodeString uWord = w;
-	    myMblem.Classify( uWord );
+	  vector<UnicodeString> parts = TiCC::split( us );
+	  for ( const auto& p : parts ){
+	    myMblem.Classify( p );
 	    vector<pair<UnicodeString,UnicodeString> > res = myMblem.getResult();
-	    UnicodeString line = w + "\t";
-	    for ( const auto& p : res ){
-	      line += p.first + "[" + p.second + "]/";
+	    UnicodeString out_line = p + "\t";
+	    for ( const auto& r : res ){
+	      out_line += r.first + "[" + r.second + "]/";
 	    }
-	    line.remove(line.length()-1);
-	    line += "\n";
-	    os << line;
+	    out_line.remove(out_line.length()-1);
+	    out_line += "\n";
+	    os << out_line;
 	  }
 	}
       }
