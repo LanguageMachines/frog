@@ -98,11 +98,11 @@ class Parser: public ParserBase {
   parseData prepareParse( frog_data& );
   void Parse( frog_data&, TimerBlock& );
  private:
-  std::vector<std::string> createPairInstances( const parseData& );
-  std::vector<std::string> createDirInstances( const parseData& );
-  std::vector<std::string> createRelInstances( const parseData& );
+  std::vector<icu::UnicodeString> createPairInstances( const parseData& );
+  std::vector<icu::UnicodeString> createDirInstances( const parseData& );
+  std::vector<icu::UnicodeString> createRelInstances( const parseData& );
   std::vector<timbl_result> timbl_server( const std::string&,
-					  const std::vector<std::string>& );
+					  const std::vector<icu::UnicodeString>& );
   std::string maxDepSpanS;
   size_t maxDepSpan;
   Timbl::TimblAPI *pairs;

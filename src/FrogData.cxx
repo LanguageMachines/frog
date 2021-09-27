@@ -97,15 +97,15 @@ json frog_record::to_json() const {
     tg["confidence"] = tag_confidence;
     result["pos"] = tg;
   }
-  if ( !ner_tag.empty() && ner_confidence > 0.0 ){
+  if ( !ner_tag.isEmpty() && ner_confidence > 0.0 ){
     json tg;
-    tg["tag"] = TiCC::uppercase(ner_tag);
+    tg["tag"] = TiCC::UnicodeToUTF8(ner_tag);
     tg["confidence"] = ner_confidence;
     result["ner"] = tg;
   }
-  if ( !iob_tag.empty() ){
+  if ( !iob_tag.isEmpty() ){
     json tg;
-    tg["tag"] = iob_tag;
+    tg["tag"] = TiCC::UnicodeToUTF8(iob_tag);
     tg["confidence"] = iob_confidence;
     result["chunking"] = tg;
   }

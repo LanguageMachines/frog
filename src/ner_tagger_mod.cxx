@@ -485,7 +485,7 @@ void NERTagger::addEntity( frog_data& sent,
     The confidence of the NE is calculated as the mean of the confidences
     of those tags.
 
-    The NE tags and that mean confidence ias assigned to the proper locations
+    The NE tags and the mean confidence are assigned to the proper locations
     in the 'sent' structure.
   */
   double c = 0;
@@ -496,7 +496,7 @@ void NERTagger::addEntity( frog_data& sent,
   for ( size_t i = 0; i < entity.size(); ++i ){
 #pragma omp critical (foliaupdate)
     {
-      sent.units[pos-entity.size()+i].ner_tag = TiCC::UnicodeToUTF8(entity[i].first);
+      sent.units[pos-entity.size()+i].ner_tag = entity[i].first;
       sent.units[pos-entity.size()+i].ner_confidence = c;
     }
   }
@@ -659,7 +659,7 @@ void NERTagger::add_result( const frog_data& fd,
       folia::KWargs args;
       args["set"] = getTagset();
       args["generate_id"] = el->id();
-      args["class"] = word.ner_tag.substr(2); // strip the B-
+      args["class"] = TiCC::UnicodeToUTF8(word.ner_tag).substr(2); // strip the B-
       args["confidence"] = TiCC::toString(word.ner_confidence);
       if ( textclass != "current" ){
 	args["textclass"] = textclass;

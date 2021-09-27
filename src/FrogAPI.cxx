@@ -2153,7 +2153,7 @@ void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
     os << Tab << Tab << Tab;
   }
   if ( options.doNER ){
-    os << Tab << TiCC::uppercase(fd.ner_tag);
+    os << Tab << fd.ner_tag;
   }
   else {
     os << Tab << Tab;

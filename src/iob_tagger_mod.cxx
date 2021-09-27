@@ -169,7 +169,7 @@ void IOBTagger::addTag( frog_record& fd,
   */
 #pragma omp critical (dataupdate)
   {
-    fd.iob_tag = TiCC::UnicodeToUTF8(tag);
+    fd.iob_tag = tag;
     fd.iob_confidence = confidence;
   }
 }
@@ -216,7 +216,7 @@ void IOBTagger::add_result( const frog_data& fd,
       if ( !el->id().empty() ){
 	args["generate_id"] = el->id();
       }
-      args["class"] = word.iob_tag.substr(2);
+      args["class"] = TiCC::UnicodeToUTF8(word.iob_tag).substr(2);
       args["confidence"] = TiCC::toString(word.iob_confidence);
       if ( textclass != "current" ){
 	args["textclass"] = textclass;

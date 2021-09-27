@@ -58,16 +58,16 @@ class frog_record {
   bool new_paragraph;        ///< did the tokenizer detect a paragraph here?
   icu::UnicodeString tag;           ///< the assigned POS tag in Unicode
   double tag_confidence;     ///< the confidence of the POS tag
-  std::string iob_tag;       ///< the assigned IOB tag
+  icu::UnicodeString iob_tag;       ///< the assigned IOB tag
   double iob_confidence;     ///< the confidence of the IOB tag
-  std::string ner_tag;       ///< the assigned NER tag
+  icu::UnicodeString ner_tag;       ///< the assigned NER tag
   double ner_confidence;     ///< the confidence of the NER tag
-  std::vector<std::string> lemmas;  ///< a list of possible lemma's
-  std::vector<std::vector<std::string>> morphs; ///< the morph analysis
+  std::vector<std::string> lemmas;  ///< a list of possible lemma's in UTF8
+  std::vector<std::vector<std::string>> morphs; ///< the morph analysis in UTF8
   std::vector<const BaseBracket*> deep_morphs;  ///< pointers to the deep morphemes
   std::string compound_string;   ///< string representation of first compound
-  std::string morph_string;      ///< string representation of first morph
-  std::string deep_morph_string; ///< string representation of first deep_morph
+  std::string morph_string;      ///< UTF8 string representation of first morph
+  std::string deep_morph_string; ///< UTF8 string representation of first deep_morph
   int parse_index;           ///< label of the dependency
   std::string parse_role;    ///< role of the dependency
   std::set<size_t> parts;    ///< set of indeces a MWU is made of (MWU only)

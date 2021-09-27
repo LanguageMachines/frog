@@ -324,13 +324,17 @@ Parser::~Parser(){
   delete pairs;
 }
 
-vector<string> Parser::createPairInstances( const parseData& pd ){
+inline UnicodeString int_to_unicode( double d ){
+  return TiCC::UnicodeFromUTF8(TiCC::toString( d ));
+}
+
+vector<UnicodeString> Parser::createPairInstances( const parseData& pd ){
   /// create a list of Instances for the 'pairs' Timbl
   /*!
     \param pd the parsedata structure with words, heads and modifiers
     \return a list of string where every string is a Timbl test instance
   */
-  vector<string> instances;
+  vector<UnicodeString> instances;
   const vector<UnicodeString>& words = pd.words;
   const vector<UnicodeString>& heads = pd.heads;
   const vector<UnicodeString>& mods = pd.mods;
@@ -339,7 +343,7 @@ vector<string> Parser::createPairInstances( const parseData& pd ){
       "__ " + words[0] + " __ ROOT ROOT ROOT __ " + heads[0]
       + " __ ROOT ROOT ROOT "+ words[0] +"^ROOT ROOT ROOT ROOT^"
       + heads[0] + " _";
-    instances.push_back( TiCC::UnicodeToUTF8(inst) );
+    instances.push_back( inst );
   }
   else {
     for ( size_t i=0 ; i < words.size(); ++i ){
@@ -369,7 +373,7 @@ vector<string> Parser::createPairInstances( const parseData& pd ){
 	+ " ROOT ROOT ROOT " + tag_1 + " "
 	+ tag0 + " " + tag1 + " ROOT ROOT ROOT " + tag0
 	+ "^ROOT ROOT ROOT ROOT^" + mods0 + " _";
-      instances.push_back( TiCC::UnicodeToUTF8(inst) );
+      instances.push_back( inst );
     }
     //
     for ( size_t wPos=0; wPos < words.size(); ++wPos ){
@@ -454,10 +458,10 @@ vector<string> Parser::createPairInstances( const parseData& pd ){
 	}
 
 	if ( wPos > pos ){
-	  inst += " LEFT " + TiCC::UnicodeFromUTF8(TiCC::toString( wPos - pos ));
+	  inst += " LEFT " + int_to_unicode( wPos - pos );
 	}
 	else {
-	  inst += " RIGHT "+ TiCC::UnicodeFromUTF8(TiCC::toString( pos - wPos ));
+	  inst += " RIGHT "+ int_to_unicode( pos - wPos );
 	}
 	if ( pos >= words.size() ){
 	  inst += " __";
@@ -466,20 +470,20 @@ vector<string> Parser::createPairInstances( const parseData& pd ){
 	  inst += " " + mods[pos];
 	}
 	inst += "^" + w_mods0 + " __";
-	instances.push_back( TiCC::UnicodeToUTF8(inst) );
+	instances.push_back( inst );
       }
     }
   }
   return instances;
 }
 
-vector<string> Parser::createDirInstances( const parseData& pd ){
+vector<UnicodeString> Parser::createDirInstances( const parseData& pd ){
   /// create a list of Instances for the 'dir' Timbl
   /*!
     \param pd the parsedata structure with words, heads and modifiers
     \return a list of string where every string is a Timbl test instance
   */
-  vector<string> d_instances;
+  vector<UnicodeString> d_instances;
   const vector<UnicodeString>& words = pd.words;
   const vector<UnicodeString>& heads = pd.heads;
   const vector<UnicodeString>& mods = pd.mods;
@@ -492,7 +496,7 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
       + " __ __ __ __ " + word0 + "^" + tag0
       + " __ __ __^" + tag0 + " " + tag0 +"^__ __ " + mod0
       + " __ ROOT";
-    d_instances.push_back( TiCC::UnicodeToUTF8(inst) );
+    d_instances.push_back( inst );
   }
   else if ( words.size() == 2 ){
     UnicodeString word0 = words[0];
@@ -516,7 +520,7 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
       + " " + mod0
       + " " + mod1
       + " ROOT";
-    d_instances.push_back( TiCC::UnicodeToUTF8(inst) );
+    d_instances.push_back( inst );
     inst = UnicodeString("__")
       + " " + word0
       + " " + word1
@@ -533,7 +537,7 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
       + " " + mod1
       + " __"
       + " ROOT";
-    d_instances.push_back( TiCC::UnicodeToUTF8(inst) );
+    d_instances.push_back( inst );
   }
   else if ( words.size() == 3 ) {
     UnicodeString word0 = words[0];
@@ -563,7 +567,7 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
       + " " + mod0
       + " " + mod1
       + " ROOT";
-    d_instances.push_back( TiCC::UnicodeToUTF8(inst) );
+    d_instances.push_back( inst );
     inst = UnicodeString("__")
       + " " + word0
       + " " + word1
@@ -583,7 +587,7 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
       + " " + mod1
       + " " + mod2
       + " ROOT";
-    d_instances.push_back( TiCC::UnicodeToUTF8(inst) );
+    d_instances.push_back( inst );
     inst = word0
       + " " + word1
       + " " + word2
@@ -602,7 +606,7 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
       + " " + mod2
       + " __"
       + " ROOT";
-    d_instances.push_back( TiCC::UnicodeToUTF8(inst) );
+    d_instances.push_back( inst );
   }
   else {
     for ( size_t i=0 ; i < words.size(); ++i ){
@@ -684,19 +688,19 @@ vector<string> Parser::createDirInstances( const parseData& pd ){
 	+ " " + mod0
 	+ " " + mod1
 	+ " ROOT";
-      d_instances.push_back( TiCC::UnicodeToUTF8(inst) );
+      d_instances.push_back( inst );
     }
   }
   return d_instances;
 }
 
-vector<string> Parser::createRelInstances( const parseData& pd ){
+vector<UnicodeString> Parser::createRelInstances( const parseData& pd ){
   /// create a list of Instances for the 'rel' Timbl
   /*!
     \param pd the parsedata structure with words, heads and modifiers
     \return a list of string where every string is a Timbl test instance
   */
-  vector<string> r_instances;
+  vector<UnicodeString> r_instances;
   const vector<UnicodeString>& words = pd.words;
   const vector<UnicodeString>& heads = pd.heads;
   const vector<UnicodeString>& mods = pd.mods;
@@ -709,7 +713,7 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
       + " __ __ "  + tag0 + " __ __ __^" + tag0
       + " " + tag0 + "^__ __^__^" + tag0
       + " " + tag0 + "^__^__ __";
-    r_instances.push_back( TiCC::UnicodeToUTF8(inst) );
+    r_instances.push_back( inst );
   }
   else if ( words.size() == 2 ){
     UnicodeString word0 = words[0];
@@ -733,7 +737,7 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
       + " __^__^" + tag0
       + " " + tag0 + "^" + tag1 + "^__"
       + " __";
-    r_instances.push_back( TiCC::UnicodeToUTF8(inst) );
+    r_instances.push_back( inst );
     inst = UnicodeString("__")
       + " " + word0
       + " " + word1
@@ -748,7 +752,7 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
       + " __^" + tag0 + "^" + tag1
       + " " + tag1 + "^__^__"
       + " __";
-    r_instances.push_back( TiCC::UnicodeToUTF8(inst) );
+    r_instances.push_back( inst );
   }
   else if ( words.size() == 3 ) {
     UnicodeString word0 = words[0];
@@ -775,7 +779,7 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
       + " __^__^" + tag0
       + " " + tag0 + "^" + tag1 + "^" + tag2
       + " __";
-    r_instances.push_back( TiCC::UnicodeToUTF8(inst) );
+    r_instances.push_back( inst );
     inst = UnicodeString("__")
       + " " + word0
       + " " + word1
@@ -792,7 +796,7 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
       + " __^" + tag0 + "^" + tag1
       + " " + tag1 + "^" + tag2 + "^__"
       + " __";
-    r_instances.push_back( TiCC::UnicodeToUTF8(inst) );
+    r_instances.push_back( inst );
     inst = word0
       + " " + word1
       + " " + word2
@@ -807,7 +811,7 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
       + " " + tag0 + "^" + tag1 + "^" + tag2
       + " " + tag2 + "^__^__"
       + " __";
-    r_instances.push_back( TiCC::UnicodeToUTF8(inst) );
+    r_instances.push_back( inst );
   }
   else {
     for ( size_t i=0 ; i < words.size(); ++i ){
@@ -871,7 +875,7 @@ vector<string> Parser::createRelInstances( const parseData& pd ){
 	+ " " + tag_2 + "^" + tag_1 + "^" + tag0
 	+ " " + tag0 + "^" + tag1 + "^" + tag2
 	+ " __";
-      r_instances.push_back( TiCC::UnicodeToUTF8(inst) );
+      r_instances.push_back( inst );
     }
   }
   return r_instances;
@@ -984,7 +988,7 @@ parseData Parser::prepareParse( frog_data& fd ){         //     |
 
 
 vector<timbl_result> timbl( Timbl::TimblAPI* tim,
-			    const vector<string>& instances ){
+			    const vector<UnicodeString>& instances ){
   /// call a Timbl experiment with a list of instances
   /*!
     \param tim The Timbl to use
@@ -995,7 +999,8 @@ vector<timbl_result> timbl( Timbl::TimblAPI* tim,
   vector<timbl_result> result;
   for ( const auto& inst : instances ){
     const Timbl::ValueDistribution *db;
-    const Timbl::TargetValue *tv = tim->Classify( inst, db );
+    const Timbl::TargetValue *tv = tim->Classify( TiCC::UnicodeToUTF8(inst),
+						  db );
     result.push_back( timbl_result( tv->Name(), db->Confidence(tv), db ) );
   }
   return result;
@@ -1019,7 +1024,7 @@ vector<pair<string,double>> parse_vd( const string& ds ){
 }
 
 vector<timbl_result> Parser::timbl_server( const string& base,
-					   const vector<string>& instances ){
+					   const vector<UnicodeString>& instances ){
   /// call a Timbl Server with a list of instances
   /*!
     \param base used to select the Timbl to use (should be configured correctly)
@@ -1071,7 +1076,7 @@ vector<timbl_result> Parser::timbl_server( const string& base,
   query["command"] = "classify";
   json arr = json::array();
   for ( const auto& i : instances ){
-    arr.push_back( i );
+    arr.push_back( TiCC::UnicodeToUTF8(i) );
   }
   query["params"] = arr;
   DBG << "send json" << query.dump(2) << endl;
@@ -1162,7 +1167,7 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
 #pragma omp section
       {
 	timers.pairsTimer.start();
-	vector<string> instances = createPairInstances( pd );
+	vector<UnicodeString> instances = createPairInstances( pd );
 	if ( _host.empty() ){
 	  p_results = timbl( pairs, instances );
 	}
@@ -1174,7 +1179,7 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
 #pragma omp section
       {
 	timers.dirTimer.start();
-	vector<string> instances = createDirInstances( pd );
+	vector<UnicodeString> instances = createDirInstances( pd );
 	if ( _host.empty() ){
 	  d_results = timbl( dir, instances );
 	}
@@ -1186,7 +1191,7 @@ void Parser::Parse( frog_data& fd, TimerBlock& timers ){
 #pragma omp section
       {
 	timers.relsTimer.start();
-	vector<string> instances = createRelInstances( pd );
+	vector<UnicodeString> instances = createRelInstances( pd );
 	if ( _host.empty() ){
 	  r_results = timbl( rels, instances );
 	}
