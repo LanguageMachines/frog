@@ -53,7 +53,7 @@ bool RulePart::isBasic() const {
 
 ostream& operator<<( ostream& os, const RulePart& r ){
   if ( r.ResultClass == CLEX::UNASS &&
-       r.inflect.empty() ){
+       r.inflect.isEmpty() ){
     os << "INVALID! No result node, AND no inflection" << endl;
   }
   else {
@@ -68,7 +68,7 @@ ostream& operator<<( ostream& os, const RulePart& r ){
       os << " ==> ";
     }
     os << r.ResultClass << " ";
-    if ( !r.inflect.empty() ){
+    if ( !r.inflect.isEmpty() ){
       os << " INFLECTION: " << r.inflect;
     }
   }
@@ -114,7 +114,7 @@ void RulePart::get_edits( const UnicodeString& edit ){
   }
 }
 
-RulePart::RulePart( const string& rs, const UChar kar, bool first ):
+RulePart::RulePart( const UnicodeString& rs, const UChar kar, bool first ):
   ResultClass(CLEX::UNASS),
   uchar(kar),
   is_affix(false),
@@ -123,46 +123,46 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
 {
   //  cerr << "extract RulePart:" << rs << endl;
   UnicodeString edit;
-  string s = rs;
-  string::size_type ppos = rs.find("+");
-  if ( ppos != string::npos ){
+  UnicodeString s = rs;
+  int ppos = rs.indexOf("+");
+  if ( ppos != -1 ){
     // some edit info is available
-    string::size_type spos = rs.find("/");
-    if ( spos != string::npos ){
+    int spos = rs.indexOf("/");
+    if ( spos != -1 ){
       // inflection too
-      inflect = rs.substr( spos+1 );
+      inflect = UnicodeString( rs, spos+1 );
       //    cerr << "inflect = " << inflect << endl;
-      edit = TiCC::UnicodeFromUTF8(rs.substr( ppos+1, spos-ppos-1 ));
+      edit = UnicodeString( rs, ppos+1, spos-ppos-1 );
     }
     else {
-      edit = TiCC::UnicodeFromUTF8(rs.substr( ppos+1 ));
+      edit = UnicodeString(rs, ppos+1 );
     }
     //    cerr << "EDIT = " << edit << endl;
     get_edits( edit );
-    s = rs.substr(0, ppos );
-    is_participle = ( s.find( "pv" ) != string::npos ) &&
+    s = UnicodeString( rs, 0, ppos );
+    is_participle = ( s.indexOf( "pv" ) != -1 ) &&
       ( del == "ge" );
   }
-  string::size_type pos = s.find("_");
-  if ( pos != string::npos ){
+  int pos = s.indexOf("_");
+  if ( pos != -1 ){
     ResultClass = CLEX::toCLEX( s[0] );
     // a rewrite RulePart
     if ( pos != 1 ){
       cerr << "Surprise! _ on a strange position:" << pos << " in " << s << endl;
     }
     else {
-      string rhs = s.substr( pos+1 );
+      UnicodeString rhs = UnicodeString( s, pos+1 );
       //      cerr << "RHS = " << rhs << endl;
-      string::size_type spos = rhs.find("/");
-      if ( spos != string::npos ){
+      int spos = rhs.indexOf("/");
+      if ( spos != -1 ){
 	// inflection too
-	inflect = rhs.substr( spos+1 );
+	inflect = UnicodeString( rhs, spos+1 );
 	// cerr << "inflect = " << inflect << endl;
-	rhs = rhs.substr( 0, spos );
+	rhs = UnicodeString( rhs, 0, spos );
       }
       //      cerr << "RHS = " << rhs << endl;
-      RightHand.resize( rhs.size() );
-      for ( size_t i = 0; i < rhs.size(); ++i ){
+      RightHand.resize( rhs.length() );
+      for ( int i = 0; i < rhs.length(); ++i ){
 	CLEX::Type tag = CLEX::toCLEX( rhs[i] );
 	if ( tag == CLEX::UNASS ){
 	  cerr << "Unhandled class in rhs=" << rhs << endl;
@@ -199,17 +199,17 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
       //      cerr << "inflect =" << inflect << endl;
     }
     else {
-      string::size_type pos = s.find("/");
-      CLEX::Type tag = CLEX::toCLEX( s );
-      if ( pos != string::npos ){
+      int pos = s.indexOf("/");
+      CLEX::Type tag = CLEX::toCLEX( TiCC::UnicodeToUTF8(s) );
+      if ( pos != -1 ){
 	// some inflection
-	string ts = s.substr(0, pos );
+	UnicodeString ts = UnicodeString( s, 0, pos );
 	//	cerr << "ts=" << ts << endl;
-	tag = CLEX::toCLEX( ts );
+	tag = CLEX::toCLEX( TiCC::UnicodeToUTF8(ts) );
 	if ( tag0 != CLEX::UNASS ){
 	  // cases like 0/e 0/te2I
 	  ResultClass = tag;
-	  inflect = s.substr(pos+1);
+	  inflect = UnicodeString( s, pos+1 );
 	}
 	else {
 	  //  E/P (suffix=e/postive infection)
@@ -230,7 +230,7 @@ RulePart::RulePart( const string& rs, const UChar kar, bool first ):
   }
 }
 
-Rule::Rule( const vector<string>& parts,
+Rule::Rule( const vector<UnicodeString>& parts,
 	    const UnicodeString& s,
 	    TiCC::LogStream& ls,
 	    TiCC::LogStream& ds,
@@ -245,7 +245,7 @@ Rule::Rule( const vector<string>& parts,
   confidence(0.0)
 {
   for ( size_t k=0; k < parts.size(); ++k ) {
-    string this_class = parts[k];
+    UnicodeString this_class = parts[k];
     RulePart cur( this_class, s[k], k==0 );
     rules.push_back( cur );
   }
@@ -284,7 +284,7 @@ void Rule::reduceZeroNodes(){
   for ( auto const& r : rules ){
     if ( r.ResultClass == CLEX::NEUTRAL
 	 && r.morpheme.isEmpty()
-	 && r.inflect.empty() ){
+	 && r.inflect.isEmpty() ){
       // skip
     }
     else {
@@ -433,8 +433,8 @@ void Rule::resolve_inflections(){
   // We take ONLY the first 'hint' of the inflection to find a new CLEX Type
   // When applicable, we replace the class from the rule
   for ( size_t i = 1; i < rules.size(); ++i ){
-    string inf = rules[i].inflect;
-    if ( !inf.empty() && !rules[i].is_participle ){
+    UnicodeString inf = rules[i].inflect;
+    if ( !inf.isEmpty() && !rules[i].is_participle ){
       // it is an inflection tag
       if (debugFlag > 1){
 	DBG << " inflection: >" << inf << "<" << endl;
@@ -442,11 +442,11 @@ void Rule::resolve_inflections(){
       // given the specific selections of certain inflections,
       //    select a tag!
       CLEX::Type new_tag = CLEX::UNASS;
-      for ( size_t i=0; i < inf.size(); ++i ){
+      for ( int i=0; i < inf.length(); ++i ){
 	new_tag = CLEX::select_tag( inf[i] );
 	if ( new_tag != CLEX::UNASS ){
 	  if ( debugFlag > 1 ){
-	    DBG << inf[i] << " selects " << new_tag << endl;
+	    DBG << (char)inf[i] << " selects " << new_tag << endl;
 	  }
 	  break;
 	}
@@ -525,35 +525,36 @@ void Rule::getCleanInflect() {
     if ( debugFlag > 5 ){
       DBG << rule << endl;
     }
-    if ( !rule.inflect.empty() ){
+    if ( !rule.inflect.isEmpty() ){
       if ( debugFlag > 5 ){
 	DBG << "x inflect:'" << rule.inflect << "'" << endl;
       }
-      string inflect;
-      for ( auto const& i : rule.inflect ){
-	if ( i != '/' ){
+      UnicodeString new_inflect;
+      for ( int i=0; i < rule.inflect.length(); ++i ){
+	UChar uc = rule.inflect[i];
+	if ( uc != '/' ){
 	  // check if it is a known inflection
 	  if ( debugFlag > 5 ){
-	    DBG << "x bekijk [" << i << "]" << endl;
+	    DBG << "x bekijk [" << (char)uc << "]" << endl;
 	  }
-	  string inf = CLEX::get_iDescr(i);
-	  if ( inf.empty() ){
+	  UnicodeString inf = TiCC::UnicodeFromUTF8(CLEX::get_iDescr((char)uc));
+	  if ( inf.isEmpty() ){
 	    DBG << "added unknown inflection X" << endl;
-	    inflect += "X";
+	    new_inflect += "X";
 	  }
 	  else {
 	    if ( debugFlag > 5 ){
-	      DBG << "added known inflection " << i
+	      DBG << "added known inflection " << (char)uc
 				<< " (" << inf << ")" << endl;
 	    }
-	    inflect += i;
+	    new_inflect += uc;
 	  }
 	}
       }
       if ( debugFlag > 5 ){
-	DBG << "cleaned inflection " << inflect << endl;
+	DBG << "cleaned inflection " << new_inflect << endl;
       }
-      inflection = inflect;
+      inflection = new_inflect;
       return;
     }
     ++it;

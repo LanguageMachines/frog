@@ -80,7 +80,7 @@ Mbma::Mbma( TiCC::LogStream *errlog, TiCC::LogStream *dbglog ):
 }
 
 // define the statics
-map<UnicodeString,string> Mbma::TAGconv;
+map<UnicodeString,UnicodeString> Mbma::TAGconv;
 string Mbma::mbma_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbma-nl";
 string Mbma::pos_tagset  = "http://ilk.uvt.nl/folia/sets/frog-mbpos-cgn";
 string Mbma::clex_tagset = "http://ilk.uvt.nl/folia/sets/frog-mbpos-clex";
@@ -134,7 +134,8 @@ void Mbma::init_cgn( const string& main, const string& sub ) {
 	LOG << "splitting '" << line << "' failed" << endl;
 	throw ( runtime_error("panic") );
       }
-      TAGconv.insert( make_pair( TiCC::UnicodeFromUTF8(tmp[0]), tmp[1] ) );
+      TAGconv.insert( make_pair( TiCC::UnicodeFromUTF8(tmp[0]),
+				 TiCC::UnicodeFromUTF8(tmp[1]) ) );
     }
   }
   else {
@@ -147,7 +148,8 @@ void Mbma::init_cgn( const string& main, const string& sub ) {
       vector<string> tmp;
       size_t num = TiCC::split_at(line, tmp, " ");
       if ( num == 2 ){
-	TAGconv.insert( make_pair( TiCC::UnicodeFromUTF8(tmp[0]), tmp[1] ) );
+	TAGconv.insert( make_pair( TiCC::UnicodeFromUTF8(tmp[0]),
+				   TiCC::UnicodeFromUTF8(tmp[1]) ) );
       }
     }
   }
@@ -333,10 +335,10 @@ vector<string> Mbma::make_instances( const icu::UnicodeString& word ){
   return insts;
 }
 
-string find_class( unsigned int step,
-		   const vector<string>& classes,
+UnicodeString find_class( unsigned int step,
+		   const vector<UnicodeString>& classes,
 		   unsigned int nranal ){
-  string result = classes[0];
+  UnicodeString result = classes[0];
   if ( nranal > 1 ){
     if ( classes.size() > 1 ){
       if ( classes.size() > step ){
@@ -350,7 +352,7 @@ string find_class( unsigned int step,
   return result;
 }
 
-vector<vector<string> > generate_all_perms( const vector<string>& classes ){
+vector<vector<UnicodeString> > generate_all_perms( const vector<string>& classes ){
   /// determine all alternative analyses, remember the largest
   /// and store every part in a vector of string vectors
   /*!
@@ -371,10 +373,11 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
     { {"A","0","0/P"}, {N","0", "0/e"}, {"V","0", "0/te1"}, {"V", "0","0/te2I"} }
    */
   size_t largest_anal=1;
-  vector<vector<string> > classParts;
+  vector<vector<UnicodeString> > classParts;
   classParts.reserve( classes.size() );
   for ( const auto& cl : classes ){
-    vector<string> parts = TiCC::split_at( cl, "|" );
+    UnicodeString uclass = TiCC::UnicodeFromUTF8(cl);
+    vector<UnicodeString> parts = TiCC::split_at( uclass, "|" );
     size_t num = parts.size();
     if ( num > 1 ){
       classParts.push_back( parts );
@@ -384,17 +387,17 @@ vector<vector<string> > generate_all_perms( const vector<string>& classes ){
     }
     else {
       // only one, create a dummy
-      vector<string> dummy;
-      dummy.push_back( cl );
+      vector<UnicodeString> dummy;
+      dummy.push_back( uclass );
       classParts.push_back( dummy );
     }
   }
   //
   // now expand the result
-  vector<vector<string> > result;
+  vector<vector<UnicodeString> > result;
   result.reserve( largest_anal );
   for ( size_t step=0; step < largest_anal; ++step ){
-    vector<string> item;
+    vector<UnicodeString> item;
     for ( const auto& cp : classParts ){
       item.push_back( find_class( step, cp, largest_anal ) );
     }
@@ -410,8 +413,8 @@ void Mbma::clearAnalysis(){
   analysis.clear();
 }
 
-Rule* Mbma::matchRule( const std::vector<std::string>& ana,
-		       const icu::UnicodeString& word ){
+Rule* Mbma::matchRule( const vector<UnicodeString>& ana,
+		       const UnicodeString& word ){
   /// attempt to match an Analysis on a word
   /*!
     \param ana one analysis result, expanded from the Timbl classifier
@@ -452,7 +455,7 @@ vector<Rule*> Mbma::execute( const icu::UnicodeString& word,
     \param classes the Timbl classifications
     \return 0 or more matching Rules
   */
-  vector<vector<string> > allParts = generate_all_perms( classes );
+  vector<vector<UnicodeString> > allParts = generate_all_perms( classes );
   if ( debugFlag > 1 ){
     string out = "alternatives: word="
       + TiCC::UnicodeToUTF8(word) + ", classes=<";
@@ -548,7 +551,7 @@ void Mbma::filterHeadTag( const UnicodeString& head ){
     throw folia::ValueError( "1 unknown head feature '"
 			     + TiCC::UnicodeToUTF8(head) + "'" );
   }
-  string celex_tag = tagIt->second;
+  string celex_tag = TiCC::UnicodeToUTF8(tagIt->second);
   if (debugFlag > 1){
     DBG << "#matches: CGN:" << head << " CELEX " << celex_tag << endl;
   }
@@ -639,8 +642,8 @@ void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
   int max_count = 0;
   for ( const auto& q : analysis ){
     int match_count = 0;
-    string inflection = q->inflection;
-    if ( inflection.empty() ){
+    UnicodeString inflection = q->inflection;
+    if ( inflection.isEmpty() ){
       bestMatches.insert(q);
       continue;
     }
@@ -650,11 +653,11 @@ void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
     for ( const auto& feat : feats ){
       auto const conv_tag_p = TAGconv.find( feat );
       if (conv_tag_p != TAGconv.end()) {
-	string c = conv_tag_p->second;
+	UnicodeString c = conv_tag_p->second;
 	if (debugFlag > 1){
 	  DBG << "found " << feat << " ==> " << c << endl;
 	}
-	if ( inflection.find( c ) != string::npos ){
+	if ( inflection.indexOf( c ) != -1 ){
 	  if (debugFlag >1){
 	    DBG << "it is in the inflection " << endl;
 	  }
@@ -828,7 +831,7 @@ void Mbma::store_brackets( frog_record& fd,
       // this should never happen
       throw logic_error( "2 unknown head feature '" + utf8_head + "'" );
     }
-    string clex_tag = tagIt->second;
+    string clex_tag = TiCC::UnicodeToUTF8(tagIt->second);
     string head_tag = CLEX::get_tDescr(CLEX::toCLEX(clex_tag));
     if (debugFlag > 1){
       DBG << "replaced X by: " << head << endl;

@@ -46,7 +46,7 @@ namespace Compound {
 /// \brief a class to hold 1 MBMA rule
 class RulePart {
 public:
-  RulePart( const std::string&, const UChar, bool );
+  RulePart( const icu::UnicodeString&, const UChar, bool );
   bool isBasic() const;
   void get_edits( const icu::UnicodeString& );
   CLEX::Type ResultClass;
@@ -56,7 +56,7 @@ public:
   icu::UnicodeString hide;
   icu::UnicodeString uchar;
   icu::UnicodeString morpheme;
-  std::string inflect;
+  icu::UnicodeString inflect;
   bool is_affix;
   bool is_glue;
   bool is_participle;
@@ -70,7 +70,7 @@ class BracketNest;
 /// \brief a class to hold a MBMA rule
 class Rule {
 public:
-  Rule( const std::vector<std::string>&,
+  Rule( const std::vector<icu::UnicodeString>&,
 	const icu::UnicodeString&,
 	TiCC::LogStream&,
 	TiCC::LogStream&,
@@ -91,7 +91,7 @@ public:
   icu::UnicodeString sortkey;
   icu::UnicodeString orig_word;
   std::string description;
-  std::string inflection;
+  icu::UnicodeString inflection;
   Compound::Type compound;
   BracketNest *brackets;
   TiCC::LogStream& myLog;

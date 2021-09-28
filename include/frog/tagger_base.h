@@ -62,7 +62,7 @@ class BaseTagger {
   void add_provenance( folia::Document&, folia::processor * ) const;
   std::string getTagset() const { return tagset; };
   std::string set_eos_mark( const std::string& );
-  bool fill_map( const std::string&, std::map<std::string,std::string>& );
+  bool fill_map( const std::string& );
   std::vector<Tagger::TagResult> tagLine( const icu::UnicodeString& );
   std::vector<Tagger::TagResult> tag_entries( const std::vector<tag_entry>& );
   std::string version() const { return _version; };
@@ -88,7 +88,7 @@ class BaseTagger {
   TiCC::UniFilter *filter;
   std::vector<std::string> _words;
   std::vector<Tagger::TagResult> _tag_result;
-  std::map<std::string,std::string> token_tag_map;
+  std::map<std::string,icu::UnicodeString> token_tag_map;
   BaseTagger( const BaseTagger& ){} // inhibit copies
 };
 

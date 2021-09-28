@@ -253,7 +253,7 @@ BracketLeaf::BracketLeaf( const RulePart& p,
     \param l a LogStream for messages
   */
   ifpos = -1;
-  if ( !p.inflect.empty() ){
+  if ( !p.inflect.isEmpty() ){
     inflect = p.inflect;
     if ( p.ResultClass == CLEX::UNASS ){
       _status = Status::INFLECTION;
@@ -263,7 +263,7 @@ BracketLeaf::BracketLeaf( const RulePart& p,
     }
   }
   else if ( RightHand.size() == 0 ){
-    orig = toString( cls );
+    orig = TiCC::UnicodeFromUTF8(toString( cls ));
     if ( ( p.ResultClass == CLEX::N
 	   || p.ResultClass == CLEX::V
 	   || p.ResultClass == CLEX::A )
@@ -276,11 +276,11 @@ BracketLeaf::BracketLeaf( const RulePart& p,
     }
   }
   else {
-    orig = toString( cls );
+    orig = TiCC::UnicodeFromUTF8(toString( cls ));
     orig += "_";
     glue = p.is_glue;
     for ( size_t i = 0; i < RightHand.size(); ++i ){
-      orig += toString(RightHand[i]);
+      orig += TiCC::UnicodeFromUTF8(toString(RightHand[i]));
       if ( RightHand[i] == CLEX::AFFIX ){
 	ifpos = i;
       }
@@ -309,7 +309,7 @@ BracketLeaf::BracketLeaf( CLEX::Type t,
     \param l a LogStream for messages
   */
   ifpos = -1;
-  orig = toString( t );
+  orig = TiCC::UnicodeFromUTF8( toString( t ) );
   _status = Status::STEM;
 }
 
@@ -383,17 +383,17 @@ icu::UnicodeString BracketLeaf::put( bool full ) const {
     result += "]";
   }
   if ( full ){
-    if ( orig.empty() ){
+    if ( orig.isEmpty() ){
       icu::UnicodeString s = TiCC::UnicodeFromUTF8(toString(cls));
       if ( s == "/" ){
-	result += s + TiCC::UnicodeFromUTF8(inflect);
+	result += s + inflect;
       }
       else {
-	result += s + "/" + TiCC::UnicodeFromUTF8(inflect);
+	result += s + "/" + inflect;
       }
     }
     else {
-      result += TiCC::UnicodeFromUTF8(orig);
+      result += orig;
     }
   }
   return result;
@@ -408,7 +408,7 @@ icu::UnicodeString BracketLeaf::pretty_put() const {
     result += "]";
   }
   if ( glue ){
-    string::size_type pos = orig.find( "^" );
+    int pos = orig.indexOf( "^" );
     string tag;
     tag += orig[pos+1];
     result += CLEX::get_tDescr(CLEX::toCLEX(tag));
@@ -425,7 +425,7 @@ icu::UnicodeString BracketLeaf::pretty_put() const {
       result += s;
     }
   }
-  for ( const auto& i : inflect ){
+  for ( int i=0; i < inflect.length(); ++i ){
     string id = CLEX::get_iDescr(i);
     if ( !id.empty() ){
       result += "/" + id;
@@ -823,8 +823,8 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   */
   folia::Morpheme *result = 0;
   desc.clear();
-  string::size_type pos = orig.find( "^" );
-  bool glue = ( pos != string::npos );
+  int pos = orig.indexOf( "^" );
+  bool glue = ( pos >= 0 );
   if ( _status == Status::COMPLEX ){
     abort();
   }
@@ -916,7 +916,8 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     ++cnt;
     args.clear();
     args["subset"] = "inflection";
-    for ( const auto& inf : inflect ){
+    for ( int i=0; i < inflect.length(); ++i ){
+      UChar inf = inflect[i];
       if ( inf != '/' ){
 	string d = CLEX::get_iDescr(inf);
 	if ( !d.empty() ){
@@ -957,7 +958,8 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     }
     ++cnt;
     desc = "[" + out + "]"; // pass it up!
-    for ( const auto& inf : inflect ){
+    for ( int i=0; i < inflect.length(); ++i ){
+      UChar inf = inflect[i];
       if ( inf != '/' ){
 	string d = CLEX::get_iDescr( inf );
 	if ( !d.empty() ){
@@ -985,7 +987,8 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     }
     args.clear();
     args["subset"] = "inflection";
-    for ( const auto& inf : inflect ){
+    for ( int i=0; i < inflect.length(); ++i ){
+      UChar inf = inflect[i];
       if ( inf != '/' ){
 	string d = CLEX::get_iDescr( inf );
 	if ( !d.empty() ){
@@ -1020,7 +1023,7 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
   /// use the data in the Leaf to create a folia::Morpheme node
   /*!
     \param doc The FoLiA Document context
-    \param desc a decriptien note to add
+    \param desc a decriptive note to add
     \param cnt a counter for the number of handled morphemes
   */
   folia::Morpheme *result = 0;
@@ -1042,10 +1045,10 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
 					     deep_cnt );
     if ( it->status() == Status::DERIVATIONAL
 	 || it->status() == Status::PARTICIPLE ){
-      if ( !it->original().empty() ){
+      if ( !it->original().isEmpty() ){
 	args.clear();
 	args["subset"] = "applied_rule";
-	args["class"] = it->original();
+	args["class"] = TiCC::UnicodeToUTF8(it->original());
 #pragma omp critical (foliaupdate)
 	{
 	  folia::Feature *feat = new folia::Feature( args );
@@ -1391,7 +1394,7 @@ void BracketNest::clearEmptyNodes(){
     }
     else {
       if ( (*it)->morpheme().isEmpty() &&
-	   (*it)->inflection().empty() ){
+	   (*it)->inflection().isEmpty() ){
 	// skip
       }
       else {
@@ -1416,7 +1419,7 @@ CLEX::Type BracketNest::getFinalTag() {
   while ( it != parts.rend() ){
     //    LOG << "bekijk: " << *it << endl;
     if ( (*it)->isNested()
-	 || ( (*it)->inflection().empty()
+	 || ( (*it)->inflection().isEmpty()
 	      && !(*it)->morpheme().isEmpty() ) ){
       result_cls = (*it)->tag();
       //      LOG << "maybe tag = " << result_cls << endl;

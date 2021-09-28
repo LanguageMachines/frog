@@ -68,13 +68,14 @@ class Mbma {
   std::vector<std::pair<std::string,std::string>> getPrettyResults( ) const;
   void setDeepMorph( bool b ){ doDeepMorph = b; };
   void clearAnalysis();
-  Rule* matchRule( const std::vector<std::string>&, const icu::UnicodeString& );
+  Rule* matchRule( const std::vector<icu::UnicodeString>&,
+		   const icu::UnicodeString& );
   std::vector<Rule*> execute( const icu::UnicodeString& ,
 			      const std::vector<std::string>& );
   std::string version() const { return _version; };
   void add_morphemes( const std::vector<folia::Word*>&,
 		      const frog_data& fd ) const;
-  static std::map<icu::UnicodeString,std::string> TAGconv;
+  static std::map<icu::UnicodeString,icu::UnicodeString> TAGconv;
   static std::string mbma_tagset;
   static std::string pos_tagset;
   static std::string clex_tagset;

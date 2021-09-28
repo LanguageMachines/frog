@@ -73,11 +73,10 @@ BaseTagger::~BaseTagger(){
   delete err_log;
 }
 
-bool BaseTagger::fill_map( const string& file, map<string,string>& mp ){
-  /// fill a map op string-string vales from a fie
+bool BaseTagger::fill_map( const string& file ){
+  /// fill the internal token_tag_map from a file
   /*!
-    \param file the filenam
-    \param mp the map to fill
+    \param file the filename
     \return true on succes, false otherwise
 
     the file should contain lines with TAB separated attribute/value pairs
@@ -101,7 +100,7 @@ bool BaseTagger::fill_map( const string& file, map<string,string>& mp ){
 	  << line << "'" << endl;
       return false;
     }
-    mp[ parts[0] ] = parts[1];
+    token_tag_map[ parts[0] ] = TiCC::UnicodeFromUTF8(parts[1]);
   }
   return true;
 }
@@ -210,7 +209,7 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   }
   if ( !tokFile.empty() ){
     tokFile = prefix( config.configDir(), tokFile );
-    if ( !fill_map( tokFile, token_tag_map ) ){
+    if ( !fill_map( tokFile ) ){
       LOG << "failed to load a token translation file from: '"
 		   << tokFile << "'"<< endl;
       return false;
