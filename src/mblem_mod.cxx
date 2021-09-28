@@ -291,7 +291,7 @@ string Mblem::make_instance( const icu::UnicodeString& in ) {
 }
 
 void Mblem::filterTag( const UnicodeString& postag ){
-  /// filater all non-matching tags out of the mblem results
+  /// filter all non-matching tags out of the mblem results
   /*!
     \param postag the tag, given by the CGN-tagger, that should match
 
@@ -389,14 +389,11 @@ void Mblem::Classify( frog_record& fd ){
     and the one-one rules.
     All 'normal' cases are handled over to the Timbl classifier
   */
-  icu::UnicodeString uword;
-  icu::UnicodeString pos;
-  string token_class;
-  uword = fd.word;
-  pos = fd.tag;
-  token_class = fd.token_class;
+  icu::UnicodeString uword = fd.word;
+  icu::UnicodeString pos_tag = fd.tag;
+  string token_class = fd.token_class;
   if (debug > 1 ){
-    DBG << "Classify " << uword << "(" << pos << ") ["
+    DBG << "Classify " << uword << "(" << pos_tag << ") ["
 	<< token_class << "]" << endl;
   }
   if ( filter ){
@@ -404,14 +401,15 @@ void Mblem::Classify( frog_record& fd ){
   }
   if ( token_class == "ABBREVIATION" ){
     // We dont handle ABBREVIATION's so just take the word as such
-    string word = TiCC::UnicodeToUTF8(uword);
 #pragma omp critical (dataupdate)
     {
-      fd.lemmas.push_back( word );
+      fd.lemmas.push_back( uword );
     }
     return;
   }
-  auto const& it1 = token_strip_map.find( TiCC::UnicodeToUTF8(pos) );
+
+  string utf8_tag = TiCC::UnicodeToUTF8(pos_tag);
+  auto const& it1 = token_strip_map.find( utf8_tag );
   if ( it1 != token_strip_map.end() ){
     // some tag/tokenizer_class combinations are special
     // we have to strip a few letters to get a lemma
@@ -421,20 +419,18 @@ void Mblem::Classify( frog_record& fd ){
       if ( uword2.isEmpty() ){
 	uword2 = uword;
       }
-      string word = TiCC::UnicodeToUTF8(uword2);
 #pragma omp critical (dataupdate)
       {
-	fd.lemmas.push_back( word );
+	fd.lemmas.push_back( uword2 );
       }
       return;
     }
   }
-  if ( one_one_tags.find( TiCC::UnicodeToUTF8(pos)) != one_one_tags.end() ){
+  if ( one_one_tags.find( utf8_tag ) != one_one_tags.end() ){
     // some tags are just taken as such
-    string word = TiCC::UnicodeToUTF8(uword);
 #pragma omp critical (dataupdate)
     {
-      fd.lemmas.push_back( word );
+      fd.lemmas.push_back( uword );
     }
     return;
   }
@@ -442,14 +438,13 @@ void Mblem::Classify( frog_record& fd ){
     uword.toLower();
   }
   Classify( uword );
-  filterTag( pos );
+  filterTag( pos_tag );
   makeUnique();
   if ( mblemResult.empty() ){
     // just return the word as a lemma
-    string word = TiCC::UnicodeToUTF8(uword);
 #pragma omp critical (dataupdate)
     {
-      fd.lemmas.push_back( word );
+      fd.lemmas.push_back( uword );
     }
   }
   else {
@@ -457,7 +452,7 @@ void Mblem::Classify( frog_record& fd ){
     {
       for ( auto const& it : mblemResult ){
 	UnicodeString result = it.getLemma();
-	fd.lemmas.push_back( TiCC::UnicodeToUTF8(result) );
+	fd.lemmas.push_back( result );
       }
     }
   }
@@ -586,19 +581,20 @@ void Mblem::Classify( const icu::UnicodeString& uWord ){
 	if ( edit == edits.front() ){
 	  continue;
 	}
+	UnicodeString edit_val = TiCC::UnicodeFromUTF8( edit.substr( 1 ) );
 	switch ( edit[0] ){
 	case 'P':
-	  prefix = TiCC::UnicodeFromUTF8( edit.substr( 1 ) );
+	  prefix = edit_val;
 	  break;
 	case 'I':
-	  insstr = TiCC::UnicodeFromUTF8( edit.substr( 1 ) );
+	  insstr = edit_val;
 	  break;
 	case 'D':
-	  delstr = TiCC::UnicodeFromUTF8( edit.substr( 1 ) );
+	  delstr = edit_val;
 	  break;
 	default:
-	  LOG << "Error: strange value in editstring: " << edit
-			 << endl;
+	  LOG << "Error: strange value [" << edit[0] << "] in editstring: "
+	      << edit << endl;
 	}
       }
       if (debug > 1){
@@ -715,7 +711,7 @@ void Mblem::add_lemmas( const vector<folia::Word*>& wv,
     folia::KWargs args;
     args["set"] = getTagset();
     for ( const auto& lemma : fd.units[i].lemmas ){
-      args["class"] = lemma;
+      args["class"] = TiCC::UnicodeToUTF8(lemma);
       if ( textclass != "current" ){
 	args["textclass"] = textclass;
       }

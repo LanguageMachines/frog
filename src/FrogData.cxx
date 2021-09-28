@@ -80,7 +80,7 @@ json frog_record::to_json() const {
     result["ucto"] = tok;
   }
   if ( !lemmas.empty() ){
-    result["lemma"] = lemmas[0];
+    result["lemma"] = TiCC::UnicodeToUTF8(lemmas[0]);
   }
   if ( !deep_morph_string.empty() ){
     result["deep_morph"] = deep_morph_string;

@@ -62,7 +62,7 @@ class frog_record {
   double iob_confidence;     ///< the confidence of the IOB tag
   icu::UnicodeString ner_tag;       ///< the assigned NER tag
   double ner_confidence;     ///< the confidence of the NER tag
-  std::vector<std::string> lemmas;  ///< a list of possible lemma's in UTF8
+  std::vector<icu::UnicodeString> lemmas;  ///< a list of possible lemma's
   std::vector<std::vector<std::string>> morphs; ///< the morph analysis in UTF8
   std::vector<const BaseBracket*> deep_morphs;  ///< pointers to the deep morphemes
   std::string compound_string;   ///< string representation of first compound
