@@ -401,17 +401,17 @@ icu::UnicodeString BracketLeaf::put( bool full ) const {
 
 icu::UnicodeString BracketLeaf::pretty_put() const {
   /// create a descriptive Unicode string representation for this object
-  string result;
+  UnicodeString result;
   if ( !morph.isEmpty() ){
     result += "[";
-    result += TiCC::UnicodeToUTF8(morph);
+    result += morph;
     result += "]";
   }
   if ( glue ){
     int pos = orig.indexOf( "^" );
-    string tag;
-    tag += orig[pos+1];
-    result += CLEX::get_tDescr(CLEX::toCLEX(tag));
+    UnicodeString tag( orig[pos+1] );
+    string utf_tag = TiCC::UnicodeToUTF8(tag);
+    result += TiCC::UnicodeFromUTF8(CLEX::get_tDescr(CLEX::toCLEX(utf_tag)));
   }
   if ( status() != Status::PARTICIPLE
        && status() != Status::PARTICLE
@@ -419,19 +419,18 @@ icu::UnicodeString BracketLeaf::pretty_put() const {
        &&  status() != Status::FAILED
        && cls != CLEX::UNASS
        && cls != CLEX::NEUTRAL ){
-    //    LOG << this << " " << this->status() << endl;
     string s = CLEX::get_tDescr(cls);
     if ( s != "/" ){
-      result += s;
+      result += TiCC::UnicodeFromUTF8(s);
     }
   }
   for ( int i=0; i < inflect.length(); ++i ){
-    string id = CLEX::get_iDescr(i);
+    string id = CLEX::get_iDescr(inflect[i]);
     if ( !id.empty() ){
-      result += "/" + id;
+      result += "/" + TiCC::UnicodeFromUTF8(id);
     }
   }
-  return TiCC::UnicodeFromUTF8(result);
+  return result;
 }
 
 icu::UnicodeString BracketNest::put( bool full ) const {
