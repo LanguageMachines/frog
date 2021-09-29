@@ -63,8 +63,8 @@ class Mbma {
   void filterHeadTag( const icu::UnicodeString& );
   void filterSubTags( const std::vector<icu::UnicodeString>& );
   void assign_compounds();
-  std::vector<std::string> getResult() const;
-  std::vector<std::pair<std::string,std::string>> getResults( ) const;
+  std::vector<icu::UnicodeString> getResult() const;
+  std::vector<std::pair<icu::UnicodeString,std::string>> getResults( ) const;
   std::vector<std::pair<std::string,std::string>> getPrettyResults( ) const;
   void setDeepMorph( bool b ){ doDeepMorph = b; };
   void clearAnalysis();

@@ -200,7 +200,7 @@ void Test( istream& in ){
 	  myMbma.filterSubTags( v );
 	  myMbma.assign_compounds();
 	  cout << tr.word() << " {" << tr.assigned_tag() << "}\t";
-	  vector<pair<string,string>> res = myMbma.getResults();
+	  vector<pair<UnicodeString,string>> res = myMbma.getResults();
 	  if ( res.size() == 0 ){
 	    cout << "[" << uWord << "]";
 	  }
@@ -225,10 +225,10 @@ void Test( istream& in ){
 	  uWord.toLower();
 	  myMbma.Classify( uWord );
 	  myMbma.assign_compounds();
-	  vector<pair<string,string>> res = myMbma.getResults();
+	  vector<pair<UnicodeString,string>> res = myMbma.getResults();
 	  string line = w + "\t";
 	  for ( auto const& r : res ){
-	    line += r.first;
+	    line += TiCC::UnicodeToUTF8(r.first);
 	    if ( !r.second.empty() ){
 	      line += "\t"+r.second;
 	    }

@@ -1075,8 +1075,8 @@ vector<timbl_result> Parser::timbl_server( const string& base,
   json query;
   query["command"] = "classify";
   json arr = json::array();
-  for ( const auto& i : instances ){
-    arr.push_back( TiCC::UnicodeToUTF8(i) );
+  for ( const auto& inst : instances ){
+    arr.push_back( TiCC::UnicodeToUTF8(inst) );
   }
   query["params"] = arr;
   DBG << "send json" << query.dump(2) << endl;

@@ -557,20 +557,21 @@ void Mblem::Classify( const icu::UnicodeString& uWord ){
   }
   int index = 0;
   while ( index < numParts ) {
-    string partS = parts[index++];
+    string part_s = parts[index++];
+    UnicodeString partS = TiCC::UnicodeFromUTF8(part_s);
     icu::UnicodeString lemma;
-    string restag;
-    string::size_type pos = partS.find("+");
-    if ( pos == string::npos ){
+    UnicodeString restag;
+    int pos = partS.indexOf("+");
+    if ( pos == -1 ){
       // nothing to edit
       restag = partS;
       lemma = uWord;
     }
     else {
       // some edit info available, like: WW(27)+Dgekomen+Ikomen
-      vector<string> edits = TiCC::split_at( partS, "+" );
+      vector<UnicodeString> edits = TiCC::split_at( partS, "+" );
       if ( edits.empty() ){
-	throw runtime_error( "invalid editstring: " + partS );
+	throw runtime_error( "invalid editstring: " + part_s );
       }
       restag = edits[0]; // the first one is the POS tag
 
@@ -581,7 +582,7 @@ void Mblem::Classify( const icu::UnicodeString& uWord ){
 	if ( edit == edits.front() ){
 	  continue;
 	}
-	UnicodeString edit_val = TiCC::UnicodeFromUTF8( edit.substr( 1 ) );
+	UnicodeString edit_val = UnicodeString( edit, 1 );
 	switch ( edit[0] ){
 	case 'P':
 	  prefix = edit_val;
@@ -657,27 +658,10 @@ void Mblem::Classify( const icu::UnicodeString& uWord ){
 	lemma = uWord;
       }
     }
-    if ( !classMap.empty() ){
-      // translate TAG(number) stuf back to CGN things
-      auto const& it = classMap.find(restag);
-      if ( debug > 1 ){
-	DBG << "looking up " << restag << endl;
-      }
-      if ( it != classMap.end() ){
-	restag = it->second;
-	if ( debug > 1 ){
-	  DBG << "found " << restag << endl;
-	}
-      }
-      else {
-	LOG << "problem: found no translation for "
-	    << restag << " using it 'as-is'" << endl;
-      }
-    }
     if ( debug > 1 ){
       DBG << "appending lemma " << lemma << " and tag " << restag << endl;
     }
-    mblemResult.push_back( mblemData( lemma, TiCC::UnicodeFromUTF8(restag) ) );
+    mblemResult.push_back( mblemData( lemma, restag ) );
   } // while
   if ( debug > 1) {
     DBG << "stored lemma and tag options: " << mblemResult.size()

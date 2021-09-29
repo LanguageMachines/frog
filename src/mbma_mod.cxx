@@ -126,16 +126,14 @@ void Mbma::init_cgn( const string& main, const string& sub ) {
   */
   ifstream tc( main );
   if ( tc ){
-    string line;
-    while( getline( tc, line) ) {
-      vector<string> tmp;
-      size_t num = TiCC::split_at(line, tmp, " ");
-      if ( num < 2 ){
+    UnicodeString line;
+    while ( getline( tc, line) ) {
+      vector<UnicodeString> tmp = TiCC::split_at( line, " " );
+      if ( tmp.size() < 2 ){
 	LOG << "splitting '" << line << "' failed" << endl;
 	throw ( runtime_error("panic") );
       }
-      TAGconv.insert( make_pair( TiCC::UnicodeFromUTF8(tmp[0]),
-				 TiCC::UnicodeFromUTF8(tmp[1]) ) );
+      TAGconv.insert( make_pair( tmp[0], tmp[1] ) );
     }
   }
   else {
@@ -143,13 +141,11 @@ void Mbma::init_cgn( const string& main, const string& sub ) {
   }
   ifstream tc1( sub );
   if ( tc1 ){
-    string line;
+    UnicodeString line;
     while( getline(tc1, line) ) {
-      vector<string> tmp;
-      size_t num = TiCC::split_at(line, tmp, " ");
-      if ( num == 2 ){
-	TAGconv.insert( make_pair( TiCC::UnicodeFromUTF8(tmp[0]),
-				   TiCC::UnicodeFromUTF8(tmp[1]) ) );
+      vector<UnicodeString> tmp = TiCC::split_at( line, " " );
+      if ( tmp.size() == 2 ){
+	TAGconv.insert( make_pair( tmp[0], tmp[1] ) );
       }
     }
   }
@@ -297,7 +293,7 @@ bool Mbma::init( const TiCC::Configuration& config ) {
 }
 
 vector<string> Mbma::make_instances( const icu::UnicodeString& word ){
-  /// convert a Unicode string into a range of instances for Timbl
+  /// convert a Unicode string into a range of UTF8 instances for Timbl
   /*!
     \param word the UnicodeString representing 1 word to analyze
     \return a vector of UTF8 stringa with instances for Timbl
@@ -920,8 +916,8 @@ void Mbma::getResult( frog_record& fd,
       }
     }
     else {
-      vector<string> v = getResult();
-      fd.morph_string = v[0];
+      vector<UnicodeString> v = getResult();
+      fd.morph_string = TiCC::UnicodeToUTF8(v[0]);
       fd.compound_string = "0";
     }
     for ( auto const& sit : analysis ){
@@ -1098,11 +1094,10 @@ void Mbma::Classify( const icu::UnicodeString& word ){
   analysis = execute( uWord, classes );
 }
 
-vector<string> Mbma::getResult() const {
-  vector<string> result;
+vector<UnicodeString> Mbma::getResult() const {
+  vector<UnicodeString> result;
   for ( const auto& it : analysis ){
-    UnicodeString tmp = it->morpheme_string( doDeepMorph );
-    result.push_back( TiCC::UnicodeToUTF8(tmp) );
+    result.push_back( it->morpheme_string( doDeepMorph ) );
   }
   if ( debugFlag > 1 ){
     DBG << "result of morph analyses: " << result << endl;
@@ -1110,12 +1105,12 @@ vector<string> Mbma::getResult() const {
   return result;
 }
 
-vector<pair<string,string>> Mbma::getResults( ) const {
-  vector<pair<string,string>> result;
+vector<pair<UnicodeString,string>> Mbma::getResults( ) const {
+  vector<pair<UnicodeString,string>> result;
   for ( const auto& it : analysis ){
     UnicodeString tmp = it->morpheme_string( true );
     string cmp = toString( it->compound );
-    result.push_back( make_pair(TiCC::UnicodeToUTF8(tmp),cmp) );
+    result.push_back( make_pair(tmp,cmp) );
   }
   if ( debugFlag > 1 ){
     DBG << "result of morph analyses: ";

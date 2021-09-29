@@ -123,3 +123,17 @@ string check_server( const string& host,
   }
   return outline;
 }
+
+istream& getline( istream& is, UnicodeString& us, char delim ){
+  /// read  a UnicodeStirng from a UTF8 encoded file
+  /*!
+    \param is The stream to read from
+    \param us the UnicodeString to read. (will be cleared before reading)
+    \param delim The delimiter. Default '\n'
+    \return the stream
+  */
+  string line;
+  getline( is, line, delim );
+  us = TiCC::UnicodeFromUTF8( line );
+  return is;
+}

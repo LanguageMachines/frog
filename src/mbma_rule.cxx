@@ -309,7 +309,7 @@ vector<UnicodeString> Rule::extract_morphemes( ) const {
 UnicodeString Rule::morpheme_string( bool structured ) const {
   UnicodeString result;
   if ( structured ){
-    result = brackets->put(true);
+    result = TiCC::UnicodeFromUTF8(brackets->put(true));
   }
   else {
     vector<UnicodeString> vec = extract_morphemes();
@@ -321,8 +321,7 @@ UnicodeString Rule::morpheme_string( bool structured ) const {
 }
 
 string Rule::pretty_string() const {
-  icu::UnicodeString us = brackets->pretty_put();
-  return TiCC::UnicodeToUTF8( us );
+  return brackets->pretty_put();
 }
 
 bool Rule::performEdits(){

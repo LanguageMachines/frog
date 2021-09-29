@@ -263,7 +263,7 @@ BracketLeaf::BracketLeaf( const RulePart& p,
     }
   }
   else if ( RightHand.size() == 0 ){
-    orig = TiCC::UnicodeFromUTF8(toString( cls ));
+    orig = toString( cls );
     if ( ( p.ResultClass == CLEX::N
 	   || p.ResultClass == CLEX::V
 	   || p.ResultClass == CLEX::A )
@@ -276,11 +276,11 @@ BracketLeaf::BracketLeaf( const RulePart& p,
     }
   }
   else {
-    orig = TiCC::UnicodeFromUTF8(toString( cls ));
+    orig = toString( cls );
     orig += "_";
     glue = p.is_glue;
     for ( size_t i = 0; i < RightHand.size(); ++i ){
-      orig += TiCC::UnicodeFromUTF8(toString(RightHand[i]));
+      orig += toString(RightHand[i]);
       if ( RightHand[i] == CLEX::AFFIX ){
 	ifpos = i;
       }
@@ -309,7 +309,7 @@ BracketLeaf::BracketLeaf( CLEX::Type t,
     \param l a LogStream for messages
   */
   ifpos = -1;
-  orig = TiCC::UnicodeFromUTF8( toString( t ) );
+  orig = toString( t );
   _status = Status::STEM;
 }
 
@@ -356,40 +356,37 @@ BracketNest::~BracketNest(){
   }
 }
 
-icu::UnicodeString BaseBracket::put( bool full ) const {
-  /// create a Unicode string representation for this object
-  icu::UnicodeString result = "[err?]";
+string BaseBracket::put( bool full ) const {
+  /// create a UTF8 string representation for this object
+  string result = "[err?]";
   if ( full ){
-    icu::UnicodeString s = TiCC::UnicodeFromUTF8(toString(cls));
-    result += s;
+    result += toString(cls);
   }
   return result;
 }
 
-icu::UnicodeString BaseBracket::pretty_put() const {
-  /// create a descriptive Unicode string representation for this object
-  icu::UnicodeString result = "[err?]";
-  icu::UnicodeString s = TiCC::UnicodeFromUTF8(CLEX::get_tDescr(cls));
-  result += s;
+string BaseBracket::pretty_put() const {
+  /// create a descriptive UTF8 string representation for this object
+  string result = "[err?]" + CLEX::get_tDescr(cls);
   return result;
 }
 
-icu::UnicodeString BracketLeaf::put( bool full ) const {
-  /// create a Unicode string representation for this object
-  icu::UnicodeString result;
+string BracketLeaf::put( bool full ) const {
+  /// create a UTF8 string representation for this object
+  string result;
   if ( !morph.isEmpty() ){
     result += "[";
-    result += morph;
+    result += TiCC::UnicodeToUTF8(morph);
     result += "]";
   }
   if ( full ){
-    if ( orig.isEmpty() ){
-      icu::UnicodeString s = TiCC::UnicodeFromUTF8(toString(cls));
+    if ( orig.empty() ){
+      string s = toString(cls);
       if ( s == "/" ){
-	result += s + inflect;
+	result += s + TiCC::UnicodeToUTF8(inflect);
       }
       else {
-	result += s + "/" + inflect;
+	result += s + "/" + TiCC::UnicodeToUTF8(inflect);
       }
     }
     else {
@@ -399,19 +396,19 @@ icu::UnicodeString BracketLeaf::put( bool full ) const {
   return result;
 }
 
-icu::UnicodeString BracketLeaf::pretty_put() const {
-  /// create a descriptive Unicode string representation for this object
-  UnicodeString result;
+string BracketLeaf::pretty_put() const {
+  /// create a descriptive UTF8 string representation for this object
+  string result;
   if ( !morph.isEmpty() ){
     result += "[";
-    result += morph;
+    result += TiCC::UnicodeToUTF8(morph);
     result += "]";
   }
   if ( glue ){
-    int pos = orig.indexOf( "^" );
+    size_t pos = orig.find_first_of( "^" );
     UnicodeString tag( orig[pos+1] );
     string utf_tag = TiCC::UnicodeToUTF8(tag);
-    result += TiCC::UnicodeFromUTF8(CLEX::get_tDescr(CLEX::toCLEX(utf_tag)));
+    result += CLEX::get_tDescr(CLEX::toCLEX(utf_tag));
   }
   if ( status() != Status::PARTICIPLE
        && status() != Status::PARTICLE
@@ -421,54 +418,54 @@ icu::UnicodeString BracketLeaf::pretty_put() const {
        && cls != CLEX::NEUTRAL ){
     string s = CLEX::get_tDescr(cls);
     if ( s != "/" ){
-      result += TiCC::UnicodeFromUTF8(s);
+      result += s;
     }
   }
   for ( int i=0; i < inflect.length(); ++i ){
     string id = CLEX::get_iDescr(inflect[i]);
     if ( !id.empty() ){
-      result += "/" + TiCC::UnicodeFromUTF8(id);
+      result += "/" + id;
     }
   }
   return result;
 }
 
-icu::UnicodeString BracketNest::put( bool full ) const {
-  /// create a Unicode string representation for this object
-  icu::UnicodeString result = "[ ";
+string BracketNest::put( bool full ) const {
+  /// create a UTF8 string representation for this object
+  string result = "[ ";
   for ( auto const& it : parts ){
-    icu::UnicodeString m = it->put( full );
-    if ( !m.isEmpty() ){
-      result += m + " ";
+    string tmp = it->put( full );
+    if ( !tmp.empty() ){
+      result += tmp + " ";
     }
   }
   result += "]";
   if ( full ){
     if ( cls != CLEX::UNASS ){
-      result += TiCC::UnicodeFromUTF8(toString(cls));
+      result += toString(cls);
     }
     if ( _compound != Compound::Type::NONE ){
-      result += " " + TiCC::UnicodeFromUTF8(toString(_compound)) + "-compound";
+      result += " " + toString(_compound) + "-compound";
     }
   }
   return result;
 }
 
-icu::UnicodeString BracketNest::pretty_put( ) const {
-  /// create a descriptive Unicode string representation for this object
-  icu::UnicodeString result;
+string BracketNest::pretty_put( ) const {
+  /// create a descriptive UTF8 string representation for this object
+  string result;
   int cnt = 0;
   for ( auto const& it : parts ){
-    icu::UnicodeString m = it->pretty_put();
-    if ( m[0] == '[' ){
+    string tmp = it->pretty_put();
+    if ( tmp[0] == '[' ){
       ++cnt;
     }
-    result += m;
+    result += tmp;
   }
   if ( cnt > 1 ){
     result = "[" + result + "]";
     if ( cls != CLEX::UNASS && cls != CLEX::NEUTRAL ){
-      result += TiCC::UnicodeFromUTF8(CLEX::get_tDescr(cls));
+      result += CLEX::get_tDescr(cls);
     }
   }
   return result;
@@ -822,8 +819,8 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   */
   folia::Morpheme *result = 0;
   desc.clear();
-  int pos = orig.indexOf( "^" );
-  bool glue = ( pos >= 0 );
+  size_t pos = orig.find_first_of( "^" );
+  bool glue = ( pos != string::npos );
   if ( _status == Status::COMPLEX ){
     abort();
   }
@@ -1044,10 +1041,10 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
 					     deep_cnt );
     if ( it->status() == Status::DERIVATIONAL
 	 || it->status() == Status::PARTICIPLE ){
-      if ( !it->original().isEmpty() ){
+      if ( !it->original().empty() ){
 	args.clear();
 	args["subset"] = "applied_rule";
-	args["class"] = TiCC::UnicodeToUTF8(it->original());
+	args["class"] = it->original();
 #pragma omp critical (foliaupdate)
 	{
 	  folia::Feature *feat = new folia::Feature( args );

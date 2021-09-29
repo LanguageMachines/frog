@@ -94,11 +94,11 @@ class BaseBracket {
   void set_status( const Status s ) { _status = s; };
   virtual icu::UnicodeString morpheme() const { return "";};
   virtual icu::UnicodeString inflection() const { return ""; };
-  virtual icu::UnicodeString original() const { return ""; };
+  virtual std::string original() const { return ""; };
   virtual int infixpos() const { return -1; };
   virtual bool isglue() const { return false; };
-  virtual icu::UnicodeString put( bool = true ) const;
-  virtual icu::UnicodeString pretty_put() const;
+  virtual std::string put( bool = true ) const;
+  virtual std::string pretty_put() const;
   virtual BaseBracket *append( BaseBracket * ){ abort(); };
   virtual bool isNested() { return false; };
   virtual void resolveGlue(){ abort(); };
@@ -128,8 +128,8 @@ public:
   BracketLeaf( const RulePart&, int, TiCC::LogStream& );
   BracketLeaf( CLEX::Type, const icu::UnicodeString&, int, TiCC::LogStream& );
   BracketLeaf *clone() const;
-  icu::UnicodeString put( bool = true ) const;
-  icu::UnicodeString pretty_put() const;
+  std::string put( bool = true ) const;
+  std::string pretty_put() const;
   icu::UnicodeString morpheme() const {
     /// return the value of the morpheme
     return morph;
@@ -138,8 +138,8 @@ public:
     /// return the value of the inflexion (if any)
     return inflect;
   };
-  icu::UnicodeString original() const {
-    /// return the original value befor processing
+  std::string original() const {
+    /// return the original value before processing started
     return orig;
   };
   int infixpos() const {
@@ -156,8 +156,8 @@ public:
 private:
   int ifpos;
   bool glue;
+  std::string orig;
   icu::UnicodeString morph;
-  icu::UnicodeString orig;
   icu::UnicodeString inflect;
 };
 
@@ -172,8 +172,8 @@ class BracketNest: public BaseBracket {
   ~BracketNest();
   bool isNested() { return true; };
   void clearEmptyNodes();
-  icu::UnicodeString put( bool = true ) const;
-  icu::UnicodeString pretty_put() const;
+  std::string put( bool = true ) const;
+  std::string pretty_put() const;
   bool testMatch( std::list<BaseBracket*>& result,
 		  const std::list<BaseBracket*>::iterator& rpos,
 		  std::list<BaseBracket*>::iterator& bpos );

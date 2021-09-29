@@ -38,6 +38,7 @@
 #include <string>
 
 #include "ticcutils/Timer.h"
+#include "ticcutils/Unicode.h"
 
 std::string prefix( const std::string& path,
 		    const std::string& fn );
@@ -48,6 +49,8 @@ std::set<std::string> getFileNames( const std::string& dirName,
 std::string check_server( const std::string& host,
 			  const std::string& port,
 			  const std::string& name= "" );
+
+std::istream& getline( std::istream&, icu::UnicodeString&, char='\n' );
 
 /// \brief a collection of Ticc:Timers that registrate timings per module
 class TimerBlock{

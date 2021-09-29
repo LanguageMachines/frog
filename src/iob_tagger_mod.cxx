@@ -130,27 +130,26 @@ void IOBTagger::post_process( frog_data& sentence ){
   if ( debug ){
     DBG << "IOB postprocess...." << endl;
   }
-  string last_tag;
+  UnicodeString last_tag;
   for ( size_t i=0; i < _tag_result.size(); ++i ){
     UnicodeString tag = _tag_result[i].assigned_tag();
     if ( tag[0] == 'I' ){
       // make sure that we start a new 'sequence' with a B
-      if ( last_tag.empty() ){
+      if ( last_tag.isEmpty() ){
 	tag.replace(0,1,'B');
       }
       else {
-	string hack = TiCC::UnicodeToUTF8( tag );
-	if ( last_tag.substr(2) != hack.substr( 2 ) ){
+	if ( UnicodeString( last_tag, 2 ) != UnicodeString( tag, 2 ) ){
 	  tag.replace(0,1,'B');
 	}
       }
-      last_tag = TiCC::UnicodeToUTF8(tag);
+      last_tag = tag;
     }
     else if ( tag[0] == 'O' ){
-      last_tag.clear();
+      last_tag.remove();
     }
     else if ( tag[0] == 'B' ){
-      last_tag = TiCC::UnicodeToUTF8(tag);
+      last_tag = tag;
     }
     addTag( sentence.units[i],
 	    tag,
