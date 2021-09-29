@@ -50,8 +50,6 @@ std::string check_server( const std::string& host,
 			  const std::string& port,
 			  const std::string& name= "" );
 
-std::istream& getline( std::istream&, icu::UnicodeString&, char='\n' );
-
 /// \brief a collection of Ticc:Timers that registrate timings per module
 class TimerBlock{
 public:

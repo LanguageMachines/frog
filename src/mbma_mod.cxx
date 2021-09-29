@@ -127,7 +127,7 @@ void Mbma::init_cgn( const string& main, const string& sub ) {
   ifstream tc( main );
   if ( tc ){
     UnicodeString line;
-    while ( getline( tc, line) ) {
+    while ( TiCC::getline( tc, line) ) {
       vector<UnicodeString> tmp = TiCC::split_at( line, " " );
       if ( tmp.size() < 2 ){
 	LOG << "splitting '" << line << "' failed" << endl;
@@ -142,7 +142,7 @@ void Mbma::init_cgn( const string& main, const string& sub ) {
   ifstream tc1( sub );
   if ( tc1 ){
     UnicodeString line;
-    while( getline(tc1, line) ) {
+    while( TiCC::getline( tc1, line ) ) {
       vector<UnicodeString> tmp = TiCC::split_at( line, " " );
       if ( tmp.size() == 2 ){
 	TAGconv.insert( make_pair( tmp[0], tmp[1] ) );
