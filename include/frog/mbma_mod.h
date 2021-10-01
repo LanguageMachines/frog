@@ -71,7 +71,7 @@ class Mbma {
   Rule* matchRule( const std::vector<icu::UnicodeString>&,
 		   const icu::UnicodeString& );
   std::vector<Rule*> execute( const icu::UnicodeString& ,
-			      const std::vector<std::string>& );
+			      const std::vector<icu::UnicodeString>& );
   std::string version() const { return _version; };
   void add_morphemes( const std::vector<folia::Word*>&,
 		      const frog_data& fd ) const;
@@ -89,7 +89,7 @@ class Mbma {
 		  const icu::UnicodeString& ) const;
   std::vector<std::string> make_instances( const icu::UnicodeString& word );
   void call_server( const std::vector<std::string>&,
-		    std::vector<std::string>& );
+		    std::vector<icu::UnicodeString>& );
   CLEX::Type getFinalTag( const std::list<BaseBracket*>& );
   int debugFlag;
   void store_morphemes( frog_record&,

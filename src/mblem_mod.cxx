@@ -530,13 +530,15 @@ string Mblem::call_server( const string& instance ){
   return result;
 }
 
-void Mblem::Classify( const icu::UnicodeString& uWord ){
+void Mblem::Classify( const icu::UnicodeString& word ){
   /// give the lemma for 1 word
   /*!
     \param uWord a Unicode string with the word
     the mblemResult struct will be filled with 1 or more (alternative) solutions
     of a lemma + a POS-tag
   */
+  static TiCC::UnicodeNormalizer nfc_norm;
+  UnicodeString uWord = nfc_norm.normalize(word);
   mblemResult.clear();
   string inst = make_instance(uWord);
   string classString;

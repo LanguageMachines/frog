@@ -348,7 +348,7 @@ UnicodeString find_class( unsigned int step,
   return result;
 }
 
-vector<vector<UnicodeString> > generate_all_perms( const vector<string>& classes ){
+vector<vector<UnicodeString> > generate_all_perms( const vector<UnicodeString>& classes ){
   /// determine all alternative analyses, remember the largest
   /// and store every part in a vector of string vectors
   /*!
@@ -371,8 +371,7 @@ vector<vector<UnicodeString> > generate_all_perms( const vector<string>& classes
   size_t largest_anal=1;
   vector<vector<UnicodeString> > classParts;
   classParts.reserve( classes.size() );
-  for ( const auto& cl : classes ){
-    UnicodeString uclass = TiCC::UnicodeFromUTF8(cl);
+  for ( const auto& uclass : classes ){
     vector<UnicodeString> parts = TiCC::split_at( uclass, "|" );
     size_t num = parts.size();
     if ( num > 1 ){
@@ -444,7 +443,7 @@ Rule* Mbma::matchRule( const vector<UnicodeString>& ana,
 }
 
 vector<Rule*> Mbma::execute( const icu::UnicodeString& word,
-			     const vector<string>& classes ){
+			     const vector<UnicodeString>& classes ){
   /// attempt to find matching Rules
   /*!
     \param word a word to check
@@ -453,8 +452,8 @@ vector<Rule*> Mbma::execute( const icu::UnicodeString& word,
   */
   vector<vector<UnicodeString> > allParts = generate_all_perms( classes );
   if ( debugFlag > 1 ){
-    string out = "alternatives: word="
-      + TiCC::UnicodeToUTF8(word) + ", classes=<";
+    UnicodeString out = "alternatives: word="
+      + word + ", classes=<";
     for ( const auto& cls : classes ){
       out += cls + ",";
     }
@@ -983,7 +982,7 @@ void Mbma::Classify( frog_record& fd ){
 }
 
 void Mbma::call_server( const vector<string>& insts,
-			vector<string>& classes ){
+			vector<UnicodeString>& classes ){
   Sockets::ClientSocket client;
   if ( !client.connect( _host, _port ) ){
     LOG << "failed to open connection, " << _host
@@ -1051,23 +1050,27 @@ void Mbma::call_server( const vector<string>& insts,
   //  LOG << "received json data:" << response.dump(2) << endl;
   assert( response.size() == insts.size() );
   if ( response.size() == 1 ){
-    classes.push_back( response["category"] );
+    classes.push_back( TiCC::UnicodeFromUTF8(response["category"]) );
   }
   else {
     for ( const auto& it : response.items() ){
-      classes.push_back( it.value()["category"] );
+      classes.push_back( TiCC::UnicodeFromUTF8(it.value()["category"]) );
     }
   }
 }
 
 void Mbma::Classify( const icu::UnicodeString& word ){
+  static TiCC::UnicodeNormalizer my_norm;
   clearAnalysis();
   icu::UnicodeString uWord = word;
   if ( filter_diac ){
     uWord = TiCC::filter_diacritics( uWord );
   }
+  else {
+    uWord = my_norm.normalize( uWord );
+  }
   vector<string> insts = make_instances( uWord );
-  vector<string> classes;
+  vector<UnicodeString> classes;
   classes.reserve( insts.size() );
   //  LOG << "made instances: " << insts << endl;
   if ( !_host.empty() ){
@@ -1083,7 +1086,7 @@ void Mbma::Classify( const icu::UnicodeString& word ){
 	    << ", depth=" << MTree->matchDepth() << endl;
 	++i;
       }
-      classes.push_back( ans);
+      classes.push_back( TiCC::UnicodeFromUTF8(ans));
     }
   }
 
