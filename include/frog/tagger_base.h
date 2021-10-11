@@ -61,7 +61,7 @@ class BaseTagger {
   virtual void add_declaration( folia::Document&, folia::processor * ) const = 0;
   void add_provenance( folia::Document&, folia::processor * ) const;
   std::string getTagset() const { return tagset; };
-  std::string set_eos_mark( const std::string& );
+  icu::UnicodeString set_eos_mark( const icu::UnicodeString& );
   bool fill_map( const std::string& );
   std::vector<Tagger::TagResult> tagLine( const icu::UnicodeString& );
   std::vector<Tagger::TagResult> tag_entries( const std::vector<tag_entry>& );

@@ -274,9 +274,10 @@ string Mblem::make_instance( const icu::UnicodeString& in ) {
   size_t length = in.length();
   for ( size_t i=0; i < history; i++) {
     size_t j = length - history + i;
-    if (( i < history - length ) &&
-	(length<history))
+    if ((  i < history - length )
+	&& ( length<history ) ) {
       instance += "=\t";
+    }
     else {
       instance += in[j];
       instance += '\t';
@@ -304,14 +305,14 @@ void Mblem::filterTag( const UnicodeString& postag ){
     if ( postag == tag ){
       if ( debug > 1 ){
 	DBG << "compare cgn-tag " << postag << " with mblem-tag " << tag
-	    << "\n\t==> identical tags"  << endl;
+	    << "\n\t==> identical tags. KEEP"  << endl;
       }
       ++it;
     }
     else {
       if ( debug > 1 ){
 	DBG << "compare cgn-tag " << postag << " with mblem-tag " << tag
-		       << "\n\t==> different tags" << endl;
+		       << "\n\t==> different tags. REMOVE" << endl;
       }
       it = mblemResult.erase(it);
     }
@@ -534,13 +535,13 @@ void Mblem::Classify( const icu::UnicodeString& word ){
   /// give the lemma for 1 word
   /*!
     \param uWord a Unicode string with the word
-    the mblemResult struct will be filled with 1 or more (alternative) solutions
-    of a lemma + a POS-tag
+    the internal mblemResult struct will be filled with 1 or more (alternative)
+    solutions of a lemma + a POS-tag
   */
   static TiCC::UnicodeNormalizer nfc_norm;
   UnicodeString uWord = nfc_norm.normalize(word);
   mblemResult.clear();
-  string inst = make_instance(uWord);
+  string inst = make_instance(uWord); // Timbl like UTF8 encoded strings
   string classString;
   if ( !_host.empty() ){
     classString = call_server( inst );
@@ -551,16 +552,13 @@ void Mblem::Classify( const icu::UnicodeString& word ){
   if ( debug > 1){
     DBG << "class: " << classString  << endl;
   }
+  UnicodeString u_class = TiCC::UnicodeFromUTF8( classString );
   // 1st find all alternatives
-  vector<string> parts;
-  int numParts = TiCC::split_at( classString, parts, "|" );
-  if ( numParts < 1 ){
+  vector<UnicodeString> parts = TiCC::split_at_first_of( u_class, "|" );
+  if ( parts.size() < 1 ){
     LOG << "no alternatives found" << endl;
   }
-  int index = 0;
-  while ( index < numParts ) {
-    string part_s = parts[index++];
-    UnicodeString partS = TiCC::UnicodeFromUTF8(part_s);
+  for ( const auto& partS : parts ) {
     icu::UnicodeString lemma;
     UnicodeString restag;
     int pos = partS.indexOf("+");
@@ -573,7 +571,8 @@ void Mblem::Classify( const icu::UnicodeString& word ){
       // some edit info available, like: WW(27)+Dgekomen+Ikomen
       vector<UnicodeString> edits = TiCC::split_at( partS, "+" );
       if ( edits.empty() ){
-	throw runtime_error( "invalid editstring: " + part_s );
+	throw runtime_error( "invalid editstring: "
+			     + TiCC::UnicodeToUTF8(partS ) );
       }
       restag = edits[0]; // the first one is the POS tag
 
@@ -703,7 +702,8 @@ void Mblem::add_lemmas( const vector<folia::Word*>& wv,
       }
 #pragma omp critical (foliaupdate)
       {
-	wv[i]->addLemmaAnnotation( args );
+	wv[i]->addLemmaAnnotation( args ); // will create Alternative nodes
+	// when there are several lemma's found
       }
     }
   }

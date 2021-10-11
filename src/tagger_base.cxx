@@ -472,10 +472,10 @@ vector<TagResult> BaseTagger::tag_entries( const vector<tag_entry>& to_do ){
   }
 }
 
-string BaseTagger::set_eos_mark( const std::string& eos ){
+UnicodeString BaseTagger::set_eos_mark( const UnicodeString& eos ){
   /// set the EOS marker for the tagger
   /*!
-    \param eos the eos marker as a string
+    \param eos the eos marker as a UnicodeString
     \return the old value
   */
   if ( !_host.empty() ){

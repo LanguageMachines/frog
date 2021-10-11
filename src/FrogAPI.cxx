@@ -804,19 +804,20 @@ void FrogAPI::run_api( const TiCC::Configuration& configuration ){
       myCGNTagger = new CGNTagger( theErrLog,theDbgLog );
       stat = myCGNTagger->init( configuration );
       if ( stat ){
-	myCGNTagger->set_eos_mark( options.uttmark );
+	UnicodeString u_mark = TiCC::UnicodeFromUTF8(  options.uttmark );
+	myCGNTagger->set_eos_mark( u_mark );
 	if ( options.doIOB ){
 	  myIOBTagger = new IOBTagger( theErrLog, theDbgLog );
 	  stat = myIOBTagger->init( configuration );
 	  if ( stat ){
-	    myIOBTagger->set_eos_mark( options.uttmark );
+	    myIOBTagger->set_eos_mark( u_mark );
 	  }
 	}
 	if ( stat && options.doNER ){
 	  myNERTagger = new NERTagger( theErrLog, theDbgLog );
 	  stat = myNERTagger->init( configuration );
 	  if ( stat ){
-	    myNERTagger->set_eos_mark( options.uttmark );
+	    myNERTagger->set_eos_mark( u_mark );
 	  }
 	}
 	if ( stat && options.doLemma ){
