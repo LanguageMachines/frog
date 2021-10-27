@@ -661,22 +661,25 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
   }
   string overridestatement;
   while ( Opts.extract("override", overridestatement )) {
-    vector<string> values;
-    const int num = TiCC::split_at( overridestatement,values,  "=" );
+    vector<string> values = TiCC::split_at( overridestatement, "=" );
+    const int num = values.size();
     if ( num == 2 ) {
-        vector<string> module_param;
-        const int num2 = TiCC::split_at(values[0], module_param, "." );
-        if (num2 == 2) {
-            LOG << "Overriding configuration parameter " << module_param[0] << "." << module_param[1] << " with " << values[1] << endl;
-            configuration.setatt( module_param[1] , values[1], module_param[0] );
-        } else if (num2 == 1) {
-            LOG << "Overriding configuration parameter " << module_param[0] << " with " << values[1] << endl;
-            configuration.setatt( module_param[0] , values[1]);
-        } else {
-            LOG << "Invalid syntax for --override option" << endl;
-        }
-    } else {
-        LOG << "Invalid syntax for --override option" << endl;
+      vector<string> module_param = TiCC::split_at(values[0], "." );
+      const int num2 = module_param.size();
+      if (num2 == 2) {
+	LOG << "Overriding configuration parameter " << module_param[0] << "." << module_param[1] << " with " << values[1] << endl;
+	configuration.setatt( module_param[1] , values[1], module_param[0] );
+      }
+      else if (num2 == 1) {
+	LOG << "Overriding configuration parameter " << module_param[0] << " with " << values[1] << endl;
+	configuration.setatt( module_param[0] , values[1]);
+      }
+      else {
+	LOG << "Invalid syntax for --override option" << endl;
+      }
+    }
+    else {
+      LOG << "Invalid syntax for --override option" << endl;
     }
   }
   if ( !Opts.empty() ){

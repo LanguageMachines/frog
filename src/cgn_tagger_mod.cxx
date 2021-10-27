@@ -319,21 +319,20 @@ void CGNTagger::add_tags( const vector<folia::Word*>& wv,
 	postag->confidence(1.0);
       }
     }
-    vector<UnicodeString> feats;
     if ( hv.size() > 1 ){
-      feats = TiCC::split_at( hv[1], "," );
-    }
-    for ( const auto& f : feats ){
-      folia::KWargs args;
-      args["set"] =  getTagset();
-      args["subset"] = getSubSet( TiCC::UnicodeToUTF8(f),
-				  TiCC::UnicodeToUTF8(head),
-				  TiCC::UnicodeToUTF8(word.tag) );
-      args["class"]  = TiCC::UnicodeToUTF8(f);
+      vector<UnicodeString> feats = TiCC::split_at( hv[1], "," );
+      for ( const auto& f : feats ){
+	folia::KWargs args;
+	args["set"] =  getTagset();
+	args["subset"] = getSubSet( TiCC::UnicodeToUTF8(f),
+				    TiCC::UnicodeToUTF8(head),
+				    TiCC::UnicodeToUTF8(word.tag) );
+	args["class"]  = TiCC::UnicodeToUTF8(f);
 #pragma omp critical (foliaupdate)
-      {
-	folia::Feature *feat = new folia::Feature( args, wv[pos]->doc() );
-	postag->append( feat );
+	{
+	  folia::Feature *feat = new folia::Feature( args, wv[pos]->doc() );
+	  postag->append( feat );
+	}
       }
     }
     ++pos;
