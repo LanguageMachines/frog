@@ -161,7 +161,7 @@ timbl_result::timbl_result( const string& cls,
   _cls(cls), _confidence(conf) {
   Timbl::ValueDistribution::dist_iterator it = vd->begin();
   while ( it != vd->end() ){
-    _dist.push_back( make_pair(it->second->Value()->utf8_name(),it->second->Weight()) );
+    _dist.push_back( make_pair(it->second->Value()->Name(),it->second->Weight()) );
     ++it;
   }
 }

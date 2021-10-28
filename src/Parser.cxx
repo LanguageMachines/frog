@@ -324,10 +324,6 @@ Parser::~Parser(){
   delete pairs;
 }
 
-inline UnicodeString int_to_unicode( double d ){
-  return TiCC::UnicodeFromUTF8(TiCC::toString( d ));
-}
-
 vector<UnicodeString> Parser::createPairInstances( const parseData& pd ){
   /// create a list of Instances for the 'pairs' Timbl
   /*!
@@ -458,10 +454,10 @@ vector<UnicodeString> Parser::createPairInstances( const parseData& pd ){
 	}
 
 	if ( wPos > pos ){
-	  inst += " LEFT " + int_to_unicode( wPos - pos );
+	  inst += " LEFT " + TiCC::toUnicodeString( wPos - pos );
 	}
 	else {
-	  inst += " RIGHT "+ int_to_unicode( pos - wPos );
+	  inst += " RIGHT "+ TiCC::toUnicodeString( pos - wPos );
 	}
 	if ( pos >= words.size() ){
 	  inst += " __";
@@ -1001,7 +997,7 @@ vector<timbl_result> timbl( Timbl::TimblAPI* tim,
     const Timbl::ValueDistribution *db;
     const Timbl::TargetValue *tv = tim->Classify( TiCC::UnicodeToUTF8(inst),
 						  db );
-    result.push_back( timbl_result( tv->utf8_name(), db->Confidence(tv), db ) );
+    result.push_back( timbl_result( tv->Name(), db->Confidence(tv), db ) );
   }
   return result;
 }
