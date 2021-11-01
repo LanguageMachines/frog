@@ -201,8 +201,8 @@ bool NERTagger::read_gazets( const string& name,
       continue;
     }
     // we search for entries of the form 'category\tfilename'
-    vector<string> parts;
-    if ( TiCC::split_at( line, parts, "\t" ) != 2 ){
+    vector<string> parts = TiCC::split_at( line, "\t" );
+    if ( parts.size() != 2 ){
       LOG << "expected 2 TAB-separated parts in line: '" << line << "'" << endl;
       if ( ++err_cnt > 50 ){
 	LOG << "too many errors in additional wordlist file: " << file_name << endl;

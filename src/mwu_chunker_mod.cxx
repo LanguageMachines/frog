@@ -131,12 +131,19 @@ bool Mwu::read_mwus( const string& fname) {
   }
   string line;
   while( getline( mwufile, line ) ) {
-    vector<string> res1, res2; //res1 has mwus and tags, res2 has ind. words
-    if ( ( TiCC::split_at(line, res1, " ") == 2 ) &&
-	 ( TiCC::split_at(res1[0], res2, "_") >= 2 ) ){
-      string key = res2[0];
-      res2.erase(res2.begin());
-      MWUs.insert( make_pair( key, res2 ) );
+    vector<string> res1 = TiCC::split_at(line, " ");
+    if ( res1.size() == 2 ){
+      vector<string> res2 = TiCC::split_at(res1[0], "_");;
+      //res1 has mwus and tags, res2 has ind. words
+      if ( res2.size() >= 2 ){
+	string key = res2[0];
+	res2.erase(res2.begin());
+	MWUs.insert( make_pair( key, res2 ) );
+      }
+      else {
+	LOG << "invalid entry in MWU file " << line << endl;
+	return false;
+      }
     }
     else {
       LOG << "invalid entry in MWU file " << line << endl;

@@ -92,9 +92,8 @@ bool BaseTagger::fill_map( const string& file ){
     if ( line.empty() || line[0] == '#' ){
       continue;
     }
-    vector<string> parts;
-    size_t num = TiCC::split_at( line, parts, "\t" );
-    if ( num != 2 ){
+    vector<string> parts = TiCC::split_at( line, "\t" );
+    if ( parts.size() != 2 ){
       LOG << "invalid entry in '" << file << "'" << endl;
       LOG << "expected 2 tab-separated values, but got: '"
 	  << line << "'" << endl;
