@@ -120,7 +120,7 @@ bool NERTagger::fill_ners( const string& cat,
       return false;
     }
   }
-  TiCC::UnicodeNormalizer nfc_normalizer;
+  static TiCC::UnicodeNormalizer nfc_normalizer;
   ifstream is( file_name );
   int long_err_cnt = 0;
   size_t ner_cnt = 0;
