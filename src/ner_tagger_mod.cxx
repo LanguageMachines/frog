@@ -104,7 +104,7 @@ bool NERTagger::init( const TiCC::Configuration& config ){
 bool NERTagger::fill_ners( const string& cat,
 			   const string& name,
 			   const string& config_dir,
-			   vector<unordered_map<string,set<string>>>& ners ){
+			   vector<map<UnicodeString,set<string>>>& ners ){
   /// fill known Named Entities from one gazeteer file
   /*!
     \param cat The NE categorie (like 'loc' or 'org')
@@ -120,16 +120,18 @@ bool NERTagger::fill_ners( const string& cat,
       return false;
     }
   }
+  TiCC::UnicodeNormalizer nfc_normalizer;
   ifstream is( file_name );
   int long_err_cnt = 0;
   size_t ner_cnt = 0;
-  string line;
-  while ( getline( is, line ) ){
-    if ( line.empty() || line[0] == '#' ){
+  UnicodeString line;
+  while ( TiCC::getline( is, line ) ){
+    if ( line.isEmpty() || line[0] == '#' ){
       continue;
     }
     else {
-      vector<string> parts = TiCC::split( line );
+      line = nfc_normalizer.normalize( line );
+      vector<UnicodeString> parts = TiCC::split( line );
       if ( parts.size() > (unsigned)max_ner_size ){
 	if ( ++long_err_cnt > 50 ){
 	  LOG << "too many long entries in additional wordlist file. " << file_name << endl;
@@ -147,14 +149,14 @@ bool NERTagger::fill_ners( const string& cat,
 	}
       }
       // reconstruct the NER with single spaces
-      line = "";
+      UnicodeString clean_line = "";
       for ( const auto& part : parts ){
-	line += part;
+	clean_line += part;
 	if ( &part != &parts.back() ){
-	  line += " ";
+	  clean_line += " ";
 	}
       }
-      ners[parts.size()][line].insert( cat );
+      ners[parts.size()][clean_line].insert( cat );
       ++ner_cnt;
     }
   }
@@ -165,7 +167,7 @@ bool NERTagger::fill_ners( const string& cat,
 
 bool NERTagger::read_gazets( const string& name,
 			     const string& config_dir,
-			     vector<unordered_map<string,set<string>>>& ners ){
+			     vector<map<UnicodeString,set<string>>>& ners ){
   /// fill known Named Entities from a list of gazeteer files
   /*!
     \param name the filename to read the gazeteer info from
@@ -248,7 +250,7 @@ static vector<UnicodeString> serialize( const vector<set<string>>& stags ){
 }
 
 vector<UnicodeString> NERTagger::create_ner_list( const vector<UnicodeString>& words,
-						  std::vector<std::unordered_map<std::string,std::set<std::string>>>& ners ){
+						  vector<map<UnicodeString,set<string>>>& ners ){
   /// create a list of ambitags given a range of words
   /*!
     \param words a sentence as a list of words
@@ -260,7 +262,7 @@ vector<UnicodeString> NERTagger::create_ner_list( const vector<UnicodeString>& w
   }
   for ( size_t j=0; j < words.size(); ++j ){
     // cycle through the words
-    string seq;
+    UnicodeString seq;
     size_t len = 1;
     for ( size_t i = 0; i < min( words.size() - j, (size_t)max_ner_size); ++i ){
       // start looking for sequences of length len
@@ -268,7 +270,7 @@ vector<UnicodeString> NERTagger::create_ner_list( const vector<UnicodeString>& w
       if ( mp.empty() ){
 	continue;
       }
-      seq += TiCC::UnicodeToUTF8(words[j+i]);
+      seq += words[j+i];
       if ( debug > 1 ){
 	DBG << "sequence = '" << seq << "'" << endl;
       }

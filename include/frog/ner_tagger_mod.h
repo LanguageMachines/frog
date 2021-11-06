@@ -74,15 +74,15 @@ class NERTagger: public BaseTagger {
  private:
   bool read_gazets( const std::string&,
 		    const std::string&,
-		    std::vector<std::unordered_map<std::string,std::set<std::string>>>& );
+		    std::vector<std::map<icu::UnicodeString,std::set<std::string>>>& );
   bool fill_ners( const std::string&,
 		  const std::string&,
 		  const std::string&,
-		  std::vector<std::unordered_map<std::string,std::set<std::string>>>& );
+		  std::vector<std::map<icu::UnicodeString,std::set<std::string>>>& );
   std::vector<icu::UnicodeString> create_ner_list( const std::vector<icu::UnicodeString>&,
-					    std::vector<std::unordered_map<std::string,std::set<std::string>>>& );
-  std::vector<std::unordered_map<std::string,std::set<std::string>>> gazet_ners;
-  std::vector<std::unordered_map<std::string,std::set<std::string>>> override_ners;
+					    std::vector<std::map<icu::UnicodeString,std::set<std::string>>>& );
+  std::vector<std::map<icu::UnicodeString,std::set<std::string>>> gazet_ners;
+  std::vector<std::map<icu::UnicodeString,std::set<std::string>>> override_ners;
   void addEntity( frog_data&,
 		  size_t,
 		  const std::vector<tc_pair>& );
