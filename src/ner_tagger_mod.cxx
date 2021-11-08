@@ -428,7 +428,7 @@ void NERTagger::post_process( frog_data& sentence,
     \param sentence a frog_data structure to update with NER info
     \param ners a sequence of NE tags (maybe 'O') with their confidence
 
-    This is a specialized version local to NERTagger. Don't use the norma;
+    This is a specialized version local to NERTagger. Don't use the normal
     post_process()
   */
   if ( sentence.size() == 0 ) {
