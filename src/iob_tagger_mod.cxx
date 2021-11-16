@@ -36,6 +36,7 @@
 #include "frog/Frog-util.h"
 
 using namespace std;
+using namespace icu;
 using namespace Tagger;
 
 #define LOG *TiCC::Log(err_log)

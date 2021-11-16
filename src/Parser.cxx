@@ -51,6 +51,7 @@
 #include "frog/Parser.h"
 
 using namespace std;
+using namespace icu;
 
 using TiCC::operator<<;
 using namespace nlohmann;

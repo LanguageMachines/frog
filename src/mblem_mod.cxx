@@ -42,6 +42,7 @@
 #include "frog/Frog-util.h"
 
 using namespace std;
+using namespace icu;
 using namespace nlohmann;
 
 #define LOG *TiCC::Log(errLog)

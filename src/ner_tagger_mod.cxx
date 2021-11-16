@@ -39,6 +39,7 @@
 #include "ticcutils/PrettyPrint.h"
 
 using namespace std;
+using namespace icu;
 using namespace Tagger;
 using TiCC::operator<<;
 

@@ -38,6 +38,7 @@
 #include "frog/mbma_brackets.h"
 
 using namespace std;
+using namespace icu;
 using namespace nlohmann;
 using TiCC::operator<<;
 

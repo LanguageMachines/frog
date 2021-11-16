@@ -45,6 +45,7 @@
 #include "frog/mbma_mod.h"
 
 using namespace std;
+using namespace icu;
 using TiCC::operator<<;
 
 #define LOG *TiCC::Log(myLog)
@@ -295,7 +296,7 @@ BracketLeaf::BracketLeaf( const RulePart& p,
 }
 
 BracketLeaf::BracketLeaf( CLEX::Type t,
-			  const icu::UnicodeString& morpheme,
+			  const UnicodeString& morpheme,
 			  int debug_flag,
 			  TiCC::LogStream& l ):
   BaseBracket( t, vector<CLEX::Type>(), debug_flag, l ),

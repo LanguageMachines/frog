@@ -50,6 +50,7 @@
 #include "frog/FrogData.h"
 
 using namespace std;
+using namespace icu;
 using namespace nlohmann;
 using TiCC::operator<<;
 
