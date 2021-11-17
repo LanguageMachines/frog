@@ -26,6 +26,7 @@
       https://github.com/LanguageMachines/frog/issues
   or send mail to:
       lamasoftware (at ) science.ru.nl
+
 */
 
 #include <cstdlib>
