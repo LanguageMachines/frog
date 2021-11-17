@@ -735,9 +735,9 @@ void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
   if ( debugFlag > 1){
     DBG << "filter: analysis before sort on length:" << endl;
     int i=0;
-    for ( const auto& it : analysis ){
-      DBG << ++i << " - " << it << " " << it->getKey(false)
-	  << " (" << it->getKey(false).length() << ")" << endl;
+    for ( const auto& a_it : analysis ){
+      DBG << ++i << " - " << a_it << " " << a_it->getKey(false)
+	  << " (" << a_it->getKey(false).length() << ")" << endl;
     }
     DBG << "" << endl;
   }
@@ -750,8 +750,8 @@ void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
   if ( debugFlag > 1){
     DBG << "filter: definitive analysis:" << endl;
     int i=0;
-    for ( auto const& it : analysis ){
-      DBG << ++i << " - " << it << endl;
+    for ( auto const& a_it : analysis ){
+      DBG << ++i << " - " << a_it << endl;
     }
     DBG << "done filtering" << endl;
   }
@@ -894,7 +894,6 @@ void Mbma::getResult( frog_record& fd,
       DBG << "no matches found, use the word instead: "
 		    << uword << endl;
     }
-    string head = TiCC::UnicodeToUTF8(uhead);
     if ( doDeepMorph ){
       store_brackets( fd, uword, uhead, true );
     }
@@ -994,14 +993,14 @@ void Mbma::call_server( const vector<string>& insts,
   if ( debugFlag > 1 ){
     DBG << "calling MBMA-server" << endl;
   }
-  string line;
-  client.read( line );
+  string in_line;
+  client.read( in_line );
   json response;
   try {
-    response = json::parse( line );
+    response = json::parse( in_line );
   }
   catch ( const exception& e ){
-    LOG << "json parsing failed on '" << line << "':"
+    LOG << "json parsing failed on '" << in_line << "':"
 	<< e.what() << endl;
     abort();
   }
@@ -1010,16 +1009,15 @@ void Mbma::call_server( const vector<string>& insts,
     json out_json;
     out_json["command"] = "base";
     out_json["param"] = _base;
-    string line = out_json.dump() + "\n";
-    //    LOG << "sending BASE json data:" << line << endl;
-    client.write( line );
-    client.read( line );
-    json response;
+    string out_line = out_json.dump() + "\n";
+    //    LOG << "sending BASE json data:" << out_line << endl;
+    client.write( out_line );
+    client.read( in_line );
     try {
-      response = json::parse( line );
+      response = json::parse( in_line );
     }
     catch ( const exception& e ){
-      LOG << "json parsing failed on '" << line << "':"
+      LOG << "json parsing failed on '" << in_line << "':"
 	  << e.what() << endl;
       abort();
     }
@@ -1035,16 +1033,16 @@ void Mbma::call_server( const vector<string>& insts,
   query["params"] = arr;
   //  LOG << "send json" << query.dump(2) << endl;
   // send it to the server
-  line = query.dump() + "\n";
-  client.write( line );
+  string out_line = query.dump() + "\n";
+  client.write( out_line );
   // receive json
-  client.read( line );
-  //  LOG << "received line:" << line << "" << endl;
+  client.read( in_line );
+  //  LOG << "received line:" << in_line << "" << endl;
   try {
-    response = json::parse( line );
+    response = json::parse( in_line );
   }
   catch ( const exception& e ){
-    LOG << "json parsing failed on '" << line << "':"
+    LOG << "json parsing failed on '" << in_line << "':"
 	<< e.what() << endl;
     abort();
   }

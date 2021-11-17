@@ -603,7 +603,7 @@ void extract_dependencies( list<pair<const dp_tree*,const dp_tree*>>& result,
   }
 }
 
-vector<parsrel> extract( list<pair<const dp_tree*,const dp_tree*>>& l ){
+vector<parsrel> extract( const list<pair<const dp_tree*,const dp_tree*>>& l ){
   /// convert a list of head-dependent pairs into a list of parsrel records
   /*!
     \param l a list of head-dependent pairs

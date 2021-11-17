@@ -296,24 +296,24 @@ void CGNTagger::add_tags( const vector<folia::Word*>& wv,
   assert( wv.size() == fd.size() );
   size_t pos = 0;
   for ( const auto& word : fd.units ){
-    folia::KWargs args;
-    args["set"]   = getTagset();
-    args["class"] = TiCC::UnicodeToUTF8(word.tag);
+    folia::KWargs u_args;
+    u_args["set"]   = getTagset();
+    u_args["class"] = TiCC::UnicodeToUTF8(word.tag);
     if ( textclass != "current" ){
-      args["textclass"] = textclass;
+      u_args["textclass"] = textclass;
     }
-    args["confidence"]= TiCC::toString(word.tag_confidence);
+    u_args["confidence"]= TiCC::toString(word.tag_confidence);
     folia::FoliaElement *postag;
 #pragma omp critical (foliaupdate)
     {
-      postag = wv[pos]->addPosAnnotation( args );
+      postag = wv[pos]->addPosAnnotation( u_args );
     }
     vector<UnicodeString> hv = TiCC::split_at_first_of( word.tag, "()" );
     UnicodeString head = hv[0];
-    args["class"] = TiCC::UnicodeToUTF8(head);
+    u_args["class"] = TiCC::UnicodeToUTF8(head);
 #pragma omp critical (foliaupdate)
     {
-      folia::Feature *feat = new folia::HeadFeature( args );
+      folia::Feature *feat = new folia::HeadFeature( u_args );
       postag->append( feat );
       if ( head == "SPEC" ){
 	postag->confidence(1.0);
@@ -322,15 +322,15 @@ void CGNTagger::add_tags( const vector<folia::Word*>& wv,
     if ( hv.size() > 1 ){
       vector<UnicodeString> feats = TiCC::split_at( hv[1], "," );
       for ( const auto& f : feats ){
-	folia::KWargs args;
-	args["set"] =  getTagset();
-	args["subset"] = getSubSet( TiCC::UnicodeToUTF8(f),
-				    TiCC::UnicodeToUTF8(head),
-				    TiCC::UnicodeToUTF8(word.tag) );
-	args["class"]  = TiCC::UnicodeToUTF8(f);
+	folia::KWargs f_args;
+	f_args["set"] =  getTagset();
+	f_args["subset"] = getSubSet( TiCC::UnicodeToUTF8(f),
+				      TiCC::UnicodeToUTF8(head),
+				      TiCC::UnicodeToUTF8(word.tag) );
+	f_args["class"]  = TiCC::UnicodeToUTF8(f);
 #pragma omp critical (foliaupdate)
 	{
-	  folia::Feature *feat = new folia::Feature( args, wv[pos]->doc() );
+	  folia::Feature *feat = new folia::Feature( f_args, wv[pos]->doc() );
 	  postag->append( feat );
 	}
       }

@@ -476,14 +476,14 @@ string Mblem::call_server( const string& instance ){
   if ( debug > 1 ){
     DBG << "calling MBLEM-server" << endl;
   }
-  string line;
-  client.read( line );
+  string in_line;
+  client.read( in_line );
   json response;
   try {
-    response = json::parse( line );
+    response = json::parse( in_line );
   }
   catch ( const exception& e ){
-    LOG << "json parsing failed on '" << line << "':"
+    LOG << "json parsing failed on '" << in_line << "':"
 	<< e.what() << endl;
     abort();
   }
@@ -492,37 +492,36 @@ string Mblem::call_server( const string& instance ){
     json out_json;
     out_json["command"] = "base";
     out_json["param"] = _base;
-    string line = out_json.dump() + "\n";
-    //    LOG << "sending BASE json data:" << line << endl;
-    client.write( line );
-    client.read( line );
-    json response;
+    string out_line = out_json.dump() + "\n";
+    //    LOG << "sending BASE json data:" << out_line << endl;
+    client.write( out_line );
+    client.read( in_line );
     try {
-      response = json::parse( line );
+      response = json::parse( in_line );
     }
     catch ( const exception& e ){
-      LOG << "json parsing failed on '" << line << "':"
+      LOG << "json parsing failed on '" << in_line << "':"
 	  << e.what() << endl;
       abort();
     }
     //    LOG << "received json data:" << response.dump(2) << endl;
   }
-  // create json struct
+  // create json query struct
   json query;
   query["command"] = "classify";
   query["param"] = instance;
   //  LOG << "send json" << query.dump(2) << endl;
   // send it to the server
-  line = query.dump() + "\n";
-  client.write( line );
+  string out_line = query.dump() + "\n";
+  client.write( out_line );
   // receive json
-  client.read( line );
-  //  LOG << "received line:" << line << "" << endl;
+  client.read( in_line );
+  //  LOG << "received line:" << in_line << "" << endl;
   try {
-    response = json::parse( line );
+    response = json::parse( in_line );
   }
   catch ( const exception& e ){
-    LOG << "json parsing failed on '" << line << "':"
+    LOG << "json parsing failed on '" << in_line << "':"
 	<< e.what() << endl;
     abort();
   }
