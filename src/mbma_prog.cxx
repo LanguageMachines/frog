@@ -226,17 +226,17 @@ void Test( istream& in ){
 	  myMbma.Classify( uWord );
 	  myMbma.assign_compounds();
 	  vector<pair<UnicodeString,string>> res = myMbma.getResults();
-	  string line = w + "\t";
+	  string out_line = w + "\t";
 	  for ( auto const& r : res ){
-	    line += TiCC::UnicodeToUTF8(r.first);
+	    out_line += TiCC::UnicodeToUTF8(r.first);
 	    if ( !r.second.empty() ){
-	      line += "\t"+r.second;
+	      out_line += "\t"+r.second;
 	    }
 	    if ( &r != &res.back() ){
-	      line += "\t";
+	      out_line += "\t";
 	    }
 	  }
-	  cout << line << endl;
+	  cout << out_line << endl;
 	}
       }
       if ( !bulk ){

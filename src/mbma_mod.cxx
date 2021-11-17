@@ -943,10 +943,7 @@ void Mbma::Classify( frog_record& fd ){
   }
   // HACK! for now remove any whitespace!
   vector<UnicodeString> parts = TiCC::split( word );
-  word.remove();
-  for ( const auto& p : parts ){
-    word += p;
-  }
+  word = TiCC::join( parts, "" );
   if ( filter ){
     word = filter->filter( word );
   }

@@ -143,15 +143,16 @@ RulePart::RulePart( const UnicodeString& rs, const UChar kar, bool first ):
     is_participle = ( s.indexOf( "pv" ) != -1 ) &&
       ( del == "ge" );
   }
-  int pos = s.indexOf("_");
-  if ( pos != -1 ){
+  int upos = s.indexOf("_");
+  if ( upos != -1 ){
     ResultClass = CLEX::toCLEX( s[0] );
     // a rewrite RulePart
-    if ( pos != 1 ){
-      cerr << "Surprise! _ on a strange position:" << pos << " in " << s << endl;
+    if ( upos != 1 ){
+      cerr << "Surprise! _ on a strange position:" << upos
+	   << " in " << s << endl;
     }
     else {
-      UnicodeString rhs = UnicodeString( s, pos+1 );
+      UnicodeString rhs = UnicodeString( s, upos+1 );
       //      cerr << "RHS = " << rhs << endl;
       int spos = rhs.indexOf("/");
       if ( spos != -1 ){
@@ -199,17 +200,17 @@ RulePart::RulePart( const UnicodeString& rs, const UChar kar, bool first ):
       //      cerr << "inflect =" << inflect << endl;
     }
     else {
-      int pos = s.indexOf("/");
+      int spos = s.indexOf("/");
       CLEX::Type tag = CLEX::toCLEX( TiCC::UnicodeToUTF8(s) );
-      if ( pos != -1 ){
+      if ( spos != -1 ){
 	// some inflection
-	UnicodeString ts = UnicodeString( s, 0, pos );
+	UnicodeString ts = UnicodeString( s, 0, spos );
 	//	cerr << "ts=" << ts << endl;
 	tag = CLEX::toCLEX( TiCC::UnicodeToUTF8(ts) );
 	if ( tag0 != CLEX::UNASS ){
 	  // cases like 0/e 0/te2I
 	  ResultClass = tag;
-	  inflect = UnicodeString( s, pos+1 );
+	  inflect = UnicodeString( s, spos+1 );
 	}
 	else {
 	  //  E/P (suffix=e/postive infection)
@@ -441,11 +442,11 @@ void Rule::resolve_inflections(){
       // given the specific selections of certain inflections,
       //    select a tag!
       CLEX::Type new_tag = CLEX::UNASS;
-      for ( int i=0; i < inf.length(); ++i ){
-	new_tag = CLEX::select_tag( inf[i] );
+      for ( int ii=0; ii < inf.length(); ++ii ){
+	new_tag = CLEX::select_tag( inf[ii] );
 	if ( new_tag != CLEX::UNASS ){
 	  if ( debugFlag > 1 ){
-	    DBG << (char)inf[i] << " selects " << new_tag << endl;
+	    DBG << (char)inf[ii] << " selects " << new_tag << endl;
 	  }
 	  break;
 	}
