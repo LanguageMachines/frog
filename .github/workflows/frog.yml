@@ -187,7 +187,7 @@ jobs:
       - name: show log on failure
         if: ${{ env.test_status != '0' }}
         run: |
-          cat frogtests/testxmlin.diff
+          cat frogtests/*.diff
 
       - name: Notify IRC of failure
 
