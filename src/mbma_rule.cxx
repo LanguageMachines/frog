@@ -458,7 +458,9 @@ void Rule::resolve_inflections(){
 	// This is not always the case, but it works
 	//
 	// go back to the previous morpheme
-	for( long int k=i-1; k >= 0; --k ){
+	for ( long int k=i-1; k > -1; --k ){
+	  // so we loop back one or more ruleparts.
+	  // even 1 before i, which is possible as i starts at 1 !!!!
 	  //	  DBG << "een terug is " << rules[k].ResultClass << endl;
 	  if ( rules[k].isBasic() &&
 	       rules[k].ResultClass != CLEX::P ){
