@@ -464,10 +464,12 @@ vector<Rule*> Mbma::execute( const icu::UnicodeString& word,
   }
 
   vector<Rule*> accepted;
+  size_t id = 0;
   // now loop over all the analysis
   for ( auto const& ana : allParts ){
     Rule *rule = matchRule( ana, word );
     if ( rule ){
+      rule->ID = id++;
       accepted.push_back( rule );
     }
   }
@@ -519,6 +521,13 @@ bool mbmacmp( Rule *m1, Rule *m2 ){
   /// sorting function for Rule's
   return m1->getKey(false).length() > m2->getKey(false).length();
 }
+
+struct id_cmp {
+  bool operator()( const Rule *m1, const Rule *m2 ){
+  /// sorting function for Rule's on ID
+    return m1->ID < m2->ID;
+  }
+};
 
 void Mbma::filterHeadTag( const UnicodeString& head ){
   /// reduce the Mbms analysis by removing all solutions where the head is not
@@ -716,8 +725,8 @@ void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
     unique[tmp] = ait;
   }
   // so now we have map of 'equal' analysis.
-  // create a set for reverse lookup.
-  set<Rule*> uniqueAna;
+  // create a set for reverse lookup, using the Rule.ID to distinguish Rule's
+  set<Rule*, id_cmp> uniqueAna;
   for ( auto const& uit : unique ){
     uniqueAna.insert( uit.second );
   }

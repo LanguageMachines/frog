@@ -97,6 +97,7 @@ public:
   TiCC::LogStream& myLog;
   TiCC::LogStream& dbgLog;
   double confidence;
+  size_t ID;
 };
 
 std::ostream& operator<<( std::ostream& os, const Rule& );
