@@ -114,6 +114,15 @@ void RulePart::get_edits( const UnicodeString& edit ){
   }
 }
 
+UnicodeString filter_inversion( const UnicodeString& inflect ){
+  if ( inflect == "te2I" ){
+    return "te1";
+  }
+  else {
+    return inflect;
+  }
+}
+
 RulePart::RulePart( const UnicodeString& rs, const UChar kar, bool first ):
   ResultClass(CLEX::UNASS),
   uchar(kar),
@@ -229,6 +238,7 @@ RulePart::RulePart( const UnicodeString& rs, const UChar kar, bool first ):
       }
     }
   }
+  //  inflect = filter_inversion( inflect );
 }
 
 Rule::Rule( const vector<UnicodeString>& parts,
@@ -261,7 +271,7 @@ ostream& operator<<( ostream& os, const Rule& r ){
   for ( const auto& rule : r.rules ){
     os << "\t" << rule << endl;
   }
-  os << "tag: " << r.tag << " infl:" << r.inflection << " morhemes: "
+  os << "tag: " << r.tag << " infl:" << r.inflection << " morphemes: "
      << r.extract_morphemes() << " description: " << r.description
      << " confidence: " << r.confidence;
   if ( r.compound != Compound::Type::NONE ){
@@ -377,7 +387,7 @@ bool Rule::performEdits(){
     bool inserted = false;
     UnicodeString part; // store to-be-inserted particles here!
     if ( !cur->hide.isEmpty() ){
-      last->morpheme += cur->uchar; // add to prevvoius morheme
+      last->morpheme += cur->uchar; // add to previous morpheme
       cur->uchar = "";
       last = cur;
     }
@@ -401,7 +411,7 @@ bool Rule::performEdits(){
       last = cur;
     }
     else if ( cur->ResultClass != CLEX::NEUTRAL ){
-      // this MUST be an inflection. like E, C S.. It starts a new morheme
+      // this MUST be an inflection. like E, C S.. It starts a new morpheme
       last = cur;
     }
     if ( !inserted || !cur->hide.isEmpty() ){
@@ -510,6 +520,7 @@ UnicodeString Rule::getKey( bool deep ){
     for ( auto const& mor : morphs ){
       tmp += mor + "++";
     }
+    //    tmp += "/" + inflection;
     return tmp;
   }
 }
