@@ -238,7 +238,7 @@ RulePart::RulePart( const UnicodeString& rs, const UChar kar, bool first ):
       }
     }
   }
-  inflect = filter_inversion( inflect );
+  //  inflect = filter_inversion( inflect );
 }
 
 Rule::Rule( const vector<UnicodeString>& parts,
