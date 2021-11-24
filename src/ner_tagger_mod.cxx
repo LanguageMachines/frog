@@ -647,11 +647,10 @@ void NERTagger::add_result( const frog_data& fd,
 	}
 #pragma omp critical (foliaupdate )
 	{
-	  el = new folia::EntitiesLayer( args, s->doc() );
-	  s->append(el);
+	  el = s->add_child<folia::EntitiesLayer>( args );
 	}
       }
-      // a new entity starts here
+      // a new entity starts here, so append the prevous one to the layer
       if ( ner != 0 ){
 #pragma omp critical (foliaupdate )
 	{
