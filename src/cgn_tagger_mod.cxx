@@ -313,8 +313,7 @@ void CGNTagger::add_tags( const vector<folia::Word*>& wv,
     u_args["class"] = TiCC::UnicodeToUTF8(head);
 #pragma omp critical (foliaupdate)
     {
-      folia::Feature *feat = new folia::HeadFeature( u_args );
-      postag->append( feat );
+      postag->add_child<folia::HeadFeature>( u_args );
       if ( head == "SPEC" ){
 	postag->confidence(1.0);
       }
@@ -330,8 +329,7 @@ void CGNTagger::add_tags( const vector<folia::Word*>& wv,
 	f_args["class"]  = TiCC::UnicodeToUTF8(f);
 #pragma omp critical (foliaupdate)
 	{
-	  folia::Feature *feat = new folia::Feature( f_args, wv[pos]->doc() );
-	  postag->append( feat );
+	  postag->add_child<folia::Feature>( f_args );
 	}
       }
     }

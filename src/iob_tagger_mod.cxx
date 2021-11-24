@@ -197,8 +197,7 @@ void IOBTagger::add_result( const frog_data& fd,
 	}
 #pragma omp critical (foliaupdate)
 	{
-	  el = new folia::ChunkingLayer( args, s->doc() );
-	  s->append(el);
+	  el = s->add_child<folia::ChunkingLayer>( args );
 	}
       }
       // a new entity starts here

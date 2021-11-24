@@ -863,8 +863,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
       }
 #pragma omp critical (foliaupdate)
       {
-	folia::Feature *feat = new folia::Feature( fargs );
-	result->append( feat );
+	result->add_child<folia::Feature>( fargs );
       }
     }
 #pragma omp critical (foliaupdate)
@@ -923,8 +922,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 	  desc += "/" + d;
 #pragma omp critical (foliaupdate)
 	  {
-	    folia::Feature *feat = new folia::Feature( args );
-	    result->append( feat );
+	    result->add_child<folia::Feature>( args );
 	  }
 	}
       }
@@ -970,8 +968,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     args["class"]  = desc;
 #pragma omp critical (foliaupdate)
     {
-      folia::Feature *feat = new folia::Feature( args );
-      result->append( feat );
+      result->add_child<folia::Feature>( args );
     }
   }
   else if ( _status == Status::INFO ){
@@ -994,8 +991,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 	  args["class"] = d;
 #pragma omp critical (foliaupdate)
 	  {
-	    folia::Feature *feat = new folia::Feature( args );
-	    result->append( feat );
+	    result->add_child<folia::Feature>( args );
 	  }
 	}
       }
@@ -1048,8 +1044,7 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
 	args["class"] = it->original();
 #pragma omp critical (foliaupdate)
 	{
-	  folia::Feature *feat = new folia::Feature( args );
-	  result->append( feat );
+	  result->add_child<folia::Feature>( args );
 	}
       }
     }
@@ -1071,8 +1066,7 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
   args["class"]  = desc;
 #pragma omp critical (foliaupdate)
   {
-    folia::Feature *feat = new folia::Feature( args );
-    result->append( feat );
+    result->add_child<folia::Feature>( args );
   }
   args.clear();
   args["set"] = Mbma::clex_tagset;
@@ -1089,8 +1083,7 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
     args["class"]  = toString(ct);
 #pragma omp critical (foliaupdate)
     {
-      folia::Feature *feat = new folia::Feature( args );
-      pos->append( feat );
+      pos->add_child<folia::Feature>( args );
     }
   }
 #pragma omp critical (foliaupdate)

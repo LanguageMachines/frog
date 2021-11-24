@@ -1237,8 +1237,7 @@ void ParserBase::add_result( const frog_data& fd,
   // if ( textclass != "current" ){
   //   args["textclass"] = textclass;
   // }
-  folia::DependenciesLayer *el = new folia::DependenciesLayer( args, s->doc() );
-  s->append( el );
+  folia::DependenciesLayer *el = s->add_child<folia::DependenciesLayer>( args );
   for ( size_t pos=0; pos < fd.mw_units.size(); ++pos ){
     //    DBG << "POS=" << pos << endl;
     string cls = fd.mw_units[pos].parse_role;
@@ -1252,14 +1251,13 @@ void ParserBase::add_result( const frog_data& fd,
 	args["textclass"] = textclass;
       }
       args["set"] = getTagset();
-      folia::Dependency *e = new folia::Dependency( args, s->doc() );
-      el->append( e );
+      folia::Dependency *dep = el->add_child<folia::Dependency>( args );
       args.clear();
       // if ( textclass != "current" ){
       // 	args["textclass"] = textclass;
       // }
       //      LOG << "wv.size=" << wv.size() << endl;
-      folia::Headspan *dh = new folia::Headspan( args );
+      folia::Headspan *dh = dep->add_child<folia::Headspan>( args );
       // DBG << "mw_units:" << fd.mw_units[pos] << endl;
       size_t head_index = fd.mw_units[pos].parse_index-1;
       // DBG << "head_index=" << head_index << endl;
@@ -1267,12 +1265,10 @@ void ParserBase::add_result( const frog_data& fd,
 	// DBG << "i=" << i << endl;
 	dh->append( wv[i] );
       }
-      e->append( dh );
-      folia::DependencyDependent *dd = new folia::DependencyDependent( args );
+      folia::DependencyDependent *dd = dep->add_child<folia::DependencyDependent>( args );
       for ( auto const& i : fd.mw_units[pos].parts ){
 	dd->append( wv[i] );
       }
-      e->append( dd );
     }
   }
 }

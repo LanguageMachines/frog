@@ -1443,8 +1443,7 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
   }
   args.clear();
   args["generate_id"] = result->id();
-  folia::Sentence *s = new folia::Sentence( args, root->doc() );
-  result->append( s );
+  folia::Sentence *s = result->add_child<folia::Sentence>( args );
   if  (options.debugFlag > 5 ){
     DBG << "append_to_folia, created Sentence" << s << endl;
   }
@@ -2420,8 +2419,7 @@ void FrogAPI::handle_one_paragraph( ostream& os,
 	    if ( !p_id.empty() ){
 	      args["generate_id"] = p_id;
 	    }
-	    folia::Sentence *s = new folia::Sentence( args, p->doc() );
-	    p->append( s );
+	    folia::Sentence *s = p->add_child<folia::Sentence>( args );
 	    append_to_sentence( s, res );
 	  }
 	  if ( toks.size() == 0 ){
@@ -2540,20 +2538,18 @@ void FrogAPI::handle_one_text_parent( ostream& os,
 	  if ( !e_id.empty() ){
 	    p_args["generate_id"] = e_id;
 	  }
-	  folia::Paragraph *p = new folia::Paragraph( p_args, e->doc() );
-	  e->append( p );
+	  folia::Paragraph *p = e->add_child<folia::Paragraph>( p_args );
 	  for ( const auto& sent : sents ){
 	    folia::KWargs args;
 	    string p_id = p->id();
 	    if ( !p_id.empty() ){
 	      args["generate_id"] = p_id;
 	    }
-	    folia::Sentence *s = new folia::Sentence( args, e->doc() );
+	    folia::Sentence *s = p->add_child<folia::Sentence>( args );
 	    append_to_sentence( s, sent );
 	    if  (options.debugFlag > 0){
 	      DBG << "created a new sentence: " << s << endl;
 	    }
-	    p->append( s );
 	  }
 	}
 	else {
@@ -2567,12 +2563,11 @@ void FrogAPI::handle_one_text_parent( ostream& os,
 	  else {
 	    args["generate_id"] = e_id;
 	  }
-	  folia::Sentence *s = new folia::Sentence( args, e->doc() );
+	  folia::Sentence *s = e->add_child<folia::Sentence>( args );
 	  append_to_sentence( s, sents[0] );
 	  if  (options.debugFlag > 0){
 	    DBG << "created a new sentence: " << s << endl;
 	  }
-	  e->append( s );
 	}
       }
     }

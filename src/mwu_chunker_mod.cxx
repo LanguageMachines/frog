@@ -405,8 +405,7 @@ void Mwu::add_result( const frog_data& fd,
   folia::EntitiesLayer *el;
 #pragma omp critical (foliaupdate)
   {
-    el = new folia::EntitiesLayer( args, s->doc() );
-    s->append( el );
+    el = s->add_child<folia::EntitiesLayer>( args );
   }
   for ( const auto& mwu : fd.mwus ){
     if ( !el->id().empty() ){
@@ -417,8 +416,7 @@ void Mwu::add_result( const frog_data& fd,
     }
 #pragma omp critical (foliaupdate)
     {
-      folia::Entity *e = new folia::Entity( args, s->doc() );
-      el->append( e );
+      folia::Entity *e = el->add_child<folia::Entity>( args );
       for ( size_t pos = mwu.first; pos <= mwu.second; ++pos ){
 	e->append( wv[pos] );
       }
