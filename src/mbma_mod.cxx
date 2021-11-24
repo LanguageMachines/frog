@@ -643,7 +643,7 @@ void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
   // find best match
   // loop through all subfeatures of the tag
   // and match with inflections from each m
-  set<Rule *, id_cmp> bestMatches;
+  set<Rule *, id_cmp> bestMatches; // store rules on ID, maybe overkill?
   int max_count = 0;
   for ( const auto& q : analysis ){
     int match_count = 0;
@@ -693,7 +693,7 @@ void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
     DBG << "" << endl;
   }
   double best_conf = -0.1;
-  set<Rule*, id_cmp> highConf;
+  set<Rule*, id_cmp> highConf; // store Rule's on ID to be reproducable
   for ( const auto& it : bestMatches ){
     if ( it->confidence >= best_conf ){
       if ( it->confidence > best_conf ){
