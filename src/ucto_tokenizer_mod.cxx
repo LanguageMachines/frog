@@ -43,6 +43,7 @@
 
 using namespace std;
 using TiCC::operator<<;
+using icu::UnicodeString;
 
 #define LOG *TiCC::Log(errLog)
 #define DBG *TiCC::Log(dbgLog)
@@ -394,22 +395,24 @@ void UctoTokenizer::add_provenance( folia::Document& doc,
   }
 }
 
-vector<string> UctoTokenizer::tokenize( const string& line ){
+vector<UnicodeString> UctoTokenizer::tokenize( const UnicodeString& line ){
   /// Tokenize a buffer of characters into a list of tokenized sentences
   /*!
-    \param line of sequence of characters to be tokenized
-    \return a vector of strings each representing a sentence
+    \param line an input sequence of Unicode characters to be tokenized
+    \return a vector of UnicodeStrings each representing one sentence from
+    the input
 
-    The input line may be long and include newlines etc. Is is assumed to be
-    in the current InputEncoding.
-
-    The output is sequence of tokenized strings in UTF8, each representing one
-    sentence.
+    The input line may be long and include newlines etc.
    */
   if ( tokenizer ){
     tokenizer->reset();
     tokenizer->tokenizeLine( line );
-    return tokenizer->getSentences();
+    vector<string> res = tokenizer->getSentences();
+    vector<UnicodeString> result;
+    for ( const auto& s : res ){
+      result.push_back( TiCC::UnicodeFromUTF8( s ) );
+    }
+    return result;
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );

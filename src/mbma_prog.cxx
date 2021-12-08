@@ -165,16 +165,16 @@ bool init(){
 }
 
 void Test( istream& in ){
-  string line;
-  while ( getline( in, line ) ){
-    line = TiCC::trim( line );
-    if ( line.empty() ){
+  UnicodeString line;
+  while ( TiCC::getline( in, line ) ){
+    line = line.trim();
+    if ( line.isEmpty() ){
       continue;
     }
     if ( verbose ){
       cerr << "processing: " << line << endl;
     }
-    vector<string> sentences;
+    vector<UnicodeString> sentences;
     if ( useTokenizer ){
       sentences = tokenizer.tokenize( line );
     }
@@ -183,7 +183,7 @@ void Test( istream& in ){
     }
     for ( auto const& s : sentences ){
       if ( useTagger ){
-	vector<TagResult> tagv = tagger.tagLine( TiCC::UnicodeFromUTF8(s) );
+	vector<TagResult> tagv = tagger.tagLine( s );
 	for ( const auto& tr : tagv ){
 	  UnicodeString uWord = tr.word();
 	  UnicodeString tag = tr.assigned_tag();
@@ -219,18 +219,18 @@ void Test( istream& in ){
 	}
       }
       else {
-	vector<string> parts = TiCC::split( s );
+	vector<UnicodeString> parts = TiCC::split( s );
 	for ( auto const& w : parts ){
-	  UnicodeString uWord = TiCC::UnicodeFromUTF8(w);
+	  UnicodeString uWord = w;
 	  uWord.toLower();
 	  myMbma.Classify( uWord );
 	  myMbma.assign_compounds();
 	  vector<pair<UnicodeString,string>> res = myMbma.getResults();
-	  string out_line = w + "\t";
+	  UnicodeString out_line = w + "\t";
 	  for ( auto const& r : res ){
-	    out_line += TiCC::UnicodeToUTF8(r.first);
+	    out_line += r.first;
 	    if ( !r.second.empty() ){
-	      out_line += "\t"+r.second;
+	      out_line += "\t" + TiCC::UnicodeFromUTF8(r.second);
 	    }
 	    if ( &r != &res.back() ){
 	      out_line += "\t";

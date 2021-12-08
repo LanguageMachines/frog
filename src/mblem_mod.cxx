@@ -42,8 +42,8 @@
 #include "frog/Frog-util.h"
 
 using namespace std;
-using namespace icu;
 using namespace nlohmann;
+using icu::UnicodeString;
 
 #define LOG *TiCC::Log(errLog)
 #define DBG *TiCC::Log(dbgLog)
@@ -262,7 +262,7 @@ Mblem::~Mblem(){
   delete errLog;
 }
 
-string Mblem::make_instance( const icu::UnicodeString& in ) {
+string Mblem::make_instance( const UnicodeString& in ) {
   /// convert a Unicode string into an instance for Timbl
   /*!
     \param in the UnicodeString representing 1 word to lemmatize
@@ -271,7 +271,7 @@ string Mblem::make_instance( const icu::UnicodeString& in ) {
   if (debug > 2 ) {
     DBG << "making instance from: " << in << endl;
   }
-  icu::UnicodeString instance = "";
+  UnicodeString instance = "";
   size_t length = in.length();
   for ( size_t i=0; i < history; i++) {
     size_t j = length - history + i;
@@ -391,8 +391,8 @@ void Mblem::Classify( frog_record& fd ){
     and the one-one rules.
     All 'normal' cases are handled over to the Timbl classifier
   */
-  icu::UnicodeString uword = fd.word;
-  icu::UnicodeString pos_tag = fd.tag;
+  UnicodeString uword = fd.word;
+  UnicodeString pos_tag = fd.tag;
   string token_class = fd.token_class;
   if (debug > 1 ){
     DBG << "Classify " << uword << "(" << pos_tag << ") ["
@@ -417,7 +417,7 @@ void Mblem::Classify( frog_record& fd ){
     // we have to strip a few letters to get a lemma
     auto const& it2 = it1->second.find( token_class );
     if ( it2 != it1->second.end() ){
-      icu::UnicodeString uword2 = icu::UnicodeString( uword, 0, uword.length() - it2->second );
+      UnicodeString uword2 = UnicodeString( uword, 0, uword.length() - it2->second );
       if ( uword2.isEmpty() ){
 	uword2 = uword;
       }
@@ -531,7 +531,7 @@ string Mblem::call_server( const string& instance ){
   return result;
 }
 
-void Mblem::Classify( const icu::UnicodeString& word ){
+void Mblem::Classify( const UnicodeString& word ){
   /// give the lemma for 1 word
   /*!
     \param uWord a Unicode string with the word
@@ -559,7 +559,7 @@ void Mblem::Classify( const icu::UnicodeString& word ){
     LOG << "no alternatives found" << endl;
   }
   for ( const auto& partS : parts ) {
-    icu::UnicodeString lemma;
+    UnicodeString lemma;
     UnicodeString restag;
     int pos = partS.indexOf("+");
     if ( pos == -1 ){
@@ -576,9 +576,9 @@ void Mblem::Classify( const icu::UnicodeString& word ){
       }
       restag = edits[0]; // the first one is the POS tag
 
-      icu::UnicodeString insstr;
-      icu::UnicodeString delstr;
-      icu::UnicodeString prefix;
+      UnicodeString insstr;
+      UnicodeString delstr;
+      UnicodeString prefix;
       for ( const auto& edit : edits ){
 	if ( edit == edits.front() ){
 	  continue;
@@ -623,7 +623,7 @@ void Mblem::Classify( const icu::UnicodeString& word ){
 	DBG << "prefixpos = " << prefixpos << endl;
       }
       if (prefixpos >= 0) {
-	lemma = icu::UnicodeString( uWord, 0L, prefixpos );
+	lemma = UnicodeString( uWord, 0L, prefixpos );
 	prefixpos = prefixpos + prefix.length();
       }
       if (debug > 1){
@@ -642,13 +642,13 @@ void Mblem::Classify( const icu::UnicodeString& word ){
 	    lemma += uWord;
 	  }
 	  else {
-	    icu::UnicodeString part = icu::UnicodeString( uWord, prefixpos, uWord.length() - delstr.length() - prefixpos );
+	    UnicodeString part = UnicodeString( uWord, prefixpos, uWord.length() - delstr.length() - prefixpos );
 	    lemma += part + insstr;
 	  }
 	}
 	else if ( insstr.isEmpty() ){
 	  // no replacement, just take part after the prefix
-	  lemma += icu::UnicodeString( uWord, prefixpos, uWord.length() ); // uWord;
+	  lemma += UnicodeString( uWord, prefixpos, uWord.length() ); // uWord;
 	}
 	else {
 	  // but replace if possible

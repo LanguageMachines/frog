@@ -173,21 +173,20 @@ bool init(){
 }
 
 void Test( istream& in, ostream& os ){
-  string line;
-  while ( getline( in, line ) ){
-    if ( line.empty() ) {
+  UnicodeString line;
+  while ( TiCC::getline( in, line ) ){
+    if ( line.isEmpty() ) {
       os << endl;
       continue;
     }
-    vector<string> sentences;
+    vector<UnicodeString> sentences;
     if ( useTokenizer ){
       sentences = tokenizer.tokenize( line );
     }
     else {
       sentences.push_back( line );
     }
-    for ( auto const& s : sentences ){
-      UnicodeString us = TiCC::UnicodeFromUTF8(s);
+    for ( auto& us : sentences ){
       if ( useTagger ){
 	vector<TagResult> tagrv = tagger.tagLine( us );
 	for ( const auto& tr : tagrv ){
@@ -213,7 +212,7 @@ void Test( istream& in, ostream& os ){
 	  }
 	  vector<UnicodeString> parts = TiCC::split( us );
 	  if ( parts.size() > 1 ){
-	    cerr << "skipping multiword " << s << endl;
+	    cerr << "skipping multiword " << us << endl;
 	  }
 	  else {
 	    myMblem.Classify( parts[0] );
