@@ -81,8 +81,8 @@ class Mblem {
   size_t history;
   int debug;
   bool keep_case;
-  std::map<std::string, std::map<std::string, int>> token_strip_map;
-  std::set<std::string> one_one_tags;
+  std::map<icu::UnicodeString, std::map<icu::UnicodeString, int>> token_strip_map;
+  std::set<icu::UnicodeString> one_one_tags;
   std::vector<mblemData> mblemResult;
   std::string _version;
   std::string tagset;

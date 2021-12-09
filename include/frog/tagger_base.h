@@ -88,7 +88,7 @@ class BaseTagger {
   TiCC::UniFilter *filter;
   std::vector<std::string> _words;
   std::vector<Tagger::TagResult> _tag_result;
-  std::map<std::string,icu::UnicodeString> token_tag_map;
+  std::map<icu::UnicodeString,icu::UnicodeString> token_tag_map;
   BaseTagger( const BaseTagger& ){} // inhibit copies
 };
 

@@ -267,7 +267,7 @@ void CGNTagger::addTag( frog_record& fd,
       fd.tag_confidence = confidence;
     }
   }
-  string ucto_class = fd.token_class;
+  UnicodeString ucto_class = fd.token_class;
   if ( debug > 1 ){
     DBG << "lookup ucto class= " << ucto_class << endl;
   }

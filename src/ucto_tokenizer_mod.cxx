@@ -614,7 +614,7 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
     if ( !ids.empty() ){
       args["generate_id"] = ids;
     }
-    args["class"] = word.token_class;
+    args["class"] = TiCC::UnicodeToUTF8(word.token_class);
     if ( word.no_space ){
       args["space"] = "no";
     }

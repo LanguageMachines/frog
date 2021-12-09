@@ -69,9 +69,9 @@ json frog_record::to_json() const {
   */
   json result;
   result["word"] = TiCC::UnicodeToUTF8(word);
-  if ( !token_class.empty() ){
+  if ( !token_class.isEmpty() ){
     json tok;
-    tok["token"] = token_class;
+    tok["token"] = TiCC::UnicodeToUTF8(token_class);
     if ( no_space ){
       tok["space"] = false;
     }

@@ -95,12 +95,12 @@ bool Mblem::fill_ts_map( const string& file ){
     LOG << "Unable to open file: '" << file << "'" << endl;
     return false;
   }
-  string line;
-  while ( getline( is, line ) ){
-    if ( line.empty() || line[0] == '#' ){
+  UnicodeString line;
+  while ( TiCC::getline( is, line ) ){
+    if ( line.isEmpty() || line[0] == '#' ){
       continue;
     }
-    vector<string> parts = TiCC::split( line );
+    vector<UnicodeString> parts = TiCC::split( line );
     if ( parts.size() != 3 ){
       LOG << "invalid line in: '" << file << "' (expected 3 parts)" << endl;
       return false;
@@ -204,9 +204,9 @@ bool Mblem::init( const TiCC::Configuration& config ) {
     }
   }
 
-  string one_one_tagS = config.lookUp( "one_one_tags", "mblem" );
-  if ( !one_one_tagS.empty() ){
-    vector<string> tags = TiCC::split_at( one_one_tagS, "," );
+  UnicodeString one_one_tagS = TiCC::UnicodeFromUTF8(config.lookUp( "one_one_tags", "mblem" ));
+  if ( !one_one_tagS.isEmpty() ){
+    vector<UnicodeString> tags = TiCC::split_at( one_one_tagS, "," );
     for ( auto const& t : tags ){
       one_one_tags.insert( t );
     }
@@ -393,7 +393,7 @@ void Mblem::Classify( frog_record& fd ){
   */
   UnicodeString uword = fd.word;
   UnicodeString pos_tag = fd.tag;
-  string token_class = fd.token_class;
+  UnicodeString token_class = fd.token_class;
   if (debug > 1 ){
     DBG << "Classify " << uword << "(" << pos_tag << ") ["
 	<< token_class << "]" << endl;
@@ -410,8 +410,7 @@ void Mblem::Classify( frog_record& fd ){
     return;
   }
 
-  string utf8_tag = TiCC::UnicodeToUTF8(pos_tag);
-  auto const& it1 = token_strip_map.find( utf8_tag );
+  auto const& it1 = token_strip_map.find( pos_tag );
   if ( it1 != token_strip_map.end() ){
     // some tag/tokenizer_class combinations are special
     // we have to strip a few letters to get a lemma
@@ -428,7 +427,7 @@ void Mblem::Classify( frog_record& fd ){
       return;
     }
   }
-  if ( one_one_tags.find( utf8_tag ) != one_one_tags.end() ){
+  if ( one_one_tags.find( pos_tag ) != one_one_tags.end() ){
     // some tags are just taken as such
 #pragma omp critical (dataupdate)
     {

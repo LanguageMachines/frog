@@ -942,8 +942,7 @@ void Mbma::getResult( frog_record& fd,
 void Mbma::Classify( frog_record& fd ){
   UnicodeString word = fd.word;
   UnicodeString tag = fd.tag;
-  string token_class;
-  token_class = fd.token_class;
+  UnicodeString token_class = fd.token_class;
   vector<UnicodeString> v = TiCC::split_at_first_of( tag, "()" );
   UnicodeString head = v[0];
   if (debugFlag >1 ){

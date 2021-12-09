@@ -52,7 +52,7 @@ class frog_record {
   nlohmann::json to_json() const;
   icu::UnicodeString word;          ///< the word in Unicode
   icu::UnicodeString clean_word;    ///< lowercased word (MBMA only) in Unicode
-  std::string token_class;   ///< the assigned token class of the word
+  icu::UnicodeString token_class;   ///< the assigned token class of the word
   std::string language;      ///< the detetected language of the word
   bool no_space;             ///< was there a space after the word?
   bool new_paragraph;        ///< did the tokenizer detect a paragraph here?

@@ -1862,7 +1862,7 @@ frog_data extract_fd( vector<Tokenizer::Token>& tokens ){
     tokens.erase(tokens.begin());
     frog_record tmp;
     tmp.word = tok.us;
-    tmp.token_class = TiCC::UnicodeToUTF8(tok.type);
+    tmp.token_class = tok.type;
     tmp.no_space = (tok.role & Tokenizer::TokenRole::NOSPACE);
     tmp.language = tok.lang_code;
     tmp.new_paragraph = (tok.role & Tokenizer::TokenRole::NEWPARAGRAPH);

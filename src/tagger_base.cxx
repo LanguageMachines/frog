@@ -87,19 +87,19 @@ bool BaseTagger::fill_map( const string& file ){
   if ( !is ){
     return false;
   }
-  string line;
-  while( getline( is, line ) ){
-    if ( line.empty() || line[0] == '#' ){
+  UnicodeString line;
+  while( TiCC::getline( is, line ) ){
+    if ( line.isEmpty() || line[0] == '#' ){
       continue;
     }
-    vector<string> parts = TiCC::split_at( line, "\t" );
+    vector<UnicodeString> parts = TiCC::split_at( line, "\t" );
     if ( parts.size() != 2 ){
       LOG << "invalid entry in '" << file << "'" << endl;
       LOG << "expected 2 tab-separated values, but got: '"
 	  << line << "'" << endl;
       return false;
     }
-    token_tag_map[ parts[0] ] = TiCC::UnicodeFromUTF8(parts[1]);
+    token_tag_map[ parts[0] ] = parts[1];
   }
   return true;
 }
@@ -525,7 +525,7 @@ vector<tag_entry> BaseTagger::extract_sentence( const frog_data& sent ){
   */
   vector<tag_entry> result;
   for ( const auto& sword : sent.units ){
-    icu::UnicodeString word = sword.word;
+    UnicodeString word = sword.word;
     if ( filter ){
       word = filter->filter( word );
     }
