@@ -1083,14 +1083,14 @@ void Mbma::Classify( const icu::UnicodeString& word ){
   else {
     int i = 0;
     for ( auto const& inst : insts ) {
-      string ans;
+      UnicodeString ans;
       MTree->Classify( inst, ans );
       if ( debugFlag > 1){
 	DBG << "itt #" << i+1 << " " << insts[i] << " ==> " << ans
 	    << ", depth=" << MTree->matchDepth() << endl;
 	++i;
       }
-      classes.push_back( TiCC::UnicodeFromUTF8(ans));
+      classes.push_back( ans );
     }
   }
 

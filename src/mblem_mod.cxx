@@ -459,7 +459,7 @@ void Mblem::Classify( frog_record& fd ){
   }
 }
 
-string Mblem::call_server( const string& instance ){
+UnicodeString Mblem::call_server( const string& instance ){
   /// use a Timbl server to classify
   /*!
     \param instance The instance to give to Timbl
@@ -527,7 +527,7 @@ string Mblem::call_server( const string& instance ){
   //  LOG << "received json data:" << response.dump(2) << endl;
   string result = response["category"];
   //  LOG << "extracted result " << result << endl;
-  return result;
+  return TiCC::UnicodeFromUTF8(result);
 }
 
 void Mblem::Classify( const UnicodeString& word ){
@@ -540,18 +540,17 @@ void Mblem::Classify( const UnicodeString& word ){
   static TiCC::UnicodeNormalizer nfc_norm;
   UnicodeString uWord = nfc_norm.normalize(word);
   mblemResult.clear();
-  string inst = make_instance(uWord); // Timbl like UTF8 encoded strings
-  string classString;
+  string inst = make_instance(uWord); // Timbl likes UTF8 encoded strings
+  UnicodeString u_class;
   if ( !_host.empty() ){
-    classString = call_server( inst );
+    u_class = call_server( inst );
   }
   else {
-    myLex->Classify( inst, classString );
+    myLex->Classify( inst, u_class );
   }
   if ( debug > 1){
-    DBG << "class: " << classString  << endl;
+    DBG << "class: " << u_class  << endl;
   }
-  UnicodeString u_class = TiCC::UnicodeFromUTF8( classString );
   // 1st find all alternatives
   vector<UnicodeString> parts = TiCC::split_at_first_of( u_class, "|" );
   if ( parts.size() < 1 ){

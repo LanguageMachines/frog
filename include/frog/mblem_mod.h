@@ -69,7 +69,7 @@ class Mblem {
   void add_lemmas( const std::vector<folia::Word*>&,
 		   const frog_data& ) const;
  private:
-  std::string call_server( const std::string& );
+  icu::UnicodeString call_server( const std::string& );
   void read_transtable( const std::string& );
   void create_MBlem_defaults();
   bool readsettings( const std::string& dir, const std::string& fname );
