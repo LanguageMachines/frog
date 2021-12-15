@@ -1,5 +1,25 @@
-0.23 - 2021
+0.24 - 2021-12-15
 [Ko vd Sloot]
+* start using the newest UTF8 aware Timbl and Mbt and Ucto
+* use NFC normalized UnicodeString more general internaly
+* added a fix in MBMA codng, to get better reproducable result on different
+  OS/Compiler combinations
+* lots of small refactoring
+* bumped library version, because of some API changed
+[maarten van Gompel]
+* merged a patch suggested by Helmut Grohne <helmut@subdivi.de>
+  - configure.ac: Bug#993123: frog FTCBFS: hard codes the build
+    architecture pkg-config Source: frog Version: 0.20-2
+      Tags: patch upstream User:
+    debian-cross@lists.debian.org Usertags:
+      ftcbfs frog fails to cross build from source, because configure.ac hard
+      codes the build architecture pkg-config in one place (after
+      correctly detecting the host architecture one). Simply using the
+      correct substitution variable makes frog cross buildable. Please
+      consider applying the attached patch.
+        Helmut Signed-off-by: Maarten van Gompel <proycon@anaproy.nl>
+
+0.23 - 2021
 * requires libfolia 2.9
 * replaced TravisCI by GitHub actions
 * fixed https://github.com/proycon/python-frog/issues/20
