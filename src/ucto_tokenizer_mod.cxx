@@ -407,11 +407,7 @@ vector<UnicodeString> UctoTokenizer::tokenize( const UnicodeString& line ){
   if ( tokenizer ){
     tokenizer->reset();
     tokenizer->tokenizeLine( line );
-    vector<string> res = tokenizer->getSentences();
-    vector<UnicodeString> result;
-    for ( const auto& s : res ){
-      result.push_back( TiCC::UnicodeFromUTF8( s ) );
-    }
+    vector<UnicodeString> result = tokenizer->getSentences();
     return result;
   }
   else {
@@ -419,11 +415,11 @@ vector<UnicodeString> UctoTokenizer::tokenize( const UnicodeString& line ){
   }
 }
 
-string UctoTokenizer::tokenizeStream( istream& is ){
+UnicodeString UctoTokenizer::tokenizeStream( istream& is ){
   /// Tokenize characters from a stream into one tokenized sentences
   /*!
     \param is the input stream
-    \return a string representing a sentence, or "" when done.
+    \return a UnicodeString representing a sentence, or "" when done.
 
     This function will extract characters from stream and tokenize them into
     a sentence. Can be called repeatedly to get more sentences.

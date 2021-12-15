@@ -134,12 +134,12 @@ bool init(){
 
 void Test( istream& in ){
   while ( in.good() ){
-    string sentence = tokenizer.tokenizeStream( in );
-    if ( sentence.empty() ){
+    UnicodeString sentence = tokenizer.tokenizeStream( in );
+    if ( sentence.isEmpty() ){
       break;
     }
     cout << "processing: " << sentence << endl;
-    vector<TagResult> tagv = tagger.tagLine(TiCC::UnicodeFromUTF8(sentence));
+    vector<TagResult> tagv = tagger.tagLine(sentence);
     for ( const auto& tr : tagv ){
       cout << tr.word() << "\t" << tr.assigned_tag() << endl;
     }
