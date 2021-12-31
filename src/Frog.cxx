@@ -1,6 +1,6 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  Copyright (c) 2006 - 2021
+  Copyright (c) 2006 - 2022
   CLST  - Radboud University
   ILK   - Tilburg University
 
@@ -175,7 +175,7 @@ string randnum( int len ){
 
 int main(int argc, char *argv[]) {
   /// Frog's main program.
-  cerr << "frog " << VERSION << " (c) CLST, ILK 1998 - 2021" << endl
+  cerr << "frog " << VERSION << " (c) CLST, ILK 1998 - 2022" << endl
        << "CLST  - Centre for Language and Speech Technology,"
        << "Radboud University" << endl
        << "ILK   - Induction of Linguistic Knowledge Research Group,"
