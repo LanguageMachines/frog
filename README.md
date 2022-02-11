@@ -49,10 +49,10 @@ https://languagemachines.github.io/frog .
 
 ## Installation
 
-To install Frog, first consult whether your distribution's package manager has
-an up-to-date package.  If not, for easy installation of Frog and its many
-dependencies, it is included as part of our software distribution
-**LaMachine**: https://proycon.github.io/LaMachine .
+To install Frog, first consult whether your distribution's package manager has an up-to-date package.  If not, for easy
+installation of Frog and its many dependencies, it is included as part of our software distribution [LaMachine](https://proycon.github.io/LaMachine).
+Alternatively, you can build a container image using the provided `Dockerfile` in
+this repository.
 
 To be able to succesfully build Frog from source instead, you need the following dependencies:
 
@@ -95,9 +95,30 @@ Contents of this distribution:
 * Example data files ( in the demos directory )
 * Documentation ( in the docs directory and on https://frognlp.readthedocs.io )
 
+## Usage
+
+Run ``frog --help`` for basic usage instructions.
+
 ## Documentation
 
 The Frog documentation can be found on https://frognlp.readthedocs.io
+
+## Container Usage
+
+You can build a docker container as follows, make sure you are in the root of this repository:
+
+``docker build -t LanguageMachines/frog .``
+
+This builds the latest stable release as packaged for [Alpine Linux](https://pkgs.alpinelinux.org/packages?name=frog), if you want to use the latest development version
+from the git repository instead, do:
+
+``docker build -t LanguageMachines/frog --build-arg VERSION=development .``
+
+Run the frog container interactively as follows, you can pass any additional arguments that ``frog`` takes.
+
+``docker run -t -i LanguageMachines/frog``
+
+Add the ``-v /path/to/your/data:/data`` parameter if you want to mount your data volume into the container at `/data`.
 
 ## Credits
 

@@ -1,0 +1,13 @@
+.git
+.cache
+.*
+_*
+*.cache
+*.pyc
+build
+*.egg-info
+gource*
+*.tar.gz
+*.pdf
+TODO
+*.lock
