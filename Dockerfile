@@ -26,7 +26,7 @@ RUN if [ "$VERSION" = "stable" ]; then \
         git clone https://github.com/LanguageMachines/timblserver && cd ucto && sh ./bootstrap.sh && ./configure && make && make install && cd .. &&\
         git clone https://github.com/LanguageMachines/mbtserver && cd mbtserver && sh ./bootstrap.sh && ./configure && make && make install && cd .. &&\
         git clone https://github.com/LanguageMachines/frogdata && cd frogdata && sh ./bootstrap.sh && ./configure && make && make install && cd .. &&\
-        cd frog && ./configure && make && make install; \
+        cd frog && sh bootstra.sh && ./configure && make && make install; \
     fi
 
 WORKDIR /
