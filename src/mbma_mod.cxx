@@ -427,7 +427,7 @@ Rule* Mbma::matchRule( const vector<UnicodeString>& ana,
     if ( debugFlag > 1 ){
       DBG << "after resolving: " << rule << endl;
     }
-    rule->resolveBrackets( doDeepMorph );
+    rule->resolveBrackets();
     rule->getCleanInflect();
     if ( debugFlag > 1 ){
       DBG << "1 added Inflection: " << rule << endl;

@@ -63,11 +63,12 @@ class frog_record {
   icu::UnicodeString ner_tag;       ///< the assigned NER tag
   double ner_confidence;     ///< the confidence of the NER tag
   std::vector<icu::UnicodeString> lemmas;  ///< a list of possible lemma's
-  std::vector<std::vector<std::string>> morphs; ///< the morph analysis in UTF8
+  std::vector<std::vector<std::string>> morphs;
+  ///< a list of alternative morph analysis in UTF8
   std::vector<const BaseBracket*> deep_morphs;  ///< pointers to the deep morphemes
   std::string compound_string;   ///< string representation of first compound
-  std::string morph_string;      ///< UTF8 string representation of first morph
-  std::string deep_morph_string; ///< UTF8 string representation of first deep_morph
+  std::string morph_string;      ///< UTF8 string representation of first morph analysis
+  std::string deep_morph_string; ///< UTF8 string representation of first deep_morph analysis
   int parse_index;           ///< label of the dependency
   std::string parse_role;    ///< role of the dependency
   std::set<size_t> parts;    ///< set of indeces a MWU is made of (MWU only)

@@ -574,7 +574,36 @@ void Rule::getCleanInflect() {
   }
 }
 
-void Rule::resolveBrackets( bool deep ) {
+static string flatten( const string& s ){
+  /// helper function to 'flatten out' bracketed morpheme strings
+  /*!
+    \param s a bracketed string of morphemes
+    \return a string with multiple '[' and ']' reduced to single occurrences
+  */
+  string result;
+  string::size_type bpos = s.find_first_not_of( "[" );
+  if ( bpos != string::npos ){
+    string::size_type epos = s.find_first_of( "]", bpos );
+    result += "[" + s.substr( bpos, epos-bpos ) + "] ";
+    bpos = s.find_first_of( "[", epos+1 );
+    bpos = s.find_first_not_of( "[", bpos );
+    while ( bpos != string::npos ){
+      epos = s.find_first_of( "]", bpos );
+      if ( epos == string::npos ){
+	break;
+      }
+      result += "[" + s.substr( bpos, epos-bpos ) + "] ";
+      bpos = s.find_first_of( "[", epos+1 );
+      bpos = s.find_first_not_of( "[", bpos );
+    }
+  }
+  else {
+    result = s;
+  }
+  return result + "]";
+}
+
+void Rule::resolveBrackets() {
   if ( debugFlag > 5 ){
     DBG << "check rule for bracketing: " << this << endl;
   }
@@ -592,28 +621,32 @@ void Rule::resolveBrackets( bool deep ) {
   if ( debugFlag > 5 ){
     DBG << "STEP 1:" << brackets << endl;
   }
-  if ( deep ){
-    brackets->resolveGlue( );
-    if ( debugFlag > 5 ){
-      DBG << "STEP 2:" << brackets << endl;
-    }
-    brackets->resolveLead( );
-    if ( debugFlag > 5 ){
-      DBG << "STEP 3:" << brackets << endl;
-    }
-    brackets->resolveTail( );
-    if ( debugFlag > 5 ){
-      DBG << "STEP 4:" << brackets << endl;
-    }
-    brackets->resolveMiddle();
-    if ( debugFlag > 5 ){
-      DBG << "STEP 5:" << brackets << endl;
-    }
-    brackets->resolveNouns( );
-    brackets->clearEmptyNodes();
+
+  brackets->resolveGlue( );
+  if ( debugFlag > 5 ){
+    DBG << "STEP 2:" << brackets << endl;
   }
+  brackets->resolveLead( );
+  if ( debugFlag > 5 ){
+    DBG << "STEP 3:" << brackets << endl;
+  }
+  brackets->resolveTail( );
+  if ( debugFlag > 5 ){
+    DBG << "STEP 4:" << brackets << endl;
+  }
+  brackets->resolveMiddle();
+  if ( debugFlag > 5 ){
+    DBG << "STEP 5:" << brackets << endl;
+  }
+  brackets->resolveNouns( );
+  brackets->clearEmptyNodes();
   tag = brackets->getFinalTag();
   description = get_tDescr( tag );
+  string deep = brackets->put(false);
+  deep_morphemes = TiCC::UnicodeFromUTF8( deep );
+  flat_morphemes = TiCC::UnicodeFromUTF8( flatten( deep ) );
+  DBG << "flat: " << flat_morphemes << endl;
+  DBG << "deep: " << deep_morphemes << endl;
   if ( debugFlag > 4 ){
     DBG << "Final Bracketing:" << brackets << " with tag=" << tag << endl;
   }
