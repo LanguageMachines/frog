@@ -341,14 +341,14 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
     exit( EXIT_FAILURE );
   }
   DBG << "calling " << _label << "-server, base=" << base << endl;
-  string line;
-  client.read( line );
+  string input_line;
+  client.read( input_line );
   json response;
   try {
-    response = json::parse( line );
+    response = json::parse( input_line );
   }
   catch ( const exception& e ){
-    LOG << "json parsing failed on '" << line << "':"
+    LOG << "json parsing failed on '" << input_line << "':"
 	<< e.what() << endl;
     abort();
   }
@@ -361,17 +361,18 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
     json out_json;
     out_json["command"] = "base";
     out_json["param"] = base;
-    string line = out_json.dump() + "\n";
-    DBG << "sending BASE json data:" << line << endl;
-    client.write( line );
-    client.read( line );
-    DBG << "received base data:" << line << endl;
+    string out_line = out_json.dump() + "\n";
+    DBG << "sending BASE json data:" << out_line << endl;
+    client.write( out_line );
+    string in_line;
+    client.read( in_line );
+    DBG << "received base data:" << in_line << endl;
     json base_response;
     try {
-      base_response = json::parse( line );
+      base_response = json::parse( in_line );
     }
     catch ( const exception& e ){
-      LOG << "json parsing failed on '" << line << "':"
+      LOG << "json parsing failed on '" << in_line << "':"
       	  << e.what() << endl;
       abort();
     }
@@ -385,17 +386,17 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
   json my_json = create_json( tv );
   DBG << "created json" << my_json << endl;
   // send it to the server
-  line = my_json.dump() + "\n";
-  DBG << "sending json data:" << line << endl;
-  client.write( line );
+  string output_line = my_json.dump() + "\n";
+  DBG << "sending json data:" << output_line << endl;
+  client.write( output_line );
   // receive json
-  client.read( line );
-  DBG << "received line:" << line << "" << endl;
+  client.read( input_line );
+  DBG << "received line:" << input_line << "" << endl;
   try {
-    my_json = json::parse( line );
+    my_json = json::parse( input_line );
   }
   catch ( const exception& e ){
-    LOG << "json parsing failed on '" << line << "':"
+    LOG << "json parsing failed on '" << input_line << "':"
 	<< e.what() << endl;
     abort();
   }
