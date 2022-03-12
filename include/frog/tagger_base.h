@@ -35,7 +35,9 @@
 #include <vector>
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Configuration.h"
+#include "ticcutils/SocketBasics.h"
 #include "ticcutils/Unicode.h"
+#include "ticcutils/json.hpp"
 #include "mbt/MbtAPI.h"
 #include "libfolia/folia.h"
 #include "ucto/tokenize.h"
@@ -68,6 +70,9 @@ class BaseTagger {
   std::string version() const { return _version; };
  private:
   std::vector<tag_entry> extract_sentence( const frog_data& );
+  nlohmann::json read_from_client( Sockets::ClientSocket& ) const;
+  void write_to_client( nlohmann::json&,
+			Sockets::ClientSocket& ) const;
  protected:
   void extract_words_tags(  const std::vector<folia::Word *>&,
 			    const std::string&,

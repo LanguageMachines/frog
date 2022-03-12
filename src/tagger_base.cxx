@@ -319,6 +319,29 @@ vector<TagResult> json_to_TR( const json& in ){
   return result;
 }
 
+json BaseTagger::read_from_client( Sockets::ClientSocket& client ) const {
+  string input_line;
+  client.read( input_line );
+  json response;
+  try {
+    response = json::parse( input_line );
+  }
+  catch ( const exception& e ){
+    LOG << "json parsing failed on '" << input_line << "':"
+	<< e.what() << endl;
+    abort();
+  }
+  DBG << "received json data:" << response << endl;
+  return response;
+}
+
+void BaseTagger::write_to_client( json& j_out,
+				  Sockets::ClientSocket& client ) const {
+  string output_line = j_out.dump() + "\n";
+  DBG << "sending json data:" << output_line << endl;
+  client.write( output_line );
+}
+
 vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
   /// Connect to a MBT server, send and receive JSON and translate to a
   /// TagResult list
@@ -341,18 +364,7 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
     exit( EXIT_FAILURE );
   }
   DBG << "calling " << _label << "-server, base=" << base << endl;
-  string input_line;
-  client.read( input_line );
-  json response;
-  try {
-    response = json::parse( input_line );
-  }
-  catch ( const exception& e ){
-    LOG << "json parsing failed on '" << input_line << "':"
-	<< e.what() << endl;
-    abort();
-  }
-  DBG << "got JSON " << response.dump(2) << endl;
+  json response = read_from_client( client );
   if ( response["status"] != "ok" ){
     LOG << "the client isn't OK" << endl;
     abort();
@@ -361,23 +373,10 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
     json out_json;
     out_json["command"] = "base";
     out_json["param"] = base;
-    string out_line = out_json.dump() + "\n";
-    DBG << "sending BASE json data:" << out_line << endl;
-    client.write( out_line );
-    string in_line;
-    client.read( in_line );
-    DBG << "received base data:" << in_line << endl;
-    json base_response;
-    try {
-      base_response = json::parse( in_line );
-    }
-    catch ( const exception& e ){
-      LOG << "json parsing failed on '" << in_line << "':"
-      	  << e.what() << endl;
-      abort();
-    }
-    DBG << "received json response:" << base_response << endl;
-    if ( response["status"] != "ok" ){
+    DBG << "created json" << out_json << endl;
+    write_to_client( out_json, client );
+    json base_response = read_from_client( client );
+    if ( base_response["status"] != "ok" ){
       LOG << "the client isn't OK" << endl;
       abort();
     }
@@ -386,21 +385,9 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
   json my_json = create_json( tv );
   DBG << "created json" << my_json << endl;
   // send it to the server
-  string output_line = my_json.dump() + "\n";
-  DBG << "sending json data:" << output_line << endl;
-  client.write( output_line );
+  write_to_client( my_json, client );
   // receive json
-  client.read( input_line );
-  DBG << "received line:" << input_line << "" << endl;
-  try {
-    my_json = json::parse( input_line );
-  }
-  catch ( const exception& e ){
-    LOG << "json parsing failed on '" << input_line << "':"
-	<< e.what() << endl;
-    abort();
-  }
-  DBG << "received json data:" << my_json << endl;
+  my_json = read_from_client( client );
   return json_to_TR( my_json );
 }
 
