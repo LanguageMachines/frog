@@ -320,17 +320,14 @@ vector<UnicodeString> Rule::extract_morphemes( ) const {
 UnicodeString Rule::morpheme_string( bool structured ) const {
   UnicodeString result;
   if ( structured ){
-    result = TiCC::UnicodeFromUTF8(brackets->put(true));
+    result = deep_morphemes;
     if ( compound != Compound::Type::NONE ){
       string cmp = " " + toString( compound ) + "-compound";
       result += TiCC::UnicodeFromUTF8(cmp);
     }
   }
   else {
-    vector<UnicodeString> vec = extract_morphemes();
-    for ( const auto& m : vec ){
-      result += "[" + m + "]";
-    }
+    result = flat_morphemes;
   }
   return result;
 }
@@ -584,12 +581,12 @@ static string flatten( const string& s, ostream& deb ){
     \param s a bracketed string of morphemes
     \return a string with multiple '[' and ']' reduced to single occurrences
   */
-  string result = "[ ";
   string::size_type bpos = s.find_first_not_of( " [" );
   //  deb << "  FLATTEN: '" << s << "'" << endl;
+  string result;
   if ( bpos != string::npos ){
     string::size_type epos = s.find_first_of( "]", bpos );
-    result += "[" + s.substr( bpos, epos-bpos ) + "] ";
+    result += "[" + s.substr( bpos, epos-bpos ) + "]";
     //    deb << "substring: '" <<  s.substr( bpos, epos-bpos ) << "'" << endl;
     bpos = s.find_first_of( "[", epos+1 );
     bpos = s.find_first_not_of( " [", bpos );
@@ -598,12 +595,11 @@ static string flatten( const string& s, ostream& deb ){
       if ( epos == string::npos ){
 	break;
       }
-      result += "[" + s.substr( bpos, epos-bpos ) + "] ";
+      result += "[" + s.substr( bpos, epos-bpos ) + "]";
       //      deb << "substring: '" <<  s.substr( bpos, epos-bpos ) << "'" << endl;
       bpos = s.find_first_of( "[", epos+1 );
       bpos = s.find_first_not_of( " [", bpos );
     }
-    result += "]";
   }
   else {
     result = s;
