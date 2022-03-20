@@ -321,6 +321,10 @@ UnicodeString Rule::morpheme_string( bool structured ) const {
   UnicodeString result;
   if ( structured ){
     result = TiCC::UnicodeFromUTF8(brackets->put(true));
+    if ( compound != Compound::Type::NONE ){
+      string cmp = " " + toString( compound ) + "-compound";
+      result += TiCC::UnicodeFromUTF8(cmp);
+    }
   }
   else {
     vector<UnicodeString> vec = extract_morphemes();
@@ -574,33 +578,38 @@ void Rule::getCleanInflect() {
   }
 }
 
-static string flatten( const string& s ){
+static string flatten( const string& s, ostream& deb ){
   /// helper function to 'flatten out' bracketed morpheme strings
   /*!
     \param s a bracketed string of morphemes
     \return a string with multiple '[' and ']' reduced to single occurrences
   */
-  string result;
-  string::size_type bpos = s.find_first_not_of( "[" );
+  string result = "[ ";
+  string::size_type bpos = s.find_first_not_of( " [" );
+  //  deb << "  FLATTEN: '" << s << "'" << endl;
   if ( bpos != string::npos ){
     string::size_type epos = s.find_first_of( "]", bpos );
     result += "[" + s.substr( bpos, epos-bpos ) + "] ";
+    //    deb << "substring: '" <<  s.substr( bpos, epos-bpos ) << "'" << endl;
     bpos = s.find_first_of( "[", epos+1 );
-    bpos = s.find_first_not_of( "[", bpos );
+    bpos = s.find_first_not_of( " [", bpos );
     while ( bpos != string::npos ){
       epos = s.find_first_of( "]", bpos );
       if ( epos == string::npos ){
 	break;
       }
       result += "[" + s.substr( bpos, epos-bpos ) + "] ";
+      //      deb << "substring: '" <<  s.substr( bpos, epos-bpos ) << "'" << endl;
       bpos = s.find_first_of( "[", epos+1 );
-      bpos = s.find_first_not_of( "[", bpos );
+      bpos = s.find_first_not_of( " [", bpos );
     }
+    result += "]";
   }
   else {
     result = s;
   }
-  return result + "]";
+  //  deb << "FLATTENED: '" << result << "'" << endl;
+  return result;
 }
 
 void Rule::resolveBrackets() {
@@ -644,9 +653,9 @@ void Rule::resolveBrackets() {
   description = get_tDescr( tag );
   string deep = brackets->put(false);
   deep_morphemes = TiCC::UnicodeFromUTF8( deep );
-  flat_morphemes = TiCC::UnicodeFromUTF8( flatten( deep ) );
-  DBG << "flat: " << flat_morphemes << endl;
-  DBG << "deep: " << deep_morphemes << endl;
+  flat_morphemes = TiCC::UnicodeFromUTF8( flatten( deep, DBG ) );
+  //  DBG << "flat: " << flat_morphemes << endl;
+  //  DBG << "deep: " << deep_morphemes << endl;
   if ( debugFlag > 4 ){
     DBG << "Final Bracketing:" << brackets << " with tag=" << tag << endl;
   }

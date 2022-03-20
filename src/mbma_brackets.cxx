@@ -445,9 +445,6 @@ string BracketNest::put( bool full ) const {
     if ( cls != CLEX::UNASS ){
       result += toString(cls);
     }
-    if ( _compound != Compound::Type::NONE ){
-      result += " " + toString(_compound) + "-compound";
-    }
   }
   return result;
 }

@@ -1116,7 +1116,7 @@ vector<pair<UnicodeString,string>> Mbma::getResults( ) const {
   vector<pair<UnicodeString,string>> result;
   for ( const auto& it : analysis ){
     UnicodeString tmp = it->morpheme_string( true );
-    string cmp = toString( it->compound );
+    string cmp;
     result.push_back( make_pair(tmp,cmp) );
   }
   if ( debugFlag > 1 ){
