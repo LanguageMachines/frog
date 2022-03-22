@@ -200,16 +200,13 @@ void Test( istream& in ){
 	  myMbma.filterSubTags( v );
 	  myMbma.assign_compounds();
 	  cout << tr.word() << " {" << tr.assigned_tag() << "}\t";
-	  vector<pair<UnicodeString,string>> res = myMbma.getResults();
+	  vector<pair<UnicodeString,string>> res = myMbma.getResults( true );
 	  if ( res.size() == 0 ){
 	    cout << "[" << uWord << "]";
 	  }
 	  else {
 	    for ( const auto& r : res ){
 	      cout << r.first;
-	      // if ( !r.second.empty() && r.second != "none" ){
-	      // 	cout << "\t" << r.second;
-	      // }
 	      if ( &r != &res.back() ){
 		cout << "\t";
 	      }
@@ -229,9 +226,6 @@ void Test( istream& in ){
 	  cout << w << "\t";
 	  for ( auto const& r : res ){
 	    cout << r.first;
-	    // if ( !r.second.empty() ){
-	    //   cout << "\t" << r.second;
-	    // }
 	    if ( &r != &res.back() ){
 	      cout << "\t";
 	    }

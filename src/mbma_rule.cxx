@@ -332,8 +332,8 @@ UnicodeString Rule::morpheme_string( bool structured ) const {
   return result;
 }
 
-string Rule::pretty_string() const {
-  return brackets->pretty_put();
+string Rule::pretty_string( bool shrt ) const {
+  return brackets->pretty_put( shrt );
 }
 
 bool Rule::performEdits(){
@@ -609,6 +609,10 @@ static string flatten( const string& s, ostream& deb ){
 }
 
 void Rule::resolveBrackets() {
+  // string teststring = "[ [ [abituriënt]N [e]N_N* ]N [n]/m ]N";
+  // cerr << "  Flatten " << teststring << endl;
+  // cerr << "Flattened " << flatten(teststring,cerr) << endl;
+  // exit(1);
   if ( debugFlag > 5 ){
     DBG << "check rule for bracketing: " << this << endl;
   }

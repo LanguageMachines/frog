@@ -366,7 +366,7 @@ string BaseBracket::put( bool full ) const {
   return result;
 }
 
-string BaseBracket::pretty_put() const {
+string BaseBracket::pretty_put( bool ) const {
   /// create a descriptive UTF8 string representation for this object
   string result = "[err?]" + CLEX::get_tDescr(cls);
   return result;
@@ -397,7 +397,7 @@ string BracketLeaf::put( bool full ) const {
   return result;
 }
 
-string BracketLeaf::pretty_put() const {
+string BracketLeaf::pretty_put( bool shrt ) const {
   /// create a descriptive UTF8 string representation for this object
   string result;
   if ( !morph.isEmpty() ){
@@ -409,8 +409,14 @@ string BracketLeaf::pretty_put() const {
     size_t pos = orig.find_first_of( "^" );
     UnicodeString tag( orig[pos+1] );
     string utf_tag = TiCC::UnicodeToUTF8(tag);
-    result += CLEX::get_tDescr(CLEX::toCLEX(utf_tag));
+    if ( shrt ){
+      result += utf_tag;
+    }
+    else {
+      result += CLEX::get_tDescr(CLEX::toCLEX(utf_tag));
+    }
   }
+
   if ( status() != Status::PARTICIPLE
        && status() != Status::PARTICLE
        && status() != Status::DERIVATIONAL
@@ -419,13 +425,26 @@ string BracketLeaf::pretty_put() const {
        && cls != CLEX::NEUTRAL ){
     string s = CLEX::get_tDescr(cls);
     if ( s != "/" ){
-      result += s;
+      if ( shrt ){
+	result += toString(cls);
+      }
+      else {
+	result += s;
+      }
     }
   }
   for ( int i=0; i < inflect.length(); ++i ){
     string id = CLEX::get_iDescr(inflect[i]);
+    cerr << "get id: " << id << " from " << inflect[i] << endl;
     if ( !id.empty() ){
-      result += "/" + id;
+      if ( shrt ){
+	UnicodeString bla = inflect[i];
+	result += "/" + TiCC::UnicodeToUTF8(bla);
+      }
+      else {
+	result += "/" + id;
+      }
+      cerr << "result=" << result << endl;
     }
   }
   return result;
@@ -449,12 +468,12 @@ string BracketNest::put( bool full ) const {
   return result;
 }
 
-string BracketNest::pretty_put( ) const {
+string BracketNest::pretty_put( bool shrt ) const {
   /// create a descriptive UTF8 string representation for this object
   string result;
   int cnt = 0;
   for ( auto const& it : parts ){
-    string tmp = it->pretty_put();
+    string tmp = it->pretty_put( shrt );
     if ( tmp[0] == '[' ){
       ++cnt;
     }
@@ -462,8 +481,14 @@ string BracketNest::pretty_put( ) const {
   }
   if ( cnt > 1 ){
     result = "[" + result + "]";
-    if ( cls != CLEX::UNASS && cls != CLEX::NEUTRAL ){
-      result += CLEX::get_tDescr(cls);
+    if ( cls != CLEX::UNASS
+	 && cls != CLEX::NEUTRAL ){
+      if ( shrt ){
+	result += toString(cls);
+      }
+      else {
+	result += CLEX::get_tDescr(cls);
+      }
     }
   }
   return result;

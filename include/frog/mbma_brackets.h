@@ -98,7 +98,7 @@ class BaseBracket {
   virtual int infixpos() const { return -1; };
   virtual bool isglue() const { return false; };
   virtual std::string put( bool = true ) const;
-  virtual std::string pretty_put() const;
+  virtual std::string pretty_put( bool = false ) const;
   virtual BaseBracket *append( BaseBracket * ){ abort(); };
   virtual bool isNested() { return false; };
   virtual void resolveGlue(){ abort(); };
@@ -129,7 +129,7 @@ public:
   BracketLeaf( CLEX::Type, const icu::UnicodeString&, int, TiCC::LogStream& );
   BracketLeaf *clone() const;
   std::string put( bool = true ) const;
-  std::string pretty_put() const;
+  std::string pretty_put( bool = false ) const;
   icu::UnicodeString morpheme() const {
     /// return the value of the morpheme
     return morph;
@@ -173,7 +173,7 @@ class BracketNest: public BaseBracket {
   bool isNested() { return true; };
   void clearEmptyNodes();
   std::string put( bool = true ) const;
-  std::string pretty_put() const;
+  std::string pretty_put( bool = false ) const;
   bool testMatch( std::list<BaseBracket*>& result,
 		  const std::list<BaseBracket*>::iterator& rpos,
 		  std::list<BaseBracket*>::iterator& bpos );

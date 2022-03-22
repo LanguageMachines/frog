@@ -64,8 +64,8 @@ class Mbma {
   void filterSubTags( const std::vector<icu::UnicodeString>& );
   void assign_compounds();
   std::vector<icu::UnicodeString> getResult() const;
-  std::vector<std::pair<icu::UnicodeString,std::string>> getResults( ) const;
-  std::vector<std::pair<std::string,std::string>> getPrettyResults( ) const;
+  std::vector<std::pair<icu::UnicodeString,std::string>> getResults( bool=false ) const;
+  std::vector<std::pair<std::string,std::string>> getPrettyResults( bool ) const;
   void setDeepMorph( bool b ){ doDeepMorph = b; };
   void clearAnalysis();
   Rule* matchRule( const std::vector<icu::UnicodeString>&,
