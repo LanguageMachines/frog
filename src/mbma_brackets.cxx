@@ -437,14 +437,17 @@ string BracketLeaf::pretty_put( bool shrt ) const {
     }
   }
   for ( int i=0; i < inflect.length(); ++i ){
+    if ( i == 0 ){
+      result += "/";
+    }
     string id = CLEX::get_iDescr(inflect[i]);
     if ( !id.empty() ){
       if ( shrt ){
 	UnicodeString bla = inflect[i];
-	result += "/" + TiCC::UnicodeToUTF8(bla);
+	result += TiCC::UnicodeToUTF8(bla);
       }
       else {
-	result += "/" + id;
+	result += id;
       }
     }
   }

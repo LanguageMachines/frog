@@ -1112,23 +1112,16 @@ vector<UnicodeString> Mbma::getResult() const {
   return result;
 }
 
-vector<pair<UnicodeString,string>> Mbma::getResults( bool extra ) const {
-  vector<pair<UnicodeString,string>> result;
+vector<UnicodeString> Mbma::getResults() const {
+  vector<UnicodeString> result;
   for ( const auto& it : analysis ){
-    UnicodeString tmp;
-    if ( extra ){
-      tmp = TiCC::UnicodeFromUTF8( it->pretty_string( true ) );
-    }
-    else {
-      tmp = it->morpheme_string( true );
-    }
-    string cmp;
-    result.push_back( make_pair(tmp,cmp) );
+    UnicodeString tmp = TiCC::UnicodeFromUTF8( it->pretty_string( true ) );
+    result.push_back( tmp );
   }
   if ( debugFlag > 1 ){
     DBG << "result of morph analyses: ";
     for ( const auto& r : result ){
-      DBG << " " << r.first << "/" << r.second << "," << endl;
+      DBG << " " << r << "," << endl;
     }
   }
   return result;
