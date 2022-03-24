@@ -222,7 +222,7 @@ void Test( istream& in ){
 	  uWord.toLower();
 	  myMbma.Classify( uWord );
 	  myMbma.assign_compounds();
-	  vector<pair<UnicodeString,string>> res = myMbma.getResults();
+	  vector<pair<UnicodeString,string>> res = myMbma.getResults(true);
 	  cout << w << "\t";
 	  for ( auto const& r : res ){
 	    cout << r.first;

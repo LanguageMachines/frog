@@ -382,6 +382,9 @@ string BracketLeaf::put( bool full ) const {
   }
   if ( full ){
     if ( orig.empty() ){
+      if ( result.back() == ' ' ){
+	result.pop_back();
+      }
       string s = toString(cls);
       if ( s == "/" ){
 	result += s + TiCC::UnicodeToUTF8(inflect);
@@ -435,7 +438,6 @@ string BracketLeaf::pretty_put( bool shrt ) const {
   }
   for ( int i=0; i < inflect.length(); ++i ){
     string id = CLEX::get_iDescr(inflect[i]);
-    cerr << "get id: " << id << " from " << inflect[i] << endl;
     if ( !id.empty() ){
       if ( shrt ){
 	UnicodeString bla = inflect[i];
@@ -444,7 +446,6 @@ string BracketLeaf::pretty_put( bool shrt ) const {
       else {
 	result += "/" + id;
       }
-      cerr << "result=" << result << endl;
     }
   }
   return result;
@@ -474,13 +475,16 @@ string BracketNest::pretty_put( bool shrt ) const {
   int cnt = 0;
   for ( auto const& it : parts ){
     string tmp = it->pretty_put( shrt );
+    if ( tmp[0] != '/' && &it != &parts.front() ){
+      result += " ";
+    }
     if ( tmp[0] == '[' ){
       ++cnt;
     }
     result += tmp;
   }
   if ( cnt > 1 ){
-    result = "[" + result + "]";
+    result = "[ " + result + " ]";
     if ( cls != CLEX::UNASS
 	 && cls != CLEX::NEUTRAL ){
       if ( shrt ){
