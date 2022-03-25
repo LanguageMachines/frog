@@ -848,7 +848,7 @@ void Mbma::store_brackets( frog_record& fd,
     if ( fd.morph_string.empty() ){
       fd.morph_string = "[" + utf8_wrd + "]" + head_tag;
     }
-    fd.deep_morphs.push_back( leaf );
+    fd.morph_structure.push_back( leaf );
   }
   else if ( head == "LET" || head == "SPEC" ){
     BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(utf8_head),
@@ -859,7 +859,7 @@ void Mbma::store_brackets( frog_record& fd,
     if ( fd.morph_string.empty() ){
       fd.morph_string = "[" + utf8_wrd + "]";
     }
-    fd.deep_morphs.push_back( leaf );
+    fd.morph_structure.push_back( leaf );
   }
   else {
     BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(utf8_head),
@@ -870,7 +870,7 @@ void Mbma::store_brackets( frog_record& fd,
     if ( fd.morph_string.empty() ){
       fd.morph_string = "[" + utf8_wrd + "]" + utf8_head;
     }
-    fd.deep_morphs.push_back( leaf );
+    fd.morph_structure.push_back( leaf );
   }
   return;
 }
@@ -889,7 +889,7 @@ void Mbma::store_brackets( frog_record& fd,
   BracketNest *copy = copy_nest( brackets );
 #pragma omp critical (dataupdate)
   {
-    fd.deep_morphs.push_back( copy );
+    fd.morph_structure.push_back( copy );
   }
   return;
 }
@@ -1175,7 +1175,7 @@ void Mbma::add_morphemes( const vector<folia::Word*>& wv,
       }
     }
     else {
-      for ( const auto& mor : fd.units[i].deep_morphs ) {
+      for ( const auto& mor : fd.units[i].morph_structure ) {
 	addBracketMorph( wv[i],
 			 TiCC::UnicodeToUTF8(fd.units[i].clean_word),
 			 mor );

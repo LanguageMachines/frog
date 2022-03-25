@@ -57,7 +57,7 @@ frog_record::frog_record():
 
 /// default destructor
 frog_record::~frog_record(){
-  for( const auto& dm : deep_morphs ){
+  for( const auto& dm : morph_structure ){
     delete dm;
   }
 }
@@ -226,14 +226,14 @@ void frog_data::resolve_mwus(){
   for ( size_t pos=0; pos < units.size(); ++pos ){
     if ( mwus.find( pos ) == mwus.end() ){
       mw_units.push_back( units[pos] );
-      mw_units.back().deep_morphs.clear(); // we don't need them AND avoid
+      mw_units.back().morph_structure.clear(); // we don't need them AND avoid
       //                                      pointers to deleted memory
       // A shallow copy function would be better
       mw_units.back().parts.insert( pos );
     }
     else {
       frog_record merged = merge( *this, pos, mwus.find( pos )->second );
-      merged.deep_morphs.clear(); // we don't need them AND avoid pointers to
+      merged.morph_structure.clear(); // we don't need them AND avoid pointers to
       //                             deleted memory
       // A shallow copy function would be better
       mw_units.push_back( merged );
