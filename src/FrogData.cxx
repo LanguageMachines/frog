@@ -131,34 +131,8 @@ ostream& operator<<( ostream& os, const frog_record& fr ){
     os << fr.lemmas[0];
   }
   os << TAB;
-  if ( fr.morphs.empty() ){
-    if ( !fr.morph_string.empty() ){
-      os << fr.morph_string;
-    }
-    else {
-      if ( !fr.deep_morphs.empty() ){
-	for ( const auto nm : fr.deep_morphs ){
-	  os << "[" << nm << "]";
-	  break; // first alternative only!
-	  // if ( &nm != &fr.deep_morphs.back() ){
-	  //   os << "/";
-	  // }
-	}
-      }
-    }
-  }
-  else {
-    if ( !fr.morph_string.empty() ){
-      os << fr.morph_string;
-    }
-    else {
-      for ( const auto nm : fr.morphs ){
-	for ( auto const& m : nm ){
-	  os << m;
-	}
-	break; // first alternative only!
-      }
-    }
+  if ( !fr.morph_string.empty() ){
+    os << fr.morph_string;
   }
   os << TAB << fr.tag << TAB << fixed << showpoint << std::setprecision(6) << fr.tag_confidence;
   os << TAB << fr.ner_tag; // << TAB << fr.ner_confidence;
