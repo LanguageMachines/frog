@@ -357,12 +357,9 @@ BracketNest::~BracketNest(){
   }
 }
 
-string BaseBracket::put( bool full ) const {
+string BaseBracket::put() const {
   /// create a UTF8 string representation for this object
-  string result = "[err?]";
-  if ( full ){
-    result += toString(cls);
-  }
+  string result = "[err?]" + toString(cls);
   return result;
 }
 
@@ -372,7 +369,7 @@ string BaseBracket::pretty_put( bool ) const {
   return result;
 }
 
-string BracketLeaf::put( bool full ) const {
+string BracketLeaf::put() const {
   /// create a UTF8 string representation for this object
   string result;
   if ( !morph.isEmpty() ){
@@ -380,22 +377,20 @@ string BracketLeaf::put( bool full ) const {
     result += TiCC::UnicodeToUTF8(morph);
     result += "]";
   }
-  if ( full ){
-    if ( orig.empty() ){
-      if ( result.back() == ' ' ){
-	result.pop_back();
-      }
-      string s = toString(cls);
-      if ( s == "/" ){
-	result += s + TiCC::UnicodeToUTF8(inflect);
-      }
-      else {
-	result += s + "/" + TiCC::UnicodeToUTF8(inflect);
-      }
+  if ( orig.empty() ){
+    if ( result.back() == ' ' ){
+      result.pop_back();
+    }
+    string s = toString(cls);
+    if ( s == "/" ){
+      result += s + TiCC::UnicodeToUTF8(inflect);
     }
     else {
-      result += orig;
+      result += s + "/" + TiCC::UnicodeToUTF8(inflect);
     }
+  }
+  else {
+    result += orig;
   }
   return result;
 }
@@ -459,20 +454,18 @@ string BracketLeaf::pretty_put( bool shrt ) const {
   return result;
 }
 
-string BracketNest::put( bool full ) const {
+string BracketNest::put() const {
   /// create a UTF8 string representation for this object
   string result = "[ ";
   for ( auto const& it : parts ){
-    string tmp = it->put( full );
+    string tmp = it->put();
     if ( !tmp.empty() ){
       result += tmp + " ";
     }
   }
   result += "]";
-  if ( full ){
-    if ( cls != CLEX::UNASS ){
-      result += toString(cls);
-    }
+  if ( cls != CLEX::UNASS ){
+    result += toString(cls);
   }
   return result;
 }

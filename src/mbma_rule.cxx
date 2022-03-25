@@ -651,7 +651,7 @@ void Rule::resolveBrackets() {
   brackets->clearEmptyNodes();
   tag = brackets->getFinalTag();
   description = get_tDescr( tag );
-  string deep = brackets->put(false);
+  string deep = brackets->put();
   deep_morphemes = TiCC::UnicodeFromUTF8( deep );
   flat_morphemes = TiCC::UnicodeFromUTF8( flatten( deep, DBG ) );
   //  DBG << "flat: " << flat_morphemes << endl;
