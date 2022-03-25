@@ -1115,8 +1115,13 @@ vector<UnicodeString> Mbma::getResult() const {
 vector<UnicodeString> Mbma::getResults() const {
   vector<UnicodeString> result;
   for ( const auto& it : analysis ){
-    UnicodeString tmp = TiCC::UnicodeFromUTF8( it->pretty_string( true ) );
-    result.push_back( tmp );
+    string tmp = it->pretty_string( true );
+    string cmp = toString( it->compound );
+    if ( cmp != "none" ){
+      tmp += " " + cmp + "-compound";
+    }
+    UnicodeString us = TiCC::UnicodeFromUTF8( tmp );
+    result.push_back( us );
   }
   if ( debugFlag > 1 ){
     DBG << "result of morph analyses: ";

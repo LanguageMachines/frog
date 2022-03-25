@@ -436,12 +436,17 @@ string BracketLeaf::pretty_put( bool shrt ) const {
       }
     }
   }
+  else if ( shrt
+	    && !orig.empty() ){
+    result += orig;
+  }
   for ( int i=0; i < inflect.length(); ++i ){
-    if ( i == 0 ){
-      result += "/";
-    }
     string id = CLEX::get_iDescr(inflect[i]);
     if ( !id.empty() ){
+      if ( !shrt
+	   || i == 0 ){
+	result += "/";
+      }
       if ( shrt ){
 	UnicodeString bla = inflect[i];
 	result += TiCC::UnicodeToUTF8(bla);
@@ -478,7 +483,8 @@ string BracketNest::pretty_put( bool shrt ) const {
   int cnt = 0;
   for ( auto const& it : parts ){
     string tmp = it->pretty_put( shrt );
-    if ( tmp[0] != '/' && &it != &parts.front() ){
+    if ( tmp[0] != '/'
+	 && &it != &parts.front() ){
       result += " ";
     }
     if ( tmp[0] == '[' ){
