@@ -68,7 +68,6 @@ class frog_record {
   std::vector<const BaseBracket*> deep_morphs;  ///< pointers to the deep morphemes
   std::string compound_string;   ///< string representation of first compound
   std::string morph_string;      ///< UTF8 string representation of first morph analysis
-  std::string deep_morph_string; ///< UTF8 string representation of first deep_morph analysis
   int parse_index;           ///< label of the dependency
   std::string parse_role;    ///< role of the dependency
   std::set<size_t> parts;    ///< set of indeces a MWU is made of (MWU only)

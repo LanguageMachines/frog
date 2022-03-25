@@ -83,14 +83,11 @@ json frog_record::to_json() const {
   if ( !lemmas.empty() ){
     result["lemma"] = TiCC::UnicodeToUTF8(lemmas[0]);
   }
-  if ( !deep_morph_string.empty() ){
-    result["deep_morph"] = deep_morph_string;
+  if ( !morph_string.empty() ){
+    result["morph"] = morph_string;
     if ( compound_string.find("0") == string::npos ){
       result["compound"] = compound_string;
     }
-  }
-  else if ( !morph_string.empty() ){
-    result["morph"] = morph_string;
   }
   if ( !tag.isEmpty() ){
     json tg;
@@ -135,8 +132,8 @@ ostream& operator<<( ostream& os, const frog_record& fr ){
   }
   os << TAB;
   if ( fr.morphs.empty() ){
-    if ( !fr.deep_morph_string.empty() ){
-      os << fr.deep_morph_string;
+    if ( !fr.morph_string.empty() ){
+      os << fr.morph_string;
     }
     else {
       if ( !fr.deep_morphs.empty() ){
@@ -198,11 +195,11 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
       result.lemmas[0] += "_" + fd.units[i].lemmas[0];
     }
     if ( result.morphs.empty() ){
-      if ( result.deep_morph_string.empty() ){
+      if ( result.morph_string.empty() ){
 	// no morphemes
       }
       else {
-	result.deep_morph_string += "_" + fd.units[i].deep_morph_string;
+	result.morph_string += "_" + fd.units[i].morph_string;
       }
     }
     else {

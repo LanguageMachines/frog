@@ -845,8 +845,8 @@ void Mbma::store_brackets( frog_record& fd,
 					 wrd,
 					 debugFlag,
 					 *dbgLog );
-    if ( fd.deep_morph_string.empty() ){
-      fd.deep_morph_string = "[" + utf8_wrd + "]" + head_tag;
+    if ( fd.morph_string.empty() ){
+      fd.morph_string = "[" + utf8_wrd + "]" + head_tag;
     }
     fd.deep_morphs.push_back( leaf );
   }
@@ -856,8 +856,8 @@ void Mbma::store_brackets( frog_record& fd,
 					 debugFlag,
 					 *dbgLog );
     leaf->set_status( STEM );
-    if ( fd.deep_morph_string.empty() ){
-      fd.deep_morph_string = "[" + utf8_wrd + "]";
+    if ( fd.morph_string.empty() ){
+      fd.morph_string = "[" + utf8_wrd + "]";
     }
     fd.deep_morphs.push_back( leaf );
   }
@@ -867,8 +867,8 @@ void Mbma::store_brackets( frog_record& fd,
 					 debugFlag,
 					 *dbgLog );
     leaf->set_status( STEM );
-    if ( fd.deep_morph_string.empty() ){
-      fd.deep_morph_string = "[" + utf8_wrd + "]" + utf8_head;
+    if ( fd.morph_string.empty() ){
+      fd.morph_string = "[" + utf8_wrd + "]" + utf8_head;
     }
     fd.deep_morphs.push_back( leaf );
   }
@@ -915,7 +915,7 @@ void Mbma::getResult( frog_record& fd,
   else {
     if ( doDeepMorph ){
       vector<pair<string,string>> pv = getPrettyResults( false );
-      fd.deep_morph_string = pv[0].first;
+      fd.morph_string = pv[0].first;
       if ( pv[0].second == "none" ){
 	fd.compound_string = "0";
       }

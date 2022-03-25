@@ -2130,8 +2130,8 @@ void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
   os << Tab;
   if ( options.doMorph ){
     if ( fd.morphs.empty() ){
-      if ( !fd.deep_morph_string.empty() ){
-	os << fd.deep_morph_string << Tab;
+      if ( !fd.morph_string.empty() ){
+	os << fd.morph_string << Tab;
 	if ( fd.compound_string == "0"  ){
 	  os << "0";
 	}
