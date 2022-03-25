@@ -505,24 +505,10 @@ void Rule::resolve_inflections(){
 
 UnicodeString Rule::getKey( bool deep ){
   if ( deep ){
-    if ( sortkey.isEmpty() ){
-      UnicodeString tmp;
-      stringstream ss;
-      ss << brackets << endl;
-      tmp = TiCC::UnicodeFromUTF8(ss.str());
-      sortkey = tmp;
-    }
-    return sortkey;
+    return deep_morphemes;
   }
   else {
-    vector<UnicodeString> morphs = extract_morphemes();
-    UnicodeString tmp;
-    // create an unique string
-    for ( auto const& mor : morphs ){
-      tmp += mor + "++";
-    }
-    //    tmp += "/" + inflection;
-    return tmp;
+    return flat_morphemes;
   }
 }
 
