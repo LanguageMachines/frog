@@ -2129,19 +2129,14 @@ void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
   }
   os << Tab;
   if ( options.doMorph ){
-    if ( fd.morphs.empty() ){
-      if ( !fd.morph_string.empty() ){
-	os << fd.morph_string << Tab;
-	if ( fd.compound_string == "0"  ){
-	  os << "0";
-	}
-	else {
-	  os << fd.compound_string + "-compound";
-	}
+    os << fd.morph_string;
+    if ( options.doDeepMorph ){
+      if ( fd.compound_string == "0"  ){
+	os << Tab << "0";
       }
-    }
-    else {
-      os << fd.morph_string;
+      else {
+	os << Tab << fd.compound_string + "-compound";
+      }
     }
   }
   if ( options.doTagger ){

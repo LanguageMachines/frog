@@ -57,9 +57,9 @@ frog_record::frog_record():
 
 /// default destructor
 frog_record::~frog_record(){
-  for( const auto& dm : morph_structure ){
-    delete dm;
-  }
+  // for( const auto& dm : morph_structure ){
+  //   delete dm;
+  // }
 }
 
 json frog_record::to_json() const {

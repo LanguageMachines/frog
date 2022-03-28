@@ -929,12 +929,8 @@ void Mbma::getResult( frog_record& fd,
       fd.compound_string = "0";
     }
     for ( auto const& sit : analysis ){
-      if ( doDeepMorph ){
-	store_brackets( fd, uword, sit->brackets );
-      }
-      else {
-	store_morphemes( fd, sit->extract_morphemes() );
-      }
+      store_brackets( fd, uword, sit->brackets );
+      store_morphemes( fd, sit->extract_morphemes() );
     }
   }
 }
