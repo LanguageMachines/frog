@@ -174,9 +174,7 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
       result.morph_string += "_" + fd.units[i].morph_string;
     }
     if ( !result.morphs.empty() ){
-      // cerr << endl << "STEP " << i << endl;
-      // cerr << "result.morphs=" << result.morphs << endl;
-      // cerr << "fd.units[" << i << "].morphs=" << fd.units[i].morphs << endl;
+      // there is structured morpheme informaton
       result.morphs[0].back() += "_";
       for ( size_t pos=0; pos < fd.units[i].morphs.size(); ++pos ){
 	auto variant = fd.units[i].morphs[pos];

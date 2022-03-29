@@ -914,8 +914,8 @@ void Mbma::getResult( frog_record& fd,
   }
   else {
     if ( doDeepMorph ){
-      vector<pair<string,string>> pv = getPrettyResults( false );
-      fd.morph_string = pv[0].first;
+      vector<pair<UnicodeString,string>> pv = getResults( false );
+      fd.morph_string = TiCC::UnicodeToUTF8(pv[0].first);
       if ( pv[0].second == "none" ){
 	fd.compound_string = "0";
       }
@@ -1108,40 +1108,18 @@ vector<UnicodeString> Mbma::getResult() const {
   return result;
 }
 
-vector<UnicodeString> Mbma::getResults() const {
-  vector<UnicodeString> result;
+vector<pair<UnicodeString,string>> Mbma::getResults( bool shrt ) const {
+  vector<pair<UnicodeString,string>> result;
   for ( const auto& it : analysis ){
-    string tmp = it->pretty_string( true );
+    string tmp = it->pretty_string( shrt );
     string cmp = toString( it->compound );
-    if ( cmp != "none" ){
-      tmp += " " + cmp + "-compound";
-    }
     UnicodeString us = TiCC::UnicodeFromUTF8( tmp );
-    result.push_back( us );
+    result.push_back( make_pair(us, cmp) );
   }
   if ( debugFlag > 1 ){
     DBG << "result of morph analyses: ";
     for ( const auto& r : result ){
       DBG << " " << r << "," << endl;
-    }
-  }
-  return result;
-}
-
-vector<pair<string,string>> Mbma::getPrettyResults( bool shrt ) const {
-  vector<pair<string,string>> result;
-  for ( const auto& it : analysis ){
-    string tmp = it->pretty_string( shrt );
-    string cmp;
-    if ( !shrt ){
-      cmp = toString( it->compound );
-    }
-    result.push_back( make_pair(tmp,cmp) );
-  }
-  if ( debugFlag > 1 ){
-    DBG << "pretty result of morph analyses: ";
-    for ( const auto& r : result ){
-      DBG << " " << r.first << "/" << r.second << "," << endl;
     }
   }
   return result;
