@@ -1100,7 +1100,7 @@ void Mbma::Classify( const icu::UnicodeString& word ){
 vector<UnicodeString> Mbma::getResult() const {
   vector<UnicodeString> result;
   for ( const auto& it : analysis ){
-    result.push_back( it->morpheme_string( doDeepMorph ) );
+    result.push_back( it->flat_morphemes );
   }
   if ( debugFlag > 1 ){
     DBG << "result of morph analyses: " << result << endl;

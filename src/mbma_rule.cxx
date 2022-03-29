@@ -317,21 +317,6 @@ vector<UnicodeString> Rule::extract_morphemes( ) const {
   return morphemes;
 }
 
-UnicodeString Rule::morpheme_string( bool structured ) const {
-  UnicodeString result;
-  if ( structured ){
-    result = deep_morphemes;
-    if ( compound != Compound::Type::NONE ){
-      string cmp = " " + toString( compound ) + "-compound";
-      result += TiCC::UnicodeFromUTF8(cmp);
-    }
-  }
-  else {
-    result = flat_morphemes;
-  }
-  return result;
-}
-
 string Rule::pretty_string( bool shrt ) const {
   return brackets->pretty_put( shrt );
 }
