@@ -166,18 +166,14 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
     result.word += "_" + fd.units[i].word;
     result.clean_word += "_" + fd.units[i].word;
     if ( !result.lemmas.empty() ){
+      // there is lemma information
       result.lemmas[0] += "_" + fd.units[i].lemmas[0];
     }
-    if ( result.morphs.empty() ){
-      if ( result.morph_string.empty() ){
-	// no morphemes
-      }
-      else {
-	result.morph_string += "_" + fd.units[i].morph_string;
-      }
-    }
-    else {
+    if ( !result.morph_string.empty() ){
+      // there is a morpheme information
       result.morph_string += "_" + fd.units[i].morph_string;
+    }
+    if ( !result.morphs.empty() ){
       // cerr << endl << "STEP " << i << endl;
       // cerr << "result.morphs=" << result.morphs << endl;
       // cerr << "fd.units[" << i << "].morphs=" << fd.units[i].morphs << endl;
