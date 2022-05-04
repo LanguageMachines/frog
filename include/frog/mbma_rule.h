@@ -93,7 +93,7 @@ public:
   icu::UnicodeString flat_morphemes;
   icu::UnicodeString deep_morphemes;
   Compound::Type compound;
-  std::string description;
+  icu::UnicodeString description;
   BracketNest *brackets;
   TiCC::LogStream& myLog;
   TiCC::LogStream& dbgLog;

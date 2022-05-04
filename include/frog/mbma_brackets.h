@@ -108,7 +108,8 @@ class BaseBracket {
   virtual void clearEmptyNodes() { abort(); };
   virtual folia::Morpheme *createMorpheme( folia::Document *  ) const = 0;
   virtual folia::Morpheme *createMorpheme( folia::Document *,
-					   std::string&, int& ) const = 0;
+					   icu::UnicodeString&,
+					   int& ) const = 0;
   virtual Compound::Type compound() const { return Compound::Type::NONE; };
   virtual Compound::Type getCompoundType() { return compound(); };
   CLEX::Type tag() const { return cls; };
@@ -152,7 +153,8 @@ public:
   };
   folia::Morpheme *createMorpheme( folia::Document * ) const;
   folia::Morpheme *createMorpheme( folia::Document *,
-				   std::string&, int& ) const;
+				   icu::UnicodeString&,
+				   int& ) const;
 private:
   int ifpos;
   bool glue;
@@ -190,7 +192,8 @@ class BracketNest: public BaseBracket {
   CLEX::Type getFinalTag();
   folia::Morpheme *createMorpheme( folia::Document * ) const;
   folia::Morpheme *createMorpheme( folia::Document *,
-				   std::string&, int& ) const;
+				   icu::UnicodeString&,
+				   int& ) const;
   std::list<BaseBracket *> parts;
   Compound::Type compound() const { return _compound; };
  private:

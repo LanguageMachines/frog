@@ -825,13 +825,13 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc ) const {
   /*!
     \param doc The FoLiA Document context
   */
-  string desc;
+  UnicodeString desc;
   int cnt = 0;
   return createMorpheme( doc, desc, cnt );
 }
 
 folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
-					      string& desc,
+					      UnicodeString& desc,
 					      int& cnt ) const {
   /// use the data in the Leaf to create a folia::Morpheme node
   /*!
@@ -840,7 +840,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     \param cnt a counter for the number of handled morphemes
   */
   folia::Morpheme *result = 0;
-  desc.clear();
+  desc.remove();
   int pos = orig.indexOf( "^" );
   bool glue = ( pos != -1 );
   if ( _status == Status::COMPLEX ){
@@ -866,13 +866,13 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     if ( glue ){
       UnicodeString tag = orig[pos+1];
       args["class"] = TiCC::UnicodeToUTF8(tag);
-      desc = "[" + TiCC::UnicodeToUTF8(out) + "]"
-	+ CLEX::get_tDescr( CLEX::toCLEX(tag) ); // spread the word upwards!
+      desc = "[" + out + "]"
+	+ CLEX::get_tag_descr( CLEX::toCLEX(tag) ); // spread the word upwards!
     }
     else {
       args["class"] = toString( tag() );
-      desc = "[" + TiCC::UnicodeToUTF8(out) + "]"
-	+ CLEX::get_tDescr( tag() ); // spread the word upwards!
+      desc = "[" + out + "]"
+	+ CLEX::get_tag_descr( tag() ); // spread the word upwards!
       folia::KWargs fargs;
       fargs["subset"] = "structure";
       if ( tag() == CLEX::SPEC
@@ -880,7 +880,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 	fargs["class"] = TiCC::UnicodeToUTF8("[" + out + "]");
       }
       else {
-	fargs["class"] = desc;
+	fargs["class"] = TiCC::UnicodeToUTF8(desc);
       }
 #pragma omp critical (foliaupdate)
       {
@@ -913,12 +913,12 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     {
       result->addPosAnnotation( args );
     }
-    desc = "[" + TiCC::UnicodeToUTF8(out) + "]"; // spread the word upwards! maybe add 'part' ??
+    desc = "[" + out + "]"; // spread the word upwards! maybe add 'part' ??
   }
   else if ( _status == Status::INFLECTION ){
     UnicodeString out = morph;
     if ( !out.isEmpty() ){
-      desc = "[" + TiCC::UnicodeToUTF8(out) + "]";
+      desc = "[" + out + "]";
     }
     folia::KWargs args;
     args["class"] = "inflection";
@@ -936,10 +936,10 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     for ( int i=0; i < inflect.length(); ++i ){
       UChar inf = inflect[i];
       if ( inf != '/' ){
-	string d = CLEX::get_iDescr(inf);
-	if ( !d.empty() ){
+	UnicodeString d = CLEX::get_inflect_descr(inf);
+	if ( !d.isEmpty() ){
 	  // happens sometimes when there is fawlty data
-	  args["class"] = d;
+	  args["class"] = TiCC::UnicodeToUTF8(d);
 	  desc += "/" + d;
 #pragma omp critical (foliaupdate)
 	  {
@@ -973,12 +973,12 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
       result->setutext( out );
     }
     ++cnt;
-    desc = "[" + TiCC::UnicodeToUTF8(out) + "]"; // pass it up!
+    desc = "[" + out + "]"; // pass it up!
     for ( int i=0; i < inflect.length(); ++i ){
       UChar inf = inflect[i];
       if ( inf != '/' ){
-	string d = CLEX::get_iDescr( inf );
-	if ( !d.empty() ){
+	UnicodeString d = CLEX::get_inflect_descr( inf );
+	if ( !d.isEmpty() ){
 	  // happens sometimes when there is fawlty data
 	  desc += "/" + d;
 	}
@@ -986,7 +986,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     }
     args.clear();
     args["subset"] = "structure";
-    args["class"]  = desc;
+    args["class"]  = TiCC::UnicodeToUTF8(desc);
 #pragma omp critical (foliaupdate)
     {
       result->add_child<folia::Feature>( args );
@@ -1005,11 +1005,11 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     for ( int i=0; i < inflect.length(); ++i ){
       UChar inf = inflect[i];
       if ( inf != '/' ){
-	string d = CLEX::get_iDescr( inf );
-	if ( !d.empty() ){
+	UnicodeString d = CLEX::get_inflect_descr( inf );
+	if ( !d.isEmpty() ){
 	  // happens sometimes when there is fawlty data
 	  desc += "/" + d;
-	  args["class"] = d;
+	  args["class"] = TiCC::UnicodeToUTF8(d);
 #pragma omp critical (foliaupdate)
 	  {
 	    result->add_child<folia::Feature>( args );
@@ -1026,13 +1026,13 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc ) const {
   /*!
     \param doc The FoLiA Document context
   */
-  string desc;
+  UnicodeString desc;
   int cnt = 0;
   return createMorpheme( doc, desc, cnt );
 }
 
 folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
-					      string& desc,
+					      UnicodeString& desc,
 					      int& cnt ) const {
   /// use the data in the Leaf to create a folia::Morpheme node
   /*!
@@ -1049,10 +1049,10 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
     result = new folia::Morpheme( args, doc );
   }
   cnt = 0;
-  desc.clear();
+  desc.remove();
   vector<folia::Morpheme*> stack;
   for ( auto const& it : parts ){
-    string deeper_desc;
+    UnicodeString deeper_desc;
     int deep_cnt = 0;
     folia::Morpheme *m = it->createMorpheme( doc,
 					     deeper_desc,
@@ -1076,15 +1076,15 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
     }
   }
   if ( cnt > 1 ){
-    desc = "[" + desc + "]" + CLEX::get_tDescr( tag() );
+    desc = "[" + desc + "]" + CLEX::get_tag_descr( tag() );
   }
   cnt = 1;
   args.clear();
   args["subset"] = "structure";
-  if ( desc.empty() ){
+  if ( desc.isEmpty() ){
     desc = "XYZ";
   }
-  args["class"]  = desc;
+  args["class"] = TiCC::UnicodeToUTF8(desc);
 #pragma omp critical (foliaupdate)
   {
     result->add_child<folia::Feature>( args );

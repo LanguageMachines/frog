@@ -522,7 +522,7 @@ void Rule::getCleanInflect() {
 	  if ( debugFlag > 5 ){
 	    DBG << "x bekijk [" << (char)uc << "]" << endl;
 	  }
-	  UnicodeString inf = TiCC::UnicodeFromUTF8(CLEX::get_iDescr((char)uc));
+	  UnicodeString inf = CLEX::get_inflect_descr((char)uc);
 	  if ( inf.isEmpty() ){
 	    DBG << "added unknown inflection X" << endl;
 	    new_inflect += "X";
@@ -622,7 +622,7 @@ void Rule::resolveBrackets() {
   brackets->resolveNouns( );
   brackets->clearEmptyNodes();
   tag = brackets->getFinalTag();
-  description = get_tDescr( tag );
+  description = get_tag_descr( tag );
   UnicodeString deep = brackets->put();
   deep_morphemes = deep;
   flat_morphemes = flatten( deep, DBG );
