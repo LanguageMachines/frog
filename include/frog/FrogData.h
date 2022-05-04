@@ -63,9 +63,9 @@ class frog_record {
   icu::UnicodeString ner_tag;       ///< the assigned NER tag
   double ner_confidence;     ///< the confidence of the NER tag
   std::vector<icu::UnicodeString> lemmas;  ///< a list of possible lemma's
-  std::vector<std::vector<std::string>> morphs;
-  ///< a list of alternative morph analysis in UTF8
-  std::string morph_string;      ///< UTF8 string representation of first morph analysis
+  std::vector<std::vector<icu::UnicodeString>> morphs;
+  ///< a list of alternative morph analysis in Unicode
+  icu::UnicodeString morph_string;      ///< UnicodeString representation of first morph analysis
   std::vector<const BaseBracket*> morph_structure;  ///< pointers to the deep morphemes
   std::string compound_string;   ///< string representation of first compound
   int parse_index;           ///< label of the dependency

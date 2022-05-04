@@ -556,13 +556,13 @@ void Mbma::filterHeadTag( const UnicodeString& head ){
     throw folia::ValueError( "1 unknown head feature '"
 			     + TiCC::UnicodeToUTF8(head) + "'" );
   }
-  string celex_tag = TiCC::UnicodeToUTF8(tagIt->second);
+  UnicodeString celex_tag = tagIt->second;
   if (debugFlag > 1){
     DBG << "#matches: CGN:" << head << " CELEX " << celex_tag << endl;
   }
   auto ait = analysis.begin();
   while ( ait != analysis.end() ){
-    string mbma_tag = CLEX::toString((*ait)->tag);
+    UnicodeString mbma_tag = CLEX::toUnicodeString((*ait)->tag);
     if ( celex_tag == mbma_tag ){
       if (debugFlag > 1){
 	DBG << "comparing " << celex_tag << " with "
@@ -802,13 +802,13 @@ void Mbma::add_provenance( folia::Document& doc,
 void Mbma::store_morphemes( frog_record& fd,
 			    const vector<UnicodeString>& morphemes ) const {
   /// store the calculated morphemes in the FrogData
-  vector<string> adapted;
+  vector<UnicodeString> adapted;
   for ( const auto& m : morphemes ){
-    adapted.push_back( "[" + TiCC::UnicodeToUTF8(m) + "]" );
+    adapted.push_back( "[" + m + "]" );
   }
 #pragma omp critical (dataupdate)
   {
-    if ( fd.morph_string.empty() ){
+    if ( fd.morph_string.isEmpty() ){
       for ( const auto& a : adapted ){
 	fd.morph_string += a;
       }
@@ -844,10 +844,10 @@ void Mbma::store_brackets( frog_record& fd,
 					 wrd,
 					 debugFlag,
 					 *dbgLog );
-    if ( fd.morph_string.empty() ){
-      fd.morph_string = "[" + utf8_wrd + "]";
+    if ( fd.morph_string.isEmpty() ){
+      fd.morph_string = "[" + wrd + "]";
       if ( doDeepMorph ){
-	string head_tag = CLEX::get_tDescr(CLEX::toCLEX(clex_tag));
+	UnicodeString head_tag = CLEX::get_tag_descr(CLEX::toCLEX(clex_tag));
 	fd.morph_string += head_tag;
       }
     }
@@ -859,8 +859,8 @@ void Mbma::store_brackets( frog_record& fd,
 					 debugFlag,
 					 *dbgLog );
     leaf->set_status( STEM );
-    if ( fd.morph_string.empty() ){
-      fd.morph_string = "[" + utf8_wrd + "]";
+    if ( fd.morph_string.isEmpty() ){
+      fd.morph_string = "[" + wrd + "]";
     }
     fd.morph_structure.push_back( leaf );
   }
@@ -870,8 +870,8 @@ void Mbma::store_brackets( frog_record& fd,
 					 debugFlag,
 					 *dbgLog );
     leaf->set_status( STEM );
-    if ( fd.morph_string.empty() ){
-      fd.morph_string = "[" + utf8_wrd + "]" + utf8_head;
+    if ( fd.morph_string.isEmpty() ){
+      fd.morph_string = "[" + wrd + "]" + head;
     }
     fd.morph_structure.push_back( leaf );
   }
@@ -914,7 +914,7 @@ void Mbma::getResult( frog_record& fd,
   else {
     if ( doDeepMorph ){
       vector<pair<UnicodeString,string>> pv = getResults( false );
-      fd.morph_string = TiCC::UnicodeToUTF8(pv[0].first);
+      fd.morph_string = pv[0].first;
       if ( pv[0].second == "none" ){
 	fd.compound_string = "0";
       }
@@ -924,7 +924,7 @@ void Mbma::getResult( frog_record& fd,
     }
     else {
       vector<UnicodeString> v = get_flat_result();
-      fd.morph_string = TiCC::UnicodeToUTF8(v[0]);
+      fd.morph_string = v[0];
       fd.compound_string = "0";
     }
     for ( auto const& sit : analysis ){
@@ -1133,10 +1133,10 @@ void Mbma::add_morphemes( const vector<folia::Word*>& wv,
 	}
 	for ( const auto& mt : mor ) {
 	  folia::Morpheme *m = new folia::Morpheme( args, wv[0]->doc() );
-	  string stripped = mt.substr(1,mt.size()-2);
+	  UnicodeString stripped = UnicodeString(mt,1,mt.length()-2);
 #pragma omp critical (foliaupdate)
 	  {
-	    m->settext( stripped, textclass );
+	    m->setutext( stripped, textclass );
 	    ml->append( m );
 	  }
 	}

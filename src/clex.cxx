@@ -29,13 +29,15 @@
 
 */
 
-#include "frog/clex.h"
+#include "ticcutils/Unicode.h"
 
+#include "frog/clex.h"
 #include <string>
 #include <map>
 
 
 using namespace std;
+using namespace icu;
 
 namespace CLEX {
 
@@ -128,6 +130,15 @@ namespace CLEX {
     return toCLEX(s);
   }
 
+  Type toCLEX( const UnicodeString& us ){
+    /// convert a UnicodeString to a CLEX::Type
+    /*!
+      \param us an UnicodeString
+      \return the CLEX::Type, may be UNASS when no translation is found
+     */
+    return toCLEX(TiCC::UnicodeToUTF8(us));
+  }
+
   string toString( const Type& t ){
     /// convert a CLEX::Type to a string
     /*!
@@ -158,6 +169,10 @@ namespace CLEX {
     default:
       return "/";
     }
+  }
+
+  UnicodeString toUnicodeString( const Type& t ){
+    return TiCC::UnicodeFromUTF8( toString( t ) );
   }
 
   bool is_CELEX_base( const Type& t ){
@@ -236,6 +251,12 @@ namespace CLEX {
     }
   }
 
+  const UnicodeString& get_inflect_descr( char c ) {
+    static UnicodeString result;
+    result = TiCC::UnicodeFromUTF8( get_iDescr(c) );
+    return result;
+  }
+
   const string& get_tDescr( CLEX::Type t ) {
     static const string empty = "";
   /// get the description related to the CLEX::Type symbol 't'
@@ -252,8 +273,12 @@ namespace CLEX {
     }
   }
 
+  const UnicodeString& get_tag_descr( CLEX::Type t ) {
+    static UnicodeString result;
+    result = TiCC::UnicodeFromUTF8( get_tDescr( t ) );
+    return result;
+  }
 }
-
 
 ostream& operator<<( ostream& os, const CLEX::Type& t ){
   os << toString( t );
