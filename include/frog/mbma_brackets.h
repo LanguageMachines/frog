@@ -94,7 +94,7 @@ class BaseBracket {
   void set_status( const Status s ) { _status = s; };
   virtual icu::UnicodeString morpheme() const { return "";};
   virtual icu::UnicodeString inflection() const { return ""; };
-  virtual std::string original() const { return ""; };
+  virtual icu::UnicodeString original() const { return ""; };
   virtual int infixpos() const { return -1; };
   virtual bool isglue() const { return false; };
   virtual icu::UnicodeString put() const;
@@ -138,7 +138,7 @@ public:
     /// return the value of the inflexion (if any)
     return inflect;
   };
-  std::string original() const {
+  icu::UnicodeString original() const {
     /// return the original value before processing started
     return orig;
   };
@@ -156,7 +156,7 @@ public:
 private:
   int ifpos;
   bool glue;
-  std::string orig;
+  icu::UnicodeString orig;
   icu::UnicodeString morph;
   icu::UnicodeString inflect;
 };

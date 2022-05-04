@@ -264,7 +264,7 @@ BracketLeaf::BracketLeaf( const RulePart& p,
     }
   }
   else if ( RightHand.size() == 0 ){
-    orig = toString( cls );
+    orig = toUnicodeString( cls );
     if ( ( p.ResultClass == CLEX::N
 	   || p.ResultClass == CLEX::V
 	   || p.ResultClass == CLEX::A )
@@ -277,11 +277,11 @@ BracketLeaf::BracketLeaf( const RulePart& p,
     }
   }
   else {
-    orig = toString( cls );
+    orig = toUnicodeString( cls );
     orig += "_";
     glue = p.is_glue;
     for ( size_t i = 0; i < RightHand.size(); ++i ){
-      orig += toString(RightHand[i]);
+      orig += toUnicodeString(RightHand[i]);
       if ( RightHand[i] == CLEX::AFFIX ){
 	ifpos = i;
       }
@@ -310,7 +310,7 @@ BracketLeaf::BracketLeaf( CLEX::Type t,
     \param l a LogStream for messages
   */
   ifpos = -1;
-  orig = toString( t );
+  orig = toUnicodeString( t );
   _status = Status::STEM;
 }
 
@@ -375,7 +375,7 @@ UnicodeString BracketLeaf::put() const {
   if ( !morph.isEmpty() ){
     result += "[" + morph + "]";
   }
-  if ( orig.empty() ){
+  if ( orig.isEmpty() ){
     TiCC::rtrim( result );
     UnicodeString s = toUnicodeString(cls);
     if ( s == "/" ){
@@ -386,7 +386,7 @@ UnicodeString BracketLeaf::put() const {
     }
   }
   else {
-    result += TiCC::UnicodeFromUTF8(orig);
+    result += orig;
   }
   return result;
 }
@@ -398,13 +398,12 @@ UnicodeString BracketLeaf::pretty_put( bool shrt ) const {
     result = "[" + morph + "]";
   }
   if ( glue ){
-    size_t pos = orig.find_first_of( "^" );
+    int pos = orig.indexOf( "^" );
     UnicodeString tag( orig[pos+1] );
     if ( shrt ){
       result += tag;
     }
     else {
-      string utf_tag = TiCC::UnicodeToUTF8(tag);
       result += CLEX::get_tag_descr(CLEX::toCLEX(tag));
     }
   }
@@ -426,8 +425,8 @@ UnicodeString BracketLeaf::pretty_put( bool shrt ) const {
     }
   }
   else if ( shrt
-	    && !orig.empty() ){
-    result += TiCC::UnicodeFromUTF8(orig);
+	    && !orig.isEmpty() ){
+    result += orig;
   }
   for ( int i=0; i < inflect.length(); ++i ){
     UnicodeString id = CLEX::get_inflect_descr(inflect[i]);
@@ -842,15 +841,15 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   */
   folia::Morpheme *result = 0;
   desc.clear();
-  size_t pos = orig.find_first_of( "^" );
-  bool glue = ( pos != string::npos );
+  int pos = orig.indexOf( "^" );
+  bool glue = ( pos != -1 );
   if ( _status == Status::COMPLEX ){
     abort();
   }
   else if ( _status == Status::STEM
 	    || ( _status == Status::DERIVATIONAL && glue ) ){
-    string out = TiCC::UnicodeToUTF8(morph);
-    if ( out.empty() ){
+    UnicodeString out = morph;
+    if ( out.isEmpty() ){
       throw logic_error( "stem has empty morpheme" );
     }
     folia::KWargs args;
@@ -859,26 +858,26 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 #pragma omp critical (foliaupdate)
     {
       result = new folia::Morpheme( args, doc );
-      result->settext( out );
+      result->setutext( out );
     }
     ++cnt;
     args.clear();
     args["set"] = Mbma::clex_tagset;
     if ( glue ){
-      string tag;
-      tag += orig[pos+1];
-      args["class"] = tag;
-      desc = "[" + out + "]" + CLEX::get_tDescr( CLEX::toCLEX(tag) ); // spread the word upwards!
-
+      UnicodeString tag = orig[pos+1];
+      args["class"] = TiCC::UnicodeToUTF8(tag);
+      desc = "[" + TiCC::UnicodeToUTF8(out) + "]"
+	+ CLEX::get_tDescr( CLEX::toCLEX(tag) ); // spread the word upwards!
     }
     else {
       args["class"] = toString( tag() );
-      desc = "[" + out + "]" + CLEX::get_tDescr( tag() ); // spread the word upwards!
+      desc = "[" + TiCC::UnicodeToUTF8(out) + "]"
+	+ CLEX::get_tDescr( tag() ); // spread the word upwards!
       folia::KWargs fargs;
       fargs["subset"] = "structure";
       if ( tag() == CLEX::SPEC
 	   || tag() == CLEX::LET ){
-	fargs["class"] = "[" + out + "]";
+	fargs["class"] = TiCC::UnicodeToUTF8("[" + out + "]");
       }
       else {
 	fargs["class"] = desc;
@@ -894,8 +893,8 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     }
   }
   else if ( _status == Status::PARTICLE ){
-    string out = TiCC::UnicodeToUTF8(morph);
-    if ( out.empty() ){
+    UnicodeString out = morph;
+    if ( out.isEmpty() ){
       throw logic_error( "particle has empty morpheme" );
     }
     folia::KWargs args;
@@ -904,7 +903,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 #pragma omp critical (foliaupdate)
     {
       result = new folia::Morpheme( args, doc );
-      result->settext( out );
+      result->setutext( out );
     }
     ++cnt;
     args.clear();
@@ -914,12 +913,12 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     {
       result->addPosAnnotation( args );
     }
-    desc = "[" + out + "]"; // spread the word upwards! maybe add 'part' ??
+    desc = "[" + TiCC::UnicodeToUTF8(out) + "]"; // spread the word upwards! maybe add 'part' ??
   }
   else if ( _status == Status::INFLECTION ){
-    string out = TiCC::UnicodeToUTF8(morph);
-    if ( !out.empty() ){
-      desc = "[" + out + "]";
+    UnicodeString out = morph;
+    if ( !out.isEmpty() ){
+      desc = "[" + TiCC::UnicodeToUTF8(out) + "]";
     }
     folia::KWargs args;
     args["class"] = "inflection";
@@ -927,8 +926,8 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 #pragma omp critical (foliaupdate)
     {
       result = new folia::Morpheme( args, doc );
-      if ( !out.empty() ){
-	result->settext( out );
+      if ( !out.isEmpty() ){
+	result->setutext( out );
       }
     }
     ++cnt;
@@ -953,8 +952,8 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   else if ( _status == Status::DERIVATIONAL
 	    || _status == Status::PARTICIPLE
 	    || _status == Status::FAILED ){
-    string out = TiCC::UnicodeToUTF8(morph);
-    if ( out.empty() ){
+    UnicodeString out = morph;
+    if ( out.isEmpty() ){
       throw logic_error( "Derivation with empty morpheme" );
     }
     folia::KWargs args;
@@ -971,10 +970,10 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 #pragma omp critical (foliaupdate)
     {
       result = new folia::Morpheme( args, doc );
-      result->settext( out );
+      result->setutext( out );
     }
     ++cnt;
-    desc = "[" + out + "]"; // pass it up!
+    desc = "[" + TiCC::UnicodeToUTF8(out) + "]"; // pass it up!
     for ( int i=0; i < inflect.length(); ++i ){
       UChar inf = inflect[i];
       if ( inf != '/' ){
@@ -1060,10 +1059,10 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
 					     deep_cnt );
     if ( it->status() == Status::DERIVATIONAL
 	 || it->status() == Status::PARTICIPLE ){
-      if ( !it->original().empty() ){
+      if ( !it->original().isEmpty() ){
 	args.clear();
 	args["subset"] = "applied_rule";
-	args["class"] = it->original();
+	args["class"] = TiCC::UnicodeToUTF8(it->original());
 #pragma omp critical (foliaupdate)
 	{
 	  result->add_child<folia::Feature>( args );
