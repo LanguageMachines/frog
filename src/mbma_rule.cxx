@@ -210,12 +210,12 @@ RulePart::RulePart( const UnicodeString& rs, const UChar kar, bool first ):
     }
     else {
       int spos = s.indexOf("/");
-      CLEX::Type tag = CLEX::toCLEX( TiCC::UnicodeToUTF8(s) );
+      CLEX::Type tag = CLEX::toCLEX( s );
       if ( spos != -1 ){
 	// some inflection
 	UnicodeString ts = UnicodeString( s, 0, spos );
 	//	cerr << "ts=" << ts << endl;
-	tag = CLEX::toCLEX( TiCC::UnicodeToUTF8(ts) );
+	tag = CLEX::toCLEX( ts );
 	if ( tag0 != CLEX::UNASS ){
 	  // cases like 0/e 0/te2I
 	  ResultClass = tag;

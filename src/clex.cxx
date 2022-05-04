@@ -91,10 +91,10 @@ namespace CLEX {
     {'a', "subjunctive"},
   };
 
-  Type toCLEX( const string& s ){
-    /// convert a string to a CLEX::Type
+  Type toCLEX( const UnicodeString& s ){
+    /// convert a UnicodeString to a CLEX::Type
     /*!
-      \param s a string
+      \param s a UnicodeString
       \return the CLEX::Type, may be UNASS when no translation is found
      */
     if ( s == "N" ) return N;
@@ -119,24 +119,15 @@ namespace CLEX {
     return UNASS;
   }
 
-  Type toCLEX( const char c ){
+  Type toCLEX( const UChar c ){
     /// convert a character  to a CLEX::Type
     /*!
       \param c a character
       \return the CLEX::Type, may be UNASS when no translation is found
      */
-    string s;
+    UnicodeString s;
     s += c;
     return toCLEX(s);
-  }
-
-  Type toCLEX( const UnicodeString& us ){
-    /// convert a UnicodeString to a CLEX::Type
-    /*!
-      \param us an UnicodeString
-      \return the CLEX::Type, may be UNASS when no translation is found
-     */
-    return toCLEX(TiCC::UnicodeToUTF8(us));
   }
 
   string toString( const Type& t ){
