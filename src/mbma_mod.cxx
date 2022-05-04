@@ -923,7 +923,7 @@ void Mbma::getResult( frog_record& fd,
       }
     }
     else {
-      vector<UnicodeString> v = getResult();
+      vector<UnicodeString> v = get_flat_result();
       fd.morph_string = TiCC::UnicodeToUTF8(v[0]);
       fd.compound_string = "0";
     }
@@ -1092,7 +1092,7 @@ void Mbma::Classify( const icu::UnicodeString& word ){
   analysis = execute( uWord, classes );
 }
 
-vector<UnicodeString> Mbma::getResult() const {
+vector<UnicodeString> Mbma::get_flat_result() const {
   vector<UnicodeString> result;
   for ( const auto& it : analysis ){
     result.push_back( it->flat_morphemes );
