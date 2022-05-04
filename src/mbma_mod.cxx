@@ -477,12 +477,12 @@ vector<Rule*> Mbma::execute( const icu::UnicodeString& word,
 }
 
 void Mbma::addBracketMorph( folia::Word *word,
-			    const string& orig_word,
+			    const UnicodeString& orig_word,
 			    const BaseBracket *brackets ) const {
   /// add a (deep) Morpheme layer to the FoLiA Word
   /*!
     \param word the FoLiA Word
-    \param orig_word, an UTF8 string with the oriiginal word
+    \param orig_word, a Unicode string with the oriiginal word
     \param brackets the nested structure describing the morphemes
    */
   if (debugFlag > 1){
@@ -512,7 +512,7 @@ void Mbma::addBracketMorph( folia::Word *word,
   }
 #pragma omp critical (foliaupdate)
   {
-    m->settext( orig_word, textclass );
+    m->setutext( orig_word, textclass );
     ml->append( m );
   }
 }
@@ -824,8 +824,6 @@ void Mbma::store_brackets( frog_record& fd,
   if (debugFlag > 1){
     DBG << "store_brackets(" << wrd << "," << head << ")" << endl;
   }
-  string utf8_wrd = TiCC::UnicodeToUTF8( wrd );
-  string utf8_head = TiCC::UnicodeToUTF8( head );
   if ( unanalysed  ) {
     // unanalysed, so trust the TAGGER
     if (debugFlag > 1){
@@ -834,9 +832,10 @@ void Mbma::store_brackets( frog_record& fd,
     const auto tagIt = TAGconv.find( head );
     if ( tagIt == TAGconv.end() ) {
       // this should never happen
-      throw logic_error( "2 unknown head feature '" + utf8_head + "'" );
+      throw logic_error( "2 unknown head feature '"
+			 + TiCC::UnicodeToUTF8( head ) + "'" );
     }
-    string clex_tag = TiCC::UnicodeToUTF8(tagIt->second);
+    UnicodeString clex_tag = tagIt->second;
     if (debugFlag > 1){
       DBG << "replaced X by: " << head << endl;
     }
@@ -854,7 +853,7 @@ void Mbma::store_brackets( frog_record& fd,
     fd.morph_structure.push_back( leaf );
   }
   else if ( head == "LET" || head == "SPEC" ){
-    BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(utf8_head),
+    BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(head),
 					 wrd,
 					 debugFlag,
 					 *dbgLog );
@@ -865,7 +864,7 @@ void Mbma::store_brackets( frog_record& fd,
     fd.morph_structure.push_back( leaf );
   }
   else {
-    BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(utf8_head),
+    BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(head),
 					 wrd,
 					 debugFlag,
 					 *dbgLog );
@@ -1144,9 +1143,7 @@ void Mbma::add_morphemes( const vector<folia::Word*>& wv,
     }
     else {
       for ( const auto& mor : fd.units[i].morph_structure ) {
-	addBracketMorph( wv[i],
-			 TiCC::UnicodeToUTF8(fd.units[i].clean_word),
-			 mor );
+	addBracketMorph( wv[i], fd.units[i].clean_word, mor );
       }
     }
   }

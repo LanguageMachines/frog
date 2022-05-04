@@ -546,12 +546,13 @@ void Rule::getCleanInflect() {
   }
 }
 
-static string flatten( const string& s, ostream& deb ){
+static UnicodeString flatten( const UnicodeString& in, ostream& deb ){
   /// helper function to 'flatten out' bracketed morpheme strings
   /*!
-    \param s a bracketed string of morphemes
+    \param in a bracketed string of morphemes
     \return a string with multiple '[' and ']' reduced to single occurrences
   */
+  string s = TiCC::UnicodeToUTF8( in );
   string::size_type bpos = s.find_first_not_of( " [" );
   //  deb << "  FLATTEN: '" << s << "'" << endl;
   string result;
@@ -576,7 +577,7 @@ static string flatten( const string& s, ostream& deb ){
     result = s;
   }
   //  deb << "FLATTENED: '" << result << "'" << endl;
-  return result;
+  return TiCC::UnicodeFromUTF8(result);
 }
 
 void Rule::resolveBrackets() {
@@ -622,9 +623,9 @@ void Rule::resolveBrackets() {
   brackets->clearEmptyNodes();
   tag = brackets->getFinalTag();
   description = get_tDescr( tag );
-  string deep = brackets->put();
-  deep_morphemes = TiCC::UnicodeFromUTF8( deep );
-  flat_morphemes = TiCC::UnicodeFromUTF8( flatten( deep, DBG ) );
+  UnicodeString deep = brackets->put();
+  deep_morphemes = deep;
+  flat_morphemes = flatten( deep, DBG );
   //  DBG << "flat: " << flat_morphemes << endl;
   //  DBG << "deep: " << deep_morphemes << endl;
   if ( debugFlag > 4 ){
