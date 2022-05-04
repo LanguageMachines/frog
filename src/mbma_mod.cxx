@@ -566,7 +566,7 @@ void Mbma::filterHeadTag( const UnicodeString& head ){
     if ( celex_tag == mbma_tag ){
       if (debugFlag > 1){
 	DBG << "comparing " << celex_tag << " with "
-		      << mbma_tag << " (OK)" << endl;
+	    << mbma_tag << " (OK)" << endl;
       }
       (*ait)->confidence = 1.0;
       ++ait;
@@ -574,7 +574,7 @@ void Mbma::filterHeadTag( const UnicodeString& head ){
     else if ( celex_tag == "N" && mbma_tag == "PN" ){
       if (debugFlag > 1){
 	DBG << "comparing " << celex_tag << " with "
-		      << mbma_tag << " (OK)" << endl;
+	    << mbma_tag << " (OK)" << endl;
       }
       (*ait)->confidence = 1.0;
       ++ait;
@@ -583,7 +583,7 @@ void Mbma::filterHeadTag( const UnicodeString& head ){
 	      || ( celex_tag == "A" && mbma_tag == "B" ) ){
       if (debugFlag > 1){
 	DBG << "comparing " << celex_tag << " with "
-		      << mbma_tag << " (OK)" << endl;
+	    << mbma_tag << " (OK)" << endl;
       }
       (*ait)->confidence = 0.8;
       ++ait;
@@ -591,7 +591,7 @@ void Mbma::filterHeadTag( const UnicodeString& head ){
     else if ( celex_tag == "A" && mbma_tag == "V" ){
       if (debugFlag > 1){
 	DBG << "comparing " << celex_tag << " with "
-		      << mbma_tag << " (OK)" << endl;
+	    << mbma_tag << " (OK)" << endl;
       }
       (*ait)->confidence = 0.5;
       ++ait;
@@ -599,7 +599,7 @@ void Mbma::filterHeadTag( const UnicodeString& head ){
     else {
       if (debugFlag > 1){
 	DBG << "comparing " << celex_tag << " with "
-		      << mbma_tag << " (rejected)" << endl;
+	    << mbma_tag << " (rejected)" << endl;
       }
       delete *ait;
       ait = analysis.erase( ait );
@@ -835,19 +835,19 @@ void Mbma::store_brackets( frog_record& fd,
       throw logic_error( "2 unknown head feature '"
 			 + TiCC::UnicodeToUTF8( head ) + "'" );
     }
-    UnicodeString clex_tag = tagIt->second;
+    CLEX::Type clex_tag = CLEX::toCLEX( tagIt->second );
     if (debugFlag > 1){
       DBG << "replaced X by: " << head << endl;
     }
-    BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(clex_tag),
+    BaseBracket *leaf = new BracketLeaf( clex_tag,
 					 wrd,
 					 debugFlag,
 					 *dbgLog );
     if ( fd.morph_string.isEmpty() ){
       fd.morph_string = "[" + wrd + "]";
       if ( doDeepMorph ){
-	UnicodeString head_tag = CLEX::get_tag_descr(CLEX::toCLEX(clex_tag));
-	fd.morph_string += head_tag;
+	UnicodeString head = CLEX::get_tag_descr(clex_tag);
+	fd.morph_string += head;
       }
     }
     fd.morph_structure.push_back( leaf );

@@ -864,15 +864,15 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     args.clear();
     args["set"] = Mbma::clex_tagset;
     if ( glue ){
-      UnicodeString tag = orig[pos+1];
-      args["class"] = TiCC::UnicodeToUTF8(tag);
-      desc = "[" + out + "]"
-	+ CLEX::get_tag_descr( CLEX::toCLEX(tag) ); // spread the word upwards!
+      UnicodeString next_tag = orig[pos+1];
+      args["class"] = TiCC::UnicodeToUTF8(next_tag);
+      desc = "[" + out + "]" + CLEX::get_tag_descr( CLEX::toCLEX(next_tag) );
+      // spread the word upwards!
     }
     else {
       args["class"] = toString( tag() );
-      desc = "[" + out + "]"
-	+ CLEX::get_tag_descr( tag() ); // spread the word upwards!
+      desc = "[" + out + "]" + CLEX::get_tag_descr( tag() );
+      // spread the word upwards!
       folia::KWargs fargs;
       fargs["subset"] = "structure";
       if ( tag() == CLEX::SPEC
