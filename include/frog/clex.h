@@ -67,8 +67,6 @@ namespace CLEX {
   Type toCLEX( const std::string& );
   Type toCLEX( const icu::UnicodeString& );
   Type toCLEX( const char );
-  const std::string& get_iDescr( char c );
-  const std::string& get_tDescr( CLEX::Type t );
   const icu::UnicodeString& get_inflect_descr( char c );
   const icu::UnicodeString& get_tag_descr( CLEX::Type t );
 }

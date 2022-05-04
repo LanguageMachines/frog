@@ -42,7 +42,7 @@ using namespace icu;
 namespace CLEX {
 
   /// a harcoded table with a mapping for CLEX::Type to a description
-  const map<CLEX::Type,string> tagNames = {
+  const map<CLEX::Type,UnicodeString> tagNames = {
     {CLEX::A, "adjective"},
     {CLEX::B, "adverb"},
     {CLEX::C, "conjunction"},
@@ -66,7 +66,7 @@ namespace CLEX {
 
   /// a hardcodes table with a mapping from inflection codes to a readable
   /// string
-  const map<char,string> iNames = {
+  const map<char,UnicodeString> iNames = {
     // the inflection names
     {'X', ""},
     {'s', "separated"},
@@ -235,13 +235,13 @@ namespace CLEX {
     return result;
   }
 
-  const string& get_iDescr( char c ) {
+  const UnicodeString& get_inflect_descr( char c ) {
     /// get the description related to the inflection symbol 'c'
     /*!
       \param c a character value for the inflexion
       \return a description, may be empty
     */
-    static const string empty = "";
+    static const UnicodeString empty = "";
     const auto& it = iNames.find(c);
     if ( it != iNames.end() ){
       return it->second;
@@ -251,15 +251,9 @@ namespace CLEX {
     }
   }
 
-  const UnicodeString& get_inflect_descr( char c ) {
-    static UnicodeString result;
-    result = TiCC::UnicodeFromUTF8( get_iDescr(c) );
-    return result;
-  }
-
-  const string& get_tDescr( CLEX::Type t ) {
-    static const string empty = "";
-  /// get the description related to the CLEX::Type symbol 't'
+  const UnicodeString& get_tag_descr( CLEX::Type t ) {
+    static const UnicodeString empty;
+    /// get the description related to the CLEX::Type symbol 't'
     /*!
       \param t a CLEX::Type
       \return a description, may be empty
@@ -273,11 +267,6 @@ namespace CLEX {
     }
   }
 
-  const UnicodeString& get_tag_descr( CLEX::Type t ) {
-    static UnicodeString result;
-    result = TiCC::UnicodeFromUTF8( get_tDescr( t ) );
-    return result;
-  }
 }
 
 ostream& operator<<( ostream& os, const CLEX::Type& t ){
