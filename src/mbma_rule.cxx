@@ -317,7 +317,7 @@ vector<UnicodeString> Rule::extract_morphemes( ) const {
   return morphemes;
 }
 
-string Rule::pretty_string( bool shrt ) const {
+UnicodeString Rule::pretty_string( bool shrt ) const {
   return brackets->pretty_put( shrt );
 }
 

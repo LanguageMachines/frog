@@ -1106,9 +1106,8 @@ vector<UnicodeString> Mbma::get_flat_result() const {
 vector<pair<UnicodeString,string>> Mbma::getResults( bool shrt ) const {
   vector<pair<UnicodeString,string>> result;
   for ( const auto& it : analysis ){
-    string tmp = it->pretty_string( shrt );
+    UnicodeString us = it->pretty_string( shrt );
     string cmp = toString( it->compound );
-    UnicodeString us = TiCC::UnicodeFromUTF8( tmp );
     result.push_back( make_pair(us, cmp) );
   }
   if ( debugFlag > 1 ){

@@ -363,9 +363,10 @@ string BaseBracket::put() const {
   return result;
 }
 
-string BaseBracket::pretty_put( bool ) const {
+UnicodeString BaseBracket::pretty_put( bool ) const {
   /// create a descriptive UTF8 string representation for this object
-  string result = "[err?]" + CLEX::get_tDescr(cls);
+  UnicodeString result = "[err?]"
+    + TiCC::UnicodeFromUTF8(CLEX::get_tDescr(cls));
   return result;
 }
 
@@ -395,23 +396,21 @@ string BracketLeaf::put() const {
   return result;
 }
 
-string BracketLeaf::pretty_put( bool shrt ) const {
+UnicodeString BracketLeaf::pretty_put( bool shrt ) const {
   /// create a descriptive UTF8 string representation for this object
-  string result;
+  UnicodeString result;
   if ( !morph.isEmpty() ){
-    result += "[";
-    result += TiCC::UnicodeToUTF8(morph);
-    result += "]";
+    result = "[" + morph + "]";
   }
   if ( glue ){
     size_t pos = orig.find_first_of( "^" );
     UnicodeString tag( orig[pos+1] );
-    string utf_tag = TiCC::UnicodeToUTF8(tag);
     if ( shrt ){
-      result += utf_tag;
+      result += tag;
     }
     else {
-      result += CLEX::get_tDescr(CLEX::toCLEX(utf_tag));
+      string utf_tag = TiCC::UnicodeToUTF8(tag);
+      result += TiCC::UnicodeFromUTF8(CLEX::get_tDescr(CLEX::toCLEX(utf_tag)));
     }
   }
 
@@ -424,16 +423,16 @@ string BracketLeaf::pretty_put( bool shrt ) const {
     string s = CLEX::get_tDescr(cls);
     if ( s != "/" ){
       if ( shrt ){
-	result += toString(cls);
+	result += TiCC::UnicodeFromUTF8(toString(cls));
       }
       else {
-	result += s;
+	result += TiCC::UnicodeFromUTF8(s);
       }
     }
   }
   else if ( shrt
 	    && !orig.empty() ){
-    result += orig;
+    result += TiCC::UnicodeFromUTF8(orig);
   }
   for ( int i=0; i < inflect.length(); ++i ){
     string id = CLEX::get_iDescr(inflect[i]);
@@ -444,10 +443,10 @@ string BracketLeaf::pretty_put( bool shrt ) const {
       }
       if ( shrt ){
 	UnicodeString bla = inflect[i];
-	result += TiCC::UnicodeToUTF8(bla);
+	result += bla;
       }
       else {
-	result += id;
+	result += TiCC::UnicodeFromUTF8(id);
       }
     }
   }
@@ -470,12 +469,12 @@ string BracketNest::put() const {
   return result;
 }
 
-string BracketNest::pretty_put( bool shrt ) const {
-  /// create a descriptive UTF8 string representation for this object
-  string result;
+UnicodeString BracketNest::pretty_put( bool shrt ) const {
+  /// create a descriptive Unicode string representation for this object
+  UnicodeString result;
   int cnt = 0;
   for ( auto const& it : parts ){
-    string tmp = it->pretty_put( shrt );
+    UnicodeString tmp = it->pretty_put( shrt );
     if ( tmp[0] != '/'
 	 && &it != &parts.front() ){
       result += " ";
@@ -490,10 +489,10 @@ string BracketNest::pretty_put( bool shrt ) const {
     if ( cls != CLEX::UNASS
 	 && cls != CLEX::NEUTRAL ){
       if ( shrt ){
-	result += toString(cls);
+	result += TiCC::UnicodeFromUTF8(toString(cls));
       }
       else {
-	result += CLEX::get_tDescr(cls);
+	result += TiCC::UnicodeFromUTF8(CLEX::get_tDescr(cls));
       }
     }
   }

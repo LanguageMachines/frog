@@ -77,7 +77,7 @@ public:
 	int );
   ~Rule();
   std::vector<icu::UnicodeString> extract_morphemes() const;
-  std::string pretty_string( bool ) const;
+  icu::UnicodeString pretty_string( bool ) const;
   icu::UnicodeString getKey( bool );
   bool performEdits();
   void getCleanInflect();
