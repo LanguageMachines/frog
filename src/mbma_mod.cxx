@@ -837,7 +837,6 @@ void Mbma::store_brackets( frog_record& fd,
       throw logic_error( "2 unknown head feature '" + utf8_head + "'" );
     }
     string clex_tag = TiCC::UnicodeToUTF8(tagIt->second);
-    string head_tag = CLEX::get_tDescr(CLEX::toCLEX(clex_tag));
     if (debugFlag > 1){
       DBG << "replaced X by: " << head << endl;
     }
@@ -846,7 +845,11 @@ void Mbma::store_brackets( frog_record& fd,
 					 debugFlag,
 					 *dbgLog );
     if ( fd.morph_string.empty() ){
-      fd.morph_string = "[" + utf8_wrd + "]" + head_tag;
+      fd.morph_string = "[" + utf8_wrd + "]";
+      if ( doDeepMorph ){
+	string head_tag = CLEX::get_tDescr(CLEX::toCLEX(clex_tag));
+	fd.morph_string += head_tag;
+      }
     }
     fd.morph_structure.push_back( leaf );
   }
@@ -903,14 +906,10 @@ void Mbma::getResult( frog_record& fd,
       DBG << "no matches found, use the word instead: "
 		    << uword << endl;
     }
-    if ( doDeepMorph ){
-      store_brackets( fd, uword, uhead, true );
-    }
-    else {
-      vector<UnicodeString> tmp;
-      tmp.push_back( uword );
-      store_morphemes( fd, tmp );
-    }
+    store_brackets( fd, uword, uhead, true );
+    vector<UnicodeString> tmp;
+    tmp.push_back( uword );
+    store_morphemes( fd, tmp );
   }
   else {
     if ( doDeepMorph ){
@@ -955,14 +954,10 @@ void Mbma::Classify( frog_record& fd ){
     // take over the letter/word 'as-is'.
     //  also ABBREVIATION's aren't handled bij mbma-rules
     fd.clean_word = word;
-    if ( doDeepMorph ){
-      store_brackets( fd, word, head );
-    }
-    else {
-      vector<UnicodeString> tmp;
-      tmp.push_back( word );
-      store_morphemes( fd, tmp );
-    }
+    store_brackets( fd, word, head );
+    vector<UnicodeString> tmp;
+    tmp.push_back( word );
+    store_morphemes( fd, tmp );
   }
   else {
     UnicodeString lWord = word;
