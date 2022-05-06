@@ -357,41 +357,13 @@ BracketNest::~BracketNest(){
   }
 }
 
-UnicodeString BaseBracket::put() const {
-  /// create a UnicodeString representation for this object
-  UnicodeString result = "[err?]" + toUnicodeString(cls);
-  return result;
-}
-
-UnicodeString BaseBracket::pretty_put( bool ) const {
+UnicodeString BaseBracket::put( bool ) const {
   /// create a descriptive UTF8 string representation for this object
   UnicodeString result = "[err?]" + CLEX::get_tag_descr(cls);
   return result;
 }
 
-UnicodeString BracketLeaf::put() const {
-  /// create a UTF8 string representation for this object
-  UnicodeString result;
-  if ( !morph.isEmpty() ){
-    result += "[" + morph + "]";
-  }
-  if ( orig.isEmpty() ){
-    TiCC::rtrim( result );
-    UnicodeString s = toUnicodeString(cls);
-    if ( s == "/" ){
-      result += s + inflect;
-    }
-    else {
-      result += s + "/" + inflect;
-    }
-  }
-  else {
-    result += orig;
-  }
-  return result;
-}
-
-UnicodeString BracketLeaf::pretty_put( bool shrt ) const {
+UnicodeString BracketLeaf::put( bool shrt ) const {
   /// create a descriptive UTF8 string representation for this object
   UnicodeString result;
   if ( !morph.isEmpty() ){
@@ -447,28 +419,12 @@ UnicodeString BracketLeaf::pretty_put( bool shrt ) const {
   return result;
 }
 
-UnicodeString BracketNest::put() const {
-  /// create a UnicodeString representation for this object
-  UnicodeString result = "[ ";
-  for ( auto const& it : parts ){
-    UnicodeString tmp = it->put();
-    if ( !tmp.isEmpty() ){
-      result += tmp + " ";
-    }
-  }
-  result += "]";
-  if ( cls != CLEX::UNASS ){
-    result += toUnicodeString(cls);
-  }
-  return result;
-}
-
-UnicodeString BracketNest::pretty_put( bool shrt ) const {
+UnicodeString BracketNest::put( bool shrt ) const {
   /// create a descriptive Unicode string representation for this object
   UnicodeString result;
   int cnt = 0;
   for ( auto const& it : parts ){
-    UnicodeString tmp = it->pretty_put( shrt );
+    UnicodeString tmp = it->put( shrt );
     if ( tmp[0] != '/'
 	 && &it != &parts.front() ){
       result += " ";
@@ -495,14 +451,14 @@ UnicodeString BracketNest::pretty_put( bool shrt ) const {
 
 ostream& operator<< ( ostream& os, const BaseBracket& c ){
   /// output a BaseBracket to a stream
-  os << c.put();
+  os << c.put(true);
   return os;
 }
 
 ostream& operator<< ( ostream& os, const BaseBracket *c ){
   /// output a BaseBracket to a stream
   if ( c ){
-    os << c->put();
+    os << c->put(true);
   }
   else {
     os << "[EMPTY]";

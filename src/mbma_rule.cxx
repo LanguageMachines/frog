@@ -318,7 +318,7 @@ vector<UnicodeString> Rule::extract_morphemes( ) const {
 }
 
 UnicodeString Rule::pretty_string( bool shrt ) const {
-  return brackets->pretty_put( shrt );
+  return brackets->put( shrt );
 }
 
 bool Rule::performEdits(){
@@ -623,9 +623,8 @@ void Rule::resolveBrackets() {
   brackets->clearEmptyNodes();
   tag = brackets->getFinalTag();
   description = get_tag_descr( tag );
-  UnicodeString deep = brackets->put();
-  deep_morphemes = deep;
-  flat_morphemes = flatten( deep, DBG );
+  deep_morphemes = pretty_string(true);
+  flat_morphemes = flatten( deep_morphemes, DBG );
   //  DBG << "flat: " << flat_morphemes << endl;
   //  DBG << "deep: " << deep_morphemes << endl;
   if ( debugFlag > 4 ){
