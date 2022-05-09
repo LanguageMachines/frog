@@ -1223,7 +1223,7 @@ bool FrogAPI::run_a_server(){
     while ( StillRunning ) {
       Sockets::ClientSocket conn;
       if ( server.accept( conn ) ){
-	LOG << "New connection..." << endl;
+	LOG << "New connection, socketid=" << conn.getSockId() << endl;
 	int pid = fork();
 	if (pid < 0) {
 	  string err = strerror(errno);
@@ -1550,7 +1550,11 @@ void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
 	string json_line;
 	// read data from the connection
 	if ( !conn.read( json_line ) ){
-	  throw( runtime_error( "read failed" ) );
+	  throw( runtime_error( "read failed: '" + json_line + "' (" +
+				conn.getMessage() + ")" ) );
+	}
+        if ( options.debugFlag > 5 ){
+	  DBG << "JSON read line: " << json_line << endl;
 	}
 	try {
 	  the_json = json::parse( json_line );
@@ -1561,7 +1565,7 @@ void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
 	  throw runtime_error( "json failure" );
 	}
 	DBG << "Read JSON: " << the_json << endl;
-	for( const auto& it : the_json ){
+	for ( const auto& it : the_json ){
 	  string data = it["sentence"];
 	  timers.tokTimer.stop();
 	  vector<Tokenizer::Token> toks = tokenizer->tokenize_line( data );
@@ -1634,11 +1638,21 @@ void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
 	//	DBG << "Done Processing... " << endl;
       }
       if ( options.doJSONout ){
+        if ( options.debugFlag > 5 ){
+	  LOG << "start JSON output:"<< endl;
+	}
+        if ( options.debugFlag > 10 ){
+	  LOG << "JSON:" << output_stream.str() << endl;
+	}
 	if (!conn.write( output_stream.str() ) ){
 	  if (options.debugFlag > 5 ) {
 	    DBG << "socket " << conn.getMessage() << endl;
 	  }
-	  throw( runtime_error( "JSON write to client failed" ) );
+	  throw ( runtime_error( "JSON write to client failed: "
+				 + conn.getMessage() ) );
+	}
+        if ( options.debugFlag > 5 ){
+	  LOG << "done with JSON output" << endl;
 	}
       }
       else if ( !conn.write( output_stream.str() )
@@ -1646,12 +1660,14 @@ void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
 	if (options.debugFlag > 5 ) {
 	  DBG << "socket " << conn.getMessage() << endl;
 	}
-	throw( runtime_error( "write to client failed" ) );
+	throw ( runtime_error( "write to client failed" +
+			       conn.getMessage() ) );
       }
     }
   }
   catch ( std::exception& e ) {
-    LOG << "connection lost unexpected : " << e.what() << endl;
+    LOG << TiCC::Timer::now() << ": connection lost unexpected : "
+	<< e.what() << endl;
   }
   LOG << "Connection closed.\n";
 }
