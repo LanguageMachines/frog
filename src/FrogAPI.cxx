@@ -33,6 +33,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <unistd.h>
+#include <pwd.h>
 #include <signal.h>
 #include <algorithm>
 #include <string>
@@ -96,6 +97,10 @@ using TiCC::operator<<;
 /// the FoLiA setname for languages
 const string ISO_SET = "http://raw.github.com/proycon/folia/master/setdefinitions/iso639_3.foliaset";
 
+const char *homedir = getenv("HOME") ? getenv("HOME") : getpwuid(getuid())->pw_dir; //never NULL
+const char *xdgconfighome = getenv("XDG_CONFIG_HOME"); //may be NULL
+
+string localConfigDir = ((xdgconfighome != NULL) ? string(xdgconfighome) : string(homedir) + "/.config") + "/" + PACKAGE + "/";
 string configDir = string(SYSCONF_PATH) + "/" + PACKAGE + "/";
 
 string FrogAPI::defaultConfigDir( const string& language ){
@@ -104,13 +109,23 @@ string FrogAPI::defaultConfigDir( const string& language ){
     \param language use this to find the configuration for this language
     \return a string representing the (language specific) path
   */
-  //! The location of the configuration files is determined at installation
-  //! of the package. All languages are supposed to be in sub-directories
+  //! The global location of the configuration files is determined at installation
+  //! of the package. Users can place configurations in $XDG_CONFIG_HOME/frog (i.e. ~/.config/frog)
+  //! which will take precendence over the global configuration.
+  //! All languages are supposed to be in sub-directories
   if ( language.empty() ){
-    return configDir;
+    if (TiCC::isDir(localConfigDir)) {
+        return localConfigDir;
+    } else {
+        return configDir;
+    }
   }
   else {
-    return configDir+language+"/";
+    if (TiCC::isDir(localConfigDir + language)) {
+        return localConfigDir + language +"/";
+    } else {
+        return configDir+language+"/";
+    }
   }
 }
 
@@ -276,9 +291,14 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
   if ( !Opts.extract( 'c',  configFileName ) ){
     Opts.extract( "config",  configFileName );
   }
+  LOG << "requested configuration: " << configFileName << endl;
   if ( !TiCC::isFile( configFileName ) && !(configFileName.rfind("/",0) == 0)){
-    // maybe it is in the default dir? (if it wasn't an absolute path)
-    configFileName = FrogAPI::defaultConfigDir() + configFileName;
+    // if only a suffix was specified, look in the local resp. global defaults dirs:
+    configFileName = localConfigDir + configFileName;
+    if (!TiCC::isFile( configFileName )) {
+        //global (final fallback)
+        configFileName = configDir + configFileName;
+    }
   }
   if ( configuration.fill( configFileName ) ){
     LOG << "config read from: " << configFileName << endl;
