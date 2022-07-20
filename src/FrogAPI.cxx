@@ -276,8 +276,8 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
   if ( !Opts.extract( 'c',  configFileName ) ){
     Opts.extract( "config",  configFileName );
   }
-  if ( !TiCC::isFile( configFileName ) ){
-    // maybe it is in the default dir?
+  if ( !TiCC::isFile( configFileName ) && !(configFileName.rfind("/",0) == 0)){
+    // maybe it is in the default dir? (if it wasn't an absolute path)
     configFileName = FrogAPI::defaultConfigDir() + configFileName;
   }
   if ( configuration.fill( configFileName ) ){
