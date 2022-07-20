@@ -1,5 +1,4 @@
-#TODO: revert channel to 'latest' instead of 'edge' once 3.16 is released
-FROM alpine:edge
+FROM alpine:latest
 #VERSION can be "stable" or "development"
 ARG VERSION="stable"
 LABEL org.opencontainers.image.authors="Maarten van Gompel <proycon@anaproy.nl>"
