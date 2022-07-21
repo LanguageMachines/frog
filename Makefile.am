@@ -15,3 +15,6 @@ docker:
 
 docker-dev:
 	docker build -t frog:dev --build-arg VERSION=development .
+
+deps:
+	./build-deps.sh
