@@ -24,7 +24,8 @@ and developed by the Language Machines Research Group and the Centre for
 Language and Speech Technology at Radboud University Nijmegen. A dependency
 parser, a base phrase chunker, and a named-entity recognizer module were added
 more recently. Where possible, Frog makes use of multi-processor support to run
-subtasks in parallel.
+subtasks in parallel. Frog offers a command-line interface (that can also run
+as a daemon) and a C++ library.
 
 Various (re)programming rounds have been made possible through funding by NWO,
 the Netherlands Organisation for Scientific Research, particularly under the
@@ -41,20 +42,16 @@ frog is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-Comments and bug-reports are welcome at our issue tracker at
-https://github.com/LanguageMachines/frog/issues or by mailing
+Comments and bug-reports are welcome at our [issue tracker](https://github.com/LanguageMachines/frog/issues) or by mailing
 lamasoftware (at) science.ru.nl.
-Updates and more info may be found on
-https://languagemachines.github.io/frog .
+Updates and more info may be found on https://languagemachines.github.io/frog .
 
 ## Installation
 
-To install Frog, first consult whether your distribution's package manager has an up-to-date package.  If not, for easy
-installation of Frog and its many dependencies, it is included as part of our software distribution [LaMachine](https://proycon.github.io/LaMachine).
-Alternatively, you can build a container image using the provided `Dockerfile` in
-this repository.
+To install Frog, first consult whether your distribution's package manager has an up-to-date package. Alternatively, you can build an OCI container image using the provided `Dockerfile` in
+this repository, or obtain a pre-made container image from Docker Hub using `docker pull proycon/frog`.
 
-To be able to succesfully build Frog from source instead, you need the following dependencies:
+To be able to successfully build Frog from source instead, you need the following dependencies:
 
 * A sane C++ build enviroment with autoconf, automake, autoconf-archive, pkg-config, gcc or clang,  libtool
 * libxml2-dev
@@ -67,8 +64,9 @@ To be able to succesfully build Frog from source instead, you need the following
 * [mbt](https://github.com/LanguageMachines/mbt)
 * [frogdata](https://github.com/LanguageMachines/frogdata)
 
-The data for Frog is packaged seperately and needs to be installed prior to installing frog:
-- [frogdata](https://github.com/LanguageMachines/frogdata)
+The data for Frog is packaged saperately and needs to be installed prior to installing frog:
+
+* [frogdata](https://github.com/LanguageMachines/frogdata)
 
 To compile and install manually from source instead, provided you have all the dependencies installed:
 
@@ -105,20 +103,28 @@ The Frog documentation can be found on https://frognlp.readthedocs.io
 
 ## Container Usage
 
-You can build a docker container as follows, make sure you are in the root of this repository:
+A pre-made container image can be obtained from Docker Hub as follows:
 
-``docker build -t LanguageMachines/frog .``
+``docker pull proycon/frog``
+
+You can also build a container image yourself as follows, make sure you are in the root of this repository:
+
+``docker build -t proycon/frog .``
 
 This builds the latest stable release as packaged for [Alpine Linux](https://pkgs.alpinelinux.org/packages?name=frog), if you want to use the latest development version
 from the git repository instead, do:
 
-``docker build -t LanguageMachines/frog --build-arg VERSION=development .``
+``docker build -t proycon/frog --build-arg VERSION=development .``
 
 Run the frog container interactively as follows, you can pass any additional arguments that ``frog`` takes.
 
-``docker run -t -i LanguageMachines/frog``
+``docker run -t -i proycon/frog``
 
 Add the ``-v /path/to/your/data:/data`` parameter if you want to mount your data volume into the container at `/data`.
+
+## Python Binding
+
+If you are looking to use Frog from Python, please see https://github.com/proycon/python-frog instead for the python binding. It is not included in this repository.
 
 ## Credits
 
