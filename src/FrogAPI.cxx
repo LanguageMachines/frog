@@ -294,10 +294,16 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
   LOG << "requested configuration: " << configFileName << endl;
   if ( !TiCC::isFile( configFileName ) && !(configFileName.rfind("/",0) == 0)){
     // if only a suffix was specified, look in the local resp. global defaults dirs:
-    configFileName = localConfigDir + configFileName;
-    if (!TiCC::isFile( configFileName )) {
+    string localConfigFileName = localConfigDir + configFileName;
+    if (TiCC::isFile( localConfigFileName )) {
+        configFileName = localConfigFileName;
+    } else {
+        LOG << "  not found locally (" << configFileName << ")" << endl;
         //global (final fallback)
         configFileName = configDir + configFileName;
+        if (!TiCC::isFile( configFileName )) {
+            LOG << "  not found globally (" << configFileName << ")" << endl;
+        }
     }
   }
   if ( configuration.fill( configFileName ) ){
