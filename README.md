@@ -11,6 +11,7 @@
 
     Centre for Language and Speech Technology, Radboud University Nijmegen
     Induction of Linguistic Knowledge Research Group, Tilburg University
+    KNAW Humanities Cluster
 
 **Website:** https://languagemachines.github.io/frog
 
