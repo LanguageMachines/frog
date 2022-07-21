@@ -126,6 +126,10 @@ Add the ``-v /path/to/your/data:/data`` parameter if you want to mount your data
 
 If you are looking to use Frog from Python, please see https://github.com/proycon/python-frog instead for the python binding. It is not included in this repository.
 
+## Webservice
+
+If you are looking to run Frog as a webservice yourself,  please see https://github.com/proycon/frog_webservice . It is not included in this repository.
+
 ## Credits
 
 Many thanks go out to the people who made the developments of the Frog
