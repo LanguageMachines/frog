@@ -48,14 +48,25 @@ Updates and more info may be found on https://languagemachines.github.io/frog .
 
 ## Installation
 
-To install Frog, first consult whether your distribution's package manager has an up-to-date package. Alternatively, you can build an OCI container image using the provided `Dockerfile` in
-this repository, or obtain a pre-made container image from Docker Hub using `docker pull proycon/frog`.
+To install Frog, first consult whether your distribution's package manager has
+an up-to-date package. Alternatively, you can build an OCI container image
+using the provided `Dockerfile` in this repository, or obtain a pre-made
+container image from Docker Hub using `docker pull proycon/frog`.
 
-To be able to successfully build Frog from source instead, you need the following dependencies:
+To compile and install manually from source instead, do the following:
 
-* A sane C++ build enviroment with autoconf, automake, autoconf-archive, pkg-config, gcc or clang,  libtool
-* libxml2-dev
-* libicu-dev
+    $ bash bootstrap.sh
+    $ sudo make deps PREFIX=/usr/local/
+    $ ./configure
+    $ make
+    $ make install
+
+and optionally:
+
+    $ make check
+
+The second step will automatically download and install (in $PREFIX) the latest stable versions of the following dependencies of our software:
+
 * [ticcutils](https://github.com/LanguageMachines/ticcutils)
 * [libfolia](https://github.com/LanguageMachines/libfolia)
 * [uctodata](https://github.com/LanguageMachines/uctodata)
@@ -64,20 +75,14 @@ To be able to successfully build Frog from source instead, you need the followin
 * [mbt](https://github.com/LanguageMachines/mbt)
 * [frogdata](https://github.com/LanguageMachines/frogdata)
 
-The data for Frog is packaged saperately and needs to be installed prior to installing frog:
+You will still need to take care to install the following 3rd party
+dependencies through your distribution's package manager, as they are not
+provided by our script:
 
-* [frogdata](https://github.com/LanguageMachines/frogdata)
-
-To compile and install manually from source instead, provided you have all the dependencies installed:
-
-    $ bash bootstrap.sh
-    $ ./configure
-    $ make
-    $ make install
-
-and optionally:
-
-    $ make check
+* ``icu`` - A C++ library for Unicode and Globalization support. On Debian/Ubuntu systems, install the package libicu-dev.
+* ``libxml2`` - An XML library. On Debian/Ubuntu systems install the package libxml2-dev.
+* ``libexttextcat`` - A language detection package. 
+* A sane build environment with a C++ compiler (e.g. gcc 4.9 or above or clang), make, autotools, libtool, pkg-config
 
 This software has been tested on:
 
@@ -90,6 +95,7 @@ Contents of this distribution:
 * Licensing information ( COPYING )
 * Installation instructions ( INSTALL )
 * Build system based on GNU Autotools
+* Container build file ( Dockerfile )
 * Example data files ( in the demos directory )
 * Documentation ( in the docs directory and on https://frognlp.readthedocs.io )
 
