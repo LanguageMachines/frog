@@ -56,7 +56,6 @@ container image from Docker Hub using `docker pull proycon/frog`.
 To compile and install manually from source instead, do the following:
 
     $ bash bootstrap.sh
-    $ sudo make deps PREFIX=/usr/local/
     $ ./configure
     $ make
     $ make install
@@ -65,7 +64,10 @@ and optionally:
 
     $ make check
 
-The second step will automatically download and install (in $PREFIX) the latest stable versions of the following dependencies of our software:
+If you want to automatically download and install the latest stable versions of
+the required dependencies, then run `./build-deps.sh` prior to the above. You
+can pass a target directory prefix as first argument and you may need to
+prepend `sudo` to ensure you can install there. The dependencies are:
 
 * [ticcutils](https://github.com/LanguageMachines/ticcutils)
 * [libfolia](https://github.com/LanguageMachines/libfolia)
