@@ -28,7 +28,7 @@ for SUFFIX in $BUILD_SOURCES; do \
     git clone "https://github.com/$SUFFIX"
     cd "$NAME"
     REF=$(git tag -l | grep -E "^v?[0-9]+(\.[0-9])*" | sort -t. -k 1.2,1n -k 2,2n -k 3,3n -k 4,4n | tail -n 1)
-    if [ "$VERSION" = "$STABLE" ] && [ -n "$REF" ]; then
+    if [ "$VERSION" = "stable" ] && [ -n "$REF" ]; then
         git -c advice.detachedHead=false checkout "$REF"
     fi
     sh ./bootstrap.sh && ./configure --prefix "$PREFIX" && make && make install
