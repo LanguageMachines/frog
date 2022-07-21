@@ -119,7 +119,7 @@ You can also build a container image yourself as follows, make sure you are in t
 
 ``docker build -t proycon/frog .``
 
-This builds the latest stable release as packaged for [Alpine Linux](https://pkgs.alpinelinux.org/packages?name=frog), if you want to use the latest development version
+This builds the latest stable release, if you want to use the latest development version
 from the git repository instead, do:
 
 ``docker build -t proycon/frog --build-arg VERSION=development .``
