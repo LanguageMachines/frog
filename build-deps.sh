@@ -5,6 +5,7 @@
 set -e
 
 [ -z "$VERSION" ] && VERSION=stable
+[ -z "$PREFIX" ] && [ -n "$1" ] && PREFIX=$1
 [ -z "$PREFIX" ] && PREFIX=/usr/local
 
 if [ "$VERSION" = "stable" ]; then 
@@ -18,6 +19,9 @@ else
     echo "-----------------------------------------------------------------------">&2
 fi
 
+PWD="$(pwd)"
+BUILDDIR="$(mktemp -dt "build-deps.XXXXXX")"
+cd "$BUILDDIR"
 BUILD_SOURCES="LanguageMachines/ticcutils LanguageMachines/libfolia LanguageMachines/uctodata LanguageMachines/ucto LanguageMachines/timbl LanguageMachines/mbt LanguageMachines/timblserver LanguageMachines/mbtserver LanguageMachines/frogdata"
 for SUFFIX in $BUILD_SOURCES; do \
     NAME="$(basename "$SUFFIX")"
@@ -30,3 +34,5 @@ for SUFFIX in $BUILD_SOURCES; do \
     sh ./bootstrap.sh && ./configure --prefix "$PREFIX" && make && make install
     cd ..
 done
+cd "$PWD"
+[ -n "$BUILDDIR" ] && rm -Rf "$BUILDDIR"
