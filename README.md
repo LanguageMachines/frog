@@ -53,8 +53,8 @@ To install Frog, first consult whether your distribution's package manager has
 an up-to-date package:
 
 * Alpine Linux users can do `apk install frog`.
-* Debian/Ubuntu users can do `apt install frog` but this version will likely be
-significantly out of date. 
+* Debian/Ubuntu users can do `apt install frog` but this version will likely be significantly out of date!
+* Arch Linux users can install Frog via the [AUR](https://aur.archlinux.org/packages/frog).
 * macOS users with [homebrew](https://brew.sh/) can do: `brew tap fbkarsdorp/homebrew-lamachine && brew install frog`
 * An OCI container image is also available and can be used with Docker: `docker pull proycon/frog`. Alternatively, you can build an OCI container image yourself using the provided `Dockerfile` in this repository.
 
