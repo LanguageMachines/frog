@@ -144,7 +144,7 @@ AC_DEFINE_UNQUOTED( [UCTO_INT_VERSION],
 	   	    [${UCTO_INT}],
 		    [The integer representation of the ucto version])
 
-PKG_CHECK_MODULES([frogdata], [frogdata >= 0.20] )
+PKG_CHECK_MODULES([frogdata], [frogdata >= 0.21] )
 
 AC_CHECK_PROGS([DOXYGEN], [doxygen])
 if test -z "$DOXYGEN"; then
