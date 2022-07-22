@@ -50,9 +50,13 @@ Updates and more info may be found on https://languagemachines.github.io/frog .
 ## Installation
 
 To install Frog, first consult whether your distribution's package manager has
-an up-to-date package. Alternatively, you can build an OCI container image
-using the provided `Dockerfile` in this repository, or obtain a pre-made
-container image from Docker Hub using `docker pull proycon/frog`.
+an up-to-date package:
+
+* Alpine Linux users can do `apk install frog`.
+* Debian/Ubuntu users can do `apt install frog` but this version will likely be
+significantly out of date. 
+* macOS users with [homebrew](https://brew.sh/) can do: `brew tap fbkarsdorp/homebrew-lamachine && brew install frog`
+* An OCI container image is also available and can be used with Docker: `docker pull proycon/frog`. Alternatively, you can build an OCI container image yourself using the provided `Dockerfile` in this repository.
 
 To compile and install manually from source instead, do the following:
 
