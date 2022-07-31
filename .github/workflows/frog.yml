@@ -172,7 +172,9 @@ jobs:
       - name: check
         env:
           CXX: ${{ matrix.compiler }}
-        run: LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib make check
+        run: |
+	  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib make check
+	  cat src/test-suite.log
         continue-on-error: true
 
       - name: frogtests
