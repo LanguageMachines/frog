@@ -155,7 +155,7 @@ ostream& operator<<( ostream& os, const frog_record& fr ){
       os << fr.morph_string;
     }
     else {
-      for ( const auto nm : fr.morphs ){
+      for ( const auto& nm : fr.morphs ){
 	for ( auto const& m : nm ){
 	  os << m;
 	}
