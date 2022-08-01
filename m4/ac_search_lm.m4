@@ -26,14 +26,13 @@
 # ----------------------------------
 AC_DEFUN([AC_SEARCH_LM],
   [tcdirs="/usr/share/libtextcat /usr/share/libexttextcat /usr/local/share/libtextcat /usr/local/share/libexttextcat /usr/local/Cellar/libtextcat/2.2/share/LM "
-
    for d in $tcdirs
    do
      if test -f ${d}/nl.lm
      then
        MODULE_PREFIX=$d
        AC_SUBST([MODULE_PREFIX])
-       AM_CONDITIONAL([OLD_LM], [test 1 = 0])
+       NL_FOUND=0
        break
      fi
    done
@@ -46,7 +45,7 @@ AC_DEFUN([AC_SEARCH_LM],
        then
          MODULE_PREFIX=$d
          AC_SUBST([MODULE_PREFIX])
-	 AM_CONDITIONAL([OLD_LM], [test 1 = 1])
+         NL_FOUND=1
          break
        fi
      done
@@ -57,5 +56,5 @@ AC_DEFUN([AC_SEARCH_LM],
    else
      TEXTCAT_FOUND=1
    fi
-
+   AM_CONDITIONAL([OLD_LM], [test NL_FOUND = 1])
  ])
