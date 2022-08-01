@@ -173,8 +173,7 @@ jobs:
         env:
           CXX: ${{ matrix.compiler }}
         run: |
-          LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib make check;
-          cat src/test-suite.log
+          LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib make check
         continue-on-error: true
 
       - name: frogtests
@@ -189,6 +188,7 @@ jobs:
       - name: show log on failure
         if: ${{ env.test_status != '0' }}
         run: |
+          cat src/test-suite.log;
           cat frogtests/*.diff
 
       - name: Notify IRC of failure
