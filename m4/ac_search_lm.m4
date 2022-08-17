@@ -25,7 +25,7 @@
 # AC_SEARCH_LM()
 # ----------------------------------
 AC_DEFUN([AC_SEARCH_LM],
-  [tcdirs="/usr/share/libtextcat /usr/share/libexttextcat /usr/local/share/libtextcat /usr/local/share/libexttextcat /usr/local/Cellar/libtextcat/2.2/share/LM "
+  [tcdirs="/usr/share/libtextcat /usr/share/libexttextcat /usr/local/share/libtextcat /usr/local/share/libexttextcat /usr/local/Cellar/libtextcat/2.2/share/LM /opt/homebrew/Cellar/libtextcat/2.2/share/LM "
    for d in $tcdirs
    do
      if test -f ${d}/nl.lm
