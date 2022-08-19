@@ -2,7 +2,8 @@
     "@context": [
         "https://doi.org/10.5063/schema/codemeta-2.0",
         "http://schema.org",
-        "https://w3id.org/software-types"
+        "https://w3id.org/software-types",
+        "https://w3id.org/software-iodata"
     ],
     "@type": "SoftwareSourceCode",
     "identifier": "frog",
