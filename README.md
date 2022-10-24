@@ -11,6 +11,7 @@
 
     Centre for Language and Speech Technology, Radboud University Nijmegen
     Induction of Linguistic Knowledge Research Group, Tilburg University
+    KNAW Humanities Cluster
 
 **Website:** https://languagemachines.github.io/frog
 
@@ -24,7 +25,8 @@ and developed by the Language Machines Research Group and the Centre for
 Language and Speech Technology at Radboud University Nijmegen. A dependency
 parser, a base phrase chunker, and a named-entity recognizer module were added
 more recently. Where possible, Frog makes use of multi-processor support to run
-subtasks in parallel.
+subtasks in parallel. Frog offers a command-line interface (that can also run
+as a daemon) and a C++ library.
 
 Various (re)programming rounds have been made possible through funding by NWO,
 the Netherlands Organisation for Scientific Research, particularly under the
@@ -41,36 +43,22 @@ frog is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-Comments and bug-reports are welcome at our issue tracker at
-https://github.com/LanguageMachines/frog/issues or by mailing
+Comments and bug-reports are welcome at our [issue tracker](https://github.com/LanguageMachines/frog/issues) or by mailing
 lamasoftware (at) science.ru.nl.
-Updates and more info may be found on
-https://languagemachines.github.io/frog .
+Updates and more info may be found on https://languagemachines.github.io/frog .
 
 ## Installation
 
 To install Frog, first consult whether your distribution's package manager has
-an up-to-date package.  If not, for easy installation of Frog and its many
-dependencies, it is included as part of our software distribution
-**LaMachine**: https://proycon.github.io/LaMachine .
+an up-to-date package:
 
-To be able to succesfully build Frog from source instead, you need the following dependencies:
+* Alpine Linux users can do `apk install frog`.
+* Debian/Ubuntu users can do `apt install frog` but this version will likely be significantly out of date!
+* Arch Linux users can install Frog via the [AUR](https://aur.archlinux.org/packages/frog).
+* macOS users with [homebrew](https://brew.sh/) can do: `brew tap fbkarsdorp/homebrew-lamachine && brew install frog`
+* An OCI container image is also available and can be used with Docker: `docker pull proycon/frog`. Alternatively, you can build an OCI container image yourself using the provided `Dockerfile` in this repository.
 
-* A sane C++ build enviroment with autoconf, automake, autoconf-archive, pkg-config, gcc or clang,  libtool
-* libxml2-dev
-* libicu-dev
-* [ticcutils](https://github.com/LanguageMachines/ticcutils)
-* [libfolia](https://github.com/LanguageMachines/libfolia)
-* [uctodata](https://github.com/LanguageMachines/uctodata)
-* [ucto](https://github.com/LanguageMachines/ucto)
-* [timbl](https://github.com/LanguageMachines/timbl)
-* [mbt](https://github.com/LanguageMachines/mbt)
-* [frogdata](https://github.com/LanguageMachines/frogdata)
-
-The data for Frog is packaged seperately and needs to be installed prior to installing frog:
-- [frogdata](https://github.com/LanguageMachines/frogdata)
-
-To compile and install manually from source instead, provided you have all the dependencies installed:
+To compile and install manually from source instead, do the following:
 
     $ bash bootstrap.sh
     $ ./configure
@@ -80,6 +68,28 @@ To compile and install manually from source instead, provided you have all the d
 and optionally:
 
     $ make check
+
+If you want to automatically download and install the latest stable versions of
+the required dependencies, then run `./build-deps.sh` prior to the above. You
+can pass a target directory prefix as first argument and you may need to
+prepend `sudo` to ensure you can install there. The dependencies are:
+
+* [ticcutils](https://github.com/LanguageMachines/ticcutils)
+* [libfolia](https://github.com/LanguageMachines/libfolia)
+* [uctodata](https://github.com/LanguageMachines/uctodata)
+* [ucto](https://github.com/LanguageMachines/ucto)
+* [timbl](https://github.com/LanguageMachines/timbl)
+* [mbt](https://github.com/LanguageMachines/mbt)
+* [frogdata](https://github.com/LanguageMachines/frogdata)
+
+You will still need to take care to install the following 3rd party
+dependencies through your distribution's package manager, as they are not
+provided by our script:
+
+* ``icu`` - A C++ library for Unicode and Globalization support. On Debian/Ubuntu systems, install the package libicu-dev.
+* ``libxml2`` - An XML library. On Debian/Ubuntu systems install the package libxml2-dev.
+* ``libexttextcat`` - A language detection package. 
+* A sane build environment with a C++ compiler (e.g. gcc 4.9 or above or clang), make, autotools, libtool, pkg-config
 
 This software has been tested on:
 
@@ -92,12 +102,46 @@ Contents of this distribution:
 * Licensing information ( COPYING )
 * Installation instructions ( INSTALL )
 * Build system based on GNU Autotools
+* Container build file ( Dockerfile )
 * Example data files ( in the demos directory )
 * Documentation ( in the docs directory and on https://frognlp.readthedocs.io )
+
+## Usage
+
+Run ``frog --help`` for basic usage instructions.
 
 ## Documentation
 
 The Frog documentation can be found on https://frognlp.readthedocs.io
+
+## Container Usage
+
+A pre-made container image can be obtained from Docker Hub as follows:
+
+``docker pull proycon/frog``
+
+You can also build a container image yourself as follows, make sure you are in the root of this repository:
+
+``docker build -t proycon/frog .``
+
+This builds the latest stable release, if you want to use the latest development version
+from the git repository instead, do:
+
+``docker build -t proycon/frog --build-arg VERSION=development .``
+
+Run the frog container interactively as follows, you can pass any additional arguments that ``frog`` takes.
+
+``docker run -t -i proycon/frog``
+
+Add the ``-v /path/to/your/data:/data`` parameter if you want to mount your data volume into the container at `/data`.
+
+## Python Binding
+
+If you are looking to use Frog from Python, please see https://github.com/proycon/python-frog instead for the python binding. It is not included in this repository.
+
+## Webservice
+
+If you are looking to run Frog as a webservice yourself,  please see https://github.com/proycon/frog_webservice . It is not included in this repository.
 
 ## Credits
 

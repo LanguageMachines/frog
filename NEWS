@@ -1,3 +1,14 @@
+0.25 - 2022-07-22
+
+[Maarten van Gompel]
+* updated metadata (codemeta.json) following new (proposed) CLARIAH requirements (CLARIAH/clariah-plus#38)
+* added builds-deps.sh for automatically building and installing dependencies
+* added Dockerfile and instructions
+* added support for user-based configuration dirs ($XDG_CONFIG_HOME/frog), takes precedence over global data dirs
+
+[Ko vd Sloot]
+* updated Doxygen config file
+
 0.24 - 2021-12-15
 [Ko vd Sloot]
 * start using the newest UTF8 aware Timbl and Mbt and Ucto
@@ -6,7 +17,8 @@
   OS/Compiler combinations
 * lots of small refactoring
 * bumped library version, because of some API changed
-[maarten van Gompel]
+
+[Maarten van Gompel]
 * merged a patch suggested by Helmut Grohne <helmut@subdivi.de>
   - configure.ac: Bug#993123: frog FTCBFS: hard codes the build
     architecture pkg-config Source: frog Version: 0.20-2

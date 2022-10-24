@@ -1,9 +1,9 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.59)
+AC_PREREQ([2.69])
 #also adapt version number in codemeta.json
-AC_INIT([frog], [0.25], [lamasoftware@science.ru.nl]) #adapt version number in codemeta.json as well
+AC_INIT([frog],[0.26],[lamasoftware@science.ru.nl]) #adapt version number in codemeta.json as well
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_MACRO_DIR([m4])
@@ -24,7 +24,6 @@ if $cxx_flags_were_set; then
 fi
 
 # use libtool
-AC_PROG_LIBTOOL
 LT_INIT
 
 # when running tests, use CXX
@@ -51,9 +50,9 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_FUNC_FORK
 AC_HEADER_DIRENT
-AC_CHECK_FUNCS([localtime_r])
+AC_CHECK_FUNCS([strerror])
 
-ACX_PTHREAD([],[AC_MSG_ERROR([We need pthread support!])])
+AX_PTHREAD([],[AC_MSG_ERROR([We need pthread support!])])
 
 if test x"$acx_pthread_ok" = xyes; then
    LIBS="$PTHREAD_LIBS $LIBS" \
@@ -133,7 +132,7 @@ PKG_CHECK_MODULES([folia],[folia >= 2.9])
 CXXFLAGS="$CXXFLAGS $folia_CFLAGS"
 LIBS="$folia_LIBS $LIBS"
 
-PKG_CHECK_MODULES([ucto], [ucto >= 0.24] )
+PKG_CHECK_MODULES([ucto], [ucto >= 0.25] )
 CXXFLAGS="$CXXFLAGS $ucto_CFLAGS"
 LIBS="$ucto_LIBS $LIBS"
 
@@ -144,7 +143,7 @@ AC_DEFINE_UNQUOTED( [UCTO_INT_VERSION],
 	   	    [${UCTO_INT}],
 		    [The integer representation of the ucto version])
 
-PKG_CHECK_MODULES([frogdata], [frogdata >= 0.20] )
+PKG_CHECK_MODULES([frogdata], [frogdata >= 0.21] )
 
 AC_CHECK_PROGS([DOXYGEN], [doxygen])
 if test -z "$DOXYGEN"; then
@@ -157,7 +156,7 @@ else
 fi
 AM_CONDITIONAL([HAVE_DOXYGEN], [test -n "$DOXYGEN"])
 
-AC_OUTPUT([
+AC_CONFIG_FILES([
   Makefile
   frog.pc
   m4/Makefile
@@ -167,3 +166,4 @@ AC_OUTPUT([
   include/Makefile
   include/frog/Makefile
 ])
+AC_OUTPUT

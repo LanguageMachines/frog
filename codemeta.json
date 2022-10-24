@@ -2,42 +2,30 @@
     "@context": [
         "https://doi.org/10.5063/schema/codemeta-2.0",
         "http://schema.org",
-        "https://github.com/CLARIAH/tool-metadata",
-        {
-            "entryPoints": { "@reverse": "schema:actionApplication" },
-            "interfaceType": { "@id": "codemeta:interfaceType" },
-            "inputLanguage": { "@id": "codemeta:inputLanguage" },
-            "inputFormat": { "@id": "codemeta:inputFormat" }
-        }
+        "https://w3id.org/software-types",
+        "https://w3id.org/software-iodata"
     ],
     "@type": "SoftwareSourceCode",
     "identifier": "frog",
     "name": "Frog",
-    "version": "0.25",
+    "version": "0.26",
     "description": "Frog is an integration of memory-based natural language processing (NLP) modules developed for Dutch. It performs automatic linguistic enrichment such as part of speech tagging, lemmatisation, named entity recognition, shallow parsing, dependency parsing and morphological analysis. All NLP modules are based on TiMBL.",
-    "license": "https://spdx.org/licenses/GPL-3.0",
+    "license": "https://spdx.org/licenses/GPL-3.0-only",
 	"url": "https://languagemachines.github.io/frog",
     "producer": {
-        "@id": "https://www.ru.nl/clst",
+        "@id": "https://huc.knaw.nl",
         "@type": "Organization",
-        "name": "Centre for Language and Speech Technology",
-        "url": "https://www.ru.nl/clst",
+        "name": "KNAW Humanities Cluster",
+        "url": "https://huc.knaw.nl",
         "parentOrganization": {
-            "@id": "https://www.ru.nl/cls",
+            "@id": "https://knaw.nl",
             "@type": "Organization",
-            "name": "Centre for Language Studies",
-            "url": "https://www.ru.nl/cls",
-            "parentOrganization": {
-                "@id": "https://www.ru.nl",
-                "name": "Radboud University",
-                "@type": "Organization",
-                "url": "https://www.ru.nl",
-                "location": {
-                    "@type": "Place",
-                    "name": "Nijmegen"
-                }
+            "name": "KNAW",
+            "url": "https://knaw.nl",
+            "location": {
+                "@type": "Place",
+                "name": "Amsterdam"
             }
-
         }
     },
     "author": [
@@ -46,7 +34,29 @@
 			"givenName": "Ko",
 			"familyName": "van der Sloot",
 			"email": "ko.vandersloot@let.ru.nl",
-			"affiliation": { "@id": "https://www.ru.nl/clst" }
+			"affiliation": { 
+                "@id": "https://www.ru.nl/clst", 
+                "@type": "Organization",
+                "name": "Centre for Language and Speech Technology",
+                "url": "https://www.ru.nl/clst",
+                "parentOrganization": {
+                    "@id": "https://www.ru.nl/cls",
+                    "@type": "Organization",
+                    "name": "Centre for Language Studies",
+                    "url": "https://www.ru.nl/cls",
+                    "parentOrganization": {
+                        "@id": "https://www.ru.nl",
+                        "name": "Radboud University",
+                        "@type": "Organization",
+                        "url": "https://www.ru.nl",
+                        "location": {
+                            "@type": "Place",
+                            "name": "Nijmegen"
+                        }
+                    }
+                }
+            },
+            "position": 1
 		},
 		{
 			"@id": "https://orcid.org/0000-0003-2493-656X",
@@ -54,7 +64,7 @@
 			"givenName": "Antal",
 			"familyName": "van den Bosch",
 			"email": "antal.vandenbosch@let.ru.nl",
-			"affiliation": { "@id": "https://www.ru.nl/cls" }
+            "position": 2
 		},
 		{
 			"@id": "https://orcid.org/0000-0002-1046-0006",
@@ -62,7 +72,11 @@
 			"givenName": "Maarten",
 			"familyName": "van Gompel",
 			"email": "proycon@anaproy.nl",
-			"affiliation": { "@id": "https://www.ru.nl/clst" }
+			"affiliation": [
+                { "@id": "https://huc.knaw.nl" },
+                { "@id": "https://www.ru.nl/clst" }
+            ],
+            "position": 3
 		}
 	],
 	"sourceOrganization": { "@id": "https://www.ru.nl/clst" },
@@ -71,7 +85,7 @@
 		"identifier": "c++",
 		"name": "C++"
 	},
-	"operatingSystem": "POSIX",
+    "operatingSystem": [ "Linux", "BSD", "macOS" ],
 	"codeRepository": "https://github.com/LanguageMachines/frog",
     "softwareRequirements": [
         {
@@ -108,14 +122,9 @@
 			"@type": "SoftwareApplication",
 			"identifier": "ucto",
 			"name": "ucto"
-		},
-        {
-			"@type": "SoftwareApplication",
-			"identifier": "frogdata",
-			"name": "frogdata"
 		}
 	],
-	"funder": [
+	"funding": [
 		{
 			"@type": "Organization",
 			"name": "CLARIN-NL"
@@ -127,10 +136,18 @@
 		}
 	],
 	"readme": "https://github.com/LanguageMachines/frog/blob/master/README.md",
+    "softwareHelp": [
+        {
+            "@id": "https://frognlp.readthedocs.io",
+            "@type": "WebSite",
+            "name": "Introduction — frog  documentation",
+            "url": "https://frognlp.readthedocs.io"
+        }
+    ],
 	"issueTracker": "https://github.com/LanguageMachines/frog/issues",
 	"contIntegration": "https://travis-ci.org/LanguageMachines/frog",
 	"releaseNotes": "https://github.com/LanguageMachines/frog/releases",
-	"developmentStatus": "active",
+	"developmentStatus": "https://www.repostatus.org/#active",
 	"keywords":  [ "nlp", "natural language processing", "pos", "lemma", "ner", "parser", "tagger", "part-of-speech tagging", "lemmatisation", "dependency parsing", "shallow parsing", "dutch" ],
     "referencePublication": [
 		{
@@ -146,7 +163,7 @@
 				"issue": "16-02",
 				"location": "Nijmegen, the Netherlands"
 			},
-			"url": "https://github.com/LanguageMachines/frog/blob/master/docs/frogmanual.pdf"
+			"url": "https://github.com/LanguageMachines/frog/raw/master/docs/frogmanual.pdf"
 		},
 		{
 			"@type": "ScholarlyArticle",
@@ -160,50 +177,130 @@
 				"name": "Selected Papers of the 17th Computational Linguistics in the Netherlands Meeting",
 				"location": "Leuven, Belgium"
 			},
-			"url": "http://ilk.uvt.nl/downloads/pub/papers/tadpole-final.pdf"
+			"url": "https://www.clinjournal.org/CLIN_proceedings/XVII/vandenbosch.pdf"
 		}
 	],
-	"dateCreated": "2011-03-27",
-    "entryPoints": [
+    "dateCreated": "2011-03-31T12:35:01Z+0000",
+    "dateModified": "2022-07-21T13:17:06Z+0200",
+    "targetProduct": [
         {
-            "@type": "EntryPoint",
+            "@type": "SoftwareLibrary",
+            "executableName": "libfrog",
+            "name": "libfrog",
+            "runtimePlatform": [ "Linux", "BSD", "macOS" ],
+            "description": "Frog Library with API for C++"
+        },
+        {
+            "@type": "CommandLineApplication",
+            "executableName": "frog",
             "name": "frog",
-            "urlTemplate": "file:///frog",
+            "runtimePlatform": [ "Linux", "BSD", "macOS" ],
             "description": "Command-line interface to the full NLP suite",
-            "interfaceType": "CLI"
+            "consumesData": [ 
+                {
+                    "@type": "TextDigitalDocument",
+                    "encodingFormat": "text/plain",
+                    "inLanguage": {
+                        "@id": "https://iso639-3.sil.org/code/nld",
+                        "@type": "Language",
+                        "name": "Dutch",
+                        "identifier": "nld"
+                    }
+                },
+                {
+                    "@type": "TextDigitalDocument",
+                    "encodingFormat": "application/folia+xml",
+                    "inLanguage": {
+                        "@id": "https://iso639-3.sil.org/code/nld",
+                        "@type": "Language",
+                        "name": "Dutch",
+                        "identifier": "nld"
+                    }
+                }
+            ],
+            "producesData": [ 
+                {
+                    "@type": "TextDigitalDocument",
+                    "encodingFormat": "text/plain",
+                    "inLanguage": {
+                        "@id": "https://iso639-3.sil.org/code/nld",
+                        "@type": "Language",
+                        "name": "Dutch",
+                        "identifier": "nld"
+                    }
+                },
+                {
+                    "@type": "TextDigitalDocument",
+                    "encodingFormat": "application/folia+xml",
+                    "inLanguage": {
+                        "@id": "https://iso639-3.sil.org/code/nld",
+                        "@type": "Language",
+                        "name": "Dutch",
+                        "identifier": "nld"
+                    }
+                }
+            ]
         },
         {
-            "@type": "EntryPoint",
+            "@type": "CommandLineApplication",
+            "executableName": "mbma",
+            "runtimePlatform": [ "Linux", "BSD", "macOS" ],
             "name": "mbma",
-            "urlTemplate": "file:///mbma",
             "description": "Memory-based Morphological Analysis (standalone)",
-            "interfaceType": "CLI"
+            "consumesData": [ 
+                {
+                    "@type": "TextDigitalDocument",
+                    "encodingFormat": "text/plain",
+                    "inLanguage": { "@id": "https://iso639-3.sil.org/code/nld" }
+                }
+            ],
+            "producesData": [ 
+                {
+                    "@type": "TextDigitalDocument",
+                    "encodingFormat": "text/plain",
+                    "inLanguage": { "@id": "https://iso639-3.sil.org/code/nld" }
+                }
+            ]
         },
         {
-            "@type": "EntryPoint",
+            "@type": "CommandLineApplication",
+            "executableName": "mblem",
             "name": "mblem",
-            "urlTemplate": "file:///mblem",
             "description": "Memory-based Lemmatiser (standalone)",
-            "interfaceType": "CLI"
+            "consumesData": [ 
+                {
+                    "@type": "TextDigitalDocument",
+                    "encodingFormat": "text/plain",
+                    "inLanguage": { "@id": "https://iso639-3.sil.org/code/nld" }
+                }
+            ],
+            "producesData": [ 
+                {
+                    "@type": "TextDigitalDocument",
+                    "encodingFormat": "text/plain",
+                    "inLanguage": { "@id": "https://iso639-3.sil.org/code/nld" }
+                }
+            ]
         },
         {
-            "@type": "EntryPoint",
+            "@type": "CommandLineApplication",
+            "executableName": "ner",
             "name": "ner",
-            "urlTemplate": "file:///ner",
             "description": "Named Entity Recogniser (standalone)",
-            "interfaceType": "CLI"
+            "consumesData": [ 
+                {
+                    "@type": "TextDigitalDocument",
+                    "encodingFormat": "text/plain",
+                    "inLanguage": { "@id": "https://iso639-3.sil.org/code/nld" }
+                }
+            ],
+            "producesData": [ 
+                {
+                    "@type": "TextDigitalDocument",
+                    "encodingFormat": "text/plain",
+                    "inLanguage": { "@id": "https://iso639-3.sil.org/code/nld" }
+                }
+            ]
         }
-    ],
-    "inputFormat": [ "text/plain", "application/folia+xml" ],
-    "inputLanguage": {
-        "@type": "Language",
-        "name": "Dutch",
-        "alternateName": "nld",
-        "sameAs": "http://www.lexvo.org/data/iso639-3/nld"
-    },
-    "outputFormat": [ "application/folia+xml" ],
-    "researchDomain": "Linguistics",
-    "linguisticsSubject": [ "general linguistics", "syntax" ],
-    "toolTask": [ "lemmatisation", "morphological analysis", "named entity recognition", "part of speech tagging", "tokenisation", "dependency parsing" ],
-    "researchPhase": "Enriching Data"
+    ]
 }

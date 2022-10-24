@@ -9,3 +9,12 @@ pkgconfig_DATA = frog.pc
 
 ChangeLog: $(top_srcdir)/NEWS
 	git pull; git2cl > ChangeLog
+
+docker:
+	docker build -t frog:latest .
+
+docker-dev:
+	docker build -t frog:dev --build-arg VERSION=development .
+
+deps:
+	./build-deps.sh

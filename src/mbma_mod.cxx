@@ -523,7 +523,7 @@ bool mbmacmp( Rule *m1, Rule *m2 ){
 }
 
 struct id_cmp {
-  bool operator()( const Rule *m1, const Rule *m2 ){
+  bool operator()( const Rule *m1, const Rule *m2 ) const {
   /// sorting function for Rule's on ID
     return m1->ID < m2->ID;
   }

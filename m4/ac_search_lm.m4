@@ -1,7 +1,7 @@
 # check_search_lm.m4 - Macro to locate textcat.lm files. -*- Autoconf -*-
 # serial 1
 #
-# Copyright © 2018 Ko van der Sloot <K.vanderSloot@let.ru.nl>
+# Copyright © 2022 Ko van der Sloot <K.vanderSloot@let.ru.nl>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,15 +25,14 @@
 # AC_SEARCH_LM()
 # ----------------------------------
 AC_DEFUN([AC_SEARCH_LM],
-  [tcdirs="/usr/share/libtextcat /usr/share/libexttextcat /usr/local/share/libtextcat /usr/local/share/libexttextcat /usr/local/Cellar/libtextcat/2.2/share/LM "
-
+  [tcdirs="/usr/share/libtextcat /usr/share/libexttextcat /usr/local/share/libtextcat /usr/local/share/libexttextcat /usr/local/Cellar/libtextcat/2.2/share/LM /opt/homebrew/Cellar/libtextcat/2.2/share/LM "
    for d in $tcdirs
    do
      if test -f ${d}/nl.lm
      then
        MODULE_PREFIX=$d
        AC_SUBST([MODULE_PREFIX])
-       AM_CONDITIONAL([OLD_LM], [test 1 = 0])
+       nl_found=false
        break
      fi
    done
@@ -46,7 +45,7 @@ AC_DEFUN([AC_SEARCH_LM],
        then
          MODULE_PREFIX=$d
          AC_SUBST([MODULE_PREFIX])
-	 AM_CONDITIONAL([OLD_LM], [test 1 = 1])
+         nl_found=true
          break
        fi
      done
@@ -57,5 +56,5 @@ AC_DEFUN([AC_SEARCH_LM],
    else
      TEXTCAT_FOUND=1
    fi
-
+   AM_CONDITIONAL([OLD_LM], [test x$nl_found = xtrue])
  ])
