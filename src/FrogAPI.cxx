@@ -2705,7 +2705,10 @@ folia::Document *FrogAPI::run_text_engine( const string& infilename,
     if ( options.docid != "untitled" ){
       doc_id = options.docid;
     }
-    doc_id.resize( doc_id.find( ".xml" ) );
+    size_t xml_pos = doc_id.find( ".xml" );
+    if ( xml_pos != string::npos ){
+      doc_id.resize( xml_pos );
+    }
     doc_id = filter_non_NC( TiCC::basename(doc_id) );
     root = start_document( doc_id, doc );
   }
