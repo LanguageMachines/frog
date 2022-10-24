@@ -206,9 +206,8 @@ string CGNTagger::getSubSet( const string& val,
   if ( it == cgnSubSets.end() ){
     throw folia::ValueError( "unknown cgn subset for class: '" + val + "', full class is: '" + fullclass + "'" );
   }
-  string result;
   while ( it != cgnSubSets.upper_bound(val) ){
-    result = it->second;
+     string result = it->second;
     auto cit = cgnConstraints.find( result );
     if ( cit == cgnConstraints.end() ){
       // no constraints on this value

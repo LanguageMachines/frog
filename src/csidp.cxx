@@ -85,7 +85,7 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
     \param dbg_log a LogStream for debugging
    */
   vector<const Constraint*> constraints;
-  vector<timbl_result>::const_iterator pit = p_res.begin();
+  auto pit = p_res.begin();
   //  LOG << "formulate WSCP, step 1" << endl;
   for ( size_t dependent_id = 1;
 	dependent_id <= sent_len;
@@ -124,8 +124,8 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
   }
 
   //  LOG << "formulate WSCP, step 3" << endl;
-  vector<timbl_result>::const_iterator dit = d_res.begin();
-  vector<timbl_result>::const_iterator rit = r_res.begin();
+  auto dit = d_res.begin();
+  auto rit = r_res.begin();
   for ( size_t token_id = 1;
 	token_id <= sent_len;
 	++token_id ) {
@@ -159,7 +159,7 @@ timbl_result::timbl_result( const string& cls,
 			    double conf,
 			    const Timbl::ValueDistribution* vd ):
   _cls(cls), _confidence(conf) {
-  Timbl::ValueDistribution::dist_iterator it = vd->begin();
+  auto it = vd->begin();
   while ( it != vd->end() ){
     _dist.push_back( make_pair(it->second->Value()->Name(),it->second->Weight()) );
     ++it;

@@ -1807,7 +1807,7 @@ void FrogAPI::run_interactive(){
       }
       if ( !data.empty() ){
 	if ( data.back() == '\n' ){
-	  data = data.substr( 0, data.size()-1 );
+	  data.pop_back();
 	}
 	cout << "Processing... '" << data << "'" << endl;
 	vector<Tokenizer::Token> toks = tokenizer->tokenize_line( data );
@@ -2694,7 +2694,7 @@ folia::Document *FrogAPI::run_text_engine( const string& infilename,
     if ( options.docid != "untitled" ){
       doc_id = options.docid;
     }
-    doc_id = doc_id.substr( 0, doc_id.find( ".xml" ) );
+    doc_id.resize( doc_id.find( ".xml" ) );
     doc_id = filter_non_NC( TiCC::basename(doc_id) );
     root = start_document( doc_id, doc );
   }

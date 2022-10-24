@@ -377,10 +377,10 @@ void Mwu::Classify(){
       }
       mWords[i]->merge( mWords[i+j] );
     }
-    vector<mwuAna*>::iterator anatmp1 = mWords.begin() + i;
-    vector<mwuAna*>::iterator anatmp2 = ++anatmp1 + matchLength;
+    auto anatmp1 = mWords.begin() + i;
+    auto anatmp2 = ++anatmp1 + matchLength;
     mWords.erase(anatmp1, anatmp2);
-    if ( debug > 1){
+    if ( debug > 1 ){
       DBG << "tussenstand:" << endl;
       DBG << *this << endl;
     }
