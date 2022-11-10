@@ -1449,6 +1449,9 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
     }
     args["xml:id"] = root->doc()->id() + ".p." + TiCC::toString(++p_count);
     folia::Paragraph *p = new folia::Paragraph( args, root->doc() );
+    if ( options.debugFlag > 5 ){
+      DBG << "created a new: " << p << endl;
+    }
     if ( root->element_id() == folia::Text_t ){
       if  (options.debugFlag > 5 ){
 	DBG << "append_to_folia, add paragraph to Text" << endl;
@@ -1470,11 +1473,11 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
   args.clear();
   args["generate_id"] = result->id();
   folia::Sentence *s = result->add_child<folia::Sentence>( args );
-  if  (options.debugFlag > 5 ){
+  if ( options.debugFlag > 5 ){
     DBG << "append_to_folia, created Sentence" << s << endl;
   }
   append_to_sentence( s, fd );
-  if  (options.debugFlag > 5 ){
+  if ( options.debugFlag > 5 ){
     DBG << "append_to_folia, done, result node = " << result << endl;
   }
   return result;
@@ -2558,23 +2561,41 @@ void FrogAPI::handle_one_text_parent( ostream& os,
 	  // just skip
 	}
 	else if ( sents.size() > 1 ){
-	  // multiple sentences. We need an extra Paragraph.
-	  folia::KWargs p_args;
-	  string e_id = e->id();
-	  if ( !e_id.empty() ){
-	    p_args["generate_id"] = e_id;
-	  }
-	  folia::Paragraph *p = e->add_child<folia::Paragraph>( p_args );
-	  for ( const auto& sent : sents ){
-	    folia::KWargs args;
-	    string p_id = p->id();
-	    if ( !p_id.empty() ){
-	      args["generate_id"] = p_id;
+	  // multiple sentences. We need an extra Paragraph. when allowed
+	  if ( e->acceptable(folia::Paragraph_t) ){
+	    folia::KWargs p_args;
+	    string e_id = e->id();
+	    if ( !e_id.empty() ){
+	      p_args["generate_id"] = e_id;
 	    }
-	    folia::Sentence *s = p->add_child<folia::Sentence>( args );
-	    append_to_sentence( s, sent );
-	    if  (options.debugFlag > 0){
-	      DBG << "created a new sentence: " << s << endl;
+	    folia::Paragraph *p = e->add_child<folia::Paragraph>( p_args );
+	    for ( const auto& sent : sents ){
+	      folia::KWargs args;
+	      string p_id = p->id();
+	      if ( !p_id.empty() ){
+		args["generate_id"] = p_id;
+	      }
+	      folia::Sentence *s = p->add_child<folia::Sentence>( args );
+	      append_to_sentence( s, sent );
+	      if  (options.debugFlag > 0){
+		DBG << "created a new sentence: " << s << endl;
+	      }
+	    }
+	  }
+	  else {
+	    DBG << "not e->acceptable\n"
+		<< e << endl;
+	    for ( const auto& sent : sents ){
+	      folia::KWargs args;
+	      string e_id = e->id();
+	      if ( !e_id.empty() ){
+		args["generate_id"] = e_id;
+	      }
+	      folia::Sentence *s = e->add_child<folia::Sentence>( args );
+	      append_to_sentence( s, sent );
+	      if  (options.debugFlag > 0){
+		DBG << "created a new sentence: " << s << endl;
+	      }
 	    }
 	  }
 	}
