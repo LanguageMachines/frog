@@ -2583,8 +2583,9 @@ void FrogAPI::handle_one_text_parent( ostream& os,
 	    }
 	  }
 	  else {
-	    DBG << "not e->acceptable\n"
-		<< e << endl;
+	    if ( options.debugFlag > 5 ){
+	      DBG << "not e->acceptable\n" << e << endl;
+	    }
 	    for ( const auto& sent : sents ){
 	      folia::KWargs args;
 	      string e_id = e->id();
