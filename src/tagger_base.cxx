@@ -206,7 +206,8 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   if ( tokFile.empty() ){
     tokFile = config.lookUp( "token_trans_file" );
   }
-  if ( !tokFile.empty() ){
+  if ( !tokFile.empty()
+       && tokFile != "ignore" ){
     tokFile = prefix( config.configDir(), tokFile );
     if ( !fill_map( tokFile ) ){
       LOG << "failed to load a token translation file from: '"
