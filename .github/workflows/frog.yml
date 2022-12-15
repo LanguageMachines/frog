@@ -18,18 +18,26 @@ jobs:
   notification:
     runs-on: ubuntu-latest
     name: Notify start to IRC/gitlama
+    outputs:
+      branch: ${{ steps.extract_branch.outputs.branch }}
     steps:
+      - name: Extract Branch name
+        shell: bash
+        run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
+        id: extract_branch
       - name: IRC notification
-        uses: Gottox/irc-message-action@v1
+        uses: Gottox/irc-message-action@v2
         with:
           server: irc.uvt.nl
           channel: '#gitlama'
           nickname: GitHub
-          message: |-
+          message: >
             ${{ github.actor }} started a build of Frog
+            [${{ steps.extract_branch.outputs.branch }}]
 
   build:
     runs-on: ${{ matrix.os }}
+    needs: notification
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
@@ -37,7 +45,7 @@ jobs:
 
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.9.0
+        uses: styfle/cancel-workflow-action@0.11.0
         with:
           access_token: ${{ github.token }}
 
@@ -162,7 +170,7 @@ jobs:
         id: compiler
         run: |
           id=$(echo ${{matrix.compiler}} | cut -d\+ -f1)
-          echo "id=$id" >> $GITHUB_OUTPUT
+          echo "id=$id" >> $GITHUB_ENV
       - name: Static Code-check
         run: cppcheck --enable=all --quiet --error-exitcode=0 .
       - name: make
@@ -192,22 +200,18 @@ jobs:
           cat frogtests/*.diff
 
       - name: Notify IRC of failure
-
         if: ${{ env.test_status != '0' }}
-        uses: Gottox/irc-message-action@v1
+        uses: Gottox/irc-message-action@v2
         with:
           server: irc.uvt.nl
           channel: '#gitlama'
-          nickname: GH-${{ runner.os }}-${{ steps.compiler.outputs.id }}
-          message: |-
-            Building Frog with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: FAILED
-
+          nickname: GH-${{ runner.os }}-${{ env.id }}
+          message: "frog [${{ needs.notification.outputs.branch }}] build with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: \u00034FAIL\u0003"
       - name: Notify IRC of success
         if: ${{ env.test_status == '0' }}
-        uses: Gottox/irc-message-action@v1
+        uses: Gottox/irc-message-action@v2
         with:
           server: irc.uvt.nl
           channel: '#gitlama'
-          nickname: GH-${{ runner.os }}-${{ steps.compiler.outputs.id }}
-          message: |-
-            Building Frog with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: SUCCESS
+          nickname: GH-${{ runner.os }}-${{ env.id }}
+          message: "frog [${{ needs.notification.outputs.branch }}] build with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: \u00033SUCCESS\u0003"
