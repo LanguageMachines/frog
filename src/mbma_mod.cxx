@@ -41,8 +41,8 @@
 #include "timbl/TimblAPI.h"
 
 #include "ticcutils/Configuration.h"
-#include "ticcutils/StringOps.h"
 #include "ticcutils/PrettyPrint.h"
+#include "ticcutils/StringOps.h"
 #include "ticcutils/Unicode.h"
 #include "ticcutils/SocketBasics.h"
 #include "ticcutils/json.hpp"
