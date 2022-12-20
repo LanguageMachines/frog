@@ -87,8 +87,8 @@ class Mbma {
   void getResult( frog_record&,
 		  const icu::UnicodeString&,
 		  const icu::UnicodeString& ) const;
-  std::vector<std::string> make_instances( const icu::UnicodeString& word );
-  void call_server( const std::vector<std::string>&,
+  std::vector<icu::UnicodeString> make_instances( const icu::UnicodeString& word );
+  void call_server( const std::vector<icu::UnicodeString>&,
 		    std::vector<icu::UnicodeString>& );
   CLEX::Type getFinalTag( const std::list<BaseBracket*>& );
   int debugFlag;

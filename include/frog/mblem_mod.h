@@ -69,13 +69,13 @@ class Mblem {
   void add_lemmas( const std::vector<folia::Word*>&,
 		   const frog_data& ) const;
  private:
-  icu::UnicodeString call_server( const std::string& );
+  icu::UnicodeString call_server( const icu::UnicodeString& );
   void read_transtable( const std::string& );
   void create_MBlem_defaults();
   bool readsettings( const std::string& dir, const std::string& fname );
   bool fill_ts_map( const std::string& );
   bool fill_eq_set( const std::string& );
-  std::string make_instance( const icu::UnicodeString& in );
+  icu::UnicodeString make_instance( const icu::UnicodeString& in );
   Timbl::TimblAPI *myLex;
   std::string punctuation;
   size_t history;
