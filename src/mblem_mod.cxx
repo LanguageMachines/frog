@@ -545,7 +545,7 @@ void Mblem::Classify( const UnicodeString& word ){
     u_class = call_server( inst );
   }
   else {
-    myLex->Classify_u( inst, u_class );
+    myLex->Classify( inst, u_class );
   }
   if ( debug > 1){
     DBG << "class: " << u_class  << endl;

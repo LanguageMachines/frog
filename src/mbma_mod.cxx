@@ -1084,7 +1084,7 @@ void Mbma::Classify( const icu::UnicodeString& word ){
     int i = 0;
     for ( auto const& inst : insts ) {
       UnicodeString ans;
-      MTree->Classify_u( inst, ans );
+      MTree->Classify( inst, ans );
       if ( debugFlag > 1){
 	DBG << "itt #" << i+1 << " " << insts[i] << " ==> " << ans
 	    << ", depth=" << MTree->matchDepth() << endl;
