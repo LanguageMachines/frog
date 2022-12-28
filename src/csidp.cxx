@@ -87,26 +87,25 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
   vector<const Constraint*> constraints;
   auto pit = p_res.begin();
   //  LOG << "formulate WSCP, step 1" << endl;
-  for ( size_t dependent_id = 1;
-	dependent_id <= sent_len;
-	++dependent_id ){
+  for ( size_t dependent_id = 1; dependent_id <= sent_len; ++dependent_id ){
     string top_class = pit->cls();
     double conf = pit->confidence();
     ++pit;
     DBG << "class=" << top_class << " met conf " << conf << endl;
     if ( top_class != "__" ){
-      constraints.push_back( new HasDependency( dependent_id, 0 ,top_class, conf ) );
+      constraints.push_back( new HasDependency( dependent_id,
+						0,
+						top_class,
+						conf ) );
     }
   }
 
   //  LOG << "formulate WSCP, step 2" << endl;
-  for ( size_t dependent_id = 1;
-	dependent_id <= sent_len;
-	++dependent_id ) {
-    for ( size_t headId = 1;
-	  headId <= sent_len;
-	  ++headId ){
-      size_t diff = ( headId > dependent_id ) ? headId - dependent_id : dependent_id - headId;
+  for ( size_t dependent_id = 1; dependent_id <= sent_len; ++dependent_id ) {
+    for ( size_t headId = 1; headId <= sent_len; ++headId ){
+      size_t diff = ( headId > dependent_id ) ?
+	headId - dependent_id :
+	dependent_id - headId;
       if ( diff != 0 && diff <= maxDist ){
 	if ( pit == p_res.end() ){
 	  DBG << "OEPS p_res leeg? " << endl;
@@ -117,7 +116,9 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
 	++pit;
 	DBG << "class=" << top_class << " met conf " << conf << endl;
 	if ( top_class != "__" ){
-	  constraints.push_back( new HasDependency(dependent_id,headId,top_class,conf));
+	  constraints.push_back( new HasDependency( dependent_id,
+						    headId,
+						    top_class,conf ) );
 	}
       }
     }
@@ -130,13 +131,13 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
 	token_id <= sent_len;
 	++token_id ) {
     for ( auto const& d : dit->dist() ){
-      constraints.push_back( new DependencyDirection( token_id, d.first, d.second ) );
+      constraints.push_back( new DependencyDirection( token_id,
+						      d.first,
+						      d.second ) );
     }
     ++dit;
 
-    for ( size_t rel_id = 1;
-	  rel_id <= sent_len;
-	  ++rel_id ) {
+    for ( size_t rel_id = 1; rel_id <= sent_len; ++rel_id ) {
       if ( rit == r_res.end() ){
 	break;
       }
@@ -145,7 +146,9 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
 	unordered_map<string,double> splits = split_dist( rit->dist() );
 	vector<string> clss = TiCC::split_at( top_class, "|" );
 	for( const auto& rel : clss ){
-	  constraints.push_back( new HasIncomingRel( rel_id, rel, splits[rel] ) );
+	  constraints.push_back( new HasIncomingRel( rel_id,
+						     rel,
+						     splits[rel] ) );
 	}
       }
       ++rit;
@@ -158,7 +161,9 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
 timbl_result::timbl_result( const string& cls,
 			    double conf,
 			    const Timbl::ValueDistribution* vd ):
-  _cls(cls), _confidence(conf) {
+  _cls(cls),
+  _confidence(conf)
+{
   auto it = vd->begin();
   while ( it != vd->end() ){
     _dist.push_back( make_pair(it->second->Value()->Name(),it->second->Weight()) );
@@ -169,7 +174,10 @@ timbl_result::timbl_result( const string& cls,
 timbl_result::timbl_result( const string& cls,
 			    double conf,
 			    const vector<std::pair<string,double>>& vd ):
-  _cls(cls), _confidence(conf), _dist(vd) {
+  _cls(cls),
+  _confidence(conf),
+  _dist(vd)
+{
 }
 
 vector<parsrel> parse( const vector<timbl_result>& p_res,
