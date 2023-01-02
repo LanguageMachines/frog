@@ -8,7 +8,7 @@
     "@type": "SoftwareSourceCode",
     "identifier": "frog",
     "name": "Frog",
-    "version": "0.26",
+    "version": "0.27",
     "description": "Frog is an integration of memory-based natural language processing (NLP) modules developed for Dutch. It performs automatic linguistic enrichment such as part of speech tagging, lemmatisation, named entity recognition, shallow parsing, dependency parsing and morphological analysis. All NLP modules are based on TiMBL.",
     "license": "https://spdx.org/licenses/GPL-3.0-only",
 	"url": "https://languagemachines.github.io/frog",
@@ -34,8 +34,8 @@
 			"givenName": "Ko",
 			"familyName": "van der Sloot",
 			"email": "ko.vandersloot@let.ru.nl",
-			"affiliation": { 
-                "@id": "https://www.ru.nl/clst", 
+			"affiliation": {
+                "@id": "https://www.ru.nl/clst",
                 "@type": "Organization",
                 "name": "Centre for Language and Speech Technology",
                 "url": "https://www.ru.nl/clst",
@@ -196,7 +196,7 @@
             "name": "frog",
             "runtimePlatform": [ "Linux", "BSD", "macOS" ],
             "description": "Command-line interface to the full NLP suite",
-            "consumesData": [ 
+            "consumesData": [
                 {
                     "@type": "TextDigitalDocument",
                     "encodingFormat": "text/plain",
@@ -218,7 +218,7 @@
                     }
                 }
             ],
-            "producesData": [ 
+            "producesData": [
                 {
                     "@type": "TextDigitalDocument",
                     "encodingFormat": "text/plain",
@@ -247,14 +247,14 @@
             "runtimePlatform": [ "Linux", "BSD", "macOS" ],
             "name": "mbma",
             "description": "Memory-based Morphological Analysis (standalone)",
-            "consumesData": [ 
+            "consumesData": [
                 {
                     "@type": "TextDigitalDocument",
                     "encodingFormat": "text/plain",
                     "inLanguage": { "@id": "https://iso639-3.sil.org/code/nld" }
                 }
             ],
-            "producesData": [ 
+            "producesData": [
                 {
                     "@type": "TextDigitalDocument",
                     "encodingFormat": "text/plain",
@@ -267,14 +267,14 @@
             "executableName": "mblem",
             "name": "mblem",
             "description": "Memory-based Lemmatiser (standalone)",
-            "consumesData": [ 
+            "consumesData": [
                 {
                     "@type": "TextDigitalDocument",
                     "encodingFormat": "text/plain",
                     "inLanguage": { "@id": "https://iso639-3.sil.org/code/nld" }
                 }
             ],
-            "producesData": [ 
+            "producesData": [
                 {
                     "@type": "TextDigitalDocument",
                     "encodingFormat": "text/plain",
@@ -287,14 +287,14 @@
             "executableName": "ner",
             "name": "ner",
             "description": "Named Entity Recogniser (standalone)",
-            "consumesData": [ 
+            "consumesData": [
                 {
                     "@type": "TextDigitalDocument",
                     "encodingFormat": "text/plain",
                     "inLanguage": { "@id": "https://iso639-3.sil.org/code/nld" }
                 }
             ],
-            "producesData": [ 
+            "producesData": [
                 {
                     "@type": "TextDigitalDocument",
                     "encodingFormat": "text/plain",
