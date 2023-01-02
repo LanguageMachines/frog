@@ -166,7 +166,8 @@ timbl_result::timbl_result( const string& cls,
 {
   auto it = vd->begin();
   while ( it != vd->end() ){
-    _dist.push_back( make_pair(it->second->Value()->Name(),it->second->Weight()) );
+    _dist.push_back( make_pair(it->second->Value()->name_string(),
+			       it->second->Weight()) );
     ++it;
   }
 }
