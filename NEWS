@@ -1,3 +1,15 @@
+0.26 - 2023-01-02
+[Ko van der Sloot]
+* fix for https://github.com/LanguageMachines/frog/issues/96
+* code improvements, readability and fixing CppCheck warnings
+* needs recent ticcutils (>=0.30)
+* needs newest Timbl (6.8) for more Unicode awarenes
+* updated GigHub action
+
+[Maarten van Gompel]
+* added MAINTAINERS file
+* updated codemeta.json
+
 0.25 - 2022-07-22
 
 [Maarten van Gompel]
