@@ -1,6 +1,6 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  Copyright (c) 2006 - 2022
+  Copyright (c) 2006 - 2023
   CLST  - Radboud University
   ILK   - Tilburg University
 
@@ -262,11 +262,11 @@ Mblem::~Mblem(){
   delete errLog;
 }
 
-string Mblem::make_instance( const UnicodeString& in ) {
+UnicodeString Mblem::make_instance( const UnicodeString& in ) {
   /// convert a Unicode string into an instance for Timbl
   /*!
     \param in the UnicodeString representing 1 word to lemmatize
-    \return an UTF8 string with an instance we can feed to Timbl
+    \return a UnicodeString with an instance we can feed to Timbl
   */
   if (debug > 2 ) {
     DBG << "making instance from: " << in << endl;
@@ -285,11 +285,10 @@ string Mblem::make_instance( const UnicodeString& in ) {
     }
   }
   instance += "?";
-  string result = TiCC::UnicodeToUTF8(instance);
   if ( debug > 2 ){
     DBG << "inst: " << instance << endl;
   }
-  return result;
+  return instance;
 }
 
 void Mblem::filterTag( const UnicodeString& postag ){
@@ -459,7 +458,7 @@ void Mblem::Classify( frog_record& fd ){
   }
 }
 
-UnicodeString Mblem::call_server( const string& instance ){
+UnicodeString Mblem::call_server( const UnicodeString& instance ){
   /// use a Timbl server to classify
   /*!
     \param instance The instance to give to Timbl
@@ -508,7 +507,7 @@ UnicodeString Mblem::call_server( const string& instance ){
   // create json query struct
   json query;
   query["command"] = "classify";
-  query["param"] = instance;
+  query["param"] = TiCC::UnicodeToUTF8(instance);
   //  LOG << "send json" << query.dump(2) << endl;
   // send it to the server
   string out_line = query.dump() + "\n";
@@ -540,7 +539,7 @@ void Mblem::Classify( const UnicodeString& word ){
   static TiCC::UnicodeNormalizer nfc_norm;
   UnicodeString uWord = nfc_norm.normalize(word);
   mblemResult.clear();
-  string inst = make_instance(uWord); // Timbl likes UTF8 encoded strings
+  UnicodeString inst = make_instance(uWord);
   UnicodeString u_class;
   if ( !_host.empty() ){
     u_class = call_server( inst );

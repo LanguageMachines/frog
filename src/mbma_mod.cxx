@@ -1,6 +1,6 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  Copyright (c) 2006 - 2022
+  Copyright (c) 2006 - 2023
   CLST  - Radboud University
   ILK   - Tilburg University
 
@@ -41,8 +41,8 @@
 #include "timbl/TimblAPI.h"
 
 #include "ticcutils/Configuration.h"
-#include "ticcutils/StringOps.h"
 #include "ticcutils/PrettyPrint.h"
+#include "ticcutils/StringOps.h"
 #include "ticcutils/Unicode.h"
 #include "ticcutils/SocketBasics.h"
 #include "ticcutils/json.hpp"
@@ -293,19 +293,19 @@ bool Mbma::init( const TiCC::Configuration& config ) {
   }
 }
 
-vector<string> Mbma::make_instances( const icu::UnicodeString& word ){
+vector<UnicodeString> Mbma::make_instances( const UnicodeString& word ){
   /// convert a Unicode string into a range of UTF8 instances for Timbl
   /*!
     \param word the UnicodeString representing 1 word to analyze
     \return a vector of UTF8 stringa with instances for Timbl
   */
-  vector<string> insts;
+  vector<UnicodeString> insts;
   insts.reserve( word.length() );
   for ( long i=0; i < word.length(); ++i ) {
     if (debugFlag > 10){
       DBG << "itt #:" << i << endl;
     }
-    icu::UnicodeString inst;
+    UnicodeString inst;
     for ( long j=i ; j <= i + RIGHT + LEFT; ++j ) {
       if (debugFlag > 10){
 	DBG << " " << j-LEFT << ": ";
@@ -327,7 +327,7 @@ vector<string> Mbma::make_instances( const icu::UnicodeString& word ){
       }
     }
     inst += "?";
-    insts.push_back( TiCC::UnicodeToUTF8(inst) );
+    insts.push_back( inst );
   }
   return insts;
 }
@@ -443,7 +443,7 @@ Rule* Mbma::matchRule( const vector<UnicodeString>& ana,
   }
 }
 
-vector<Rule*> Mbma::execute( const icu::UnicodeString& word,
+vector<Rule*> Mbma::execute( const UnicodeString& word,
 			     const vector<UnicodeString>& classes ){
   /// attempt to find matching Rules
   /*!
@@ -976,7 +976,7 @@ void Mbma::Classify( frog_record& fd ){
   }
 }
 
-void Mbma::call_server( const vector<string>& insts,
+void Mbma::call_server( const vector<UnicodeString>& insts,
 			vector<UnicodeString>& classes ){
   Sockets::ClientSocket client;
   if ( !client.connect( _host, _port ) ){
@@ -1023,7 +1023,7 @@ void Mbma::call_server( const vector<string>& insts,
   query["command"] = "classify";
   json arr = json::array();
   for ( const auto& i : insts ){
-    arr.push_back( i );
+    arr.push_back( TiCC::UnicodeToUTF8(i) );
   }
   query["params"] = arr;
   //  LOG << "send json" << query.dump(2) << endl;
@@ -1063,7 +1063,7 @@ void Mbma::Classify( const icu::UnicodeString& word ){
   else {
     uWord = my_norm.normalize( uWord );
   }
-  vector<string> insts = make_instances( uWord );
+  vector<UnicodeString> insts = make_instances( uWord );
   vector<UnicodeString> classes;
   classes.reserve( insts.size() );
   //  LOG << "made instances: " << insts << endl;

@@ -1,6 +1,6 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  Copyright (c) 2006 - 2022
+  Copyright (c) 2006 - 2023
   CLST  - Radboud University
   ILK   - Tilburg University
 
@@ -206,7 +206,8 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   if ( tokFile.empty() ){
     tokFile = config.lookUp( "token_trans_file" );
   }
-  if ( !tokFile.empty() ){
+  if ( !tokFile.empty()
+       && tokFile != "ignore" ){
     tokFile = prefix( config.configDir(), tokFile );
     if ( !fill_map( tokFile ) ){
       LOG << "failed to load a token translation file from: '"

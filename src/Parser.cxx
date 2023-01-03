@@ -1,6 +1,6 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  Copyright (c) 2006 - 2022
+  Copyright (c) 2006 - 2023
   CLST  - Radboud University
   ILK   - Tilburg University
 
@@ -996,9 +996,9 @@ vector<timbl_result> timbl( Timbl::TimblAPI* tim,
   vector<timbl_result> result;
   for ( const auto& inst : instances ){
     const Timbl::ValueDistribution *db;
-    const Timbl::TargetValue *tv = tim->Classify( TiCC::UnicodeToUTF8(inst),
-						  db );
-    result.push_back( timbl_result( tv->Name(), db->Confidence(tv), db ) );
+    const Timbl::TargetValue *tv = tim->Classify( inst, db );
+    result.push_back( timbl_result( tv->name_string(),
+				    db->Confidence(tv), db ) );
   }
   return result;
 }

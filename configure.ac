@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.69])
 #also adapt version number in codemeta.json
-AC_INIT([frog],[0.26],[lamasoftware@science.ru.nl]) #adapt version number in codemeta.json as well
+AC_INIT([frog],[0.27],[lamasoftware@science.ru.nl]) #adapt version number in codemeta.json as well
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_MACRO_DIR([m4])
@@ -115,12 +115,12 @@ LIBS="$ICU_LIBS $LIBS"
 
 AX_LIB_READLINE
 
-PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.28] )
+PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.30] )
 
 CXXFLAGS="$CXXFLAGS $ticcutils_CFLAGS"
 LIBS="$ticcutils_LIBS $LIBS"
 
-PKG_CHECK_MODULES([timbl], [timbl >= 6.6] )
+PKG_CHECK_MODULES([timbl], [timbl >= 6.8] )
 CXXFLAGS="$CXXFLAGS $timbl_CFLAGS"
 LIBS="$timbl_LIBS $LIBS"
 
