@@ -2889,26 +2889,49 @@ void FrogAPI::run_api_tests( const string& testName ){
   }
 }
 
+const string& get_mbma_tagset( const std::string& module ){
+  /// expose ttagset information from de mbma module tot the world
+  /*!
+    \param module the specific set
+    \return a string with the setname
+
+  */
+
+  if ( module == "mbma" ){
+    return Mbma::mbma_tagset;
+  }
+  else if ( module == "celex" ){
+    return Mbma::clex_tagset;
+  }
+  else if ( module == "cgn" ){
+    return Mbma::pos_tagset;
+  }
+  else {
+    string msg = "get_mbma_tagset(): Unsupported module " + module + "\n"
+      + "Valid modules are: 'mbma', 'cgn' and 'celex'";
+    throw runtime_error( msg );
+  }
+}
+
 vector<string> get_compound_analysis( folia::Word* word ){
   /// extract compound information from the deep_morph analysis in word
   /*!
     \param word the folia::Word to extract from
     \return a vector of strings with compound information
 
-    this function is ONLY used by TSCAN atm.
+    this function is ONLY used by TSCAN, should be moved there
 
-    moving it there is problematic because tscan has no knowledge about the
-    `Mbma::mbma_tagset`
   */
   vector<string> result;
   vector<folia::MorphologyLayer*> layers
-    = word->annotations<folia::MorphologyLayer>( Mbma::mbma_tagset );
+    = word->annotations<folia::MorphologyLayer>( get_mbma_tagset( "mbma" ) );
   for ( const auto& layer : layers ){
     vector<folia::Morpheme*> m =
-      layer->select<folia::Morpheme>( Mbma::mbma_tagset, false );
+      layer->select<folia::Morpheme>( get_mbma_tagset( "mbma" ), false );
     if ( m.size() == 1 ) {
       // check for top layer compound
-      folia::PosAnnotation *tag = m[0]->annotation<folia::PosAnnotation>( Mbma::clex_tagset );
+      folia::PosAnnotation *tag
+	= m[0]->annotation<folia::PosAnnotation>( get_mbma_tagset( "celex" ) );
       if ( tag ){
 	result.push_back( tag->feat( "compound" ) ); // might be empty
       }
@@ -2959,17 +2982,15 @@ vector<string> get_full_morph_analysis( folia::Word *word,
     \param make_flat When 'true' remove extra brackets
     \return a vector of strings with flattended morpheme information
 
-    this function is ONLY used by TSCAN atm.
+    this function is ONLY used by TSCAN, should be moved there
 
-    moving it there is problematic because tscan has no knowledge about the
-    `Mbma::mbma_tagset`
   */
   vector<string> result;
   vector<folia::MorphologyLayer*> layers
-    = word->annotations<folia::MorphologyLayer>( Mbma::mbma_tagset );
+    = word->annotations<folia::MorphologyLayer>( get_mbma_tagset( "mbma" ) );
   for ( const auto& layer : layers ){
     vector<folia::Morpheme*> m =
-      layer->select<folia::Morpheme>( Mbma::mbma_tagset, false );
+      layer->select<folia::Morpheme>( get_mbma_tagset( "mbma" ), false );
     bool is_deep = false;
     if ( m.size() == 1 ) {
       // check for top layer from deep morph analysis
@@ -2985,7 +3006,7 @@ vector<string> get_full_morph_analysis( folia::Word *word,
     if ( !is_deep ){
       // flat structure
       string morph;
-      m = layer->select<folia::Morpheme>( Mbma::mbma_tagset );
+      m = layer->select<folia::Morpheme>( get_mbma_tagset( "mbma" ) );
       for ( const auto& mor : m ){
 	string txt = TiCC::UnicodeToUTF8( mor->text( cls ) );
 	morph += "[" + txt + "]";
@@ -3003,10 +3024,8 @@ vector<string> get_full_morph_analysis( folia::Word *word, bool make_flat ){
     \param make_flat When 'true' remove extra brackets
     \return a vector of strings with flattended morpheme information
 
-    this function is ONLY used by TSCAN atm.
+    this function is ONLY used by TSCAN, should be moved there
 
-    moving it there is problematic because tscan has no knowledge about the
-    `Mbma::mbma_tagset`
   */
   return get_full_morph_analysis( word, "current", make_flat );
 }

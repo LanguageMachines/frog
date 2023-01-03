@@ -265,4 +265,6 @@ std::vector<std::string> get_full_morph_analysis( folia::Word *word,
 						  bool make_flat=false );
 std::vector<std::string> get_compound_analysis( folia::Word *word );
 
+const std::string& get_mbma_tagset( const std::string& );
+
 #endif
