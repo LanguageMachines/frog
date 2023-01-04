@@ -118,7 +118,8 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
 	if ( top_class != "__" ){
 	  constraints.push_back( new HasDependency( dependent_id,
 						    headId,
-						    top_class,conf ) );
+						    top_class,
+						    conf ) );
 	}
       }
     }
