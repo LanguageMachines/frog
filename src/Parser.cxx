@@ -995,18 +995,18 @@ vector<timbl_result> timbl( Timbl::TimblAPI* tim,
    */
   vector<timbl_result> result;
   for ( const auto& inst : instances ){
-    const Timbl::ValueDistribution *db;
+    const Timbl::ClassDistribution *db;
     const Timbl::TargetValue *tv = tim->Classify( inst, db );
     result.push_back( timbl_result( TiCC::UnicodeToUTF8(tv->name()),
-				    db->Confidence(tv), db ) );
+				    db->Confidence(tv), *db ) );
   }
   return result;
 }
 
 vector<pair<string,double>> parse_vd( const string& ds ){
-  /// parse a ValueDistribution string into a vector of class/value pairs
+  /// parse a ClassDistribution string into a vector of class/value pairs
   /*!
-    \param ds a string representation of a Timbl ValueDistribution
+    \param ds a string representation of a Timbl ClassDistribution
     \return a vector of string/double pairs. Each pair is one class + it's
     (relative) count
   */

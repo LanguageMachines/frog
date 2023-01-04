@@ -43,7 +43,7 @@ class timbl_result {
  public:
   timbl_result( const std::string&,
 		double,
-		const Timbl::ValueDistribution* );
+		const Timbl::ClassDistribution& );
   timbl_result( const std::string&,
 		double,
 		const std::vector<std::pair<std::string,double>>& );
