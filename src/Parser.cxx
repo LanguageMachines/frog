@@ -997,7 +997,7 @@ vector<timbl_result> timbl( Timbl::TimblAPI* tim,
   for ( const auto& inst : instances ){
     const Timbl::ValueDistribution *db;
     const Timbl::TargetValue *tv = tim->Classify( inst, db );
-    result.push_back( timbl_result( tv->name_string(),
+    result.push_back( timbl_result( TiCC::UnicodeToUTF8(tv->name()),
 				    db->Confidence(tv), db ) );
   }
   return result;
