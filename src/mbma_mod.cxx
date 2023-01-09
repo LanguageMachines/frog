@@ -333,8 +333,8 @@ vector<UnicodeString> Mbma::make_instances( const UnicodeString& word ){
 }
 
 UnicodeString find_class( unsigned int step,
-		   const vector<UnicodeString>& classes,
-		   unsigned int nranal ){
+			  const vector<UnicodeString>& classes,
+			  unsigned int nranal ){
   UnicodeString result = classes[0];
   if ( nranal > 1 ){
     if ( classes.size() > 1 ){
@@ -508,6 +508,47 @@ void Mbma::addBracketMorph( folia::Word *word,
   }
   catch( const exception& e ){
     LOG << "createMorpheme failed: " << e.what() << endl;
+    throw;
+  }
+#pragma omp critical (foliaupdate)
+  {
+    m->setutext( orig_word, textclass );
+    ml->append( m );
+  }
+}
+
+void Mbma::addFlatMorph( folia::Word *word,
+			 const UnicodeString& orig_word,
+			 const BaseBracket *brackets ) const {
+  /// add a flat Morpheme layer to the FoLiA Word
+  /*!
+    \param word the FoLiA Word
+    \param orig_word, a Unicode string with the oriiginal word
+    \param brackets the nested structure describing the morphemes
+   */
+  if (debugFlag > 1){
+    DBG << "addFlatMorph(" << word << "," << orig_word << ","
+	<< brackets << ")" << endl;
+  }
+  folia::KWargs args;
+  args["set"] = mbma_tagset;
+  folia::MorphologyLayer *ml;
+#pragma omp critical (foliaupdate)
+  {
+    try {
+      ml = word->addMorphologyLayer( args );
+    }
+    catch( const exception& e ){
+      LOG << e.what() << " addBracketMorph failed." << endl;
+      throw;
+    }
+  }
+  folia::Morpheme *m = 0;
+  try {
+    m = brackets->createFlatMorpheme( word->doc() );
+  }
+  catch( const exception& e ){
+    LOG << "createFlatMorpheme failed: " << e.what() << endl;
     throw;
   }
 #pragma omp critical (foliaupdate)
@@ -794,9 +835,9 @@ void Mbma::add_provenance( folia::Document& doc,
   args.clear();
   args["processor"] = proc->id();
   doc.declare( folia::AnnotationType::MORPHOLOGICAL, mbma_tagset, args );
-  if ( doDeepMorph ){
+  //  if ( doDeepMorph ){
     doc.declare( folia::AnnotationType::POS, clex_tagset, args );
-  }
+    //  }
 }
 
 void Mbma::store_morphemes( frog_record& fd,
@@ -1122,23 +1163,8 @@ void Mbma::add_morphemes( const vector<folia::Word*>& wv,
 			  const frog_data& fd ) const {
   for ( size_t i=0; i < wv.size(); ++i ){
     if ( !doDeepMorph ){
-      for ( const auto& mor : fd.units[i].morphs ) {
-	folia::KWargs args;
-	args["set"] = mbma_tagset;
-	folia::MorphologyLayer *ml = 0;
-#pragma omp critical (foliaupdate)
-	{
-	  ml = wv[i]->addMorphologyLayer( args );
-	}
-	for ( const auto& mt : mor ) {
-	  folia::Morpheme *m = new folia::Morpheme( args, wv[0]->doc() );
-	  UnicodeString stripped = UnicodeString(mt,1,mt.length()-2);
-#pragma omp critical (foliaupdate)
-	  {
-	    m->setutext( stripped, textclass );
-	    ml->append( m );
-	  }
-	}
+      for ( const auto& mor : fd.units[i].morph_structure ) {
+	addFlatMorph( wv[i], fd.units[i].clean_word, mor );
       }
     }
     else {
@@ -1148,3 +1174,24 @@ void Mbma::add_morphemes( const vector<folia::Word*>& wv,
     }
   }
 }
+
+#ifdef OLDCODE
+for ( const auto& mor : fd.units[i].morphs ) {
+  folia::KWargs args;
+  args["set"] = mbma_tagset;
+  folia::MorphologyLayer *ml = 0;
+#pragma omp critical (foliaupdate)
+  {
+    ml = wv[i]->addMorphologyLayer( args );
+  }
+  for ( const auto& mt : mor ) {
+    folia::Morpheme *m = new folia::Morpheme( args, wv[0]->doc() );
+    UnicodeString stripped = UnicodeString(mt,1,mt.length()-2);
+#pragma omp critical (foliaupdate)
+    {
+      m->setutext( stripped, textclass );
+      ml->append( m );
+    }
+  }
+ }
+#endif

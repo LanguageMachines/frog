@@ -977,6 +977,188 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   return result;
 }
 
+folia::Morpheme *BracketLeaf::createFlatMorpheme( folia::Document *doc ) const {
+  /// use the data in the Leaf to create a folia::Morpheme node
+  /*!
+    \param doc The FoLiA Document context
+  */
+  UnicodeString desc;
+  int cnt = 0;
+  return createFlatMorpheme( doc, desc, cnt );
+}
+
+folia::Morpheme *BracketLeaf::createFlatMorpheme( folia::Document *doc,
+						  UnicodeString& desc,
+						  int& cnt ) const {
+  /// use the data in the Leaf to create a flat folia::Morpheme node
+  /*!
+    \param doc The FoLiA Document context
+    \param desc a decriptien note to add
+    \param cnt a counter for the number of handled morphemes
+  */
+  folia::Morpheme *result = 0;
+  desc.remove();
+  int pos = orig.indexOf( "^" );
+  bool glue = ( pos != -1 );
+  if ( _status == Status::COMPLEX ){
+    abort();
+  }
+  else if ( _status == Status::STEM
+	    || ( _status == Status::DERIVATIONAL && glue ) ){
+    UnicodeString out = morph;
+    if ( out.isEmpty() ){
+      throw logic_error( "stem has empty morpheme" );
+    }
+    folia::KWargs args;
+    args["set"] = Mbma::mbma_tagset;
+    args["class"] = "stem";
+#pragma omp critical (foliaupdate)
+    {
+      result = new folia::Morpheme( args, doc );
+      result->setutext( out );
+    }
+    ++cnt;
+    args.clear();
+    args["set"] = Mbma::clex_tagset;
+    if ( glue ){
+      UnicodeString next_tag = orig[pos+1];
+      args["class"] = TiCC::UnicodeToUTF8(next_tag);
+      desc = "[" + out + "]" + CLEX::get_tag_descr( CLEX::toCLEX(next_tag) );
+      // spread the word upwards!
+    }
+    else {
+      args["class"] = toString( tag() );
+      desc = "[" + out + "]" + CLEX::get_tag_descr( tag() );
+      // spread the word upwards!
+    }
+#pragma omp critical (foliaupdate)
+    {
+      result->addPosAnnotation( args );
+    }
+  }
+  else if ( _status == Status::PARTICLE ){
+    UnicodeString out = morph;
+    if ( out.isEmpty() ){
+      throw logic_error( "particle has empty morpheme" );
+    }
+    folia::KWargs args;
+    args["set"] = Mbma::mbma_tagset;
+    args["class"] = "particle";
+#pragma omp critical (foliaupdate)
+    {
+      result = new folia::Morpheme( args, doc );
+      result->setutext( out );
+    }
+    ++cnt;
+    args.clear();
+    args["set"] = Mbma::clex_tagset;
+    args["class"] = toString( tag() );
+#pragma omp critical (foliaupdate)
+    {
+      result->addPosAnnotation( args );
+    }
+    desc = "[" + out + "]"; // spread the word upwards! maybe add 'part' ??
+  }
+  else if ( _status == Status::INFLECTION ){
+    UnicodeString out = morph;
+    if ( !out.isEmpty() ){
+      desc = "[" + out + "]";
+    }
+    folia::KWargs args;
+    args["class"] = "inflection";
+    args["set"] = Mbma::mbma_tagset;
+#pragma omp critical (foliaupdate)
+    {
+      result = new folia::Morpheme( args, doc );
+      if ( !out.isEmpty() ){
+	result->setutext( out );
+      }
+    }
+    ++cnt;
+    args.clear();
+    args["subset"] = "inflection";
+    for ( int i=0; i < inflect.length(); ++i ){
+      UChar inf = inflect[i];
+      if ( inf != '/' ){
+	UnicodeString d = CLEX::get_inflect_descr(inf);
+	if ( !d.isEmpty() ){
+	  // happens sometimes when there is fawlty data
+	  args["class"] = TiCC::UnicodeToUTF8(d);
+	  desc += "/" + d;
+#pragma omp critical (foliaupdate)
+	  {
+	    result->add_child<folia::Feature>( args );
+	  }
+	}
+      }
+    }
+  }
+  else if ( _status == Status::DERIVATIONAL
+	    || _status == Status::PARTICIPLE
+	    || _status == Status::FAILED ){
+    UnicodeString out = morph;
+    if ( out.isEmpty() ){
+      throw logic_error( "Derivation with empty morpheme" );
+    }
+    folia::KWargs args;
+    if ( _status == Status::DERIVATIONAL ){
+      args["class"] = "affix";
+    }
+    else if ( _status == Status::PARTICIPLE ){
+      args["class"] = "participle";
+    }
+    else {
+      args["class"] = "derivational";
+    }
+    args["set"] = Mbma::mbma_tagset;
+#pragma omp critical (foliaupdate)
+    {
+      result = new folia::Morpheme( args, doc );
+      result->setutext( out );
+    }
+    ++cnt;
+    desc = "[" + out + "]"; // pass it up!
+    for ( int i=0; i < inflect.length(); ++i ){
+      UChar inf = inflect[i];
+      if ( inf != '/' ){
+	UnicodeString d = CLEX::get_inflect_descr( inf );
+	if ( !d.isEmpty() ){
+	  // happens sometimes when there is fawlty data
+	  desc += "/" + d;
+	}
+      }
+    }
+  }
+  else if ( _status == Status::INFO ){
+    folia::KWargs args;
+    args["class"] = "inflection";
+    args["set"] = Mbma::mbma_tagset;
+#pragma omp critical (foliaupdate)
+    {
+      result = new folia::Morpheme( args, doc );
+    }
+    args.clear();
+    args["subset"] = "inflection";
+    for ( int i=0; i < inflect.length(); ++i ){
+      UChar inf = inflect[i];
+      if ( inf != '/' ){
+	UnicodeString d = CLEX::get_inflect_descr( inf );
+	if ( !d.isEmpty() ){
+	  // happens sometimes when there is fawlty data
+	  desc += "/" + d;
+	  args["class"] = TiCC::UnicodeToUTF8(d);
+#pragma omp critical (foliaupdate)
+	  {
+	    result->add_child<folia::Feature>( args );
+	  }
+	}
+      }
+    }
+  }
+  return result;
+}
+
+
 folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc ) const {
   /// use the data in the Leaf to create a folia::Morpheme node
   /*!
@@ -1062,6 +1244,69 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
     {
       pos->add_child<folia::Feature>( args );
     }
+  }
+#pragma omp critical (foliaupdate)
+  for ( const auto& s : stack ){
+    result->append( s );
+  }
+  return result;
+}
+
+folia::Morpheme *BracketNest::createFlatMorpheme( folia::Document *doc ) const {
+  /// use the data in the Leaf to create a folia::Morpheme node
+  /*!
+    \param doc The FoLiA Document context
+  */
+  UnicodeString desc;
+  int cnt = 0;
+  return createFlatMorpheme( doc, desc, cnt );
+}
+
+folia::Morpheme *BracketNest::createFlatMorpheme( folia::Document *doc,
+						  UnicodeString& desc,
+						  int& cnt ) const {
+  /// use the data in the Leaf to create a folia::Morpheme node
+  /*!
+    \param doc The FoLiA Document context
+    \param desc a decriptive note to add
+    \param cnt a counter for the number of handled morphemes
+  */
+  folia::Morpheme *result = 0;
+  folia::KWargs args;
+  args["set"] = Mbma::mbma_tagset;
+#pragma omp critical (foliaupdate)
+  {
+    result = new folia::Morpheme( args, doc );
+  }
+  cnt = 0;
+  desc.remove();
+  vector<folia::Morpheme*> stack;
+  for ( auto const& it : parts ){
+    UnicodeString deeper_desc;
+    int deep_cnt = 0;
+    folia::Morpheme *m = it->createFlatMorpheme( doc,
+						 deeper_desc,
+						 deep_cnt );
+    if ( it->status() == Status::DERIVATIONAL
+	 || it->status() == Status::PARTICIPLE ){
+      if ( !it->original().isEmpty() ){
+	args.clear();
+	args["subset"] = "applied_rule";
+	args["class"] = TiCC::UnicodeToUTF8(it->original());
+#pragma omp critical (foliaupdate)
+	{
+	  result->add_child<folia::Feature>( args );
+	}
+      }
+    }
+    if ( m ){
+      desc += deeper_desc;
+      cnt += deep_cnt;
+      stack.push_back( m );
+    }
+  }
+  if ( cnt > 1 ){
+    desc = "[" + desc + "]" + CLEX::get_tag_descr( tag() );
   }
 #pragma omp critical (foliaupdate)
   for ( const auto& s : stack ){
