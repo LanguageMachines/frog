@@ -1075,20 +1075,13 @@ folia::Morpheme *BracketLeaf::createFlatMorpheme( folia::Document *doc,
       }
     }
     ++cnt;
-    args.clear();
-    args["subset"] = "inflection";
     for ( int i=0; i < inflect.length(); ++i ){
       UChar inf = inflect[i];
       if ( inf != '/' ){
 	UnicodeString d = CLEX::get_inflect_descr(inf);
 	if ( !d.isEmpty() ){
 	  // happens sometimes when there is fawlty data
-	  args["class"] = TiCC::UnicodeToUTF8(d);
 	  desc += "/" + d;
-#pragma omp critical (foliaupdate)
-	  {
-	    result->add_child<folia::Feature>( args );
-	  }
 	}
       }
     }
@@ -1131,14 +1124,11 @@ folia::Morpheme *BracketLeaf::createFlatMorpheme( folia::Document *doc,
   }
   else if ( _status == Status::INFO ){
     folia::KWargs args;
-    args["class"] = "inflection";
     args["set"] = Mbma::mbma_tagset;
 #pragma omp critical (foliaupdate)
     {
       result = new folia::Morpheme( args, doc );
     }
-    args.clear();
-    args["subset"] = "inflection";
     for ( int i=0; i < inflect.length(); ++i ){
       UChar inf = inflect[i];
       if ( inf != '/' ){
@@ -1146,11 +1136,6 @@ folia::Morpheme *BracketLeaf::createFlatMorpheme( folia::Document *doc,
 	if ( !d.isEmpty() ){
 	  // happens sometimes when there is fawlty data
 	  desc += "/" + d;
-	  args["class"] = TiCC::UnicodeToUTF8(d);
-#pragma omp critical (foliaupdate)
-	  {
-	    result->add_child<folia::Feature>( args );
-	  }
 	}
       }
     }
@@ -1299,9 +1284,9 @@ folia::Morpheme *BracketNest::createFlatMorpheme( folia::Document *doc,
 	}
       }
     }
+    desc += deeper_desc;
+    cnt += deep_cnt;
     if ( m ){
-      desc += deeper_desc;
-      cnt += deep_cnt;
       stack.push_back( m );
     }
   }
