@@ -837,9 +837,9 @@ void Mbma::add_provenance( folia::Document& doc,
   args.clear();
   args["processor"] = proc->id();
   doc.declare( folia::AnnotationType::MORPHOLOGICAL, mbma_tagset, args );
-  //  if ( doDeepMorph ){
+  if ( doDeepMorph ){
     doc.declare( folia::AnnotationType::POS, clex_tagset, args );
-    //  }
+  }
 }
 
 void Mbma::store_morphemes( frog_record& fd,
