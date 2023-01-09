@@ -1009,31 +1009,15 @@ folia::Morpheme *BracketLeaf::createFlatMorpheme( folia::Document *doc,
     if ( out.isEmpty() ){
       throw logic_error( "stem has empty morpheme" );
     }
-    folia::KWargs args;
-    args["set"] = Mbma::mbma_tagset;
-    args["class"] = "stem";
-#pragma omp critical (foliaupdate)
-    {
-      result = new folia::Morpheme( args, doc );
-      result->setutext( out );
-    }
     ++cnt;
-    args.clear();
-    args["set"] = Mbma::clex_tagset;
     if ( glue ){
       UnicodeString next_tag = orig[pos+1];
-      args["class"] = TiCC::UnicodeToUTF8(next_tag);
       desc = "[" + out + "]" + CLEX::get_tag_descr( CLEX::toCLEX(next_tag) );
       // spread the word upwards!
     }
     else {
-      args["class"] = toString( tag() );
       desc = "[" + out + "]" + CLEX::get_tag_descr( tag() );
       // spread the word upwards!
-    }
-#pragma omp critical (foliaupdate)
-    {
-      result->addPosAnnotation( args );
     }
   }
   else if ( _status == Status::PARTICLE ){
