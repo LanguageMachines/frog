@@ -955,6 +955,9 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 #pragma omp critical (foliaupdate)
     {
       result = new folia::Morpheme( args, doc );
+      if ( !morph.isEmpty() ){
+	result->setutext( morph );
+      }
     }
     args.clear();
     args["subset"] = "inflection";
