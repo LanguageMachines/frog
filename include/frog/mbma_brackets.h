@@ -67,6 +67,7 @@ namespace Compound {
 namespace folia {
   class Document;
   class Morpheme;
+  class MorphologyLayer;
 }
 
 class RulePart;
@@ -109,12 +110,14 @@ class BaseBracket {
   virtual folia::Morpheme *createMorpheme( folia::Document *,
 					   icu::UnicodeString&,
 					   int& ) const = 0;
-  virtual folia::Morpheme *createFlatMorpheme( folia::Document *,
-					       const std::string& ) const = 0;
-  virtual folia::Morpheme *createFlatMorpheme( folia::Document *,
-					       const std::string&,
-					       icu::UnicodeString&,
-					       int& ) const = 0;
+  virtual void createFlatMorpheme( folia::MorphologyLayer *,
+				   folia::Document *,
+				   const std::string& ) const = 0;
+  virtual void createFlatMorpheme( folia::MorphologyLayer *,
+				   folia::Document *,
+				   const std::string&,
+				   icu::UnicodeString&,
+				   int& ) const = 0;
   virtual Compound::Type compound() const { return Compound::Type::NONE; };
   virtual Compound::Type getCompoundType() { return compound(); };
   CLEX::Type tag() const { return cls; };
@@ -159,12 +162,14 @@ public:
   folia::Morpheme *createMorpheme( folia::Document *,
 				   icu::UnicodeString&,
 				   int& ) const override;
-  folia::Morpheme *createFlatMorpheme( folia::Document *,
-				       const std::string& ) const override;
-  folia::Morpheme *createFlatMorpheme( folia::Document *,
-				       const std::string& ,
-				       icu::UnicodeString&,
-				       int& ) const override;
+  void createFlatMorpheme( folia::MorphologyLayer *,
+			   folia::Document *,
+			   const std::string& ) const override;
+  void createFlatMorpheme( folia::MorphologyLayer *,
+			   folia::Document *,
+			   const std::string& ,
+			   icu::UnicodeString&,
+			   int& ) const override;
 private:
   int ifpos;
   bool glue;
@@ -203,12 +208,14 @@ class BracketNest: public BaseBracket {
   folia::Morpheme *createMorpheme( folia::Document *,
 				   icu::UnicodeString&,
 				   int& ) const override;
-  folia::Morpheme *createFlatMorpheme( folia::Document *,
-				       const std::string& ) const override;
-  folia::Morpheme *createFlatMorpheme( folia::Document *,
-				       const std::string&,
-				       icu::UnicodeString&,
-				       int& ) const override;
+  void createFlatMorpheme( folia::MorphologyLayer *,
+			   folia::Document *,
+			   const std::string& ) const override;
+  void createFlatMorpheme( folia::MorphologyLayer *,
+			   folia::Document *,
+			   const std::string&,
+			   icu::UnicodeString&,
+			   int& ) const override;
   std::list<BaseBracket *> parts;
   Compound::Type compound() const { return _compound; };
  private:

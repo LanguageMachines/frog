@@ -545,18 +545,11 @@ void Mbma::addFlatMorph( folia::Word *word,
   }
   folia::Morpheme *m = 0;
   try {
-    m = brackets->createFlatMorpheme( word->doc(), textclass );
+    brackets->createFlatMorpheme( ml, word->doc(), textclass );
   }
   catch( const exception& e ){
     LOG << "createFlatMorpheme failed: " << e.what() << endl;
     throw;
-  }
-  if ( m ){
-#pragma omp critical (foliaupdate)
-    {
-      //      m->setutext( orig_word, textclass );
-      ml->append( m );
-    }
   }
 }
 
