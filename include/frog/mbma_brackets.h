@@ -109,8 +109,10 @@ class BaseBracket {
   virtual folia::Morpheme *createMorpheme( folia::Document *,
 					   icu::UnicodeString&,
 					   int& ) const = 0;
-  virtual folia::Morpheme *createFlatMorpheme( folia::Document *  ) const = 0;
   virtual folia::Morpheme *createFlatMorpheme( folia::Document *,
+					       const std::string& ) const = 0;
+  virtual folia::Morpheme *createFlatMorpheme( folia::Document *,
+					       const std::string&,
 					       icu::UnicodeString&,
 					       int& ) const = 0;
   virtual Compound::Type compound() const { return Compound::Type::NONE; };
@@ -157,8 +159,10 @@ public:
   folia::Morpheme *createMorpheme( folia::Document *,
 				   icu::UnicodeString&,
 				   int& ) const override;
-  folia::Morpheme *createFlatMorpheme( folia::Document * ) const override;
   folia::Morpheme *createFlatMorpheme( folia::Document *,
+				       const std::string& ) const override;
+  folia::Morpheme *createFlatMorpheme( folia::Document *,
+				       const std::string& ,
 				       icu::UnicodeString&,
 				       int& ) const override;
 private:
@@ -199,10 +203,12 @@ class BracketNest: public BaseBracket {
   folia::Morpheme *createMorpheme( folia::Document *,
 				   icu::UnicodeString&,
 				   int& ) const override;
-  folia::Morpheme *createFlatMorpheme( folia::Document * ) const override;
   folia::Morpheme *createFlatMorpheme( folia::Document *,
-				   icu::UnicodeString&,
-				   int& ) const override;
+				       const std::string& ) const override;
+  folia::Morpheme *createFlatMorpheme( folia::Document *,
+				       const std::string&,
+				       icu::UnicodeString&,
+				       int& ) const override;
   std::list<BaseBracket *> parts;
   Compound::Type compound() const { return _compound; };
  private:

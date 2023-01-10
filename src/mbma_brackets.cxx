@@ -977,17 +977,19 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   return result;
 }
 
-folia::Morpheme *BracketLeaf::createFlatMorpheme( folia::Document *doc ) const {
+folia::Morpheme *BracketLeaf::createFlatMorpheme( folia::Document *doc,
+						  const string& textclass ) const {
   /// use the data in the Leaf to create a folia::Morpheme node
   /*!
     \param doc The FoLiA Document context
   */
   UnicodeString desc;
   int cnt = 0;
-  return createFlatMorpheme( doc, desc, cnt );
+  return createFlatMorpheme( doc, textclass, desc, cnt );
 }
 
 folia::Morpheme *BracketLeaf::createFlatMorpheme( folia::Document *doc,
+						  const string& textclass,
 						  UnicodeString& desc,
 						  int& cnt ) const {
   /// use the data in the Leaf to create a flat folia::Morpheme node
@@ -1011,14 +1013,15 @@ folia::Morpheme *BracketLeaf::createFlatMorpheme( folia::Document *doc,
     if ( out.isEmpty() ){
       throw logic_error( "stem has empty morpheme" );
     }
-    if ( orig == "SPEC"
+    if ( true
+	 || orig == "SPEC"
 	 || orig == "LET" ){
       folia::KWargs args;
       args["set"] = Mbma::mbma_tagset;
 #pragma omp critical (foliaupdate)
       {
 	result = new folia::Morpheme( args, doc );
-	result->setutext( out );
+	result->setutext( out, textclass );
       }
     }
     ++cnt;
@@ -1186,17 +1189,19 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
   return result;
 }
 
-folia::Morpheme *BracketNest::createFlatMorpheme( folia::Document *doc ) const {
+folia::Morpheme *BracketNest::createFlatMorpheme( folia::Document *doc,
+						  const string& textclass ) const {
   /// use the data in the Leaf to create a folia::Morpheme node
   /*!
     \param doc The FoLiA Document context
   */
   UnicodeString desc;
   int cnt = 0;
-  return createFlatMorpheme( doc, desc, cnt );
+  return createFlatMorpheme( doc, textclass, desc, cnt );
 }
 
 folia::Morpheme *BracketNest::createFlatMorpheme( folia::Document *doc,
+						  const string& textclass,
 						  UnicodeString& desc,
 						  int& cnt ) const {
   /// use the data in the Leaf to create a folia::Morpheme node
@@ -1205,13 +1210,6 @@ folia::Morpheme *BracketNest::createFlatMorpheme( folia::Document *doc,
     \param desc a decriptive note to add
     \param cnt a counter for the number of handled morphemes
   */
-  folia::Morpheme *result = 0;
-  folia::KWargs args;
-  args["set"] = Mbma::mbma_tagset;
-#pragma omp critical (foliaupdate)
-  {
-    result = new folia::Morpheme( args, doc );
-  }
   cnt = 0;
   desc.remove();
   vector<folia::Morpheme*> stack;
@@ -1219,20 +1217,10 @@ folia::Morpheme *BracketNest::createFlatMorpheme( folia::Document *doc,
     UnicodeString deeper_desc;
     int deep_cnt = 0;
     folia::Morpheme *m = it->createFlatMorpheme( doc,
+						 textclass,
 						 deeper_desc,
 						 deep_cnt );
-    if ( it->status() == Status::DERIVATIONAL
-	 || it->status() == Status::PARTICIPLE ){
-      if ( !it->original().isEmpty() ){
-	args.clear();
-	args["subset"] = "applied_rule";
-	args["class"] = TiCC::UnicodeToUTF8(it->original());
-#pragma omp critical (foliaupdate)
-	{
-	  result->add_child<folia::Feature>( args );
-	}
-      }
-    }
+
     desc += deeper_desc;
     cnt += deep_cnt;
     if ( m ){
@@ -1242,9 +1230,24 @@ folia::Morpheme *BracketNest::createFlatMorpheme( folia::Document *doc,
   if ( cnt > 1 ){
     desc = "[" + desc + "]" + CLEX::get_tag_descr( tag() );
   }
+  folia::Morpheme *result = 0;
+  if ( stack.empty() ){
+    folia::KWargs args;
+    args["set"] = Mbma::mbma_tagset;
 #pragma omp critical (foliaupdate)
-  for ( const auto& s : stack ){
-    result->append( s );
+    {
+      result = new folia::Morpheme( args, doc );
+    }
+  }
+  else {
+    result = stack[0];
+#pragma omp critical (foliaupdate)
+    for ( const auto& s : stack ){
+      if ( &s == &(*stack.begin()) ){
+	continue;
+      }
+      result->append( s );
+    }
   }
   return result;
 }
