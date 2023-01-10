@@ -1103,6 +1103,16 @@ void BracketLeaf::createFlatMorpheme( folia::MorphologyLayer *ml,
     }
   }
   else if ( _status == Status::INFO ){
+    UnicodeString out = morph;
+    if ( !out.isEmpty() ){
+      folia::KWargs args;
+      args["set"] = Mbma::mbma_tagset;
+#pragma omp critical (foliaupdate)
+      {
+	result = new folia::Morpheme( args, doc );
+	result->setutext( out, textclass );
+      }
+    }
     for ( int i=0; i < inflect.length(); ++i ){
       UChar inf = inflect[i];
       if ( inf != '/' ){
