@@ -1040,6 +1040,13 @@ void BracketLeaf::createFlatMorpheme( folia::MorphologyLayer *ml,
     }
     ++cnt;
     desc = "[" + out + "]"; // spread the word upwards! maybe add 'part' ??
+    folia::KWargs args;
+    args["set"] = Mbma::mbma_tagset;
+#pragma omp critical (foliaupdate)
+    {
+      result = new folia::Morpheme( args, doc );
+      result->setutext( out, textclass );
+    }
   }
   else if ( _status == Status::INFLECTION ){
     UnicodeString out = morph;
@@ -1073,6 +1080,13 @@ void BracketLeaf::createFlatMorpheme( folia::MorphologyLayer *ml,
       throw logic_error( "Derivation with empty morpheme" );
     }
     ++cnt;
+    folia::KWargs args;
+    args["set"] = Mbma::mbma_tagset;
+#pragma omp critical (foliaupdate)
+    {
+      result = new folia::Morpheme( args, doc );
+      result->setutext( out, textclass );
+    }
     desc = "[" + out + "]"; // pass it up!
     for ( int i=0; i < inflect.length(); ++i ){
       UChar inf = inflect[i];
