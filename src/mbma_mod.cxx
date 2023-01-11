@@ -880,13 +880,14 @@ void Mbma::add_provenance( folia::Document& doc,
 void Mbma::store_morphemes( frog_record& fd,
 			    const vector<UnicodeString>& morphemes ) const {
   /// store the calculated morphemes in the FrogData
-  vector<UnicodeString> adapted;
-  for ( const auto& m : morphemes ){
-    adapted.push_back( "[" + m + "]" );
-  }
+  if ( fd.morph_string.isEmpty() ){
+    // not yet filled
+    vector<UnicodeString> adapted;
+    for ( const auto& m : morphemes ){
+      adapted.push_back( "[" + m + "]" );
+    }
 #pragma omp critical (dataupdate)
-  {
-    if ( fd.morph_string.isEmpty() ){
+    {
       for ( const auto& a : adapted ){
 	fd.morph_string += a;
       }
