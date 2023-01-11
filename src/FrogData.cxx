@@ -173,26 +173,14 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
       // there is a morpheme information
       result.morph_string += "_" + fd.units[i].morph_string;
     }
-    if ( !result.morphs.empty() ){
-      // there is structured morpheme informaton
-      result.morphs[0].back() += "_";
-      for ( size_t pos=0; pos < fd.units[i].morphs.size(); ++pos ){
-	auto variant = fd.units[i].morphs[pos];
-	for ( size_t k=0; k < variant.size(); ++k ){
-	  result.morphs[0].back() += variant[k];
-	}
-      }
-    }
     result.tag += "_" + fd.units[i].tag;
     result.compound_string += "_" + fd.units[i].compound_string;
     result.tag_confidence *= fd.units[i].tag_confidence;
     result.ner_tag += "_" + fd.units[i].ner_tag;
     result.iob_tag += "_" + fd.units[i].iob_tag;
     // cerr << "intermediate: " << result << endl;
-    // cerr << "result.morphs=" << result.morphs << endl;
   }
   // cerr << "DONE: " << result << endl;
-  // cerr << "result.morphs=" << result.morphs << endl;
   return result;
 }
 

@@ -543,7 +543,6 @@ void Mbma::addFlatMorph( folia::Word *word,
       throw;
     }
   }
-  folia::Morpheme *m = 0;
   try {
     brackets->createFlatMorpheme( ml, word->doc(), textclass );
   }
@@ -849,7 +848,6 @@ void Mbma::store_morphemes( frog_record& fd,
 	fd.morph_string += a;
       }
     }
-    fd.morphs.push_back( adapted );
   }
 }
 
@@ -1169,24 +1167,3 @@ void Mbma::add_morphemes( const vector<folia::Word*>& wv,
     }
   }
 }
-
-#ifdef OLDCODE
-for ( const auto& mor : fd.units[i].morphs ) {
-  folia::KWargs args;
-  args["set"] = mbma_tagset;
-  folia::MorphologyLayer *ml = 0;
-#pragma omp critical (foliaupdate)
-  {
-    ml = wv[i]->addMorphologyLayer( args );
-  }
-  for ( const auto& mt : mor ) {
-    folia::Morpheme *m = new folia::Morpheme( args, wv[0]->doc() );
-    UnicodeString stripped = UnicodeString(mt,1,mt.length()-2);
-#pragma omp critical (foliaupdate)
-    {
-      m->setutext( stripped, textclass );
-      ml->append( m );
-    }
-  }
- }
-#endif
