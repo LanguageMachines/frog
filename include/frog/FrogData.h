@@ -68,7 +68,7 @@ class frog_record {
   std::string compound_string;   ///< string representation of first compound
   int parse_index;           ///< label of the dependency
   std::string parse_role;    ///< role of the dependency
-  std::set<size_t> parts;    ///< set of indeces a MWU is made of (MWU only)
+  std::set<size_t> parts;    ///< set of indices a MWU is made of (MWU only)
 };
 
 /// a datastructure to hold all frogged information of one Sentence

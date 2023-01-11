@@ -552,6 +552,49 @@ void Mbma::addFlatMorph( folia::Word *word,
   }
 }
 
+static UnicodeString flatten( const UnicodeString& in, ostream& deb ){
+  /// helper function to 'flatten out' bracketed morpheme strings
+  /*!
+    \param in a bracketed string of morphemes
+    \return a string with multiple '[' and ']' reduced to single occurrences
+  */
+  string s = TiCC::UnicodeToUTF8( in );
+  string::size_type bpos = s.find_first_not_of( " [" );
+  //  deb << "  FLATTEN: '" << s << "'" << endl;
+  string result;
+  if ( bpos != string::npos ){
+    string::size_type epos = s.find_first_of( "]", bpos );
+    result += "[" + s.substr( bpos, epos-bpos ) + "]";
+    //    deb << "substring: '" <<  s.substr( bpos, epos-bpos ) << "'" << endl;
+    bpos = s.find_first_of( "[", epos+1 );
+    bpos = s.find_first_not_of( " [", bpos );
+    while ( bpos != string::npos ){
+      epos = s.find_first_of( "]", bpos );
+      if ( epos == string::npos ){
+	break;
+      }
+      result += "[" + s.substr( bpos, epos-bpos ) + "]";
+      //      deb << "substring: '" <<  s.substr( bpos, epos-bpos ) << "'" << endl;
+      bpos = s.find_first_of( "[", epos+1 );
+      bpos = s.find_first_not_of( " [", bpos );
+    }
+  }
+  else {
+    result = s;
+  }
+  //  deb << "FLATTENED: '" << result << "'" << endl;
+  return TiCC::UnicodeFromUTF8(result);
+}
+
+UnicodeString Rule::getKey( bool deep ){
+  if ( deep ){
+    return deep_morphemes;
+  }
+  else {
+    return flatten( deep_morphemes, DBG );
+  }
+}
+
 bool mbmacmp( Rule *m1, Rule *m2 ){
   /// sorting function for Rule's
   return m1->getKey(false).length() > m2->getKey(false).length();
@@ -1128,7 +1171,7 @@ void Mbma::Classify( const icu::UnicodeString& word ){
 vector<UnicodeString> Mbma::get_flat_result() const {
   vector<UnicodeString> result;
   for ( const auto& it : analysis ){
-    result.push_back( it->flat_morphemes );
+    result.push_back( flatten( it->deep_morphemes, DBG ) );
   }
   if ( debugFlag > 1 ){
     DBG << "result of morph analyses: " << result << endl;
@@ -1155,14 +1198,12 @@ vector<pair<UnicodeString,string>> Mbma::getResults( bool shrt ) const {
 void Mbma::add_morphemes( const vector<folia::Word*>& wv,
 			  const frog_data& fd ) const {
   for ( size_t i=0; i < wv.size(); ++i ){
-    if ( !doDeepMorph ){
-      for ( const auto& mor : fd.units[i].morph_structure ) {
-	addFlatMorph( wv[i], fd.units[i].clean_word, mor );
-      }
-    }
-    else {
-      for ( const auto& mor : fd.units[i].morph_structure ) {
+    for ( const auto& mor : fd.units[i].morph_structure ) {
+      if ( doDeepMorph ){
 	addBracketMorph( wv[i], fd.units[i].clean_word, mor );
+      }
+      else {
+	addFlatMorph( wv[i], fd.units[i].clean_word, mor );
       }
     }
   }

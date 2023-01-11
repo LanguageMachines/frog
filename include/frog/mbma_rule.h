@@ -90,7 +90,6 @@ public:
   icu::UnicodeString sortkey;
   icu::UnicodeString orig_word;
   icu::UnicodeString inflection;
-  icu::UnicodeString flat_morphemes;
   icu::UnicodeString deep_morphemes;
   Compound::Type compound;
   icu::UnicodeString description;
