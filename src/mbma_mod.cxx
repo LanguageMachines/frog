@@ -882,15 +882,13 @@ void Mbma::store_morphemes( frog_record& fd,
   /// store the calculated morphemes in the FrogData
   if ( fd.morph_string.isEmpty() ){
     // not yet filled
-    vector<UnicodeString> adapted;
+    UnicodeString out;
     for ( const auto& m : morphemes ){
-      adapted.push_back( "[" + m + "]" );
+      out += "[" + m + "]";
     }
 #pragma omp critical (dataupdate)
     {
-      for ( const auto& a : adapted ){
-	fd.morph_string += a;
-      }
+      fd.morph_string = out;
     }
   }
 }
@@ -1027,7 +1025,9 @@ void Mbma::Classify( frog_record& fd ){
   if ( filter ){
     word = filter->filter( word );
   }
-  if ( head == "LET" || head == "SPEC" || token_class == "ABBREVIATION" ){
+  if ( head == "LET"
+       || head == "SPEC"
+       || token_class == "ABBREVIATION" ){
     // take over the letter/word 'as-is'.
     //  also ABBREVIATION's aren't handled bij mbma-rules
     fd.clean_word = word;
@@ -1038,13 +1038,11 @@ void Mbma::Classify( frog_record& fd ){
   }
   else {
     UnicodeString lWord = word;
-    if ( head != "SPEC" ){
-      lWord.toLower();
-    }
+    lWord.toLower();
     fd.clean_word = lWord;
     Classify( lWord );
     vector<UnicodeString> featVals;
-    if( v.size() > 1 ){
+    if ( v.size() > 1 ){
       featVals = TiCC::split_at( v[1], "," );
     }
     filterHeadTag( head );
@@ -1073,9 +1071,9 @@ void Mbma::call_server( const vector<UnicodeString>& insts,
     response = json::parse( in_line );
   }
   catch ( const exception& e ){
-    LOG << "json parsing failed on '" << in_line << "':"
-	<< e.what() << endl;
-    abort();
+    string err_msg = "json parsing failed on '" + in_line + "':" + e.what();
+    LOG << err_msg << endl;
+    throw( runtime_error( err_msg ) );
   }
   //  LOG << "received json data:" << response.dump(2) << endl;
   if ( !_base.empty() ){
@@ -1090,9 +1088,9 @@ void Mbma::call_server( const vector<UnicodeString>& insts,
       response = json::parse( in_line );
     }
     catch ( const exception& e ){
-      LOG << "json parsing failed on '" << in_line << "':"
-	  << e.what() << endl;
-      abort();
+      string err_msg = "json parsing failed on '" + in_line + "':" + e.what();
+      LOG << err_msg << endl;
+      throw( runtime_error( err_msg ) );
     }
     //    LOG << "received json data:" << response.dump(2) << endl;
   }
@@ -1115,9 +1113,9 @@ void Mbma::call_server( const vector<UnicodeString>& insts,
     response = json::parse( in_line );
   }
   catch ( const exception& e ){
-    LOG << "json parsing failed on '" << in_line << "':"
-	<< e.what() << endl;
-    abort();
+    string err_msg = "json parsing failed on '" + in_line + "':" + e.what();
+    LOG << err_msg << endl;
+    throw( runtime_error( err_msg ) );
   }
   //  LOG << "received json data:" << response.dump(2) << endl;
   assert( response.size() == insts.size() );
