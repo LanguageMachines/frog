@@ -106,8 +106,10 @@ class BaseBracket {
   virtual void resolveTail(){ abort(); };
   virtual void resolveMiddle(){ abort(); };
   virtual void clearEmptyNodes() { abort(); };
-  virtual folia::Morpheme *createMorpheme( folia::Document *  ) const = 0;
   virtual folia::Morpheme *createMorpheme( folia::Document *,
+					   const std::string& ) const = 0;
+  virtual folia::Morpheme *createMorpheme( folia::Document *,
+					   const std::string&,
 					   icu::UnicodeString&,
 					   int& ) const = 0;
   virtual void createFlatMorpheme( folia::MorphologyLayer *,
@@ -153,8 +155,10 @@ public:
     /// return tre if this is a glue tag
     return glue;
   };
-  folia::Morpheme *createMorpheme( folia::Document * ) const override;
   folia::Morpheme *createMorpheme( folia::Document *,
+				   const std::string&) const override;
+  folia::Morpheme *createMorpheme( folia::Document *,
+				   const std::string&,
 				   icu::UnicodeString&,
 				   int& ) const override;
   void createFlatMorpheme( folia::MorphologyLayer *,
@@ -194,8 +198,10 @@ class BracketNest: public BaseBracket {
   void resolveMiddle();
   Compound::Type getCompoundType();
   CLEX::Type getFinalTag();
-  folia::Morpheme *createMorpheme( folia::Document * ) const override;
   folia::Morpheme *createMorpheme( folia::Document *,
+				   const std::string& ) const override;
+  folia::Morpheme *createMorpheme( folia::Document *,
+				   const std::string&,
 				   icu::UnicodeString&,
 				   int& ) const override;
   void createFlatMorpheme( folia::MorphologyLayer *,

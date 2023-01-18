@@ -776,17 +776,19 @@ Compound::Type BracketNest::getCompoundType(){
   return compound;
 }
 
-folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc ) const {
+folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
+					      const string& textclass ) const {
   /// use the data in the Leaf to create a folia::Morpheme node
   /*!
     \param doc The FoLiA Document context
   */
   UnicodeString desc;
   int cnt = 0;
-  return createMorpheme( doc, desc, cnt );
+  return createMorpheme( doc, textclass, desc, cnt );
 }
 
 folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
+					      const string& textclass,
 					      UnicodeString& desc,
 					      int& cnt ) const {
   /// use the data in the Leaf to create a folia::Morpheme node
@@ -814,7 +816,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 #pragma omp critical (foliaupdate)
     {
       result = new folia::Morpheme( args, doc );
-      result->setutext( out );
+      result->setutext( out, textclass );
     }
     ++cnt;
     args.clear();
@@ -859,7 +861,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 #pragma omp critical (foliaupdate)
     {
       result = new folia::Morpheme( args, doc );
-      result->setutext( out );
+      result->setutext( out, textclass );
     }
     ++cnt;
     args.clear();
@@ -883,7 +885,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     {
       result = new folia::Morpheme( args, doc );
       if ( !out.isEmpty() ){
-	result->setutext( out );
+	result->setutext( out, textclass );
       }
     }
     ++cnt;
@@ -926,7 +928,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 #pragma omp critical (foliaupdate)
     {
       result = new folia::Morpheme( args, doc );
-      result->setutext( out );
+      result->setutext( out, textclass );
     }
     ++cnt;
     desc = "[" + out + "]"; // pass it up!
@@ -956,7 +958,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     {
       result = new folia::Morpheme( args, doc );
       if ( !morph.isEmpty() ){
-	result->setutext( morph );
+	result->setutext( morph, textclass );
       }
     }
     args.clear();
@@ -1024,17 +1026,19 @@ void BracketLeaf::createFlatMorpheme( folia::MorphologyLayer *ml,
 }
 
 
-folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc ) const {
+folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
+					      const string& textclass ) const {
   /// use the data in the Leaf to create a folia::Morpheme node
   /*!
     \param doc The FoLiA Document context
   */
   UnicodeString desc;
   int cnt = 0;
-  return createMorpheme( doc, desc, cnt );
+  return createMorpheme( doc, textclass, desc, cnt );
 }
 
 folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
+					      const string& textclass,
 					      UnicodeString& desc,
 					      int& cnt ) const {
   /// use the data in the Leaf to create a folia::Morpheme node
@@ -1058,6 +1062,7 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
     UnicodeString deeper_desc;
     int deep_cnt = 0;
     folia::Morpheme *m = it->createMorpheme( doc,
+					     textclass,
 					     deeper_desc,
 					     deep_cnt );
     if ( it->status() == Status::DERIVATIONAL

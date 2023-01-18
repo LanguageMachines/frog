@@ -504,7 +504,7 @@ void Mbma::addBracketMorph( folia::Word *word,
   }
   folia::Morpheme *m = 0;
   try {
-    m = brackets->createMorpheme( word->doc() );
+    m = brackets->createMorpheme( word->doc(), textclass );
   }
   catch( const exception& e ){
     LOG << "createMorpheme failed: " << e.what() << endl;
