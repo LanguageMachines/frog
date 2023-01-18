@@ -989,43 +989,37 @@ void BracketLeaf::createFlatMorpheme( folia::MorphologyLayer *ml,
     \param doc The FoLiA Document context
     \param textclass the textclass to use
   */
-  folia::Morpheme *result = 0;
-  int pos = orig.indexOf( "^" );
-  bool glue = ( pos != -1 );
-  if ( _status == Status::COMPLEX ){
-    abort();
-  }
-  else if ( _status == Status::STEM
-	    || ( _status == Status::DERIVATIONAL && glue ) ){
+  switch ( _status ){
+  case Status::STEM :
+    // fall through
+  case Status::PARTICLE :
+    // fall through
+  case Status::DERIVATIONAL :
+    // fall through
+  case Status::PARTICIPLE :
+    // fall through
+  case Status::FAILED :
     if ( morph.isEmpty() ){
-      throw logic_error( "stem has empty morpheme" );
+      throw logic_error( toString(_status) + " has empty morpheme" );
     }
-  }
-  else if ( _status == Status::PARTICLE ){
-    if ( morph.isEmpty() ){
-      throw logic_error( "particle has empty morpheme" );
-    }
-  }
-  else if ( _status == Status::INFLECTION ){
-  }
-  else if ( _status == Status::DERIVATIONAL
-	    || _status == Status::PARTICIPLE
-	    || _status == Status::FAILED ){
-    if ( morph.isEmpty() ){
-      throw logic_error( "Derivation with empty morpheme" );
-    }
-  }
-  else if ( _status == Status::INFO ){
+    break;
+  case Status::INFLECTION :
+    // fall through
+  case Status::INFO :
+    break;
+  default :
+    throw logic_error( "Not implemented case for " + toString( _status ) );
+    break;
   }
   if ( !morph.isEmpty() ){
     folia::KWargs args;
     args["set"] = Mbma::mbma_tagset;
 #pragma omp critical (foliaupdate)
     {
-      result = new folia::Morpheme( args, doc );
+      folia::Morpheme *result = new folia::Morpheme( args, doc );
       result->setutext( morph, textclass );
+      ml->append( result );
     }
-    ml->append( result );
   }
 }
 
