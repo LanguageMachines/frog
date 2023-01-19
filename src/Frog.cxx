@@ -40,9 +40,6 @@
 #include <fstream>
 #include <vector>
 #include "config.h"
-#ifdef HAVE_OPENMP
-#include <omp.h>
-#endif
 
 #include "timbl/TimblAPI.h"
 #include "ticcutils/FdStream.h"
