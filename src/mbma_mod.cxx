@@ -552,7 +552,7 @@ void Mbma::addFlatMorph( folia::Word *word,
   }
 }
 
-static UnicodeString flatten( const UnicodeString& in, ostream& deb ){
+static UnicodeString flatten( const UnicodeString& in ){
   /// helper function to 'flatten out' bracketed morpheme strings
   /*!
     \param in a bracketed string of morphemes
@@ -586,18 +586,13 @@ static UnicodeString flatten( const UnicodeString& in, ostream& deb ){
   return TiCC::UnicodeFromUTF8(result);
 }
 
-UnicodeString Rule::getKey( bool deep ){
-  if ( deep ){
-    return deep_morphemes;
-  }
-  else {
-    return flatten( deep_morphemes, DBG );
-  }
+UnicodeString Rule::getKey() const {
+  return flatten( sort_key );
 }
 
 bool mbmacmp( Rule *m1, Rule *m2 ){
   /// sorting function for Rule's
-  return m1->getKey(false).length() > m2->getKey(false).length();
+  return m1->getKey().length() > m2->getKey().length();
 }
 
 struct id_cmp {
@@ -799,7 +794,7 @@ void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
   //
   map<icu::UnicodeString, Rule*> unique;
   for ( const auto& ait : highConf ){
-    icu::UnicodeString tmp = ait->getKey( doDeepMorph );
+    icu::UnicodeString tmp = ait->getKey();
     unique[tmp] = ait;
   }
   // so now we have map of 'equal' analysis.
@@ -823,8 +818,8 @@ void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
     DBG << "filter: analysis before sort on length:" << endl;
     int i=0;
     for ( const auto& a_it : analysis ){
-      DBG << ++i << " - " << a_it << " " << a_it->getKey(false)
-	  << " (" << a_it->getKey(false).length() << ")" << endl;
+      DBG << ++i << " - " << a_it << " " << a_it->getKey()
+	  << " (" << a_it->getKey().length() << ")" << endl;
     }
     DBG << "" << endl;
   }
@@ -987,20 +982,20 @@ void Mbma::getResult( frog_record& fd,
     store_morphemes( fd, tmp );
   }
   else {
+    vector<pair<UnicodeString,string>> pv;
     if ( doDeepMorph ){
-      vector<pair<UnicodeString,string>> pv = getResults( false );
+      pv = getResults();
       fd.morph_string = pv[0].first;
-      if ( pv[0].second == "none" ){
-	fd.compound_string = "0";
-      }
-      else {
-	fd.compound_string = pv[0].second;
-      }
     }
     else {
-      vector<UnicodeString> v = get_flat_result();
-      fd.morph_string = v[0];
+      pv = getResults();
+      fd.morph_string = flatten( pv[0].first );
+    }
+    if ( pv[0].second == "none" ){
       fd.compound_string = "0";
+    }
+    else {
+      fd.compound_string = pv[0].second;
     }
     for ( auto const& sit : analysis ){
       store_brackets( fd, uword, sit->brackets );
@@ -1165,17 +1160,6 @@ void Mbma::Classify( const icu::UnicodeString& word ){
     classes[0] = "X";
   }
   analysis = execute( uWord, classes );
-}
-
-vector<UnicodeString> Mbma::get_flat_result() const {
-  vector<UnicodeString> result;
-  for ( const auto& it : analysis ){
-    result.push_back( flatten( it->deep_morphemes, DBG ) );
-  }
-  if ( debugFlag > 1 ){
-    DBG << "result of morph analyses: " << result << endl;
-  }
-  return result;
 }
 
 vector<pair<UnicodeString,string>> Mbma::getResults( bool shrt ) const {

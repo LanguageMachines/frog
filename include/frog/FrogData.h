@@ -57,7 +57,8 @@ class frog_record {
   bool no_space;             ///< was there a space after the word?
   bool new_paragraph;        ///< did the tokenizer detect a paragraph here?
   icu::UnicodeString tag;           ///< the assigned POS tag in Unicode
-  double tag_confidence;     ///< the confidence of the POS tag
+  double tag_confidence;            ///< the confidence of the POS tag
+  icu::UnicodeString next_tag;      ///< the assigned next POS tag in Unicode
   icu::UnicodeString iob_tag;       ///< the assigned IOB tag
   double iob_confidence;     ///< the confidence of the IOB tag
   icu::UnicodeString ner_tag;       ///< the assigned NER tag

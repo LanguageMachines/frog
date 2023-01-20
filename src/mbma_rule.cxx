@@ -482,7 +482,7 @@ void Rule::resolve_inflections(){
       else {
 	// this realy shouldn't happen. probably an error in the data!?
 	LOG << "inflection: " << inf
-			  << " Problem: DOESN'T select a tag" << endl;
+	    << " Problem: DOESN'T select a tag" << endl;
       }
     }
   }
@@ -580,8 +580,8 @@ void Rule::resolveBrackets() {
   brackets->clearEmptyNodes();
   tag = brackets->getFinalTag();
   description = get_tag_descr( tag );
-  deep_morphemes = pretty_string(true);
-  //  DBG << "deep: " << deep_morphemes << endl;
+  sort_key = pretty_string(true);
+  //  DBG << "deep: " << sort_key << endl;
   if ( debugFlag > 4 ){
     DBG << "Final Bracketing:" << brackets << " with tag=" << tag << endl;
   }

@@ -237,6 +237,9 @@ void CGNTagger::post_process( frog_data& words ){
     addTag( words.units[i],
 	    _tag_result[i].assigned_tag(),
 	    _tag_result[i].confidence() );
+    if ( i < _tag_result.size()-1 ){
+      words.units[i].next_tag = _tag_result[i+1].assigned_tag();
+    }
   }
 }
 

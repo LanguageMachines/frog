@@ -78,7 +78,7 @@ public:
   ~Rule();
   std::vector<icu::UnicodeString> extract_morphemes() const;
   icu::UnicodeString pretty_string( bool ) const;
-  icu::UnicodeString getKey( bool );
+  icu::UnicodeString getKey() const;
   bool performEdits();
   void getCleanInflect();
   void reduceZeroNodes();
@@ -90,7 +90,7 @@ public:
   icu::UnicodeString sortkey;
   icu::UnicodeString orig_word;
   icu::UnicodeString inflection;
-  icu::UnicodeString deep_morphemes;
+  icu::UnicodeString sort_key;
   Compound::Type compound;
   icu::UnicodeString description;
   BracketNest *brackets;
