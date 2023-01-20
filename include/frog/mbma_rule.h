@@ -78,7 +78,7 @@ public:
   ~Rule();
   std::vector<icu::UnicodeString> extract_morphemes() const;
   icu::UnicodeString pretty_string( bool ) const;
-  icu::UnicodeString getKey() const;
+  icu::UnicodeString getKey() const { return sort_key; };
   bool performEdits();
   void getCleanInflect();
   void reduceZeroNodes();
@@ -100,6 +100,8 @@ public:
   size_t ID;
 };
 
+
+icu::UnicodeString flatten( const icu::UnicodeString& in );
 std::ostream& operator<<( std::ostream& os, const Rule& );
 std::ostream& operator<<( std::ostream& os, const Rule * );
 

@@ -537,6 +537,40 @@ void Rule::getCleanInflect() {
   }
 }
 
+UnicodeString flatten( const UnicodeString& in ){
+  /// helper function to 'flatten out' bracketed morpheme strings
+  /*!
+    \param in a bracketed string of morphemes
+    \return a string with multiple '[' and ']' reduced to single occurrences
+  */
+  string s = TiCC::UnicodeToUTF8( in );
+  string::size_type bpos = s.find_first_not_of( " [" );
+  //  deb << "  FLATTEN: '" << s << "'" << endl;
+  string result;
+  if ( bpos != string::npos ){
+    string::size_type epos = s.find_first_of( "]", bpos );
+    result += "[" + s.substr( bpos, epos-bpos ) + "]";
+    //    deb << "substring: '" <<  s.substr( bpos, epos-bpos ) << "'" << endl;
+    bpos = s.find_first_of( "[", epos+1 );
+    bpos = s.find_first_not_of( " [", bpos );
+    while ( bpos != string::npos ){
+      epos = s.find_first_of( "]", bpos );
+      if ( epos == string::npos ){
+	break;
+      }
+      result += "[" + s.substr( bpos, epos-bpos ) + "]";
+      //      deb << "substring: '" <<  s.substr( bpos, epos-bpos ) << "'" << endl;
+      bpos = s.find_first_of( "[", epos+1 );
+      bpos = s.find_first_not_of( " [", bpos );
+    }
+  }
+  else {
+    result = s;
+  }
+  //  deb << "FLATTENED: '" << result << "'" << endl;
+  return TiCC::UnicodeFromUTF8(result);
+}
+
 void Rule::resolveBrackets() {
   // string teststring = "[ [ [abituriënt]N [e]N_N* ]N [n]/m ]N";
   // cerr << "  Flatten " << teststring << endl;
@@ -580,8 +614,7 @@ void Rule::resolveBrackets() {
   brackets->clearEmptyNodes();
   tag = brackets->getFinalTag();
   description = get_tag_descr( tag );
-  sort_key = pretty_string(true);
-  //  DBG << "deep: " << sort_key << endl;
+  sort_key = flatten( pretty_string(true));
   if ( debugFlag > 4 ){
     DBG << "Final Bracketing:" << brackets << " with tag=" << tag << endl;
   }

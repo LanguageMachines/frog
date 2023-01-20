@@ -539,7 +539,7 @@ void Mbma::addFlatMorph( folia::Word *word,
       ml = word->addMorphologyLayer( args );
     }
     catch( const exception& e ){
-      LOG << e.what() << " addBracketMorph failed." << endl;
+      LOG << e.what() << " addFlatMorph failed." << endl;
       throw;
     }
   }
@@ -550,44 +550,6 @@ void Mbma::addFlatMorph( folia::Word *word,
     LOG << "createFlatMorpheme failed: " << e.what() << endl;
     throw;
   }
-}
-
-static UnicodeString flatten( const UnicodeString& in ){
-  /// helper function to 'flatten out' bracketed morpheme strings
-  /*!
-    \param in a bracketed string of morphemes
-    \return a string with multiple '[' and ']' reduced to single occurrences
-  */
-  string s = TiCC::UnicodeToUTF8( in );
-  string::size_type bpos = s.find_first_not_of( " [" );
-  //  deb << "  FLATTEN: '" << s << "'" << endl;
-  string result;
-  if ( bpos != string::npos ){
-    string::size_type epos = s.find_first_of( "]", bpos );
-    result += "[" + s.substr( bpos, epos-bpos ) + "]";
-    //    deb << "substring: '" <<  s.substr( bpos, epos-bpos ) << "'" << endl;
-    bpos = s.find_first_of( "[", epos+1 );
-    bpos = s.find_first_not_of( " [", bpos );
-    while ( bpos != string::npos ){
-      epos = s.find_first_of( "]", bpos );
-      if ( epos == string::npos ){
-	break;
-      }
-      result += "[" + s.substr( bpos, epos-bpos ) + "]";
-      //      deb << "substring: '" <<  s.substr( bpos, epos-bpos ) << "'" << endl;
-      bpos = s.find_first_of( "[", epos+1 );
-      bpos = s.find_first_not_of( " [", bpos );
-    }
-  }
-  else {
-    result = s;
-  }
-  //  deb << "FLATTENED: '" << result << "'" << endl;
-  return TiCC::UnicodeFromUTF8(result);
-}
-
-UnicodeString Rule::getKey() const {
-  return flatten( sort_key );
 }
 
 bool mbmacmp( Rule *m1, Rule *m2 ){
@@ -794,7 +756,7 @@ void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
   //
   map<icu::UnicodeString, Rule*> unique;
   for ( const auto& ait : highConf ){
-    icu::UnicodeString tmp = ait->getKey();
+    icu::UnicodeString tmp = ait->getKey()+ait->inflection;
     unique[tmp] = ait;
   }
   // so now we have map of 'equal' analysis.
