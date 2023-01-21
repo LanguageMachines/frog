@@ -754,9 +754,22 @@ void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
   // we still might have doubles. (different Rule's yielding the same result)
   // reduce these
   //
+  if ( debugFlag > 1){
+    DBG << "filter: analysis before sort key:" << endl;
+    int i=0;
+    for ( const auto& it : bestMatches ){
+      DBG << ++i << " - " << it << endl;
+    }
+    DBG << "" << endl;
+  }
   map<icu::UnicodeString, Rule*> unique;
   for ( const auto& ait : highConf ){
-    icu::UnicodeString tmp = ait->getKey()+ait->inflection;
+    icu::UnicodeString tmp = ait->getKey();
+    // same result may have different inflection!
+    if (doDeepMorph){
+      // but only relevant for doDeep
+      tmp += ait->inflection;
+    }
     unique[tmp] = ait;
   }
   // so now we have map of 'equal' analysis.
