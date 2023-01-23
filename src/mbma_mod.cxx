@@ -410,7 +410,8 @@ void Mbma::clearAnalysis(){
 }
 
 Rule* Mbma::matchRule( const vector<UnicodeString>& ana,
-		       const UnicodeString& word ){
+		       const UnicodeString& word,
+		       bool next_is_V2 ){
   /// attempt to match an Analysis on a word
   /*!
     \param ana one analysis result, expanded from the Timbl classifier
@@ -427,11 +428,11 @@ Rule* Mbma::matchRule( const vector<UnicodeString>& ana,
     if ( debugFlag > 1 ){
       DBG << "after resolving: " << rule << endl;
     }
-    rule->resolveBrackets();
-    rule->getCleanInflect();
+    rule->getCleanInflect( next_is_V2 );
     if ( debugFlag > 1 ){
       DBG << "1 added Inflection: " << rule << endl;
     }
+    rule->resolveBrackets();
     return rule;
   }
   else {
@@ -444,6 +445,7 @@ Rule* Mbma::matchRule( const vector<UnicodeString>& ana,
 }
 
 vector<Rule*> Mbma::execute( const UnicodeString& word,
+			     bool next_is_V2,
 			     const vector<UnicodeString>& classes ){
   /// attempt to find matching Rules
   /*!
@@ -467,7 +469,7 @@ vector<Rule*> Mbma::execute( const UnicodeString& word,
   size_t id = 0;
   // now loop over all the analysis
   for ( auto const& ana : allParts ){
-    Rule *rule = matchRule( ana, word );
+    Rule *rule = matchRule( ana, word, next_is_V2 );
     if ( rule ){
       rule->ID = id++;
       accepted.push_back( rule );
@@ -979,6 +981,18 @@ void Mbma::getResult( frog_record& fd,
   }
 }
 
+bool check_next( const UnicodeString& tag ){
+  vector<UnicodeString> v = TiCC::split_at_first_of( tag, "()" );
+  if ( v.size() != 2
+       || v[0] != "VNW" ){
+    return false;
+  }
+  else {
+    bool result = v[1].indexOf( ",2," ) == -1;
+    return result;
+  }
+}
+
 void Mbma::Classify( frog_record& fd ){
   UnicodeString word = fd.word;
   UnicodeString tag = fd.tag;
@@ -1010,7 +1024,8 @@ void Mbma::Classify( frog_record& fd ){
     UnicodeString lWord = word;
     lWord.toLower();
     fd.clean_word = lWord;
-    Classify( lWord );
+    bool next_is_V2 = check_next( fd.next_tag );
+    Classify( lWord, next_is_V2 );
     vector<UnicodeString> featVals;
     if ( v.size() > 1 ){
       featVals = TiCC::split_at( v[1], "," );
@@ -1099,7 +1114,7 @@ void Mbma::call_server( const vector<UnicodeString>& insts,
   }
 }
 
-void Mbma::Classify( const icu::UnicodeString& word ){
+void Mbma::Classify( const icu::UnicodeString& word, bool next_is_V2 ){
   static TiCC::UnicodeNormalizer my_norm;
   clearAnalysis();
   icu::UnicodeString uWord = word;
@@ -1134,7 +1149,7 @@ void Mbma::Classify( const icu::UnicodeString& word ){
   if ( classes[0] == "0" ){
     classes[0] = "X";
   }
-  analysis = execute( uWord, classes );
+  analysis = execute( uWord, next_is_V2, classes );
 }
 
 vector<pair<UnicodeString,string>> Mbma::getResults( bool shrt ) const {

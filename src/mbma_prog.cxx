@@ -164,6 +164,23 @@ bool init(){
   return true;
 }
 
+bool check_next( const UnicodeString& tag ){
+  if ( tag.isEmpty() ){
+    return false;
+  }
+  else {
+    vector<UnicodeString> v = TiCC::split_at_first_of( tag, "()" );
+    if ( v.size() != 2
+	 || v[0] != "VNW" ){
+      return false;
+    }
+    else {
+      bool result = v[1].indexOf( ",2," ) != -1;
+      return result;
+    }
+  }
+}
+
 void Test( istream& in ){
   UnicodeString line;
   while ( TiCC::getline( in, line ) ){
@@ -195,7 +212,12 @@ void Test( istream& in ){
 	  if ( head != "SPEC" ){
 	    uWord.toLower();
 	  }
-	  myMbma.Classify( uWord );
+	  UnicodeString next_tag;
+	  if ( &tr != &tagv.back() ){
+	    next_tag = (&tr+1)->assigned_tag();
+	  }
+	  bool next_is_V2 = check_next( next_tag );
+	  myMbma.Classify( uWord, next_is_V2 );
 	  myMbma.filterHeadTag( head );
 	  myMbma.filterSubTags( v );
 	  myMbma.assign_compounds();
@@ -223,7 +245,7 @@ void Test( istream& in ){
 	for ( auto const& w : parts ){
 	  UnicodeString uWord = w;
 	  uWord.toLower();
-	  myMbma.Classify( uWord );
+	  myMbma.Classify( uWord, false );
 	  myMbma.assign_compounds();
 	  vector<pair<UnicodeString,string>> res = myMbma.getResults(true);
 	  cout << w << "\t";

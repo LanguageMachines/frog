@@ -80,7 +80,7 @@ public:
   icu::UnicodeString pretty_string( bool ) const;
   icu::UnicodeString getKey() const { return sort_key; };
   bool performEdits();
-  void getCleanInflect();
+  void getCleanInflect( bool );
   void reduceZeroNodes();
   void resolveBrackets();
   void resolve_inflections();

@@ -59,7 +59,7 @@ class Mbma {
   bool init( const TiCC::Configuration& );
   void add_provenance( folia::Document&, folia::processor * ) const;
   void Classify( frog_record& );
-  void Classify( const icu::UnicodeString& );
+  void Classify( const icu::UnicodeString&, bool );
   void filterHeadTag( const icu::UnicodeString& );
   void filterSubTags( const std::vector<icu::UnicodeString>& );
   void assign_compounds();
@@ -67,8 +67,10 @@ class Mbma {
   void setDeepMorph( bool b ){ doDeepMorph = b; };
   void clearAnalysis();
   Rule* matchRule( const std::vector<icu::UnicodeString>&,
-		   const icu::UnicodeString& );
-  std::vector<Rule*> execute( const icu::UnicodeString& ,
+		   const icu::UnicodeString&,
+		   bool );
+  std::vector<Rule*> execute( const icu::UnicodeString&,
+			      bool,
 			      const std::vector<icu::UnicodeString>& );
   std::string version() const { return _version; };
   void add_morphemes( const std::vector<folia::Word*>&,

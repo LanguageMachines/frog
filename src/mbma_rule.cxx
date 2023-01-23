@@ -488,11 +488,12 @@ void Rule::resolve_inflections(){
   }
 }
 
-void Rule::getCleanInflect() {
+void Rule::getCleanInflect( bool next_is_V2 ) {
   // get the last inflection and clean it up by extracting only
   //  known inflection names
   if ( debugFlag > 5 ){
     DBG << "getCleanInflect: " << this << endl;
+    DBG << "next_is_V2=" << TiCC::toString( next_is_V2 ) << endl;
   }
   inflection = "";
   auto it = rules.rbegin();
@@ -529,6 +530,17 @@ void Rule::getCleanInflect() {
       }
       if ( debugFlag > 5 ){
 	DBG << "cleaned inflection " << new_inflect << endl;
+      }
+      if ( new_inflect.indexOf( "te2I" ) != -1
+	   && !next_is_V2 ){
+	if ( debugFlag > 0 ){
+	  DBG << "HIT!" << endl;
+	}
+	new_inflect = "te1";
+	it->inflect = new_inflect;
+	if ( debugFlag > 0 ){
+	  DBG << "AFTER getCleanInflect: " << this << endl;
+	}
       }
       inflection = new_inflect;
       return;
