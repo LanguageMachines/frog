@@ -130,8 +130,7 @@ void usage( ) {
        << "\t --outputdir=<dir>      Output to dir, instead of default stdout\n"
        << "\t --xmldir=<dir>         Use 'dir' to output FoliA XML to.\n"
        << "\t --deep-morph           add deep morphological information to the output\n"
-       << "\t --classic              DONT'T add compound information to the output\n"
-       << "\t                        (backward compatability)\n"
+       << "\t --compounds            add compound information to the output\n"
        << "\t --JSONout=n            Output JSON instead of Tabbed.\n"
        << "\t                        When n != 0, use it for pretty-printing the output. (default n=0) \n"
        << "\t ============= OTHER OPTIONS ============================================\n"
@@ -193,10 +192,10 @@ int main(int argc, char *argv[]) {
   try {
     TiCC::CL_Options Opts("c:e:o:t:T:x::X::nQhVd:S:",
 			  "config:,testdir:,"
-			  "textclass:,inputclass:,outputclass:,"
+			  "help,textclass:,inputclass:,outputclass:,"
 			  "uttmarker:,max-parser-tokens:,textredundancy:,"
 			  "skip:,id:,outputdir:,xmldir:,tmpdir:,deep-morph,"
-			  "classic,help,language:,retry,nostdout,ner-override:,"
+			  "compounds,language:,retry,nostdout,ner-override:,"
 			  "debug:,keep-parser-files,version,threads:,alpino::,"
 			  "override:,KANON,TESTAPI,debugfile:,JSONin,JSONout::,"
 			  "allow-word-corrections,OLDMWU");
