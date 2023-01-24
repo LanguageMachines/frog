@@ -160,6 +160,7 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
   //      << " and finish=" << finish << endl;
   frog_record result = fd.units[start];
   //  cerr << "start: " << result << endl;
+  result.compound_string = "0"; // MWU's are never compounds
   result.parts.insert( start );
   for ( size_t i = start+1; i <= finish; ++i ){
     result.parts.insert( i );
@@ -174,7 +175,6 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
       result.morph_string += "_" + fd.units[i].morph_string;
     }
     result.tag += "_" + fd.units[i].tag;
-    result.compound_string += "_" + fd.units[i].compound_string;
     result.tag_confidence *= fd.units[i].tag_confidence;
     result.ner_tag += "_" + fd.units[i].ner_tag;
     result.iob_tag += "_" + fd.units[i].iob_tag;

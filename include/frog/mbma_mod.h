@@ -59,7 +59,8 @@ class Mbma {
   bool init( const TiCC::Configuration& );
   void add_provenance( folia::Document&, folia::processor * ) const;
   void Classify( frog_record& );
-  void Classify( const icu::UnicodeString&, bool );
+  void Classify( const icu::UnicodeString&,
+		 const icu::UnicodeString& );
   void filterHeadTag( const icu::UnicodeString& );
   void filterSubTags( const std::vector<icu::UnicodeString>& );
   void assign_compounds();
@@ -70,7 +71,7 @@ class Mbma {
 		   const icu::UnicodeString&,
 		   bool );
   std::vector<Rule*> execute( const icu::UnicodeString&,
-			      bool,
+			      const icu::UnicodeString&,
 			      const std::vector<icu::UnicodeString>& );
   std::string version() const { return _version; };
   void add_morphemes( const std::vector<folia::Word*>&,
@@ -84,9 +85,9 @@ class Mbma {
   bool readsettings( const std::string&, const std::string& );
   void fillMaps();
   void init_cgn( const std::string&, const std::string& );
-  void getResult( frog_record&,
-		  const icu::UnicodeString&,
-		  const icu::UnicodeString& ) const;
+  void storeResult( frog_record&,
+		    const icu::UnicodeString&,
+		    const icu::UnicodeString& ) const;
   std::vector<icu::UnicodeString> make_instances( const icu::UnicodeString& word );
   void call_server( const std::vector<icu::UnicodeString>&,
 		    std::vector<icu::UnicodeString>& );

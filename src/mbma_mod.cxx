@@ -411,7 +411,7 @@ void Mbma::clearAnalysis(){
 
 Rule* Mbma::matchRule( const vector<UnicodeString>& ana,
 		       const UnicodeString& word,
-		       bool next_is_V2 ){
+		       bool keep_V2I ){
   /// attempt to match an Analysis on a word
   /*!
     \param ana one analysis result, expanded from the Timbl classifier
@@ -428,7 +428,7 @@ Rule* Mbma::matchRule( const vector<UnicodeString>& ana,
     if ( debugFlag > 1 ){
       DBG << "after resolving: " << rule << endl;
     }
-    rule->getCleanInflect( next_is_V2 );
+    rule->getCleanInflect( keep_V2I );
     if ( debugFlag > 1 ){
       DBG << "1 added Inflection: " << rule << endl;
     }
@@ -444,8 +444,20 @@ Rule* Mbma::matchRule( const vector<UnicodeString>& ana,
   }
 }
 
+bool check_next( const UnicodeString& tag ){
+  vector<UnicodeString> v = TiCC::split_at_first_of( tag, "()" );
+  if ( v.size() != 2
+       || v[0] != "VNW" ){
+    return false;
+  }
+  else {
+    bool result = v[1].indexOf( ",2," ) == -1;
+    return result;
+  }
+}
+
 vector<Rule*> Mbma::execute( const UnicodeString& word,
-			     bool next_is_V2,
+			     const UnicodeString& next_tag,
 			     const vector<UnicodeString>& classes ){
   /// attempt to find matching Rules
   /*!
@@ -482,14 +494,15 @@ vector<Rule*> Mbma::execute( const UnicodeString& word,
       DBG << "in : " << out << endl;
     }
   }
-  if ( both_V2_and_V2I ){
-    next_is_V2 = false;
+  bool keep_V2I = false;
+  if ( !both_V2_and_V2I ){
+    keep_V2I = check_next( next_tag );
   }
   vector<Rule*> accepted;
   size_t id = 0;
   // now loop over all the analysis
   for ( auto const& ana : allParts ){
-    Rule *rule = matchRule( ana, word, next_is_V2 );
+    Rule *rule = matchRule( ana, word, keep_V2I );
     if ( rule ){
       rule->ID = id++;
       accepted.push_back( rule );
@@ -941,7 +954,10 @@ void Mbma::store_brackets( frog_record& fd,
 					 *dbgLog );
     leaf->set_status( STEM );
     if ( fd.morph_string.isEmpty() ){
-      fd.morph_string = "[" + wrd + "]" + head;
+      fd.morph_string = "[" + wrd + "]";
+    }
+    if ( doDeepMorph ){
+      fd.morph_string += head;
     }
     fd.morph_structure.push_back( leaf );
   }
@@ -967,9 +983,9 @@ void Mbma::store_brackets( frog_record& fd,
   return;
 }
 
-void Mbma::getResult( frog_record& fd,
-		      const UnicodeString& uword,
-		      const UnicodeString& uhead ) const {
+void Mbma::storeResult( frog_record& fd,
+			const UnicodeString& uword,
+			const UnicodeString& uhead ) const {
   if ( analysis.size() == 0 ){
     // fallback option: use the word and pretend it's a morpheme ;-)
     if ( debugFlag > 1){
@@ -982,14 +998,16 @@ void Mbma::getResult( frog_record& fd,
     store_morphemes( fd, tmp );
   }
   else {
-    vector<pair<UnicodeString,string>> pv;
+    vector<pair<UnicodeString,string>> pv = getResults();
     if ( doDeepMorph ){
-      pv = getResults();
       fd.morph_string = pv[0].first;
     }
     else {
-      pv = getResults();
       fd.morph_string = flatten( pv[0].first );
+      if ( pv[0].first != fd.morph_string ){
+	cerr << "JAMMER! '" << pv[0].first << "' ' "
+	     << fd.morph_string << "'" << endl;
+      }
     }
     if ( pv[0].second == "none" ){
       fd.compound_string = "0";
@@ -1001,18 +1019,6 @@ void Mbma::getResult( frog_record& fd,
       store_brackets( fd, uword, sit->brackets );
       store_morphemes( fd, sit->extract_morphemes() );
     }
-  }
-}
-
-bool check_next( const UnicodeString& tag ){
-  vector<UnicodeString> v = TiCC::split_at_first_of( tag, "()" );
-  if ( v.size() != 2
-       || v[0] != "VNW" ){
-    return false;
-  }
-  else {
-    bool result = v[1].indexOf( ",2," ) == -1;
-    return result;
   }
 }
 
@@ -1047,8 +1053,7 @@ void Mbma::Classify( frog_record& fd ){
     UnicodeString lWord = word;
     lWord.toLower();
     fd.clean_word = lWord;
-    bool next_is_V2 = check_next( fd.next_tag );
-    Classify( lWord, next_is_V2 );
+    Classify( lWord, fd.next_tag );
     vector<UnicodeString> featVals;
     if ( v.size() > 1 ){
       featVals = TiCC::split_at( v[1], "," );
@@ -1056,7 +1061,7 @@ void Mbma::Classify( frog_record& fd ){
     filterHeadTag( head );
     filterSubTags( featVals );
     assign_compounds();
-    getResult( fd, lWord, head );
+    storeResult( fd, lWord, head );
   }
 }
 
@@ -1137,7 +1142,8 @@ void Mbma::call_server( const vector<UnicodeString>& insts,
   }
 }
 
-void Mbma::Classify( const icu::UnicodeString& word, bool next_is_V2 ){
+void Mbma::Classify( const icu::UnicodeString& word,
+		     const icu::UnicodeString& next_tag ){
   static TiCC::UnicodeNormalizer my_norm;
   clearAnalysis();
   icu::UnicodeString uWord = word;
@@ -1147,6 +1153,7 @@ void Mbma::Classify( const icu::UnicodeString& word, bool next_is_V2 ){
   else {
     uWord = my_norm.normalize( uWord );
   }
+
   vector<UnicodeString> insts = make_instances( uWord );
   vector<UnicodeString> classes;
   classes.reserve( insts.size() );
@@ -1172,7 +1179,7 @@ void Mbma::Classify( const icu::UnicodeString& word, bool next_is_V2 ){
   if ( classes[0] == "0" ){
     classes[0] = "X";
   }
-  analysis = execute( uWord, next_is_V2, classes );
+  analysis = execute( uWord, next_tag, classes );
 }
 
 vector<pair<UnicodeString,string>> Mbma::getResults( bool shrt ) const {

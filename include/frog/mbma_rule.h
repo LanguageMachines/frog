@@ -87,7 +87,6 @@ public:
   std::vector<RulePart> rules;
   int debugFlag;
   CLEX::Type tag;
-  icu::UnicodeString sortkey;
   icu::UnicodeString orig_word;
   icu::UnicodeString inflection;
   icu::UnicodeString sort_key;

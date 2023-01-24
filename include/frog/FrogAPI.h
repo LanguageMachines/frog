@@ -63,6 +63,7 @@ class FrogOptions {
   bool doLemma;              ///< should we run the lemmatizer?
   bool doMorph;              ///< should we run the morphological analyzer?
   bool doDeepMorph;          ///< do we want a deep morphological analysis?
+  bool doClassic;            ///< do we want clasic output (no compounds)?
   bool doMwu;                ///< should we resolve Multi Word Units?
   bool doIOB;                ///< should we run the IOB Chuker?
   bool doNER;                ///< should we run the Named Entity recognizer?

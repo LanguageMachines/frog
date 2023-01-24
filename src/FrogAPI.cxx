@@ -150,6 +150,7 @@ FrogOptions::FrogOptions() {
   doParse = true;
   doTagger = true;
   doDeepMorph = false;
+  doClassic = false;
   doSentencePerLine = false;
   doQuoteDetection = false;
   doRetry = false;
@@ -454,6 +455,7 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
     options.doDeepMorph = true;
     options.doMorph = true;
   }
+  options.doClassic = !Opts.extract( "classic" );
   options.doRetry = Opts.extract( "retry" );
   options.noStdOut = Opts.extract( "nostdout" );
   Opts.extract( 'e', options.encoding );
@@ -2175,12 +2177,14 @@ void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
   os << Tab;
   if ( options.doMorph ){
     os << fd.morph_string;
-    if ( options.doDeepMorph ){
-      if ( fd.compound_string == "0"  ){
-	os << Tab << "0";
+    if ( !options.doClassic
+	 || options.doDeepMorph ){
+      os << Tab;
+      if ( fd.compound_string.find("0") != string::npos  ){
+	os << "0";
       }
       else {
-	os << Tab << fd.compound_string + "-compound";
+	os << fd.compound_string + "-compound";
       }
     }
   }

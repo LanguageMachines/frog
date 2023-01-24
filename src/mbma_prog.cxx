@@ -216,8 +216,7 @@ void Test( istream& in ){
 	  if ( &tr != &tagv.back() ){
 	    next_tag = (&tr+1)->assigned_tag();
 	  }
-	  bool next_is_V2 = check_next( next_tag );
-	  myMbma.Classify( uWord, next_is_V2 );
+	  myMbma.Classify( uWord, next_tag );
 	  myMbma.filterHeadTag( head );
 	  myMbma.filterSubTags( v );
 	  myMbma.assign_compounds();
