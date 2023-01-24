@@ -464,7 +464,27 @@ vector<Rule*> Mbma::execute( const UnicodeString& word,
     DBG << out << endl;
     DBG << "allParts : " << allParts << endl;
   }
-
+  bool both_V2_and_V2I = false;
+  for ( const auto& cls : classes ){
+    if ( cls.indexOf( "te2|" ) != -1
+	 && cls.indexOf( "te2I" ) != -1 ){
+      both_V2_and_V2I = true;
+      break;
+    }
+  }
+  if ( debugFlag > 1 ){
+    if ( both_V2_and_V2I ){
+      DBG << "found a special one! " << word << endl;
+      UnicodeString out;
+      for ( const auto& cls : classes ){
+	out += cls + ",";
+      }
+      DBG << "in : " << out << endl;
+    }
+  }
+  if ( both_V2_and_V2I ){
+    next_is_V2 = false;
+  }
   vector<Rule*> accepted;
   size_t id = 0;
   // now loop over all the analysis
@@ -772,7 +792,10 @@ void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
       // but only relevant for doDeep
       tmp += ait->inflection;
     }
-    unique[tmp] = ait;
+    if ( unique.find(tmp) == unique.end() ){
+      // make sure to preserve the first one
+      unique[tmp] = ait;
+    }
   }
   // so now we have map of 'equal' analysis.
   // create a set for reverse lookup, using the Rule.ID to distinguish Rule's
