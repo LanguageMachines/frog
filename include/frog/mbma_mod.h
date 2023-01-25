@@ -102,9 +102,6 @@ class Mbma {
   void addBracketMorph( folia::Word *,
 			const icu::UnicodeString&,
 			const BaseBracket * ) const;
-  void addFlatMorph( folia::Word *,
-		     const icu::UnicodeString&,
-		     const BaseBracket * ) const;
   void store_brackets( frog_record&,
 		       const icu::UnicodeString&,
 		       const BracketNest * ) const;

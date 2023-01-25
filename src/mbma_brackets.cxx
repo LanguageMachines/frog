@@ -982,51 +982,6 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   return result;
 }
 
-void BracketLeaf::createFlatMorpheme( folia::MorphologyLayer *ml,
-				      folia::Document *doc,
-				      const string& textclass,
-				      bool ) const {
-  /// use the data in the Leaf to create a flat folia::Morpheme node
-  /*!
-    \param ml the Layer to add to
-    \param doc The FoLiA Document context
-    \param textclass the textclass to use
-  */
-  switch ( _status ){
-  case Status::STEM :
-    // fall through
-  case Status::PARTICLE :
-    // fall through
-  case Status::DERIVATIONAL :
-    // fall through
-  case Status::PARTICIPLE :
-    // fall through
-  case Status::FAILED :
-    if ( morph.isEmpty() ){
-      throw logic_error( toString(_status) + " has empty morpheme" );
-    }
-    break;
-  case Status::INFLECTION :
-    // fall through
-  case Status::INFO :
-    break;
-  default :
-    throw logic_error( "Not implemented case for " + toString( _status ) );
-    break;
-  }
-  if ( !morph.isEmpty() ){
-    folia::KWargs args;
-    args["set"] = Mbma::mbma_tagset;
-#pragma omp critical (foliaupdate)
-    {
-      folia::Morpheme *result = new folia::Morpheme( args, doc );
-      result->setutext( morph, textclass );
-      ml->append( result );
-    }
-  }
-}
-
-
 folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
 					      const string& textclass ) const {
   /// use the data in the Leaf to create a folia::Morpheme node
@@ -1121,47 +1076,6 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
     result->append( s );
   }
   return result;
-}
-
-void BracketNest::createFlatMorpheme( folia::MorphologyLayer *ml,
-				      folia::Document *doc,
-				      const string& textclass,
-				      bool add_compound ) const {
-  /// use the data in the Leaf to create a folia::Morpheme node
-  /*!
-    \param doc The FoLiA Document context
-    \param desc a decriptive note to add
-    \param testclass, the textclass to place <t> nodes in.
-  */
-  for ( auto const& it : parts ){
-    it->createFlatMorpheme( ml,
-			    doc,
-			    textclass,
-			    false);
-  }
-  if ( add_compound ){
-    Compound::Type ct = compound();
-    if ( ct != Compound::Type::NONE ){
-      folia::KWargs args;
-      args["value"] = toString(ct) + "-compound";
-      //      args["set"] = Mbma::mbma_tagset;
-      // LOG << "add " << toString(ct) << "-compound to layer:\n" << ml << endl;
-      string what;
-#pragma omp critical (foliaupdate)
-      {
-	try {
-	  ml->add_child<folia::Description>( args );
-	}
-	catch( const exception& e ){
-	  LOG << "adding Description failed: " << e.what() << endl;
-	  what = e.what();
-	}
-      }
-      if ( !what.empty() ){
-	throw runtime_error( what );
-      }
-    }
-  }
 }
 
 list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& result,

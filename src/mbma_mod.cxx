@@ -552,41 +552,6 @@ void Mbma::addBracketMorph( folia::Word *word,
   }
 }
 
-void Mbma::addFlatMorph( folia::Word *word,
-			 const UnicodeString& orig_word,
-			 const BaseBracket *brackets ) const {
-  /// add a flat Morpheme layer to the FoLiA Word
-  /*!
-    \param word the FoLiA Word
-    \param orig_word, a Unicode string with the oriiginal word
-    \param brackets the nested structure describing the morphemes
-   */
-  if (debugFlag > 1){
-    DBG << "addFlatMorph(" << word << "," << orig_word << ","
-	<< brackets << ")" << endl;
-  }
-  folia::KWargs args;
-  args["set"] = mbma_tagset;
-  folia::MorphologyLayer *ml;
-#pragma omp critical (foliaupdate)
-  {
-    try {
-      ml = word->addMorphologyLayer( args );
-    }
-    catch( const exception& e ){
-      LOG << e.what() << " addFlatMorph failed." << endl;
-      throw;
-    }
-  }
-  try {
-    brackets->createFlatMorpheme( ml, word->doc(), textclass, true );
-  }
-  catch( const exception& e ){
-    LOG << "createFlatMorpheme failed: " << e.what() << endl;
-    throw e;
-  }
-}
-
 bool mbmacmp( Rule *m1, Rule *m2 ){
   /// sorting function for Rule's
   return m1->getKey().length() > m2->getKey().length();
@@ -880,13 +845,7 @@ void Mbma::add_provenance( folia::Document& doc,
   args.clear();
   args["processor"] = proc->id();
   doc.declare( folia::AnnotationType::MORPHOLOGICAL, mbma_tagset, args );
-  if ( doDeepMorph ){
-    doc.declare( folia::AnnotationType::POS, clex_tagset, args );
-  }
-  else {
-    // We use <decl> to store compound info in "flat" mode
-    doc.declare( folia::AnnotationType::DESCRIPTION, mbma_tagset, args );
-  }
+  doc.declare( folia::AnnotationType::POS, clex_tagset, args );
 }
 
 void Mbma::store_morphemes( frog_record& fd,
@@ -1236,12 +1195,7 @@ void Mbma::add_folia_morphemes( const vector<folia::Word*>& wv,
 				const frog_data& fd ) const {
   for ( size_t i=0; i < wv.size(); ++i ){
     for ( const auto& mor : fd.units[i].morph_structure ) {
-      if ( doDeepMorph ){
-	addBracketMorph( wv[i], fd.units[i].clean_word, mor );
-      }
-      else {
-	addFlatMorph( wv[i], fd.units[i].clean_word, mor );
-      }
+      addBracketMorph( wv[i], fd.units[i].clean_word, mor );
     }
   }
 }

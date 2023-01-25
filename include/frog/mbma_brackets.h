@@ -112,10 +112,6 @@ class BaseBracket {
 					   const std::string&,
 					   icu::UnicodeString&,
 					   int& ) const = 0;
-  virtual void createFlatMorpheme( folia::MorphologyLayer *,
-				   folia::Document *,
-				   const std::string&,
-				   bool ) const = 0;
   virtual Compound::Type compound() const { return Compound::Type::NONE; };
   virtual Compound::Type getCompoundType() { return compound(); };
   CLEX::Type tag() const { return cls; };
@@ -162,10 +158,6 @@ public:
 				   const std::string&,
 				   icu::UnicodeString&,
 				   int& ) const override;
-  void createFlatMorpheme( folia::MorphologyLayer *,
-			   folia::Document *,
-			   const std::string&,
-			   bool ) const override;
 private:
   int ifpos;
   bool glue;
@@ -206,10 +198,6 @@ class BracketNest: public BaseBracket {
 				   const std::string&,
 				   icu::UnicodeString&,
 				   int& ) const override;
-  void createFlatMorpheme( folia::MorphologyLayer *,
-			   folia::Document *,
-			   const std::string&,
-			   bool ) const override;
   std::list<BaseBracket *> parts;
   Compound::Type compound() const { return _compound; };
  private:
