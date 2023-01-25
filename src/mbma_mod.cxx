@@ -987,6 +987,40 @@ void Mbma::store_brackets( frog_record& fd,
   return;
 }
 
+UnicodeString flatten( const UnicodeString& in ){
+  /// helper function to 'flatten out' bracketed morpheme strings
+  /*!
+    \param in a bracketed string of morphemes
+    \return a string with multiple '[' and ']' reduced to single occurrences
+  */
+  string s = TiCC::UnicodeToUTF8( in );
+  string::size_type bpos = s.find_first_not_of( " [" );
+  //  deb << "  FLATTEN: '" << s << "'" << endl;
+  string result;
+  if ( bpos != string::npos ){
+    string::size_type epos = s.find_first_of( "]", bpos );
+    result += "[" + s.substr( bpos, epos-bpos ) + "]";
+    //    deb << "substring: '" <<  s.substr( bpos, epos-bpos ) << "'" << endl;
+    bpos = s.find_first_of( "[", epos+1 );
+    bpos = s.find_first_not_of( " [", bpos );
+    while ( bpos != string::npos ){
+      epos = s.find_first_of( "]", bpos );
+      if ( epos == string::npos ){
+	break;
+      }
+      result += "[" + s.substr( bpos, epos-bpos ) + "]";
+      //      deb << "substring: '" <<  s.substr( bpos, epos-bpos ) << "'" << endl;
+      bpos = s.find_first_of( "[", epos+1 );
+      bpos = s.find_first_not_of( " [", bpos );
+    }
+  }
+  else {
+    result = s;
+  }
+  //  deb << "FLATTENED: '" << result << "'" << endl;
+  return TiCC::UnicodeFromUTF8(result);
+}
+
 void Mbma::storeResult( frog_record& fd,
 			const UnicodeString& uword,
 			const UnicodeString& uhead ) const {
@@ -1198,8 +1232,8 @@ vector<pair<UnicodeString,string>> Mbma::getResults( bool shrt ) const {
   return result;
 }
 
-void Mbma::add_morphemes( const vector<folia::Word*>& wv,
-			  const frog_data& fd ) const {
+void Mbma::add_folia_morphemes( const vector<folia::Word*>& wv,
+				const frog_data& fd ) const {
   for ( size_t i=0; i < wv.size(); ++i ){
     for ( const auto& mor : fd.units[i].morph_structure ) {
       if ( doDeepMorph ){

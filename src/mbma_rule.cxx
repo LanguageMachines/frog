@@ -47,6 +47,8 @@ using TiCC::operator<<;
 #define LOG *TiCC::Log(myLog)
 #define DBG *TiCC::Log(dbgLog)
 
+extern icu::UnicodeString flatten( const icu::UnicodeString& );
+
 bool RulePart::isBasic() const {
   return is_CELEX_base( ResultClass );
 }
@@ -549,45 +551,7 @@ void Rule::getCleanInflect( bool next_is_V2 ) {
   }
 }
 
-UnicodeString flatten( const UnicodeString& in ){
-  /// helper function to 'flatten out' bracketed morpheme strings
-  /*!
-    \param in a bracketed string of morphemes
-    \return a string with multiple '[' and ']' reduced to single occurrences
-  */
-  string s = TiCC::UnicodeToUTF8( in );
-  string::size_type bpos = s.find_first_not_of( " [" );
-  //  deb << "  FLATTEN: '" << s << "'" << endl;
-  string result;
-  if ( bpos != string::npos ){
-    string::size_type epos = s.find_first_of( "]", bpos );
-    result += "[" + s.substr( bpos, epos-bpos ) + "]";
-    //    deb << "substring: '" <<  s.substr( bpos, epos-bpos ) << "'" << endl;
-    bpos = s.find_first_of( "[", epos+1 );
-    bpos = s.find_first_not_of( " [", bpos );
-    while ( bpos != string::npos ){
-      epos = s.find_first_of( "]", bpos );
-      if ( epos == string::npos ){
-	break;
-      }
-      result += "[" + s.substr( bpos, epos-bpos ) + "]";
-      //      deb << "substring: '" <<  s.substr( bpos, epos-bpos ) << "'" << endl;
-      bpos = s.find_first_of( "[", epos+1 );
-      bpos = s.find_first_not_of( " [", bpos );
-    }
-  }
-  else {
-    result = s;
-  }
-  //  deb << "FLATTENED: '" << result << "'" << endl;
-  return TiCC::UnicodeFromUTF8(result);
-}
-
 void Rule::resolveBrackets() {
-  // string teststring = "[ [ [abituriënt]N [e]N_N* ]N [n]/m ]N";
-  // cerr << "  Flatten " << teststring << endl;
-  // cerr << "Flattened " << flatten(teststring,cerr) << endl;
-  // exit(1);
   if ( debugFlag > 5 ){
     DBG << "check rule for bracketing: " << this << endl;
   }

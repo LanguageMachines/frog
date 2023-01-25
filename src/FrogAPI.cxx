@@ -1399,7 +1399,7 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
       myMblem->add_lemmas( wv, fd );
     }
     if ( options.doMorph ){
-      myMbma->add_morphemes( wv, fd );
+      myMbma->add_folia_morphemes( wv, fd );
     }
     if ( options.doIOB ){
       myIOBTagger->add_result( fd, wv );
@@ -1511,7 +1511,7 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
       myMblem->add_lemmas( wv, fd );
     }
     if ( options.doMorph ){
-      myMbma->add_morphemes( wv, fd );
+      myMbma->add_folia_morphemes( wv, fd );
     }
     if ( options.doNER ){
       myNERTagger->add_result( fd, wv );

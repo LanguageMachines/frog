@@ -74,8 +74,8 @@ class Mbma {
 			      const icu::UnicodeString&,
 			      const std::vector<icu::UnicodeString>& );
   std::string version() const { return _version; };
-  void add_morphemes( const std::vector<folia::Word*>&,
-		      const frog_data& fd ) const;
+  void add_folia_morphemes( const std::vector<folia::Word*>&,
+			    const frog_data& fd ) const;
   static std::map<icu::UnicodeString,icu::UnicodeString> TAGconv;
   static std::string mbma_tagset;
   static std::string pos_tagset;
@@ -122,5 +122,7 @@ class Mbma {
   bool filter_diac;
   bool doDeepMorph;
 };
+
+icu::UnicodeString flatten( const icu::UnicodeString& in );
 
 #endif

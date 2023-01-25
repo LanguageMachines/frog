@@ -100,7 +100,6 @@ public:
 };
 
 
-icu::UnicodeString flatten( const icu::UnicodeString& in );
 std::ostream& operator<<( std::ostream& os, const Rule& );
 std::ostream& operator<<( std::ostream& os, const Rule * );
 
