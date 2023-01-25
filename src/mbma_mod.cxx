@@ -583,7 +583,7 @@ void Mbma::addFlatMorph( folia::Word *word,
   }
   catch( const exception& e ){
     LOG << "createFlatMorpheme failed: " << e.what() << endl;
-    throw;
+    throw e;
   }
 }
 

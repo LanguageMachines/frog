@@ -1144,14 +1144,21 @@ void BracketNest::createFlatMorpheme( folia::MorphologyLayer *ml,
     if ( ct != Compound::Type::NONE ){
       folia::KWargs args;
       args["value"] = toString(ct) + "-compound";
-      args["set"] = Mbma::mbma_tagset;
-      //      LOG << "add " << toString(ct) << "-compound to layer:\n" << ml << endl;
+      //      args["set"] = Mbma::mbma_tagset;
+      // LOG << "add " << toString(ct) << "-compound to layer:\n" << ml << endl;
+      string what;
 #pragma omp critical (foliaupdate)
-      try {
-	ml->add_child<folia::Description>( args );
+      {
+	try {
+	  ml->add_child<folia::Description>( args );
+	}
+	catch( const exception& e ){
+	  LOG << "adding Description failed: " << e.what() << endl;
+	  what = e.what();
+	}
       }
-      catch( const exception& e ){
-	LOG << "adding Description failed: " << e.what() << endl;
+      if ( !what.empty() ){
+	throw runtime_error( what );
       }
     }
   }
