@@ -984,7 +984,8 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 
 void BracketLeaf::createFlatMorpheme( folia::MorphologyLayer *ml,
 				      folia::Document *doc,
-				      const string& textclass ) const {
+				      const string& textclass,
+				      bool ) const {
   /// use the data in the Leaf to create a flat folia::Morpheme node
   /*!
     \param ml the Layer to add to
@@ -1124,7 +1125,8 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
 
 void BracketNest::createFlatMorpheme( folia::MorphologyLayer *ml,
 				      folia::Document *doc,
-				      const string& textclass ) const {
+				      const string& textclass,
+				      bool add_compound ) const {
   /// use the data in the Leaf to create a folia::Morpheme node
   /*!
     \param doc The FoLiA Document context
@@ -1134,7 +1136,23 @@ void BracketNest::createFlatMorpheme( folia::MorphologyLayer *ml,
   for ( auto const& it : parts ){
     it->createFlatMorpheme( ml,
 			    doc,
-			    textclass );
+			    textclass,
+			    false);
+  }
+  if ( add_compound ){
+    Compound::Type ct = compound();
+    if ( ct != Compound::Type::NONE ){
+      folia::KWargs args;
+      args["value"] = toString(ct) + "-compound";
+      //      LOG << "add " << toString(ct) << "-compound to layer:\n" << ml << endl;
+#pragma omp critical (foliaupdate)
+      try {
+	ml->add_child<folia::Description>( args );
+      }
+      catch( const exception& e ){
+	LOG << "adding Description failed: " << e.what() << endl;
+      }
+    }
   }
 }
 

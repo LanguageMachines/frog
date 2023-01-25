@@ -579,7 +579,7 @@ void Mbma::addFlatMorph( folia::Word *word,
     }
   }
   try {
-    brackets->createFlatMorpheme( ml, word->doc(), textclass );
+    brackets->createFlatMorpheme( ml, word->doc(), textclass, true );
   }
   catch( const exception& e ){
     LOG << "createFlatMorpheme failed: " << e.what() << endl;
@@ -1004,10 +1004,6 @@ void Mbma::storeResult( frog_record& fd,
     }
     else {
       fd.morph_string = flatten( pv[0].first );
-      if ( pv[0].first != fd.morph_string ){
-	cerr << "JAMMER! '" << pv[0].first << "' ' "
-	     << fd.morph_string << "'" << endl;
-      }
     }
     if ( pv[0].second == "none" ){
       fd.compound_string = "0";
