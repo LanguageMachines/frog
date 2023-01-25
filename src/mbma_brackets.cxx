@@ -794,7 +794,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   /// use the data in the Leaf to create a folia::Morpheme node
   /*!
     \param doc The FoLiA Document context
-    \param desc a decriptien note to add
+    \param desc a decriptive note to add
     \param cnt a counter for the number of handled morphemes
   */
   folia::Morpheme *result = 0;
@@ -1144,6 +1144,7 @@ void BracketNest::createFlatMorpheme( folia::MorphologyLayer *ml,
     if ( ct != Compound::Type::NONE ){
       folia::KWargs args;
       args["value"] = toString(ct) + "-compound";
+      args["set"] = Mbma::mbma_tagset;
       //      LOG << "add " << toString(ct) << "-compound to layer:\n" << ml << endl;
 #pragma omp critical (foliaupdate)
       try {

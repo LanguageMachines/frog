@@ -883,6 +883,10 @@ void Mbma::add_provenance( folia::Document& doc,
   if ( doDeepMorph ){
     doc.declare( folia::AnnotationType::POS, clex_tagset, args );
   }
+  else {
+    // We use <decl> to store compound info in "flat" mode
+    doc.declare( folia::AnnotationType::DESCRIPTION, mbma_tagset, args );
+  }
 }
 
 void Mbma::store_morphemes( frog_record& fd,
