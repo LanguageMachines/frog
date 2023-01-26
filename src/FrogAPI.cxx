@@ -1587,26 +1587,33 @@ void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
         if ( options.debugFlag > 5 ){
 	  DBG << "JSON read line: " << json_line << endl;
 	}
-	try {
-	  the_json = json::parse( json_line );
+	if ( json_line.empty() ){
+	  // assume we are done
+	  LOG << "Done with JSON" << endl;
+	  return; // closes this connection
 	}
-	catch ( const exception& e ){
-	  cerr << "json parsing failed on '" << json_line + "':"
-	       << e.what() << endl;
-	  throw runtime_error( "json failure" );
-	}
-	DBG << "Read JSON: " << the_json << endl;
-	for ( const auto& it : the_json ){
-	  string data = it["sentence"];
-	  timers.tokTimer.stop();
-	  vector<Tokenizer::Token> toks = tokenizer->tokenize_line( data );
-	  timers.tokTimer.stop();
-	  while ( toks.size() > 0 ){
-	    frog_data sent = frog_sentence( toks, 1 );
-	    show_results( output_stream, sent );
-	    timers.tokTimer.start();
-	    toks = tokenizer->tokenize_line_next();
+	else {
+	  try {
+	    the_json = json::parse( json_line );
+	  }
+	  catch ( const exception& e ){
+	    cerr << "json parsing failed on '" << json_line + "':"
+		 << e.what() << endl;
+	    throw runtime_error( "json failure" );
+	  }
+	  DBG << "Read JSON: " << the_json << endl;
+	  for ( const auto& it : the_json ){
+	    string data = it["sentence"];
 	    timers.tokTimer.stop();
+	    vector<Tokenizer::Token> toks = tokenizer->tokenize_line( data );
+	    timers.tokTimer.stop();
+	    while ( toks.size() > 0 ){
+	      frog_data sent = frog_sentence( toks, 1 );
+	      show_results( output_stream, sent );
+	      timers.tokTimer.start();
+	      toks = tokenizer->tokenize_line_next();
+	      timers.tokTimer.stop();
+	    }
 	  }
 	}
       }
