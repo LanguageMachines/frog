@@ -85,9 +85,9 @@ json frog_record::to_json() const {
   }
   if ( !morph_string.isEmpty() ){
     result["morph"] = TiCC::UnicodeToUTF8(morph_string);
-    if ( compound_string.find("0") == string::npos ){
-      result["compound"] = compound_string;
-    }
+  }
+  if ( compound_string.find("0") == string::npos ){
+    result["compound"] = compound_string;
   }
   if ( !tag.isEmpty() ){
     json tg;
@@ -130,10 +130,7 @@ ostream& operator<<( ostream& os, const frog_record& fr ){
   if ( !fr.lemmas.empty() ){
     os << fr.lemmas[0];
   }
-  os << TAB;
-  if ( !fr.morph_string.isEmpty() ){
-    os << fr.morph_string;
-  }
+  os << TAB << fr.morph_string;
   os << TAB << fr.tag << TAB << fixed << showpoint << std::setprecision(6) << fr.tag_confidence;
   os << TAB << fr.ner_tag; // << TAB << fr.ner_confidence;
   os << TAB << fr.iob_tag; // << TAB << fr.iob_confidence;
@@ -171,7 +168,7 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
       result.lemmas[0] += "_" + fd.units[i].lemmas[0];
     }
     if ( !result.morph_string.isEmpty() ){
-      // there is a morpheme information
+      // there is already morpheme information
       result.morph_string += "_" + fd.units[i].morph_string;
     }
     result.tag += "_" + fd.units[i].tag;
