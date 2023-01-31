@@ -1,4 +1,4 @@
-.TH frog 1 "2020 apr 14"
+.TH frog 1 "2023 jan 31"
 
 .SH NAME
 frog \- Dutch Natural Language Toolkit
@@ -44,10 +44,15 @@ set global debug level. (for all modules)
 
 .BR \-\-deep\(hymorph
 .RS
-generate a deep morphological analysis and add it to the XML. This also
-includes compound information.
-The default 'Tabbed' and JSON output is also more detailed in the Morpheme
-field.
+Add a deep morphological analysis to the 'Tabbed' and JSON output.
+This analysis is added to XML unconditionally.
+
+.RE
+
+.BR \-\-compounds
+.RS
+include compound information as a column to 'Tabbed' output.
+This information is added to XML and JSON unconditionally.
 
 .RE
 
