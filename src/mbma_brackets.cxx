@@ -906,6 +906,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     folia::KWargs args;
     args["subset"] = "inflection";
     for ( int i=0; i < inflect.length(); ++i ){
+      // for every part of the inflection, add the value as a feature
       UChar inf = inflect[i];
       if ( inf != '/' ){
 	UnicodeString d = CLEX::get_inflect_descr(inf);
@@ -926,6 +927,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 	    || _status == Status::FAILED ){
     desc = "[" + morph + "]"; // pass it up!
     for ( int i=0; i < inflect.length(); ++i ){
+      // for every part of the inflection, add it to the description only
       UChar inf = inflect[i];
       if ( inf != '/' ){
 	UnicodeString d = CLEX::get_inflect_descr( inf );
@@ -935,6 +937,8 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 	}
       }
     }
+    //
+    // now we add the description as a feature
     folia::KWargs args;
     args["subset"] = "structure";
     args["class"]  = TiCC::UnicodeToUTF8(desc);
