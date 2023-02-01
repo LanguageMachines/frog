@@ -894,9 +894,14 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     }
     desc = "[" + morph + "]"; // spread the word upwards! maybe add 'part' ??
   }
-  else if ( _status == Status::INFLECTION ){
+  else if ( _status == Status::INFLECTION
+	    || _status == Status::INFO ){
     if ( !morph.isEmpty() ){
       desc = "[" + morph + "]";
+    }
+    if ( _status == Status::INFO ){
+      // avoid to many brackets
+      --cnt;
     }
     folia::KWargs args;
     args["subset"] = "inflection";
@@ -936,26 +941,6 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 #pragma omp critical (foliaupdate)
     {
       result->add_child<folia::Feature>( args );
-    }
-  }
-  else if ( _status == Status::INFO ){
-    --cnt; // avoid to many brackets
-    folia::KWargs args;
-    args["subset"] = "inflection";
-    for ( int i=0; i < inflect.length(); ++i ){
-      UChar inf = inflect[i];
-      if ( inf != '/' ){
-	UnicodeString d = CLEX::get_inflect_descr( inf );
-	if ( !d.isEmpty() ){
-	  // happens sometimes when there is fawlty data
-	  desc += "/" + d;
-	  args["class"] = TiCC::UnicodeToUTF8(d);
-#pragma omp critical (foliaupdate)
-	  {
-	    result->add_child<folia::Feature>( args );
-	  }
-	}
-      }
     }
   }
   return result;
