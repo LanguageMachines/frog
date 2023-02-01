@@ -595,6 +595,7 @@ Compound::Type BracketNest::getCompoundType(){
 	 && st1 != Status::PARTICIPLE ){
       switch ( tag1 ){
       case CLEX::N:
+	// fall through
       case CLEX::A:
 	if ( st1 == Status::DERIVATIONAL ){
 	  compound = cp2;
@@ -801,22 +802,44 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   desc.remove();
   int pos = orig.indexOf( "^" );
   bool glue = ( pos != -1 );
-  if ( _status == Status::COMPLEX ){
+
+  switch ( _status ){
+  case Status::COMPLEX:
     abort();
-  }
-  else if ( _status == Status::STEM
-	    || ( _status == Status::DERIVATIONAL && glue ) ){
-    UnicodeString out = morph;
-    if ( out.isEmpty() ){
-      throw logic_error( "stem has empty morpheme" );
+    break;
+  case Status::STEM:
+    if ( morph.isEmpty() ){
+      throw logic_error( "Stem has empty morpheme" );
     }
+    break;
+  case Status::DERIVATIONAL:
+    if ( glue && morph.isEmpty() ){
+      throw logic_error( "Derivation has empty morpheme" );
+    }
+    break;
+  case Status::PARTICIPLE:
+    if ( morph.isEmpty() ){
+      throw logic_error( "Particle has empty morpheme" );
+    }
+    break;
+  case Status::FAILED:
+    if ( morph.isEmpty() ){
+      throw logic_error( "failed status, empty morpheme" );
+    }
+    break;
+  default:
+    break;
+  }
+
+  if ( _status == Status::STEM
+       || ( _status == Status::DERIVATIONAL && glue ) ){
     folia::KWargs args;
     args["set"] = Mbma::mbma_tagset;
     args["class"] = "stem";
 #pragma omp critical (foliaupdate)
     {
       result = new folia::Morpheme( args, doc );
-      result->setutext( out, textclass );
+      result->setutext( morph, textclass );
     }
     ++cnt;
     args.clear();
@@ -824,18 +847,18 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     if ( glue ){
       UnicodeString next_tag = orig[pos+1];
       args["class"] = TiCC::UnicodeToUTF8(next_tag);
-      desc = "[" + out + "]" + CLEX::get_tag_descr( CLEX::toCLEX(next_tag) );
+      desc = "[" + morph + "]" + CLEX::get_tag_descr( CLEX::toCLEX(next_tag) );
       // spread the word upwards!
     }
     else {
       args["class"] = toString( tag() );
-      desc = "[" + out + "]" + CLEX::get_tag_descr( tag() );
+      desc = "[" + morph + "]" + CLEX::get_tag_descr( tag() );
       // spread the word upwards!
       folia::KWargs fargs;
       fargs["subset"] = "structure";
       if ( tag() == CLEX::SPEC
 	   || tag() == CLEX::LET ){
-	fargs["class"] = TiCC::UnicodeToUTF8("[" + out + "]");
+	fargs["class"] = TiCC::UnicodeToUTF8("[" + morph + "]");
       }
       else {
 	fargs["class"] = TiCC::UnicodeToUTF8(desc);
@@ -851,17 +874,13 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     }
   }
   else if ( _status == Status::PARTICLE ){
-    UnicodeString out = morph;
-    if ( out.isEmpty() ){
-      throw logic_error( "particle has empty morpheme" );
-    }
     folia::KWargs args;
     args["set"] = Mbma::mbma_tagset;
     args["class"] = "particle";
 #pragma omp critical (foliaupdate)
     {
       result = new folia::Morpheme( args, doc );
-      result->setutext( out, textclass );
+      result->setutext( morph, textclass );
     }
     ++cnt;
     args.clear();
@@ -871,12 +890,11 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     {
       result->addPosAnnotation( args );
     }
-    desc = "[" + out + "]"; // spread the word upwards! maybe add 'part' ??
+    desc = "[" + morph + "]"; // spread the word upwards! maybe add 'part' ??
   }
   else if ( _status == Status::INFLECTION ){
-    UnicodeString out = morph;
-    if ( !out.isEmpty() ){
-      desc = "[" + out + "]";
+    if ( !morph.isEmpty() ){
+      desc = "[" + morph + "]";
     }
     folia::KWargs args;
     args["class"] = "inflection";
@@ -884,8 +902,8 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 #pragma omp critical (foliaupdate)
     {
       result = new folia::Morpheme( args, doc );
-      if ( !out.isEmpty() ){
-	result->setutext( out, textclass );
+      if ( !morph.isEmpty() ){
+	result->setutext( morph, textclass );
       }
     }
     ++cnt;
@@ -910,10 +928,6 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   else if ( _status == Status::DERIVATIONAL
 	    || _status == Status::PARTICIPLE
 	    || _status == Status::FAILED ){
-    UnicodeString out = morph;
-    if ( out.isEmpty() ){
-      throw logic_error( "Derivation with empty morpheme" );
-    }
     folia::KWargs args;
     if ( _status == Status::DERIVATIONAL ){
       args["class"] = "affix";
@@ -928,10 +942,10 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 #pragma omp critical (foliaupdate)
     {
       result = new folia::Morpheme( args, doc );
-      result->setutext( out, textclass );
+      result->setutext( morph, textclass );
     }
     ++cnt;
-    desc = "[" + out + "]"; // pass it up!
+    desc = "[" + morph + "]"; // pass it up!
     for ( int i=0; i < inflect.length(); ++i ){
       UChar inf = inflect[i];
       if ( inf != '/' ){
