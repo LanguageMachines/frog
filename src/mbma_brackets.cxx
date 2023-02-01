@@ -802,7 +802,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   desc.remove();
   int pos = orig.indexOf( "^" );
   bool glue = ( pos != -1 );
-
+  string m_class = toString( _status );
   switch ( _status ){
   case Status::COMPLEX:
     abort();
@@ -813,8 +813,14 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     }
     break;
   case Status::DERIVATIONAL:
-    if ( glue && morph.isEmpty() ){
+    if ( morph.isEmpty() ){
       throw logic_error( "Derivation has empty morpheme" );
+    }
+    if ( glue ){
+      m_class = "stem";
+    }
+    else {
+      m_class = "affix";
     }
     break;
   case Status::PARTICIPLE:
@@ -826,23 +832,28 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     if ( morph.isEmpty() ){
       throw logic_error( "failed status, empty morpheme" );
     }
+    m_class = "derivational";
+    break;
+  case Status::INFO:
+    m_class = "inflection";
     break;
   default:
     break;
   }
-
+  folia::KWargs m_args;
+  m_args["set"] = Mbma::mbma_tagset;
+  m_args["class"] = m_class;
+#pragma omp critical (foliaupdate)
+  {
+    result = new folia::Morpheme( m_args, doc );
+    if ( !morph.isEmpty() ){
+      result->setutext( morph, textclass );
+    }
+  }
+  ++cnt;
   if ( _status == Status::STEM
        || ( _status == Status::DERIVATIONAL && glue ) ){
     folia::KWargs args;
-    args["set"] = Mbma::mbma_tagset;
-    args["class"] = "stem";
-#pragma omp critical (foliaupdate)
-    {
-      result = new folia::Morpheme( args, doc );
-      result->setutext( morph, textclass );
-    }
-    ++cnt;
-    args.clear();
     args["set"] = Mbma::clex_tagset;
     if ( glue ){
       UnicodeString next_tag = orig[pos+1];
@@ -875,15 +886,6 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   }
   else if ( _status == Status::PARTICLE ){
     folia::KWargs args;
-    args["set"] = Mbma::mbma_tagset;
-    args["class"] = "particle";
-#pragma omp critical (foliaupdate)
-    {
-      result = new folia::Morpheme( args, doc );
-      result->setutext( morph, textclass );
-    }
-    ++cnt;
-    args.clear();
     args["set"] = Mbma::clex_tagset;
     args["class"] = toString( tag() );
 #pragma omp critical (foliaupdate)
@@ -897,17 +899,6 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
       desc = "[" + morph + "]";
     }
     folia::KWargs args;
-    args["class"] = "inflection";
-    args["set"] = Mbma::mbma_tagset;
-#pragma omp critical (foliaupdate)
-    {
-      result = new folia::Morpheme( args, doc );
-      if ( !morph.isEmpty() ){
-	result->setutext( morph, textclass );
-      }
-    }
-    ++cnt;
-    args.clear();
     args["subset"] = "inflection";
     for ( int i=0; i < inflect.length(); ++i ){
       UChar inf = inflect[i];
@@ -928,23 +919,6 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   else if ( _status == Status::DERIVATIONAL
 	    || _status == Status::PARTICIPLE
 	    || _status == Status::FAILED ){
-    folia::KWargs args;
-    if ( _status == Status::DERIVATIONAL ){
-      args["class"] = "affix";
-    }
-    else if ( _status == Status::PARTICIPLE ){
-      args["class"] = "participle";
-    }
-    else {
-      args["class"] = "derivational";
-    }
-    args["set"] = Mbma::mbma_tagset;
-#pragma omp critical (foliaupdate)
-    {
-      result = new folia::Morpheme( args, doc );
-      result->setutext( morph, textclass );
-    }
-    ++cnt;
     desc = "[" + morph + "]"; // pass it up!
     for ( int i=0; i < inflect.length(); ++i ){
       UChar inf = inflect[i];
@@ -956,7 +930,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 	}
       }
     }
-    args.clear();
+    folia::KWargs args;
     args["subset"] = "structure";
     args["class"]  = TiCC::UnicodeToUTF8(desc);
 #pragma omp critical (foliaupdate)
@@ -965,17 +939,8 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     }
   }
   else if ( _status == Status::INFO ){
+    --cnt; // avoid to many brackets
     folia::KWargs args;
-    args["class"] = "inflection";
-    args["set"] = Mbma::mbma_tagset;
-#pragma omp critical (foliaupdate)
-    {
-      result = new folia::Morpheme( args, doc );
-      if ( !morph.isEmpty() ){
-	result->setutext( morph, textclass );
-      }
-    }
-    args.clear();
     args["subset"] = "inflection";
     for ( int i=0; i < inflect.length(); ++i ){
       UChar inf = inflect[i];
