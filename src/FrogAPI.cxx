@@ -2918,6 +2918,27 @@ void FrogAPI::run_api_tests( const string& testName ){
     else {
       LOG << "test OK!" << endl;
     }
+    if ( options.doDeepMorph ){
+      *outS << "TESTING DEEP " << endl;
+      folia::Document *doc = 0;
+      try {
+	doc = FrogFile( testName );
+      }
+      catch ( exception& e ){
+	LOG << "problem frogging: " << testName << endl
+	    << e.what() << endl;
+      }
+      if ( doc ){
+	*outS << "GOT FOLIA, extracting WORDS " << endl;
+	vector<folia::Word*> words = doc->words();
+	for ( const auto& w : words ){
+	  vector<string> morphs = get_full_morph_analysis( w );
+	  vector<string> compounds = get_compound_analysis( w );
+	  *outS << w->text() << ": " << morphs << " :: " << compounds << endl;
+	}
+	*outS << "DEEP_MORPH test DONE " << endl;
+      }
+    }
     LOG << "Done with:" << testName << endl;
   }
 }
