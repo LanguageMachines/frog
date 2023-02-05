@@ -159,6 +159,7 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     }
     else {
       rulesName = resolve_configdir( rulesName, config.configDir() );
+      LOG << "using tokenizer configuration: " << rulesName << endl;
       if ( !tokenizer->init( rulesName ) ){
 	return false;
       }
