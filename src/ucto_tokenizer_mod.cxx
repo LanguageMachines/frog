@@ -71,10 +71,6 @@ UctoTokenizer::UctoTokenizer( TiCC::LogStream *err_log,
 
 UctoTokenizer::~UctoTokenizer(){
   /// Destroy the Tokenizer
-  // dbg_log is deleted by deleting the tokenizer element.
-  if ( dbgLog != errLog ){
-    delete errLog;
-  }
   delete tokenizer;
 }
 
@@ -109,7 +105,8 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     throw runtime_error( "ucto tokenizer is already initialized" );
   }
   tokenizer = new Tokenizer::TokenizerClass();
-  tokenizer->setErrorLog( dbgLog );
+  tokenizer->setErrorLog( errLog );
+  tokenizer->setDebugLog( dbgLog );
   tokenizer->setEosMarker( "" );
   tokenizer->setVerbose( false );
   tokenizer->setParagraphDetection( false ); //detection of paragraphs
