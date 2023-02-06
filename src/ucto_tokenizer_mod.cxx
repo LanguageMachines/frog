@@ -164,6 +164,9 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
 	   && *language_list.begin() != r_lang ){
 	language_list.insert( language_list.begin(), r_lang );
 	tokenizer->setLangDetection(false);
+	LOG << "Language detection is disabled, while you are using a "
+	    << "default language: '" << r_lang
+	    << "' which is not supported by Textcat" << endl;
       }
       if ( !language_list.empty() ){
 	LOG << "init tokenizer for languages: " << language_list << endl;
@@ -178,7 +181,6 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
 	}
       }
       if ( !language_list.empty() ){
-	LOG << "default tokenizer language = " << language_list[0] << endl;
 	tokenizer->setLanguage( language_list[0] );
       }
     }
