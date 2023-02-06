@@ -140,15 +140,13 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     }
     // when a language (list) is specified on the command line,
     // it overrules the language from the config file
-    string rulesName;
-    if ( language_list.empty() ){
-      rulesName = config.lookUp( "rulesFile", "tokenizer" );
-    }
+    string rulesName = config.lookUp( "rulesFile", "tokenizer" );
     if ( rulesName.empty() ){
       if ( language_list.empty() ){
 	LOG << "no 'rulesFile' or 'languages' found in configuration" << endl;
 	return false;
       }
+      LOG << "init tokenizer for languages: " << language_list << endl;
       if ( !tokenizer->init( language_list ) ){
 	return false;
       }
@@ -156,11 +154,31 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     }
     else {
       rulesName = resolve_configdir( rulesName, config.configDir() );
-      LOG << "using tokenizer configuration: " << rulesName << endl;
-      if ( !tokenizer->init( rulesName ) ){
-	return false;
+      string r_lang;
+      auto pos = rulesName.find( "tokconfig-" );
+      if ( pos != string::npos ){
+	r_lang = rulesName.substr( pos+10 );
+      }
+      if ( !r_lang.empty()
+	   &&  !language_list.empty()
+	   && *language_list.begin() != r_lang ){
+	language_list.insert( language_list.begin(), r_lang );
+	tokenizer->setLangDetection(false);
       }
       if ( !language_list.empty() ){
+	LOG << "init tokenizer for languages: " << language_list << endl;
+	if ( !tokenizer->init( language_list ) ){
+	  return false;
+	}
+      }
+      else {
+	LOG << "using tokenizer configuration: " << rulesName << endl;
+	if ( !tokenizer->init( rulesName ) ){
+	  return false;
+	}
+      }
+      if ( !language_list.empty() ){
+	LOG << "default tokenizer language = " << language_list[0] << endl;
 	tokenizer->setLanguage( language_list[0] );
       }
     }

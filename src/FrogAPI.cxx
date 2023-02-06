@@ -116,15 +116,17 @@ string FrogAPI::defaultConfigDir( const string& language ){
   if ( language.empty() ){
     if (TiCC::isDir(localConfigDir)) {
         return localConfigDir;
-    } else {
-        return configDir;
+    }
+    else {
+      return configDir;
     }
   }
   else {
     if (TiCC::isDir(localConfigDir + language)) {
         return localConfigDir + language +"/";
-    } else {
-        return configDir+language+"/";
+    }
+    else {
+      return configDir+language+"/";
     }
   }
 }
@@ -297,13 +299,14 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
     string localConfigFileName = localConfigDir + configFileName;
     if (TiCC::isFile( localConfigFileName )) {
         configFileName = localConfigFileName;
-    } else {
-        LOG << "  not found locally (" << configFileName << ")" << endl;
-        //global (final fallback)
-        configFileName = configDir + configFileName;
-        if (!TiCC::isFile( configFileName )) {
-            LOG << "  not found globally (" << configFileName << ")" << endl;
-        }
+    }
+    else {
+      LOG << "  not found locally (" << configFileName << ")" << endl;
+      //global (final fallback)
+      configFileName = configDir + configFileName;
+      if (!TiCC::isFile( configFileName )) {
+	LOG << "  not found globally (" << configFileName << ")" << endl;
+      }
     }
   }
   if ( configuration.fill( configFileName ) ){
@@ -328,6 +331,20 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
     return false;
   }
   if ( !languages.empty() ){
+    set<string> ucto_languages = Tokenizer::Setting::installed_languages();
+    vector<string> lang_v = TiCC::split_at( languages, "," );
+    auto l = lang_v.begin();
+    while ( l != lang_v.end() ){
+      if ( ucto_languages.find( *l ) == ucto_languages.end() ){
+	LOG << "remove unknow language '" << *l << "'" << endl;
+	l = lang_v.erase(l);
+      }
+      else {
+	++l;
+      }
+    }
+    languages = TiCC::join( lang_v, "," );
+    LOG << "configuring languages = '" << languages << "'" << endl;
     configuration.setatt( "languages", languages, "tokenizer" );
   }
   string opt_val;
