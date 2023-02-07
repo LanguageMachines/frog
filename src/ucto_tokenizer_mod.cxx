@@ -421,10 +421,6 @@ void UctoTokenizer::add_provenance( folia::Document& doc,
   }
   else {
     tokenizer->add_provenance_setting( &doc, main );
-    LOG << "GET UND_LANG=" <<  tokenizer->getUndLang() << endl;
-    if ( tokenizer->getUndLang() ){
-      tokenizer->add_provenance_undetermined( &doc, main );
-    }
     if ( !tokenizer->ucto_re_run() ){
       //      cerr << "FOUND processor: " << p << endl;
       tokenizer->add_provenance_structure( &doc, main );
@@ -632,7 +628,6 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
   string textclass = tokenizer->getOutputClass();
   string tok_set;
   string lang = fd.get_language();
-  LOG << "LANG=" << lang << endl;
   if ( tokenizer->getPassThru() || lang.empty() ){
     tok_set = "passthru";
   }
@@ -645,7 +640,6 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
   else {
     tok_set = "tokconfig-" + default_language();
   }
-  LOG << "tok_set=" << tok_set << endl;
   vector<folia::Word*> wv;
   if (  debug > 5 ){
     DBG << "add_words\n" << fd << endl;

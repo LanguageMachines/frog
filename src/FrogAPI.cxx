@@ -979,8 +979,6 @@ void FrogAPI::run_api( const TiCC::Configuration& configuration ){
 	  tokenizer->setOutputClass( options.outputclass );
 	  tokenizer->setTextRedundancy( options.textredundancy );
 	  tokenizer->setWordCorrection( options.correct_words );
-	  LOG << "SET UND LANG=" << TiCC::toString( options.do_und_language )
-	      << endl;
 	  tokenizer->setUndLang( options.do_und_language );
 	}
       }
