@@ -167,7 +167,7 @@ FrogOptions::FrogOptions() {
   test_API =  false;
   hide_timers = false;
   interactive = false;
-
+  do_und_language = false;
   maxParserTokens = 500; // 500 words in a sentence is already insane
   // needs about 16 Gb memory to parse!
   // set tot 0 for unlimited
@@ -237,6 +237,17 @@ void FrogAPI::test_version( const TiCC::Configuration& configuration,
   }
 }
 
+bool check_language_option( const string& languages ){
+  cerr << "check: " << languages << endl;
+  vector<string> lang_v = TiCC::split_at( languages, "," );
+  if ( lang_v.empty() ){
+    cerr<< "invalid value in --language=" << languages
+	<< " option. " << endl;
+    return false;
+  }
+  return true;
+}
+
 bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
 			       TiCC::Configuration& configuration,
 			       TiCC::LogStream* theErrLog ){
@@ -261,14 +272,13 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
     options.languages.insert( "nld" );
   }
   else {
-    vector<string> lang_v = TiCC::split_at( languages, "," );
-    if ( lang_v.empty() ){
-      cerr<< "invalid value in --language=" << languages
-	  << " option. " << endl;
+    if ( !check_language_option( languages ) ){
       return false;
     }
+    vector<string> lang_v = TiCC::split_at( languages, "," );
     auto it = find( lang_v.begin(), lang_v.end(), "und" );
     if ( it != lang_v.end() ){
+      options.do_und_language = true;
       lang_v.erase( it );
     }
     language = lang_v[0]; // the first mentioned is the default.
@@ -338,6 +348,7 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
     while ( l != lang_v.end() ){
       if ( *l == "und" ){
 	add_und = true;
+	options.do_und_language = true;
 	l = lang_v.erase(l);
       }
       else if ( ucto_languages.find( *l ) == ucto_languages.end() ){
@@ -860,6 +871,7 @@ void FrogAPI::run_api( const TiCC::Configuration& configuration ){
       tokenizer->setOutputClass( options.outputclass );
       tokenizer->setTextRedundancy( options.textredundancy );
       tokenizer->setWordCorrection( options.correct_words );
+      tokenizer->setUndLang( options.do_und_language );
       myCGNTagger = new CGNTagger( theErrLog,theDbgLog );
       stat = myCGNTagger->init( configuration );
       if ( stat ){
@@ -967,6 +979,9 @@ void FrogAPI::run_api( const TiCC::Configuration& configuration ){
 	  tokenizer->setOutputClass( options.outputclass );
 	  tokenizer->setTextRedundancy( options.textredundancy );
 	  tokenizer->setWordCorrection( options.correct_words );
+	  LOG << "SET UND LANG=" << TiCC::toString( options.do_und_language )
+	      << endl;
+	  tokenizer->setUndLang( options.do_und_language );
 	}
       }
 #pragma omp section

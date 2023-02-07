@@ -113,6 +113,7 @@ class FrogOptions {
   /*!< This assumes that Alpinois installed locally and the Alpino command is
     working.
    */
+  bool do_und_language;     ///< shoulde the tokenizer handle 'und'?
   int numThreads;           ///< limit for the number of threads
   int debugFlag;            ///< value for the generic debug level
   /*!< This value is used as the debug level for EVERY module.

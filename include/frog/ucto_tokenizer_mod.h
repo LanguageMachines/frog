@@ -53,6 +53,8 @@ class UctoTokenizer {
   void setDocID( const std::string& );
   void setTextRedundancy( const std::string& );
   void setWordCorrection( bool );
+  bool setUndLang( bool );
+  bool getUndLang() const;
   std::string get_data_version() const;
   std::string default_language() const;
   bool get_setting_info( const std::string&, std::string&, std::string& ) const;
