@@ -267,6 +267,10 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
 	  << " option. " << endl;
       return false;
     }
+    auto it = find( lang_v.begin(), lang_v.end(), "und" );
+    if ( it != lang_v.end() ){
+      lang_v.erase( it );
+    }
     language = lang_v[0]; // the first mentioned is the default.
     for ( const auto& l : lang_v ){
       options.languages.insert( l );
@@ -276,8 +280,8 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
 	   << " with more then one language " << endl
 	   << "\t specified. These values will be handled to the tokenizer,"
 	   << " but Frog"<< endl
-	   << "\t will only handle the first language: " << language
-	   << " for further processing!" << endl;
+	   << "\t will only handle the first language: '" << language
+	   << "' for further processing!" << endl;
     }
     configFileName = FrogAPI::defaultConfigFile(language);
     if ( !TiCC::isFile( configFileName ) ){
@@ -315,13 +319,9 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
     if ( !vers.empty() ){
       LOG << "configuration version = " << vers << endl;
     }
-    string langs = configuration.getatt( "languages", "tokenizer" );
-    if ( !langs.empty() ){
-      vector<string> lang_v = TiCC::split_at( langs, "," );
-      options.default_language = lang_v[0];
-      for ( const auto& l : lang_v ){
-	options.languages.insert( l );
-      }
+    string tmp = configuration.lookUp( "languages", "tokenizer" );
+    if ( !tmp.empty() ){
+      languages = tmp;
     }
   }
   else {
@@ -333,17 +333,29 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
   if ( !languages.empty() ){
     set<string> ucto_languages = Tokenizer::Setting::installed_languages();
     vector<string> lang_v = TiCC::split_at( languages, "," );
+    bool add_und = false;
     auto l = lang_v.begin();
     while ( l != lang_v.end() ){
-      if ( ucto_languages.find( *l ) == ucto_languages.end() ){
-	LOG << "remove unknow language '" << *l << "'" << endl;
+      if ( *l == "und" ){
+	add_und = true;
+	l = lang_v.erase(l);
+      }
+      else if ( ucto_languages.find( *l ) == ucto_languages.end() ){
+	LOG << "remove unknown language '" << *l << "'" << endl;
 	l = lang_v.erase(l);
       }
       else {
 	++l;
       }
     }
+    options.default_language = lang_v[0];
+    for ( const auto& l : lang_v ){
+      options.languages.insert( l );
+    }
     languages = TiCC::join( lang_v, "," );
+    if ( add_und ){
+    languages += ",und";
+    }
     LOG << "configuring languages = '" << languages << "'" << endl;
     configuration.setatt( "languages", languages, "tokenizer" );
   }
