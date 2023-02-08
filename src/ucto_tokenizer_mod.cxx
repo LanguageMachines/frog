@@ -115,80 +115,80 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     tokenizer->setPassThru();
     // when passthru, we don't further initialize the tokenizer
     // it wil run in minimal mode then.
+    LOG << "no tokenizer configured, running in 'passthru' mode" << endl;
+    return true;
+  }
+
+  string val = config.lookUp( "debug", "tokenizer" );
+  if ( val.empty() ){
+    val = config.lookUp( "debug" );
+  }
+  if ( !val.empty() ){
+    debug = TiCC::stringTo<int>( val );
+  }
+  if ( debug > 1 ){
+    tokenizer->setDebug( debug );
+  }
+  val = config.lookUp( "textcatdebug", "tokenizer" );
+  if ( !val.empty() ){
+    tokenizer->set_tc_debug( true );
+  }
+  string languages = config.lookUp( "languages", "tokenizer" );
+  vector<string> language_list;
+  if ( !languages.empty() ){
+    language_list = TiCC::split_at( languages, "," );
+    LOG << "Language List ="  << language_list << endl;
+    tokenizer->setLangDetection(true);
+  }
+  // when a language (list) is specified on the command line,
+  // it overrules the language from the config file
+  string rulesName = config.lookUp( "rulesFile", "tokenizer" );
+  if ( rulesName.empty() ){
+    if ( language_list.empty() ){
+      LOG << "no 'rulesFile' or 'languages' found in configuration" << endl;
+      return false;
+    }
+    LOG << "init tokenizer for languages: " << language_list << endl;
+    if ( !tokenizer->init( language_list ) ){
+      return false;
+    }
+    tokenizer->setLanguage( language_list[0] );
   }
   else {
-    string val = config.lookUp( "debug", "tokenizer" );
-    if ( val.empty() ){
-      val = config.lookUp( "debug" );
+    rulesName = resolve_configdir( rulesName, config.configDir() );
+    string r_lang;
+    auto pos = rulesName.find( "tokconfig-" );
+    if ( pos != string::npos ){
+      r_lang = rulesName.substr( pos+10 );
     }
-    if ( !val.empty() ){
-      debug = TiCC::stringTo<int>( val );
+    if ( !r_lang.empty()
+	 &&  !language_list.empty()
+	 && *language_list.begin() != r_lang ){
+      language_list.insert( language_list.begin(), r_lang );
+      tokenizer->setLangDetection(false);
+      LOG << "Language detection is disabled, while you are using a "
+	  << "default language: '" << r_lang
+	  << "' which is not supported by Textcat" << endl;
     }
-    if ( debug > 1 ){
-      tokenizer->setDebug( debug );
-    }
-    val = config.lookUp( "textcatdebug", "tokenizer" );
-    if ( !val.empty() ){
-      tokenizer->set_tc_debug( true );
-    }
-    string languages = config.lookUp( "languages", "tokenizer" );
-    vector<string> language_list;
-    if ( !languages.empty() ){
-      language_list = TiCC::split_at( languages, "," );
-      LOG << "Language List ="  << language_list << endl;
-      tokenizer->setLangDetection(true);
-    }
-    // when a language (list) is specified on the command line,
-    // it overrules the language from the config file
-    string rulesName = config.lookUp( "rulesFile", "tokenizer" );
-    if ( rulesName.empty() ){
-      if ( language_list.empty() ){
-	LOG << "no 'rulesFile' or 'languages' found in configuration" << endl;
-	return false;
-      }
+    if ( !language_list.empty() ){
       LOG << "init tokenizer for languages: " << language_list << endl;
       if ( !tokenizer->init( language_list ) ){
 	return false;
       }
-      tokenizer->setLanguage( language_list[0] );
     }
     else {
-      rulesName = resolve_configdir( rulesName, config.configDir() );
-      string r_lang;
-      auto pos = rulesName.find( "tokconfig-" );
-      if ( pos != string::npos ){
-	r_lang = rulesName.substr( pos+10 );
-      }
-      if ( !r_lang.empty()
-	   &&  !language_list.empty()
-	   && *language_list.begin() != r_lang ){
-	language_list.insert( language_list.begin(), r_lang );
-	tokenizer->setLangDetection(false);
-	LOG << "Language detection is disabled, while you are using a "
-	    << "default language: '" << r_lang
-	    << "' which is not supported by Textcat" << endl;
-      }
-      if ( !language_list.empty() ){
-	LOG << "init tokenizer for languages: " << language_list << endl;
-	if ( !tokenizer->init( language_list ) ){
-	  return false;
-	}
-      }
-      else {
-	LOG << "using tokenizer configuration: " << rulesName << endl;
-	if ( !tokenizer->init( rulesName ) ){
-	  return false;
-	}
-      }
-      if ( !language_list.empty() ){
-	tokenizer->setLanguage( language_list[0] );
+      LOG << "using tokenizer configuration: " << rulesName << endl;
+      if ( !tokenizer->init( rulesName ) ){
+	return false;
       }
     }
-
-    textredundancy = config.lookUp( "textredundancy", "tokenizer" );
-    if ( !textredundancy.empty() ){
-      tokenizer->setTextRedundancy( textredundancy );
+    if ( !language_list.empty() ){
+      tokenizer->setLanguage( language_list[0] );
     }
+  }
+  textredundancy = config.lookUp( "textredundancy", "tokenizer" );
+  if ( !textredundancy.empty() ){
+    tokenizer->setTextRedundancy( textredundancy );
   }
   return true;
 }
