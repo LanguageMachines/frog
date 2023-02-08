@@ -132,7 +132,7 @@ PKG_CHECK_MODULES([folia],[folia >= 2.9])
 CXXFLAGS="$CXXFLAGS $folia_CFLAGS"
 LIBS="$folia_LIBS $LIBS"
 
-PKG_CHECK_MODULES([ucto], [ucto >= 0.25] )
+PKG_CHECK_MODULES([ucto], [ucto >= 0.28] )
 CXXFLAGS="$CXXFLAGS $ucto_CFLAGS"
 LIBS="$ucto_LIBS $LIBS"
 

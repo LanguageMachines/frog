@@ -116,15 +116,17 @@ string FrogAPI::defaultConfigDir( const string& language ){
   if ( language.empty() ){
     if (TiCC::isDir(localConfigDir)) {
         return localConfigDir;
-    } else {
-        return configDir;
+    }
+    else {
+      return configDir;
     }
   }
   else {
     if (TiCC::isDir(localConfigDir + language)) {
         return localConfigDir + language +"/";
-    } else {
-        return configDir+language+"/";
+    }
+    else {
+      return configDir+language+"/";
     }
   }
 }
@@ -166,7 +168,8 @@ FrogOptions::FrogOptions() {
   test_API =  false;
   hide_timers = false;
   interactive = false;
-
+  do_und_language = false;
+  do_language_detection = false;
   maxParserTokens = 500; // 500 words in a sentence is already insane
   // needs about 16 Gb memory to parse!
   // set tot 0 for unlimited
@@ -236,6 +239,43 @@ void FrogAPI::test_version( const TiCC::Configuration& configuration,
   }
 }
 
+bool FrogAPI::parse_language_option( const string& languages ){
+  if ( languages.empty() ){
+    return true;
+  }
+  LOG << "check: " << languages << endl;
+  vector<string> lang_v = TiCC::split_at( languages, "," );
+  if ( lang_v.empty() ){
+    LOG << "invalid value in --language=" << languages
+	<< " option. " << endl;
+    return false;
+  }
+  set<string> ucto_languages = Tokenizer::Setting::installed_languages();
+  set<string> rejected;
+  auto l = lang_v.begin();
+  while ( l != lang_v.end() ){
+    if ( *l == "und" ){
+      options.do_und_language = true;
+      l = lang_v.erase(l);
+    }
+    else if ( ucto_languages.find( *l ) == ucto_languages.end() ){
+      rejected.insert( *l );
+      ++l;
+    }
+    else {
+      ++l;
+    }
+  }
+  if ( !rejected.empty() ){
+    LOG << "unsupported languages: " << rejected << endl;
+    LOG << "available languages: " << ucto_languages << endl;
+    return false;
+  }
+  options.languages = lang_v;
+  options.default_language = options.languages[0];  // the first mentioned is the default.
+  return true;
+}
+
 bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
 			       TiCC::Configuration& configuration,
 			       TiCC::LogStream* theErrLog ){
@@ -247,50 +287,46 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
     return true on succes
   */
   options.command = Opts.toString();
-  // is a language-list specified? Default is dutch
-  string language;
-  string languages;
-  Opts.extract ("language", languages );
+
+  // get the (optional) configuration file
   string configFileName;
-  if ( languages.empty() ){
-    // ok no languages parameter.
-    // use a (default) configfile. Dutch
-    configFileName = FrogAPI::defaultConfigFile("nld");
-    language = "nld";
-    options.languages.insert( "nld" );
-  }
-  else {
-    vector<string> lang_v = TiCC::split_at( languages, "," );
-    if ( lang_v.empty() ){
-      cerr<< "invalid value in --language=" << languages
-	  << " option. " << endl;
-      return false;
-    }
-    language = lang_v[0]; // the first mentioned is the default.
-    for ( const auto& l : lang_v ){
-      options.languages.insert( l );
-    }
-    if ( lang_v.size() > 1 ){
-      cerr << "WARNING: you used the --language=" << languages << " option"
-	   << " with more then one language " << endl
-	   << "\t specified. These values will be handled to the tokenizer,"
-	   << " but Frog"<< endl
-	   << "\t will only handle the first language: " << language
-	   << " for further processing!" << endl;
-    }
-    configFileName = FrogAPI::defaultConfigFile(language);
-    if ( !TiCC::isFile( configFileName ) ){
-      cerr << "configuration file: " << configFileName << " not found" << endl;
-      cerr << "Did you correctly install the frogdata package for language="
-	   << language << "?" << endl;
-      configFileName = FrogAPI::defaultConfigFile();
-      cerr << "using fallback configuration file: " << configFileName << endl;
-    }
-  }
-  options.default_language = language;
-  // override default config settings when a configfile is specified
   if ( !Opts.extract( 'c',  configFileName ) ){
     Opts.extract( "config",  configFileName );
+  }
+  // is a language-list specified? Default is dutch
+  string languages;
+  Opts.extract ("language", languages );
+  if ( configFileName.empty() ){
+    if ( languages.empty() ){
+      // ok no config or languages parameter.
+      // use a (default) configfile. Dutch
+      configFileName = FrogAPI::defaultConfigFile("nld");
+      options.default_language = "nld";
+      options.languages.push_back( "nld" );
+    }
+    else {
+      // no config, but languages
+      if ( !parse_language_option( languages ) ){
+	return false;
+      }
+      if ( options.languages.size() > 1 ){
+	cerr << "WARNING: you used the --language=" << languages << " option"
+	     << " with more then one language " << endl
+	     << "\t specified. These values will be handled to the tokenizer,"
+	     << " but Frog"<< endl
+	     << "\t will only handle the first language: '"
+	     << options.default_language
+	     << "' for further processing!" << endl;
+	options.do_language_detection = true;
+      }
+      configFileName = FrogAPI::defaultConfigFile(options.default_language);
+      if ( !TiCC::isFile( configFileName ) ){
+	cerr << "configuration file: " << configFileName << " not found" << endl;
+	cerr << "Did you correctly install the frogdata package for language="
+	     << options.default_language << "?" << endl;
+	return false;
+      }
+    }
   }
   LOG << "requested configuration: " << configFileName << endl;
   if ( !TiCC::isFile( configFileName ) && !(configFileName.rfind("/",0) == 0)){
@@ -298,13 +334,14 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
     string localConfigFileName = localConfigDir + configFileName;
     if (TiCC::isFile( localConfigFileName )) {
         configFileName = localConfigFileName;
-    } else {
-        LOG << "  not found locally (" << configFileName << ")" << endl;
-        //global (final fallback)
-        configFileName = configDir + configFileName;
-        if (!TiCC::isFile( configFileName )) {
-            LOG << "  not found globally (" << configFileName << ")" << endl;
-        }
+    }
+    else {
+      LOG << "  not found locally (" << configFileName << ")" << endl;
+      //global (final fallback)
+      configFileName = configDir + configFileName;
+      if (!TiCC::isFile( configFileName )) {
+	LOG << "  not found globally (" << configFileName << ")" << endl;
+      }
     }
   }
   if ( configuration.fill( configFileName ) ){
@@ -313,23 +350,33 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
     if ( !vers.empty() ){
       LOG << "configuration version = " << vers << endl;
     }
-    string langs = configuration.getatt( "languages", "tokenizer" );
-    if ( !langs.empty() ){
-      vector<string> lang_v = TiCC::split_at( langs, "," );
-      options.default_language = lang_v[0];
-      for ( const auto& l : lang_v ){
-	options.languages.insert( l );
-      }
+    string tmp = configuration.lookUp( "languages", "tokenizer" );
+    // We will override the language options from the commandline
+    // with those from the config file (if available)
+    if ( tmp.empty() ){
+      // not in the config, so use the commandline then
+      tmp = languages;
+    }
+    if ( !parse_language_option( tmp ) ){
+      return false;
     }
   }
   else {
     cerr << "failed to read configuration from '" << configFileName << "' !!" << endl;
     cerr << "Did you correctly install the frogdata package for language="
-	 << language << "?" << endl;
+	 << options.default_language << "?" << endl;
     return false;
   }
-  if ( !languages.empty() ){
-    configuration.setatt( "languages", languages, "tokenizer" );
+  string conf_languages;
+  for ( const auto& l : options.languages ){
+    conf_languages += l + ",";
+  }
+  if ( options.do_und_language ){
+    conf_languages += "und";
+  }
+  if ( !conf_languages.empty() ){
+    LOG << "SET config " << conf_languages << endl;
+    configuration.setatt( "languages", conf_languages, "tokenizer" );
   }
   string opt_val;
   // debug opts
@@ -831,8 +878,9 @@ void FrogAPI::run_api( const TiCC::Configuration& configuration ){
       tokenizer->setUttMarker( options.uttmark );
       tokenizer->setInputClass( options.inputclass );
       tokenizer->setOutputClass( options.outputclass );
-      tokenizer->setTextRedundancy( options.textredundancy );
       tokenizer->setWordCorrection( options.correct_words );
+      tokenizer->setUndLang( options.do_und_language );
+      tokenizer->setLangDetection( options.do_language_detection );
       myCGNTagger = new CGNTagger( theErrLog,theDbgLog );
       stat = myCGNTagger->init( configuration );
       if ( stat ){
@@ -938,8 +986,9 @@ void FrogAPI::run_api( const TiCC::Configuration& configuration ){
 	  tokenizer->setUttMarker( options.uttmark );
 	  tokenizer->setInputClass( options.inputclass );
 	  tokenizer->setOutputClass( options.outputclass );
-	  tokenizer->setTextRedundancy( options.textredundancy );
 	  tokenizer->setWordCorrection( options.correct_words );
+	  tokenizer->setUndLang( options.do_und_language );
+	  tokenizer->setLangDetection( options.do_language_detection );
 	}
       }
 #pragma omp section
@@ -2391,7 +2440,8 @@ void FrogAPI::handle_one_sentence( ostream& os,
   if ( sent_lang.empty() ){
     sent_lang = tokenizer->default_language();
   }
-  if ( options.languages.find( sent_lang ) == options.languages.end() ){
+  if ( find( options.languages.begin(), options.languages.end(), sent_lang )
+       == options.languages.end() ){
     // ignore this language!
     if ( options.debugFlag > 0 ){
       DBG << sent_lang << " NOT in: " << options.languages << endl;

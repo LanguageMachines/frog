@@ -71,10 +71,6 @@ UctoTokenizer::UctoTokenizer( TiCC::LogStream *err_log,
 
 UctoTokenizer::~UctoTokenizer(){
   /// Destroy the Tokenizer
-  // dbg_log is deleted by deleting the tokenizer element.
-  if ( dbgLog != errLog ){
-    delete errLog;
-  }
   delete tokenizer;
 }
 
@@ -109,7 +105,8 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     throw runtime_error( "ucto tokenizer is already initialized" );
   }
   tokenizer = new Tokenizer::TokenizerClass();
-  tokenizer->setErrorLog( dbgLog );
+  tokenizer->setErrorLog( errLog );
+  tokenizer->setDebugLog( dbgLog );
   tokenizer->setEosMarker( "" );
   tokenizer->setVerbose( false );
   tokenizer->setParagraphDetection( false ); //detection of paragraphs
@@ -118,58 +115,83 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     tokenizer->setPassThru();
     // when passthru, we don't further initialize the tokenizer
     // it wil run in minimal mode then.
+    LOG << "no tokenizer configured, running in 'passthru' mode" << endl;
+    return true;
+  }
+
+  string val = config.lookUp( "debug", "tokenizer" );
+  if ( val.empty() ){
+    val = config.lookUp( "debug" );
+  }
+  if ( !val.empty() ){
+    debug = TiCC::stringTo<int>( val );
+  }
+  if ( debug > 1 ){
+    tokenizer->setDebug( debug );
+  }
+  val = config.lookUp( "textcatdebug", "tokenizer" );
+  if ( !val.empty() ){
+    tokenizer->set_tc_debug( true );
+  }
+  string languages = config.lookUp( "languages", "tokenizer" );
+  vector<string> language_list;
+  if ( !languages.empty() ){
+    language_list = TiCC::split_at( languages, "," );
+    LOG << "Language List ="  << language_list << endl;
+    tokenizer->setLangDetection(true);
+  }
+  // when a language (list) is specified on the command line,
+  // it overrules the language from the config file
+  string rulesName = config.lookUp( "rulesFile", "tokenizer" );
+  LOG << "rulesName=" << rulesName << endl;
+  if ( rulesName.empty() ){
+    if ( language_list.empty() ){
+      LOG << "no 'rulesFile' or 'languages' found in configuration" << endl;
+      return false;
+    }
+    LOG << "init tokenizer for languages: " << language_list << endl;
+    if ( !tokenizer->init( language_list ) ){
+      return false;
+    }
+    tokenizer->setLanguage( language_list[0] );
   }
   else {
-    string val = config.lookUp( "debug", "tokenizer" );
-    if ( val.empty() ){
-      val = config.lookUp( "debug" );
+    rulesName = resolve_configdir( rulesName, config.configDir() );
+    string r_lang;
+    auto pos = rulesName.find( "tokconfig-" );
+    if ( pos != string::npos ){
+      r_lang = rulesName.substr( pos+10 );
     }
-    if ( !val.empty() ){
-      debug = TiCC::stringTo<int>( val );
-    }
-    if ( debug > 1 ){
-      tokenizer->setDebug( debug );
-    }
-    val = config.lookUp( "textcatdebug", "tokenizer" );
-    if ( !val.empty() ){
-      tokenizer->set_tc_debug( true );
-    }
-    string languages = config.lookUp( "languages", "tokenizer" );
-    vector<string> language_list;
-    if ( !languages.empty() ){
-      language_list = TiCC::split_at( languages, "," );
-      LOG << "Language List ="  << language_list << endl;
-      tokenizer->setLangDetection(true);
-    }
-    // when a language (list) is specified on the command line,
-    // it overrules the language from the config file
-    string rulesName;
-    if ( language_list.empty() ){
-      rulesName = config.lookUp( "rulesFile", "tokenizer" );
-    }
-    if ( rulesName.empty() ){
-      if ( language_list.empty() ){
-	LOG << "no 'rulesFile' or 'languages' found in configuration" << endl;
-	return false;
+    LOG << "R_LANG=" << r_lang << endl;
+    set<string> ucto_languages = Tokenizer::Setting::installed_languages();
+    if ( !r_lang.empty()
+	 && ucto_languages.find( r_lang ) != ucto_languages.end() ){
+      // so we have a tokconfig- file for language r_lang available
+      if ( find( language_list.begin(), language_list.end(), r_lang )
+	   == language_list.end() ){
+	// but is is NOT in the known language list, add it
+	language_list.insert( language_list.begin(), r_lang );
+	// mark textcat to be disabled
+	tokenizer->setLangDetection(false);
+	LOG << "Language detection is disabled, while you are using a "
+	    << "default language: '" << r_lang
+	    << "' which is not supported by the TextCat tool" << endl;
       }
+    }
+    if ( !language_list.empty() ){
+      LOG << "init tokenizer for languages: " << language_list << endl;
       if ( !tokenizer->init( language_list ) ){
 	return false;
       }
-      tokenizer->setLanguage( language_list[0] );
     }
     else {
-      rulesName = resolve_configdir( rulesName, config.configDir() );
+      LOG << "using tokenizer configuration: " << rulesName << endl;
       if ( !tokenizer->init( rulesName ) ){
 	return false;
       }
-      if ( !language_list.empty() ){
-	tokenizer->setLanguage( language_list[0] );
-      }
     }
-
-    textredundancy = config.lookUp( "textredundancy", "tokenizer" );
-    if ( !textredundancy.empty() ){
-      tokenizer->setTextRedundancy( textredundancy );
+    if ( !language_list.empty() ){
+      tokenizer->setLanguage( language_list[0] );
     }
   }
   return true;
@@ -359,6 +381,42 @@ bool UctoTokenizer::getPassThru() const {
   /// get the value of the PassThru setting
   if ( tokenizer ){
     return tokenizer->getPassThru();
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
+bool UctoTokenizer::setLangDetection( const bool b ) {
+  /// set the tokenizer LangDetection property
+  /*!
+    \param b a boolean, true to set to ON or OFF respectively
+  */
+  if ( tokenizer ){
+    return tokenizer->setLangDetection( b );
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
+bool UctoTokenizer::setUndLang( const bool b ) {
+  /// set the tokenizer UndLang property
+  /*!
+    \param b a boolean, true to set to ON or OFF respectively
+  */
+  if ( tokenizer ){
+    return tokenizer->setUndLang( b );
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
+bool UctoTokenizer::getUndLang() const {
+  /// get the value of the UndLang setting
+  if ( tokenizer ){
+    return tokenizer->getUndLang();
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
@@ -589,6 +647,9 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
   string lang = fd.get_language();
   if ( tokenizer->getPassThru() || lang.empty() ){
     tok_set = "passthru";
+  }
+  else if ( lang == "und" ){
+    tok_set = "undetermined";
   }
   else if ( lang != "default" ){
     tok_set = "tokconfig-" + lang;
