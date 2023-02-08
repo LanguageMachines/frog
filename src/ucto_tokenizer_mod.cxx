@@ -143,6 +143,7 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
   // when a language (list) is specified on the command line,
   // it overrules the language from the config file
   string rulesName = config.lookUp( "rulesFile", "tokenizer" );
+  LOG << "rulesName=" << rulesName << endl;
   if ( rulesName.empty() ){
     if ( language_list.empty() ){
       LOG << "no 'rulesFile' or 'languages' found in configuration" << endl;
@@ -161,14 +162,21 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     if ( pos != string::npos ){
       r_lang = rulesName.substr( pos+10 );
     }
+    LOG << "R_LANG=" << r_lang << endl;
+    set<string> ucto_languages = Tokenizer::Setting::installed_languages();
     if ( !r_lang.empty()
-	 &&  !language_list.empty()
-	 && *language_list.begin() != r_lang ){
-      language_list.insert( language_list.begin(), r_lang );
-      tokenizer->setLangDetection(false);
-      LOG << "Language detection is disabled, while you are using a "
-	  << "default language: '" << r_lang
-	  << "' which is not supported by Textcat" << endl;
+	 && ucto_languages.find( r_lang ) != ucto_languages.end() ){
+      // so we have a tokconfig- file for language r_lang available
+      if ( find( language_list.begin(), language_list.end(), r_lang )
+	   == language_list.end() ){
+	// but is is NOT in the known language list, add it
+	language_list.insert( language_list.begin(), r_lang );
+	// mark textcat to be disabled
+	tokenizer->setLangDetection(false);
+	LOG << "Language detection is disabled, while you are using a "
+	    << "default language: '" << r_lang
+	    << "' which is not supported by the TextCat tool" << endl;
+      }
     }
     if ( !language_list.empty() ){
       LOG << "init tokenizer for languages: " << language_list << endl;
@@ -185,10 +193,6 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     if ( !language_list.empty() ){
       tokenizer->setLanguage( language_list[0] );
     }
-  }
-  textredundancy = config.lookUp( "textredundancy", "tokenizer" );
-  if ( !textredundancy.empty() ){
-    tokenizer->setTextRedundancy( textredundancy );
   }
   return true;
 }

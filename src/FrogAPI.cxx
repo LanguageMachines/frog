@@ -271,7 +271,7 @@ bool FrogAPI::parse_language_option( const string& languages ){
     return false;
   }
   options.languages = lang_v;
-  options.default_language = lang_v[0];  // the first mentioned is the default.
+  options.default_language = options.languages[0];  // the first mentioned is the default.
   return true;
 }
 
@@ -352,6 +352,10 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
     string tmp = configuration.lookUp( "languages", "tokenizer" );
     // We will override the language options from the commandline
     // with those from the config file (if available)
+    if ( tmp.empty() ){
+      // not in the config, so use the commandline then
+      tmp = languages;
+    }
     if ( !parse_language_option( tmp ) ){
       return false;
     }
@@ -370,6 +374,7 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
     conf_languages += "und";
   }
   if ( !conf_languages.empty() ){
+    LOG << "SET config " << conf_languages << endl;
     configuration.setatt( "languages", conf_languages, "tokenizer" );
   }
   string opt_val;
@@ -871,7 +876,6 @@ void FrogAPI::run_api( const TiCC::Configuration& configuration ){
       tokenizer->setUttMarker( options.uttmark );
       tokenizer->setInputClass( options.inputclass );
       tokenizer->setOutputClass( options.outputclass );
-      tokenizer->setTextRedundancy( options.textredundancy );
       tokenizer->setWordCorrection( options.correct_words );
       tokenizer->setUndLang( options.do_und_language );
       tokenizer->setLangDetection( options.do_language_detection );
@@ -980,7 +984,6 @@ void FrogAPI::run_api( const TiCC::Configuration& configuration ){
 	  tokenizer->setUttMarker( options.uttmark );
 	  tokenizer->setInputClass( options.inputclass );
 	  tokenizer->setOutputClass( options.outputclass );
-	  tokenizer->setTextRedundancy( options.textredundancy );
 	  tokenizer->setWordCorrection( options.correct_words );
 	  tokenizer->setUndLang( options.do_und_language );
 	  tokenizer->setLangDetection( options.do_language_detection );
