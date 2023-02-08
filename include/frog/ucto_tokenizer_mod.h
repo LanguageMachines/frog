@@ -54,6 +54,7 @@ class UctoTokenizer {
   void setTextRedundancy( const std::string& );
   void setWordCorrection( bool );
   bool setUndLang( bool );
+  bool setLangDetection( bool );
   bool getUndLang() const;
   std::string get_data_version() const;
   std::string default_language() const;

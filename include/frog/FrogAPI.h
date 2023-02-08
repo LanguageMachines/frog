@@ -113,7 +113,8 @@ class FrogOptions {
   /*!< This assumes that Alpinois installed locally and the Alpino command is
     working.
    */
-  bool do_und_language;     ///< shoulde the tokenizer handle 'und'?
+  bool do_und_language;     ///< should the tokenizer handle 'und'?
+  bool do_language_detection;  ///< should the tokenizer detect more languages?
   int numThreads;           ///< limit for the number of threads
   int debugFlag;            ///< value for the generic debug level
   /*!< This value is used as the debug level for EVERY module.
@@ -134,8 +135,8 @@ of input encodings. The default is UTF8. The output will always be in UTF8.
   std::string inputclass;  ///< the textclass to use on FoLiA input
   std::string outputclass; ///< the textclass to use on FoLiA output
   std::string default_language; ///< what is our default language
-  std::set<std::string> languages; ///< all languages to take into account
-  /*< This set of languages will be handled over to the ucto tokenizer
+  std::vector<std::string> languages; ///< all languages to take into account
+  /*< This list of languages will be handled over to the ucto tokenizer
    */
   std::string textredundancy; ///< determines how much text is added in the FoLiA
   /*!< possible values are 'full', 'minimal' and 'none'.
@@ -186,7 +187,7 @@ class FrogAPI {
   std::string Frogtostring( const std::string& );
   std::string Frogtostringfromfile( const std::string& );
   static std::string defaultConfigFile( const std::string& ="" );
-
+  bool parse_language_option( const std::string& );
  private:
   static std::string defaultConfigDir( const std::string& ="" );
   bool collect_options( TiCC::CL_Options&,

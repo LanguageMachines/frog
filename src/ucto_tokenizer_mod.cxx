@@ -383,6 +383,19 @@ bool UctoTokenizer::getPassThru() const {
   }
 }
 
+bool UctoTokenizer::setLangDetection( const bool b ) {
+  /// set the tokenizer LangDetection property
+  /*!
+    \param b a boolean, true to set to ON or OFF respectively
+  */
+  if ( tokenizer ){
+    return tokenizer->setLangDetection( b );
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
 bool UctoTokenizer::setUndLang( const bool b ) {
   /// set the tokenizer UndLang property
   /*!
