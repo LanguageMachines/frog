@@ -350,15 +350,10 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
       LOG << "configuration version = " << vers << endl;
     }
     string tmp = configuration.lookUp( "languages", "tokenizer" );
+    // We will override the language options from the commandline
+    // with those from the config file (if available)
     if ( !parse_language_option( tmp ) ){
-      LOG << "OK DIT IS DOOD" << endl;
-      LOG << "OK DIT IS DOOD" << endl;
-      LOG << "OK DIT IS DOOD" << endl;
-      LOG << "OK DIT IS DOOD" << endl;
       return false;
-    }
-    if ( !tmp.empty() ){
-      languages = tmp;
     }
   }
   else {
