@@ -435,7 +435,7 @@ UnicodeString BracketNest::put( bool shrt ) const {
     result += tmp;
   }
   if ( cnt > 1 ){
-    result = "[ " + result + " ]";
+    result = "[" + result + "]";
     if ( cls != CLEX::UNASS
 	 && cls != CLEX::NEUTRAL ){
       if ( shrt ){
