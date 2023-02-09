@@ -162,7 +162,6 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     if ( pos != string::npos ){
       r_lang = rulesName.substr( pos+10 );
     }
-    LOG << "R_LANG=" << r_lang << endl;
     set<string> ucto_languages = Tokenizer::Setting::installed_languages();
     if ( !r_lang.empty()
 	 && ucto_languages.find( r_lang ) != ucto_languages.end() ){

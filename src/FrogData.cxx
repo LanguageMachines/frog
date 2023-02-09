@@ -212,9 +212,9 @@ void frog_data::resolve_mwus(){
     }
     else {
       frog_record merged = merge( *this, pos, mwus.find( pos )->second );
-      merged.morph_structure.clear(); // we don't need them AND avoid pointers to
-      //                             deleted memory
-      // A shallow copy function would be better
+      merged.morph_structure.clear(); // we don't need them AND avoid pointers
+      //                                 deleted memory
+      //           A shallow copy function would be better
       mw_units.push_back( merged );
       pos = mwus[pos];
     }
