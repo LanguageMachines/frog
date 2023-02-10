@@ -426,7 +426,8 @@ UnicodeString BracketNest::put( bool shrt ) const {
   for ( auto const& it : parts ){
     UnicodeString tmp = it->put( shrt );
     if ( tmp[0] != '/'
-	 && &it != &parts.front() ){
+	 && &it != &parts.front()
+	 && result[result.length()-1] != ']' ){
       result += " ";
     }
     if ( tmp[0] == '[' ){
