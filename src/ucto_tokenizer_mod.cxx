@@ -138,7 +138,9 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
   if ( !languages.empty() ){
     language_list = TiCC::split_at( languages, "," );
     LOG << "Language List ="  << language_list << endl;
-    tokenizer->setLangDetection(true);
+    if ( language_list.size() > 1 ){
+      tokenizer->setLangDetection(true);
+    }
   }
   // when a language (list) is specified on the command line,
   // it overrules the language from the config file
