@@ -139,7 +139,10 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
     language_list = TiCC::split_at( languages, "," );
     LOG << "Language List ="  << language_list << endl;
     if ( language_list.size() > 1 ){
-      tokenizer->setLangDetection(true);
+      if ( !tokenizer->setLangDetection() ){
+	LOG << "TEXTCAT IS NOT AVAILABLE, running without TextCat support"
+	    << endl;
+      }
     }
   }
   // when a language (list) is specified on the command line,
