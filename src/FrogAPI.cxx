@@ -1392,9 +1392,7 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
   add_provenance( *doc );
   folia::KWargs args;
   args["xml:id"] = doc->id() + ".text";
-  folia::Text *text = new folia::Text( args );
-  doc->addText( text );
-  return text;
+  return doc->setTextRoot( args );
 }
 
 void FrogAPI::append_to_sentence( folia::Sentence *sent,
@@ -1499,25 +1497,25 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
       DBG << "append_to_folia, NEW paragraph " << endl;
     }
     args["xml:id"] = root->doc()->id() + ".p." + TiCC::toString(++p_count);
-    folia::Paragraph *p = new folia::Paragraph( args, root->doc() );
-    if ( options.debugFlag > 5 ){
-      DBG << "created a new: " << p << endl;
-    }
+    folia::Paragraph *p;
     if ( root->element_id() == folia::Text_t ){
       if  (options.debugFlag > 5 ){
 	DBG << "append_to_folia, add paragraph to Text" << endl;
       }
-      root->append( p );
+      p = root->add_child<folia::Paragraph>( args );
+      if ( options.debugFlag > 5 ){
+	DBG << "created a new: " << p << endl;
+      }
     }
     else {
       // root is a paragraph, which is done now.
+      p = root->parent()->add_child<folia::Paragraph>( args );
       if ( options.textredundancy == "full" ){
 	root->settext( root->str(options.outputclass), options.outputclass);
       }
       if  (options.debugFlag > 5 ){
 	DBG << "append_to_folia, add paragraph to parent of " << root << endl;
       }
-      root->parent()->append( p );
     }
     result = p;
   }

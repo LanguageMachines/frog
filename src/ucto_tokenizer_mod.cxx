@@ -690,7 +690,7 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
 	DBG << "create Word(" << args << ") = " << word.word << endl;
       }
       try {
-	w = new folia::Word( args, s->doc() );
+	w = s->add_child<folia::Word>( args );
       }
       catch ( const exception& e ){
 	cerr << "Word(" << args << ") creation failed: " << e.what() << endl;
@@ -700,7 +700,6 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
       if (  debug > 5 ){
 	DBG << "add_result, create a word, done:" << w << endl;
       }
-      s->append( w );
     }
     wv.push_back( w );
   }
