@@ -229,12 +229,7 @@ int main(int argc, char *argv[]) {
       frog.run_on_files();
     }
     else if ( frog.options.doServer ) {
-      if ( frog.run_a_server() ){
-	return EXIT_SUCCESS;
-      }
-      else {
-	return EXIT_FAILURE;
-      }
+      frog.run_a_server();
     }
     else {
       // interactive mode
