@@ -1,3 +1,24 @@
+0.27 - 2023-02-20
+[Ko van der Sloot]
+Major Release.
+Internally we always perform a 'deep' morphological analysis.
+This information is used for XML ans JSON output.
+For the 'classic' Tabbed output, we maintain backward comptability.
+You need to specify '--deep-morph' to get the deep analysis in the output.
+You may also specify '--compounds' to get an extra column with compound
+information.
+
+Other changes:
+* C++ code quality
+* adapted to more recent Timbl implementations (Unicode awareness)
+* Tokenizer:
+  - Better handling of --languages option.
+  - 'und' is now also acceptable as a "language"
+  - Better debugging possibility
+* Mbma: To many alternatives with Inverted Verbs were generated. As the
+        Tagger doesn't help us directly, we filter on the person of the next
+	word, and only return V/te2I when the next word is 2-nd person
+
 0.26 - 2023-01-02
 [Ko van der Sloot]
 * fix for https://github.com/LanguageMachines/frog/issues/96
