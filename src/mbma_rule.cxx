@@ -116,15 +116,6 @@ void RulePart::get_edits( const UnicodeString& edit ){
   }
 }
 
-UnicodeString filter_inversion( const UnicodeString& inflect ){
-  if ( inflect == "te2I" ){
-    return "te1";
-  }
-  else {
-    return inflect;
-  }
-}
-
 RulePart::RulePart( const UnicodeString& rs, const UChar kar, bool first ):
   ResultClass(CLEX::UNASS),
   uchar(kar),
@@ -240,7 +231,6 @@ RulePart::RulePart( const UnicodeString& rs, const UChar kar, bool first ):
       }
     }
   }
-  //  inflect = filter_inversion( inflect );
 }
 
 Rule::Rule( const vector<UnicodeString>& parts,
@@ -490,12 +480,12 @@ void Rule::resolve_inflections(){
   }
 }
 
-void Rule::getCleanInflect( bool next_is_V2 ) {
+void Rule::getCleanInflect( bool next_is_VNW_2 ) {
   // get the last inflection and clean it up by extracting only
   //  known inflection names
   if ( debugFlag > 5 ){
     DBG << "getCleanInflect: " << this << endl;
-    DBG << "next_is_V2=" << TiCC::toString( next_is_V2 ) << endl;
+    DBG << "next_is_VNW_2=" << TiCC::toString( next_is_VNW_2 ) << endl;
   }
   inflection = "";
   auto it = rules.rbegin();
@@ -534,9 +524,9 @@ void Rule::getCleanInflect( bool next_is_V2 ) {
 	DBG << "cleaned inflection " << new_inflect << endl;
       }
       if ( new_inflect.indexOf( "te2I" ) != -1
-	   && !next_is_V2 ){
+	   && !next_is_VNW_2 ){
 	if ( debugFlag > 0 ){
-	  DBG << "HIT!" << endl;
+	  DBG << "Found NO 2-nd person, replacing te2I by te1" << endl;
 	}
 	new_inflect = "te1";
 	it->inflect = new_inflect;
