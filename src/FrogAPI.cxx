@@ -1645,6 +1645,9 @@ void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
 	}
 	if ( json_line.empty() ){
 	  // assume we are done
+	  if ( options.debugFlag > 5 ){
+	    DBG << "Done with processing JSON. exit" << endl;
+	  }
 	  LOG << "Done with JSON" << endl;
 	  return; // closes this connection
 	}
@@ -1657,7 +1660,9 @@ void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
 		 << e.what() << endl;
 	    throw runtime_error( "json failure" );
 	  }
-	  DBG << "Read JSON: " << the_json << endl;
+	  if ( options.debugFlag ){
+	    DBG << "Parsed JSON: " << the_json << endl;
+	  }
 	  for ( const auto& it : the_json ){
 	    string data = it["sentence"];
 	    timers.tokTimer.stop();
@@ -2315,7 +2320,9 @@ void FrogAPI::output_JSON( ostream& os,
       out_json.push_back( part );
     }
   }
-  DBG << "spitting out JSON:" << out_json << endl;
+  if ( options.debugFlag ){
+    DBG << "spitting out JSON:" << out_json << endl;
+  }
   os << std::setw(pp_val) << out_json << endl;
 }
 
