@@ -61,7 +61,7 @@ class FrogOptions {
   FrogOptions();             ///< the constructor
   bool doTok;                ///< should we run the tokenizer?
   bool doLemma;              ///< should we run the lemmatizer?
-  bool doMorph;              ///< should we run the morphological analyzer?
+  bool doMbma;               ///< should we run the morphological analyzer?
   bool doDeepMorph;          ///< do we want a deep morphological analysis?
   bool doCompounds;          ///< do we want compounds in the output?
   bool doMwu;                ///< should we resolve Multi Word Units?

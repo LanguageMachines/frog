@@ -145,7 +145,7 @@ string FrogAPI::defaultConfigFile( const string& language ){
 FrogOptions::FrogOptions() {
   doTok = true;
   doLemma = true;
-  doMorph = true;
+  doMbma = true;
   doMwu = true;
   doIOB = true;
   doNER = true;
@@ -460,7 +460,7 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
       options.doLemma = false;
     }
     if ( skip.find_first_of("aA") != string::npos ){
-      options.doMorph = false;
+      options.doMbma = false;
     }
     if ( skip.find_first_of("mM") != string::npos ){
       if ( options.doAlpino ){
@@ -499,10 +499,19 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
   };
 
   if ( Opts.extract( "deep-morph" ) ) {
+    if ( !options.doMbma ){
+      LOG << " Option --deep-morph NOT possible, because of --skip=a" << endl;
+      return false;
+    }
     options.doDeepMorph = true;
-    options.doMorph = true;
   }
-  options.doCompounds = Opts.extract( "compounds" );
+  if ( Opts.extract( "compounds" ) ){
+    if ( !options.doMbma ){
+      LOG << " Option --compounds NOT possible, because of --skip=a" << endl;
+      return false;
+    }
+    options.doCompounds = true;
+  }
   options.doRetry = Opts.extract( "retry" );
   options.noStdOut = Opts.extract( "nostdout" );
   Opts.extract( 'e', options.encoding );
@@ -773,10 +782,10 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
     LOG << "Disabled the tokenizer." << endl;
     options.doTok = false;
   }
-  if ( options.doMorph && !configuration.hasSection("mbma") ){
+  if ( options.doMbma && !configuration.hasSection("mbma") ){
     LOG << "Missing [[mbma]] section in config file." << endl;
     LOG << "Disabled the Morhological analyzer." << endl;
-    options.doMorph = false;
+    options.doMbma = false;
   }
   if ( options.doIOB ){
     if ( !configuration.hasSection("IOB") ){
@@ -904,7 +913,7 @@ void FrogAPI::run_api( const TiCC::Configuration& configuration ){
 	  myMblem = new Mblem(theErrLog,theDbgLog);
 	  stat = myMblem->init( configuration );
 	}
-	if ( stat && options.doMorph ){
+	if ( stat && options.doMbma ){
 	  myMbma = new Mbma(theErrLog,theDbgLog);
 	  stat = myMbma->init( configuration );
 	  if ( stat ) {
@@ -1006,7 +1015,7 @@ void FrogAPI::run_api( const TiCC::Configuration& configuration ){
       }
 #pragma omp section
       {
-	if ( options.doMorph ){
+	if ( options.doMbma ){
 	  try {
 	    myMbma = new Mbma(theErrLog,theDbgLog);
 	    mbaStat = myMbma->init( configuration );
@@ -1358,7 +1367,7 @@ folia::processor *FrogAPI::add_provenance( folia::Document& doc ) const {
   if ( options.doLemma ){
     myMblem->add_provenance( doc, proc );
   }
-  if ( options.doMorph ){
+  if ( options.doMbma ){
     myMbma->add_provenance( doc, proc );
   }
   if ( options.doIOB ){
@@ -1445,7 +1454,7 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     if ( options.doLemma ){
       myMblem->add_lemmas( wv, fd );
     }
-    if ( options.doMorph ){
+    if ( options.doMbma ){
       myMbma->add_folia_morphemes( wv, fd );
     }
     if ( options.doIOB ){
@@ -1557,7 +1566,7 @@ void FrogAPI::append_to_words( const vector<folia::Word*>& wv,
     if ( options.doLemma ){
       myMblem->add_lemmas( wv, fd );
     }
-    if ( options.doMorph ){
+    if ( options.doMbma ){
       myMbma->add_folia_morphemes( wv, fd );
     }
     if ( options.doNER ){
@@ -2055,7 +2064,7 @@ frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
 	// per word
 #pragma omp section
 	{
-	  if ( options.doMorph ){
+	  if ( options.doMbma ){
 	    timers.mbmaTimer.start();
 	    if (options.debugFlag > 1){
 	      DBG << "Calling mbma..." << endl;
@@ -2229,7 +2238,7 @@ void FrogAPI::output_tabbed( ostream& os, const frog_record& fd ) const {
     os << Tab;
   }
   os << Tab;
-  if ( options.doMorph ){
+  if ( options.doMbma ){
     os << fd.morph_string;
     if ( options.doCompounds
 	 || options.doDeepMorph ){
@@ -2849,7 +2858,7 @@ folia::Document *FrogAPI::FrogFile( const string& infilename ){
     if ( options.doNER){
       LOG << "NER took:           " << timers.nerTimer << endl;
     }
-    if ( options.doMorph ){
+    if ( options.doMbma ){
       LOG << "MBMA took:          " << timers.mbmaTimer << endl;
     }
     if ( options.doLemma ){
