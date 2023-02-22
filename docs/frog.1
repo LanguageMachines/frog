@@ -1,11 +1,11 @@
-.TH frog 1 "2023 jan 31"
+.TH frog 1 "2023 feb 22"
 
 .SH NAME
 frog \- Dutch Natural Language Toolkit
 .SH SYNOPSIS
-frog [options]
+frog [\-t] test\-file
 
-frog \-t test\-file
+frog [options]
 
 .SH DESCRIPTION
 Frog is an integration of memory\(hy-based natural language processing (NLP)
@@ -25,7 +25,7 @@ you can use
 to select the 'config-file' for an installed language 'lang'
 .RE
 
-.BR \-\-debug =<modele><level>,...
+.BR \-\-debug =<module><level>,...
 .RS
 set debug level per module, indicated by a single letter:
 Tagger (T), Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a),
@@ -35,11 +35,14 @@ or Parser (p). Different modules must be separated by commas.
 (e.g. \-\-debug=l5,n3 sets the level for the Lemmatizer to 5 and for the NER
 to 3 )
 
+Debugging lines are written to a file
+.BR frog.<number>.debug
 .RE
+The name of that file is given at the end of the run.
 
 .BR \-d " <level>"
 .RS
-set global debug level. (for all modules)
+set a global debug level for all modules at once.
 .RE
 
 .BR \-\-deep\(hymorph
@@ -75,7 +78,12 @@ The first language in the list will be the default, unspecified languages are
 asumed to be of that default.
 
 e.g. \-\-language=nld,eng,por
-means: detect Dutch, English and Portuguese, with Dutch being the default.
+means: detect Dutch, English and Portuguese, with Dutch being the default,
+using TextCat. Mainly useful for XML processing.
+
+Specifying a unsupported language is a fatal error. However, you can add the
+special language 'und' which assures that sentences in an unknown languages
+will be labeled as such, and processed no further.
 
 .B IMPORTANT
 Frog can at the moment handle only one language at a time, as determined by the
@@ -115,23 +123,24 @@ from the inputfilename(s) with '.out' appended.
 .BR \-\-retry
 .RS
 assume a re-run on the same input file(s). Frog wil only process those files
-that haven't been processed yet. This is accomplished by looking at the output
-file names. (so this has no effect if neither \-o, \-\-outputdir, \-X or
-\-\-xmldir is used)
+that haven't been processed yet.
 .RE
 
 
 .BR \-\-skip =[tlacnmp]
 .RS
 skip parts of the process: Tokenizer (t), Lemmatizer (l), Morphological
-Analyzer (a), Chunker (c), Named Entity Recognition (n), Multi-Word Units (m) or Parser (p).
+Analyzer (a), Chunker (c), Named Entity Recognition (n), Multi-Word Units (m)
+or Parser (p).
+
+The Tagger cannot be skipped.
 
 Skipping the Multiword Unit implies disabling the Parser too.
 .RE
 
 .BR \-\-alpino
 .RS
-Use a locally installed Alpino parser
+Use a locally installed Alpino parser. Disables our build-in Dependency parser
 .RE
 
 .BR \-\-alpino =server
@@ -154,9 +163,14 @@ Run Frog as a server on 'port'
 .RS
 process 'file'.
 
-\-t can be omitted. Frog will run on any <file> found on the command-line.
+This option can be omitted. Frog will run on any <file> found on the
+qcommand-line.
 Wildcards are allowed too. When NO files are specified, Frog will start in
 interactive mode.
+
+Files with the extension '.gz' or '.bz2' are handled too. The corresponding
+output-files will be compressed using the same compression again. Except
+when an explicit output filename is specified.
 .RE
 
 .BR \-x " <xmlfile>"
@@ -165,13 +179,20 @@ process 'xmlfile', which is supposed to be in FoLiA format! If 'xmlfile' is
 empty, and
 .BR \-\-testdir =<dir>
 is provided, all '.xml' files in 'dir' will be processed as FoLia XML.
+
+This option can be omitted. Frog will process files with the 'xml' extension
+as FoLiA files.
+
+Files with the extension '.xml.gz' or '.xml.bz2' are handled too. The
+corresponding output-files will be compressed using the same compression again.
+Except when an explicit output filename is specified.
 .RE
 
 .BR \-X " <xmlfile>"
 .RS
 When 'xmlfile' is specified, create a FoLiA XML output file with that name.
 
-When 'xmlfile' is empty, generate XML output for every inputfile.
+When 'xmlfile' is empty, generate FoLiA XML output for every inputfile.
 .RE
 
 .BR \-\-textclass "=<cls>"
@@ -181,7 +202,6 @@ When
 is given, use 'cls' to find AND store text in the FoLiA document(s).
 Using \-\-inputclass and \-\-\outputclass is in general a better choice.
 .RE
-
 
 .BR \-\-inputclass "=<cls>"
 .RS
@@ -196,14 +216,9 @@ Preferably this is another class then the inputclass.
 
 .BR \-\-testdir =<dir>
 .RS
-process all files in 'dir'. When the input mode is XML, only '.xml' files are
-teken from 'dir'. see also
+process all files in 'dir'. When the input mode is XML, only '.xml' files,
+'.xml.gz' or '.xml.bz2' files are taken from 'dir'. see also
 .B \-\-outputdir
-.RE
-
-.BR \-\-tmpdir =<dir>
-.RS
-location to store intermediate files. Default /tmp. NOT USED!
 .RE
 
 .BR \-\-uttmarker =<mark>
@@ -308,3 +323,6 @@ Antal van den Bosch
 e\-mail: lamasoftware@science.ru.nl
 .SH SEE ALSO
 .BR ucto (1)
+.BR mblem (1)
+.BR mbma (1)
+.BR ner (1)
