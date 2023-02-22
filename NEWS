@@ -1,4 +1,4 @@
-0.27 - 2023-02-20
+0.27 - 2023-02-22
 [Ko van der Sloot]
 Major Release.
 Internally we always perform a 'deep' morphological analysis.
