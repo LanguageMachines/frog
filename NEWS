@@ -1,12 +1,16 @@
+0.27.1 - 2023-02-22
+[Maarten van Gompel]
+* Software metadata update only, no functional changes
+
 0.27 - 2023-02-22
 [Ko van der Sloot]
-Major Release.
-Internally we always perform a 'deep' morphological analysis.
-This information is used for XML and JSON output.
-For the 'classic' Tabbed output, we maintain backward comptability.
-You need to specify '--deep-morph' to get the deep analysis in the output.
-You may also specify '--compounds' to get an extra column with compound
-information.
+* Major Release.
+* Internally we always perform a 'deep' morphological analysis.
+* This information is used for XML and JSON output.
+* For the 'classic' Tabbed output, we maintain backward comptability.
+* You need to specify '--deep-morph' to get the deep analysis in the output.
+* You may also specify '--compounds' to get an extra column with compound
+  information.
 
 Other changes:
 * C++ code quality
