@@ -8,7 +8,7 @@
     "@type": "SoftwareSourceCode",
     "identifier": "frog",
     "name": "Frog",
-    "version": "0.28",
+    "version": "0.27.1",
     "description": "Frog is an integration of memory-based natural language processing (NLP) modules developed for Dutch. It performs automatic linguistic enrichment such as part of speech tagging, lemmatisation, named entity recognition, shallow parsing, dependency parsing and morphological analysis. All NLP modules are based on TiMBL.",
     "license": "https://spdx.org/licenses/GPL-3.0-only",
 	"url": "https://languagemachines.github.io/frog",
@@ -56,16 +56,14 @@
                         }
                     }
                 }
-            },
-            "position": 1
+            }
 		},
 		{
 			"@id": "https://orcid.org/0000-0003-2493-656X",
 			"@type": "Person",
 			"givenName": "Antal",
 			"familyName": "van den Bosch",
-			"email": "antal.vandenbosch@let.ru.nl",
-            "position": 2
+			"email": "antal.vandenbosch@let.ru.nl"
 		},
 		{
 			"@id": "https://orcid.org/0000-0002-1046-0006",
@@ -77,7 +75,6 @@
                 { "@id": "https://huc.knaw.nl" },
                 { "@id": "https://www.ru.nl/clst" }
             ],
-            "position": 3
 		}
 	],
 	"sourceOrganization": { "@id": "https://www.ru.nl/clst" },
@@ -166,7 +163,7 @@
         }
     ],
 	"issueTracker": "https://github.com/LanguageMachines/frog/issues",
-	"contIntegration": "https://travis-ci.org/LanguageMachines/frog",
+	"contIntegration": "https://github.com/LanguageMachines/frog/actions/workflows/frog.yml",
 	"releaseNotes": "https://github.com/LanguageMachines/frog/releases",
 	"developmentStatus": [ "https://www.repostatus.org/#active", "https://w3id.org/research-technology-readiness-levels#Level9Proven" ],
 	"keywords":  [ "nlp", "natural language processing", "pos", "lemma", "ner", "parser", "tagger", "part-of-speech tagging", "lemmatisation", "dependency parsing", "shallow parsing", "dutch" ],
