@@ -783,6 +783,8 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   /// use the data in the Leaf to create a folia::Morpheme node
   /*!
     \param doc The FoLiA Document context
+    \param textclass textclass to use for FoLiA text-elements
+    \return a FoLiA Morpheme node
   */
   UnicodeString desc;
   int cnt = 0;
@@ -796,8 +798,10 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   /// use the data in the Leaf to create a folia::Morpheme node
   /*!
     \param doc The FoLiA Document context
+    \param textclass textclass to use for FoLiA text-elements
     \param desc a decriptive note to add
     \param cnt a counter for the number of handled morphemes
+    \return a FoLiA Morpheme node
   */
   folia::Morpheme *result = 0;
   desc.remove();

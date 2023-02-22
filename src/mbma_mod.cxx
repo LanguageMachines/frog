@@ -462,6 +462,7 @@ vector<Rule*> Mbma::execute( const UnicodeString& word,
   /// attempt to find matching Rules
   /*!
     \param word a word to check
+    \param next_tag The tag of the word following this word (when available)
     \param classes the Timbl classifications
     \return 0 or more matching Rules
   */
