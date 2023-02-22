@@ -126,14 +126,34 @@
 	],
 	"funding": [
 		{
-			"@type": "Organization",
-			"name": "CLARIN-NL"
+			"@type": "Grant",
+			"name": "CLARIN-NL (NWO grant 184.021.003)",
+			"url": "https://www.clariah.nl",
+            "funder": {
+                "@type": "Organization",
+                "name": "NWO", 
+                "url": "https://www.nwo.nl"
+            }
 		},
 		{
-			"@type": "Organization",
-			"name": "CLARIAH",
-			"url": "https://www.clariah.nl"
-		}
+			"@type": "Grant",
+			"name": "CLARIAH-CORE (NWO grant 184.033.101)",
+			"url": "https://www.clariah.nl",
+            "funder": {
+                "@type": "Organization",
+                "name": "NWO", 
+                "url": "https://www.nwo.nl"
+            }
+        },
+        {
+            "@type": "Grant",
+            "name": "CLARIAH-PLUS (NWO grant 184.034.023)",
+            "funder": {
+                "@type": "Organization",
+                "name": "NWO", 
+                "url": "https://www.nwo.nl"
+            }
+        }
 	],
 	"readme": "https://github.com/LanguageMachines/frog/blob/master/README.md",
     "softwareHelp": [
@@ -147,8 +167,9 @@
 	"issueTracker": "https://github.com/LanguageMachines/frog/issues",
 	"contIntegration": "https://travis-ci.org/LanguageMachines/frog",
 	"releaseNotes": "https://github.com/LanguageMachines/frog/releases",
-	"developmentStatus": "https://www.repostatus.org/#active",
+	"developmentStatus": [ "https://www.repostatus.org/#active", "https://w3id.org/research-technology-readiness-levels#Level9Proven" ],
 	"keywords":  [ "nlp", "natural language processing", "pos", "lemma", "ner", "parser", "tagger", "part-of-speech tagging", "lemmatisation", "dependency parsing", "shallow parsing", "dutch" ],
+    "applicationCategory": [ "https://vocabs.dariah.eu/tadirah/annotating", "https://vocabs.dariah.eu/tadirah/tagging", "https://vocabs.dariah.eu/tadirah/namedEntityRecognition", "https://vocabs.dariah.eu/tadirah/posTagging", "https://vocabs.dariah.eu/tadirah/segmenting", "https://vocabs.dariah.eu/tadirah/treeTagging", "https://vocabs.dariah.eu/tadirah/contextualizing" , "https://w3id.org/nwo-research-fields#Linguistics", "https://w3id.org/nwo-research-fields#TextualAndContentAnalysis" ],
     "referencePublication": [
 		{
 			"@type": "TechArticle",
@@ -181,7 +202,7 @@
 		}
 	],
     "dateCreated": "2011-03-31T12:35:01Z+0000",
-    "dateModified": "2022-07-21T13:17:06Z+0200",
+    "dateModified": "2023-02-22T11:55:06Z+0200",
     "targetProduct": [
         {
             "@type": "SoftwareLibrary",
