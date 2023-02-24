@@ -196,6 +196,7 @@ jobs:
         if: ${{ env.test_status != '0' }}
         run: |
           cat src/test-suite.log;
+          cat frogtests/*.diff
 
       - name: Notify IRC of failure
         if: ${{ env.test_status != '0' }}
