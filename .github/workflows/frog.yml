@@ -196,10 +196,6 @@ jobs:
         if: ${{ env.test_status != '0' }}
         run: |
           cat src/test-suite.log;
-          cat frogtests/testjsonserver.err
-          cat frogtests/testjsonserver.log
-          cat frogtests/testjsonserver2.err
-          cat frogtests/testjsonserver.log
 
       - name: Notify IRC of failure
         if: ${{ env.test_status != '0' }}
