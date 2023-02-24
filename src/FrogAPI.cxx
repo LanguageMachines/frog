@@ -2554,6 +2554,12 @@ void FrogAPI::handle_one_paragraph( ostream& os,
   }
   else {
     if ( !wv.empty() ){
+      string msg = "paragraph " + p->id() + " has both <w> and <s> nodes. "
+	+ "this is NOT supported by Frog";
+      throw runtime_error( msg );
+#ifdef TOO_OPTIMISTIC
+      // Not good enough. The words in wv can be scattered within sentences
+      // You should split wv further in parts with adjacent Words
       folia::KWargs args;
       args["generate_id"] = p->id();
       folia::Sentence *s = new folia::Sentence( args, p->doc() );
@@ -2563,6 +2569,7 @@ void FrogAPI::handle_one_paragraph( ostream& os,
 	s->append( w );
       }
       handle_word_vector( os, wv, sentences_done );
+#endif
     }
     for ( const auto& s : sv ){
       handle_one_sentence( os, s, sentences_done );
