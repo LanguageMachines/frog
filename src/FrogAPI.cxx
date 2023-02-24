@@ -2390,13 +2390,14 @@ void FrogAPI::handle_word_vector( ostream& os,
     \param wv_in the Word list to handle
     \param s_cnt the sentence count
   */
-  folia::FoliaElement *s = wv_in[0]->parent();
-  vector<folia::Word*> wv =  wv_in;
+  folia::FoliaElement *parent = wv_in[0]->parent();
+  //  LOG << "PARENT = " << parent << endl;
+  vector<folia::Word*> wv = wv_in;
   vector<Tokenizer::Token> toks;
   if ( options.correct_words ){
     // we are allowed to let the tokenizer correct those
-    toks = tokenizer->correct_words( s, wv );
-    wv = s->words();
+    toks = tokenizer->correct_words( parent, wv );
+    wv = parent->words();
   }
   else {
     // assume unfrogged BUT tokenized!
@@ -2411,9 +2412,9 @@ void FrogAPI::handle_word_vector( ostream& os,
       DBG << "handle_one_sentence() untokenized string: '" << text << "'" << endl;
     }
     toks = tokenizer->tokenize_line( text );
+    //    cerr << "text:" << text << " size=" << wv.size() << endl;
   }
-  // cerr << "text:" << text << " size=" << wv.size() << endl;
-  // cerr << "tokens:" << toks << " size=" << toks.size() << endl;
+  //  cerr << "tokens:" << toks << " size=" << toks.size() << endl;
   if ( toks.size() == wv.size() ){
     frog_data res = frog_sentence( toks, s_cnt );
     //    cerr << "res:" << res << " size=" << res.size() << endl;
@@ -2427,14 +2428,14 @@ void FrogAPI::handle_word_vector( ostream& os,
     }
   }
   else {
-    LOG << s->doc()->filename() << ": unable to frog sentence: " << s->id()
-	<< " because it contains untokenized Words."
-	<< endl;
+    string msg = parent->doc()->filename() + ": unable to frog: " + parent->id()
+      + " because it contains untokenized Words.";
+    LOG << msg << endl;
     if ( !options.correct_words ) {
       LOG << " (you might try --allow-word-corrections)"
 	  << endl;
     }
-    exit( EXIT_FAILURE );
+    throw runtime_error( msg );
   }
 }
 
@@ -2496,7 +2497,7 @@ void FrogAPI::handle_one_sentence( ostream& os,
 
 void FrogAPI::handle_one_paragraph( ostream& os,
 				    folia::Paragraph *p,
-				    int& sentence_done ){
+				    int& sentences_done ){
   /// run frog on a folia::Paragraph as extracted from a document
   /*!
     \param os stream for output
@@ -2523,7 +2524,7 @@ void FrogAPI::handle_one_paragraph( ostream& os,
       vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text );
       timers.tokTimer.stop();
       while ( toks.size() > 0 ){
-	frog_data res = frog_sentence( toks, ++sentence_done );
+	frog_data res = frog_sentence( toks, ++sentences_done );
 	while ( !res.empty() ){
 	  if ( !options.noStdOut ){
 	    show_results( os, res );
@@ -2540,7 +2541,7 @@ void FrogAPI::handle_one_paragraph( ostream& os,
 	  if ( toks.size() == 0 ){
 	    break;
 	  }
-	  res = frog_sentence( toks, ++sentence_done );
+	  res = frog_sentence( toks, ++sentences_done );
 	}
 	timers.tokTimer.start();
 	toks = tokenizer->tokenize_line_next();
@@ -2548,17 +2549,23 @@ void FrogAPI::handle_one_paragraph( ostream& os,
       }
     }
     else {
-      handle_word_vector( os, wv, sentence_done );
+      handle_word_vector( os, wv, sentences_done );
     }
   }
   else {
     if ( !wv.empty() ){
-      string msg = "paragraph " + p->id() + " has both <w> and <s> nodes. "
-	+ "this is NOT supported by Frog";
-      throw runtime_error( msg );
+      folia::KWargs args;
+      args["generate_id"] = p->id();
+      folia::Sentence *s = new folia::Sentence( args, p->doc() );
+      p->insert_after( wv.back(), s );
+      for ( auto& w : wv ){
+	p->remove( w );
+	s->append( w );
+      }
+      handle_word_vector( os, wv, sentences_done );
     }
     for ( const auto& s : sv ){
-      handle_one_sentence( os, s, sentence_done );
+      handle_one_sentence( os, s, sentences_done );
     }
   }
 }
