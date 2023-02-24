@@ -2552,7 +2552,11 @@ void FrogAPI::handle_one_paragraph( ostream& os,
     }
   }
   else {
-    // For now wu just IGNORE the loose words (backward compatability)
+    if ( !wv.empty() ){
+      string msg = "paragraph " + p->id() + " has both <w> and <s> nodes. "
+	+ "this is NOT supported by Frog";
+      throw runtime_error( msg );
+    }
     for ( const auto& s : sv ){
       handle_one_sentence( os, s, sentence_done );
     }
