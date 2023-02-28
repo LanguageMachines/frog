@@ -1,3 +1,10 @@
+0.28 - 2023-02-28
+[Ko van der Sloot]
+*  We no longer accept FoLiA paragraphs with both Words and Sentences.
+
+[Maarten van Gompel]
+* Software metadata fix
+
 0.27.2 - 2023-02-23
 [Maarten van Gompel]
 * Minor software metadata fix only, no functional changes
