@@ -45,6 +45,7 @@
 #include "frog/Frog-util.h" // defines etc.
 
 using namespace std;
+using TiCC::operator<<;
 
 #define LOG *TiCC::Log(errLog)
 #define DBG *TiCC::Log(dbgLog)
@@ -126,7 +127,8 @@ bool Mwu::read_mwus( const string& fname) {
    */
   LOG << "read mwus " + fname << endl;
   ifstream mwufile(fname, ios::in);
-  if(mwufile.bad()){
+  if ( !mwufile ){
+    LOG << "reading of " << fname << " FAILED" << endl;
     return false;
   }
   string line;
@@ -254,7 +256,7 @@ void Mwu::add_provenance( folia::Document& doc,
 }
 
 void Mwu::Classify( frog_data& sent ){
-  /// run the Mwu classifier on e sentence in frog_data format
+  /// run the Mwu classifier on a sentence in frog_data format
   /*!
     \param sent a frog_data structure with unresolved MWU's
    */
@@ -272,6 +274,12 @@ void Mwu::Classify( frog_data& sent ){
     }
   }
   sent.resolve_mwus();
+}
+
+string decap( const string& word ){
+  string result = word;
+  result[0] = tolower( result[0] );
+  return result;
 }
 
 void Mwu::Classify(){
@@ -308,8 +316,18 @@ void Mwu::Classify(){
     if ( debug > 1 ){
       DBG << "checking word[" << i <<"]: " << word << endl;
     }
-    const auto matches = MWUs.equal_range(word);
-    if ( matches.first != MWUs.end() ) {
+    auto matches = MWUs.equal_range(word);
+    if ( i == 0
+	 && matches.first == matches.second ) {
+      // no match on first word. try decaped version.
+      // we do this ONLY for the very first word in the sentence!
+      word = decap( word );
+      if ( debug > 1 ){
+     	DBG << "checking decapped word [" << i <<"]: " << word << endl;
+      }
+      matches = MWUs.equal_range(word);
+    }
+    if ( matches.first != matches.second ) {
       //match
       auto current_match = matches.first;
       if (  debug > 1 ) {
