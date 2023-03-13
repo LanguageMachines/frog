@@ -46,11 +46,12 @@
 
 using namespace std;
 using TiCC::operator<<;
+using icu::UnicodeString;
 
 #define LOG *TiCC::Log(errLog)
 #define DBG *TiCC::Log(dbgLog)
 
-mwuAna::mwuAna( const string& wrd,
+mwuAna::mwuAna( const UnicodeString& wrd,
 		bool glue_tag,
 		size_t index ){
   /// create a mwu Analysis record
@@ -110,14 +111,13 @@ void Mwu::add( frog_record& fd ){
   /*!
     \param fd The frog_data structure with the information to use
    */
-  icu::UnicodeString tmp = fd.word;
+  icu::UnicodeString word = fd.word;
   if ( filter ){
-    tmp = filter->filter( tmp );
+    word = filter->filter( word );
   }
-  string txt = TiCC::UnicodeToUTF8( tmp );
   bool glue = ( fd.tag == glue_tag );
   size_t index = mWords.size();
-  mWords.push_back( new mwuAna( txt, glue, index ) );
+  mWords.push_back( new mwuAna( word, glue, index ) );
 }
 
 bool Mwu::read_mwus( const string& fname) {
@@ -131,14 +131,14 @@ bool Mwu::read_mwus( const string& fname) {
     LOG << "reading of " << fname << " FAILED" << endl;
     return false;
   }
-  string line;
-  while( getline( mwufile, line ) ) {
-    vector<string> res1 = TiCC::split_at(line, " ");
+  UnicodeString line;
+  while( TiCC::getline( mwufile, line ) ) {
+    vector<UnicodeString> res1 = TiCC::split_at(line, " ");
     if ( res1.size() == 2 ){
-      vector<string> res2 = TiCC::split_at(res1[0], "_");;
+      vector<UnicodeString> res2 = TiCC::split_at(res1[0], "_");;
       //res1 has mwus and tags, res2 has ind. words
       if ( res2.size() >= 2 ){
-	string key = res2[0];
+	UnicodeString key = res2[0];
 	res2.erase(res2.begin());
 	MWUs.insert( make_pair( key, res2 ) );
       }
@@ -276,9 +276,16 @@ void Mwu::Classify( frog_data& sent ){
   sent.resolve_mwus();
 }
 
-string decap( const string& word ){
-  string result = word;
-  result[0] = tolower( result[0] );
+UnicodeString decap( const UnicodeString& word ){
+  UnicodeString result;
+  for ( int i=0; i < word.length(); ++i ){
+    if ( i == 0 ){
+      result += u_tolower(word[0]);
+    }
+    else {
+      result += word[i];
+    }
+  }
   return result;
 }
 
@@ -300,19 +307,19 @@ void Mwu::Classify(){
   // add all current sequences of the glue_tag words to MWUs
   for ( size_t i=0; i < max-1; ++i ) {
     if ( mWords[i]->isSpec() && mWords[i+1]->isSpec() ) {
-      vector<string> newmwu;
+      vector<UnicodeString> newmwu;
       while ( i < max && mWords[i]->isSpec() ){
 	newmwu.push_back(mWords[i]->getWord());
 	i++;
       }
-      string key = newmwu[0];
+      UnicodeString key = newmwu[0];
       newmwu.erase( newmwu.begin() );
       MWUs.insert( make_pair(key, newmwu) );
     }
   }
   size_t i;
   for ( i = 0; i < max; i++) {
-    string word = mWords[i]->getWord();
+    UnicodeString word = mWords[i]->getWord();
     if ( debug > 1 ){
       DBG << "checking word[" << i <<"]: " << word << endl;
     }
@@ -335,7 +342,7 @@ void Mwu::Classify(){
       }
       while( current_match != matches.second
 	     && current_match != MWUs.end() ){
-	vector<string> match = current_match->second;
+	vector<UnicodeString> match = current_match->second;
 	size_t max_match = match.size();
 	size_t j = 0;
 	if ( debug > 1 ){

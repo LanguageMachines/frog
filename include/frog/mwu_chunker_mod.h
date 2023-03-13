@@ -43,13 +43,13 @@
 /// \brief a helper class for Mwu. Stores needed information.
 class mwuAna {
   friend std::ostream& operator<< (std::ostream&, const mwuAna& );
- public:
-  mwuAna( const std::string&, bool, size_t );
+public:
+  mwuAna( const icu::UnicodeString&, bool, size_t );
   virtual ~mwuAna() {};
 
   void merge( const mwuAna * );
 
-  std::string getWord() const {
+  icu::UnicodeString getWord() const {
     return word;
   }
 
@@ -58,18 +58,18 @@ class mwuAna {
   size_t mwu_start;
   size_t mwu_end;
 
- protected:
-    mwuAna(){};
-    std::string word;
-    bool spec;
+protected:
+  mwuAna(){};
+  icu::UnicodeString word;
+  bool spec;
 };
 
-#define mymap2 std::multimap<std::string, std::vector<std::string> >
+#define mymap2 std::multimap<icu::UnicodeString, std::vector<icu::UnicodeString> >
 
 /// \brief provide all functionality to detect MWU's
 class Mwu {
   friend std::ostream& operator<< (std::ostream&, const Mwu& );
- public:
+public:
   explicit Mwu( TiCC::LogStream*, TiCC::LogStream* );
   ~Mwu();
   void reset();
@@ -82,7 +82,7 @@ class Mwu {
   /// return the value for \e mwu_tagset. (set via Configuration)
   std::string getTagset() const { return mwu_tagset; };
   std::string version() const { return _version; };
- private:
+private:
   bool readsettings( const std::string&, const std::string&);
   bool read_mwus( const std::string& );
   void Classify();
