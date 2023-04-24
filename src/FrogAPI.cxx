@@ -1241,7 +1241,7 @@ void FrogAPI::run_on_files(){
       }
       if ( !xmlOutName.empty() ){
 	if ( !result ){
-	  LOG << "FAILED to create FoLiA??" << endl;
+	  LOG << "FAILED to create FoLiA: " << xmlOutName << endl;
 	}
 	else {
 	  result->save( xmlOutName );
@@ -2432,8 +2432,7 @@ void FrogAPI::handle_word_vector( ostream& os,
       + " because it contains untokenized Words.";
     LOG << msg << endl;
     if ( !options.correct_words ) {
-      LOG << " (you might try --allow-word-corrections)"
-	  << endl;
+      LOG << " (you might try --allow-word-corrections)" << endl;
     }
     throw runtime_error( msg );
   }
@@ -2768,6 +2767,7 @@ folia::Document *FrogAPI::run_folia_engine( const string& infilename,
     LOG << "document contains no text in the desired inputclass: "
 	<< options.inputclass << endl;
     LOG << "NO real frogging is done!" << endl;
+    return 0;
   }
   else {
     folia::Document &doc = *engine.doc();
