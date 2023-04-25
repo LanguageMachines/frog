@@ -740,14 +740,14 @@ void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
     }
   }
   // now we can remove all analysis that aren't in the set.
-  auto it = analysis.begin();
-  while ( it != analysis.end() ){
-    if ( highConf.find( *it ) == highConf.end() ){
-      delete *it;
-      it = analysis.erase( it );
+  auto ana = analysis.begin();
+  while ( ana != analysis.end() ){
+    if ( highConf.find( *ana ) == highConf.end() ){
+      delete *ana;
+      ana = analysis.erase( ana );
     }
     else {
-      ++it;
+      ++ana;
     }
   }
 
@@ -771,10 +771,12 @@ void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
       // but only relevant for doDeep
       tmp += ait->inflection;
     }
-    if ( unique.find(tmp) == unique.end() ){
-      // make sure to preserve the first one
-      unique[tmp] = ait;
-    }
+    // if ( unique.find(tmp) == unique.end() ){
+    //   // make sure to preserve the first one
+    //   unique[tmp] = ait;
+    // }
+    // make sure to preserve the first one
+    unique.emplace(tmp,ait);
   }
   // so now we have map of 'equal' analysis.
   // create a set for reverse lookup, using the Rule.ID to distinguish Rule's
@@ -783,14 +785,14 @@ void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
     uniqueAna.insert( uit.second );
   }
   // now we can remove all analysis that aren't in that set.
-  it = analysis.begin();
-  while ( it != analysis.end() ){
-    if ( uniqueAna.find( *it ) == uniqueAna.end() ){
-      delete *it;
-      it = analysis.erase( it );
+  ana = analysis.begin();
+  while ( ana != analysis.end() ){
+    if ( uniqueAna.find( *ana ) == uniqueAna.end() ){
+      delete *ana;
+      ana = analysis.erase( ana );
     }
     else {
-      ++it;
+      ++ana;
     }
   }
   if ( debugFlag > 1){
