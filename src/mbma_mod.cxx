@@ -483,12 +483,8 @@ vector<Rule*> Mbma::execute( const UnicodeString& word,
   }
   if ( debugFlag > 1 ){
     if ( both_V2_and_V2I ){
-      DBG << "found a special one! " << word << endl;
-      UnicodeString out;
-      for ( const auto& cls : classes ){
-	out += cls + ",";
-      }
-      DBG << "in : " << out << endl;
+      DBG << "found a special V2VI one: " << word << " in : "
+	  << TiCC::join( classes, "," ) << endl;
     }
   }
   bool keep_V2I = false;
