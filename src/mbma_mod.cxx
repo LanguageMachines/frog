@@ -469,11 +469,7 @@ vector<Rule*> Mbma::execute( const UnicodeString& word,
   vector<vector<UnicodeString> > allParts = generate_all_perms( classes );
   if ( debugFlag > 1 ){
     UnicodeString out = "alternatives: word="
-      + word + ", classes=<";
-    for ( const auto& cls : classes ){
-      out += cls + ",";
-    }
-    out += ">";
+      + word + ", classes=<" + TiCC::join( classes, "," ) + ">";
     DBG << out << endl;
     DBG << "allParts : " << allParts << endl;
   }
@@ -758,10 +754,11 @@ void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
   if ( debugFlag > 1){
     DBG << "filter: analysis before sort key:" << endl;
     int i=0;
-    for ( const auto& it : bestMatches ){
-      DBG << ++i << " - " << it << endl;
+    for ( const auto& a_it : analysis ){
+      DBG << ++i << " - " << a_it << " " << a_it->getKey()
+	  << " (" << a_it->getKey().length() << ")" << endl;
     }
-    DBG << "" << endl;
+    DBG << endl;
   }
   map<icu::UnicodeString, Rule*> unique;
   for ( const auto& ait : highConf ){
