@@ -204,19 +204,14 @@ void frog_data::resolve_mwus(){
   /// resolve MWU's by merging them into the first record of the MWU
   mw_units.clear();
   for ( size_t pos=0; pos < units.size(); ++pos ){
-    if ( mwus.find( pos ) == mwus.end() ){
-      mw_units.push_back( units[pos] );
-      mw_units.back().morph_structure.clear(); // we don't need them AND avoid
-      //                                      pointers to deleted memory
-      // A shallow copy function would be better
-      mw_units.back().parts.insert( pos );
+    size_t e_pos = pos;
+    auto const it = mwus.find( pos );
+    if ( it != mwus.end() ){
+      e_pos = it->second;
     }
-    else {
-      frog_record merged = merge( *this, pos, mwus.find( pos )->second );
-      //           A shallow copy function would be better
-      mw_units.push_back( merged );
-      pos = mwus[pos];
-    }
+    frog_record merged = merge( *this, pos, e_pos );
+    mw_units.push_back( merged );
+    pos = e_pos;
   }
 }
 
