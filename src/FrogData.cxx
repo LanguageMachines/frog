@@ -140,7 +140,7 @@ ostream& operator<<( ostream& os, const frog_record& fr ){
 }
 
 frog_record merge( const frog_data& fd, size_t start, size_t finish ){
-  /// merge a range of records of an frog_data structure into the first one
+  /// merge a range of records of a frog_data structure into a new one
   /*!
     \param fd the frog_data structure
     \param start index of the first record in the structure to merge
@@ -155,7 +155,8 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
    */
   // cerr << "merge a FD of size:" << fd.units.size() << " with start=" << start
   //      << " and finish=" << finish << endl;
-  frog_record result = fd.units[start];
+  frog_record result = fd.units[start]; // copy the first
+  result.morph_structure.clear(); // no need for references into the structure
   //  cerr << "start: " << result << endl;
   result.compound_string = "0"; // MWU's are never compounds
   result.parts.insert( start );
@@ -212,8 +213,6 @@ void frog_data::resolve_mwus(){
     }
     else {
       frog_record merged = merge( *this, pos, mwus.find( pos )->second );
-      merged.morph_structure.clear(); // we don't need them AND avoid pointers
-      //                                 deleted memory
       //           A shallow copy function would be better
       mw_units.push_back( merged );
       pos = mwus[pos];
