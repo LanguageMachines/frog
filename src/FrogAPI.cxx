@@ -1960,10 +1960,12 @@ string FrogAPI::Frogtostringfromfile( const string& infilename ){
   return ss.str();
 }
 
-frog_data extract_fd( vector<Tokenizer::Token>& tokens ){
+frog_data extract_fd( vector<Tokenizer::Token>& tokens,
+		      bool no_eos ){
   /// extract a frog_data structure from a list of Tokens
   /*!
     \param tokens a list of Tokenizer::Token
+    \param no_eos if true, ignore ENDOFSENTENCE marks, and read on
     \return the new frog_data structure
 
     The tokens list may span multiple sentences and paragraphs; this function
@@ -1988,7 +1990,8 @@ frog_data extract_fd( vector<Tokenizer::Token>& tokens ){
     if ( (tok.role & Tokenizer::TokenRole::ENDQUOTE) ){
       --quotelevel;
     }
-    if ( (tok.role & Tokenizer::TokenRole::ENDOFSENTENCE) ){
+    if ( !no_eos
+	 && (tok.role & Tokenizer::TokenRole::ENDOFSENTENCE) ){
       // we are at ENDOFSENTENCE.
       // when quotelevel == 0, we step out, until the next call
       if ( quotelevel == 0 ){
@@ -2001,11 +2004,13 @@ frog_data extract_fd( vector<Tokenizer::Token>& tokens ){
 }
 
 frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
-				  const size_t s_count ){
+				  const size_t s_count,
+				  bool no_eos ){
   /// extract a frog_data structure, representing 1 frogged sentence
   /*!
     \param sent a list of Tokenizer::Token
     \param s_count holds the sentence count
+    \parem no_eos if true,process the whole sent, ignoring ENDOFSENTENCE marks
     \return a frog_data structure representing 1 totally frogged sentence. Will
     be empty if we are done.
 
@@ -2021,7 +2026,7 @@ frog_data FrogAPI::frog_sentence( vector<Tokenizer::Token>& sent,
   if ( options.debugFlag > 0 ){
     DBG << "tokens:\n" << sent << endl;
   }
-  frog_data sentence = extract_fd( sent );
+  frog_data sentence = extract_fd( sent, no_eos );
   if ( options.debugFlag > 0 ){
     DBG << "sentence:\n" << sentence << endl;
   }
@@ -2476,20 +2481,37 @@ void FrogAPI::handle_one_sentence( ostream& os,
       DBG << "handle_one_sentence() from string: '" << text << "' (lang="
 	  << sent_lang << ")" << endl;
     }
-    timers.tokTimer.start();
-    vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text, sent_lang );
-    timers.tokTimer.stop();
-    while ( toks.size() > 0 ){
-      frog_data sent = frog_sentence( toks, s_cnt );
+    if ( options.doXMLout ){
+      timers.tokTimer.start();
+      vector<Tokenizer::Token> all_toks;
+      vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text, sent_lang );
+      while ( toks.size() > 0 ){
+	// the tokenizer may split the text into more sentences
+	// but we don't want that, it spoils the outpyt FoLiA.
+	// The input Sentence node should stay leading
+	all_toks.insert( all_toks.end(), toks.begin(), toks.end() );
+	toks = tokenizer->tokenize_line_next();
+      }
+      timers.tokTimer.stop();
+      frog_data sent = frog_sentence( all_toks, s_cnt, true );
       if ( !options.noStdOut ){
 	show_results( os, sent );
       }
-      if ( options.doXMLout ){
-	append_to_sentence( s, sent );
-      }
+      append_to_sentence( s, sent );
+    }
+    else {
       timers.tokTimer.start();
-      toks = tokenizer->tokenize_line_next();
+      vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text, sent_lang );
       timers.tokTimer.stop();
+      while ( toks.size() > 0 ){
+	frog_data sent = frog_sentence( toks, s_cnt );
+	if ( !options.noStdOut ){
+	  show_results( os, sent );
+	}
+	timers.tokTimer.start();
+	toks = tokenizer->tokenize_line_next();
+	timers.tokTimer.stop();
+      }
     }
   }
 }

@@ -198,7 +198,8 @@ class FrogAPI {
   void FrogServer( Sockets::ClientSocket &conn );
 
   frog_data frog_sentence( std::vector<Tokenizer::Token>&,
-			   const size_t );
+			   const size_t,
+			   bool=false );
   folia::Document *run_folia_engine( const std::string&,
 				     std::ostream& );
   folia::Document *run_text_engine( const std::string&,
