@@ -2931,7 +2931,7 @@ folia::Document *FrogAPI::FrogFile( const string& infilename ){
   return result;
 }
 
-int folia_diff( const string s1, const string& s2 ){
+int folia_diff( const string& s1, const string& s2 ){
   TiCC::tmp_stream ts1( "diff" );
   ts1.os() << s1 << endl;
   ts1.close();
@@ -2948,7 +2948,7 @@ void FrogAPI::run_api_tests( const string& testName ){
   /*!
     \param testName a file to test on
   */
-  LOG << "running some extra Frog tests...." << endl;
+  *outS << "running some extra Frog tests...." << endl;
   if ( testName.find( ".xml" ) != string::npos ){
     options.doXMLin = true;
     options.doXMLout = true;
@@ -2958,26 +2958,26 @@ void FrogAPI::run_api_tests( const string& testName ){
     options.doXMLout = false;
   }
   {
-    LOG << "Start test 1: " << testName << endl;
+    *outS << "Start test 1: " << testName << endl;
     stringstream ss;
     ifstream is( testName );
     string line;
     while ( getline( is, line ) ){
       ss << line << endl;
     }
-    *outS << "test 1 STRING 1 " << endl;
     string s1 = Frogtostring( ss.str() );
-    *outS << s1 << endl;
-    *outS << "test 1 STRING 2 " << endl;
     string s2 = Frogtostringfromfile( testName );
-    *outS << s2 << endl;
     if ( s1 != s2 ){
-      LOG << "FAILED test 1 :" << testName << endl;
+      *outS << "FAILED test 1 :" << testName << endl;
+      *outS << "test 1 STRING 1 " << endl;
+      *outS << s1 << endl;
+      *outS << "test 1 STRING 2 " << endl;
+      *outS << s2 << endl;
     }
     else {
-      LOG << "test 1 OK!" << endl;
+      *outS << "test 1 OK!" << endl;
     }
-    LOG << "Done with:" << testName << endl;
+    *outS << "Done with:" << testName << endl;
   }
   //
   // also test FoLiA in en text out
@@ -2986,26 +2986,26 @@ void FrogAPI::run_api_tests( const string& testName ){
       options.doXMLin = true;
       options.doXMLout = false;
     }
-    LOG << "Start test 2: " << testName << endl;
+    *outS << "Start test 2: " << testName << endl;
     stringstream ss;
     ifstream is( testName );
     string line;
     while ( getline( is, line ) ){
       ss << line << endl;
     }
-    *outS << "test 2 STRING 1 " << endl;
     string s1 = Frogtostring( ss.str() );
-    *outS << s1 << endl;
-    *outS << "test 2 STRING 2 " << endl;
     string s2 = Frogtostringfromfile( testName );
-    *outS << s2 << endl;
     if ( s1 != s2 ){
-      LOG << "FAILED test 2:" << testName << endl;
+      *outS << "FAILED test 2:" << testName << endl;
+      *outS << "test 2 STRING 1 " << endl;
+      *outS << s1 << endl;
+      *outS << "test 2 STRING 2 " << endl;
+      *outS << s2 << endl;
     }
     else {
-      LOG << "test 2 OK!" << endl;
+      *outS << "test 2 OK!" << endl;
     }
-    LOG << "Done with:" << testName << endl;
+    *outS << "Done with:" << testName << endl;
   }
   //
   // and even text in and FoLiA out
@@ -3014,7 +3014,7 @@ void FrogAPI::run_api_tests( const string& testName ){
       options.doXMLin = false;
       options.doXMLout = true;
     }
-    LOG << "Start test 3: " << testName << endl;
+    *outS << "Start test 3: " << testName << endl;
     stringstream ss;
     ifstream is( testName );
     string line;
@@ -3023,26 +3023,30 @@ void FrogAPI::run_api_tests( const string& testName ){
     }
     options.docid = "test";
     string s1 = Frogtostring( ss.str() );
-    *outS << "test 3 STRING 1 " << endl;
-    *outS << s1 << endl;
     string s2 = Frogtostringfromfile( testName );
-    *outS << "test 3 STRING 2 " << endl;
-    *outS << s2 << endl;
     if ( options.doXMLout ){
       // no simple string comparison possible. just say OK
       if ( folia_diff( s1, s2 ) ){
-	LOG << "test 3 OK!" << endl;
+	*outS << "test 3 FoLiA OK!" << endl;
       }
       else {
-	LOG << "FAILED test 3 :" << testName << endl;
+	*outS << "FAILED FoLiA test 3 :" << testName << endl;
+	*outS << "test 3 STRING 1 " << endl;
+	*outS << s1 << endl;
+	*outS << "test 3 STRING 2 " << endl;
+	*outS << s2 << endl;
       }
     }
     else {
       if ( s1 != s2 ){
-	LOG << "FAILED test 3 :" << testName << endl;
+	*outS << "FAILED test 3 :" << testName << endl;
+	*outS << "test 3 STRING 1 " << endl;
+	*outS << s1 << endl;
+	*outS << "test 3 STRING 2 " << endl;
+	*outS << s2 << endl;
       }
       else {
-	LOG << "test 3 OK!" << endl;
+	*outS << "test 3 OK!" << endl;
       }
     }
     if ( options.doDeepMorph ){
@@ -3052,7 +3056,7 @@ void FrogAPI::run_api_tests( const string& testName ){
 	doc = FrogFile( testName );
       }
       catch ( exception& e ){
-	LOG << "problem frogging: " << testName << endl
+	*outS << "problem frogging: " << testName << endl
 	    << e.what() << endl;
       }
       if ( doc ){
@@ -3066,7 +3070,7 @@ void FrogAPI::run_api_tests( const string& testName ){
 	*outS << "DEEP_MORPH test DONE " << endl;
       }
     }
-    LOG << "Done with:" << testName << endl;
+    *outS << "Done with:" << testName << endl;
   }
 }
 
