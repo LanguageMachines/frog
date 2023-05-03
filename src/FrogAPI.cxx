@@ -2967,7 +2967,19 @@ void FrogAPI::run_api_tests( const string& testName ){
     }
     string s1 = Frogtostring( ss.str() );
     string s2 = Frogtostringfromfile( testName );
-    if ( s1 != s2 ){
+    if ( options.doXMLout ){
+      if ( folia_diff( s1, s2 ) ){
+	*outS << "test 1 FoLiA OK!" << endl;
+      }
+      else {
+	*outS << "FAILED FoLiA test 1 :" << testName << endl;
+	*outS << "test 1 STRING 1 " << endl;
+	*outS << s1 << endl;
+	*outS << "test 1 STRING 2 " << endl;
+	*outS << s2 << endl;
+      }
+    }
+    else if ( s1 != s2 ){
       *outS << "FAILED test 1 :" << testName << endl;
       *outS << "test 1 STRING 1 " << endl;
       *outS << s1 << endl;
