@@ -51,3 +51,4 @@ src/test-suite.log
 src/tst.out
 src/tst.sh.log
 src/tst.sh.trs
+build/
