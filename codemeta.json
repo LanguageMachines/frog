@@ -8,7 +8,7 @@
     "@type": "SoftwareSourceCode",
     "identifier": "frog",
     "name": "Frog",
-    "version": "0.29",
+    "version": "0.30",
     "description": "Frog is an integration of memory-based natural language processing (NLP) modules developed for Dutch. It performs automatic linguistic enrichment such as part of speech tagging, lemmatisation, named entity recognition, shallow parsing, dependency parsing and morphological analysis. All NLP modules are based on TiMBL.",
     "license": "https://spdx.org/licenses/GPL-3.0-only",
 	"url": "https://languagemachines.github.io/frog",
@@ -129,7 +129,7 @@
 			"url": "https://www.clariah.nl",
             "funder": {
                 "@type": "Organization",
-                "name": "NWO", 
+                "name": "NWO",
                 "url": "https://www.nwo.nl"
             }
 		},
@@ -139,7 +139,7 @@
 			"url": "https://www.clariah.nl",
             "funder": {
                 "@type": "Organization",
-                "name": "NWO", 
+                "name": "NWO",
                 "url": "https://www.nwo.nl"
             }
         },
@@ -148,7 +148,7 @@
             "name": "CLARIAH-PLUS (NWO grant 184.034.023)",
             "funder": {
                 "@type": "Organization",
-                "name": "NWO", 
+                "name": "NWO",
                 "url": "https://www.nwo.nl"
             }
         }
