@@ -1,3 +1,15 @@
+0.29 - 2023-05-05
+[Ko van der Sloot]
+* added a fix for https://github.com/LanguageMachines/frog/issues/100
+  (where Frog created invalid FoLiA in a cornercase)
+* improved api_test
+* small code refactorings
+* require libfolia >= 2.15, for correct working of word correction
+* improved MWU code. Using Unicode strings and detecting MWU's with a starting
+  Capital.
+[Maarten van Gompel]
+* .gitignore: added build dir
+
 0.28 - 2023-02-28
 [Ko van der Sloot]
 *  We no longer accept FoLiA paragraphs with both Words and Sentences.
