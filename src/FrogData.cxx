@@ -139,7 +139,7 @@ ostream& operator<<( ostream& os, const frog_record& fr ){
   return os;
 }
 
-frog_record merge( const frog_data& fd, size_t start, size_t finish ){
+frog_record merge( frog_data& fd, size_t start, size_t finish ){
   /// merge a range of records of a frog_data structure into a new one
   /*!
     \param fd the frog_data structure
@@ -156,7 +156,7 @@ frog_record merge( const frog_data& fd, size_t start, size_t finish ){
   // cerr << "merge a FD of size:" << fd.units.size() << " with start=" << start
   //      << " and finish=" << finish << endl;
   frog_record result = fd.units[start]; // copy the first
-  result.morph_structure.clear(); // no need for references into the structure
+  //  result.morph_structure.clear();
   //  cerr << "start: " << result << endl;
   result.compound_string = "0"; // MWU's are never compounds
   result.parts.insert( start );
@@ -210,7 +210,7 @@ void frog_data::resolve_mwus(){
       e_pos = it->second;
     }
     frog_record merged = merge( *this, pos, e_pos );
-    mw_units.push_back( merged );
+    mw_units.emplace_back( merged );
     pos = e_pos;
   }
 }
@@ -240,7 +240,7 @@ void frog_data::append( const frog_record& fr ){
   /*!
     \param fr the record to add.
   */
-  units.push_back( fr );
+  units.emplace_back( fr );
 }
 
 string frog_data::get_language() const {

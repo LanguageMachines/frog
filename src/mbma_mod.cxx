@@ -923,10 +923,6 @@ void Mbma::store_brackets( frog_record& fd,
   return;
 }
 
-BracketNest *copy_nest( const BracketNest *brackets ){
-  return brackets->clone();
-}
-
 void Mbma::store_brackets( frog_record& fd,
 			   const UnicodeString& orig_word,
 			   const BracketNest *brackets ) const {
@@ -934,10 +930,9 @@ void Mbma::store_brackets( frog_record& fd,
     DBG << "store_brackets(" << fd.word << "," << orig_word
 	<< "," << brackets << ")" << endl;
   }
-  BracketNest *copy = copy_nest( brackets );
 #pragma omp critical (dataupdate)
   {
-    fd.morph_structure.push_back( copy );
+    fd.morph_structure.push_back( brackets );
   }
   return;
 }
@@ -1004,8 +999,9 @@ void Mbma::storeResult( frog_record& fd,
     else {
       fd.compound_string = pv[0].second;
     }
-    for ( auto const& sit : analysis ){
+    for ( auto& sit : analysis ){
       store_brackets( fd, uword, sit->brackets );
+      sit->brackets = NULL;
       store_morphemes( fd, sit->extract_morphemes() );
     }
   }

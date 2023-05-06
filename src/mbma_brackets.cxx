@@ -314,11 +314,6 @@ BracketLeaf::BracketLeaf( CLEX::Type t,
   _status = Status::STEM;
 }
 
-BracketLeaf *BracketLeaf::clone() const{
-  /// make a copy of the BracketLeaf
-  return new BracketLeaf( *this );
-}
-
 BracketNest::BracketNest( CLEX::Type t,
 			  Compound::Type c,
 			  int debug_flag,
@@ -334,15 +329,6 @@ BracketNest::BracketNest( CLEX::Type t,
     \param l a LogStream for messages
   */
   _status = Status::COMPLEX;
-}
-
-BracketNest *BracketNest::clone() const {
-  /// make a deep copy of the Bracketnest
-  BracketNest *result = new BracketNest( *this );
-  for ( auto& it : result->parts ){
-    it = it->clone();
-  }
-  return result;
 }
 
 BaseBracket *BracketNest::append( BaseBracket *t ){
@@ -1344,6 +1330,7 @@ void BracketNest::clearEmptyNodes(){
       if ( (*it)->morpheme().isEmpty() &&
 	   (*it)->inflection().isEmpty() ){
 	// skip
+	delete *it;
       }
       else {
 	out.push_back( *it );
