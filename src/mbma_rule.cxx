@@ -577,7 +577,6 @@ void Rule::resolveBrackets() {
     DBG << "STEP 5:" << brackets << endl;
   }
   brackets->resolveNouns( );
-  brackets->clearEmptyNodes();
   tag = brackets->getFinalTag();
   description = get_tag_descr( tag );
   sort_key = flatten( pretty_string(true));

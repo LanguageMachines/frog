@@ -1308,42 +1308,6 @@ void BracketNest::resolveMiddle(){
   }
 }
 
-void BracketNest::clearEmptyNodes(){
-  /// remove all nodes that don't have a morpheme or an inflection
-  if ( debugFlag > 5 ){
-    LOG << "clear emptyNodes: " << this << endl;
-  }
-  list<BaseBracket*> out;
-  list<BaseBracket*>::iterator it = parts.begin();
-  while ( it != parts.end() ){
-    if ( debugFlag > 5 ){
-      LOG << "loop clear emptyNodes : " << *it << endl;
-    }
-    if ( (*it)->isNested() ){
-      if ( debugFlag > 5 ){
-	LOG << "nested! " << endl;
-      }
-      (*it)->clearEmptyNodes( );
-      out.push_back( *it );
-    }
-    else {
-      if ( (*it)->morpheme().isEmpty() &&
-	   (*it)->inflection().isEmpty() ){
-	// skip
-	delete *it;
-      }
-      else {
-	out.push_back( *it );
-      }
-    }
-    ++it;
-  }
-  parts.swap( out );
-  if ( debugFlag > 5 ){
-    LOG << "RESULT clear emptyNodes: " << this << endl;
-  }
-}
-
 CLEX::Type BracketNest::getFinalTag() {
   /// get the result tag for this rule
   // It is the last tag in the list, except for 'P' tags
