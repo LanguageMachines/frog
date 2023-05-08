@@ -3085,6 +3085,7 @@ void FrogAPI::run_api_tests( const string& testName ){
 	  *outS << w->text() << ": " << morphs << " :: " << compounds << endl;
 	}
 	*outS << "DEEP_MORPH test DONE " << endl;
+	delete doc;
       }
     }
     *outS << "Done with:" << testName << endl;
