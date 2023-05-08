@@ -1,3 +1,8 @@
+0.30 - 2023-05-08
+[Ko van der Sloot]
+* finally fixed a major memory-leak in MBMA which bothered me for months
+* also some minor leaks are plugged
+
 0.29 - 2023-05-05
 [Ko van der Sloot]
 * added a fix for https://github.com/LanguageMachines/frog/issues/100
