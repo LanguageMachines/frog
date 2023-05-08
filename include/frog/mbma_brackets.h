@@ -128,6 +128,7 @@ class BracketLeaf: public BaseBracket {
 public:
   BracketLeaf( const RulePart&, int, TiCC::LogStream& );
   BracketLeaf( CLEX::Type, const icu::UnicodeString&, int, TiCC::LogStream& );
+  ~BracketLeaf();
   icu::UnicodeString put( bool = false ) const;
   icu::UnicodeString morpheme() const {
     /// return the value of the morpheme

@@ -907,6 +907,7 @@ void Mbma::store_brackets( frog_record& fd,
     fd.morph_structure.push_back( leaf );
   }
   else {
+    DBG << "case 3 " << endl;
     BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(head),
 					 wrd,
 					 debugFlag,
@@ -1001,8 +1002,8 @@ void Mbma::storeResult( frog_record& fd,
     }
     for ( auto& sit : analysis ){
       store_brackets( fd, uword, sit->brackets );
-      sit->brackets = NULL;
       store_morphemes( fd, sit->extract_morphemes() );
+      sit->brackets = NULL;
     }
   }
 }

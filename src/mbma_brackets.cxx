@@ -337,10 +337,15 @@ BaseBracket *BracketNest::append( BaseBracket *t ){
   return this;
 }
 
+BracketLeaf::~BracketLeaf(){
+  //  LOG << "DELETED LEAF: " << (void *)this << endl;
+}
+
 BracketNest::~BracketNest(){
   for ( auto const& it : parts ){
     delete it;
   }
+  //  LOG << "DELETED NEST: " << (void *)this << endl;
 }
 
 UnicodeString BaseBracket::put( bool ) const {
@@ -1037,6 +1042,18 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
   return result;
 }
 
+
+void display_parts( ostream& os, const list<BaseBracket*>& parts,
+		    int indent=0 ){
+  int i=1;
+  for ( const auto& it : parts ){
+    os << string(indent,' ') << "[" << i++ << "]= " << (void*)it << endl;
+    if ( it->isNested() ){
+      display_parts( os, dynamic_cast<BracketNest*>(it)->parts, indent + 4 );
+    }
+  }
+}
+
 list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& result,
 							const list<BaseBracket*>::iterator& rpos ){
   /// try to resolve an Affix rule
@@ -1047,6 +1064,7 @@ list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& resu
   */
   if ( debugFlag > 5 ){
     LOG << "resolve affix" << endl;
+    display_parts( LOG, parts );
   }
   list<BaseBracket*>::iterator bit;
   bool matched = testMatch( result, rpos, bit );
@@ -1059,12 +1077,17 @@ list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& resu
       // the rule matches exact what we have.
       // leave it
       list<BaseBracket*>::iterator it = rpos;
+      // return next position continuation
       return ++it;
     }
     else {
+      // we create a new Bracketnest, and connect all the Brackets
+      // from the matching rule to this Nest
       list<BaseBracket*>::iterator it = bit--;
-      BracketNest *tmp
-	= new BracketNest( (*rpos)->tag(), Compound::Type::NONE, debugFlag, myLog );
+      BracketNest *tmp = new BracketNest( (*rpos)->tag(),
+					  Compound::Type::NONE,
+					  debugFlag,
+					  myLog );
       for ( size_t j = 0; j < len; ++j ){
 	tmp->append( *it );
 	if ( debugFlag > 5 ){

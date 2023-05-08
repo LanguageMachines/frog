@@ -57,9 +57,9 @@ frog_record::frog_record():
 
 /// default destructor
 frog_record::~frog_record(){
-  // for( const auto& dm : morph_structure ){
-  //   delete dm;
-  // }
+  for( const auto& dm : morph_structure ){
+    delete dm;
+  }
 }
 
 json frog_record::to_json() const {
@@ -156,7 +156,7 @@ frog_record merge( frog_data& fd, size_t start, size_t finish ){
   // cerr << "merge a FD of size:" << fd.units.size() << " with start=" << start
   //      << " and finish=" << finish << endl;
   frog_record result = fd.units[start]; // copy the first
-  //  result.morph_structure.clear();
+  result.morph_structure.clear();
   //  cerr << "start: " << result << endl;
   result.compound_string = "0"; // MWU's are never compounds
   result.parts.insert( start );

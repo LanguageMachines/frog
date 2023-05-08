@@ -2669,12 +2669,13 @@ void FrogAPI::handle_one_text_parent( ostream& os,
       timers.tokTimer.start();
       vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text );
       timers.tokTimer.stop();
-      vector<frog_data> sents;
+      vector<frog_data*> sents; // a vector of pointers, to avoid premature
+      // deletion of the frog_data
       while ( toks.size() > 0 ){
-	frog_data res = frog_sentence( toks, ++sentence_done );
+	frog_data *res = new frog_data( frog_sentence( toks, ++sentence_done) );
 	sents.push_back( res );
 	if ( !options.noStdOut ){
-	  show_results( os, res );
+	  show_results( os, *res );
 	}
 	timers.tokTimer.start();
 	toks = tokenizer->tokenize_line_next( );
@@ -2701,7 +2702,7 @@ void FrogAPI::handle_one_text_parent( ostream& os,
 		args["generate_id"] = p_id;
 	      }
 	      folia::Sentence *s = p->add_child<folia::Sentence>( args );
-	      append_to_sentence( s, sent );
+	      append_to_sentence( s, *sent );
 	      if  (options.debugFlag > 0){
 		DBG << "created a new sentence: " << s << endl;
 	      }
@@ -2718,7 +2719,7 @@ void FrogAPI::handle_one_text_parent( ostream& os,
 		args["generate_id"] = e_id;
 	      }
 	      folia::Sentence *s = e->add_child<folia::Sentence>( args );
-	      append_to_sentence( s, sent );
+	      append_to_sentence( s, *sent );
 	      if  (options.debugFlag > 0){
 		DBG << "created a new sentence: " << s << endl;
 	      }
@@ -2737,11 +2738,15 @@ void FrogAPI::handle_one_text_parent( ostream& os,
 	    args["generate_id"] = e_id;
 	  }
 	  folia::Sentence *s = e->add_child<folia::Sentence>( args );
-	  append_to_sentence( s, sents[0] );
+	  append_to_sentence( s, *sents[0] );
 	  if  (options.debugFlag > 0){
 	    DBG << "created a new sentence: " << s << endl;
 	  }
 	}
+      }
+      // now we are allowed to cleanup the frog_data
+      for ( const auto& s : sents ){
+	delete s;
       }
     }
     else if ( !pv.empty() ){
