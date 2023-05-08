@@ -242,6 +242,9 @@ int main(int argc, char *argv[]) {
   }
   catch ( const exception& e ){
     LOG << "fatal error: " << e.what() << endl;
+    delete theErrLog;
+    delete theDbgLog;
+    delete the_dbg_stream;
     return EXIT_FAILURE;
   }
   delete theErrLog;
