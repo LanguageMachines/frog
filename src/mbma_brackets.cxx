@@ -1043,15 +1043,13 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
 }
 
 
-void display_parts( ostream& os, const list<BaseBracket*>& parts,
-		    int indent=0 ){
+void BracketNest::display_parts( ostream& os,
+				 int indent ) const {
   int i=1;
   for ( const auto& it : parts ){
     os << string(indent,' ') << "[" << i++ << "]= "
        << static_cast<void*>(it) << endl;
-    if ( it->isNested() ){
-      display_parts( os, dynamic_cast<BracketNest*>(it)->parts, indent + 4 );
-    }
+    it->display_parts( os, indent + 4 );
   }
 }
 
@@ -1065,7 +1063,7 @@ list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& resu
   */
   if ( debugFlag > 5 ){
     LOG << "resolve affix" << endl;
-    display_parts( LOG, parts );
+    display_parts( LOG );
   }
   list<BaseBracket*>::iterator bit;
   bool matched = testMatch( result, rpos, bit );

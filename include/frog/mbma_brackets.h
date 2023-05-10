@@ -112,6 +112,7 @@ class BaseBracket {
 					   int& ) const = 0;
   virtual Compound::Type compound() const { return Compound::Type::NONE; };
   virtual Compound::Type speculateCompoundType() { return compound(); };
+  virtual void display_parts( std::ostream&, int=0 ) const { return; };
   CLEX::Type tag() const { return cls; };
   void setTag( CLEX::Type t ) { cls = t; };
   std::vector<CLEX::Type> RightHand;
@@ -181,22 +182,23 @@ class BracketNest: public BaseBracket {
 					  const std::list<BaseBracket*>::iterator& ) const;
   std::list<BaseBracket*>::iterator resolveAffix( std::list<BaseBracket*>&,
 						  const std::list<BaseBracket*>::iterator& );
-  void resolveGlue();
-  void resolveNouns();
-  void resolveLead();
-  void resolveTail();
-  void resolveMiddle();
-  Compound::Type speculateCompoundType();
-  CLEX::Type getFinalTag();
+  void resolveGlue() override;
+  void resolveLead() override;
+  void resolveTail() override;
+  void resolveMiddle() override;
+  Compound::Type speculateCompoundType() override;
   folia::Morpheme *createMorpheme( folia::Document *,
 				   const std::string& ) const override;
   folia::Morpheme *createMorpheme( folia::Document *,
 				   const std::string&,
 				   icu::UnicodeString&,
 				   int& ) const override;
-  std::list<BaseBracket *> parts;
-  Compound::Type compound() const { return _compound; };
+  void resolveNouns();
+  CLEX::Type getFinalTag();
+  Compound::Type compound() const override { return _compound; };
+  void display_parts( std::ostream&, int=0 ) const override;
  private:
+  std::list<BaseBracket *> parts;
   Compound::Type _compound;
 };
 
