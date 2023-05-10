@@ -817,7 +817,7 @@ void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
 void Mbma::assign_compounds(){
   /// add compound information to the result
   for ( auto const& sit : analysis ){
-    sit->compound = sit->brackets->getCompoundType();
+    sit->compound = sit->brackets->speculateCompoundType();
   }
 }
 

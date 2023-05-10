@@ -460,7 +460,7 @@ ostream& operator<< ( ostream& os, const BaseBracket *c ){
 
 bool BracketNest::testMatch( list<BaseBracket*>& result,
 			     const list<BaseBracket*>::iterator& rpos,
-			     list<BaseBracket*>::iterator& bpos ){
+			     list<BaseBracket*>::iterator& bpos ) const {
   /// test if the rule matches at a certain position
   /*!
     \param result the current result. A new match will be appended
@@ -554,10 +554,10 @@ Compound::Type construct( const CLEX::Type tag1, const CLEX::Type tag2 ){
   return construct( v );
 }
 
-Compound::Type BracketNest::getCompoundType(){
+Compound::Type BracketNest::speculateCompoundType() {
   /// extract the Compound::Type
   /*!
-    This function uses a lot of heuristics to determine get Compound::Type
+    This function uses a lot of heuristics to determine the Compound::Type
     given the elements in the BracketNest
   */
   if ( debugFlag > 5 ){
@@ -567,7 +567,7 @@ Compound::Type BracketNest::getCompoundType(){
   Compound::Type compound = Compound::Type::NONE;
   if ( parts.size() == 1 ){
     auto part = *parts.begin();
-    compound = part->getCompoundType();
+    compound = part->speculateCompoundType();
   }
   else if ( parts.size() == 2 ){
     auto it = parts.begin();
@@ -1047,7 +1047,8 @@ void display_parts( ostream& os, const list<BaseBracket*>& parts,
 		    int indent=0 ){
   int i=1;
   for ( const auto& it : parts ){
-    os << string(indent,' ') << "[" << i++ << "]= " << (void*)it << endl;
+    os << string(indent,' ') << "[" << i++ << "]= "
+       << static_cast<void*>(it) << endl;
     if ( it->isNested() ){
       display_parts( os, dynamic_cast<BracketNest*>(it)->parts, indent + 4 );
     }
@@ -1098,7 +1099,7 @@ list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& resu
       if ( debugFlag > 5 ){
 	LOG << "new node:" << tmp << endl;
       }
-      _compound = tmp->getCompoundType();
+      _compound = tmp->speculateCompoundType();
       result.insert( ++bit, tmp );
       return bit;
     }
@@ -1156,7 +1157,7 @@ void BracketNest::resolveNouns( ){
 }
 
 list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
-						const list<BaseBracket*>::iterator& rpos ){
+						const list<BaseBracket*>::iterator& rpos ) const {
   /// apply a glue rule
   if ( debugFlag > 5 ){
     LOG << "glue " << endl;
@@ -1331,7 +1332,7 @@ void BracketNest::resolveMiddle(){
   }
 }
 
-CLEX::Type BracketNest::getFinalTag() {
+CLEX::Type BracketNest::getFinalTag(){
   /// get the result tag for this rule
   // It is the last tag in the list, except for 'P' tags
   //

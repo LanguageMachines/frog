@@ -99,7 +99,7 @@ class BaseBracket {
   virtual bool isglue() const { return false; };
   virtual icu::UnicodeString put( bool = false ) const;
   virtual BaseBracket *append( BaseBracket * ){ abort(); };
-  virtual bool isNested() { return false; };
+  virtual bool isNested() const { return false; };
   virtual void resolveGlue(){ abort(); };
   virtual void resolveLead(){ abort(); };
   virtual void resolveTail(){ abort(); };
@@ -111,7 +111,7 @@ class BaseBracket {
 					   icu::UnicodeString&,
 					   int& ) const = 0;
   virtual Compound::Type compound() const { return Compound::Type::NONE; };
-  virtual Compound::Type getCompoundType() { return compound(); };
+  virtual Compound::Type speculateCompoundType() { return compound(); };
   CLEX::Type tag() const { return cls; };
   void setTag( CLEX::Type t ) { cls = t; };
   std::vector<CLEX::Type> RightHand;
@@ -129,24 +129,24 @@ public:
   BracketLeaf( const RulePart&, int, TiCC::LogStream& );
   BracketLeaf( CLEX::Type, const icu::UnicodeString&, int, TiCC::LogStream& );
   ~BracketLeaf();
-  icu::UnicodeString put( bool = false ) const;
-  icu::UnicodeString morpheme() const {
+  icu::UnicodeString put( bool = false ) const override;
+  icu::UnicodeString morpheme() const override {
     /// return the value of the morpheme
     return morph;
   };
-  icu::UnicodeString inflection() const {
+  icu::UnicodeString inflection() const override {
     /// return the value of the inflexion (if any)
     return inflect;
   };
-  icu::UnicodeString original() const {
+  icu::UnicodeString original() const override {
     /// return the original value before processing started
     return orig;
   };
-  int infixpos() const {
+  int infixpos() const override {
     /// return the position of an infix
     return ifpos;
   };
-  bool isglue() const {
+  bool isglue() const override {
     /// return tre if this is a glue tag
     return glue;
   };
@@ -170,15 +170,15 @@ private:
 class BracketNest: public BaseBracket {
  public:
   BracketNest( CLEX::Type, Compound::Type, int, TiCC::LogStream& );
-  BaseBracket *append( BaseBracket * );
+  BaseBracket *append( BaseBracket * ) override ;
   ~BracketNest();
-  bool isNested() { return true; };
-  icu::UnicodeString put( bool = false ) const;
+  bool isNested() const override { return true; };
+  icu::UnicodeString put( bool = false ) const override;
   bool testMatch( std::list<BaseBracket*>& result,
 		  const std::list<BaseBracket*>::iterator& rpos,
-		  std::list<BaseBracket*>::iterator& bpos );
+		  std::list<BaseBracket*>::iterator& bpos ) const;
   std::list<BaseBracket*>::iterator glue( std::list<BaseBracket*>&,
-					  const std::list<BaseBracket*>::iterator& );
+					  const std::list<BaseBracket*>::iterator& ) const;
   std::list<BaseBracket*>::iterator resolveAffix( std::list<BaseBracket*>&,
 						  const std::list<BaseBracket*>::iterator& );
   void resolveGlue();
@@ -186,7 +186,7 @@ class BracketNest: public BaseBracket {
   void resolveLead();
   void resolveTail();
   void resolveMiddle();
-  Compound::Type getCompoundType();
+  Compound::Type speculateCompoundType();
   CLEX::Type getFinalTag();
   folia::Morpheme *createMorpheme( folia::Document *,
 				   const std::string& ) const override;

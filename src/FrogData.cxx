@@ -139,7 +139,7 @@ ostream& operator<<( ostream& os, const frog_record& fr ){
   return os;
 }
 
-frog_record merge( frog_data& fd, size_t start, size_t finish ){
+frog_record merge( const frog_data& fd, size_t start, size_t finish ){
   /// merge a range of records of a frog_data structure into a new one
   /*!
     \param fd the frog_data structure
