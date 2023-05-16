@@ -457,7 +457,7 @@ void UctoTokenizer::add_provenance( folia::Document& doc,
   }
 }
 
-vector<UnicodeString> UctoTokenizer::tokenize( const UnicodeString& line ){
+vector<UnicodeString> UctoTokenizer::tokenize( const icu::UnicodeString& line ){
   /// Tokenize a buffer of characters into a list of tokenized sentences
   /*!
     \param line an input sequence of Unicode characters to be tokenized

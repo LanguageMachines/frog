@@ -409,13 +409,15 @@ void Mbma::clearAnalysis(){
   analysis.clear();
 }
 
-Rule* Mbma::matchRule( const vector<UnicodeString>& ana,
-		       const UnicodeString& word,
+Rule* Mbma::matchRule( const std::vector<icu::UnicodeString>& ana,
+		       const icu::UnicodeString& word,
 		       bool keep_V2I ){
   /// attempt to match an Analysis on a word
   /*!
     \param ana one analysis result, expanded from the Timbl classifier
     \param word a Unicode Word to check
+    \param keep_V2I a boolean that determines if we want to keep Inversed
+                    second person variants.
     \return a matched Rule or 0
   */
   Rule *rule = new Rule( ana, word, *errLog, *dbgLog, debugFlag );
@@ -456,9 +458,9 @@ bool check_next( const UnicodeString& tag ){
   }
 }
 
-vector<Rule*> Mbma::execute( const UnicodeString& word,
-			     const UnicodeString& next_tag,
-			     const vector<UnicodeString>& classes ){
+vector<Rule*> Mbma::execute( const icu::UnicodeString& word,
+			     const icu::UnicodeString& next_tag,
+			     const vector<icu::UnicodeString>& classes ){
   /// attempt to find matching Rules
   /*!
     \param word a word to check
@@ -557,7 +559,7 @@ struct id_cmp {
   }
 };
 
-void Mbma::filterHeadTag( const UnicodeString& head ){
+void Mbma::filterHeadTag( const icu::UnicodeString& head ){
   /// reduce the Mbms analysis by removing all solutions where the head is not
   /// matched
   /*!
@@ -642,7 +644,7 @@ void Mbma::filterHeadTag( const UnicodeString& head ){
   }
 }
 
-void Mbma::filterSubTags( const vector<UnicodeString>& feats ){
+void Mbma::filterSubTags( const vector<icu::UnicodeString>& feats ){
   /// reduce the analyses set based on sub-features
   /*!
     \param feats a list of subfeatures

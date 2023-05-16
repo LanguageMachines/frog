@@ -392,7 +392,7 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
   return json_to_TR( my_json );
 }
 
-vector<TagResult> BaseTagger::tagLine( const UnicodeString& line ){
+vector<TagResult> BaseTagger::tagLine( const icu::UnicodeString& line ){
   /// tag a string into a vector of TagResult elements
   /*!
     \param line a (UTF8 encoded) string, may be multilined and include Enrichments
@@ -460,7 +460,7 @@ vector<TagResult> BaseTagger::tag_entries( const vector<tag_entry>& to_do ){
   }
 }
 
-UnicodeString BaseTagger::set_eos_mark( const UnicodeString& eos ){
+UnicodeString BaseTagger::set_eos_mark( const icu::UnicodeString& eos ){
   /// set the EOS marker for the tagger
   /*!
     \param eos the eos marker as a UnicodeString

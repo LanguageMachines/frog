@@ -545,7 +545,7 @@ UnicodeString to_tag( const UnicodeString& label, bool inside ){
 void NERTagger::merge_override( vector<tc_pair>& tags,
 				const vector<tc_pair>& overrides,
 				bool unconditional,
-				const vector<UnicodeString>& POS_tags ) const {
+				const vector<icu::UnicodeString>& POS_tags ) const {
   /// merge overrides into the tc_pair vector
   /*!
     \param tags the list of tc_pair to merge into

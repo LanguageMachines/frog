@@ -291,7 +291,7 @@ UnicodeString Mblem::make_instance( const UnicodeString& in ) {
   return instance;
 }
 
-void Mblem::filterTag( const UnicodeString& postag ){
+void Mblem::filterTag( const icu::UnicodeString& postag ){
   /// filter all non-matching tags out of the mblem results
   /*!
     \param postag the tag, given by the CGN-tagger, that should match
@@ -532,7 +532,7 @@ UnicodeString Mblem::call_server( const UnicodeString& instance ){
 void Mblem::Classify( const UnicodeString& word ){
   /// give the lemma for 1 word
   /*!
-    \param uWord a Unicode string with the word
+    \param word a Unicode string with the word
     the internal mblemResult struct will be filled with 1 or more (alternative)
     solutions of a lemma + a POS-tag
   */

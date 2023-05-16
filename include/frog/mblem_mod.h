@@ -64,7 +64,7 @@ class Mblem {
   std::vector<std::pair<icu::UnicodeString,icu::UnicodeString> > getResult() const;
   std::string getTagset() const { return tagset; };
   std::string version() const { return _version; };
-  void filterTag( const icu::UnicodeString&  );
+  void filterTag( const icu::UnicodeString& );
   void makeUnique();
   void add_lemmas( const std::vector<folia::Word*>&,
 		   const frog_data& ) const;
