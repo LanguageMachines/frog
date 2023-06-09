@@ -267,7 +267,7 @@ vector<UnicodeString> NERTagger::create_ner_list( const vector<UnicodeString>& w
     size_t len = 1;
     for ( size_t i = 0; i < min( words.size() - j, (size_t)max_ner_size); ++i ){
       // start looking for sequences of length len
-      auto const& mp = ners[len++];
+      auto const mp = ners[len++];
       if ( mp.empty() ){
 	continue;
       }

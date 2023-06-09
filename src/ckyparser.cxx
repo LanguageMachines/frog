@@ -269,6 +269,11 @@ void CKYParser::parse(){
 	  bestI = r;
 	}
       }
+      if ( bestI < 0 ){
+	string msg = "bestI index out of bounds in: ";
+	msg += __FILE__ + string(":") + std::to_string(__LINE__);
+	throw logic_error( msg );
+      }
       DBG << "STEP 3 ADD: " << bestScore <<"-" << bestI << "-" << bestL << endl;
       chart[s][t].l_True = SubTree( bestScore, bestI, bestL );
       chart[s][t].l_True.satisfiedConstraints.insert( chart[s][bestI].l_True.satisfiedConstraints.begin(), chart[s][bestI].l_True.satisfiedConstraints.end() );
@@ -284,7 +289,11 @@ void CKYParser::parse(){
 	  bestI = r;
 	}
       }
-
+      if ( bestI < 0 ){
+	string msg = "bestI index out of bounds in: ";
+	msg += __FILE__ + string(":") + std::to_string(__LINE__);
+	throw logic_error( msg );
+      }
       DBG << "STEP 4 ADD: " << bestScore <<"-" << bestI << "-" << bestL << endl;
       chart[s][t].r_True = SubTree( bestScore, bestI, bestL );
       chart[s][t].r_True.satisfiedConstraints.insert( chart[s][bestI].r_False.satisfiedConstraints.begin(), chart[s][bestI].r_False.satisfiedConstraints.end() );

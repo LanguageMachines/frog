@@ -391,6 +391,9 @@ dp_tree *parse_node( xmlNode *node ){
   if ( !dp->word.empty() ){
     dp->word_index = dp->end;
   }
+  else {
+    dp->word_index = 0;
+  }
   dp->link = 0;
   dp->next = 0;
   //  cerr << "created dp_tree: " << dp << endl;
