@@ -41,13 +41,17 @@
 
 /// \brief Helper class for Mblem. A datastructure to hold lemma/tag information
 class mblemData {
- public:
- mblemData( const icu::UnicodeString& l, const icu::UnicodeString& t ):
-  lemma( l ),
+public:
+  mblemData( const icu::UnicodeString& l, const icu::UnicodeString& t ):
+    lemma( l ),
     tag( t ) { };
   icu::UnicodeString getLemma() const { return lemma; };
   icu::UnicodeString getTag() const { return tag; };
- private:
+  bool operator==( const mblemData& rhs ){
+    return ( lemma == rhs.lemma )
+      && ( tag == rhs.tag );
+  }
+private:
   icu::UnicodeString lemma;
   icu::UnicodeString tag;
 };

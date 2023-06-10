@@ -322,34 +322,19 @@ void Mblem::filterTag( const icu::UnicodeString& postag ){
   }
 }
 
+bool cmp_lemma( const mblemData& lhs, const mblemData& rhs ){
+  return lhs.getLemma() == rhs.getLemma();
+}
+
 void Mblem::makeUnique( ){
   /// filter out all results that are equal
   /*
     should be called AFTER filterTag() and cleans out doubles
   */
-  auto it = mblemResult.begin();
-  while( it != mblemResult.end() ){
-    UnicodeString lemma = it->getLemma();
-    auto it2 = it+1;
-    while( it2 != mblemResult.end() ){
-      if (debug > 1){
-	DBG << "compare lemma " << lemma << " with " << it2->getLemma() << " ";
-      }
-      if ( lemma == it2->getLemma() ){
-	if ( debug > 1){
-	  DBG << "equal " << endl;
-	}
-	it2 = mblemResult.erase(it2);
-      }
-      else {
-	if ( debug > 1){
-	  DBG << "NOT equal! " << endl;
-	}
-	++it2;
-      }
-    }
-    ++it;
-  }
+  // unique shifts unique elements to the front
+  auto last = std::unique(mblemResult.begin(), mblemResult.end(), cmp_lemma );
+  // remove the rest
+  mblemResult.erase( last, mblemResult.end() );
   if (debug > 1){
     DBG << "final result after filter and unique" << endl;
     for ( const auto& mbr : mblemResult ){
