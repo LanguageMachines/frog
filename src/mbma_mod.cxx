@@ -760,17 +760,7 @@ void Mbma::filterSubTags( const vector<icu::UnicodeString>& feats ){
   }
   map<icu::UnicodeString, Rule*> unique;
   for ( const auto& ait : highConf ){
-    icu::UnicodeString tmp = ait->getKey();
-    // same result may have different inflection!
-    if (doDeepMorph){
-      // but only relevant for doDeep
-      tmp += ait->inflection;
-    }
-    // if ( unique.find(tmp) == unique.end() ){
-    //   // make sure to preserve the first one
-    //   unique[tmp] = ait;
-    // }
-    // make sure to preserve the first one
+    icu::UnicodeString tmp = ait->getKey( doDeepMorph );
     unique.emplace(tmp,ait);
   }
   // so now we have map of 'equal' analysis.

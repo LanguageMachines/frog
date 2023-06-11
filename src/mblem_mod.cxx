@@ -322,8 +322,12 @@ void Mblem::filterTag( const icu::UnicodeString& postag ){
   }
 }
 
-bool cmp_lemma( const mblemData& lhs, const mblemData& rhs ){
+bool cmp_eq_lemma( const mblemData& lhs, const mblemData& rhs ){
   return lhs.getLemma() == rhs.getLemma();
+}
+
+bool cmp_less_lemma( const mblemData& lhs, const mblemData& rhs ){
+  return lhs.getLemma() < rhs.getLemma();
 }
 
 void Mblem::makeUnique( ){
@@ -331,8 +335,10 @@ void Mblem::makeUnique( ){
   /*
     should be called AFTER filterTag() and cleans out doubles
   */
-  // unique shifts unique elements to the front
-  auto last = std::unique(mblemResult.begin(), mblemResult.end(), cmp_lemma );
+  // unique shifts unique elements to the front, for consecutive elements
+  // so mblemResult needs to be SORTED on LEMMA!
+  std::sort( mblemResult.begin(), mblemResult.end(), cmp_less_lemma );
+  auto last = std::unique(mblemResult.begin(), mblemResult.end(), cmp_eq_lemma );
   // remove the rest
   mblemResult.erase( last, mblemResult.end() );
   if (debug > 1){

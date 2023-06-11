@@ -78,7 +78,13 @@ public:
   ~Rule();
   std::vector<icu::UnicodeString> extract_morphemes() const;
   icu::UnicodeString pretty_string( bool ) const;
-  icu::UnicodeString getKey() const { return sort_key; };
+  icu::UnicodeString getKey( bool deep=false) const {
+    icu::UnicodeString result = sort_key;
+    if ( deep ){
+      result += inflection;
+    }
+    return result;
+  }
   bool performEdits();
   void getCleanInflect( bool );
   void reduceZeroNodes();
@@ -89,7 +95,6 @@ public:
   CLEX::Type tag;
   icu::UnicodeString orig_word;
   icu::UnicodeString inflection;
-  icu::UnicodeString sort_key;
   Compound::Type compound;
   icu::UnicodeString description;
   BracketNest *brackets;
@@ -97,6 +102,8 @@ public:
   TiCC::LogStream& dbgLog;
   double confidence;
   size_t ID;
+private:
+  icu::UnicodeString sort_key;
 };
 
 

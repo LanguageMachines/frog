@@ -47,10 +47,6 @@ public:
     tag( t ) { };
   icu::UnicodeString getLemma() const { return lemma; };
   icu::UnicodeString getTag() const { return tag; };
-  bool operator==( const mblemData& rhs ){
-    return ( lemma == rhs.lemma )
-      && ( tag == rhs.tag );
-  }
 private:
   icu::UnicodeString lemma;
   icu::UnicodeString tag;
