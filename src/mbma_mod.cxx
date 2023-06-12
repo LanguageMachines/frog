@@ -759,6 +759,9 @@ void Mbma::filterSubTags( const vector<icu::UnicodeString>& feats ){
     DBG << endl;
   }
   map<icu::UnicodeString, Rule*> unique;
+  // create a map of "key's" to Rule. The key is the string representation
+  // of the Rule's flattened result, like [ver][zeker][ing][s][ageer][ent]
+  // (with inflection info for Deep Morph analysis)
   for ( const auto& ait : highConf ){
     icu::UnicodeString tmp = ait->getKey( doDeepMorph );
     unique.emplace(tmp,ait);
