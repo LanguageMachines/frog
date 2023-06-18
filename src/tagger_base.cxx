@@ -478,35 +478,6 @@ UnicodeString BaseTagger::set_eos_mark( const icu::UnicodeString& eos ){
   throw runtime_error( _label + "-tagger is not initialized" );
 }
 
-void BaseTagger::extract_words_tags(  const vector<folia::Word *>& swords,
-				      const string& tagset,
-				      vector<UnicodeString>& words,
-				      vector<UnicodeString>& ptags ){
-  /// extract word and POS-tag information from a list of folia::Word
-  /*
-    \param swords the input list of Word elements
-    \param tagset the folia::setname for the POS-tags
-    \param words the extracted words as UTF8 string
-    \param tags the extracted POS-tags as string
-  */
-  for ( size_t i=0; i < swords.size(); ++i ){
-    folia::Word *sw = swords[i];
-    folia::PosAnnotation *postag = 0;
-    UnicodeString word;
-#pragma omp critical (foliaupdate)
-    {
-      word = sw->text( textclass );
-      postag = sw->annotation<folia::PosAnnotation>( tagset );
-    }
-    if ( filter ){
-      word = filter->filter( word );
-    }
-    word = filter_spaces( word );
-    words.push_back( word );
-    ptags.push_back( TiCC::UnicodeFromUTF8(postag->cls()) );
-  }
-}
-
 vector<tag_entry> BaseTagger::extract_sentence( const frog_data& sent ){
   /// extract a tag_entry list from a frog_data structure
   /*!

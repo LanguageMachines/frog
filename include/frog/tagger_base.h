@@ -74,10 +74,6 @@ class BaseTagger {
   void write_to_client( nlohmann::json&,
 			Sockets::ClientSocket& ) const;
  protected:
-  void extract_words_tags(  const std::vector<folia::Word *>&,
-			    const std::string&,
-			    std::vector<icu::UnicodeString>&,
-			    std::vector<icu::UnicodeString>& );
   std::vector<Tagger::TagResult> call_server( const std::vector<tag_entry>& ) const;
   int debug;
   std::string _label;
