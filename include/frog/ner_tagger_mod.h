@@ -45,12 +45,12 @@ typedef std::pair<icu::UnicodeString,double> tc_pair;
 class NERTagger: public BaseTagger {
  public:
   explicit NERTagger( TiCC::LogStream *, TiCC::LogStream * =0 );
-  bool init( const TiCC::Configuration& );
-  void Classify( frog_data& );
-  void post_process( frog_data& );
+  bool init( const TiCC::Configuration& ) override;
+  void Classify( frog_data& ) override;
+  void post_process( frog_data& ) override;
   void post_process( frog_data&,
 		     const std::vector<tc_pair>& );
-  void add_declaration( folia::Document&, folia::processor * ) const;
+  void add_declaration( folia::Document&, folia::processor * ) const override;
   void add_result( const frog_data& fd,
 		   const std::vector<folia::Word*>& wv ) const;
   bool read_gazets( const std::string& f, const std::string& p ){

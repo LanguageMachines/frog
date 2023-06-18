@@ -40,9 +40,9 @@ class CGNTagger: public BaseTagger {
  public:
   explicit CGNTagger( TiCC::LogStream *l, TiCC::LogStream *d = 0 ):
   BaseTagger( l, d, "tagger" ){};
-  bool init( const TiCC::Configuration& );
-  void add_declaration( folia::Document&, folia::processor * ) const;
-  void post_process( frog_data& );
+  bool init( const TiCC::Configuration& ) override;
+  void add_declaration( folia::Document&, folia::processor * ) const override;
+  void post_process( frog_data& ) override;
   void add_tags( const std::vector<folia::Word*>&,
 		 const frog_data& ) const;
   std::string getSubSet( const std::string& ,

@@ -50,11 +50,12 @@ using TiCC::operator<<;
 
 BaseTagger::BaseTagger( TiCC::LogStream *errlog,
 			TiCC::LogStream *dbglog,
-			const string& label ){
-  debug = 0;
-  tagger = 0;
-  filter = 0;
-  _label = label;
+			const string& label ):
+  debug(0),
+  _label(label),
+  tagger(NULL),
+  filter(NULL)
+{
   err_log = new TiCC::LogStream( errlog, _label + "-tagger-" );
   if ( dbglog ){
     dbg_log = new TiCC::LogStream( dbglog, _label + "-tagger-" );

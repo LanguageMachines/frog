@@ -245,7 +245,8 @@ Rule::Rule( const vector<UnicodeString>& parts,
   brackets(0),
   myLog(ls),
   dbgLog(ds),
-  confidence(0.0)
+  confidence(0.0),
+  ID(0)
 {
   for ( size_t k=0; k < parts.size(); ++k ) {
     UnicodeString this_class = parts[k];

@@ -68,9 +68,9 @@ class HasIncomingRel: public Constraint {
  HasIncomingRel( int i, const std::string& r, double w ):
   Constraint( w, i ), relType(r){
   };
-  void put( std::ostream& ) const;
-  ConstraintType type() const { return Incoming; }
-  std::string rel() const { return relType; };
+  void put( std::ostream& ) const override;
+  ConstraintType type() const override { return Incoming; }
+  std::string rel() const override { return relType; };
  private:
   std::string relType;
 };
@@ -81,10 +81,10 @@ class HasDependency: public Constraint {
  HasDependency( int i, int h, const std::string& r, double w ):
   Constraint( w, i ), relType(r), headType(h) {
     };
-  void put( std::ostream& ) const;
-  ConstraintType type() const { return Dependency; };
-  int hIndex() const { return headType; };
-  std::string rel() const { return relType; };
+  void put( std::ostream& ) const override;
+  ConstraintType type() const override { return Dependency; };
+  int hIndex() const override { return headType; };
+  std::string rel() const override { return relType; };
  private:
   std::string relType;
   int headType;
@@ -96,9 +96,9 @@ class DependencyDirection: public Constraint {
  DependencyDirection( int i, const std::string& d, double w ):
   Constraint( w, i ), direction(toEnum(d)){
   }
-  void put( std::ostream& ) const;
-  ConstraintType type() const { return Direction; };
-  dirType direct() const { return direction; };
+  void put( std::ostream& ) const override;
+  ConstraintType type() const override { return Direction; };
+  dirType direct() const override { return direction; };
  private:
   dirType toEnum( const std::string& s ){
     if ( s == "ROOT" )
@@ -170,6 +170,9 @@ private:
   std::vector< std::vector<chart_rec>> chart;
 
   TiCC::LogStream *ckyLog;
+
+  CKYParser( const CKYParser& ) = delete;
+  CKYParser operator=( const CKYParser& ) = delete;
 };
 
 #endif

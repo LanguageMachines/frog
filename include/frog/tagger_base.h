@@ -94,7 +94,8 @@ class BaseTagger {
   std::vector<std::string> _words;
   std::vector<Tagger::TagResult> _tag_result;
   std::map<icu::UnicodeString,icu::UnicodeString> token_tag_map;
-  BaseTagger( const BaseTagger& ){} // inhibit copies
+  BaseTagger( const BaseTagger& ) = delete; // inhibit copies
+  BaseTagger& operator=( const BaseTagger& ) = delete; // inhibit copies
 };
 
 icu::UnicodeString filter_spaces( const icu::UnicodeString& );

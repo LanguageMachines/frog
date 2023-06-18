@@ -300,6 +300,8 @@ BracketLeaf::BracketLeaf( CLEX::Type t,
 			  int debug_flag,
 			  TiCC::LogStream& l ):
   BaseBracket( t, vector<CLEX::Type>(), debug_flag, l ),
+  glue(false),
+  orig( toUnicodeString( t ) ),
   morph( morpheme )
 {
   /// create a BracketLeaf object from a CLEX::Type and a morpheme
@@ -310,7 +312,6 @@ BracketLeaf::BracketLeaf( CLEX::Type t,
     \param l a LogStream for messages
   */
   ifpos = -1;
-  orig = toUnicodeString( t );
   _status = Status::STEM;
 }
 

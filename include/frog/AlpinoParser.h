@@ -67,11 +67,12 @@ class AlpinoParser: public ParserBase {
   ParserBase( errlog, dbglog ),
     _alpino_server(false)
       {};
-  bool init( const TiCC::Configuration& );
-  void add_provenance( folia::Document& doc, folia::processor * ) const;
-  void Parse( frog_data&, TimerBlock& );
+  bool init( const TiCC::Configuration& ) override;
+  void add_provenance( folia::Document& doc,
+		       folia::processor * ) const override;
+  void Parse( frog_data&, TimerBlock& ) override;
   void add_result( const frog_data&,
-		   const std::vector<folia::Word*>& ) const;
+		   const std::vector<folia::Word*>& ) const override;
   void add_mwus( const frog_data&,
 		 const std::vector<folia::Word*>& ) const;
  private:

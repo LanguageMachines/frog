@@ -53,16 +53,18 @@ using icu::UnicodeString;
 
 mwuAna::mwuAna( const UnicodeString& wrd,
 		bool glue_tag,
-		size_t index ){
+		size_t index ):
+  mwu_start( index ),
+  mwu_end( index ),
+  word(wrd),
+  spec(glue_tag)
+{
   /// create a mwu Analysis record
   /*!
     \param wrd The text of the word
     \param glue_tag was a \e 'glue' tag detected?
     \param index The (initial) position in the sentence
    */
-  word = wrd;
-  spec = glue_tag;
-  mwu_start = mwu_end = index;
 }
 
 void mwuAna::merge( const mwuAna *add ){
@@ -106,7 +108,7 @@ void Mwu::reset(){
   mWords.clear();
 }
 
-void Mwu::add( frog_record& fd ){
+void Mwu::add( const frog_record& fd ){
   /// add a mwuAna record to this Mwu
   /*!
     \param fd The frog_data structure with the information to use

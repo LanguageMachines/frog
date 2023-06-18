@@ -884,8 +884,8 @@ void Mbma::store_brackets( frog_record& fd,
     if ( fd.morph_string.isEmpty() ){
       fd.morph_string = "[" + wrd + "]";
       if ( doDeepMorph ){
-	UnicodeString head = CLEX::get_tag_descr(clex_tag);
-	fd.morph_string += head;
+	UnicodeString head_desc = CLEX::get_tag_descr(clex_tag);
+	fd.morph_string += head_desc;
       }
     }
     fd.morph_structure.push_back( leaf );

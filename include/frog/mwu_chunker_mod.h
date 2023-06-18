@@ -76,7 +76,7 @@ public:
   bool init( const TiCC::Configuration& );
   void add_provenance( folia::Document&, folia::processor * ) const;
   void Classify( frog_data& );
-  void add( frog_record& );
+  void add( const frog_record& );
   void add_result( const frog_data&,
 		   const std::vector<folia::Word*>& ) const;
   /// return the value for \e mwu_tagset. (set via Configuration)
@@ -97,6 +97,8 @@ private:
   std::string mwu_tagset;
   icu::UnicodeString glue_tag;
   TiCC::UniFilter *filter;
+  Mwu( const Mwu& ) = delete; // no copies
+  Mwu operator=( const Mwu& ) = delete; // no copies
 };
 
 #endif

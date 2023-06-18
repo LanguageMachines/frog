@@ -566,7 +566,7 @@ void Mblem::Classify( const UnicodeString& word ){
 
       UnicodeString insstr;
       UnicodeString delstr;
-      UnicodeString prefix;
+      UnicodeString pref;
       for ( const auto& edit : edits ){
 	if ( edit == edits.front() ){
 	  continue;
@@ -574,7 +574,7 @@ void Mblem::Classify( const UnicodeString& word ){
 	UnicodeString edit_val = UnicodeString( edit, 1 );
 	switch ( edit[0] ){
 	case 'P':
-	  prefix = edit_val;
+	  pref = edit_val;
 	  break;
 	case 'I':
 	  insstr = edit_val;
@@ -589,21 +589,21 @@ void Mblem::Classify( const UnicodeString& word ){
       }
       if (debug > 1){
 	DBG << "pre-prefix word: '" << uWord << "' prefix: '"
-	    << prefix << "'" << endl;
+	    << pref << "'" << endl;
       }
       int prefixpos = 0;
-      if ( !prefix.isEmpty() ) {
+      if ( !pref.isEmpty() ) {
 	// Whenever Toads makemblem is improved, (the infamous
 	// 'tegemoetgekomen' example), this should probably
 	// become prefixpos = uWord.lastIndexOf(prefix);
-	prefixpos = uWord.indexOf(prefix);
+	prefixpos = uWord.indexOf(pref);
 	if (debug > 1){
 	  DBG << "prefixpos = " << prefixpos << endl;
 	}
 	// repair cases where there's actually not a prefix present
 	if (prefixpos > uWord.length()-2) {
 	  prefixpos = 0;
-	  prefix.remove();
+	  pref.remove();
 	}
       }
 
@@ -612,12 +612,12 @@ void Mblem::Classify( const UnicodeString& word ){
       }
       if (prefixpos >= 0) {
 	lemma = UnicodeString( uWord, 0L, prefixpos );
-	prefixpos = prefixpos + prefix.length();
+	prefixpos = prefixpos + pref.length();
       }
       if (debug > 1){
 	DBG << "post word: "<< uWord
 	    << " lemma: " << lemma
-	    << " prefix: " << prefix
+	    << " prefix: " << pref
 	    << " delstr: " << delstr
 	    << " insstr: " << insstr
 	    << endl;

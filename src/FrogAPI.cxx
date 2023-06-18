@@ -142,51 +142,52 @@ string FrogAPI::defaultConfigFile( const string& language ){
   return defaultConfigDir( language ) + "frog.cfg";
 }
 
-FrogOptions::FrogOptions() {
-  doTok = true;
-  doLemma = true;
-  doMbma = true;
-  doMwu = true;
-  doIOB = true;
-  doNER = true;
-  doParse = true;
-  doTagger = true;
-  doDeepMorph = false;
-  doCompounds = false;
-  doSentencePerLine = false;
-  doQuoteDetection = false;
-  doRetry = false;
-  noStdOut = false;
-  doServer = false;
-  doXMLin =  false;
-  doXMLout =  false;
-  doJSONin = false;
-  doJSONout = false;
-  doKanon =  false;
-  doAlpinoServer = false;
-  doAlpino =  false;
-  test_API =  false;
-  hide_timers = false;
-  interactive = false;
-  do_und_language = false;
-  do_language_detection = false;
-  maxParserTokens = 500; // 500 words in a sentence is already insane
+FrogOptions::FrogOptions():
+  doTok(true),
+  doLemma(true),
+  doMbma(true),
+  doDeepMorph(false),
+  doCompounds(false),
+  doMwu(true),
+  doIOB(true),
+  doNER(true),
+  doParse(true),
+  doTagger(true),
+  doSentencePerLine(false),
+  doQuoteDetection(false),
+  doRetry(false),
+  noStdOut(false),
+  doXMLin(false),
+  doXMLout(false),
+  wantOUT(false),
+  doJSONin(false),
+  doJSONout(false),
+  doServer(false),
+  doKanon(false),
+  test_API(false),
+  hide_timers(false),
+  interactive(false),
+  doAlpinoServer(false),
+  doAlpino(false),
+  do_und_language(false),
+  do_language_detection(false),
+  numThreads(1),
+  debugFlag(0),
+  JSON_pp(0),
+  uttmark("<utt>"),
+  listenport("void"),
+  docid("untitled"),
+  inputclass("current"),
+  outputclass("current"),
+  textredundancy("minimal"),
+  correct_words(false),
+  maxParserTokens(500) // 500 words in a sentence is already insane
   // needs about 16 Gb memory to parse!
   // set tot 0 for unlimited
+{
 #ifdef HAVE_OPENMP
   numThreads = min<int>( 8, omp_get_max_threads() ); // ok, don't overdo
-#else
-  numThreads = 1;
 #endif
-  uttmark = "<utt>";
-  listenport = "void";
-  docid = "untitled";
-  inputclass="current";
-  outputclass="current";
-  textredundancy="minimal";
-  correct_words = false;
-  debugFlag = 0;
-  JSON_pp = 0;
 }
 
 void FrogAPI::test_version( const TiCC::Configuration& configuration,

@@ -53,12 +53,12 @@ class timbl_result;
 class ParserBase {
  public:
   explicit ParserBase( TiCC::LogStream* errlog, TiCC::LogStream* dbglog ):
-  isInit( false ),
+    isInit( false ),
     filter( 0 )
-      {
-	errLog = new TiCC::LogStream(errlog, "parser-");
-	dbgLog = new TiCC::LogStream(dbglog, "parser-dbg-");
-      };
+  {
+    errLog = new TiCC::LogStream(errlog, "parser-");
+    dbgLog = new TiCC::LogStream(dbglog, "parser-dbg-");
+  };
   virtual ~ParserBase();
   virtual bool init( const TiCC::Configuration& ) = 0;
   virtual void add_provenance( folia::Document& doc,
@@ -80,23 +80,25 @@ class ParserBase {
   TiCC::UniFilter *filter;
   std::string _host;
   std::string _port;
-  ParserBase( const ParserBase& ){}; // inhibit copies
+  ParserBase( const ParserBase& ) = delete; // inhibit copies
+  ParserBase operator=( const ParserBase& ) = delete; // inhibit copies
 };
 
 /// \brief a specialization of ParserBase to run a CKY parser
 class Parser: public ParserBase {
- public:
+public:
   explicit Parser( TiCC::LogStream* errlog, TiCC::LogStream* dbglog ):
-  ParserBase( errlog, dbglog ),
+    ParserBase( errlog, dbglog ),
     maxDepSpan( 0 ),
     pairs(0),
     dir(0),
     rels(0) {};
   ~Parser();
-  bool init( const TiCC::Configuration& );
-  void add_provenance( folia::Document& doc, folia::processor * ) const;
+  bool init( const TiCC::Configuration& ) override;
+  void add_provenance( folia::Document& doc,
+		       folia::processor * ) const override;
   parseData prepareParse( frog_data& );
-  void Parse( frog_data&, TimerBlock& );
+  void Parse( frog_data&, TimerBlock& ) override;
  private:
   std::vector<icu::UnicodeString> createPairInstances( const parseData& );
   std::vector<icu::UnicodeString> createDirInstances( const parseData& );
