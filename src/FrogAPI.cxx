@@ -368,12 +368,9 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
 	 << options.default_language << "?" << endl;
     return false;
   }
-  string conf_languages;
-  for ( const auto& l : options.languages ){
-    conf_languages += l + ",";
-  }
+  string conf_languages = TiCC::join( options.languages, "," );
   if ( options.do_und_language ){
-    conf_languages += "und";
+    conf_languages += ",und";
   }
   if ( !conf_languages.empty() ){
     LOG << "SET config " << conf_languages << endl;

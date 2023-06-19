@@ -352,9 +352,9 @@ void NERTagger::Classify( frog_data& swords ){
     vector<UnicodeString> gazet_tags = create_ner_list( words, gazet_ners );
     vector<UnicodeString> override_v = create_ner_list( words, override_ners );
     vector<tc_pair> override_tags;
-    for ( const auto& it : override_v ){
-      override_tags.push_back( make_pair( it, 1.0 ) );
-    }
+    std::transform( override_v.cbegin(), override_v.cend(),
+		    std::back_inserter(override_tags),
+		    []( auto us ){ return make_pair(us,1.0); } );
     UnicodeString prev = "_";
     UnicodeString prevN = "_";
     vector<tag_entry> to_do;
@@ -491,10 +491,9 @@ void NERTagger::addEntity( frog_data& sent,
     The NE tags and the mean confidence are assigned to the proper locations
     in the 'sent' structure.
   */
-  double c = 0;
-  for ( auto const& val : entity ){
-    c += val.second;
-  }
+  double c = std::accumulate( entity.cbegin(), entity.cend(),
+			      0.0,
+			      []( const double& res, const tc_pair& p ){ return std::move(res) + p.second; } );
   c /= entity.size();
   for ( size_t i = 0; i < entity.size(); ++i ){
 #pragma omp critical (foliaupdate)
@@ -620,7 +619,7 @@ void NERTagger::merge_override( vector<tc_pair>& tags,
 }
 
 
-bool NERTagger::Generate( const std::string& opt_line ){
+bool NERTagger::Generate( const string& opt_line ){
   /// generate a new tagger using opt_line
   return tagger->GenerateTagger( opt_line );
 }
