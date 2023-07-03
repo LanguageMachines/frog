@@ -33,6 +33,10 @@ the Netherlands Organisation for Scientific Research, particularly under the
 CGN project, the IMIX programme, the Implicit Linguistics project, the
 CLARIN-NL programme and the CLARIAH programme.
 
+## Demo
+
+![Frog Demo](https://raw.githubusercontent.com/CLARIAH/wp3-demos/master/frog.gif)
+
 ## License
 
 Frog is free software; you can redistribute it and/or modify it under the terms
@@ -110,9 +114,6 @@ Contents of this distribution:
 
 Run ``frog --help`` for basic usage instructions.
 
-## Demo
-
-![Frog Demo](https://raw.githubusercontent.com/CLARIAH/wp3-demos/master/frog.gif)
 
 ## Documentation
 
