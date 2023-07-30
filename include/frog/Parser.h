@@ -80,8 +80,6 @@ class ParserBase {
   TiCC::UniFilter *filter;
   std::string _host;
   std::string _port;
-  ParserBase( const ParserBase& ) = delete; // inhibit copies
-  ParserBase operator=( const ParserBase& ) = delete; // inhibit copies
 };
 
 /// \brief a specialization of ParserBase to run a CKY parser
@@ -105,6 +103,8 @@ public:
   std::vector<icu::UnicodeString> createRelInstances( const parseData& );
   std::vector<timbl_result> timbl_server( const std::string&,
 					  const std::vector<icu::UnicodeString>& );
+  Parser( const Parser& ) = delete; // inhibit copies
+  Parser operator=( const Parser& ) = delete; // inhibit copies
   std::string maxDepSpanS;
   size_t maxDepSpan;
   Timbl::TimblAPI *pairs;

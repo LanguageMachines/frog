@@ -79,6 +79,8 @@ class AlpinoParser: public ParserBase {
   std::vector<parsrel> alpino_parse( frog_data& );
   std::vector<parsrel> alpino_server_parse( frog_data& );
   bool _alpino_server;
+  AlpinoParser( const AlpinoParser& ) = delete; // inhibit copies
+  AlpinoParser operator=( const AlpinoParser& ) = delete; // inhibit copies
 };
 
 
