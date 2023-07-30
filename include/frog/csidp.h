@@ -30,8 +30,14 @@
 */
 #ifndef CSIDP_H
 #define CSIDP_H
-#include "timbl/TimblAPI.h"
-#include "frog/ckyparser.h"
+#include <cstddef>
+#include <vector>
+#include <string>
+#include <utility>
+
+namespace TiCC { class LogStream; }
+namespace Timbl { class ClassDistribution; }
+struct parsrel;
 
 /// this class stores a triple of Timbl results
 /*!

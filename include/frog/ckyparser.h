@@ -31,6 +31,8 @@
 #ifndef CKYPARSER_H
 #define CKYPARSER_H
 
+#include <cstdlib>
+#include <string>
 #include <set>
 #include <vector>
 #include <ostream>
