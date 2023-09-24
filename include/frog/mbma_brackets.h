@@ -133,23 +133,23 @@ public:
   icu::UnicodeString put( bool = false ) const override;
   icu::UnicodeString morpheme() const override {
     /// return the value of the morpheme
-    return morph;
+    return _morph;
   };
   icu::UnicodeString inflection() const override {
     /// return the value of the inflexion (if any)
-    return inflect;
+    return _inflect;
   };
   icu::UnicodeString original() const override {
     /// return the original value before processing started
-    return orig;
+    return _orig;
   };
   int infixpos() const override {
     /// return the position of an infix
-    return ifpos;
+    return _ifpos;
   };
   bool isglue() const override {
     /// return tre if this is a glue tag
-    return glue;
+    return _glue;
   };
   folia::Morpheme *createMorpheme( folia::Document *,
 				   const std::string&) const override;
@@ -158,11 +158,11 @@ public:
 				   icu::UnicodeString&,
 				   int& ) const override;
 private:
-  int ifpos;
-  bool glue;
-  icu::UnicodeString orig;
-  icu::UnicodeString morph;
-  icu::UnicodeString inflect;
+  int _ifpos;
+  bool _glue;
+  icu::UnicodeString _orig;
+  icu::UnicodeString _morph;
+  icu::UnicodeString _inflect;
 };
 
 /// \brief a specialization of BaseBracket to store intermediate nodes
@@ -198,7 +198,7 @@ class BracketNest: public BaseBracket {
   Compound::Type compound() const override { return _compound; };
   void display_parts( std::ostream&, int=0 ) const override;
  private:
-  std::list<BaseBracket *> parts;
+  std::list<BaseBracket *> _parts;
   Compound::Type _compound;
 };
 

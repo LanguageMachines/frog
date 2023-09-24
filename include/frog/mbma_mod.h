@@ -80,6 +80,8 @@ class Mbma {
   static std::string mbma_tagset;
   static std::string pos_tagset;
   static std::string clex_tagset;
+  Mbma( const Mbma& ) = delete;
+  Mbma& operator=( const Mbma& ) = delete;
  private:
   void cleanUp();
   bool readsettings( const std::string&, const std::string& );

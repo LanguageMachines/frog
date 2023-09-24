@@ -68,6 +68,8 @@ class ParserBase {
 			   const std::vector<folia::Word*>& ) const;
   std::vector<std::string> createParserInstances( const parseData& );
   std::string getTagset() const { return dep_tagset; };
+  ParserBase( const ParserBase& ) = delete;
+  ParserBase& operator=( const ParserBase& ) = delete;
  protected:
   bool isInit;
   TiCC::LogStream *errLog;

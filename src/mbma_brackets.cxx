@@ -244,8 +244,8 @@ BracketLeaf::BracketLeaf( const RulePart& p,
 			  int debug_flag,
 			  TiCC::LogStream& l ):
   BaseBracket(p.ResultClass, p.RightHand, debug_flag, l ),
-  glue(false),
-  morph(p.morpheme )
+  _glue(false),
+  _morph(p.morpheme )
 {
   /// create a BracketLeaf object from a RulePart
   /*!
@@ -253,9 +253,9 @@ BracketLeaf::BracketLeaf( const RulePart& p,
     \param debug_flag the debug value
     \param l a LogStream for messages
   */
-  ifpos = -1;
+  _ifpos = -1;
   if ( !p.inflect.isEmpty() ){
-    inflect = p.inflect;
+    _inflect = p.inflect;
     if ( p.ResultClass == CLEX::UNASS ){
       _status = Status::INFLECTION;
     }
@@ -264,12 +264,13 @@ BracketLeaf::BracketLeaf( const RulePart& p,
     }
   }
   else if ( RightHand.size() == 0 ){
-    orig = toUnicodeString( cls );
+    _orig = toUnicodeString( cls );
     if ( ( p.ResultClass == CLEX::N
 	   || p.ResultClass == CLEX::V
 	   || p.ResultClass == CLEX::A )
 	 &&
-	 ( morph == "be" || morph == "ge" || morph == "ver" || morph == "ex" ) ){
+	 ( _morph == "be" || _morph == "ge"
+	   || _morph == "ver" || _morph == "ex" ) ){
       _status = Status::PARTICLE;
     }
     else {
@@ -277,16 +278,17 @@ BracketLeaf::BracketLeaf( const RulePart& p,
     }
   }
   else {
-    orig = toUnicodeString( cls );
-    orig += "_";
-    glue = p.is_glue;
+    _orig = toUnicodeString( cls );
+    _orig += "_";
+    _glue = p.is_glue;
     for ( size_t i = 0; i < RightHand.size(); ++i ){
-      orig += toUnicodeString(RightHand[i]);
+      _orig += toUnicodeString(RightHand[i]);
       if ( RightHand[i] == CLEX::AFFIX ){
-	ifpos = i;
+	_ifpos = i;
       }
     }
-    if ( morph == "be" || morph == "ge" || morph == "ver" || morph == "ex" ){
+    if ( _morph == "be" || _morph == "ge"
+	 || _morph == "ver" || _morph == "ex" ){
       _status = Status::PARTICIPLE;
     }
     else {
@@ -300,9 +302,9 @@ BracketLeaf::BracketLeaf( CLEX::Type t,
 			  int debug_flag,
 			  TiCC::LogStream& l ):
   BaseBracket( t, vector<CLEX::Type>(), debug_flag, l ),
-  glue(false),
-  orig( toUnicodeString( t ) ),
-  morph( morpheme )
+  _glue(false),
+  _orig( toUnicodeString( t ) ),
+  _morph( morpheme )
 {
   /// create a BracketLeaf object from a CLEX::Type and a morpheme
   /*!
@@ -311,7 +313,7 @@ BracketLeaf::BracketLeaf( CLEX::Type t,
     \param debug_flag the debug value
     \param l a LogStream for messages
   */
-  ifpos = -1;
+  _ifpos = -1;
   _status = Status::STEM;
 }
 
@@ -334,7 +336,7 @@ BracketNest::BracketNest( CLEX::Type t,
 
 BaseBracket *BracketNest::append( BaseBracket *t ){
   /// append a Bracket structure to this Nest
-  parts.push_back( t );
+  _parts.push_back( t );
   return this;
 }
 
@@ -343,7 +345,7 @@ BracketLeaf::~BracketLeaf(){
 }
 
 BracketNest::~BracketNest(){
-  for ( auto const& it : parts ){
+  for ( auto const& it : _parts ){
     delete it;
   }
   //  LOG << "DELETED NEST: " << (void *)this << endl;
@@ -358,12 +360,12 @@ UnicodeString BaseBracket::put( bool ) const {
 UnicodeString BracketLeaf::put( bool shrt ) const {
   /// create a descriptive UTF8 string representation for this object
   UnicodeString result;
-  if ( !morph.isEmpty() ){
-    result = "[" + morph + "]";
+  if ( !_morph.isEmpty() ){
+    result = "[" + _morph + "]";
   }
-  if ( glue ){
-    int pos = orig.indexOf( "^" );
-    UnicodeString tag( orig[pos+1] );
+  if ( _glue ){
+    int pos = _orig.indexOf( "^" );
+    UnicodeString tag( _orig[pos+1] );
     if ( shrt ){
       result += tag;
     }
@@ -389,18 +391,18 @@ UnicodeString BracketLeaf::put( bool shrt ) const {
     }
   }
   else if ( shrt
-	    && !orig.isEmpty() ){
-    result += orig;
+	    && !_orig.isEmpty() ){
+    result += _orig;
   }
-  for ( int i=0; i < inflect.length(); ++i ){
-    UnicodeString id = CLEX::get_inflect_descr(inflect[i]);
+  for ( int i=0; i < _inflect.length(); ++i ){
+    UnicodeString id = CLEX::get_inflect_descr(_inflect[i]);
     if ( !id.isEmpty() ){
       if ( !shrt
 	   || i == 0 ){
 	result += "/";
       }
       if ( shrt ){
-	UnicodeString bla = inflect[i];
+	UnicodeString bla = _inflect[i];
 	result += bla;
       }
       else {
@@ -415,10 +417,10 @@ UnicodeString BracketNest::put( bool shrt ) const {
   /// create a descriptive Unicode string representation for this object
   UnicodeString result;
   int cnt = 0;
-  for ( auto const& it : parts ){
+  for ( auto const& it : _parts ){
     UnicodeString tmp = it->put( shrt );
     if ( tmp[0] != '/'
-	 && &it != &parts.front()
+	 && &it != &_parts.front()
 	 && result[result.length()-1] != ']' ){
       result += " ";
     }
@@ -563,15 +565,15 @@ Compound::Type BracketNest::speculateCompoundType() {
   */
   if ( debugFlag > 5 ){
     LOG << "get compoundType: " << this << endl;
-    LOG << "#parts: " << parts.size() << endl;
+    LOG << "#parts: " << _parts.size() << endl;
   }
-  Compound::Type compound = Compound::Type::NONE;
-  if ( parts.size() == 1 ){
-    auto part = *parts.begin();
-    compound = part->speculateCompoundType();
+  Compound::Type result = Compound::Type::NONE;
+  if ( _parts.size() == 1 ){
+    auto part = *_parts.begin();
+    result = part->speculateCompoundType();
   }
-  else if ( parts.size() == 2 ){
-    auto it = parts.begin();
+  else if ( _parts.size() == 2 ){
+    auto it = _parts.begin();
     CLEX::Type tag1 = (*it)->tag();
     Compound::Type cp1 = (*it)->compound();
     Status st1 = (*it)->status();
@@ -591,37 +593,37 @@ Compound::Type BracketNest::speculateCompoundType() {
 	// fall through
       case CLEX::A:
 	if ( st1 == Status::DERIVATIONAL ){
-	  compound = cp2;
+	  result = cp2;
 	}
 	else if ( st2 == Status::STEM ){
-	  compound = construct( tag1, tag2 );
+	  result = construct( tag1, tag2 );
 	}
 	else if ( st2 == Status::DERIVATIONAL
 		  || st2 == Status::INFO
 		  || st2 == Status::INFLECTION ){
-	  compound = cp1;
+	  result = cp1;
 	}
 	break;
       case  CLEX::B:
 	if ( st2 == Status::STEM ){
-	  compound = construct( tag1, tag2 );
+	  result = construct( tag1, tag2 );
 	}
 	break;
       case CLEX::P:
 	if ( st2 == Status::STEM ){
-	  compound = construct( tag1, tag2 );
+	  result = construct( tag1, tag2 );
 	}
 	else if ( tag2 == CLEX::NEUTRAL
 		  || tag2 == CLEX::UNASS ){
-	  compound = cp1;
+	  result = cp1;
 	}
 	break;
       case CLEX::V:
 	if ( st1 == Status::DERIVATIONAL ){
-	  compound = cp2;
+	  result = cp2;
 	}
 	else if ( st2 == Status::STEM ){
-	  compound = construct( tag1, tag2 );
+	  result = construct( tag1, tag2 );
 	}
 	break;
       default:
@@ -629,8 +631,8 @@ Compound::Type BracketNest::speculateCompoundType() {
       }
     }
   }
-  else if ( parts.size() > 2 ){
-    auto it = parts.begin();
+  else if ( _parts.size() > 2 ){
+    auto it = _parts.begin();
     Compound::Type cp1 = (*it)->compound();
     CLEX::Type tag1 = (*it)->tag();
     Status st1 = (*it)->status();
@@ -654,96 +656,96 @@ Compound::Type BracketNest::speculateCompoundType() {
       case CLEX::N:
 	if ( ( st2 == Status::STEM || st2 == Status::COMPLEX ) && tag2 == CLEX::N
 	     && (st3 == Status::STEM || st3 == Status::COMPLEX ) && tag3 == CLEX::N ){
-	  compound = Compound::Type::NNN;
+	  result = Compound::Type::NNN;
 	}
 	else if ( st1 != Status::DERIVATIONAL && st2 == Status::STEM &&
 	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
-	  compound = construct( tag1, tag2 );
+	  result = construct( tag1, tag2 );
 	}
 	else if ( st1 == Status::STEM || st1 == Status::COMPLEX ){
 	  if ( (tag2 == CLEX::N &&
 		( st2 == Status::STEM || st2 == Status::COMPLEX ) )
 	       && (tag3 == CLEX::NEUTRAL || st3 == Status::INFLECTION ) ) {
-	    compound = Compound::Type::NN;
+	    result = Compound::Type::NN;
 	  }
 	  else if ( ( tag2 == CLEX::V && st2 == Status::STEM )
 		    && ( tag3 == CLEX::N && st3 == Status::STEM ) ){
-	    compound = Compound::Type::NVN;
+	    result = Compound::Type::NVN;
 	  }
 	  else if ( ( tag2 == CLEX::A &&
 		      ( st2 == Status::STEM || st2 == Status::COMPLEX ) )
 		    && ( tag3 == CLEX::A && st3 == Status::DERIVATIONAL ) ){
-	    compound = Compound::Type::NA;
+	    result = Compound::Type::NA;
 	  }
 	  else if ( st2 == Status::DERIVATIONAL && tag3 == CLEX::NEUTRAL ){
-	    compound = cp1;
+	    result = cp1;
 	  }
 	  else if ( st2 == Status::INFLECTION &&
 		    ( tag3 == CLEX::NEUTRAL || st3 == Status::INFLECTION ) ){
-	    compound = cp1;
+	    result = cp1;
 	  }
 	  else if (  st2 == Status::DERIVATIONAL
 		     && tag3 == CLEX::N ){
 	    if  ( cp3 == Compound::Type::NN ||
 		  cp3 == Compound::Type::NNN ) {
-	      compound = Compound::Type::NNN;
+	      result = Compound::Type::NNN;
 	    }
 	    else {
-	      compound = Compound::Type::NN;
+	      result = Compound::Type::NN;
 	    }
 	  }
 	  else if ( st3 == Status::DERIVATIONAL
 		    && tag3 == CLEX::N ){
-	    compound = Compound::Type::NN;
+	    result = Compound::Type::NN;
 	  }
 	}
 	break;
       case CLEX::A:
 	if ( st2 == Status::STEM &&
 	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
-	  compound = construct( tag1, tag2 );
+	  result = construct( tag1, tag2 );
 	}
 	else if ( st1 == Status::STEM || st1 == Status::COMPLEX ){
 	  if ( tag2 == CLEX::N
 	       && ( tag3 == CLEX::NEUTRAL ||  tag3 == CLEX::UNASS ) ){
-	    compound = Compound::Type::AN;
+	    result = Compound::Type::AN;
 	  }
 	  else if ( tag2 == CLEX::A
 		    && ( tag3 == CLEX::NEUTRAL ||  tag3 == CLEX::UNASS ) ){
-	    compound = Compound::Type::AA;
+	    result = Compound::Type::AA;
 	  }
 	  else if ( st2 == Status::INFLECTION && st3 == Status::INFLECTION ){
-	    compound = cp1;
+	    result = cp1;
 	  }
 	}
 	break;
       case CLEX::P:
 	if ( st2 == Status::STEM &&
 	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
-	  compound = construct( tag1, tag2 );
+	  result = construct( tag1, tag2 );
 	}
 	else if ( st2 == Status::COMPLEX ){
-	  compound = cp2;
+	  result = cp2;
 	}
 	else if ( tag3 == CLEX::NEUTRAL ){
-	  compound = construct( tag1, tag2 );
+	  result = construct( tag1, tag2 );
 	}
 	else if ( st3 == Status::DERIVATIONAL ){
-	  compound = construct( tag1, tag3 );
+	  result = construct( tag1, tag3 );
 	}
 	break;
       case CLEX::B:
 	if ( st1 == Status::STEM ){
 	  if ( ( st2 == Status::STEM
 		 && ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ) ){
-	    compound = construct( tag1, tag2 );
+	    result = construct( tag1, tag2 );
 	  }
 	  else if ( st2 == Status::COMPLEX ){
 	    if ( tag2 == CLEX::N ){
-	      compound = Compound::Type::BN;
+	      result = Compound::Type::BN;
 	    }
 	    else {
-	      compound = cp2;
+	      result = cp2;
 	    }
 	  }
 	}
@@ -751,11 +753,11 @@ Compound::Type BracketNest::speculateCompoundType() {
       case CLEX::V:
       	if ( st2 == Status::STEM &&
 	     ( st3 == Status::INFLECTION || tag3 == CLEX::NEUTRAL ) ){
-	  compound = construct( tag1, tag2 );
+	  result = construct( tag1, tag2 );
 	}
       	else if ( st3 == Status::STEM &&
 		  ( st2 == Status::INFLECTION ) ){
-	  compound = construct( tag1, tag3 );
+	  result = construct( tag1, tag3 );
 	}
 	break;
       default:
@@ -764,10 +766,10 @@ Compound::Type BracketNest::speculateCompoundType() {
     }
   }
   if ( debugFlag > 5 ){
-    LOG << "   ASSIGNED :" << compound << endl;
+    LOG << "   ASSIGNED :" << result << endl;
   }
-  _compound = compound;
-  return compound;
+  _compound = result;
+  return result;
 }
 
 folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
@@ -797,7 +799,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   */
   folia::Morpheme *result = 0;
   desc.remove();
-  int pos = orig.indexOf( "^" );
+  int pos = _orig.indexOf( "^" );
   bool glue = ( pos != -1 );
   string m_class = toString( _status );
   switch ( _status ){
@@ -805,12 +807,12 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     abort();
     break;
   case Status::STEM:
-    if ( morph.isEmpty() ){
+    if ( _morph.isEmpty() ){
       throw logic_error( "Stem has empty morpheme" );
     }
     break;
   case Status::DERIVATIONAL:
-    if ( morph.isEmpty() ){
+    if ( _morph.isEmpty() ){
       throw logic_error( "Derivation has empty morpheme" );
     }
     if ( glue ){
@@ -821,12 +823,12 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     }
     break;
   case Status::PARTICIPLE:
-    if ( morph.isEmpty() ){
+    if ( _morph.isEmpty() ){
       throw logic_error( "Particle has empty morpheme" );
     }
     break;
   case Status::FAILED:
-    if ( morph.isEmpty() ){
+    if ( _morph.isEmpty() ){
       throw logic_error( "failed status, empty morpheme" );
     }
     m_class = "derivational";
@@ -843,8 +845,8 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 #pragma omp critical (foliaupdate)
   {
     result = new folia::Morpheme( m_args, doc );
-    if ( !morph.isEmpty() ){
-      result->setutext( morph, textclass );
+    if ( !_morph.isEmpty() ){
+      result->setutext( _morph, textclass );
     }
   }
   ++cnt;
@@ -853,20 +855,20 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     folia::KWargs args;
     args["set"] = Mbma::clex_tagset;
     if ( glue ){
-      UnicodeString next_tag = orig[pos+1];
+      UnicodeString next_tag = _orig[pos+1];
       args["class"] = TiCC::UnicodeToUTF8(next_tag);
-      desc = "[" + morph + "]" + CLEX::get_tag_descr( CLEX::toCLEX(next_tag) );
+      desc = "[" + _morph + "]" + CLEX::get_tag_descr( CLEX::toCLEX(next_tag) );
       // spread the word upwards!
     }
     else {
       args["class"] = toString( tag() );
-      desc = "[" + morph + "]" + CLEX::get_tag_descr( tag() );
+      desc = "[" + _morph + "]" + CLEX::get_tag_descr( tag() );
       // spread the word upwards!
       folia::KWargs fargs;
       fargs["subset"] = "structure";
       if ( tag() == CLEX::SPEC
 	   || tag() == CLEX::LET ){
-	fargs["class"] = TiCC::UnicodeToUTF8("[" + morph + "]");
+	fargs["class"] = TiCC::UnicodeToUTF8("[" + _morph + "]");
       }
       else {
 	fargs["class"] = TiCC::UnicodeToUTF8(desc);
@@ -889,12 +891,12 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     {
       result->addPosAnnotation( args );
     }
-    desc = "[" + morph + "]"; // spread the word upwards! maybe add 'part' ??
+    desc = "[" + _morph + "]"; // spread the word upwards! maybe add 'part' ??
   }
   else if ( _status == Status::INFLECTION
 	    || _status == Status::INFO ){
-    if ( !morph.isEmpty() ){
-      desc = "[" + morph + "]";
+    if ( !_morph.isEmpty() ){
+      desc = "[" + _morph + "]";
     }
     if ( _status == Status::INFO ){
       // avoid to many brackets
@@ -902,9 +904,9 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     }
     folia::KWargs args;
     args["subset"] = "inflection";
-    for ( int i=0; i < inflect.length(); ++i ){
+    for ( int i=0; i < _inflect.length(); ++i ){
       // for every part of the inflection, add the value as a feature
-      UChar inf = inflect[i];
+      UChar inf = _inflect[i];
       if ( inf != '/' ){
 	UnicodeString d = CLEX::get_inflect_descr(inf);
 	if ( !d.isEmpty() ){
@@ -922,10 +924,10 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   else if ( _status == Status::DERIVATIONAL
 	    || _status == Status::PARTICIPLE
 	    || _status == Status::FAILED ){
-    desc = "[" + morph + "]"; // pass it up!
-    for ( int i=0; i < inflect.length(); ++i ){
+    desc = "[" + _morph + "]"; // pass it up!
+    for ( int i=0; i < _inflect.length(); ++i ){
       // for every part of the inflection, add it to the description only
-      UChar inf = inflect[i];
+      UChar inf = _inflect[i];
       if ( inf != '/' ){
 	UnicodeString d = CLEX::get_inflect_descr( inf );
 	if ( !d.isEmpty() ){
@@ -981,7 +983,7 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
   cnt = 0;
   desc.remove();
   vector<folia::Morpheme*> stack;
-  for ( auto const& it : parts ){
+  for ( auto const& it : _parts ){
     UnicodeString deeper_desc;
     int deep_cnt = 0;
     folia::Morpheme *m = it->createMorpheme( doc,
@@ -1049,7 +1051,7 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
 void BracketNest::display_parts( ostream& os,
 				 int indent ) const {
   int i=1;
-  for ( const auto& it : parts ){
+  for ( const auto& it : _parts ){
     os << string(indent,' ') << "[" << i++ << "]= "
        << static_cast<void*>(it) << endl;
     it->display_parts( os, indent + 4 );
@@ -1118,9 +1120,9 @@ void BracketNest::resolveNouns( ){
   if ( debugFlag > 5 ){
     LOG << "resolve NOUNS in:" << this << endl;
   }
-  list<BaseBracket*>::iterator it = parts.begin();
+  list<BaseBracket*>::iterator it = _parts.begin();
   list<BaseBracket*>::iterator prev = it++;
-  while ( it != parts.end() ){
+  while ( it != _parts.end() ){
     if ( (*prev)->tag() == CLEX::N && (*prev)->RightHand.size() == 0
 	 && ( (*it)->tag() == CLEX::N && (*it)->status() == Status::STEM )
 	 && (*it)->RightHand.size() == 0 ){
@@ -1132,18 +1134,18 @@ void BracketNest::resolveNouns( ){
       tmp->append( *prev );
       tmp->append( *it );
       if ( debugFlag > 5 ){
-	LOG << "current result:" << parts << endl;
+	LOG << "current result:" << _parts << endl;
 	LOG << "new node:" << tmp << endl;
 	LOG << "erase " << *prev << endl;
       }
-      prev = parts.erase(prev);
+      prev = _parts.erase(prev);
       if ( debugFlag > 5 ){
 	LOG << "erase " << *prev << endl;
       }
-      prev = parts.erase(prev);
-      prev = parts.insert( prev, tmp );
+      prev = _parts.erase(prev);
+      prev = _parts.insert( prev, tmp );
       if ( debugFlag > 5 ){
-	LOG << "current result:" << parts << endl;
+	LOG << "current result:" << _parts << endl;
       }
       it = prev;
       ++it;
@@ -1231,14 +1233,14 @@ list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
 
 void BracketNest::resolveGlue( ){
   /// resolve all glue rules
-  list<BaseBracket*>::iterator it = parts.begin();
-  while ( it != parts.end() ){
+  list<BaseBracket*>::iterator it = _parts.begin();
+  while ( it != _parts.end() ){
     // search for glue rules
     if ( debugFlag > 5 ){
       LOG << "search glue: bekijk: " << *it << endl;
     }
     if ( (*it)->isglue() ){
-      it = glue( parts, it );
+      it = glue( _parts, it );
     }
     else {
       ++it;
@@ -1248,8 +1250,8 @@ void BracketNest::resolveGlue( ){
 
 void BracketNest::resolveLead( ){
   /// resolve rules starting with *
-  list<BaseBracket*>::iterator it = parts.begin();
-  while ( it != parts.end() ){
+  list<BaseBracket*>::iterator it = _parts.begin();
+  while ( it != _parts.end() ){
     // search for rules with a * at the begin
     if ( debugFlag > 5 ){
       LOG << "search leading *: bekijk: " << *it << endl;
@@ -1263,7 +1265,7 @@ void BracketNest::resolveLead( ){
     }
     else {
       if ( (*it)->infixpos() == 0 ){
-	it = resolveAffix( parts, it );
+	it = resolveAffix( _parts, it );
       }
       else {
 	++it;
@@ -1274,8 +1276,8 @@ void BracketNest::resolveLead( ){
 
 void BracketNest::resolveTail(){
   /// resolve rules ending with *
-  list<BaseBracket *>::iterator it = parts.begin();
-  while ( it != parts.end() ){
+  list<BaseBracket *>::iterator it = _parts.begin();
+  while ( it != _parts.end() ){
     // search for rules with a * at the end
     if ( debugFlag > 5 ){
       LOG << "search trailing *: bekijk: " << *it << endl;
@@ -1296,7 +1298,7 @@ void BracketNest::resolveTail(){
 	  LOG << "infixpos=" << (*it)->infixpos() << endl;
 	  LOG << "len=" << len << endl;
 	}
-	it = resolveAffix( parts, it );
+	it = resolveAffix( _parts, it );
       }
       else {
 	++it;
@@ -1307,8 +1309,8 @@ void BracketNest::resolveTail(){
 
 void BracketNest::resolveMiddle(){
   /// resolve rules with a * NOT at begin or end
-  list<BaseBracket*>::iterator it = parts.begin();
-  while ( it != parts.end() ){
+  list<BaseBracket*>::iterator it = _parts.begin();
+  while ( it != _parts.end() ){
     // now search for other rules with a * in the middle
     if ( debugFlag > 5 ){
       LOG << "hoofd infix loop bekijk: " << *it << endl;
@@ -1324,7 +1326,7 @@ void BracketNest::resolveMiddle(){
       size_t len = (*it)->RightHand.size();
       if ( (*it)->infixpos() > 0
 	   && (*it)->infixpos() < signed(len)-1 ){
-	it = resolveAffix( parts, it );
+	it = resolveAffix( _parts, it );
       }
       else {
 	++it;
@@ -1339,8 +1341,8 @@ CLEX::Type BracketNest::getFinalTag(){
   //
   // LOG << "get Final Tag from: " << this << endl;
   CLEX::Type result_cls = CLEX::UNASS;
-  auto it = parts.rbegin();
-  while ( it != parts.rend() ){
+  auto it = _parts.rbegin();
+  while ( it != _parts.rend() ){
     //    LOG << "bekijk: " << *it << endl;
     if ( (*it)->isNested()
 	 || ( (*it)->inflection().isEmpty()
@@ -1351,7 +1353,7 @@ CLEX::Type BracketNest::getFinalTag(){
 	// in case of P we hope for better to the left
 	auto it2 = it;
 	++it2;
-	if ( it2 != parts.rend() ){
+	if ( it2 != _parts.rend() ){
 	  //	  LOG << "bekijk ook " << *it2 << endl;
 	  if ( (*it2)->infixpos() == 0 ){
 	    result_cls = (*it2)->tag();

@@ -547,7 +547,7 @@ void Mbma::addBracketMorph( folia::Word *word,
   }
 }
 
-bool mbmacmp( Rule *m1, Rule *m2 ){
+bool mbmacmp( const Rule *m1, const Rule *m2 ){
   /// sorting function for Rule's
   return m1->getKey().length() > m2->getKey().length();
 }
