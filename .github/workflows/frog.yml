@@ -176,7 +176,7 @@ jobs:
           id=$(echo ${{matrix.compiler}} | cut -d\+ -f1)
           echo "id=$id" >> $GITHUB_ENV
       - name: Static Code-check
-        run: cppcheck --enable=all --suppress=missingIncludeSystem -I include --quiet --error-exitcode=0 .
+        run: cppcheck --enable=all --suppress=missingIncludeSystem -I include -I /usr/local/include --quiet --error-exitcode=0 .
       - name: make
         run: make
       - name: install
