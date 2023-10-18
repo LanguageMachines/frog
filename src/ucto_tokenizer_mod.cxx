@@ -163,14 +163,14 @@ bool UctoTokenizer::init( const TiCC::Configuration& config ){
   else {
     rulesName = resolve_configdir( rulesName, config.configDir() );
     string r_lang;
-    auto pos = rulesName.find( "tokconfig-" );
+    auto pos = rulesName.find( Tokenizer::config_prefix() );
     if ( pos != string::npos ){
       r_lang = rulesName.substr( pos+10 );
     }
     set<string> ucto_languages = Tokenizer::Setting::installed_languages();
     if ( !r_lang.empty()
 	 && ucto_languages.find( r_lang ) != ucto_languages.end() ){
-      // so we have a tokconfig- file for language r_lang available
+      // so we have a config- file for language r_lang available
       if ( find( language_list.begin(), language_list.end(), r_lang )
 	   == language_list.end() ){
 	// but is is NOT in the known language list, add it
@@ -656,10 +656,10 @@ vector<folia::Word*> UctoTokenizer::add_words( folia::Sentence* s,
     tok_set = "undetermined";
   }
   else if ( lang != "default" ){
-    tok_set = "tokconfig-" + lang;
+    tok_set = Tokenizer::config_prefix() + lang;
   }
   else {
-    tok_set = "tokconfig-" + default_language();
+    tok_set = Tokenizer::config_prefix() + default_language();
   }
   vector<folia::Word*> wv;
   if (  debug > 5 ){
