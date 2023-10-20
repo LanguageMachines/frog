@@ -552,6 +552,23 @@ vector<Tokenizer::Token> UctoTokenizer::tokenize_line( const string& buffer,
     After calling tokenize_line() you should continue by calling
     tokenize_line_next() repeatedly to extract the next sentences
    */
+  UnicodeString us = TiCC::UnicodeFromUTF8( buffer );
+  return tokenize_line( us, lang );
+}
+
+vector<Tokenizer::Token> UctoTokenizer::tokenize_line( const UnicodeString& buffer,
+						       const string& lang ){
+  /// tokenize a buffer using a specific language
+  /*!
+    \param buffer a (possible long) sequence of characters
+    \param lang the language to use for tokenizing
+    \return a list of Ucto::Token elements representing the first sentence
+
+    The buffer is consumed completely and stored as tokens in the Ucto Tokenizer
+
+    After calling tokenize_line() you should continue by calling
+    tokenize_line_next() repeatedly to extract the next sentences
+   */
   if ( tokenizer ){
     tokenizer->reset();
     tokenizer->tokenizeLine( buffer, lang ); // will consume whole line!

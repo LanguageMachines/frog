@@ -61,6 +61,7 @@ class UctoTokenizer {
   bool get_setting_info( const std::string&, std::string&, std::string& ) const;
   std::vector<icu::UnicodeString> tokenize( const icu::UnicodeString&  );
   std::vector<Tokenizer::Token> tokenize_line( const std::string&, const std::string& = "" );
+  std::vector<Tokenizer::Token> tokenize_line( const icu::UnicodeString&, const std::string& = "" );
   std::vector<Tokenizer::Token> tokenize_line_next();
   std::vector<Tokenizer::Token> tokenize_stream( std::istream& );
   std::vector<Tokenizer::Token> tokenize_stream_next();

@@ -1662,8 +1662,8 @@ void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
 	    DBG << "Parsed JSON: " << the_json << endl;
 	  }
 	  for ( const auto& it : the_json ){
-	    string data = it["sentence"];
-	    timers.tokTimer.stop();
+	    UnicodeString data = TiCC::UnicodeFromUTF8(it["sentence"]);
+	    timers.tokTimer.start();
 	    vector<Tokenizer::Token> toks = tokenizer->tokenize_line( data );
 	    timers.tokTimer.stop();
 	    while ( toks.size() > 0 ){
@@ -2404,11 +2404,11 @@ void FrogAPI::handle_word_vector( ostream& os,
   }
   else {
     // assume unfrogged BUT tokenized!
-    string text;
+    UnicodeString text;
     for ( const auto& w : wv ){
       UnicodeString tmp = w->unicode( options.inputclass );
       tmp = replace_spaces( tmp );
-      text += TiCC::UnicodeToUTF8(tmp) + " ";
+      text += tmp + " ";
     }
     if  ( options.debugFlag > 1 ){
       DBG << "handle_one_sentence() on existing words" << endl;
@@ -2474,7 +2474,7 @@ void FrogAPI::handle_one_sentence( ostream& os,
     handle_word_vector( os, wv, s_cnt );
   }
   else {
-    string text = s->str(options.inputclass);
+    UnicodeString text = s->unicode(options.inputclass);
     if ( options.debugFlag > 0 ){
       DBG << "handle_one_sentence() from string: '" << text << "' (lang="
 	  << sent_lang << ")" << endl;
@@ -2535,7 +2535,7 @@ void FrogAPI::handle_one_paragraph( ostream& os,
   if ( sv.empty() ){
     // No Sentence, so only words OR just text
     if ( wv.empty() ){
-      string text = p->str(options.inputclass);
+      UnicodeString text = p->unicode(options.inputclass);
       if ( options.debugFlag > 0 ){
 	DBG << "handle_one_paragraph:" << text << endl;
       }
@@ -2612,8 +2612,8 @@ void FrogAPI::handle_one_text_parent( ostream& os,
   if ( e->xmltag() == "w" ){
     // already tokenized into words!
     folia::Word *word = dynamic_cast<folia::Word*>(e);
-    UnicodeString utext = word->unicode( options.inputclass );
-    string text = TiCC::UnicodeToUTF8(replace_spaces( utext ));
+    UnicodeString text = word->unicode( options.inputclass );
+    text = replace_spaces( text );
     vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text );
     if ( toks.size() > 0 ){
       frog_data res = frog_sentence( toks, ++sentence_done );
@@ -2660,7 +2660,7 @@ void FrogAPI::handle_one_text_parent( ostream& os,
     }
     if ( pv.empty() && sv.empty() ){
       // just words of text
-      string text = e->str(options.inputclass);
+      UnicodeString text = e->unicode(options.inputclass);
       if ( options.debugFlag > 1 ){
 	DBG << "frog-" << e->xmltag() << ":" << text << endl;
       }
