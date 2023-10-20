@@ -1670,7 +1670,7 @@ void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
 	      frog_data sent = frog_sentence( toks, 1 );
 	      show_results( output_stream, sent );
 	      timers.tokTimer.start();
-	      toks = tokenizer->tokenize_line_next();
+	      toks = tokenizer->tokenize_next();
 	      timers.tokTimer.stop();
 	    }
 	  }
@@ -1712,9 +1712,9 @@ void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
 	}
 	timers.tokTimer.start();
 	// start tokenizing
-	// tokenize_line() delivers 1 sentence at a time and should
-	//  be called multiple times to get all sentences!
-	vector<Tokenizer::Token> toks = tokenizer->tokenize_line( data );
+	// tokenize_data() delivers the first sentence, call
+	//  tokenize_next() multiple times to get all sentences!
+	vector<Tokenizer::Token> toks = tokenizer->tokenize_data( data );
 	timers.tokTimer.stop();
 	while ( toks.size() > 0 ){
 	  frog_data sent = frog_sentence( toks, 1 );
@@ -1725,7 +1725,7 @@ void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
 	    show_results( output_stream, sent );
 	  }
 	  timers.tokTimer.start();
-	  toks = tokenizer->tokenize_line_next();
+	  toks = tokenizer->tokenize_next();
 	  timers.tokTimer.stop();
 	}
 	if ( options.doXMLout && doc ){
@@ -1817,11 +1817,11 @@ void FrogAPI::FrogStdin( bool prompt ) {
     if ( prompt ){
       cout << "Processing... " << endl;
     }
-    vector<Tokenizer::Token> toks = tokenizer->tokenize_line( data );
+    vector<Tokenizer::Token> toks = tokenizer->tokenize_data( data );
     while ( toks.size() > 0 ){
       frog_data res = frog_sentence( toks, 1 );
       show_results( cout, res );
-      toks = tokenizer->tokenize_line_next();
+      toks = tokenizer->tokenize_next();
     }
     if ( prompt ){
       cout << "frog>"; cout.flush();
@@ -1897,11 +1897,11 @@ void FrogAPI::run_interactive(){
 	  data.pop_back();
 	}
 	cout << "Processing... '" << data << "'" << endl;
-	vector<Tokenizer::Token> toks = tokenizer->tokenize_line( data );
+	vector<Tokenizer::Token> toks = tokenizer->tokenize_data( data );
 	while ( !toks.empty() ){
 	  frog_data res = frog_sentence( toks, 1 );
 	  show_results( cout, res );
-	  toks = tokenizer->tokenize_line_next();
+	  toks = tokenizer->tokenize_next();
 	}
       }
     }
@@ -2488,7 +2488,7 @@ void FrogAPI::handle_one_sentence( ostream& os,
 	// but we don't want that, it spoils the outpyt FoLiA.
 	// The input Sentence node should stay leading
 	all_toks.insert( all_toks.end(), toks.begin(), toks.end() );
-	toks = tokenizer->tokenize_line_next();
+	toks = tokenizer->tokenize_next();
       }
       timers.tokTimer.stop();
       frog_data sent = frog_sentence( all_toks, s_cnt, true );
@@ -2507,7 +2507,7 @@ void FrogAPI::handle_one_sentence( ostream& os,
 	  show_results( os, sent );
 	}
 	timers.tokTimer.start();
-	toks = tokenizer->tokenize_line_next();
+	toks = tokenizer->tokenize_next();
 	timers.tokTimer.stop();
       }
     }
@@ -2563,7 +2563,7 @@ void FrogAPI::handle_one_paragraph( ostream& os,
 	  res = frog_sentence( toks, ++sentences_done );
 	}
 	timers.tokTimer.start();
-	toks = tokenizer->tokenize_line_next();
+	toks = tokenizer->tokenize_next();
 	timers.tokTimer.stop();
       }
     }
@@ -2676,7 +2676,7 @@ void FrogAPI::handle_one_text_parent( ostream& os,
 	  show_results( os, *res );
 	}
 	timers.tokTimer.start();
-	toks = tokenizer->tokenize_line_next( );
+	toks = tokenizer->tokenize_next( );
 	timers.tokTimer.stop();
       }
       if ( options.doXMLout ){

@@ -270,6 +270,19 @@ void UctoTokenizer::setInputEncoding( const std::string & enc ){
   }
 }
 
+const string UctoTokenizer::getInputEncoding() const {
+  /// get the tokenizer InputEncoding value
+  /*!
+    \return a string holding the current encoding. e.g. "WINDOWS-1252"
+  */
+  if ( tokenizer ){
+    return tokenizer->getInputEncoding();
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
 void UctoTokenizer::setInputClass( const std::string& cls ){
   /// set the tokenizer InputClass value
   /*!
@@ -539,20 +552,22 @@ vector<Tokenizer::Token> UctoTokenizer::tokenize_stream( istream& is ){
   }
 }
 
-vector<Tokenizer::Token> UctoTokenizer::tokenize_line( const string& buffer,
+vector<Tokenizer::Token> UctoTokenizer::tokenize_data( const string& buffer,
 						       const string& lang ){
-  /// tokenize a buffer using a specific language
+  /// tokenize a buffer using a specific language, maybe encoded
   /*!
     \param buffer a (possible long) sequence of characters
     \param lang the language to use for tokenizing
     \return a list of Ucto::Token elements representing the first sentence
 
-    The buffer is consumed completely and stored as tokens in the Ucto Tokenizer
+    We first decode the buffer from the preferred encoding into Unicode.
+    Then the buffer is consumed completely and stored as tokens in the Ucto
+    Tokenizer
 
-    After calling tokenize_line() you should continue by calling
-    tokenize_line_next() repeatedly to extract the next sentences
+    After calling tokenize_data() you should continue by calling
+    tokenize_next() repeatedly to extract the next sentences
    */
-  UnicodeString us = TiCC::UnicodeFromUTF8( buffer );
+  UnicodeString us = TiCC::UnicodeFromEnc( buffer, getInputEncoding() );
   return tokenize_line( us, lang );
 }
 
@@ -567,19 +582,19 @@ vector<Tokenizer::Token> UctoTokenizer::tokenize_line( const UnicodeString& buff
     The buffer is consumed completely and stored as tokens in the Ucto Tokenizer
 
     After calling tokenize_line() you should continue by calling
-    tokenize_line_next() repeatedly to extract the next sentences
+    tokenize_next() repeatedly to extract the next sentences
    */
   if ( tokenizer ){
     tokenizer->reset();
     tokenizer->tokenizeLine( buffer, lang ); // will consume whole line!
-    return tokenize_line_next(); // returns next sentence in the line
+    return tokenize_next(); // returns next sentence in the line
   }
   else {
     throw runtime_error( "ucto tokenizer not initialized" );
   }
 }
 
-vector<Tokenizer::Token> UctoTokenizer::tokenize_line_next() {
+vector<Tokenizer::Token> UctoTokenizer::tokenize_next() {
   /// extract the next sequence of Token elements
   /*!
     \return a list of Ucto::Token elements representing the next sentence

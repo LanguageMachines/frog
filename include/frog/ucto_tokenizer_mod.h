@@ -45,6 +45,7 @@ class UctoTokenizer {
   bool getPassThru() const;
   void setSentencePerLineInput( bool );
   void setInputEncoding( const std::string& );
+  const std::string getInputEncoding() const ;
   void setQuoteDetection( bool );
   void setInputXml( bool );
   void setFiltering( bool );
@@ -60,9 +61,10 @@ class UctoTokenizer {
   std::string default_language() const;
   bool get_setting_info( const std::string&, std::string&, std::string& ) const;
   std::vector<icu::UnicodeString> tokenize( const icu::UnicodeString&  );
-  std::vector<Tokenizer::Token> tokenize_line( const std::string&, const std::string& = "" );
+  std::vector<Tokenizer::Token> tokenize_data( const std::string&,
+					       const std::string& = "" );
   std::vector<Tokenizer::Token> tokenize_line( const icu::UnicodeString&, const std::string& = "" );
-  std::vector<Tokenizer::Token> tokenize_line_next();
+  std::vector<Tokenizer::Token> tokenize_next();
   std::vector<Tokenizer::Token> tokenize_stream( std::istream& );
   std::vector<Tokenizer::Token> tokenize_stream_next();
   icu::UnicodeString tokenizeStream( std::istream& );
