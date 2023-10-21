@@ -1432,7 +1432,8 @@ void FrogAPI::append_to_sentence( folia::Sentence *sent,
     //
     Tokenizer::set_language( sent, detected_lang );
     if ( options.textredundancy == "full" ){
-      sent->settext( sent->str(options.inputclass), options.inputclass );
+      sent->setutext( sent->unicode(options.inputclass),
+		      options.inputclass );
     }
     return;
   }
@@ -1518,7 +1519,8 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
       // root is a paragraph, which is done now.
       p = root->parent()->add_child<folia::Paragraph>( args );
       if ( options.textredundancy == "full" ){
-	root->settext( root->str(options.outputclass), options.outputclass);
+	root->setutext( root->unicode(options.outputclass),
+			options.outputclass);
       }
       if  (options.debugFlag > 5 ){
 	DBG << "append_to_folia, add paragraph to parent of " << root << endl;
