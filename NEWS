@@ -1,3 +1,12 @@
+0.31 - 2023-10-21
+[Ko van der Sloot]
+* use ticcutils > 0.34. NFC normalizations is standard now
+* use Tokenizer::config_prefix() instead of magic string 'tokconfig-'
+* code cleanup and quality improvement (cppcheck is very useful)
+
+[Maarten van Gompel]
+* added frog demo gif
+
 0.30 - 2023-05-08
 [Ko van der Sloot]
 * finally fixed a major memory-leak in MBMA which bothered me for months
