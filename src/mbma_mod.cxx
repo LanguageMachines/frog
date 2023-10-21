@@ -1125,16 +1125,11 @@ void Mbma::call_server( const vector<UnicodeString>& insts,
 
 void Mbma::Classify( const icu::UnicodeString& word,
 		     const icu::UnicodeString& next_tag ){
-  static TiCC::UnicodeNormalizer my_norm;
   clearAnalysis();
   icu::UnicodeString uWord = word;
   if ( filter_diac ){
     uWord = TiCC::filter_diacritics( uWord );
   }
-  else {
-    uWord = my_norm.normalize( uWord );
-  }
-
   vector<UnicodeString> insts = make_instances( uWord );
   vector<UnicodeString> classes;
   classes.reserve( insts.size() );

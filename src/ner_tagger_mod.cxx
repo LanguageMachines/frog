@@ -121,7 +121,6 @@ bool NERTagger::fill_ners( const string& cat,
       return false;
     }
   }
-  static TiCC::UnicodeNormalizer nfc_normalizer;
   ifstream is( file_name );
   int long_err_cnt = 0;
   size_t ner_cnt = 0;
@@ -131,7 +130,6 @@ bool NERTagger::fill_ners( const string& cat,
       continue;
     }
     else {
-      line = nfc_normalizer.normalize( line );
       vector<UnicodeString> parts = TiCC::split( line );
       if ( parts.size() > (unsigned)max_ner_size ){
 	if ( ++long_err_cnt > 50 ){

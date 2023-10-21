@@ -520,15 +520,13 @@ UnicodeString Mblem::call_server( const UnicodeString& instance ){
   return TiCC::UnicodeFromUTF8(result);
 }
 
-void Mblem::Classify( const UnicodeString& word ){
+void Mblem::Classify( const UnicodeString& uWord ){
   /// give the lemma for 1 word
   /*!
     \param word a Unicode string with the word
     the internal mblemResult struct will be filled with 1 or more (alternative)
     solutions of a lemma + a POS-tag
   */
-  static TiCC::UnicodeNormalizer nfc_norm;
-  UnicodeString uWord = nfc_norm.normalize(word);
   mblemResult.clear();
   UnicodeString inst = make_instance(uWord);
   UnicodeString u_class;
