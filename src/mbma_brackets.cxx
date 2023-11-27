@@ -813,7 +813,8 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     break;
   case Status::DERIVATIONAL:
     if ( _morph.isEmpty() ){
-      throw logic_error( "Derivation has empty morpheme" );
+      //      throw logic_error( "Derivation has empty morpheme" );
+      return result;
     }
     if ( glue ){
       m_class = "stem";
