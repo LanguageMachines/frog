@@ -815,8 +815,9 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     if ( _morph.isEmpty() ){
       //      throw logic_error( "Derivation has empty morpheme" );
       cerr << "WARNING: MBMA Derivation has empty morpheme." << endl;
-      cerr << "         Probably due to an problem in de MBMA rules."<< endl;
-      cerr << "         We just ignore this" << endl;
+      cerr << "         This is probably due to an problem in de MBMA rules."
+	   << endl;
+      cerr << "         We will just ignore this" << endl;
       return result;
     }
     if ( glue ){
