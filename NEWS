@@ -1,3 +1,7 @@
+0.32 - 2023-12-05
+[Ko van der Sloot]
+* ignore but warn on empty derivations, a lame fix for https://github.com/LanguageMachines/frog/issues/103
+
 0.31 - 2023-10-21
 [Ko van der Sloot]
 * use ticcutils > 0.34. NFC normalizations is standard now
