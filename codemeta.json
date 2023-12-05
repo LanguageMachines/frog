@@ -8,7 +8,7 @@
     "@type": "SoftwareSourceCode",
     "identifier": "frog",
     "name": "Frog",
-    "version": "0.32",
+    "version": "0.33",
     "description": "Frog is an integration of memory-based natural language processing (NLP) modules developed for Dutch. It performs automatic linguistic enrichment such as part of speech tagging, lemmatisation, named entity recognition, shallow parsing, dependency parsing and morphological analysis. All NLP modules are based on TiMBL.",
     "license": "https://spdx.org/licenses/GPL-3.0-only",
 	"url": "https://languagemachines.github.io/frog",
@@ -200,7 +200,7 @@
 		}
 	],
     "dateCreated": "2011-03-31T12:35:01Z+0000",
-    "dateModified": "2023-02-22T11:55:06Z+0200",
+    "dateModified": "2023-12-05T15:43:06Z+0100",
     "targetProduct": [
         {
             "@type": "SoftwareLibrary",
