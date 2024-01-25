@@ -3093,7 +3093,7 @@ void FrogAPI::run_api_tests( const string& testName ){
 }
 
 const string& get_mbma_tagset( const std::string& module ){
-  /// expose ttagset information from de mbma module tot the world
+  /// expose tagset information from de mbma module tot the world
   /*!
     \param module the specific set
     \return a string with the setname

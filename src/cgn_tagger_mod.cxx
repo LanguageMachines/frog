@@ -256,7 +256,7 @@ void CGNTagger::addTag( frog_record& fd,
     The confidence will be ignored for SPEC POS tags (1.0) is used then.
 
     Also a token_tag_map may be used to POST correct the found tags for
-    specific Ucto token_classes. e.g. an EMOTICON will might be translated to a
+    specific Ucto token_classes. e.g. an EMOTICON might be translated to a
     SPEC(SYMB) or a PUNCTUATION to a LET()
   */
 #pragma omp critical (dataupdate)
