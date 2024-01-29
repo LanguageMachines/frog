@@ -246,3 +246,8 @@ img.big {
     margin-right: auto;
     width: 60%;
 }
+img.full {
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+}
