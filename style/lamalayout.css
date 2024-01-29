@@ -116,6 +116,15 @@ h1#title  {
 	min-height: 87px;
     margin-top: -30px;
 }
+#huclogo {
+    display: block;
+	background: url(logo-knaw-huc.png);
+    background-size: 113px 90px;
+	width: 113px;
+	height: 90px;
+	min-width: 113px;
+	min-height: 90px;
+}
 #lamalogo {
     position: absolute;
     display: block;

@@ -12,14 +12,15 @@ based on <strong>Timbl</strong>, the Tilburg memory-based learning software pack
 modules were created in the 1990s at the <a href="http://ilk.uvt.nl">ILK Research Group</a> (Tilburg
 University, the Netherlands) and the <a href="http://www.clips.ua.ac.be">CLiPS Research Centre</a> (University of
 Antwerp, Belgium). Over the years they have been integrated into a single text
-processing tool, which is currently maintained and developed by the <a href="http://cls.ru.nl/languagemachines/">Language Machines</a> Research Group and the <a href="http://www.ru.nl/clst">Centre for Language and Speech Technology</a> at <a href="http://cls.ru.nl">Radboud University Nijmegen</a>. A dependency parser, a base phrase chunker, and
+processing tool. This has been further developed at the <a href="https://www.ru.nl/clst">Centre for Language and Speech Technology</a> at <a href="https://cls.ru.nl">Radboud University Nijmegen</a>, and currently maintained at the <a href="https://knaw.huc.nl">KNAW Humanities Cluster</a>.
+The tool features a dependency parser, a base phrase chunker, and
 a named-entity recognizer module were added more recently. Where possible, Frog makes use of
 multi-processor support to run subtasks in parallel.</p>
 
 <p>Various (re)programming rounds have been made possible through funding by
-<a href="http://www.nwo.nl">NWO</a>, the Netherlands Organisation for Scientific Research, particularly under
-the CGN project, the IMIX programme, the <a href="http://ilk.uvt.nl/il">Implicit Linguistics project</a>, the
-<a href="http://www.clarin.nl">CLARIN-NL</a> programme and the <a href="http://www.clariah.nl">CLARIAH</a> programme.</p>
+<a href="https://www.nwo.nl">NWO</a>, the Netherlands Organisation for Scientific Research, particularly under
+the CGN project, the IMIX programme, the Implicit Linguistics project, the
+<a href="https://www.clarin.nl">CLARIN-NL</a> programme and the <a href="https://www.clariah.nl">CLARIAH</a> programme.</p>
 
 </section>
 
@@ -27,9 +28,9 @@ the CGN project, the IMIX programme, the <a href="http://ilk.uvt.nl/il">Implicit
 <section>
     <h2>What does it do?</h2>
 
-<p><strong>Frog</strong>'s current version will tokenize, tag, lemmatize, and morphologically segment word tokens in Dutch text files, will assign a dependency graph to each sentence, will identify the base phrase chunks in the sentence, and will attempt to find and label all named entities.</a>
+<p><strong>Frog</strong> can tokenize, tag, lemmatize, and morphologically segment word tokens in Dutch text files, will assign a dependency graph to each sentence, will identify the base phrase chunks in the sentence, and will attempt to find and label all named entities.</a>
 
-<p>Frog produces <a href="https://proycon.github.io/folia">FoLiA XML</a>, or tab-delimited column-formatted output, one line per token, that looks as follows:</p>
+<p>Frog produces <a href="https://proycon.github.io/folia">FoLiA XML</a>, or a tab-delimited column-formatted output, one line per token, that looks as follows:</p>
 
 <img src="frog-output.png" alt="frog output" />
 
@@ -104,8 +105,8 @@ or mail lamasoftware (at) science.ru.nl.</p>
 
 <p>
 Frog is free software; you can redistribute it and/or modify it under the terms
-of the <a href="http://www.gnu.org/copyleft/gpl.html">GNU General Public
-License</a> as published by the <a href="http://www.fsf.org/">Free Software
+of the <a href="https://www.gnu.org/copyleft/gpl.html">GNU General Public
+License v3</a> as published by the <a href="https://www.fsf.org/">Free Software
 Foundation</a>.
 </p>
 
@@ -114,11 +115,9 @@ Foundation</a>.
 <ol>
 <li>First check if there are up-to-date packages
 included in your distribution's package manager. There are packages for
-<strong>Debian</strong>,<strong>Ubuntu</strong> and <strong>Arch
-Linux</strong>.</li>
-<li>If not, we <strong>strongly recommend</strong> you use our <a
-href="https://proycon.github.io/LaMachine">LaMachine</a> software distribution,
-which includes Frog and all necessary dependencies, and runs on Linux, BSD and
+<strong>Alpine Linux</strong>, <strong>Arch Linux</strong> (AUR), <strong>macOS</strong> (homebrew), <strong>Debian</strong>,<strong>Ubuntu</strong>.</li>
+<li>If you're only interested in the Frog Python binding, then a simple <tt>pip install python-frog</tt> suffices.</li>
+<li>If not, we <strong>recommend</strong> you use our docker container via <tt>docker pull proycon/frog</tt>. It includes Frog and all necessary dependencies, and runs on Linux, BSD and
 Mac OS X. It can also run as a <em>virtual machine</em> under any host OS.</li>
 <li>Alternatively, you can always download, compile and install Frog manually, as shown next.</li>
 </ol>
@@ -151,8 +150,8 @@ Mac OS X. It can also run as a <em>virtual machine</em> under any host OS.</li>
 <p>As well as the following 3rd party dependencies:</p>
 
 <ul>
-<li><a href="http://icu-project.org">icu</a> - A C++ library for Unicode and Globalization support. On Debian/Ubuntu systems, install the package <tt>libicu-dev</tt>. </li>
-<li><a href="http://xmlsoft.org">libxml2</a> - An XML library. On Debian/Ubuntu systems install the package <tt>libxml2-dev</tt>.</li>
+<li><a href="https://icu.unicode.org">icu</a> - A C++ library for Unicode and Globalization support. On Debian/Ubuntu systems, install the package <tt>libicu-dev</tt>. </li>
+<li><a href="https://xmlsoft.org">libxml2</a> - An XML library. On Debian/Ubuntu systems install the package <tt>libxml2-dev</tt>.</li>
 <li>A sane build environment with a C++ compiler (e.g. gcc or clang), autotools, libtool, pkg-config</li>
 </ul>
 
@@ -172,11 +171,11 @@ list of available commandline options. Some main options are:</p>
     <li>With <tt>--skip=[mptnc]</tt> you can tell Frog to skip tokenization (t), base phrase chunking (c), named-entity recognition (n), multi-word unit chunking for the parser (m), or parsing (p).</li>
 </ul>
 
+If you're using the docker container then follow <a href="https://github.com/LanguageMachines/frog#container-usage">these instructions</a>.
+
 <p>Frog can be used from Python through the <a
 href="https://github.com/proycon/python-frog">python-frog</a> binding, which
-has to be obtained separately unless you are using <a
-href="https://proycon.github.io/LaMachine">LaMachine</a>. A python-frog example
-is shown below:</p>
+can be downloaded and installed by running <tt>pip install python-frog</tt>. 
 
 <pre>
 import frog
@@ -188,9 +187,8 @@ print("PARSED OUTPUT=",output)
 </pre>
 
 <p>If you want to connect to the Frog server using Python, then you can use the
-Frog client included in <a href="https://github.com/proycon/pynlpl">PyNLPl</a>
-(also included as part of <a
-href="https://proycon.github.io/LaMachine">LaMachine</a>).</p>
+Frog client included in <a href="https://github.com/proycon/pynlpl">PyNLPl</a>.
+<tt>pip install pynlpl</tt>.</p>
 
 <pre>
 from pynlpl.clients.frogclient import FrogClient
@@ -215,8 +213,6 @@ classification using <a href="http://cran.r-project.org/web/packages/RTextTools/
 <p>
 <a href="http://machiel.me">Machiel Molenaar</a> developed a Frog client for <strong>Go</strong>, aptly named <a href="https://github.com/Machiel/gorf">gorf</a>.
 <p>
-
-<p><strong>Notice:</strong> we are in the process of writing a reference guide for Frog that explains all options in detail.</p>
 
 </section>
 
