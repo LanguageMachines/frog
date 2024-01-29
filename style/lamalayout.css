@@ -77,6 +77,7 @@ a:hover {
 h1#title  {
 	font-size: 500%;
 	font-weight: bold;
+    clear: both;
 }
 
 
@@ -124,6 +125,7 @@ h1#title  {
 	height: 90px;
 	min-width: 113px;
 	min-height: 90px;
+    margin-left: auto;
 }
 #lamalogo {
     position: absolute;
