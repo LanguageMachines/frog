@@ -80,6 +80,14 @@ jobs:
                 brew install telnet
                 brew install cppcheck
              fi
+      - name: Configure CppCheck
+        run: |
+             if [ "$RUNNER_OS" == "Linux" ]; then
+                cpc_opts="--enable=all --inline-suppr --force -I include -I /usr/local/include --quiet --error-exitcode=0"
+             else
+                cpc_opts="--enable=all --inline-suppr --force -I include -I /usr/local/include -I /usr/local/opt/icu4c/include -I /usr/local/opt/libxml2/include --suppress=missingIncludeSystem --suppress=duplInheritedMember --quiet --error-exitcode=0"
+             fi
+             echo "cpc_opts=$cpc_opts" >> $GITHUB_ENV
       - name: install TiccUtils
         env:
           CXX: ${{ matrix.compiler }}
@@ -176,7 +184,7 @@ jobs:
           id=$(echo ${{matrix.compiler}} | cut -d\+ -f1)
           echo "id=$id" >> $GITHUB_ENV
       - name: Static Code-check
-        run: cppcheck --enable=all --suppress=missingIncludeSystem -I include -I /usr/local/include --quiet --error-exitcode=0 .
+        run: cppcheck ${{ env.cpc_opts }} .
       - name: make
         run: make
       - name: install
