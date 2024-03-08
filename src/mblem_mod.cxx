@@ -302,7 +302,34 @@ void Mblem::filterTag( const icu::UnicodeString& postag ){
   auto it = mblemResult.begin();
   while( it != mblemResult.end() ){
     UnicodeString tag = it->getTag();
-    if ( postag == tag ){
+    bool found = ( postag == tag );
+    if ( !found ){
+      // try fuzzy matching. It't enough when the head tags match AND
+      // all subtags from the lemmatizer are found in the postag of the Tagger
+      vector<UnicodeString> pos_parts = TiCC::split_at_first_of( postag, "(,)" );
+      vector<UnicodeString> tag_parts = TiCC::split_at_first_of( tag, "(,)" );
+      if ( pos_parts[0] == tag_parts[0] ){
+	found = true;
+	// there is a chance
+	if ( debug > 2 ){
+	  DBG << "MISSCHIEN match van tag=" << tag
+	      << " in pos=" << postag << endl;
+	}
+	for ( const auto& it : tag_parts ){
+	  if ( std::find( pos_parts.begin(), pos_parts.end(), it ) != pos_parts.end() ){
+	    found = false;
+	    break;
+	  }
+	}
+	if ( found ){
+	  if ( debug > 2 ){
+	    DBG << "fuzzy match van tag=" << tag
+		<< " in pos=" << postag << endl;
+	  }
+	}
+      }
+    }
+    if ( found ){
       if ( debug > 1 ){
 	DBG << "compare cgn-tag " << postag << " with mblem-tag " << tag
 	    << "\n\t==> identical tags. KEEP"  << endl;
@@ -310,12 +337,12 @@ void Mblem::filterTag( const icu::UnicodeString& postag ){
       ++it;
     }
     else {
-      if ( debug > 1 ){
-	DBG << "compare cgn-tag " << postag << " with mblem-tag " << tag
-		       << "\n\t==> different tags. REMOVE" << endl;
+	if ( debug > 1 ){
+	  DBG << "compare cgn-tag " << postag << " with mblem-tag " << tag
+	      << "\n\t==> different tags. REMOVE" << endl;
+	}
+	it = mblemResult.erase(it);
       }
-      it = mblemResult.erase(it);
-    }
   }
   if ( (debug > 1) && mblemResult.empty() ){
     DBG << "NO CORRESPONDING TAG! " << postag << endl;
