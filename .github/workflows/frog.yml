@@ -45,7 +45,7 @@ jobs:
     needs: notification
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-13]
         compiler: [g++, clang++]
 
     steps:
