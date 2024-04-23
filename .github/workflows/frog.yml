@@ -63,6 +63,7 @@ jobs:
                 brew upgrade;
                 brew install pkg-config
                 brew install autoconf-archive
+                brew install libtool
                 brew install autoconf
                 brew install automake
              fi
