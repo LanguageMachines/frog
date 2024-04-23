@@ -1358,6 +1358,7 @@ folia::processor *FrogAPI::add_provenance( folia::Document& doc ) const {
   if ( options.debugFlag > 4 ){
     DBG << "add_provenance(), using processor: " << proc->id() << endl;
   }
+  tokenizer->reset();
   tokenizer->add_provenance( doc, proc ); // unconditional
   if ( options.doTagger ){
     myCGNTagger->add_provenance( doc, proc );

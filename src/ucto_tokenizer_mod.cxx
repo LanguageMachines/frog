@@ -91,6 +91,15 @@ string resolve_configdir( const string& rules_name, const string& dir ){
   return rules_name;
 }
 
+bool UctoTokenizer::reset( ){
+  if ( tokenizer ){
+    return tokenizer->reset();
+  }
+  else {
+    throw runtime_error( "ucto tokenizer not initialized" );
+  }
+}
+
 bool UctoTokenizer::init( const TiCC::Configuration& config ){
   /// initalize a Tokenizer using a Configuration structure
   /*!
@@ -447,6 +456,8 @@ void UctoTokenizer::add_provenance( folia::Document& doc,
     \param doc the FoLiA document to add to
     \param main the processor to use (presumably the Frog processor)
   */
+  cerr << "tokenizer add provenance: " << main->id() << endl;
+  cerr << "tokenizer add provenance: " << (void*)main << endl;
   if ( !tokenizer ){
     throw runtime_error( "ucto tokenizer not initialized" );
   }
