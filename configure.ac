@@ -70,7 +70,7 @@ else
     export PKG_CONFIG_PATH="$prefix/lib/pkgconfig:$PKG_CONFIG_PATH"
 fi
 
-AC_OSX_PKG( [icu4c] )
+AC_OSX_PKG( [icu4c libtextcat] )
 
 PKG_CHECK_MODULES( [TEXTCAT],
   [libexttextcat],
