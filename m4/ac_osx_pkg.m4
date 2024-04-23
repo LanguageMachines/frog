@@ -1,7 +1,7 @@
 # osx_pkg.m4 - Macros to add OSX brew locations to pkg-config. -*- Autoconf -*-
-# serial 1
+# serial 2 (pkg-config-0.24)
 #
-# Copyright © 2018 Ko van der Sloot <K.vanderSloot@let.ru.nl>
+# Copyright © 2024 Ko van der Sloot <K.vanderSloot@let.ru.nl>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,11 +40,18 @@ case ${host_os} in
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/$i/lib/pkgconfig"
       fi
     done
+    for i in `ls /opt/homewbrew/opt`
+    do
+      if test -d "/opt/homebrew/opt/$i/lib/pkgconfig"
+      then
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/opt/homebrew/opt/$i/lib/pkgconfig"
+      fi
+    done
     ;;
 esac
 ])
 
-# AC_OSX_PKG_ALL([LIST_OF_PACKAGES])
+# AC_OSX_PKG([LIST_OF_PACKAGES])
 # fore every packake in LIST_OF_PACKAGES, add the /opt/{package} directory
 # to the PKG_CONFIG search path
 # ----------------------------------
@@ -55,12 +62,17 @@ case ${host_os} in
  # linux is wellbehaved
     ;;
  darwin*)
- # darwin isn't
+ # darwin/macos isn't
     for i in $*
     do
       if test -d "/usr/local/opt/$i/lib/pkgconfig"
       then
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/$i/lib/pkgconfig"
+      else
+        if test -d "/opt/homebrew/opt//$i/lib/pkgconfig"
+        then
+          export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/opt/homebrew/opt/$i/lib/pkgconfig"
+        fi
       fi
     done
     ;;
