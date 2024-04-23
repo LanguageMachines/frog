@@ -21,7 +21,7 @@ aclocal=aclocal
 # inspired by hack as used in mcl (from http://micans.org/)
 
 # autoconf-archive Debian package, aclocal-archive RPM, obsolete/badly supported OS, installed in home dir
-   acdirs="/usr/share/autoconf-archive/ /usr/share/aclocal/ /usr/local/share/aclocal/ $HOME/local/share/autoconf-archive/"
+   acdirs="/usr/share/autoconf-archive/ /usr/share/aclocal/ /usr/local/share/aclocal/ $HOME/local/share/autoconf-archive/ /opt/homebrew/share/aclocal/"
 
    found=false
    for d in $acdirs
