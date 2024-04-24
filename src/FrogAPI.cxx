@@ -575,6 +575,10 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
   }
   string TestFileName;
   if ( Opts.extract( "testdir", TestFileName ) ) {
+    if ( options.doServer ){
+      LOG << "a testdir is not possible when running a Server" << endl;
+      return false;
+    }
     options.testDirName = TestFileName;
     if ( options.testDirName.back() != '/' ){
       options.testDirName += "/";
@@ -585,6 +589,10 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
     }
   }
   else if ( Opts.extract( 't', TestFileName ) ) {
+    if ( options.doServer ){
+      LOG << "an input file is not possible when running a Server" << endl;
+      return false;
+    }
     if ( !TiCC::isFile( TestFileName ) ){
       LOG << "input stream " << TestFileName << " is not readable" << endl;
       return false;
@@ -592,6 +600,10 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
   };
   options.wantOUT = false;
   if ( Opts.extract( "outputdir", options.outputDirName )) {
+    if ( options.doServer ){
+      LOG << "an outputdir is not possible when running a Server" << endl;
+      return false;
+    }
     if ( options.outputDirName.back() != '/' ){
       options.outputDirName += "/";
     }
@@ -736,6 +748,10 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
     }
   }
   if ( options.fileNames.size() > 1 ){
+    if ( options.doServer ){
+      LOG << "specifying inputfiles not possible when running a Server" << endl;
+      return false;
+    }
     if ( !options.XMLoutFileName.empty() ){
       LOG << "'-X " << options.XMLoutFileName
 	  << "' is invalid for multiple inputfiles." << endl;
@@ -1358,7 +1374,6 @@ folia::processor *FrogAPI::add_provenance( folia::Document& doc ) const {
   if ( options.debugFlag > 4 ){
     DBG << "add_provenance(), using processor: " << proc->id() << endl;
   }
-  tokenizer->reset();
   tokenizer->add_provenance( doc, proc ); // unconditional
   if ( options.doTagger ){
     myCGNTagger->add_provenance( doc, proc );
@@ -2778,6 +2793,7 @@ folia::Document *FrogAPI::run_folia_engine( const string& infilename,
     The strings in those nodes will be frogged, and they are enriched with all
     found information, like POS, lemma etc.
   */
+  tokenizer->reset();
   if ( options.inputclass == options.outputclass ){
     tokenizer->setFiltering(false);
   }
