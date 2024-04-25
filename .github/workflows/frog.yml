@@ -197,6 +197,11 @@ jobs:
           LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib make check
         continue-on-error: true
 
+      - name: show log on failed make check
+        if: ${{ env.test_status != '0' }}
+        run: |
+          cat src/test-suite.log
+
       - name: frogtests
         run: |
           git clone --depth=1 --single-branch https://github.com/LanguageMachines/frogtests.git;
@@ -206,10 +211,9 @@ jobs:
           echo "test_status=$TEST_STAT" >> $GITHUB_ENV
         continue-on-error: true
 
-      - name: show log on failure
+      - name: show log on failed test
         if: ${{ env.test_status != '0' }}
         run: |
-          cat src/test-suite.log;
           cat frogtests/*.err
           cat frogtests/*.diff
 
@@ -220,7 +224,7 @@ jobs:
           server: irc.uvt.nl
           channel: '#gitlama'
           nickname: GH-${{ runner.os }}-${{ env.id }}
-          message: "frog [${{ needs.notification.outputs.branch }}] build with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: \u00034FAIL\u0003"
+          message: "frog [${{ needs.notification.outputs.branch }}] build with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: \u00034FAILED\u0003"
       - name: Notify IRC of success
         if: ${{ env.test_status == '0' }}
         uses: Gottox/irc-message-action@v2
