@@ -1258,7 +1258,7 @@ void FrogAPI::run_on_files(){
 	  LOG << "FAILED to create FoLiA: " << xmlOutName << endl;
 	}
 	else {
-	  result->save( xmlOutName );
+	  result->save( xmlOutName, doKanon );
 	  LOG << "FoLiA stored in " << xmlOutName << endl;
 	  delete result;
 	}
@@ -1747,7 +1747,8 @@ void FrogAPI::FrogServer( Sockets::ClientSocket &conn ){
 	  timers.tokTimer.stop();
 	}
 	if ( options.doXMLout && doc ){
-	  doc->save( output_stream, options.doKanon );
+	  doc->set_canonical(options.doKanon);
+	  output_stream << doc;
 	  delete doc;
 	}
 	//	DBG << "Done Processing... " << endl;
