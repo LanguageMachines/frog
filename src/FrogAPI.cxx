@@ -1258,7 +1258,7 @@ void FrogAPI::run_on_files(){
 	  LOG << "FAILED to create FoLiA: " << xmlOutName << endl;
 	}
 	else {
-	  result->save( xmlOutName, doKanon );
+	  result->save( xmlOutName, options.doKanon );
 	  LOG << "FoLiA stored in " << xmlOutName << endl;
 	  delete result;
 	}
