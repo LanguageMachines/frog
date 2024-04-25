@@ -225,6 +225,7 @@ jobs:
           channel: '#gitlama'
           nickname: GH-${{ runner.os }}-${{ env.id }}
           message: "frog [${{ needs.notification.outputs.branch }}] build with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: \u00034FAILED\u0003"
+
       - name: Notify IRC of success
         if: ${{ env.test_status == '0' }}
         uses: Gottox/irc-message-action@v2
