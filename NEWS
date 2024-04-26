@@ -1,3 +1,9 @@
+0.33 - 2024-04-26
+[Ko van der Sloot]
+* --KANON was not always hounored
+* after a change in ucto, it was needed to reset the tokenizer more often
+* in the lemmatizer, fuzzy matching of CGN tags is implemented
+
 0.32 - 2023-12-05
 [Ko van der Sloot]
 * ignore but warn on empty derivations, a lame fix for https://github.com/LanguageMachines/frog/issues/103
