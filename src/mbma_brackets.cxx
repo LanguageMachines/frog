@@ -461,9 +461,9 @@ ostream& operator<< ( ostream& os, const BaseBracket *c ){
   return os;
 }
 
-bool BracketNest::testMatch( list<BaseBracket*>& result,
-			     const list<BaseBracket*>::iterator& rpos,
-			     list<BaseBracket*>::iterator& bpos ) const {
+bool BracketNest::testMatch( const list<BaseBracket*>& result,
+			     const list<BaseBracket*>::const_iterator& rpos,
+			     list<BaseBracket*>::const_iterator& bpos ) const {
   /// test if the rule matches at a certain position
   /*!
     \param result the current result. A new match will be appended
@@ -486,7 +486,7 @@ bool BracketNest::testMatch( list<BaseBracket*>& result,
   if ( debugFlag > 5 ){
     LOG << "test MATCH, fpos=" << fpos << " en len=" << len << endl;
   }
-  list<BaseBracket*>::iterator it = rpos;
+  list<BaseBracket*>::const_iterator it = rpos;
   while ( fpos > 0 ){
     --fpos;
     --it;
@@ -988,7 +988,7 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
   cnt = 0;
   desc.remove();
   vector<folia::Morpheme*> stack;
-  for ( auto const& it : _parts ){
+  for ( auto const *it : _parts ){
     UnicodeString deeper_desc;
     int deep_cnt = 0;
     folia::Morpheme *m = it->createMorpheme( doc,
@@ -1063,8 +1063,8 @@ void BracketNest::display_parts( ostream& os,
   }
 }
 
-list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& result,
-							const list<BaseBracket*>::iterator& rpos ){
+list<BaseBracket*>::const_iterator BracketNest::resolveAffix( list<BaseBracket*>& result,
+							      const list<BaseBracket*>::const_iterator& rpos ){
   /// try to resolve an Affix rule
   /*!
     \param result the output, matches might replace part of it by a new Nest
@@ -1075,7 +1075,7 @@ list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& resu
     LOG << "resolve affix" << endl;
     display_parts( LOG );
   }
-  list<BaseBracket*>::iterator bit;
+  list<BaseBracket*>::const_iterator bit;
   bool matched = testMatch( result, rpos, bit );
   if ( matched ){
     if ( debugFlag > 5 ){
@@ -1085,14 +1085,14 @@ list<BaseBracket*>::iterator BracketNest::resolveAffix( list<BaseBracket*>& resu
     if ( len == result.size() ){
       // the rule matches exact what we have.
       // leave it
-      list<BaseBracket*>::iterator it = rpos;
+      list<BaseBracket*>::const_iterator it = rpos;
       // return next position continuation
       return ++it;
     }
     else {
       // we create a new Bracketnest, and connect all the Brackets
       // from the matching rule to this Nest
-      list<BaseBracket*>::iterator it = bit--;
+      list<BaseBracket*>::const_iterator it = bit--;
       BracketNest *tmp = new BracketNest( (*rpos)->tag(),
 					  Compound::Type::NONE,
 					  debugFlag,
@@ -1255,7 +1255,7 @@ void BracketNest::resolveGlue( ){
 
 void BracketNest::resolveLead( ){
   /// resolve rules starting with *
-  list<BaseBracket*>::iterator it = _parts.begin();
+  list<BaseBracket*>::const_iterator it = _parts.begin();
   while ( it != _parts.end() ){
     // search for rules with a * at the begin
     if ( debugFlag > 5 ){
@@ -1281,7 +1281,7 @@ void BracketNest::resolveLead( ){
 
 void BracketNest::resolveTail(){
   /// resolve rules ending with *
-  list<BaseBracket *>::iterator it = _parts.begin();
+  list<BaseBracket *>::const_iterator it = _parts.begin();
   while ( it != _parts.end() ){
     // search for rules with a * at the end
     if ( debugFlag > 5 ){
@@ -1314,7 +1314,7 @@ void BracketNest::resolveTail(){
 
 void BracketNest::resolveMiddle(){
   /// resolve rules with a * NOT at begin or end
-  list<BaseBracket*>::iterator it = _parts.begin();
+  list<BaseBracket*>::const_iterator it = _parts.begin();
   while ( it != _parts.end() ){
     // now search for other rules with a * in the middle
     if ( debugFlag > 5 ){

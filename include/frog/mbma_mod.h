@@ -73,7 +73,7 @@ class Mbma {
   std::vector<Rule*> execute( const icu::UnicodeString&,
 			      const icu::UnicodeString&,
 			      const std::vector<icu::UnicodeString>& );
-  std::string version() const { return _version; };
+  const std::string& version() const { return _version; };
   void add_folia_morphemes( const std::vector<folia::Word*>&,
 			    const frog_data& fd ) const;
   static std::map<icu::UnicodeString,icu::UnicodeString> TAGconv;

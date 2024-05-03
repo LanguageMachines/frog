@@ -175,13 +175,13 @@ class BracketNest: public BaseBracket {
   ~BracketNest() override;
   bool isNested() const override { return true; };
   icu::UnicodeString put( bool = false ) const override;
-  bool testMatch( std::list<BaseBracket*>& result,
-		  const std::list<BaseBracket*>::iterator& rpos,
-		  std::list<BaseBracket*>::iterator& bpos ) const;
+  bool testMatch( const std::list<BaseBracket*>& result,
+		  const std::list<BaseBracket*>::const_iterator& rpos,
+		  std::list<BaseBracket*>::const_iterator& bpos ) const;
   std::list<BaseBracket*>::iterator glue( std::list<BaseBracket*>&,
 					  const std::list<BaseBracket*>::iterator& ) const;
-  std::list<BaseBracket*>::iterator resolveAffix( std::list<BaseBracket*>&,
-						  const std::list<BaseBracket*>::iterator& );
+  std::list<BaseBracket*>::const_iterator resolveAffix( std::list<BaseBracket*>&,
+							const std::list<BaseBracket*>::const_iterator& );
   void resolveGlue() override;
   void resolveLead() override;
   void resolveTail() override;
