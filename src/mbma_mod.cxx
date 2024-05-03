@@ -63,6 +63,7 @@ const long int RIGHT = 6; // right context
 Mbma::Mbma( TiCC::LogStream *errlog, TiCC::LogStream *dbglog ):
   MTree(0),
   filter(0),
+  debugFlag(0),
   filter_diac(false),
   doDeepMorph(false)
 {
@@ -576,7 +577,7 @@ void Mbma::filterHeadTag( const icu::UnicodeString& head ){
     DBG << "filter with head: " << head << endl;
     DBG << "filter: analysis is:" << endl;
     int i=0;
-    for ( const auto& it : analysis ){
+    for ( const auto *it : analysis ){
       DBG << ++i << " - " << it << endl;
     }
   }
@@ -638,7 +639,7 @@ void Mbma::filterHeadTag( const icu::UnicodeString& head ){
   if (debugFlag > 1){
     DBG << "filter: analysis after head filter:" << endl;
     int i=0;
-    for ( const auto& it : analysis ){
+    for ( const auto *it : analysis ){
       DBG << ++i << " - " << it << endl;
     }
   }
@@ -717,14 +718,14 @@ void Mbma::filterSubTags( const vector<icu::UnicodeString>& feats ){
   if ( debugFlag > 1){
     DBG << "filter: best matches before sort on confidence:" << endl;
     int i=0;
-    for ( const auto& it : bestMatches ){
+    for ( const auto *it : bestMatches ){
       DBG << ++i << " - " << it << endl;
     }
     DBG << "" << endl;
   }
   double best_conf = -0.1;
-  set<Rule*, id_cmp> highConf; // store Rule's on ID to be reproducable
-  for ( const auto& it : bestMatches ){
+  set<const Rule*, id_cmp> highConf; // store Rule's on ID to be reproducable
+  for ( const auto *it : bestMatches ){
     if ( it->confidence >= best_conf ){
       if ( it->confidence > best_conf ){
 	best_conf = it->confidence;
@@ -752,13 +753,13 @@ void Mbma::filterSubTags( const vector<icu::UnicodeString>& feats ){
   if ( debugFlag > 1){
     DBG << "filter: analysis before sort key:" << endl;
     int i=0;
-    for ( const auto& a_it : analysis ){
+    for ( const auto *a_it : analysis ){
       DBG << ++i << " - " << a_it << " " << a_it->getKey()
 	  << " (" << a_it->getKey().length() << ")" << endl;
     }
     DBG << endl;
   }
-  map<icu::UnicodeString, Rule*> unique;
+  map<icu::UnicodeString, const Rule*> unique;
   // create a map of "key's" to Rule. The key is the string representation
   // of the Rule's flattened result, like [ver][zeker][ing][s][ageer][ent]
   // (with inflection info for Deep Morph analysis)
@@ -768,7 +769,7 @@ void Mbma::filterSubTags( const vector<icu::UnicodeString>& feats ){
   }
   // so now we have map of 'equal' analysis.
   // create a set for reverse lookup, using the Rule.ID to distinguish Rule's
-  set<Rule*, id_cmp> uniqueAna;
+  set<const Rule*, id_cmp> uniqueAna;
   for ( auto const& uit : unique ){
     uniqueAna.insert( uit.second );
   }
@@ -786,7 +787,7 @@ void Mbma::filterSubTags( const vector<icu::UnicodeString>& feats ){
   if ( debugFlag > 1){
     DBG << "filter: analysis before sort on length:" << endl;
     int i=0;
-    for ( const auto& a_it : analysis ){
+    for ( const auto *a_it : analysis ){
       DBG << ++i << " - " << a_it << " " << a_it->getKey()
 	  << " (" << a_it->getKey().length() << ")" << endl;
     }
@@ -801,7 +802,7 @@ void Mbma::filterSubTags( const vector<icu::UnicodeString>& feats ){
   if ( debugFlag > 1){
     DBG << "filter: definitive analysis:" << endl;
     int i=0;
-    for ( auto const& a_it : analysis ){
+    for ( auto const *a_it : analysis ){
       DBG << ++i << " - " << a_it << endl;
     }
     DBG << "done filtering" << endl;
@@ -1160,7 +1161,7 @@ void Mbma::Classify( const icu::UnicodeString& word,
 
 vector<pair<UnicodeString,string>> Mbma::getResults( bool shrt ) const {
   vector<pair<UnicodeString,string>> result;
-  for ( const auto& it : analysis ){
+  for ( const auto *it : analysis ){
     UnicodeString us = it->pretty_string( shrt );
     string cmp = toString( it->compound );
     result.push_back( make_pair(us, cmp) );

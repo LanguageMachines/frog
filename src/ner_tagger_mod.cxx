@@ -249,7 +249,7 @@ static vector<UnicodeString> serialize( const vector<set<string>>& stags ){
 }
 
 vector<UnicodeString> NERTagger::create_ner_list( const vector<UnicodeString>& words,
-						  vector<map<UnicodeString,set<string>>>& ners ){
+						  const vector<map<UnicodeString,set<string>>>& ners ){
   /// create a list of ambitags given a range of words
   /*!
     \param words a sentence as a list of words

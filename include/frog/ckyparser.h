@@ -128,7 +128,7 @@ class SubTree {
   std::set<const Constraint*>  satisfiedConstraints;
   double score() const { return _score; };
   int r() const { return _r; };
-  std::string edgeLabel() const { return _edgeLabel; };
+  const std::string& edgeLabel() const { return _edgeLabel; };
  private:
   double _score;
   int _r;

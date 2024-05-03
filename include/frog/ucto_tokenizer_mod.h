@@ -38,6 +38,8 @@ class UctoTokenizer {
  public:
   explicit UctoTokenizer( TiCC::LogStream *, TiCC::LogStream * =0 );
   ~UctoTokenizer();
+  UctoTokenizer( const UctoTokenizer& ) = delete;
+  UctoTokenizer& operator=( const UctoTokenizer& ) = delete;
   bool init( const TiCC::Configuration& );
   bool reset();
   void setUttMarker( const std::string& );

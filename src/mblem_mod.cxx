@@ -274,12 +274,12 @@ UnicodeString Mblem::make_instance( const UnicodeString& in ) {
   UnicodeString instance = "";
   size_t length = in.length();
   for ( size_t i=0; i < history; i++) {
-    size_t j = length - history + i;
     if ((  i < history - length )
 	&& ( length<history ) ) {
       instance += "=\t";
     }
     else {
+      size_t j = length - history + i;
       instance += in[j];
       instance += '\t';
     }
@@ -315,8 +315,8 @@ void Mblem::filterTag( const icu::UnicodeString& postag ){
 	  DBG << "MISSCHIEN match van tag=" << tag
 	      << " in pos=" << postag << endl;
 	}
-	for ( const auto& it : tag_parts ){
-	  if ( std::find( pos_parts.begin(), pos_parts.end(), it ) != pos_parts.end() ){
+	for ( const auto& pit : tag_parts ){
+	  if ( std::find( pos_parts.begin(), pos_parts.end(), pit ) != pos_parts.end() ){
 	    found = false;
 	    break;
 	  }

@@ -62,8 +62,8 @@ class Mblem {
   void Classify( frog_record& );
   void Classify( const icu::UnicodeString& );
   std::vector<std::pair<icu::UnicodeString,icu::UnicodeString> > getResult() const;
-  std::string getTagset() const { return tagset; };
-  std::string version() const { return _version; };
+  const std::string& getTagset() const { return tagset; };
+  const std::string& version() const { return _version; };
   void filterTag( const icu::UnicodeString& );
   void makeUnique();
   void add_lemmas( const std::vector<folia::Word*>&,

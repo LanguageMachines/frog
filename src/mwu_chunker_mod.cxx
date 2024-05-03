@@ -264,13 +264,13 @@ void Mwu::Classify( frog_data& sent ){
    */
   reset();
   // setup the Mwu
-  for ( auto& word : sent.units ){
+  for ( const auto& word : sent.units ){
     add( word );
   }
   // collect mwu's
   Classify();
   //  take over the mwu postions in the frog_data
-  for ( const auto& mword : mWords ){
+  for ( const auto *mword : mWords ){
     if ( mword->mwu_start != mword->mwu_end ){
       sent.mwus[mword->mwu_start] = mword->mwu_end;
     }

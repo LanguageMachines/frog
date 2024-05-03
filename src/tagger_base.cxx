@@ -227,8 +227,8 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
     DBG << _label << "-tagger textclass= " << textclass << endl;
   }
   if ( _host.empty() ){
-    string init = "-s " + settings + " -vcf";
-    tagger = new MbtAPI( init, *dbg_log );
+    string init_string = "-s " + settings + " -vcf";
+    tagger = new MbtAPI( init_string, *dbg_log );
     return tagger->isInit();
   }
   else {

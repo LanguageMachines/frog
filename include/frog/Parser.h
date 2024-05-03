@@ -67,7 +67,7 @@ class ParserBase {
   virtual void add_result( const frog_data&,
 			   const std::vector<folia::Word*>& ) const;
   std::vector<std::string> createParserInstances( const parseData& );
-  std::string getTagset() const { return dep_tagset; };
+  const std::string& getTagset() const { return dep_tagset; };
   ParserBase( const ParserBase& ) = delete;
   ParserBase& operator=( const ParserBase& ) = delete;
  protected:
@@ -93,7 +93,7 @@ public:
     pairs(0),
     dir(0),
     rels(0) {};
-  ~Parser();
+  ~Parser() override;
   bool init( const TiCC::Configuration& ) override;
   void add_provenance( folia::Document& doc,
 		       folia::processor * ) const override;

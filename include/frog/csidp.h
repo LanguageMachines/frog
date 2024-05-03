@@ -53,7 +53,7 @@ class timbl_result {
   timbl_result( const std::string&,
 		double,
 		const std::vector<std::pair<std::string,double>>& );
-  std::string cls() const {
+  const std::string& cls() const {
     /// return the cls value
     return _cls;
   };

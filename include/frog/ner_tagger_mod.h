@@ -80,7 +80,7 @@ class NERTagger: public BaseTagger {
 		  const std::string&,
 		  std::vector<std::map<icu::UnicodeString,std::set<std::string>>>& );
   std::vector<icu::UnicodeString> create_ner_list( const std::vector<icu::UnicodeString>&,
-					    std::vector<std::map<icu::UnicodeString,std::set<std::string>>>& );
+						   const std::vector<std::map<icu::UnicodeString,std::set<std::string>>>& );
   std::vector<std::map<icu::UnicodeString,std::set<std::string>>> gazet_ners;
   std::vector<std::map<icu::UnicodeString,std::set<std::string>>> override_ners;
   void addEntity( frog_data&,

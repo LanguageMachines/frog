@@ -94,7 +94,6 @@ class Mbma {
   void call_server( const std::vector<icu::UnicodeString>&,
 		    std::vector<icu::UnicodeString>& );
   CLEX::Type getFinalTag( const std::list<BaseBracket*>& );
-  int debugFlag;
   void store_morphemes( frog_record&,
 			const std::vector<icu::UnicodeString>& ) const;
   void store_brackets( frog_record&,
@@ -118,6 +117,7 @@ class Mbma {
   std::string _host;
   std::string _port;
   std::string _base;
+  int debugFlag;
   bool filter_diac;
   bool doDeepMorph;
 };

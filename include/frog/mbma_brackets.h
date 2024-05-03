@@ -129,7 +129,7 @@ class BracketLeaf: public BaseBracket {
 public:
   BracketLeaf( const RulePart&, int, TiCC::LogStream& );
   BracketLeaf( CLEX::Type, const icu::UnicodeString&, int, TiCC::LogStream& );
-  ~BracketLeaf();
+  ~BracketLeaf() override;
   icu::UnicodeString put( bool = false ) const override;
   icu::UnicodeString morpheme() const override {
     /// return the value of the morpheme
@@ -172,7 +172,7 @@ class BracketNest: public BaseBracket {
  public:
   BracketNest( CLEX::Type, Compound::Type, int, TiCC::LogStream& );
   BaseBracket *append( BaseBracket * ) override ;
-  ~BracketNest();
+  ~BracketNest() override;
   bool isNested() const override { return true; };
   icu::UnicodeString put( bool = false ) const override;
   bool testMatch( std::list<BaseBracket*>& result,
