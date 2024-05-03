@@ -45,7 +45,7 @@ jobs:
     needs: notification
     strategy:
       matrix:
-        os: [ubuntu-latest]  # , macos-14]
+        os: [ubuntu-latest, macos-13]  # macos-14 lacks libtextcat
         compiler: [g++, clang++]
 
     steps:
@@ -57,10 +57,11 @@ jobs:
       - uses: actions/checkout@v4.1.1
       - name: Install Build Environment
         run: |
-             if [ "$RUNNER_OS" == "Linux" ]; then
+             if [ "$RUNNER_OS" == "Linux" ]
+             then
                 sudo apt-get install pkg-config autoconf-archive
              else
-                brew upgrade;
+                brew upgrade
                 brew install pkg-config
                 brew install autoconf-archive
                 brew install libtool
@@ -69,7 +70,8 @@ jobs:
              fi
       - name: Install Dependencies
         run: |
-             if [ "$RUNNER_OS" == "Linux" ]; then
+             if [ "$RUNNER_OS" == "Linux" ]
+             then
                 sudo apt-get install libicu-dev libxml2-dev libbz2-dev
                 sudo apt-get install zlib1g-dev libexttextcat-dev
                 sudo apt-get install expect cppcheck
@@ -83,95 +85,96 @@ jobs:
              fi
       - name: Configure CppCheck
         run: |
-             if [ "$RUNNER_OS" == "Linux" ]; then
-                cpc_opts="--enable=all --inline-suppr --force -I include -I /usr/local/include --quiet --error-exitcode=0"
+             if [ "$RUNNER_OS" == "Linux" ]
+             then
+                cpc_opts="--enable=warning,style --inline-suppr --force -I include --quiet --error-exitcode=0"
              else
-                cpc_opts="--enable=all --inline-suppr --force -I include -I /usr/local/include -I /usr/local/opt/icu4c/include -I /usr/local/opt/libxml2/include --suppress=missingIncludeSystem --suppress=duplInheritedMember --quiet --error-exitcode=0"
+                cpc_opts="--enable=warning,style --inline-suppr --force -I include --check-level=exhaustive --quiet --error-exitcode=0"
              fi
              echo "cpc_opts=$cpc_opts" >> $GITHUB_ENV
       - name: install TiccUtils
         env:
           CXX: ${{ matrix.compiler }}
         run: |
-          git clone https://github.com/LanguageMachines/ticcutils;
-          cd ticcutils;
-          bash bootstrap.sh;
-          ./configure;
-          make;
-          sudo make install;
-          cd ..;
+          git clone https://github.com/LanguageMachines/ticcutils
+          cd ticcutils
+          bash bootstrap.sh
+          ./configure
+          make
+          sudo make install
+          cd ..
 
       - name: install libfolia
         env:
           CXX: ${{ matrix.compiler }}
         run: |
-          git clone https://github.com/LanguageMachines/libfolia;
-          cd libfolia;
-          bash bootstrap.sh;
-          ./configure;
-          make;
-          sudo make install;
-          cd ..;
+          git clone https://github.com/LanguageMachines/libfolia
+          cd libfolia
+          bash bootstrap.sh
+          ./configure
+          make
+          sudo make install
+          cd ..
 
       - name: install uctodata
         env:
           CXX: ${{ matrix.compiler }}
         run: |
-          git clone https://github.com/LanguageMachines/uctodata;
-          cd uctodata;
-          bash bootstrap.sh;
-          ./configure;
-          make;
-          sudo make install;
-          cd ..;
+          git clone https://github.com/LanguageMachines/uctodata
+          cd uctodata
+          bash bootstrap.sh
+          ./configure
+          make
+          sudo make install
+          cd ..
 
       - name: install ucto
         env:
           CXX: ${{ matrix.compiler }}
         run: |
-          git clone https://github.com/LanguageMachines/ucto;
-          cd ucto;
-          bash bootstrap.sh;
-          ./configure;
-          make;
-          sudo make install;
-          cd ..;
+          git clone https://github.com/LanguageMachines/ucto
+          cd ucto
+          bash bootstrap.sh
+          ./configure
+          make
+          sudo make install
+          cd ..
 
       - name: install timbl
         env:
           CXX: ${{ matrix.compiler }}
         run: |
-          git clone https://github.com/LanguageMachines/timbl;
-          cd timbl;
-          bash bootstrap.sh;
-          ./configure;
-          make;
-          sudo make install;
-          cd ..;
+          git clone https://github.com/LanguageMachines/timbl
+          cd timbl
+          bash bootstrap.sh
+          ./configure
+          make
+          sudo make install
+          cd ..
 
       - name: install mbt
         env:
           CXX: ${{ matrix.compiler }}
         run: |
-          git clone https://github.com/LanguageMachines/mbt;
-          cd mbt;
-          bash bootstrap.sh;
-          ./configure;
-          make;
-          sudo make install;
-          cd ..;
+          git clone https://github.com/LanguageMachines/mbt
+          cd mbt
+          bash bootstrap.sh
+          ./configure
+          make
+          sudo make install
+          cd ..
 
       - name: install frogdata
         env:
           CXX: ${{ matrix.compiler }}
         run: |
-          git clone https://github.com/LanguageMachines/frogdata;
-          cd frogdata;
-          bash bootstrap.sh;
-          ./configure;
-          make;
-          sudo make install;
-          cd ..;
+          git clone https://github.com/LanguageMachines/frogdata
+          cd frogdata
+          bash bootstrap.sh
+          ./configure
+          make
+          sudo make install
+          cd ..
 
       - name: bootstrap
         run: sh bootstrap.sh
@@ -204,9 +207,9 @@ jobs:
 
       - name: frogtests
         run: |
-          git clone --depth=1 --single-branch https://github.com/LanguageMachines/frogtests.git;
-          cd frogtests;
-          frog_bin=/usr/local/bin LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib ./testaction.sh;
+          git clone --depth=1 --single-branch https://github.com/LanguageMachines/frogtests.git
+          cd frogtests
+          frog_bin=/usr/local/bin LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib ./testaction.sh
           TEST_STAT=$(cat status.tmp)
           echo "test_status=$TEST_STAT" >> $GITHUB_ENV
         continue-on-error: true
@@ -224,7 +227,9 @@ jobs:
           server: irc.uvt.nl
           channel: '#gitlama'
           nickname: GH-${{ runner.os }}-${{ env.id }}
-          message: "frog [${{ needs.notification.outputs.branch }}] build with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: \u00034FAILED\u0003"
+          message: "frog [${{ needs.notification.outputs.branch }}] build \
+with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: \
+\u00034FAILED\u0003"
 
       - name: Notify IRC of success
         if: ${{ env.test_status == '0' }}
@@ -233,4 +238,6 @@ jobs:
           server: irc.uvt.nl
           channel: '#gitlama'
           nickname: GH-${{ runner.os }}-${{ env.id }}
-          message: "frog [${{ needs.notification.outputs.branch }}] build with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: \u00033SUCCESS\u0003"
+          message: "frog [${{ needs.notification.outputs.branch }}] build \
+with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: \
+\u00033SUCCESS\u0003"
