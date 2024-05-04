@@ -297,6 +297,7 @@ int main(int argc, char *argv[]) {
       }
     }
     if ( os != &cout ){
+      // cppcheck-suppress autovarInvalidDeallocation
       delete os;
     }
   }
