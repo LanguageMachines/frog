@@ -229,7 +229,7 @@ jobs:
           nickname: GH-${{ runner.os }}-${{ env.id }}
           message: "frog [${{ needs.notification.outputs.branch }}] build \
 with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: \
-\u00034FAILED\u0003"
+\u00034FAILED\u0003 with ${{ env.test_status }} errors"
 
       - name: Notify IRC of success
         if: ${{ env.test_status == '0' }}
