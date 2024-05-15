@@ -127,6 +127,21 @@ jobs:
           sudo make install
           cd ..
 
+
+      - name: install libexttextcat on MacOS
+        env:
+          CXX: ${{ matrix.compiler }}
+        run: |
+          if [ "$RUNNER_OS" != "Linux" ]; then
+            git clone https://github.com/LibreOffice/libexttextcat/
+            cd libexttextcat
+            sh autogen.sh
+            ./configure
+            make
+            sudo make install
+            cd ..
+          fi
+
       - name: install ucto
         env:
           CXX: ${{ matrix.compiler }}
@@ -174,20 +189,6 @@ jobs:
           make
           sudo make install
           cd ..
-
-      - name: install libexttextcat on MacOS
-        env:
-          CXX: ${{ matrix.compiler }}
-        run: |
-          if [ "$RUNNER_OS" != "Linux" ]; then
-            git clone https://github.com/LibreOffice/libexttextcat/
-            cd libexttextcat
-            sh autogen.sh
-            ./configure
-            make
-            sudo make install
-            cd ..
-          fi
 
       - name: bootstrap
         run: sh bootstrap.sh
