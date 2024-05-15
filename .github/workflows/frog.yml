@@ -88,7 +88,7 @@ jobs:
              then
                 cpc_opts="--enable=warning,style --inline-suppr --force -I include --quiet --error-exitcode=0"
              else
-                cpc_opts="--enable=warning,style --inline-suppr --force -I include --check-level=exhaustive --quiet --error-exitcode=0"
+                cpc_opts="--enable=warning,style --inline-suppr --force -I include --check-level=exhaustive --suppress=*:*libexttextcat* --quiet --error-exitcode=0"
              fi
              echo "cpc_opts=$cpc_opts" >> $GITHUB_ENV
       - name: install TiccUtils
