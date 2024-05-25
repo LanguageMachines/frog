@@ -192,17 +192,30 @@ jobs:
 
       - name: bootstrap
         run: sh bootstrap.sh
+
       - name: configure
         env:
           CXX: ${{ matrix.compiler }}
         run: ./configure
+
       - name: compiler-id
         id: compiler
         run: |
           id=$(echo ${{matrix.compiler}} | cut -d\+ -f1)
           echo "id=$id" >> $GITHUB_ENV
+
       - name: Static Code-check
         run: cppcheck ${{ env.cpc_opts }} .
+
+      - name: Run Scan-Build on LINUX
+        env:
+          CXX: ${{ matrix.compiler }}
+        run: |
+          if [ "$RUNNER_OS" == "Linux" && ${{matrix.compiler}} == "clang"]
+          then
+            scan-build --status-bugs make
+          fi
+
       - name: make
         run: make
       - name: install
