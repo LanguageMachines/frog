@@ -211,7 +211,7 @@ jobs:
         env:
           CXX: ${{ matrix.compiler }}
         run: |
-          if: ${{ $runner.os == 'Linux' && env.id == 'clang' }}
+          if: ${{ runner.os == 'Linux' && env.id == 'clang' }}
           then
             scan-build --status-bugs make
           fi
