@@ -117,8 +117,11 @@ jobs:
           cd frogtests
           frog_bin=/usr/local/bin LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib ./testaction.sh
           TEST_STAT=$(cat status.tmp)
-          echo "action_status=frogtests" >> $GITHUB_ENV
-          echo "action_details=$TEST_STAT errors" >> $GITHUB_ENV
+          if [ $TEST_STAT != 0 ]
+          then
+            echo "action_status=frogtests" >> $GITHUB_ENV
+            echo "action_details=$TEST_STAT errors" >> $GITHUB_ENV
+          fi
         continue-on-error: true
 
       - name: log problems
