@@ -120,8 +120,8 @@ jobs:
           if [ $TEST_STAT != 0 ]
           then
             echo "action_status=frogtests" >> $GITHUB_ENV
-            echo "action_details=$TEST_STAT errors" >> $GITHUB_ENV
           fi
+          echo "action_details=$TEST_STAT errors" >> $GITHUB_ENV
         continue-on-error: true
 
       - name: log problems
