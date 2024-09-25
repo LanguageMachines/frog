@@ -27,6 +27,10 @@ jobs:
     steps:
       - name: IRC notification
         uses: LanguageMachines/ticcactions/irc-init@v1
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
 
   build:
     needs: notification
@@ -37,18 +41,6 @@ jobs:
         compiler: [g++-12, clang++]
 
     steps:
-      - name: exclude Mac-OS with g++
-        shell: bash
-        if: ${{ matrix.os == 'macos-latest' && matrix.compiler == 'g++-12' }}
-        run: |
-          echo "action_status=skip" >> $GITHUB_ENV
-          echo "action_details='c++ library issues'" >> $GITHUB_ENV
-
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.12.1
-        with:
-          access_token: ${{ github.token }}
-
       - uses: actions/checkout@v4.1.1
       - uses: LanguageMachines/ticcactions/cpp-build-env@v1
       - uses: LanguageMachines/ticcactions/cpp-dependencies@v1
