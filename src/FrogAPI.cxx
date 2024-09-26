@@ -2503,8 +2503,8 @@ void FrogAPI::handle_one_sentence( ostream& os,
       vector<Tokenizer::Token> all_toks;
       vector<Tokenizer::Token> toks = tokenizer->tokenize_line( text, sent_lang );
       while ( toks.size() > 0 ){
-	// the tokenizer may split the text into more sentences
-	// but we don't want that, it spoils the outpyt FoLiA.
+	// the tokenizer may split the text into more than one sentences
+	// but we don't want that, it spoils the resulting FoLiA.
 	// The input Sentence node should stay leading
 	all_toks.insert( all_toks.end(), toks.begin(), toks.end() );
 	toks = tokenizer->tokenize_next();

@@ -36,15 +36,13 @@
 #include <string>
 #include <ostream>
 #include <fstream>
+#include <filesystem>
 #include "ticcutils/SocketBasics.h"
 #include "ticcutils/FileUtils.h"
 #include "config.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifdef HAVE_DIRENT_H
-#include <dirent.h>
-#endif
 
 using namespace std;
 
@@ -64,43 +62,25 @@ string prefix( const string& path, const string& fn ){
   return fn;
 }
 
-#ifdef HAVE_DIRENT_H
-set<string> getFileNames( const string& dirName,
-			   const string& ext ){
+set<string> getFileNames( const string& dir_name,
+			  const string& ext ){
   /// extract a (sorted) list of file-names matching an extension pattern
   /*!
-    \param dirName the search directory
+    \param dir_name the search directory
     \param ext the file extension we search
-    \return a sorted list og file-names
+    \return a sorted list of file-names
   */
   set<string> result;
-  DIR *dir = opendir( dirName.c_str() );
-  if ( !dir ){
-    return result;
-  }
-  else {
-    struct stat sb;
-    struct dirent *entry = readdir( dir );
-    while ( entry ){
-      if ( entry->d_name[0] != '.' ) {
-	string filename = entry->d_name;
-	if ( ext.empty() ||
-	     filename.rfind( ext ) != string::npos ) {
-	  string fullName = dirName + "/" + filename;
-	  if ( stat( fullName.c_str(), &sb ) >= 0 ){
-            if ( (sb.st_mode & S_IFMT) == S_IFREG ){
-	      result.insert( entry->d_name );
-	    }
-	  }
-	}
-      }
-      entry = readdir( dir );
+  filesystem::path path( dir_name );
+  for( auto const& entry : filesystem::directory_iterator(path) ){
+    string val = entry.path().filename();
+    if ( ext.empty() ||
+	 val.rfind( ext ) != string::npos ) {
+      result.insert(val);
     }
-    closedir( dir );
-    return result;
   }
+  return result;
 }
-#endif
 
 string check_server( const string& host,
 		     const string& port,
