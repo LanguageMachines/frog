@@ -39,9 +39,10 @@ AC_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_SIZE_T
 
+AC_CHECK_HEADERS([unistd.h])
+
 # Checks for library functions.
 AC_FUNC_FORK
-AC_HEADER_DIRENT
 AC_CHECK_FUNCS([strerror])
 
 AX_PTHREAD([],[AC_MSG_ERROR([We need pthread support!])])
