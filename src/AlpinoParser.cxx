@@ -614,24 +614,24 @@ vector<parsrel> extract( const list<pair<const dp_tree*,const dp_tree*>>& l ){
     This function does a lot of trickery to handle special nodes.
   */
   vector<parsrel> result(l.size());
-  for ( const auto& it : l ){
+  for ( const auto& [head,dependent] : l ){
 #ifdef DEBUG_EXTRACT
-    cerr << "bekijk: " << it << endl;
+    cerr << "bekijk: " << head << "-" << dependent << endl;
 #endif
     int pos = 0;
     int dep = 0;
     string rel;
-    if ( it.second == 0 ){
+    if ( dep == 0 ){
       // root node
-      if ( it.first->word.empty() ){
-	if ( it.first->link
-	     && it.first->rel != "--" ){
+      if ( head->word.empty() ){
+	if ( head->link
+	     && head->rel != "--" ){
 #ifdef DEBUG_EXTRACT
-	  cerr << "AHA   some special thing: " << it.first->rel << endl;
+	  cerr << "AHA   some special thing: " << head->rel << endl;
 	  cerr << "          IN            : " << it << endl;
 #endif
 	  // not a word but an aggregate
-	  const dp_tree *my_head = extract_hd( it.first );
+	  const dp_tree *my_head = extract_hd(head);
 	  if ( my_head ){
 #ifdef DEBUG_EXTRACT
 	    cerr << "TEMP ROOT=" << my_head << endl;
@@ -650,17 +650,17 @@ vector<parsrel> extract( const list<pair<const dp_tree*,const dp_tree*>>& l ){
 	}
       }
       else {
-	pos = it.first->word_index;
+	pos = head->word_index;
 	rel = "punct";
-	dep = it.first->begin;
+	dep = head->begin;
 #ifdef DEBUG_EXTRACT
 	cerr << "A match[" << pos << "] " << rel << " " << dep << endl;
 #endif
       }
     }
-    else if ( it.first->word.empty() ){
+    else if ( head->word.empty() ){
       // not a word but an aggregate
-      const dp_tree *my_head = extract_hd( it.first );
+      const dp_tree *my_head = extract_hd( head );
       //      cerr << "TEMP ROOT=" << my_head << endl;
       if ( !my_head ){
 	//	cerr << "PANIC" << it << endl;
@@ -668,18 +668,18 @@ vector<parsrel> extract( const list<pair<const dp_tree*,const dp_tree*>>& l ){
       }
       else {
 	pos = my_head->word_index;
-	rel = it.first->rel;
-	dep = it.second->word_index;
+	rel = head->rel;
+	dep = dependent->word_index;
 #ifdef DEBUG_EXTRACT
 	cerr << "B match[" << pos << "] " << rel << " " << dep << endl;
 #endif
       }
     }
-    else if ( it.first->rel == "hd"
-	      || it.first->rel == "crd"
-	      || it.first->rel == "cmp" ){
-      if ( it.second->rel == "--" ){
-	pos = it.first->word_index;
+    else if ( head->rel == "hd"
+	      || head->rel == "crd"
+	      || head->rel == "cmp" ){
+      if ( dependent->rel == "--" ){
+	pos = head->word_index;
 	rel = "ROOT";
 	dep = 0;
 #ifdef DEBUG_EXTRACT
@@ -687,18 +687,18 @@ vector<parsrel> extract( const list<pair<const dp_tree*,const dp_tree*>>& l ){
 #endif
       }
       else {
-	pos = it.first->word_index;
-	rel = it.second->rel;
-	dep = it.second->end;
+	pos = head->word_index;
+	rel = dependent->rel;
+	dep = dependent->end;
 #ifdef DEBUG_EXTRACT
 	cerr << "D match[" << pos << "] " << rel << " " << dep << endl;
 #endif
       }
     }
     else {
-      pos = it.first->word_index;
-      rel = it.first->rel;
-      dep = it.second->word_index;
+      pos = head->word_index;
+      rel = head->rel;
+      dep = dependent->word_index;
 #ifdef DEBUG_EXTRACT
       cerr << "E match[" << pos << "] " << rel << " " << dep << endl;
 #endif

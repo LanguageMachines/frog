@@ -449,6 +449,21 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
     LOG << "Quote detection is NOT supported!" << endl;
     return false;
   }
+  options.doAlpino = Opts.extract("alpino", opt_val);
+  if ( options.doAlpino ){
+    options.doParse = false;
+    options.doMwu = false;
+    if ( !opt_val.empty() ){
+      if ( opt_val == "server" ){
+	options.doAlpinoServer = true;
+	configuration.setatt( "alpinoserver", "true", "parser" );
+      }
+      else {
+	LOG << "unsupported value for --alpino: " << opt_val << endl;
+	return false;
+      }
+    }
+  }
   if ( Opts.extract( "skip", opt_val )) {
     string skip = opt_val;
     if ( skip.find_first_of("tT") != string::npos ){
@@ -529,21 +544,6 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
   if ( options.doJSONin && !options.doServer ){
     LOG << "option JSONin is only allowed for server mode. (-S option)" << endl;
     return false;
-  }
-  options.doAlpino = Opts.extract("alpino", opt_val);
-  if ( options.doAlpino ){
-    options.doParse = false;
-    options.doMwu = false;
-    if ( !opt_val.empty() ){
-      if ( opt_val == "server" ){
-	options.doAlpinoServer = true;
-	configuration.setatt( "alpinoserver", "true", "parser" );
-      }
-      else {
-	LOG << "unsupported value for --alpino: " << opt_val << endl;
-	return false;
-      }
-    }
   }
 #ifdef HAVE_OPENMP
   if ( options.doServer ) {
