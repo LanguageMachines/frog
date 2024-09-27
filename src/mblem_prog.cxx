@@ -194,8 +194,8 @@ void Test( istream& in, ostream& os ){
 	  myMblem.filterTag( tr.assigned_tag() );
 	  vector<pair<UnicodeString,UnicodeString> > res = myMblem.getResult();
 	  UnicodeString out_line = tr.word() + " {" + tr.assigned_tag() + "}\t";
-	  for ( const auto& p : res ){
-	    out_line += p.first + "[" + p.second + "]/";
+	  for ( const auto& [lemma,tag] : res ){
+	    out_line += lemma + "[" + tag + "]/";
 	  }
 	  out_line.remove(out_line.length()-1);
 	  out_line += "\n";
@@ -219,9 +219,9 @@ void Test( istream& in, ostream& os ){
 	    vector<pair<UnicodeString,UnicodeString> > res = myMblem.getResult();
 	    UnicodeString out_line = parts[0] + ",";
 	    set<UnicodeString> out_set;
-	    for ( const auto& p : res ){
-	      if ( p.first != parts[0] || out_set.empty() ){
-		out_set.insert( p.first );
+	    for ( const auto& [lemma,tag] : res ){
+	      if ( lemma != parts[0] || out_set.empty() ){
+		out_set.insert( lemma );
 	      }
 	    }
 	    for ( const auto& st : out_set ){
@@ -236,8 +236,8 @@ void Test( istream& in, ostream& os ){
 	    myMblem.Classify( p );
 	    vector<pair<UnicodeString,UnicodeString> > res = myMblem.getResult();
 	    UnicodeString out_line = p + "\t";
-	    for ( const auto& r : res ){
-	      out_line += r.first + "[" + r.second + "]/";
+	    for ( const auto& [lemma,tag] : res ){
+	      out_line += lemma + "[" + tag + "]/";
 	    }
 	    out_line.remove(out_line.length()-1);
 	    out_line += "\n";
