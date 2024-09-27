@@ -741,8 +741,8 @@ vector<parsrel> extract_dp( xmlDoc *alp_doc,
     extract_dependencies( result, dp, 0 );
 #if defined(DEBUG_EXTRACT) || defined(DEBUG_MWU)
     cerr << "found dependencies: "<< endl;
-    for ( const auto& it : result ){
-      cerr << it.first << " " << it.second << endl;
+    for ( const auto& [head,dep] : result ){
+      cerr << head << " " << dep << endl;
     }
 #endif
   }
