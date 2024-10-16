@@ -393,7 +393,7 @@ void Mwu::Classify(){
       }
     }
   } //for (i < max)
-  if (matchLength > 0 ) {
+  if ( matchLength > 0 ) {
     //concat
     if ( debug >1 ){
       DBG << "mwu found, processing" << endl;
@@ -434,17 +434,17 @@ void Mwu::add_result( const frog_data& fd,
   {
     el = s->add_child<folia::EntitiesLayer>( args );
   }
-  for ( const auto& mwu : fd.mwus ){
-    if ( !el->id().empty() ){
-      args["generate_id"] = el->id();
-    }
-    if ( textclass != "current" ){
-      args["textclass"] = textclass;
-    }
+  if ( !el->id().empty() ){
+    args["generate_id"] = el->id();
+  }
+  if ( textclass != "current" ){
+    args["textclass"] = textclass;
+  }
+  for ( const auto& [start,end] : fd.mwus ){
 #pragma omp critical (foliaupdate)
     {
       folia::Entity *e = el->add_child<folia::Entity>( args );
-      for ( size_t pos = mwu.first; pos <= mwu.second; ++pos ){
+      for ( size_t pos = start; pos <= end; ++pos ){
 	e->append( wv[pos] );
       }
     }
