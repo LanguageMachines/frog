@@ -152,6 +152,7 @@ of input encodings. The default is UTF8. The output will always be in UTF8.
     lot of (redundant) text.
 
    */
+  std::string debug_folia;  ///< the string with a FoLiA debug instruction
   bool correct_words;      ///< should we allow the tokenizer to correct words?
   /*!< When true, the tokenizer might split words changing the number of words
     and the text value of the above structure(s). e.g '1984!' to '1984 !'

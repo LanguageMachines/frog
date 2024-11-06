@@ -140,7 +140,9 @@ void usage( ) {
        << "\t -V or --version        Show version info.\n"
        << "\t -d <debug level>  (for more verbosity)\n"
        << "\t --debug=<module><level>,<module><level>... (eg --debug=l5,n3) \n"
-       << "\t                        Set debug value for Tagger (T), Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c),\n"
+       << "\t                        Set debug value for Tagger (T),"
+    " Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c),"
+    " or the internal Folia (F)\n"
        << "\t                        Multi-Word Units (m), Named Entity Recognition (n), or Parser (p)\n"
        << "\t -S <port>              Run as server instead of reading from testfile, using 'port' \n"
 #ifdef HAVE_OPENMP

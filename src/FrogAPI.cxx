@@ -180,6 +180,7 @@ FrogOptions::FrogOptions():
   inputclass("current"),
   outputclass("current"),
   textredundancy("minimal"),
+  debug_folia( "NODEBUG" ),
   correct_words(false),
   maxParserTokens(500) // 500 words in a sentence is already insane
   // needs about 16 Gb memory to parse!
@@ -395,38 +396,43 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
       char mod = val[0];
       string value = val.substr(1);
       int dbval = 0;
-      if ( !TiCC::stringTo<int>( value, dbval ) ){
-	cerr << "expected integer value for --debug=" << mod << value << endl;
-	return false;
+      if ( mod == 'F' ) {
+	options.debug_folia = value;
       }
-      switch ( mod ){
-      case 'T':
-	configuration.setatt( "debug", value, "tagger" );
-	break;
-      case 't':
-	configuration.setatt( "debug", value, "tokenizer" );
-	break;
-      case 'l':
-	configuration.setatt( "debug", value, "mblem" );
-	break;
-      case 'a':
-	configuration.setatt( "debug", value, "mbma" );
-	break;
-      case 'm':
-	configuration.setatt( "debug", value, "mwu" );
-	break;
-      case 'c':
-	configuration.setatt( "debug", value, "IOB" );
-	break;
-      case 'n':
-	configuration.setatt( "debug", value, "NER" );
-	break;
-      case 'p':
-	configuration.setatt( "debug", value, "parser" );
-	break;
-      default:
-	cerr << "unknown module code:'" << mod << "'" << endl;
-	return false;
+      else {
+	if ( !TiCC::stringTo<int>( value, dbval ) ){
+	  cerr << "expected integer value for --debug=" << mod << value << endl;
+	  return false;
+	}
+	switch ( mod ){
+	case 'T':
+	  configuration.setatt( "debug", value, "tagger" );
+	  break;
+	case 't':
+	  configuration.setatt( "debug", value, "tokenizer" );
+	  break;
+	case 'l':
+	  configuration.setatt( "debug", value, "mblem" );
+	  break;
+	case 'a':
+	  configuration.setatt( "debug", value, "mbma" );
+	  break;
+	case 'm':
+	  configuration.setatt( "debug", value, "mwu" );
+	  break;
+	case 'c':
+	  configuration.setatt( "debug", value, "IOB" );
+	  break;
+	case 'n':
+	  configuration.setatt( "debug", value, "NER" );
+	  break;
+	case 'p':
+	  configuration.setatt( "debug", value, "parser" );
+	  break;
+	default:
+	  cerr << "unknown module code:'" << mod << "'" << endl;
+	  return false;
+	}
       }
     }
   }
@@ -1408,6 +1414,8 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
     \return a pointer to the top \<text\> node of the Document.
    */
   doc = new folia::Document( "xml:id='" + id + "'" );
+  //  cerr << "options.debug_folia=" << options.debug_folia << endl;
+  doc->setdebug(options.debug_folia );
   doc->addStyle( "text/xsl", "folia.xsl" );
   if ( options.debugFlag > 1 ){
     DBG << "start document!!!" << endl;
@@ -2816,6 +2824,8 @@ folia::Document *FrogAPI::run_folia_engine( const string& infilename,
   }
   else {
     folia::Document &doc = *engine.doc();
+    //    cerr << "options.debug_folia=" << options.debug_folia << endl;
+    doc.setdebug( options.debug_folia );
     string def_lang = tokenizer->default_language();
     if ( !def_lang.empty() ){
       if ( doc.metadata_type() == "native" ){
