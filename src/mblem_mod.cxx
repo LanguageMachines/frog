@@ -61,9 +61,11 @@ Mblem::Mblem( TiCC::LogStream *errlog, TiCC::LogStream *dbglog ):
   keep_case( false ),
   filter(0)
 {
-  errLog = new TiCC::LogStream( errlog, "mblem-" );
+  errLog = new TiCC::LogStream( errlog );
+  errLog->add_message( "mblem-" );
   if ( dbglog ){
-    dbgLog = new TiCC::LogStream( dbglog, "mblem" );
+    dbgLog = new TiCC::LogStream( dbglog );
+    dbgLog->add_message( "mblem" );
   }
   else {
     dbgLog = errLog;

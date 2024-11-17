@@ -51,7 +51,7 @@ using namespace Timbl;
 using namespace Tagger;
 using TiCC::operator<<;
 
-TiCC::LogStream my_default_log( cerr, "", StampMessage ); // fall-back
+TiCC::LogStream my_default_log( cerr ); // fall-back
 TiCC::LogStream *theErrLog = &my_default_log;  // fill the externals
 
 vector<string> fileNames;

@@ -56,8 +56,10 @@ class ParserBase {
     isInit( false ),
     filter( 0 )
   {
-    errLog = new TiCC::LogStream(errlog, "parser-");
-    dbgLog = new TiCC::LogStream(dbglog, "parser-dbg-");
+    errLog = new TiCC::LogStream(errlog);
+    errLog->add_message("parser-");
+    dbgLog = new TiCC::LogStream(dbglog);
+    dbgLog->add_message("parser-dbg-");
   };
   virtual ~ParserBase();
   virtual bool init( const TiCC::Configuration& ) = 0;

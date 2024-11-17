@@ -101,7 +101,7 @@ bool AlpinoParser::init( const TiCC::Configuration& configuration ){
     int level;
     if ( TiCC::stringTo<int>( val, level ) ){
       if ( level > 5 ){
-	dbgLog->setlevel( LogLevel::LogDebug );
+	dbgLog->set_level( LogLevel::LogDebug );
       }
     }
   }

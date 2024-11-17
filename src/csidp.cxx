@@ -63,11 +63,10 @@ unordered_map<string,double> split_dist( const vector< pair<string,double>>& dis
     the result would be { {"a",0.5},{"b",0.5},{"c",0.6},{"d",0.6},{"e",0.6}}
    */
   unordered_map<string,double> result;
-  for( const auto& it : dist ){
-    double d = it.second;
-    vector<string> tags = TiCC::split_at( it.first, "|" );
+  for( const auto& [str,val] : dist ){
+    vector<string> tags = TiCC::split_at( str, "|" );
     for( const auto& t : tags ){
-      result[t] += d;
+      result[t] += val;
     }
   }
   return result;
@@ -135,10 +134,10 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
   for ( size_t token_id = 1;
 	token_id <= sent_len;
 	++token_id ) {
-    for ( auto const& d : dit->dist() ){
+    for ( auto const& [str,val] : dit->dist() ){
       constraints.push_back( new DependencyDirection( token_id,
-						      d.first,
-						      d.second ) );
+						      str,
+						      val ) );
     }
     ++dit;
 
@@ -169,9 +168,9 @@ timbl_result::timbl_result( const string& cls,
   _cls(cls),
   _confidence(conf)
 {
-  for ( const auto& it : vd ){
-    _dist.push_back( make_pair( TiCC::UnicodeToUTF8(it.second->Value()->name()),
-				it.second->Weight()) );
+  for ( const auto& [dummy,val] : vd ){
+    _dist.push_back( make_pair( TiCC::UnicodeToUTF8(val->Value()->name()),
+				val->Weight()) );
   }
 }
 
