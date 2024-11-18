@@ -68,8 +68,6 @@ class Mblem {
   void makeUnique();
   void add_lemmas( const std::vector<folia::Word*>&,
 		   const frog_data& ) const;
-  Mblem( const Mblem& ) = delete;
-  Mblem& operator=( const Mblem& ) = delete;
  private:
   icu::UnicodeString call_server( const icu::UnicodeString& );
   void read_transtable( const std::string& );
@@ -96,6 +94,8 @@ class Mblem {
   TiCC::LogStream *errLog;
   TiCC::LogStream *dbgLog;
   TiCC::UniFilter *filter;
+  Mblem( const Mblem& ) = delete;
+  Mblem& operator=( const Mblem& ) = delete;
 };
 
 #endif

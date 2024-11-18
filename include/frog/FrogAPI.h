@@ -170,7 +170,7 @@ maximum of 500 words PER SENTENC. Which is already a lot!
   std::string command;        ///< the original command that invoked Frog
 
  private:
-  FrogOptions( const FrogOptions & );
+  FrogOptions( const FrogOptions & ) = delete;
 };
 
 /// \brief This is the API class which can be used to set up Frog and run it
