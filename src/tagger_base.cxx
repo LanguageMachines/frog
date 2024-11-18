@@ -350,7 +350,7 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
   /// Connect to a MBT server, send and receive JSON and translate to a
   /// TagResult list
   /*!
-    \param tv the tag_entry we would like to be seviced
+    \param tv the tag_entry we would like to be serviced
     \return a vector of TagResult elements
 
     We set up a connection to the configured server, send a query in JSON
