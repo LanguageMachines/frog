@@ -1530,7 +1530,7 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
     }
     args["xml:id"] = root->doc()->id() + ".p." + TiCC::toString(++p_count);
     folia::Paragraph *p;
-    if ( root->element_id() == folia::Text_t ){
+    if ( root->isinstance<folia::Text>() ){
       if  (options.debugFlag > 5 ){
 	DBG << "append_to_folia, add paragraph to Text" << endl;
       }
@@ -2713,7 +2713,7 @@ void FrogAPI::handle_one_text_parent( ostream& os,
 	}
 	else if ( sents.size() > 1 ){
 	  // multiple sentences. We need an extra Paragraph. when allowed
-	  if ( e->acceptable(folia::Paragraph_t) ){
+	  if ( e->acceptable<folia::Paragraph>() ){
 	    folia::KWargs p_args;
 	    string e_id = e->id();
 	    if ( !e_id.empty() ){
