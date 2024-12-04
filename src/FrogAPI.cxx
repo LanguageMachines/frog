@@ -2553,8 +2553,10 @@ void FrogAPI::handle_one_paragraph( ostream& os,
     a Paragraph may contain both Word and Sentence nodes
     if so, the Sentences should be handled separately
   */
-  vector<folia::Word*> wv = p->select<folia::Word>(false);
-  vector<folia::Sentence*> sv = p->select<folia::Sentence>(false);
+  vector<folia::Word*> wv
+    = p->select<folia::Word>(folia::SELECT_FLAGS::LOCAL);
+  vector<folia::Sentence*> sv
+    = p->select<folia::Sentence>(folia::SELECT_FLAGS::LOCAL);
   if ( options.debugFlag > 1 ){
     DBG << "found some Words " << wv << endl;
     DBG << "found some Sentences " << sv << endl;
@@ -2677,9 +2679,12 @@ void FrogAPI::handle_one_text_parent( ostream& os,
     // mabe <div> or <note> or such
     // there may be Paragraph, Word and Sentence nodes
     // if so, Paragraphs and Sentences should be handled separately
-    vector<folia::Word*> wv = e->select<folia::Word>(false);
-    vector<folia::Sentence*> sv = e->select<folia::Sentence>(false);
-    vector<folia::Paragraph*> pv = e->select<folia::Paragraph>(false);
+    vector<folia::Word*> wv
+      = e->select<folia::Word>(folia::SELECT_FLAGS::LOCAL);
+    vector<folia::Sentence*>
+      sv = e->select<folia::Sentence>(folia::SELECT_FLAGS::LOCAL);
+    vector<folia::Paragraph*>
+      pv = e->select<folia::Paragraph>(folia::SELECT_FLAGS::LOCAL);
     if ( options.debugFlag > 1 ){
       DBG << "found some Words " << wv << endl;
       DBG << "found some Sentences " << sv << endl;
@@ -3158,7 +3163,8 @@ vector<string> get_compound_analysis( folia::Word* word ){
     = word->annotations<folia::MorphologyLayer>( get_mbma_tagset( "mbma" ) );
   for ( const auto& layer : layers ){
     vector<folia::Morpheme*> m =
-      layer->select<folia::Morpheme>( get_mbma_tagset( "mbma" ), false );
+      layer->select<folia::Morpheme>( get_mbma_tagset( "mbma" ),
+				      folia::SELECT_FLAGS::LOCAL );
     if ( m.size() == 1 ) {
       // check for top layer compound
       folia::PosAnnotation *tag
@@ -3221,7 +3227,8 @@ vector<string> get_full_morph_analysis( folia::Word *word,
     = word->annotations<folia::MorphologyLayer>( get_mbma_tagset( "mbma" ) );
   for ( const auto& layer : layers ){
     vector<folia::Morpheme*> m =
-      layer->select<folia::Morpheme>( get_mbma_tagset( "mbma" ), false );
+      layer->select<folia::Morpheme>( get_mbma_tagset( "mbma" ),
+				      folia::SELECT_FLAGS::LOCAL );
     bool is_deep = false;
     if ( m.size() == 1 ) {
       // check for top layer from deep morph analysis
