@@ -9,7 +9,7 @@ on:
   push:
     branches:
       - master
-      - action
+      - develop
 
     paths:
       - configure.ac
@@ -58,18 +58,22 @@ jobs:
 
       - uses: LanguageMachines/ticcactions/cpp-submodule-build@v1
         with:
+          branch: ${{ github.ref_name }}
           module: ticcutils
 
       - uses: LanguageMachines/ticcactions/cpp-submodule-build@v1
         with:
+          branch: ${{ github.ref_name }}
           module: libfolia
 
       - uses: LanguageMachines/ticcactions/cpp-submodule-build@v1
         with:
+          branch: ${{ github.ref_name }}
           module: timbl
 
       - uses: LanguageMachines/ticcactions/cpp-submodule-build@v1
         with:
+          branch: ${{ github.ref_name }}
           module: mbt
 
       - uses: LanguageMachines/ticcactions/add-textcat@v1
@@ -80,6 +84,7 @@ jobs:
 
       - uses: LanguageMachines/ticcactions/cpp-submodule-build@v1
         with:
+          branch: ${{ github.ref_name }}
           module: ucto
 
       - uses: LanguageMachines/ticcactions/cpp-submodule-build@v1

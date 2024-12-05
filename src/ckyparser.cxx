@@ -107,7 +107,8 @@ CKYParser::CKYParser( size_t num,
   for ( const auto& constraint : constraints ){
     addConstraint( constraint );
   }
-  ckyLog = new TiCC::LogStream( log, "cky:" );
+  ckyLog = new TiCC::LogStream( log );
+  ckyLog->add_message( "cky:" );
 }
 
 

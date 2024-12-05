@@ -140,7 +140,9 @@ void usage( ) {
        << "\t -V or --version        Show version info.\n"
        << "\t -d <debug level>  (for more verbosity)\n"
        << "\t --debug=<module><level>,<module><level>... (eg --debug=l5,n3) \n"
-       << "\t                        Set debug value for Tagger (T), Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c),\n"
+       << "\t                        Set debug value for Tagger (T),"
+    " Tokenizer (t), Lemmatizer (l), Morphological Analyzer (a), Chunker (c),"
+    " or the internal Folia (F)\n"
        << "\t                        Multi-Word Units (m), Named Entity Recognition (n), or Parser (p)\n"
        << "\t -S <port>              Run as server instead of reading from testfile, using 'port' \n"
 #ifdef HAVE_OPENMP
@@ -217,13 +219,17 @@ int main(int argc, char *argv[]) {
     if ( system( remove_command.c_str() ) ){
       // nothing
     }
-    theErrLog = new TiCC::LogStream( cerr, "frog-", StampMessage );
+    theErrLog = new TiCC::LogStream( cerr );
+    theErrLog->set_message( "frog-" );
+    theErrLog->set_stamp( StampMessage );
     Opts.extract( "debugfile", db_filename );
     if ( db_filename.empty() ){
       db_filename = "frog." + randnum(8) + ".debug";
     }
     the_dbg_stream = new ofstream( db_filename );
-    theDbgLog = new TiCC::LogStream( *the_dbg_stream, "frog-", StampMessage );
+    theDbgLog = new TiCC::LogStream( *the_dbg_stream );
+    theDbgLog->set_message( "frog-" );
+    theDbgLog->set_stamp( StampMessage );
     FrogAPI frog( Opts, theErrLog, theDbgLog );
     if ( !frog.options.fileNames.empty() ) {
       frog.run_on_files();

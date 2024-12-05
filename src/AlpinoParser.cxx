@@ -52,7 +52,7 @@ using TiCC::operator<<;
 
 //#define DEBUG_ALPINO
 //#define DEBUG_MWU
-//#define DEBUG_EXTRACT
+#define DEBUG_EXTRACT
 
 const string alpino_tagset = "http://ilk.uvt.nl/folia/sets/alpino-parse-nl";
 const string alpino_mwu_tagset = "http://ilk.uvt.nl/folia/sets/alpino-mwu-nl";
@@ -101,7 +101,7 @@ bool AlpinoParser::init( const TiCC::Configuration& configuration ){
     int level;
     if ( TiCC::stringTo<int>( val, level ) ){
       if ( level > 5 ){
-	dbgLog->setlevel( LogLevel::LogDebug );
+	dbgLog->set_level( LogLevel::LogDebug );
       }
     }
   }
@@ -621,14 +621,14 @@ vector<parsrel> extract( const list<pair<const dp_tree*,const dp_tree*>>& l ){
     int pos = 0;
     int dep = 0;
     string rel;
-    if ( dep == 0 ){
+    if ( dependent == 0 ){
       // root node
       if ( head->word.empty() ){
 	if ( head->link
 	     && head->rel != "--" ){
 #ifdef DEBUG_EXTRACT
 	  cerr << "AHA   some special thing: " << head->rel << endl;
-	  cerr << "          IN            : " << it << endl;
+	  cerr << "          IN            : " << head << "-" << dependent << endl;
 #endif
 	  // not a word but an aggregate
 	  const dp_tree *my_head = extract_hd(head);

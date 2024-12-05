@@ -72,9 +72,11 @@ Mbma::Mbma( TiCC::LogStream *errlog, TiCC::LogStream *dbglog ):
     \param errlog the LogStream to use for Error messages
     \param dbglog the LogStream to use for Debug messages
   */
-  errLog = new TiCC::LogStream( errlog, "mbma-" );
+  errLog = new TiCC::LogStream( errlog );
+  errLog->add_message( "mbma-" );
   if ( dbglog ){
-    dbgLog = new TiCC::LogStream( dbglog, "mbma-" );
+    dbgLog = new TiCC::LogStream( dbglog );
+    dbgLog->add_message( "mbma-" );
   }
   else {
     dbgLog = errLog;

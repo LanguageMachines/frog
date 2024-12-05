@@ -180,6 +180,7 @@ FrogOptions::FrogOptions():
   inputclass("current"),
   outputclass("current"),
   textredundancy("minimal"),
+  debug_folia( "NODEBUG" ),
   correct_words(false),
   maxParserTokens(500) // 500 words in a sentence is already insane
   // needs about 16 Gb memory to parse!
@@ -395,38 +396,43 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
       char mod = val[0];
       string value = val.substr(1);
       int dbval = 0;
-      if ( !TiCC::stringTo<int>( value, dbval ) ){
-	cerr << "expected integer value for --debug=" << mod << value << endl;
-	return false;
+      if ( mod == 'F' ) {
+	options.debug_folia = value;
       }
-      switch ( mod ){
-      case 'T':
-	configuration.setatt( "debug", value, "tagger" );
-	break;
-      case 't':
-	configuration.setatt( "debug", value, "tokenizer" );
-	break;
-      case 'l':
-	configuration.setatt( "debug", value, "mblem" );
-	break;
-      case 'a':
-	configuration.setatt( "debug", value, "mbma" );
-	break;
-      case 'm':
-	configuration.setatt( "debug", value, "mwu" );
-	break;
-      case 'c':
-	configuration.setatt( "debug", value, "IOB" );
-	break;
-      case 'n':
-	configuration.setatt( "debug", value, "NER" );
-	break;
-      case 'p':
-	configuration.setatt( "debug", value, "parser" );
-	break;
-      default:
-	cerr << "unknown module code:'" << mod << "'" << endl;
-	return false;
+      else {
+	if ( !TiCC::stringTo<int>( value, dbval ) ){
+	  cerr << "expected integer value for --debug=" << mod << value << endl;
+	  return false;
+	}
+	switch ( mod ){
+	case 'T':
+	  configuration.setatt( "debug", value, "tagger" );
+	  break;
+	case 't':
+	  configuration.setatt( "debug", value, "tokenizer" );
+	  break;
+	case 'l':
+	  configuration.setatt( "debug", value, "mblem" );
+	  break;
+	case 'a':
+	  configuration.setatt( "debug", value, "mbma" );
+	  break;
+	case 'm':
+	  configuration.setatt( "debug", value, "mwu" );
+	  break;
+	case 'c':
+	  configuration.setatt( "debug", value, "IOB" );
+	  break;
+	case 'n':
+	  configuration.setatt( "debug", value, "NER" );
+	  break;
+	case 'p':
+	  configuration.setatt( "debug", value, "parser" );
+	  break;
+	default:
+	  cerr << "unknown module code:'" << mod << "'" << endl;
+	  return false;
+	}
       }
     }
   }
@@ -1408,6 +1414,8 @@ folia::FoliaElement* FrogAPI::start_document( const string& id,
     \return a pointer to the top \<text\> node of the Document.
    */
   doc = new folia::Document( "xml:id='" + id + "'" );
+  //  cerr << "options.debug_folia=" << options.debug_folia << endl;
+  doc->setdebug(options.debug_folia );
   doc->addStyle( "text/xsl", "folia.xsl" );
   if ( options.debugFlag > 1 ){
     DBG << "start document!!!" << endl;
@@ -1522,7 +1530,7 @@ folia::FoliaElement *FrogAPI::append_to_folia( folia::FoliaElement *root,
     }
     args["xml:id"] = root->doc()->id() + ".p." + TiCC::toString(++p_count);
     folia::Paragraph *p;
-    if ( root->element_id() == folia::Text_t ){
+    if ( root->isinstance<folia::Text>() ){
       if  (options.debugFlag > 5 ){
 	DBG << "append_to_folia, add paragraph to Text" << endl;
       }
@@ -2545,8 +2553,10 @@ void FrogAPI::handle_one_paragraph( ostream& os,
     a Paragraph may contain both Word and Sentence nodes
     if so, the Sentences should be handled separately
   */
-  vector<folia::Word*> wv = p->select<folia::Word>(false);
-  vector<folia::Sentence*> sv = p->select<folia::Sentence>(false);
+  vector<folia::Word*> wv
+    = p->select<folia::Word>(folia::SELECT_FLAGS::LOCAL);
+  vector<folia::Sentence*> sv
+    = p->select<folia::Sentence>(folia::SELECT_FLAGS::LOCAL);
   if ( options.debugFlag > 1 ){
     DBG << "found some Words " << wv << endl;
     DBG << "found some Sentences " << sv << endl;
@@ -2669,9 +2679,12 @@ void FrogAPI::handle_one_text_parent( ostream& os,
     // mabe <div> or <note> or such
     // there may be Paragraph, Word and Sentence nodes
     // if so, Paragraphs and Sentences should be handled separately
-    vector<folia::Word*> wv = e->select<folia::Word>(false);
-    vector<folia::Sentence*> sv = e->select<folia::Sentence>(false);
-    vector<folia::Paragraph*> pv = e->select<folia::Paragraph>(false);
+    vector<folia::Word*> wv
+      = e->select<folia::Word>(folia::SELECT_FLAGS::LOCAL);
+    vector<folia::Sentence*>
+      sv = e->select<folia::Sentence>(folia::SELECT_FLAGS::LOCAL);
+    vector<folia::Paragraph*>
+      pv = e->select<folia::Paragraph>(folia::SELECT_FLAGS::LOCAL);
     if ( options.debugFlag > 1 ){
       DBG << "found some Words " << wv << endl;
       DBG << "found some Sentences " << sv << endl;
@@ -2705,7 +2718,7 @@ void FrogAPI::handle_one_text_parent( ostream& os,
 	}
 	else if ( sents.size() > 1 ){
 	  // multiple sentences. We need an extra Paragraph. when allowed
-	  if ( e->acceptable(folia::Paragraph_t) ){
+	  if ( e->acceptable<folia::Paragraph>() ){
 	    folia::KWargs p_args;
 	    string e_id = e->id();
 	    if ( !e_id.empty() ){
@@ -2816,6 +2829,8 @@ folia::Document *FrogAPI::run_folia_engine( const string& infilename,
   }
   else {
     folia::Document &doc = *engine.doc();
+    //    cerr << "options.debug_folia=" << options.debug_folia << endl;
+    doc.setdebug( options.debug_folia );
     string def_lang = tokenizer->default_language();
     if ( !def_lang.empty() ){
       if ( doc.metadata_type() == "native" ){
@@ -3148,7 +3163,8 @@ vector<string> get_compound_analysis( folia::Word* word ){
     = word->annotations<folia::MorphologyLayer>( get_mbma_tagset( "mbma" ) );
   for ( const auto& layer : layers ){
     vector<folia::Morpheme*> m =
-      layer->select<folia::Morpheme>( get_mbma_tagset( "mbma" ), false );
+      layer->select<folia::Morpheme>( get_mbma_tagset( "mbma" ),
+				      folia::SELECT_FLAGS::LOCAL );
     if ( m.size() == 1 ) {
       // check for top layer compound
       folia::PosAnnotation *tag
@@ -3211,7 +3227,8 @@ vector<string> get_full_morph_analysis( folia::Word *word,
     = word->annotations<folia::MorphologyLayer>( get_mbma_tagset( "mbma" ) );
   for ( const auto& layer : layers ){
     vector<folia::Morpheme*> m =
-      layer->select<folia::Morpheme>( get_mbma_tagset( "mbma" ), false );
+      layer->select<folia::Morpheme>( get_mbma_tagset( "mbma" ),
+				      folia::SELECT_FLAGS::LOCAL );
     bool is_deep = false;
     if ( m.size() == 1 ) {
       // check for top layer from deep morph analysis

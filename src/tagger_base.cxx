@@ -56,9 +56,11 @@ BaseTagger::BaseTagger( TiCC::LogStream *errlog,
   tagger(NULL),
   filter(NULL)
 {
-  err_log = new TiCC::LogStream( errlog, _label + "-tagger-" );
+  err_log = new TiCC::LogStream( errlog );
+  err_log->set_message( _label + "-tagger-" );
   if ( dbglog ){
-    dbg_log = new TiCC::LogStream( dbglog, _label + "-tagger-" );
+    dbg_log = new TiCC::LogStream( dbglog );
+    dbg_log->set_message( _label + "-tagger-" );
   }
   else {
     dbg_log = err_log;
@@ -148,22 +150,22 @@ bool BaseTagger::init( const TiCC::Configuration& config ){
   switch ( debug ){
   case 0:
   case 1:
-    dbg_log->setlevel(LogSilent);
+    dbg_log->set_level(LogSilent);
     break;
   case 2:
-    dbg_log->setlevel(LogNormal);
+    dbg_log->set_level(LogNormal);
     break;
   case 3:
   case 4:
-    dbg_log->setlevel(LogDebug);
+    dbg_log->set_level(LogDebug);
     break;
   case 5:
   case 6:
   case 7:
-    dbg_log->setlevel(LogHeavy);
+    dbg_log->set_level(LogHeavy);
     break;
   default:
-    dbg_log->setlevel(LogExtreme);
+    dbg_log->set_level(LogExtreme);
   }
   string settings;
   if ( _host.empty() ){
@@ -348,7 +350,7 @@ vector<TagResult> BaseTagger::call_server( const vector<tag_entry>& tv ) const {
   /// Connect to a MBT server, send and receive JSON and translate to a
   /// TagResult list
   /*!
-    \param tv the tag_entry we would like to be seviced
+    \param tv the tag_entry we would like to be serviced
     \return a vector of TagResult elements
 
     We set up a connection to the configured server, send a query in JSON

@@ -44,7 +44,7 @@ enum dirType { ROOT, LEFT, RIGHT, ERROR };
 class Constraint {
  public:
   enum ConstraintType { Incoming, Dependency, Direction };
- Constraint( double w, int i ): weight(w),tokenIndex(i){
+  Constraint( double w, int i ): weight(w),tokenIndex(i){
   };
   virtual ~Constraint(){};
   virtual void put( std::ostream& os ) const {

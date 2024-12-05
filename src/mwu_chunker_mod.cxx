@@ -87,8 +87,10 @@ Mwu::Mwu( TiCC::LogStream *err_log, TiCC::LogStream *dbg_log ){
 
     a call to Mwu::init() is needed to be able to use the Mwu classifier
    */
-  errLog = new TiCC::LogStream( err_log, "mwu-" );
-  dbgLog = new TiCC::LogStream( dbg_log, "mwu-" );
+  errLog = new TiCC::LogStream( err_log );
+  errLog->add_message( "mwu-" );
+  dbgLog = new TiCC::LogStream( dbg_log );
+  dbgLog->add_message( "mwu-" );
   filter = 0;
 }
 

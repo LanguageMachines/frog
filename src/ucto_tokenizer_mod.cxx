@@ -59,9 +59,11 @@ UctoTokenizer::UctoTokenizer( TiCC::LogStream *err_log,
   */
   tokenizer = 0;
   cur_is = 0;
-  errLog = new TiCC::LogStream( err_log, "tok-" );
+  errLog = new TiCC::LogStream( err_log );
+  errLog->add_message( "tok-" );
   if ( dbg_log ){
-    dbgLog = new TiCC::LogStream( dbg_log, "tok-" );
+    dbgLog = new TiCC::LogStream( dbg_log );
+    dbgLog->add_message( "tok-" );
   }
   else {
     dbgLog = errLog;
