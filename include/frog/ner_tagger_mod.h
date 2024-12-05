@@ -39,7 +39,7 @@
 #include "libfolia/folia.h"
 #include "frog/tagger_base.h"
 
-typedef std::pair<icu::UnicodeString,double> tc_pair;
+using tc_pair = std::pair<icu::UnicodeString,double>;
 
 /// \brief a specialization of Basetagger to tag Named Entities
 class NERTagger: public BaseTagger {
