@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.69])
 #also adapt version number in codemeta.json
-AC_INIT([frog],[0.34],[lamasoftware@science.ru.nl]) #adapt version number in codemeta.json as well
+AC_INIT([frog],[0.35],[lamasoftware@science.ru.nl]) #adapt version number in codemeta.json as well
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_MACRO_DIR([m4])
