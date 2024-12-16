@@ -1,3 +1,11 @@
+0.34 - 2024-04-26
+[Ko van der Sloot]
+* require C++17
+* require latest ticcutils and libfolia
+* some code refactoring
+* improved GitHub CI
+* removed dependency on libtar
+
 0.33 - 2024-04-26
 [Ko van der Sloot]
 * --KANON was not always hounored
