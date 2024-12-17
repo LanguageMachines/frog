@@ -395,11 +395,11 @@ bool FrogAPI::collect_options( TiCC::CL_Options& Opts,
     for ( const auto& val : vec ){
       char mod = val[0];
       string value = val.substr(1);
-      int dbval = 0;
       if ( mod == 'F' ) {
 	options.debug_folia = value;
       }
       else {
+	int dbval = 0;
 	if ( !TiCC::stringTo<int>( value, dbval ) ){
 	  cerr << "expected integer value for --debug=" << mod << value << endl;
 	  return false;
