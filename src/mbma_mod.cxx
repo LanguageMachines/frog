@@ -296,7 +296,7 @@ bool Mbma::init( const TiCC::Configuration& config ) {
   }
 }
 
-vector<UnicodeString> Mbma::make_instances( const UnicodeString& word ){
+vector<UnicodeString> Mbma::make_instances( const icu::UnicodeString& word ){
   /// convert a Unicode string into a range of UTF8 instances for Timbl
   /*!
     \param word the UnicodeString representing 1 word to analyze
@@ -859,8 +859,8 @@ void Mbma::store_morphemes( frog_record& fd,
 }
 
 void Mbma::store_brackets( frog_record& fd,
-			   const UnicodeString& wrd,
-			   const UnicodeString& head,
+			   const icu::UnicodeString& wrd,
+			   const icu::UnicodeString& head,
 			   bool unanalysed ) const {
   if (debugFlag > 1){
     DBG << "store_brackets(" << wrd << "," << head << ")" << endl;
@@ -923,7 +923,7 @@ void Mbma::store_brackets( frog_record& fd,
 }
 
 void Mbma::store_brackets( frog_record& fd,
-			   const UnicodeString& orig_word,
+			   const icu::UnicodeString& orig_word,
 			   const BracketNest *brackets ) const {
   if (debugFlag > 1){
     DBG << "store_brackets(" << fd.word << "," << orig_word

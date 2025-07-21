@@ -298,7 +298,7 @@ BracketLeaf::BracketLeaf( const RulePart& p,
 }
 
 BracketLeaf::BracketLeaf( CLEX::Type t,
-			  const UnicodeString& morpheme,
+			  const icu::UnicodeString& morpheme,
 			  int debug_flag,
 			  TiCC::LogStream& l ):
   BaseBracket( t, vector<CLEX::Type>(), debug_flag, l ),
@@ -787,7 +787,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 
 folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 					      const string& textclass,
-					      UnicodeString& desc,
+					      icu::UnicodeString& desc,
 					      int& cnt ) const {
   /// use the data in the Leaf to create a folia::Morpheme node
   /*!
@@ -968,7 +968,7 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
 
 folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
 					      const string& textclass,
-					      UnicodeString& desc,
+					      icu::UnicodeString& desc,
 					      int& cnt ) const {
   /// use the data in the Leaf to create a folia::Morpheme node
   /*!
