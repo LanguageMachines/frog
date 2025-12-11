@@ -1,6 +1,6 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  Copyright (c) 2006 - 2024
+  Copyright (c) 2006 - 2026
   CLST  - Radboud University
   ILK   - Tilburg University
 
@@ -166,7 +166,7 @@ bool NERTagger::fill_ners( const string& cat,
 
 bool NERTagger::read_gazets( const string& name,
 			     const string& config_dir,
-			     vector<map<UnicodeString,set<string>>>& ners ){
+			     vector<map<icu::UnicodeString,set<string>>>& ners ){
   /// fill known Named Entities from a list of gazeteer files
   /*!
     \param name the filename to read the gazeteer info from
@@ -248,8 +248,8 @@ static vector<UnicodeString> serialize( const vector<set<string>>& stags ){
   return ambitags;
 }
 
-vector<UnicodeString> NERTagger::create_ner_list( const vector<UnicodeString>& words,
-						  const vector<map<UnicodeString,set<string>>>& ners ){
+vector<UnicodeString> NERTagger::create_ner_list( const vector<icu::UnicodeString>& words,
+						  const vector<map<icu::UnicodeString,set<string>>>& ners ){
   /// create a list of ambitags given a range of words
   /*!
     \param words a sentence as a list of words

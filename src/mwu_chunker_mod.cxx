@@ -1,6 +1,6 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  Copyright (c) 2006 - 2024
+  Copyright (c) 2006 - 2026
   CLST  - Radboud University
   ILK   - Tilburg University
 
@@ -51,7 +51,7 @@ using icu::UnicodeString;
 #define LOG *TiCC::Log(errLog)
 #define DBG *TiCC::Log(dbgLog)
 
-mwuAna::mwuAna( const UnicodeString& wrd,
+mwuAna::mwuAna( const icu::UnicodeString& wrd,
 		bool glue_tag,
 		size_t index ):
   mwu_start( index ),

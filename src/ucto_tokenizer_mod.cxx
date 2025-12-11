@@ -1,6 +1,6 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  Copyright (c) 2006 - 2024
+  Copyright (c) 2006 - 2026
   CLST  - Radboud University
   ILK   - Tilburg University
 
@@ -582,8 +582,8 @@ vector<Tokenizer::Token> UctoTokenizer::tokenize_data( const string& buffer,
   return tokenize_line( us, lang );
 }
 
-vector<Tokenizer::Token> UctoTokenizer::tokenize_line( const UnicodeString& buffer,
-						       const string& lang ){
+vector<Tokenizer::Token> UctoTokenizer::tokenize_line( const icu::UnicodeString& buffer,
+						       const std::string& lang ){
   /// tokenize a buffer using a specific language
   /*!
     \param buffer a (possible long) sequence of characters

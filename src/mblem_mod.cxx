@@ -1,6 +1,6 @@
 /* ex: set tabstop=8 expandtab: */
 /*
-  Copyright (c) 2006 - 2024
+  Copyright (c) 2006 - 2026
   CLST  - Radboud University
   ILK   - Tilburg University
 
@@ -549,10 +549,10 @@ UnicodeString Mblem::call_server( const UnicodeString& instance ){
   return TiCC::UnicodeFromUTF8(result);
 }
 
-void Mblem::Classify( const UnicodeString& uWord ){
+void Mblem::Classify( const icu::UnicodeString& uWord ){
   /// give the lemma for 1 word
   /*!
-    \param word a Unicode string with the word
+    \param uWord a Unicode string with the word
     the internal mblemResult struct will be filled with 1 or more (alternative)
     solutions of a lemma + a POS-tag
   */
