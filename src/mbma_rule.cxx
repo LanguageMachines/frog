@@ -30,6 +30,7 @@
 */
 
 #include "frog/mbma_rule.h"
+#include "frog/mbma_mod.h"
 
 #include <string>
 #include <vector>
@@ -46,8 +47,6 @@ using TiCC::operator<<;
 
 #define LOG *TiCC::Log(myLog)
 #define DBG *TiCC::Log(dbgLog)
-
-extern icu::UnicodeString flatten( const icu::UnicodeString& );
 
 bool RulePart::isBasic() const {
   return is_CELEX_base( ResultClass );

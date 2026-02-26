@@ -114,6 +114,7 @@ class Mbma {
   TiCC::LogStream *errLog;
   TiCC::LogStream *dbgLog;
   TiCC::UniFilter *filter;
+  mutable TiCC::UnicodeNormalizer _normalizer;
   std::string _host;
   std::string _port;
   std::string _base;

@@ -62,7 +62,7 @@ namespace CLEX {
   };
   bool is_CELEX_base( const Type& );
   Type select_tag( const char ch );
-  std::string toString( const Type& );
+  icu::UnicodeString toString( const Type& );
   icu::UnicodeString toUnicodeString( const Type& );
   Type toCLEX( const icu::UnicodeString& );
   Type toCLEX( const UChar );

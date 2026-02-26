@@ -113,7 +113,7 @@ string toString( const Compound::Type& ct ){
   return "DEADLY";
 }
 
-Compound::Type stringToCompound( const string& s ){
+Compound::Type stringToCompound( const UnicodeString& s ){
   /// give the Compound::Type for this string
   if ( s == "NN" ){
     return Compound::Type::NN;
@@ -196,11 +196,11 @@ Compound::Type stringToCompound( const string& s ){
   else if ( s == "VV" ){
     return  Compound::Type::VV;
   }
-  else if ( s.empty() || s == "none" ){
+  else if ( s.isEmpty() || s == "none" ){
     return  Compound::Type::NONE;
   }
   else {
-    throw runtime_error( "no such compound:" + s );
+    throw runtime_error( "no such compound:" + TiCC::UnicodeToUTF8(s) );
   }
 }
 
@@ -532,7 +532,7 @@ Compound::Type construct( const vector<CLEX::Type>& tags ){
     \param tags a list of CLEX::Types
     \return a Compound::Type
   */
-  string s;
+  UnicodeString s;
   for ( const auto& t : tags ){
     s += toString( t );
   }
@@ -799,6 +799,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   */
   folia::Morpheme *result = 0;
   desc.remove();
+  TiCC::UnicodeNormalizer UN;
   int pos = _orig.indexOf( "^" );
   bool glue = ( pos != -1 );
   string m_class = toString( _status );
@@ -861,22 +862,22 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     args["set"] = Mbma::clex_tagset;
     if ( glue ){
       UnicodeString next_tag = _orig[pos+1];
-      args["class"] = TiCC::UnicodeToUTF8(next_tag);
+      args["class"] = TiCC::UnicodeToUTF8(next_tag,UN);
       desc = "[" + _morph + "]" + CLEX::get_tag_descr( CLEX::toCLEX(next_tag) );
       // spread the word upwards!
     }
     else {
-      args["class"] = toString( tag() );
+      args["class"] = TiCC::UnicodeToUTF8(toString(tag()), UN );
       desc = "[" + _morph + "]" + CLEX::get_tag_descr( tag() );
       // spread the word upwards!
       folia::KWargs fargs;
       fargs["subset"] = "structure";
       if ( tag() == CLEX::SPEC
 	   || tag() == CLEX::LET ){
-	fargs["class"] = TiCC::UnicodeToUTF8("[" + _morph + "]");
+	fargs["class"] = TiCC::UnicodeToUTF8("[" + _morph + "]",UN);
       }
       else {
-	fargs["class"] = TiCC::UnicodeToUTF8(desc);
+	fargs["class"] = TiCC::UnicodeToUTF8(desc,UN);
       }
 #pragma omp critical (foliaupdate)
       {
@@ -891,7 +892,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   else if ( _status == Status::PARTICLE ){
     folia::KWargs args;
     args["set"] = Mbma::clex_tagset;
-    args["class"] = toString( tag() );
+    args["class"] = TiCC::UnicodeToUTF8(toString( tag() ), UN );
 #pragma omp critical (foliaupdate)
     {
       result->addPosAnnotation( args );
@@ -916,7 +917,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 	UnicodeString d = CLEX::get_inflect_descr(inf);
 	if ( !d.isEmpty() ){
 	  // happens sometimes when there is fawlty data
-	  args["class"] = TiCC::UnicodeToUTF8(d);
+	  args["class"] = TiCC::UnicodeToUTF8(d,UN);
 	  desc += "/" + d;
 #pragma omp critical (foliaupdate)
 	  {
@@ -945,7 +946,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     // now we add the description as a feature
     folia::KWargs args;
     args["subset"] = "structure";
-    args["class"]  = TiCC::UnicodeToUTF8(desc);
+    args["class"]  = TiCC::UnicodeToUTF8(desc,UN);
 #pragma omp critical (foliaupdate)
     {
       result->add_child<folia::Feature>( args );
@@ -978,6 +979,7 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
     \param cnt a counter for the number of handled morphemes
   */
   folia::Morpheme *result = 0;
+  TiCC::UnicodeNormalizer UN;
   folia::KWargs args;
   args["class"] = "complex";
   args["set"] = Mbma::mbma_tagset;
@@ -1000,7 +1002,7 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
       if ( !it->original().isEmpty() ){
 	args.clear();
 	args["subset"] = "applied_rule";
-	args["class"] = TiCC::UnicodeToUTF8(it->original());
+	args["class"] = TiCC::UnicodeToUTF8(it->original(),UN);
 #pragma omp critical (foliaupdate)
 	{
 	  result->add_child<folia::Feature>( args );
@@ -1022,14 +1024,14 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
   if ( desc.isEmpty() ){
     desc = "XYZ";
   }
-  args["class"] = TiCC::UnicodeToUTF8(desc);
+  args["class"] = TiCC::UnicodeToUTF8(desc,UN);
 #pragma omp critical (foliaupdate)
   {
     result->add_child<folia::Feature>( args );
   }
   args.clear();
   args["set"] = Mbma::clex_tagset;
-  args["class"] = toString( tag() );
+  args["class"] = TiCC::UnicodeToUTF8(toString( tag() ), UN);
   folia::PosAnnotation *pos = 0;
 #pragma omp critical (foliaupdate)
   {

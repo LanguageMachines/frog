@@ -130,8 +130,8 @@ namespace CLEX {
     return toCLEX(s);
   }
 
-  string toString( const Type& t ){
-    /// convert a CLEX::Type to a string
+  UnicodeString toString( const Type& t ){
+    /// convert a CLEX::Type to a UnicodeString
     /*!
       \param t a CLEX::Type value
       \return a string representing the type, in a format that can be converted
@@ -163,7 +163,7 @@ namespace CLEX {
   }
 
   UnicodeString toUnicodeString( const Type& t ){
-    return TiCC::UnicodeFromUTF8( toString( t ) );
+    return toString( t );
   }
 
   bool is_CELEX_base( const Type& t ){

@@ -984,8 +984,8 @@ parseData Parser::prepareParse( frog_data& fd ){         //     |
 }
 
 
-vector<timbl_result> timbl( Timbl::TimblAPI* tim,
-			    const vector<UnicodeString>& instances ){
+vector<timbl_result> Parser::timbl( Timbl::TimblAPI* tim,
+				    const vector<UnicodeString>& instances ){
   /// call a Timbl experiment with a list of instances
   /*!
     \param tim The Timbl to use
@@ -997,7 +997,7 @@ vector<timbl_result> timbl( Timbl::TimblAPI* tim,
   for ( const auto& inst : instances ){
     const Timbl::ClassDistribution *db;
     const Timbl::TargetValue *tv = tim->Classify( inst, db );
-    result.push_back( timbl_result( TiCC::UnicodeToUTF8(tv->name()),
+    result.push_back( timbl_result( TiCC::UnicodeToUTF8(tv->name(),_normalizer),
 				    db->Confidence(tv), *db ) );
   }
   return result;
@@ -1073,7 +1073,7 @@ vector<timbl_result> Parser::timbl_server( const string& base,
   query["command"] = "classify";
   json arr = json::array();
   for ( const auto& inst : instances ){
-    arr.push_back( TiCC::UnicodeToUTF8(inst) );
+    arr.push_back( TiCC::UnicodeToUTF8(inst,_normalizer) );
   }
   query["params"] = arr;
   DBG << "send json" << query.dump(2) << endl;

@@ -82,6 +82,7 @@ class ParserBase {
   std::string MWU_tagset;
   std::string textclass;
   TiCC::UniFilter *filter;
+  TiCC::UnicodeNormalizer _normalizer;
   std::string _host;
   std::string _port;
 };
@@ -107,6 +108,8 @@ public:
   std::vector<icu::UnicodeString> createRelInstances( const parseData& );
   std::vector<timbl_result> timbl_server( const std::string&,
 					  const std::vector<icu::UnicodeString>& );
+  std::vector<timbl_result> timbl( Timbl::TimblAPI *,
+				   const std::vector<UnicodeString>& );
   Parser( const Parser& ) = delete; // inhibit copies
   Parser operator=( const Parser& ) = delete; // inhibit copies
   std::string maxDepSpanS;

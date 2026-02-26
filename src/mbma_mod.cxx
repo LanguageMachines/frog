@@ -587,7 +587,7 @@ void Mbma::filterHeadTag( const icu::UnicodeString& head ){
   if ( tagIt == TAGconv.end() ) {
     // this should never happen
     throw folia::ValueError( "1 unknown head feature '"
-			     + TiCC::UnicodeToUTF8(head) + "'" );
+			     + TiCC::UnicodeToUTF8(head,_normalizer) + "'" );
   }
   UnicodeString celex_tag = tagIt->second;
   if (debugFlag > 1){
@@ -874,7 +874,7 @@ void Mbma::store_brackets( frog_record& fd,
     if ( tagIt == TAGconv.end() ) {
       // this should never happen
       throw logic_error( "2 unknown head feature '"
-			 + TiCC::UnicodeToUTF8( head ) + "'" );
+			 + TiCC::UnicodeToUTF8( head, _normalizer ) + "'" );
     }
     CLEX::Type clex_tag = CLEX::toCLEX( tagIt->second );
     if (debugFlag > 1){
@@ -936,13 +936,14 @@ void Mbma::store_brackets( frog_record& fd,
   return;
 }
 
-UnicodeString flatten( const UnicodeString& in ){
+UnicodeString flatten( const UnicodeString& in ) {
   /// helper function to 'flatten out' bracketed morpheme strings
   /*!
     \param in a bracketed string of morphemes
     \return a string with multiple '[' and ']' reduced to single occurrences
   */
-  string s = TiCC::UnicodeToUTF8( in );
+  TiCC::UnicodeNormalizer UN;
+  string s = TiCC::UnicodeToUTF8( in, UN );
   string::size_type bpos = s.find_first_not_of( " [" );
   //  deb << "  FLATTEN: '" << s << "'" << endl;
   string result;
@@ -967,7 +968,7 @@ UnicodeString flatten( const UnicodeString& in ){
     result = s;
   }
   //  deb << "FLATTENED: '" << result << "'" << endl;
-  return TiCC::UnicodeFromUTF8(result);
+  return TiCC::UnicodeFromUTF8(result,UN);
 }
 
 void Mbma::storeResult( frog_record& fd,
@@ -1096,7 +1097,7 @@ void Mbma::call_server( const vector<UnicodeString>& insts,
   query["command"] = "classify";
   json arr = json::array();
   for ( const auto& i : insts ){
-    arr.push_back( TiCC::UnicodeToUTF8(i) );
+    arr.push_back( TiCC::UnicodeToUTF8(i,_normalizer) );
   }
   query["params"] = arr;
   //  LOG << "send json" << query.dump(2) << endl;
@@ -1117,11 +1118,11 @@ void Mbma::call_server( const vector<UnicodeString>& insts,
   //  LOG << "received json data:" << response.dump(2) << endl;
   assert( response.size() == insts.size() );
   if ( response.size() == 1 ){
-    classes.push_back( TiCC::UnicodeFromUTF8(response["category"]) );
+    classes.push_back( TiCC::UnicodeFromUTF8(response["category"],_normalizer) );
   }
   else {
     for ( const auto& it : response.items() ){
-      classes.push_back( TiCC::UnicodeFromUTF8(it.value()["category"]) );
+      classes.push_back( TiCC::UnicodeFromUTF8(it.value()["category"],_normalizer) );
     }
   }
 }

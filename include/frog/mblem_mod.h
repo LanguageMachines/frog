@@ -94,6 +94,7 @@ class Mblem {
   TiCC::LogStream *errLog;
   TiCC::LogStream *dbgLog;
   TiCC::UniFilter *filter;
+  mutable TiCC::UnicodeNormalizer _normalizer;
   Mblem( const Mblem& ) = delete;
   Mblem& operator=( const Mblem& ) = delete;
 };

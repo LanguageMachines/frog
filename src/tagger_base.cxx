@@ -268,7 +268,7 @@ void BaseTagger::add_provenance( folia::Document& doc,
   add_declaration( doc, proc );
 }
 
-json create_json( const vector<tag_entry>& tv ){
+json BaseTagger::create_json( const vector<tag_entry>& tv ) const {
   /// output a vector of tag_entry structs as JSON
   /*!
     \param tv The vector of tag_entry elements, filled by the tagger
@@ -279,9 +279,9 @@ json create_json( const vector<tag_entry>& tv ){
   json arr = json::array();
   for ( const auto& it : tv ){
     json one_entry;
-    one_entry["word"] = TiCC::UnicodeToUTF8(it.word);
+    one_entry["word"] = TiCC::UnicodeToUTF8(it.word,_normalizer);
     if ( !it.enrichment.isEmpty() ){
-      one_entry["enrichment"] = TiCC::UnicodeToUTF8(it.enrichment);
+      one_entry["enrichment"] = TiCC::UnicodeToUTF8(it.enrichment,_normalizer);
     }
     arr.push_back( one_entry );
   }
@@ -289,7 +289,7 @@ json create_json( const vector<tag_entry>& tv ){
   return result;
 }
 
-vector<TagResult> json_to_TR( const json& in ){
+vector<TagResult> BaseTagger::json_to_TR( const json& in ) const {
   /// convert a JSON structure to a vector of TagResult elements
   /*!
     \param in The input JSON
@@ -301,11 +301,11 @@ vector<TagResult> json_to_TR( const json& in ){
   vector<TagResult> result;
   for ( auto& i : in ){
     TagResult tr;
-    tr.set_word( TiCC::UnicodeFromUTF8(i["word"]) );
+    tr.set_word( TiCC::UnicodeFromUTF8(i["word"],_normalizer) );
     if ( i.find("known") != i.end() ){
       tr.set_known( i["known"] == "true" );
     }
-    tr.set_tag( TiCC::UnicodeFromUTF8(i["tag"]) );
+    tr.set_tag( TiCC::UnicodeFromUTF8(i["tag"],_normalizer) );
     if ( i.find("confidence") != i.end() ){
       tr.set_confidence( i["confidence"] );
     }
@@ -313,10 +313,10 @@ vector<TagResult> json_to_TR( const json& in ){
       tr.set_distance( i["distance"] );
     }
     if ( i.find("distribution") != i.end() ){
-      tr.set_distribution(  TiCC::UnicodeFromUTF8(i["distribution"]) );
+      tr.set_distribution(  TiCC::UnicodeFromUTF8(i["distribution"],_normalizer) );
     }
     if ( i.find("enrichment") != i.end() ){
-      tr.set_enrichment( TiCC::UnicodeFromUTF8(i["enrichment"]) );
+      tr.set_enrichment( TiCC::UnicodeFromUTF8(i["enrichment"],_normalizer) );
     }
     result.push_back( tr );
   }

@@ -206,7 +206,8 @@ bool Mblem::init( const TiCC::Configuration& config ) {
     }
   }
 
-  UnicodeString one_one_tagS = TiCC::UnicodeFromUTF8(config.lookUp( "one_one_tags", "mblem" ));
+  UnicodeString one_one_tagS
+    = TiCC::UnicodeFromUTF8(config.lookUp( "one_one_tags", "mblem" ), _normalizer );
   if ( !one_one_tagS.isEmpty() ){
     vector<UnicodeString> tags = TiCC::split_at( one_one_tagS, "," );
     for ( auto const& t : tags ){
@@ -527,7 +528,7 @@ UnicodeString Mblem::call_server( const UnicodeString& instance ){
   // create json query struct
   json query;
   query["command"] = "classify";
-  query["param"] = TiCC::UnicodeToUTF8(instance);
+  query["param"] = TiCC::UnicodeToUTF8(instance,_normalizer);
   //  LOG << "send json" << query.dump(2) << endl;
   // send it to the server
   string out_line = query.dump() + "\n";
@@ -546,7 +547,7 @@ UnicodeString Mblem::call_server( const UnicodeString& instance ){
   //  LOG << "received json data:" << response.dump(2) << endl;
   string result = response["category"];
   //  LOG << "extracted result " << result << endl;
-  return TiCC::UnicodeFromUTF8(result);
+  return TiCC::UnicodeFromUTF8(result,_normalizer);
 }
 
 void Mblem::Classify( const icu::UnicodeString& uWord ){
@@ -587,7 +588,7 @@ void Mblem::Classify( const icu::UnicodeString& uWord ){
       vector<UnicodeString> edits = TiCC::split_at( partS, "+" );
       if ( edits.empty() ){
 	throw runtime_error( "invalid editstring: "
-			     + TiCC::UnicodeToUTF8(partS ) );
+			     + TiCC::UnicodeToUTF8(partS,_normalizer ) );
       }
       restag = edits[0]; // the first one is the POS tag
 
@@ -711,7 +712,7 @@ void Mblem::add_lemmas( const vector<folia::Word*>& wv,
     folia::KWargs args;
     args["set"] = getTagset();
     for ( const auto& lemma : fd.units[i].lemmas ){
-      args["class"] = TiCC::UnicodeToUTF8(lemma);
+      args["class"] = TiCC::UnicodeToUTF8(lemma,_normalizer);
       if ( textclass != "current" ){
 	args["textclass"] = textclass;
       }
