@@ -123,6 +123,7 @@ class Mbma {
   bool doDeepMorph;
 };
 
-icu::UnicodeString flatten( const icu::UnicodeString& in );
+icu::UnicodeString flatten( const icu::UnicodeString&,
+			    TiCC::UnicodeNormalizer& );
 
 #endif

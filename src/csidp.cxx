@@ -164,13 +164,14 @@ vector<const Constraint*> formulateWCSP( const vector<timbl_result>& d_res,
 
 timbl_result::timbl_result( const string& cls,
 			    double conf,
-			    const Timbl::ClassDistribution& vd ):
+			    const Timbl::ClassDistribution& vd,
+			    TiCC::UnicodeNormalizer& norm ):
   _cls(cls),
   _confidence(conf)
 {
   for ( const auto& [dummy,val] : vd ){
-    _dist.push_back( make_pair( TiCC::UnicodeToUTF8(val->Value()->name()),
-				val->Weight()) );
+    _dist.push_back( make_pair(TiCC::UnicodeToUTF8(val->Value()->name(), norm),
+			       val->Weight()));
   }
 }
 

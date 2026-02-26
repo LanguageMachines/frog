@@ -242,8 +242,9 @@ ostream& operator<<( ostream& os, const Status& st ){
 
 BracketLeaf::BracketLeaf( const RulePart& p,
 			  int debug_flag,
-			  TiCC::LogStream& l ):
-  BaseBracket(p.ResultClass, p.RightHand, debug_flag, l ),
+			  TiCC::LogStream& l,
+			  TiCC::UnicodeNormalizer& norm ):
+  BaseBracket(p.ResultClass, p.RightHand, debug_flag, l, norm ),
   _glue(false),
   _morph(p.morpheme )
 {
@@ -300,8 +301,9 @@ BracketLeaf::BracketLeaf( const RulePart& p,
 BracketLeaf::BracketLeaf( CLEX::Type t,
 			  const icu::UnicodeString& morpheme,
 			  int debug_flag,
-			  TiCC::LogStream& l ):
-  BaseBracket( t, vector<CLEX::Type>(), debug_flag, l ),
+			  TiCC::LogStream& l,
+			  TiCC::UnicodeNormalizer& norm ):
+  BaseBracket( t, vector<CLEX::Type>(), debug_flag, l, norm ),
   _glue(false),
   _orig( toUnicodeString( t ) ),
   _morph( morpheme )
@@ -320,8 +322,9 @@ BracketLeaf::BracketLeaf( CLEX::Type t,
 BracketNest::BracketNest( CLEX::Type t,
 			  Compound::Type c,
 			  int debug_flag,
-			  TiCC::LogStream& l ):
-  BaseBracket( t, debug_flag, l ),
+			  TiCC::LogStream& l,
+			  TiCC::UnicodeNormalizer& norm ):
+  BaseBracket( t, debug_flag, l, norm ),
   _compound( c )
 {
   /// create a BracketNest object from a CLEX::Type and a CompoundType
@@ -799,7 +802,6 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   */
   folia::Morpheme *result = 0;
   desc.remove();
-  TiCC::UnicodeNormalizer UN;
   int pos = _orig.indexOf( "^" );
   bool glue = ( pos != -1 );
   string m_class = toString( _status );
@@ -862,22 +864,22 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     args["set"] = Mbma::clex_tagset;
     if ( glue ){
       UnicodeString next_tag = _orig[pos+1];
-      args["class"] = TiCC::UnicodeToUTF8(next_tag,UN);
+      args["class"] = TiCC::UnicodeToUTF8(next_tag,_normalizer);
       desc = "[" + _morph + "]" + CLEX::get_tag_descr( CLEX::toCLEX(next_tag) );
       // spread the word upwards!
     }
     else {
-      args["class"] = TiCC::UnicodeToUTF8(toString(tag()), UN );
+      args["class"] = TiCC::UnicodeToUTF8(toString(tag()), _normalizer );
       desc = "[" + _morph + "]" + CLEX::get_tag_descr( tag() );
       // spread the word upwards!
       folia::KWargs fargs;
       fargs["subset"] = "structure";
       if ( tag() == CLEX::SPEC
 	   || tag() == CLEX::LET ){
-	fargs["class"] = TiCC::UnicodeToUTF8("[" + _morph + "]",UN);
+	fargs["class"] = TiCC::UnicodeToUTF8("[" + _morph + "]",_normalizer);
       }
       else {
-	fargs["class"] = TiCC::UnicodeToUTF8(desc,UN);
+	fargs["class"] = TiCC::UnicodeToUTF8(desc,_normalizer);
       }
 #pragma omp critical (foliaupdate)
       {
@@ -892,7 +894,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
   else if ( _status == Status::PARTICLE ){
     folia::KWargs args;
     args["set"] = Mbma::clex_tagset;
-    args["class"] = TiCC::UnicodeToUTF8(toString( tag() ), UN );
+    args["class"] = TiCC::UnicodeToUTF8(toString( tag() ), _normalizer );
 #pragma omp critical (foliaupdate)
     {
       result->addPosAnnotation( args );
@@ -917,7 +919,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
 	UnicodeString d = CLEX::get_inflect_descr(inf);
 	if ( !d.isEmpty() ){
 	  // happens sometimes when there is fawlty data
-	  args["class"] = TiCC::UnicodeToUTF8(d,UN);
+	  args["class"] = TiCC::UnicodeToUTF8(d,_normalizer);
 	  desc += "/" + d;
 #pragma omp critical (foliaupdate)
 	  {
@@ -946,7 +948,7 @@ folia::Morpheme *BracketLeaf::createMorpheme( folia::Document *doc,
     // now we add the description as a feature
     folia::KWargs args;
     args["subset"] = "structure";
-    args["class"]  = TiCC::UnicodeToUTF8(desc,UN);
+    args["class"]  = TiCC::UnicodeToUTF8(desc,_normalizer);
 #pragma omp critical (foliaupdate)
     {
       result->add_child<folia::Feature>( args );
@@ -979,7 +981,6 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
     \param cnt a counter for the number of handled morphemes
   */
   folia::Morpheme *result = 0;
-  TiCC::UnicodeNormalizer UN;
   folia::KWargs args;
   args["class"] = "complex";
   args["set"] = Mbma::mbma_tagset;
@@ -1002,7 +1003,7 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
       if ( !it->original().isEmpty() ){
 	args.clear();
 	args["subset"] = "applied_rule";
-	args["class"] = TiCC::UnicodeToUTF8(it->original(),UN);
+	args["class"] = TiCC::UnicodeToUTF8(it->original(),_normalizer);
 #pragma omp critical (foliaupdate)
 	{
 	  result->add_child<folia::Feature>( args );
@@ -1024,14 +1025,14 @@ folia::Morpheme *BracketNest::createMorpheme( folia::Document *doc,
   if ( desc.isEmpty() ){
     desc = "XYZ";
   }
-  args["class"] = TiCC::UnicodeToUTF8(desc,UN);
+  args["class"] = TiCC::UnicodeToUTF8(desc,_normalizer);
 #pragma omp critical (foliaupdate)
   {
     result->add_child<folia::Feature>( args );
   }
   args.clear();
   args["set"] = Mbma::clex_tagset;
-  args["class"] = TiCC::UnicodeToUTF8(toString( tag() ), UN);
+  args["class"] = TiCC::UnicodeToUTF8(toString( tag() ), _normalizer );
   folia::PosAnnotation *pos = 0;
 #pragma omp critical (foliaupdate)
   {
@@ -1098,7 +1099,8 @@ list<BaseBracket*>::const_iterator BracketNest::resolveAffix( list<BaseBracket*>
       BracketNest *tmp = new BracketNest( (*rpos)->tag(),
 					  Compound::Type::NONE,
 					  debugFlag,
-					  myLog );
+					  myLog,
+					  _normalizer );
       for ( size_t j = 0; j < len; ++j ){
 	tmp->append( *it );
 	if ( debugFlag > 5 ){
@@ -1137,7 +1139,8 @@ void BracketNest::resolveNouns( ){
       if ( (*prev)->compound() == Compound::Type::NN ){
 	newt = Compound::Type::NNN;
       }
-      BaseBracket *tmp = new BracketNest( CLEX::N, newt, debugFlag, myLog );
+      BaseBracket *tmp = new BracketNest( CLEX::N, newt, debugFlag,
+					  myLog, _normalizer );
       tmp->append( *prev );
       tmp->append( *it );
       if ( debugFlag > 5 ){
@@ -1213,7 +1216,8 @@ list<BaseBracket*>::iterator BracketNest::glue( list<BaseBracket*>& result,
     }
     list<BaseBracket*>::iterator it = bit--;
     BracketNest *tmp
-      = new BracketNest( (*rpos)->tag(), Compound::Type::NONE, debugFlag, myLog );
+      = new BracketNest( (*rpos)->tag(), Compound::Type::NONE,
+			 debugFlag, myLog, _normalizer );
     for ( size_t j = 0; j < len-1; ++j ){
       tmp->append( *it );
       if ( debugFlag > 5 ){

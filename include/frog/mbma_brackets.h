@@ -34,8 +34,8 @@
 
 #include <vector>
 #include <list>
-#include "unicode/unistr.h"
 #include "ticcutils/LogStream.h"
+#include "ticcutils/Unicode.h"
 #include "frog/clex.h"
 
 /// The state of the MBMA structure
@@ -75,20 +75,23 @@ class RulePart;
 /// \brief a base class for storing bracketted MBMA rules
 class BaseBracket {
  public:
- BaseBracket( CLEX::Type t, const std::vector<CLEX::Type>& R, int flag,
-	      TiCC::LogStream& l ):
-  RightHand(R),
+  BaseBracket( CLEX::Type t, const std::vector<CLEX::Type>& R, int flag,
+	       TiCC::LogStream& l, TiCC::UnicodeNormalizer& norm ):
+    RightHand(R),
     cls(t),
     _status( FAILED ),
     debugFlag(flag),
-    myLog(l)
-    {};
- BaseBracket( CLEX::Type t, int flag, TiCC::LogStream& l ):
-  cls(t),
+    myLog(l),
+    _normalizer(norm)
+  {};
+  BaseBracket( CLEX::Type t, int flag,
+	       TiCC::LogStream& l, TiCC::UnicodeNormalizer & norm ):
+    cls(t),
     _status( FAILED ),
     debugFlag(flag),
-    myLog(l)
-    {};
+    myLog(l),
+    _normalizer(norm)
+  {};
   virtual ~BaseBracket() {};
   Status status() const { return _status; };
   void set_status( const Status s ) { _status = s; };
@@ -121,14 +124,17 @@ class BaseBracket {
   Status _status;
   int debugFlag;
   TiCC::LogStream& myLog;
+  TiCC::UnicodeNormalizer& _normalizer;
 };
 
 /// \brief a specialization of BaseBracket to store endnodes (morphemes and
 /// inflection information
 class BracketLeaf: public BaseBracket {
 public:
-  BracketLeaf( const RulePart&, int, TiCC::LogStream& );
-  BracketLeaf( CLEX::Type, const icu::UnicodeString&, int, TiCC::LogStream& );
+  BracketLeaf( const RulePart&, int,
+	       TiCC::LogStream&, TiCC::UnicodeNormalizer& );
+  BracketLeaf( CLEX::Type, const icu::UnicodeString&, int,
+	       TiCC::LogStream&, TiCC::UnicodeNormalizer& );
   ~BracketLeaf() override;
   icu::UnicodeString put( bool = false ) const override;
   icu::UnicodeString morpheme() const override {
@@ -170,7 +176,8 @@ private:
 /// provides functions to test and resolve rules
 class BracketNest: public BaseBracket {
  public:
-  BracketNest( CLEX::Type, Compound::Type, int, TiCC::LogStream& );
+  BracketNest( CLEX::Type, Compound::Type, int,
+	       TiCC::LogStream&, TiCC::UnicodeNormalizer& );
   BaseBracket *append( BaseBracket * ) override ;
   ~BracketNest() override;
   bool isNested() const override { return true; };

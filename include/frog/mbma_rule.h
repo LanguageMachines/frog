@@ -37,6 +37,7 @@
 #include <string>
 #include "unicode/unistr.h"
 #include "ticcutils/LogStream.h"
+#include "ticcutils/Unicode.h"
 #include "frog/clex.h"
 
 namespace Compound {
@@ -74,7 +75,8 @@ public:
 	const icu::UnicodeString&,
 	TiCC::LogStream&,
 	TiCC::LogStream&,
-	int );
+	int,
+	TiCC::UnicodeNormalizer& );
   ~Rule();
   std::vector<icu::UnicodeString> extract_morphemes() const;
   icu::UnicodeString pretty_string( bool ) const;
@@ -103,6 +105,7 @@ public:
   double confidence;
   size_t ID;
 private:
+  TiCC::UnicodeNormalizer& _normalizer;
   icu::UnicodeString sort_key;
 };
 

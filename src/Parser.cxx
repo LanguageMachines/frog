@@ -998,7 +998,7 @@ vector<timbl_result> Parser::timbl( Timbl::TimblAPI* tim,
     const Timbl::ClassDistribution *db;
     const Timbl::TargetValue *tv = tim->Classify( inst, db );
     result.push_back( timbl_result( TiCC::UnicodeToUTF8(tv->name(),_normalizer),
-				    db->Confidence(tv), *db ) );
+				    db->Confidence(tv), *db, _normalizer ) );
   }
   return result;
 }

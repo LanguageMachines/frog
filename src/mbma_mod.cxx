@@ -423,7 +423,7 @@ Rule* Mbma::matchRule( const std::vector<icu::UnicodeString>& ana,
                     second person variants.
     \return a matched Rule or 0
   */
-  Rule *rule = new Rule( ana, word, *errLog, *dbgLog, debugFlag );
+  Rule *rule = new Rule( ana, word, *errLog, *dbgLog, debugFlag, _normalizer );
   if ( rule->performEdits() ){
     rule->reduceZeroNodes();
     if ( debugFlag > 1 ){
@@ -883,7 +883,8 @@ void Mbma::store_brackets( frog_record& fd,
     BaseBracket *leaf = new BracketLeaf( clex_tag,
 					 wrd,
 					 debugFlag,
-					 *dbgLog );
+					 *dbgLog,
+					 _normalizer );
     if ( fd.morph_string.isEmpty() ){
       fd.morph_string = "[" + wrd + "]";
       if ( doDeepMorph ){
@@ -897,7 +898,8 @@ void Mbma::store_brackets( frog_record& fd,
     BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(head),
 					 wrd,
 					 debugFlag,
-					 *dbgLog );
+					 *dbgLog,
+					 _normalizer );
     leaf->set_status( STEM );
     if ( fd.morph_string.isEmpty() ){
       fd.morph_string = "[" + wrd + "]";
@@ -909,7 +911,8 @@ void Mbma::store_brackets( frog_record& fd,
     BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(head),
 					 wrd,
 					 debugFlag,
-					 *dbgLog );
+					 *dbgLog,
+					 _normalizer );
     leaf->set_status( STEM );
     if ( fd.morph_string.isEmpty() ){
       fd.morph_string = "[" + wrd + "]";
@@ -936,14 +939,15 @@ void Mbma::store_brackets( frog_record& fd,
   return;
 }
 
-UnicodeString flatten( const UnicodeString& in ) {
+UnicodeString flatten( const UnicodeString& in,
+		       TiCC::UnicodeNormalizer& norm ) {
   /// helper function to 'flatten out' bracketed morpheme strings
   /*!
     \param in a bracketed string of morphemes
     \return a string with multiple '[' and ']' reduced to single occurrences
   */
-  TiCC::UnicodeNormalizer UN;
-  string s = TiCC::UnicodeToUTF8( in, UN );
+
+  string s = TiCC::UnicodeToUTF8( in, norm );
   string::size_type bpos = s.find_first_not_of( " [" );
   //  deb << "  FLATTEN: '" << s << "'" << endl;
   string result;
@@ -968,7 +972,7 @@ UnicodeString flatten( const UnicodeString& in ) {
     result = s;
   }
   //  deb << "FLATTENED: '" << result << "'" << endl;
-  return TiCC::UnicodeFromUTF8(result,UN);
+  return TiCC::UnicodeFromUTF8(result,norm);
 }
 
 void Mbma::storeResult( frog_record& fd,
@@ -991,7 +995,7 @@ void Mbma::storeResult( frog_record& fd,
       fd.morph_string = pv[0].first;
     }
     else {
-      fd.morph_string = flatten( pv[0].first );
+      fd.morph_string = flatten( pv[0].first, _normalizer );
     }
     if ( pv[0].second == "none" ){
       fd.compound_string = "0";
