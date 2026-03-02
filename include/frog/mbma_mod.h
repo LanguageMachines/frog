@@ -80,6 +80,7 @@ class Mbma {
   static std::string mbma_tagset;
   static std::string pos_tagset;
   static std::string clex_tagset;
+  TiCC::UnicodeNormalizer& normalizer(){ return _normalizer; };
   Mbma( const Mbma& ) = delete;
   Mbma& operator=( const Mbma& ) = delete;
  private:

@@ -125,7 +125,7 @@ bool NERTagger::fill_ners( const string& cat,
   int long_err_cnt = 0;
   size_t ner_cnt = 0;
   UnicodeString line;
-  while ( TiCC::getline( is, line ) ){
+  while ( TiCC::getline( is, _normalizer, line ) ){
     if ( line.isEmpty() || line[0] == '#' ){
       continue;
     }

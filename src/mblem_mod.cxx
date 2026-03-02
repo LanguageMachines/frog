@@ -98,7 +98,7 @@ bool Mblem::fill_ts_map( const string& file ){
     return false;
   }
   UnicodeString line;
-  while ( TiCC::getline( is, line ) ){
+  while ( TiCC::getline( is, _normalizer, line ) ){
     if ( line.isEmpty() || line[0] == '#' ){
       continue;
     }

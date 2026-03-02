@@ -136,7 +136,7 @@ bool Mwu::read_mwus( const string& fname) {
     return false;
   }
   UnicodeString line;
-  while( TiCC::getline( mwufile, line ) ) {
+  while( TiCC::getline( mwufile, _normalizer, line ) ) {
     vector<UnicodeString> res1 = TiCC::split_at(line, " ");
     if ( res1.size() == 2 ){
       vector<UnicodeString> res2 = TiCC::split_at(res1[0], "_");;
@@ -211,7 +211,7 @@ bool Mwu::init( const TiCC::Configuration& config ) {
     glue_tag = "SPEC(deeleigen)";
   }
   else {
-    glue_tag = TiCC::UnicodeFromUTF8(val);
+    glue_tag = TiCC::UnicodeFromUTF8(val,_normalizer);
   }
 
   string cls = config.lookUp( "outputclass" );

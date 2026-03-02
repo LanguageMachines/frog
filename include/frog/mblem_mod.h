@@ -68,6 +68,7 @@ class Mblem {
   void makeUnique();
   void add_lemmas( const std::vector<folia::Word*>&,
 		   const frog_data& ) const;
+  TiCC::UnicodeNormalizer& normalizer(){ return _normalizer; };
  private:
   icu::UnicodeString call_server( const icu::UnicodeString& );
   void read_transtable( const std::string& );
