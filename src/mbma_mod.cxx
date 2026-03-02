@@ -975,6 +975,11 @@ UnicodeString flatten( const UnicodeString& in,
   return TiCC::UnicodeFromUTF8(result,norm);
 }
 
+UnicodeString flatten( const UnicodeString& in ){
+  TiCC::UnicodeNormalizer UN;
+  return flatten( in, UN );
+}
+
 void Mbma::storeResult( frog_record& fd,
 			const UnicodeString& uword,
 			const UnicodeString& uhead ) const {

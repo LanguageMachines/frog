@@ -127,4 +127,6 @@ class Mbma {
 icu::UnicodeString flatten( const icu::UnicodeString&,
 			    TiCC::UnicodeNormalizer& );
 
+icu::UnicodeString flatten( const icu::UnicodeString& );
+
 #endif

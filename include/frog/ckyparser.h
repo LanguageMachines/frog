@@ -153,7 +153,9 @@ class chart_rec {
 /// \brief The class that can run the parser
 class CKYParser {
 public:
-  CKYParser( size_t, const std::vector<const Constraint*>&, TiCC::LogStream* );
+  CKYParser( size_t,
+	     const std::vector<const Constraint*>&,
+	     const TiCC::LogStream* );
   ~CKYParser(){ delete ckyLog; };
   void parse();
   void leftIncomplete( int , int , std::vector<parsrel>& );

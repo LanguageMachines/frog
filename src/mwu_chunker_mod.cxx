@@ -79,7 +79,9 @@ void mwuAna::merge( const mwuAna *add ){
   delete add;
 }
 
-Mwu::Mwu( TiCC::LogStream *err_log, TiCC::LogStream *dbg_log ){
+Mwu::Mwu( TiCC::LogStream *err_log, TiCC::LogStream *dbg_log ):
+  filter(0)
+{
   /// create a Mwu record (UNINITIALIZED yet)
   /*!
     \param err_log The LogStream for errors
@@ -91,7 +93,6 @@ Mwu::Mwu( TiCC::LogStream *err_log, TiCC::LogStream *dbg_log ){
   errLog->add_message( "mwu-" );
   dbgLog = new TiCC::LogStream( dbg_log );
   dbgLog->add_message( "mwu-" );
-  filter = 0;
 }
 
 Mwu::~Mwu(){

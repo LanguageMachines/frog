@@ -85,7 +85,7 @@ void DependencyDirection::put( ostream & os ) const {
 
 CKYParser::CKYParser( size_t num,
 		      const vector<const Constraint*>& constraints,
-		      TiCC::LogStream* log ):
+		      const TiCC::LogStream* log ):
   numTokens(num)
 {
   /// initalialize a CKYparser
