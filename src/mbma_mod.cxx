@@ -944,6 +944,7 @@ UnicodeString flatten( const UnicodeString& in,
   /// helper function to 'flatten out' bracketed morpheme strings
   /*!
     \param in a bracketed string of morphemes
+    \param norm the UnicodeNormalizer to use in UTF8 de/encoding
     \return a string with multiple '[' and ']' reduced to single occurrences
   */
 

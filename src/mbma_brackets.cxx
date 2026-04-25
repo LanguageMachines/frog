@@ -253,6 +253,7 @@ BracketLeaf::BracketLeaf( const RulePart& p,
     \param p A Rulepart to create from
     \param debug_flag the debug value
     \param l a LogStream for messages
+    \param norm the UnicodeNormalizer to use in UTF8 de/encoding
   */
   _ifpos = -1;
   if ( !p.inflect.isEmpty() ){
@@ -314,6 +315,7 @@ BracketLeaf::BracketLeaf( CLEX::Type t,
     \param morpheme the (Unicode) morpheme
     \param debug_flag the debug value
     \param l a LogStream for messages
+    \param norm the UnicodeNormalizer to use in UTF8 de/encoding
   */
   _ifpos = -1;
   _status = Status::STEM;
@@ -333,6 +335,7 @@ BracketNest::BracketNest( CLEX::Type t,
     \param c a Compound::Type
     \param debug_flag the debug value
     \param l a LogStream for messages
+    \param norm the UnicodeNormalizer to use in UTF8 de/encoding
   */
   _status = Status::COMPLEX;
 }
