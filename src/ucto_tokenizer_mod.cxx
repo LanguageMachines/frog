@@ -467,8 +467,17 @@ void UctoTokenizer::add_provenance( folia::Document& doc,
   else {
     tokenizer->add_provenance_setting( &doc, main );
     if ( !tokenizer->ucto_re_run() ){
-      //      cerr << "FOUND processor: " << p << endl;
-      tokenizer->add_provenance_structure( &doc, main );
+      // assume we might create Sentences, Paragaraphs and Quotes
+      // so add provenance for those
+      tokenizer->add_provenance_structure( &doc,
+				folia::AnnotationType::PARAGRAPH,
+				main );
+      tokenizer->add_provenance_structure( &doc,
+				folia::AnnotationType::SENTENCE,
+				main );
+      tokenizer->add_provenance_structure( &doc,
+				folia::AnnotationType::QUOTE,
+				main );
     }
     else {
       cerr << "\nWARNING: cannot tokenize: " << doc.filename()
