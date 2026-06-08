@@ -493,11 +493,18 @@ bool BracketNest::testMatch( const list<BaseBracket*>& result,
     LOG << "test MATCH, fpos=" << fpos << " en len=" << len << endl;
   }
   list<BaseBracket*>::const_iterator it = rpos;
+  if ( debugFlag > 5 ){
+    LOG << "backward loop fpos=" << fpos << " en it=" << *it << endl;
+  }
   while ( fpos > 0 ){
     --fpos;
     --it;
   }
   size_t j = 0;
+  if ( debugFlag > 5 ){
+    LOG << "VOOR test MATCH  j= " << j << endl;
+    LOG << "VOOR test MATCH  it= " << *it << endl;
+  }
   bpos = it;
   for (; j < len && it != result.end(); ++j, ++it ){
     if ( debugFlag > 5 ){
@@ -527,7 +534,7 @@ bool BracketNest::testMatch( const list<BaseBracket*>& result,
     return false;
   }
   if ( debugFlag > 5 ){
-    LOG << "test MATCH OK" << endl;
+    LOG << "test MATCH OK bpos=" << *bpos << endl;
   }
   return true;
 }
@@ -1064,7 +1071,7 @@ void BracketNest::display_parts( ostream& os,
   int i=1;
   for ( const auto& it : _parts ){
     os << string(indent,' ') << "[" << i++ << "]= "
-       << static_cast<void*>(it) << endl;
+       << it << " (" << static_cast<void*>(it) << ")" << endl;
     it->display_parts( os, indent + 4 );
   }
 }
@@ -1099,6 +1106,9 @@ list<BaseBracket*>::const_iterator BracketNest::resolveAffix( list<BaseBracket*>
       // we create a new Bracketnest, and connect all the Brackets
       // from the matching rule to this Nest
       list<BaseBracket*>::const_iterator it = bit--;
+      if ( debugFlag > 5 ){
+	LOG << "new node from: " << *it << endl;
+      }
       BracketNest *tmp = new BracketNest( (*rpos)->tag(),
 					  Compound::Type::NONE,
 					  debugFlag,
@@ -1116,6 +1126,10 @@ list<BaseBracket*>::const_iterator BracketNest::resolveAffix( list<BaseBracket*>
       }
       _compound = tmp->speculateCompoundType();
       result.insert( ++bit, tmp );
+      if ( debugFlag > 5 ){
+	LOG << " return " << *bit << endl;
+	LOG << "result = " << result << endl;
+      }
       return bit;
     }
   }
