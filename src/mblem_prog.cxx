@@ -174,7 +174,7 @@ bool init(){
 
 void Test( istream& in, ostream& os ){
   UnicodeString line;
-  while ( TiCC::getline( in, line ) ){
+  while ( TiCC::getline( in, myMblem.normalizer(),line ) ){
     if ( line.isEmpty() ) {
       os << endl;
       continue;

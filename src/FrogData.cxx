@@ -68,10 +68,11 @@ json frog_record::to_json() const {
     \return an JSON structure
   */
   json result;
-  result["word"] = TiCC::UnicodeToUTF8(word);
+  TiCC::UnicodeNormalizer UN;
+  result["word"] = TiCC::UnicodeToUTF8(word,UN);
   if ( !token_class.isEmpty() ){
     json tok;
-    tok["token"] = TiCC::UnicodeToUTF8(token_class);
+    tok["token"] = TiCC::UnicodeToUTF8(token_class,UN);
     if ( no_space ){
       tok["space"] = false;
     }
@@ -81,29 +82,29 @@ json frog_record::to_json() const {
     result["ucto"] = tok;
   }
   if ( !lemmas.empty() ){
-    result["lemma"] = TiCC::UnicodeToUTF8(lemmas[0]);
+    result["lemma"] = TiCC::UnicodeToUTF8(lemmas[0],UN);
   }
   if ( !morph_string.isEmpty() ){
-    result["morph"] = TiCC::UnicodeToUTF8(morph_string);
+    result["morph"] = TiCC::UnicodeToUTF8(morph_string,UN);
   }
   if ( compound_string.find("0") == string::npos ){
     result["compound"] = compound_string;
   }
   if ( !tag.isEmpty() ){
     json tg;
-    tg["tag"] = TiCC::UnicodeToUTF8(tag);
+    tg["tag"] = TiCC::UnicodeToUTF8(tag,UN);
     tg["confidence"] = tag_confidence;
     result["pos"] = tg;
   }
   if ( !ner_tag.isEmpty() && ner_confidence > 0.0 ){
     json tg;
-    tg["tag"] = TiCC::UnicodeToUTF8(ner_tag);
+    tg["tag"] = TiCC::UnicodeToUTF8(ner_tag,UN);
     tg["confidence"] = ner_confidence;
     result["ner"] = tg;
   }
   if ( !iob_tag.isEmpty() ){
     json tg;
-    tg["tag"] = TiCC::UnicodeToUTF8(iob_tag);
+    tg["tag"] = TiCC::UnicodeToUTF8(iob_tag,UN);
     tg["confidence"] = iob_confidence;
     result["chunking"] = tg;
   }

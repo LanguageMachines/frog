@@ -52,17 +52,17 @@ using icu::UnicodeString;
 #define DBG *TiCC::Log(dbgLog)
 
 mwuAna::mwuAna( const icu::UnicodeString& wrd,
-		bool glue_tag,
+		bool do_glue,
 		size_t index ):
   mwu_start( index ),
   mwu_end( index ),
   word(wrd),
-  spec(glue_tag)
+  spec(do_glue)
 {
   /// create a mwu Analysis record
   /*!
     \param wrd The text of the word
-    \param glue_tag was a \e 'glue' tag detected?
+    \param do_glue was a \e 'glue' tag detected?
     \param index The (initial) position in the sentence
    */
 }
@@ -79,7 +79,9 @@ void mwuAna::merge( const mwuAna *add ){
   delete add;
 }
 
-Mwu::Mwu( TiCC::LogStream *err_log, TiCC::LogStream *dbg_log ){
+Mwu::Mwu( TiCC::LogStream *err_log, TiCC::LogStream *dbg_log ):
+  filter(0)
+{
   /// create a Mwu record (UNINITIALIZED yet)
   /*!
     \param err_log The LogStream for errors
@@ -91,7 +93,6 @@ Mwu::Mwu( TiCC::LogStream *err_log, TiCC::LogStream *dbg_log ){
   errLog->add_message( "mwu-" );
   dbgLog = new TiCC::LogStream( dbg_log );
   dbgLog->add_message( "mwu-" );
-  filter = 0;
 }
 
 Mwu::~Mwu(){
@@ -136,7 +137,7 @@ bool Mwu::read_mwus( const string& fname) {
     return false;
   }
   UnicodeString line;
-  while( TiCC::getline( mwufile, line ) ) {
+  while( TiCC::getline( mwufile, _normalizer, line ) ) {
     vector<UnicodeString> res1 = TiCC::split_at(line, " ");
     if ( res1.size() == 2 ){
       vector<UnicodeString> res2 = TiCC::split_at(res1[0], "_");;
@@ -211,7 +212,7 @@ bool Mwu::init( const TiCC::Configuration& config ) {
     glue_tag = "SPEC(deeleigen)";
   }
   else {
-    glue_tag = TiCC::UnicodeFromUTF8(val);
+    glue_tag = TiCC::UnicodeFromUTF8(val,_normalizer);
   }
 
   string cls = config.lookUp( "outputclass" );

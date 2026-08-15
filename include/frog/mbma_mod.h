@@ -80,6 +80,7 @@ class Mbma {
   static std::string mbma_tagset;
   static std::string pos_tagset;
   static std::string clex_tagset;
+  TiCC::UnicodeNormalizer& normalizer(){ return _normalizer; };
   Mbma( const Mbma& ) = delete;
   Mbma& operator=( const Mbma& ) = delete;
  private:
@@ -114,6 +115,7 @@ class Mbma {
   TiCC::LogStream *errLog;
   TiCC::LogStream *dbgLog;
   TiCC::UniFilter *filter;
+  mutable TiCC::UnicodeNormalizer _normalizer;
   std::string _host;
   std::string _port;
   std::string _base;
@@ -122,6 +124,9 @@ class Mbma {
   bool doDeepMorph;
 };
 
-icu::UnicodeString flatten( const icu::UnicodeString& in );
+icu::UnicodeString flatten( const icu::UnicodeString&,
+			    TiCC::UnicodeNormalizer& );
+
+icu::UnicodeString flatten( const icu::UnicodeString& );
 
 #endif

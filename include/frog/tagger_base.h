@@ -70,6 +70,8 @@ class BaseTagger {
   const std::string& version() const { return _version; };
  private:
   std::vector<tag_entry> extract_sentence( const frog_data& );
+  nlohmann::json create_json( const std::vector<tag_entry>& ) const;
+  std::vector<Tagger::TagResult> json_to_TR( const nlohmann::json& in ) const;
   nlohmann::json read_from_client( Sockets::ClientSocket& ) const;
   void write_to_client( nlohmann::json&,
 			Sockets::ClientSocket& ) const;
@@ -87,6 +89,7 @@ class BaseTagger {
   std::string _port;
   MbtAPI *tagger;
   TiCC::UniFilter *filter;
+  mutable TiCC::UnicodeNormalizer _normalizer;
   std::vector<std::string> _words;
   std::vector<Tagger::TagResult> _tag_result;
   std::map<icu::UnicodeString,icu::UnicodeString> token_tag_map;

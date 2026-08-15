@@ -131,7 +131,7 @@ void Mbma::init_cgn( const string& main, const string& sub ) {
   ifstream tc( main );
   if ( tc ){
     UnicodeString line;
-    while ( TiCC::getline( tc, line) ) {
+    while ( TiCC::getline( tc, _normalizer, line) ) {
       vector<UnicodeString> tmp = TiCC::split_at( line, " " );
       if ( tmp.size() < 2 ){
 	LOG << "splitting '" << line << "' failed" << endl;
@@ -146,7 +146,7 @@ void Mbma::init_cgn( const string& main, const string& sub ) {
   ifstream tc1( sub );
   if ( tc1 ){
     UnicodeString line;
-    while( TiCC::getline( tc1, line ) ) {
+    while( TiCC::getline( tc1, _normalizer, line ) ) {
       vector<UnicodeString> tmp = TiCC::split_at( line, " " );
       if ( tmp.size() == 2 ){
 	TAGconv.insert( make_pair( tmp[0], tmp[1] ) );
@@ -423,7 +423,7 @@ Rule* Mbma::matchRule( const std::vector<icu::UnicodeString>& ana,
                     second person variants.
     \return a matched Rule or 0
   */
-  Rule *rule = new Rule( ana, word, *errLog, *dbgLog, debugFlag );
+  Rule *rule = new Rule( ana, word, *errLog, *dbgLog, debugFlag, _normalizer );
   if ( rule->performEdits() ){
     rule->reduceZeroNodes();
     if ( debugFlag > 1 ){
@@ -587,7 +587,7 @@ void Mbma::filterHeadTag( const icu::UnicodeString& head ){
   if ( tagIt == TAGconv.end() ) {
     // this should never happen
     throw folia::ValueError( "1 unknown head feature '"
-			     + TiCC::UnicodeToUTF8(head) + "'" );
+			     + TiCC::UnicodeToUTF8(head,_normalizer) + "'" );
   }
   UnicodeString celex_tag = tagIt->second;
   if (debugFlag > 1){
@@ -874,7 +874,7 @@ void Mbma::store_brackets( frog_record& fd,
     if ( tagIt == TAGconv.end() ) {
       // this should never happen
       throw logic_error( "2 unknown head feature '"
-			 + TiCC::UnicodeToUTF8( head ) + "'" );
+			 + TiCC::UnicodeToUTF8( head, _normalizer ) + "'" );
     }
     CLEX::Type clex_tag = CLEX::toCLEX( tagIt->second );
     if (debugFlag > 1){
@@ -883,7 +883,8 @@ void Mbma::store_brackets( frog_record& fd,
     BaseBracket *leaf = new BracketLeaf( clex_tag,
 					 wrd,
 					 debugFlag,
-					 *dbgLog );
+					 *dbgLog,
+					 _normalizer );
     if ( fd.morph_string.isEmpty() ){
       fd.morph_string = "[" + wrd + "]";
       if ( doDeepMorph ){
@@ -897,7 +898,8 @@ void Mbma::store_brackets( frog_record& fd,
     BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(head),
 					 wrd,
 					 debugFlag,
-					 *dbgLog );
+					 *dbgLog,
+					 _normalizer );
     leaf->set_status( STEM );
     if ( fd.morph_string.isEmpty() ){
       fd.morph_string = "[" + wrd + "]";
@@ -909,7 +911,8 @@ void Mbma::store_brackets( frog_record& fd,
     BaseBracket *leaf = new BracketLeaf( CLEX::toCLEX(head),
 					 wrd,
 					 debugFlag,
-					 *dbgLog );
+					 *dbgLog,
+					 _normalizer );
     leaf->set_status( STEM );
     if ( fd.morph_string.isEmpty() ){
       fd.morph_string = "[" + wrd + "]";
@@ -936,13 +939,16 @@ void Mbma::store_brackets( frog_record& fd,
   return;
 }
 
-UnicodeString flatten( const UnicodeString& in ){
+UnicodeString flatten( const UnicodeString& in,
+		       TiCC::UnicodeNormalizer& norm ) {
   /// helper function to 'flatten out' bracketed morpheme strings
   /*!
     \param in a bracketed string of morphemes
+    \param norm the UnicodeNormalizer to use in UTF8 de/encoding
     \return a string with multiple '[' and ']' reduced to single occurrences
   */
-  string s = TiCC::UnicodeToUTF8( in );
+
+  string s = TiCC::UnicodeToUTF8( in, norm );
   string::size_type bpos = s.find_first_not_of( " [" );
   //  deb << "  FLATTEN: '" << s << "'" << endl;
   string result;
@@ -967,7 +973,12 @@ UnicodeString flatten( const UnicodeString& in ){
     result = s;
   }
   //  deb << "FLATTENED: '" << result << "'" << endl;
-  return TiCC::UnicodeFromUTF8(result);
+  return TiCC::UnicodeFromUTF8(result,norm);
+}
+
+UnicodeString flatten( const UnicodeString& in ){
+  TiCC::UnicodeNormalizer UN;
+  return flatten( in, UN );
 }
 
 void Mbma::storeResult( frog_record& fd,
@@ -990,7 +1001,7 @@ void Mbma::storeResult( frog_record& fd,
       fd.morph_string = pv[0].first;
     }
     else {
-      fd.morph_string = flatten( pv[0].first );
+      fd.morph_string = flatten( pv[0].first, _normalizer );
     }
     if ( pv[0].second == "none" ){
       fd.compound_string = "0";
@@ -1096,7 +1107,7 @@ void Mbma::call_server( const vector<UnicodeString>& insts,
   query["command"] = "classify";
   json arr = json::array();
   for ( const auto& i : insts ){
-    arr.push_back( TiCC::UnicodeToUTF8(i) );
+    arr.push_back( TiCC::UnicodeToUTF8(i,_normalizer) );
   }
   query["params"] = arr;
   //  LOG << "send json" << query.dump(2) << endl;
@@ -1117,11 +1128,11 @@ void Mbma::call_server( const vector<UnicodeString>& insts,
   //  LOG << "received json data:" << response.dump(2) << endl;
   assert( response.size() == insts.size() );
   if ( response.size() == 1 ){
-    classes.push_back( TiCC::UnicodeFromUTF8(response["category"]) );
+    classes.push_back( TiCC::UnicodeFromUTF8(response["category"],_normalizer) );
   }
   else {
     for ( const auto& it : response.items() ){
-      classes.push_back( TiCC::UnicodeFromUTF8(it.value()["category"]) );
+      classes.push_back( TiCC::UnicodeFromUTF8(it.value()["category"],_normalizer) );
     }
   }
 }

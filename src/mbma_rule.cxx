@@ -30,6 +30,7 @@
 */
 
 #include "frog/mbma_rule.h"
+#include "frog/mbma_mod.h"
 
 #include <string>
 #include <vector>
@@ -46,8 +47,6 @@ using TiCC::operator<<;
 
 #define LOG *TiCC::Log(myLog)
 #define DBG *TiCC::Log(dbgLog)
-
-extern icu::UnicodeString flatten( const icu::UnicodeString& );
 
 bool RulePart::isBasic() const {
   return is_CELEX_base( ResultClass );
@@ -237,7 +236,8 @@ Rule::Rule( const vector<UnicodeString>& parts,
 	    const UnicodeString& s,
 	    TiCC::LogStream& ls,
 	    TiCC::LogStream& ds,
-	    int flag ):
+	    int flag,
+	    TiCC::UnicodeNormalizer& norm ):
   debugFlag( flag ),
   tag(CLEX::UNASS),
   orig_word(s),
@@ -246,7 +246,8 @@ Rule::Rule( const vector<UnicodeString>& parts,
   myLog(ls),
   dbgLog(ds),
   confidence(0.0),
-  ID(0)
+  ID(0),
+  _normalizer(norm)
 {
   for ( size_t k=0; k < parts.size(); ++k ) {
     UnicodeString this_class = parts[k];
@@ -546,10 +547,11 @@ void Rule::resolveBrackets() {
   if ( debugFlag > 5 ){
     DBG << "check rule for bracketing: " << this << endl;
   }
-  brackets = new BracketNest( CLEX::UNASS, Compound::Type::NONE, debugFlag, dbgLog );
+  brackets = new BracketNest( CLEX::UNASS, Compound::Type::NONE,
+			      debugFlag, dbgLog, _normalizer );
   for ( auto const& rule : rules ){
     // fill a flat result;
-    BracketLeaf *tmp = new BracketLeaf( rule, debugFlag, dbgLog );
+    BracketLeaf *tmp = new BracketLeaf( rule, debugFlag, dbgLog, _normalizer );
     if ( tmp->status() == Status::STEM && tmp->morpheme().isEmpty() ){
       delete tmp;
     }
@@ -580,7 +582,7 @@ void Rule::resolveBrackets() {
   brackets->resolveNouns( );
   tag = brackets->getFinalTag();
   description = get_tag_descr( tag );
-  sort_key = flatten( pretty_string(true));
+  sort_key = flatten( pretty_string(true),_normalizer);
   if ( debugFlag > 4 ){
     DBG << "Final Bracketing:" << brackets << " with tag=" << tag << endl;
   }

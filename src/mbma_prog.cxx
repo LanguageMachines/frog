@@ -183,7 +183,7 @@ bool check_next( const UnicodeString& tag ){
 
 void Test( istream& in ){
   UnicodeString line;
-  while ( TiCC::getline( in, line ) ){
+  while ( TiCC::getline( in, myMbma.normalizer(), line ) ){
     line = line.trim();
     if ( line.isEmpty() ){
       continue;

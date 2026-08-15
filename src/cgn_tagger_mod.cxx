@@ -300,7 +300,7 @@ void CGNTagger::add_tags( const vector<folia::Word*>& wv,
   for ( const auto& word : fd.units ){
     folia::KWargs u_args;
     u_args["set"]   = getTagset();
-    u_args["class"] = TiCC::UnicodeToUTF8(word.tag);
+    u_args["class"] = TiCC::UnicodeToUTF8(word.tag,_normalizer);
     if ( textclass != "current" ){
       u_args["textclass"] = textclass;
     }
@@ -312,7 +312,7 @@ void CGNTagger::add_tags( const vector<folia::Word*>& wv,
     }
     vector<UnicodeString> hv = TiCC::split_at_first_of( word.tag, "()" );
     UnicodeString head = hv[0];
-    u_args["class"] = TiCC::UnicodeToUTF8(head);
+    u_args["class"] = TiCC::UnicodeToUTF8(head,_normalizer);
 #pragma omp critical (foliaupdate)
     {
       postag->add_child<folia::HeadFeature>( u_args );
@@ -325,10 +325,10 @@ void CGNTagger::add_tags( const vector<folia::Word*>& wv,
       for ( const auto& f : feats ){
 	folia::KWargs f_args;
 	f_args["set"] =  getTagset();
-	f_args["subset"] = getSubSet( TiCC::UnicodeToUTF8(f),
-				      TiCC::UnicodeToUTF8(head),
-				      TiCC::UnicodeToUTF8(word.tag) );
-	f_args["class"]  = TiCC::UnicodeToUTF8(f);
+	f_args["subset"] = getSubSet( TiCC::UnicodeToUTF8(f,_normalizer),
+				      TiCC::UnicodeToUTF8(head,_normalizer),
+				      TiCC::UnicodeToUTF8(word.tag,_normalizer) );
+	f_args["class"]  = TiCC::UnicodeToUTF8(f,_normalizer);
 #pragma omp critical (foliaupdate)
 	{
 	  postag->add_child<folia::Feature>( f_args );

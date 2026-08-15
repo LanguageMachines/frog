@@ -32,6 +32,7 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
+
   build:
     needs: notification
     runs-on: ${{ matrix.os }}
@@ -123,7 +124,7 @@ jobs:
 
       - name: log problems
         if: >-
-            ${{ env.action_status == '' &&
+            ${{ env.action_status != '' &&
                 steps.frogtests.outcome != 'success' }}
         run: |
           cat frogtests/*.err

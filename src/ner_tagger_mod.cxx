@@ -125,7 +125,7 @@ bool NERTagger::fill_ners( const string& cat,
   int long_err_cnt = 0;
   size_t ner_cnt = 0;
   UnicodeString line;
-  while ( TiCC::getline( is, line ) ){
+  while ( TiCC::getline( is, _normalizer, line ) ){
     if ( line.isEmpty() || line[0] == '#' ){
       continue;
     }
@@ -230,18 +230,18 @@ bool NERTagger::read_gazets( const string& name,
   }
 }
 
-static vector<UnicodeString> serialize( const vector<set<string>>& stags ){
+vector<UnicodeString> NERTagger::serialize( const vector<set<string>>& stags ) const {
   /// for every non empty set {el1,el2,..} in stags we compose a string like:
   /// el1+el2+...
   vector<UnicodeString> ambitags( stags.size(), "O" );
   size_t pos = 0;
   for ( const auto& it : stags ){
     if ( !it.empty() ){
-      UnicodeString res;
+      string res;
       for ( const auto& s : it ){
-	res += TiCC::UnicodeFromUTF8(s) + "+";
+	res += s + "+";
       }
-      ambitags[pos] = res;
+      ambitags[pos] = TiCC::UnicodeFromUTF8(res,_normalizer);
     }
     ++pos;
   }
@@ -658,7 +658,7 @@ void NERTagger::add_result( const frog_data& fd,
       folia::KWargs args;
       args["set"] = getTagset();
       args["generate_id"] = el->id();
-      args["class"] = TiCC::UnicodeToUTF8(word.ner_tag).substr(2); // strip the B-
+      args["class"] = TiCC::UnicodeToUTF8(word.ner_tag,_normalizer).substr(2); // strip the B-
       args["confidence"] = TiCC::toString(word.ner_confidence);
       if ( textclass != "current" ){
 	args["textclass"] = textclass;

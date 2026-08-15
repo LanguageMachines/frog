@@ -1,6 +1,7 @@
-0.34.1 - 2026-08-15
+0.35 - 2026-08-15
 [Ko van der Sloot]
-* make sure the master branch compiles with the Timbl master branch
+* new release. Works with the Timbl release
+* minor other updates
 
 0.34 - 2024-04-26
 [Ko van der Sloot]

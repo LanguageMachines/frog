@@ -97,6 +97,7 @@ private:
   std::string mwu_tagset;
   icu::UnicodeString glue_tag;
   TiCC::UniFilter *filter;
+  TiCC::UnicodeNormalizer _normalizer;
   Mwu( const Mwu& ) = delete; // no copies
   Mwu operator=( const Mwu& ) = delete; // no copies
 };
