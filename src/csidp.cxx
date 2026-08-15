@@ -168,9 +168,9 @@ timbl_result::timbl_result( const string& cls,
   _cls(cls),
   _confidence(conf)
 {
-  for ( const auto& [dummy,val] : vd ){
-    _dist.push_back( make_pair( TiCC::UnicodeToUTF8(val->Value()->name()),
-				val->Weight()) );
+  for ( const auto& val : vd ){
+    _dist.push_back( make_pair( TiCC::UnicodeToUTF8(val.Value()->name()),
+				val.Weight()) );
   }
 }
 
