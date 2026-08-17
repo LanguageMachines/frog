@@ -108,16 +108,16 @@ LIBS="$ICU_LIBS $LIBS"
 
 AX_LIB_READLINE
 
-PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.37] )
+PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.38] )
 
 CXXFLAGS="$CXXFLAGS $ticcutils_CFLAGS"
 LIBS="$ticcutils_LIBS $LIBS"
 
-PKG_CHECK_MODULES([timbl], [timbl >= 6.12] )
+PKG_CHECK_MODULES([timbl], [timbl >= 7.0] )
 CXXFLAGS="$CXXFLAGS $timbl_CFLAGS"
 LIBS="$timbl_LIBS $LIBS"
 
-PKG_CHECK_MODULES([mbt], [mbt >= 3.7] )
+PKG_CHECK_MODULES([mbt], [mbt >= 3.12] )
 CXXFLAGS="$CXXFLAGS $mbt_CFLAGS"
 LIBS="$mbt_LIBS $LIBS"
 
