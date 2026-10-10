@@ -414,12 +414,7 @@ vector<UnicodeString> Parser::createPairInstances( const parseData& pd ){
 	else {
 	  inst += " " + words[pos-1];
 	}
-	if ( pos < words.size() ){
-	  inst += " " + words[pos];
-	}
-	else {
-	  inst += " __";
-	}
+	inst += " " + words[pos];
 	if ( pos < words.size()-1 ){
 	  inst += " " + words[pos+1];
 	}
@@ -433,12 +428,7 @@ vector<UnicodeString> Parser::createPairInstances( const parseData& pd ){
 	else {
 	  inst += " " + heads[pos-1];
 	}
-	if ( pos < words.size() ){
-	  inst += " " + heads[pos];
-	}
-	else {
-	  inst += " __";
-	}
+	inst += " " + heads[pos];
 	if ( pos < words.size()-1 ){
 	  inst += " " + heads[pos+1];
 	}
@@ -447,25 +437,14 @@ vector<UnicodeString> Parser::createPairInstances( const parseData& pd ){
 	}
 
 	inst += " " + w_tag0 + "^";
-	if ( pos < words.size() ){
-	  inst += heads[pos];
-	}
-	else {
-	  inst += "__";
-	}
-
+	inst += heads[pos];
 	if ( wPos > pos ){
 	  inst += " LEFT " + TiCC::toUnicodeString( wPos - pos );
 	}
 	else {
 	  inst += " RIGHT "+ TiCC::toUnicodeString( pos - wPos );
 	}
-	if ( pos >= words.size() ){
-	  inst += " __";
-	}
-	else {
-	  inst += " " + mods[pos];
-	}
+	inst += " " + mods[pos];
 	inst += "^" + w_mods0 + " __";
 	instances.push_back( inst );
       }
